@@ -60,7 +60,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
 import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
-import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
@@ -97,8 +96,6 @@ public class PackageManagerSettingsTests {
     RuntimePermissionsPersistence mRuntimePermissionsPersistence;
     @Mock
     LegacyPermissionDataProvider mPermissionDataProvider;
-    @Mock
-    IntentFilterVerificationManager mIntentFilterVerificationManager;
     @Mock
     DomainVerificationManagerInternal mDomainVerificationManager;
 
@@ -1200,7 +1197,7 @@ public class PackageManagerSettingsTests {
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
-                mIntentFilterVerificationManager, mDomainVerificationManager, new Object());
+                mDomainVerificationManager, new Object());
     }
 
     private void verifyKeySetMetaData(Settings settings)

@@ -123,7 +123,6 @@ class DomainVerificationEnforcerTest {
                         this[0] = PackageUserState()
                     }
                 }
-                whenever(intentFilterVerificationInfo) { null }
             }
 
             val makeService: (Context) -> Triple<AtomicInteger, AtomicInteger, DomainVerificationService> =

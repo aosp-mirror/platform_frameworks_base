@@ -382,9 +382,6 @@ import com.android.server.pm.domain.verify.DomainVerificationService;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyV1;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyV2;
-import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
-import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationParams;
-import com.android.server.pm.intent.verify.legacy.IntentVerifierProxy;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
@@ -1073,8 +1070,6 @@ public class PackageManagerService extends IPackageManager.Stub
         private final ServiceProducer mGetLocalServiceProducer;
         private final ServiceProducer mGetSystemServiceProducer;
         private final Singleton<ModuleInfoProvider> mModuleInfoProviderProducer;
-        private final Singleton<IntentFilterVerificationManager>
-                mIntentFilterVerificationManagerProducer;
         private final Singleton<DomainVerificationManagerInternal>
                 mDomainVerificationManagerInternalProducer;
         private final Singleton<Handler> mHandlerProducer;
@@ -1106,7 +1101,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         instantAppResolverConnectionProducer,
                 Producer<ModuleInfoProvider> moduleInfoProviderProducer,
                 Producer<LegacyPermissionManagerInternal> legacyPermissionManagerInternalProducer,
-                Producer<IntentFilterVerificationManager> intentFilterVerificationManagerProducer,
                 Producer<DomainVerificationManagerInternal>
                         domainVerificationManagerInternalProducer,
                 Producer<Handler> handlerProducer,
@@ -1147,8 +1141,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mSystemWrapper = systemWrapper;
             mGetLocalServiceProducer = getLocalServiceProducer;
             mGetSystemServiceProducer = getSystemServiceProducer;
-            mIntentFilterVerificationManagerProducer =
-                    new Singleton<>(intentFilterVerificationManagerProducer);
             mDomainVerificationManagerInternalProducer =
                     new Singleton<>(domainVerificationManagerInternalProducer);
             mHandlerProducer = new Singleton<>(handlerProducer);
@@ -1296,10 +1288,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
         public LegacyPermissionManagerInternal getLegacyPermissionManagerInternal() {
             return mLegacyPermissionManagerInternalProducer.get(this, mPackageManager);
-        }
-
-        public IntentFilterVerificationManager getIntentFilterVerificationManager() {
-            return mIntentFilterVerificationManagerProducer.get(this, mPackageManager);
         }
 
         public DomainVerificationManagerInternal getDomainVerificationManagerInternal() {
@@ -1486,9 +1474,6 @@ public class PackageManagerService extends IPackageManager.Stub
     boolean mResolverReplaced = false;
 
     @NonNull
-    private final IntentFilterVerificationManager mIntentFilterVerificationManager;
-
-    @NonNull
     private final DomainVerificationManagerInternal mDomainVerificationManager;
 
     /** The service connection to the ephemeral resolver */
@@ -1598,8 +1583,8 @@ public class PackageManagerService extends IPackageManager.Stub
     static final int WRITE_PACKAGE_RESTRICTIONS = 14;
     static final int PACKAGE_VERIFIED = 15;
     static final int CHECK_PENDING_VERIFICATION = 16;
-    public static final int START_INTENT_FILTER_VERIFICATIONS = 17;
-    public static final int INTENT_FILTER_VERIFIED = 18;
+    // public static final int UNUSED = 17;
+    // public static final int UNUSED = 18;
     static final int WRITE_PACKAGE_LIST = 19;
     static final int INSTANT_APP_RESOLUTION_PHASE_TWO = 20;
     static final int ENABLE_ROLLBACK_STATUS = 21;
@@ -1623,8 +1608,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
             2 * 60 * 60 * 1000L; /* two hours */
-
-    private static final boolean USE_DOMAIN_VERIFICATION_V2 = true;
 
     final UserManagerService mUserManager;
 
@@ -1703,124 +1686,6 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private final PackageUsage mPackageUsage = new PackageUsage();
     private final CompilerStats mCompilerStats = new CompilerStats();
-
-    // TODO(b/171251883): STOPSHIP Remove
-    private final IntentVerifierProxy.PackageManagerServiceConnection
-            mIntentFilterVerificationConnection =
-            new IntentVerifierProxy.PackageManagerServiceConnection() {
-                @Override
-                public void lock(Runnable block) {
-                    synchronized (mLock) {
-                        block.run();
-                    }
-                }
-
-                @Override
-                public <T> T lockReturn(Supplier<T> block) {
-                    synchronized (mLock) {
-                        return block.get();
-                    }
-                }
-
-                @Override
-                public void debugLog(String message) {
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.d(TAG + "IntentFilterVerify", message);
-                    }
-                }
-
-                @Override
-                public void verboseLog(String message) {
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.v(TAG + "IntentFilterVerify", message);
-                    }
-                }
-
-                @Override
-                public void warnLog(String message) {
-                    Slog.w(TAG + "IntentFilterVerify", message);
-                }
-
-                @Override
-                public void infoLog(String message) {
-                    Slog.i(TAG + "IntentFilterVerify", message);
-                }
-
-                @Override
-                public void writeSettings(String packageName, ArraySet<String> domainsSet) {
-                    synchronized (mLock) {
-                        PackageSetting ps = mSettings.mPackages.get(packageName);
-                        if (ps == null) {
-                            if (DEBUG_DOMAIN_VERIFICATION) {
-                                warnLog("No package known: " + packageName);
-                            }
-                        } else {
-                            mIntentFilterVerificationManager.updatePackageSetting(ps,
-                                    domainsSet);
-                            PackageManagerService.this.scheduleWriteSettingsLocked();
-                        }
-                    }
-                }
-
-                @Override
-                public void scheduleWriteSettingsLocked() {
-                    PackageManagerService.this.scheduleWriteSettingsLocked();
-                }
-
-                @Override
-                public void scheduleWritePackageRestrictionsLocked(int userId) {
-                    PackageManagerService.this.scheduleWritePackageRestrictionsLocked(
-                            userId);
-                }
-
-                @Override
-                public long getVerificationTimeout() {
-                    return PackageManagerService.this.getVerificationTimeout();
-                }
-
-                @Override
-                public String getInstantAppPackageName(int callingUid) {
-                    return PackageManagerService.this.getInstantAppPackageName(callingUid);
-                }
-
-                @Nullable
-                @Override
-                public PackageSetting getPackageSettingLPr(@NonNull String packageName) {
-                    return mSettings.getPackageLPr(packageName);
-                }
-
-                @NonNull
-                @Override
-                public Map<String, PackageSetting> getPackageSettingsLPr() {
-                    return mSettings.mPackages;
-                }
-
-                @Override
-                public boolean shouldFilterApplicationLocked(PackageSetting ps,
-                        int callingUid, @UserIdInt int userId) {
-                    return PackageManagerService.this.shouldFilterApplicationLocked(ps, callingUid,
-                            userId);
-                }
-
-                @Override
-                public int getPackageUid(String packageName, int flags,
-                        @UserIdInt int userId) {
-                    return PackageManagerService.this.getPackageUid(packageName, flags,
-                            userId);
-                }
-
-                @NonNull
-                @Override
-                public WatchedSparseIntArray getNextAppLinkGeneration() {
-                    return null;
-                }
-
-                @NonNull
-                @Override
-                public DeviceIdleInternal getDeviceIdleInternal() {
-                    return mInjector.getLocalService(DeviceIdleInternal.class);
-                }
-            };
 
     private final DomainVerificationConnection mDomainVerificationConnection =
             new DomainVerificationConnection();
@@ -2721,8 +2586,6 @@ public class PackageManagerService extends IPackageManager.Stub
             final ArrayList<ResolveInfo> result = new ArrayList<>();
             final ArrayList<ResolveInfo> alwaysList = new ArrayList<>();
             final ArrayList<ResolveInfo> undefinedList = new ArrayList<>();
-            final ArrayList<ResolveInfo> alwaysAskList = new ArrayList<>();
-            final ArrayList<ResolveInfo> neverList = new ArrayList<>();
             final ArrayList<ResolveInfo> matchAllList = new ArrayList<>();
             final int count = candidates.size();
             // First, try to use linked apps. Partition the candidates into four lists:
@@ -2739,55 +2602,14 @@ public class PackageManagerService extends IPackageManager.Stub
                         continue;
                     }
 
-                    if (USE_DOMAIN_VERIFICATION_V2) {
-                        boolean isAlways = mDomainVerificationManager
-                                .isApprovedForDomain(ps, intent, userId);
-                        if (isAlways) {
-                            alwaysList.add(info);
-                        } else {
-                            undefinedList.add(info);
-                        }
-                        continue;
-                    }
-
-                    // Try to get the status from User settings first
-                    long packedStatus = 0;
-                    //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
-                    int status = (int)(packedStatus >> 32);
-                    int linkGeneration = (int)(packedStatus & 0xFFFFFFFF);
-                    if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
-                            Slog.i(TAG, "  + always: " + info.activityInfo.packageName
-                                    + " : linkgen=" + linkGeneration);
-                        }
-
-                        if (!intent.hasCategory(CATEGORY_BROWSABLE)
-                                || !intent.hasCategory(CATEGORY_DEFAULT)) {
-                            undefinedList.add(info);
-                            continue;
-                        }
-
-                        // Use link-enabled generation as preferredOrder, i.e.
-                        // prefer newly-enabled over earlier-enabled.
-                        info.preferredOrder = linkGeneration;
+                    boolean isAlways = mDomainVerificationManager
+                            .isApprovedForDomain(ps, intent, userId);
+                    if (isAlways) {
                         alwaysList.add(info);
-                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
-                            Slog.i(TAG, "  + never: " + info.activityInfo.packageName);
-                        }
-                        neverList.add(info);
-                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
-                            Slog.i(TAG, "  + always-ask: " + info.activityInfo.packageName);
-                        }
-                        alwaysAskList.add(info);
-                    } else if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED ||
-                            status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK) {
-                        if (DEBUG_DOMAIN_VERIFICATION || debug) {
-                            Slog.i(TAG, "  + ask: " + info.activityInfo.packageName);
-                        }
+                    } else {
                         undefinedList.add(info);
                     }
+                    continue;
                 }
             }
 
@@ -2801,27 +2623,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Add all undefined apps as we want them to appear in the disambiguation dialog.
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
-                if (xpDomainInfo != null) {
-                    if (USE_DOMAIN_VERIFICATION_V2) {
-                        if (xpDomainInfo.wereAnyDomainsVerificationApproved) {
-                            result.add(xpDomainInfo.resolveInfo);
-                        }
-                    } else if (xpDomainInfo.bestDomainVerificationStatus
-                            != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                        result.add(xpDomainInfo.resolveInfo);
-                    }
+                if (xpDomainInfo != null && xpDomainInfo.wereAnyDomainsVerificationApproved) {
+                    result.add(xpDomainInfo.resolveInfo);
                 }
-                includeBrowser = true;
-            }
-
-            // The presence of any 'always ask' alternatives means we'll also offer browsers.
-            // If there were 'always' entries their preferred order has been set, so we also
-            // back that off to make the alternatives equivalent
-            if (alwaysAskList.size() > 0) {
-                for (ResolveInfo i : result) {
-                    i.preferredOrder = 0;
-                }
-                result.addAll(alwaysAskList);
                 includeBrowser = true;
             }
 
@@ -2875,7 +2679,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 // has explicitly put into the INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER state
                 if (result.size() == 0) {
                     result.addAll(candidates);
-                    result.removeAll(neverList);
                 }
             }
             return result;
@@ -2975,27 +2778,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             sourceUserId, parentUserId);
                 }
 
-                if (USE_DOMAIN_VERIFICATION_V2) {
-                    result.wereAnyDomainsVerificationApproved |= mDomainVerificationManager
-                            .isApprovedForDomain(ps, intent, riTargetUser.targetUserId);
-                } else {
-                    long verificationState = 0;
-                    //IntentVerifyUtils.getDomainVerificationStatus(ps, parentUserId);
-                    int status = (int) (verificationState >> 32);
-                    result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
-                            result.bestDomainVerificationStatus);
-                }
+                result.wereAnyDomainsVerificationApproved |= mDomainVerificationManager
+                        .isApprovedForDomain(ps, intent, riTargetUser.targetUserId);
             }
-            if (result != null) {
-                if (USE_DOMAIN_VERIFICATION_V2) {
-                    if (!result.wereAnyDomainsVerificationApproved) {
-                        return null;
-                    }
-                } else if (result.bestDomainVerificationStatus
-                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                    // Don't consider matches with status NEVER across profiles.
-                    return null;
-                }
+            if (result != null && !result.wereAnyDomainsVerificationApproved) {
+                return null;
             }
             return result;
         }
@@ -3237,46 +3024,20 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
-                        if (USE_DOMAIN_VERIFICATION_V2) {
-                            if (mDomainVerificationManager
-                                    .isApprovedForDomain(ps, intent, userId)) {
-                                if (DEBUG_INSTANT) {
-                                    Slog.v(TAG, "Instant app approvd for intent; pkg: "
-                                            + packageName);
-                                }
-                                localInstantApp = info;
-                                break;
-                            } else {
-                                if (DEBUG_INSTANT) {
-                                    Slog.v(TAG, "Instant app not approved for intent; pkg: "
-                                            + packageName);
-                                }
-                                blockResolution = true;
-                                break;
-                            }
-                        }
-
-                        final long packedStatus = 0;
-                        //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
-                        final int status = (int)(packedStatus >> 32);
-                        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                            // there's a local instant application installed, but, the user has
-                            // chosen to never use it; skip resolution and don't acknowledge
-                            // an instant application is even available
+                        if (mDomainVerificationManager.isApprovedForDomain(ps, intent, userId)) {
                             if (DEBUG_INSTANT) {
-                                Slog.v(TAG, "Instant app marked to never run; pkg: " + packageName);
-                            }
-                            blockResolution = true;
-                            break;
-                        } else {
-                            // we have a locally installed instant application; skip resolution
-                            // but acknowledge there's an instant application available
-                            if (DEBUG_INSTANT) {
-                                Slog.v(TAG, "Found installed instant app; pkg: " + packageName);
+                                Slog.v(TAG, "Instant app approvd for intent; pkg: "
+                                        + packageName);
                             }
                             localInstantApp = info;
-                            break;
+                        } else {
+                            if (DEBUG_INSTANT) {
+                                Slog.v(TAG, "Instant app not approved for intent; pkg: "
+                                        + packageName);
+                            }
+                            blockResolution = true;
                         }
+                        break;
                     }
                 }
             }
@@ -4190,29 +3951,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        if (USE_DOMAIN_VERIFICATION_V2) {
-                            if (mDomainVerificationManager
-                                    .isApprovedForDomain(ps, intent, userId)) {
-                                if (DEBUG_INSTANT) {
-                                    Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
-                                            + ", approved");
-                                }
-                                return false;
+                        if (mDomainVerificationManager.isApprovedForDomain(ps, intent, userId)) {
+                            if (DEBUG_INSTANT) {
+                                Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
+                                        + ", approved");
                             }
-                        } else {
-                            // Try to get the status from User settings first
-                            final long packedStatus = 0;
-                            //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
-                            final int status = (int) (packedStatus >> 32);
-                            if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
-                                    || status
-                                    == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                                if (DEBUG_INSTANT) {
-                                    Slog.v(TAG, "DENY instant app;"
-                                            + " pkg: " + packageName + ", status: " + status);
-                                }
-                                return false;
-                            }
+                            return false;
                         }
                     }
                     if (ps.getInstantApp(userId)) {
@@ -5352,15 +5096,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     params.handleIntegrityVerificationFinished();
                     break;
                 }
-                case START_INTENT_FILTER_VERIFICATIONS: {
-                    mIntentFilterVerificationManager.verifyIntentFiltersIfNeeded(
-                            (IntentFilterVerificationParams) msg.obj);
-                    break;
-                }
-                case INTENT_FILTER_VERIFIED: {
-                    mIntentFilterVerificationManager.onFilterVerified(msg);
-                    break;
-                }
                 case INSTANT_APP_RESOLUTION_PHASE_TWO: {
                     InstantAppResolver.doInstantAppResolutionPhaseTwo(mContext,
                             mInstantAppResolverConnection,
@@ -6018,7 +5753,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new Settings(Environment.getDataDirectory(),
                         RuntimePermissionsPersistence.createInstance(),
                         i.getPermissionManagerServiceInternal(),
-                        i.getIntentFilterVerificationManager(),
                         domainVerificationService, lock),
                 (i, pm) -> AppsFilter.create(pm.mPmInternal, i),
                 (i, pm) -> (PlatformCompat) ServiceManager.getService("platform_compat"),
@@ -6052,9 +5786,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         i.getContext(), cn, Intent.ACTION_RESOLVE_INSTANT_APP_PACKAGE),
                 (i, pm) -> new ModuleInfoProvider(i.getContext(), pm),
                 (i, pm) -> LegacyPermissionManagerService.create(i.getContext()),
-                (i, pm) -> new IntentFilterVerificationManager(pm.mContext, i.getHandler(),
-                        pm.mIntentFilterVerificationConnection, SystemConfig.getInstance(),
-                        i.getUserManagerService()),
                 (i, pm) -> domainVerificationService,
                 (i, pm) -> {
                     HandlerThread thread = new ServiceThread(TAG,
@@ -6233,7 +5964,6 @@ public class PackageManagerService extends IPackageManager.Stub
         mPermissionManager = injector.getPermissionManagerServiceInternal();
         mSettings = injector.getSettings();
         mUserManager = injector.getUserManagerService();
-        mIntentFilterVerificationManager = injector.getIntentFilterVerificationManager();
         mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
         mHandler = injector.getHandler();
 
@@ -6484,7 +6214,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mHandler = injector.getHandler();
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
-            mIntentFilterVerificationManager = injector.getIntentFilterVerificationManager();
 
             ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
                     = systemConfig.getSharedLibraries();
@@ -6967,7 +6696,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!mOnlyCore && (mPromoteSystemApps || mFirstBoot)) {
                 for (UserInfo user : mInjector.getUserManagerInternal().getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
-                    primeDomainVerificationsLPw(user.id);
                 }
             }
 
@@ -7085,11 +6813,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         mDomainVerificationConnection);
 
                 mDomainVerificationManager.setProxy(domainVerificationProxy);
-
-                if (intentFilterVerifierComponent != null) {
-                    mIntentFilterVerificationManager.setVerifierComponent(
-                            intentFilterVerifierComponent);
-                }
 
                 mServicesExtensionPackageName = getRequiredServicesExtensionPackageLPr();
                 mSharedSystemSharedLibraryPackageName = getRequiredSharedLibraryLPr(
@@ -7798,11 +7521,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return null;
         }
         return matches.get(0).getComponentInfo().getComponentName();
-    }
-
-    @GuardedBy("mLock")
-    private void primeDomainVerificationsLPw(int userId) {
-        mIntentFilterVerificationManager.primeDomainVerificationsLPw(userId, mPackages);
     }
 
     private boolean packageIsBrowser(String packageName, int userId) {
@@ -9650,18 +9368,9 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
-                        if (USE_DOMAIN_VERIFICATION_V2) {
-                            if (ps != null && mDomainVerificationManager
-                                    .isApprovedForDomain(ps, intent, userId)) {
-                                return ri;
-                            }
-                        } else {
-                            final long packedStatus = 0;
-                            //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
-                            final int status = (int) (packedStatus >> 32);
-                            if (status != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                                return ri;
-                            }
+                        if (ps != null && mDomainVerificationManager
+                                .isApprovedForDomain(ps, intent, userId)) {
+                            return ri;
                         }
                     }
                 }
@@ -10152,8 +9861,6 @@ public class PackageManagerService extends IPackageManager.Stub
     private static class CrossProfileDomainInfo {
         /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
         ResolveInfo resolveInfo;
-        /* Best domain verification status of the activities found in the other profile */
-        int bestDomainVerificationStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
         boolean wereAnyDomainsVerificationApproved;
     }
 
@@ -16439,28 +16146,31 @@ public class PackageManagerService extends IPackageManager.Stub
         return DEFAULT_INTEGRITY_VERIFY_ENABLE;
     }
 
+    @Deprecated
     @Override
     public void verifyIntentFilter(int id, int verificationCode, List<String> failedDomains) {
         DomainVerificationProxyV1.queueLegacyVerifyResult(mContext, mDomainVerificationConnection,
                 id, verificationCode, failedDomains, Binder.getCallingUid());
-        mIntentFilterVerificationManager.queueVerifyResult(id, verificationCode, failedDomains);
     }
 
+    @Deprecated
     @Override
     public int getIntentVerificationStatus(String packageName, int userId) {
         return mDomainVerificationManager.getLegacyState(packageName, userId);
     }
 
+    @Deprecated
     @Override
     public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
         mDomainVerificationManager.setLegacyUserState(packageName, userId, status);
         return true;
     }
 
+    @Deprecated
     @Override
     public @NonNull ParceledListSlice<IntentFilterVerificationInfo> getIntentFilterVerifications(
             String packageName) {
-        return mIntentFilterVerificationManager.getIntentFilterVerifications(packageName);
+        return ParceledListSlice.emptyList();
     }
 
     @Override
@@ -20143,14 +19853,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     "Failed to set up verity: " + e);
         }
 
-        if (!instantApp) {
-            mIntentFilterVerificationManager.startIntentFilterVerifications(
-                    args.user.getIdentifier(), replace, parsedPackage);
-        } else {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(TAG, "Not verifying instant app install for app links: " + pkgName);
-            }
-        }
         final PackageFreezer freezer =
                 freezePackageForInstall(pkgName, installFlags, "installPackageLI");
         boolean shouldCloseFreezerBeforeReturn = true;
@@ -21153,8 +20855,6 @@ public class PackageManagerService extends IPackageManager.Stub
             if ((flags & PackageManager.DELETE_KEEP_DATA) == 0) {
                 final SparseBooleanArray changedUsers = new SparseBooleanArray();
                 synchronized (mLock) {
-                    mIntentFilterVerificationManager.clearIntentFilterVerificationsLocked(
-                            deletedPs.name, UserHandle.USER_ALL, true);
                     mDomainVerificationManager.clearPackage(deletedPs.name);
                     clearDefaultBrowserIfNeeded(packageName);
                     mSettings.getKeySetManagerService().removeAppKeySetDataLPw(packageName);
@@ -22286,10 +21986,7 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             synchronized (mLock) {
                 mSettings.applyDefaultPreferredAppsLPw(userId);
-                mIntentFilterVerificationManager.clearIntentFilterVerificationsLocked(userId,
-                        mPackages);
                 mDomainVerificationManager.clearUser(userId);
-                primeDomainVerificationsLPw(userId);
                 final int numPackages = mPackages.size();
                 for (int i = 0; i < numPackages; i++) {
                     final AndroidPackage pkg = mPackages.valueAt(i);
@@ -22551,29 +22248,8 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SecurityException("Only the system may call getIntentFilterVerificationBackup()");
         }
 
-        ByteArrayOutputStream dataStream = new ByteArrayOutputStream();
-        try {
-            final TypedXmlSerializer serializer = Xml.newFastSerializer();
-            serializer.setOutput(dataStream, StandardCharsets.UTF_8.name());
-            serializer.startDocument(null, true);
-            serializer.startTag(null, TAG_INTENT_FILTER_VERIFICATION);
-
-            synchronized (mLock) {
-                mIntentFilterVerificationManager.writeAllDomainVerificationsLPr(serializer, userId,
-                        mSettings.mPackages);
-            }
-
-            serializer.endTag(null, TAG_INTENT_FILTER_VERIFICATION);
-            serializer.endDocument();
-            serializer.flush();
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Unable to write default apps for backup", e);
-            }
-            return null;
-        }
-
-        return dataStream.toByteArray();
+        // TODO(b/170746586)
+        return null;
     }
 
     @Override
@@ -22581,23 +22257,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Only the system may call restorePreferredActivities()");
         }
-
-        try {
-            final TypedXmlPullParser parser = Xml.newFastPullParser();
-            parser.setInput(new ByteArrayInputStream(backup), StandardCharsets.UTF_8.name());
-            restoreFromXml(parser, userId, TAG_INTENT_FILTER_VERIFICATION,
-                    (parser1, userId1) -> {
-                        synchronized (mLock) {
-                            mIntentFilterVerificationManager.readAllDomainVerificationsLPr(parser1,
-                                    userId1);
-                            writeSettingsLPrTEMP();
-                        }
-                    });
-        } catch (Exception e) {
-            if (DEBUG_BACKUP) {
-                Slog.e(TAG, "Exception restoring preferred activities: " + e.getMessage());
-            }
-        }
+        // TODO(b/170746586)
     }
 
     @Override
@@ -24599,35 +24259,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private String dumpDomainString(String packageName) {
-        List<IntentFilterVerificationInfo> iviList = getIntentFilterVerifications(packageName)
-                .getList();
-        List<IntentFilter> filters = getAllIntentFilters(packageName).getList();
-
-        ArraySet<String> result = new ArraySet<>();
-        if (iviList.size() > 0) {
-            for (IntentFilterVerificationInfo ivi : iviList) {
-                result.addAll(ivi.getDomains());
-            }
-        }
-        if (filters != null && filters.size() > 0) {
-            for (IntentFilter filter : filters) {
-                if (filter.hasCategory(Intent.CATEGORY_BROWSABLE)
-                        && (filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
-                                filter.hasDataScheme(IntentFilter.SCHEME_HTTPS))) {
-                    result.addAll(filter.getHostsList());
-                }
-            }
-        }
-
-        StringBuilder sb = new StringBuilder(result.size() * 16);
-        for (String domain : result) {
-            if (sb.length() > 0) sb.append(" ");
-            sb.append(domain);
-        }
-        return sb.toString();
-    }
-
     // ------- apps on sdcard specific code -------
     static final boolean DEBUG_SD_INSTALL = false;
 
@@ -25823,7 +25454,6 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
-            primeDomainVerificationsLPw(userId);
             mAppsFilter.onUsersChanged();
         }
     }

@@ -41,6 +41,7 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 

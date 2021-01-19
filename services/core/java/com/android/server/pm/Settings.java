@@ -108,7 +108,6 @@ import com.android.server.pm.Installer.InstallerException;
 import com.android.server.pm.domain.verify.DomainVerificationLegacySettings;
 import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 import com.android.server.pm.domain.verify.DomainVerificationPersistence;
-import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -511,8 +510,6 @@ public final class Settings implements Watchable, Snappable {
 
     private final LegacyPermissionDataProvider mPermissionDataProvider;
 
-    private final IntentFilterVerificationManager mIntentFilterVerificationManager;
-
     private final DomainVerificationManagerInternal mDomainVerificationManager;
 
     /**
@@ -541,7 +538,6 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
-        mIntentFilterVerificationManager = null;
         mDomainVerificationManager = null;
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
@@ -563,7 +559,6 @@ public final class Settings implements Watchable, Snappable {
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
             LegacyPermissionDataProvider permissionDataProvider,
-            @NonNull IntentFilterVerificationManager intentFilterVerificationManager,
             @NonNull DomainVerificationManagerInternal domainVerificationManager,
             @NonNull Object lock)  {
         mLock = lock;
@@ -592,7 +587,6 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
 
-        mIntentFilterVerificationManager = intentFilterVerificationManager;
         mDomainVerificationManager = domainVerificationManager;
 
         mPackages.registerObserver(mObserver);
@@ -635,7 +629,6 @@ public final class Settings implements Watchable, Snappable {
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
 
-        mIntentFilterVerificationManager = r.mIntentFilterVerificationManager;
         mDomainVerificationManager = r.mDomainVerificationManager;
 
         mInstallerPackages.addAll(r.mInstallerPackages);
@@ -2323,8 +2316,6 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            mIntentFilterVerificationManager.writeRestoredIntentFilterVerifications(serializer);
-
             mDomainVerificationManager.writeSettings(serializer);
 
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
@@ -2847,8 +2838,6 @@ public final class Settings implements Watchable, Snappable {
                     if (nname != null && oname != null) {
                         mRenamedPackages.put(nname, oname);
                     }
-                } else if (tagName.equals("restored-ivi")) {
-                    mIntentFilterVerificationManager.readRestoredIntentFilterVerifications(parser);
                 } else if (tagName.equals("last-platform-version")) {
                     // Upgrade from older XML schema
                     final VersionInfo internal = findOrCreateVersion(

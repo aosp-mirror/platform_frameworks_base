@@ -47,6 +47,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.pm.dex.ArtManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -93,6 +94,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Class for retrieving various kinds of information related to the application
@@ -2201,8 +2203,10 @@ public abstract class PackageManager {
      * {@link PackageManager#verifyIntentFilter} to indicate that the calling
      * IntentFilter Verifier confirms that the IntentFilter is verified.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_VERIFICATION_SUCCESS = 1;
 
@@ -2211,16 +2215,20 @@ public abstract class PackageManager {
      * {@link PackageManager#verifyIntentFilter} to indicate that the calling
      * IntentFilter Verifier confirms that the IntentFilter is NOT verified.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_VERIFICATION_FAILURE = -1;
 
     /**
      * Internal status code to indicate that an IntentFilter verification result is not specified.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED = 0;
 
@@ -2230,8 +2238,10 @@ public abstract class PackageManager {
      * will always be prompted the Intent Disambiguation Dialog if there are two
      * or more Intent resolved for the IntentFilter's domain(s).
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK = 1;
 
@@ -2242,8 +2252,10 @@ public abstract class PackageManager {
      * or more resolution of the Intent. The default App for the domain(s)
      * specified in the IntentFilter will also ALWAYS be used.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS = 2;
 
@@ -2254,8 +2266,10 @@ public abstract class PackageManager {
      * Intent resolved. The default App for the domain(s) specified in the
      * IntentFilter will also NEVER be presented to the User.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER = 3;
 
@@ -2268,8 +2282,10 @@ public abstract class PackageManager {
      * more than one candidate app, then a disambiguation is *always* presented
      * even if there is another candidate app with the 'always' state.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SystemApi
     public static final int INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK = 4;
 
@@ -3743,8 +3759,10 @@ public abstract class PackageManager {
      * Passed to an intent filter verifier and is used to call back to
      * {@link #verifyIntentFilter}
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_INTENT_FILTER_VERIFICATION_ID
             = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_ID";
 
@@ -3754,8 +3772,10 @@ public abstract class PackageManager {
      *
      * Usually this is "https"
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_INTENT_FILTER_VERIFICATION_URI_SCHEME
             = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_URI_SCHEME";
 
@@ -3766,8 +3786,10 @@ public abstract class PackageManager {
      *
      * This is a space delimited list of hosts.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_INTENT_FILTER_VERIFICATION_HOSTS
             = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_HOSTS";
 
@@ -3777,8 +3799,10 @@ public abstract class PackageManager {
      * from the hosts. Each host response will need to include the package name of APK containing
      * the intent filter.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     public static final String EXTRA_INTENT_FILTER_VERIFICATION_PACKAGE_NAME
             = "android.content.pm.extra.INTENT_FILTER_VERIFICATION_PACKAGE_NAME";
 
@@ -6956,8 +6980,10 @@ public abstract class PackageManager {
      * @throws SecurityException if the caller does not have the
      *            INTENT_FILTER_VERIFICATION_AGENT permission.
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @RequiresPermission(android.Manifest.permission.INTENT_FILTER_VERIFICATION_AGENT)
@@ -6982,8 +7008,10 @@ public abstract class PackageManager {
      *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER} or
      *              {@link #INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED}
      *
+     * @deprecated Use {@link DomainVerificationManager} APIs.
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @RequiresPermission(Manifest.permission.INTERACT_ACROSS_USERS_FULL)
@@ -7008,8 +7036,18 @@ public abstract class PackageManager {
      *
      * @return true if the status has been set. False otherwise.
      *
+     * @deprecated This API represents a very dangerous behavior where Settings or a system app with
+     * the right permissions can force an application to be verified for all of its declared
+     * domains. This has been removed to prevent unintended usage, and no longer does anything,
+     * always returning false. If a caller truly wishes to grant <i></i>every</i> declared web
+     * domain to an application, use
+     * {@link DomainVerificationManager#setDomainVerificationUserSelection(UUID, Set, boolean)},
+     * passing in all of the domains returned inside
+     * {@link DomainVerificationManager#getDomainVerificationUserSelection(String)}.
+     *
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS)
@@ -7026,8 +7064,10 @@ public abstract class PackageManager {
      *
      * @return a list of IntentFilterVerificationInfo for a specific package.
      *
+     * @deprecated Use {@link DomainVerificationManager} instead.
      * @hide
      */
+    @Deprecated
     @SuppressWarnings("HiddenAbstractMethod")
     @NonNull
     @SystemApi
