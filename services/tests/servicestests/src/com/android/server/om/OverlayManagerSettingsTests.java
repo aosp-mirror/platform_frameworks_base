@@ -195,7 +195,8 @@ public class OverlayManagerSettingsTests {
                 STATE_DISABLED,
                 0,
                 0,
-                true);
+                true,
+                false);
         insertSetting(otherTarget);
         assertFalse(mSettings.setPriority(OVERLAY_A, otherTarget.getOverlayIdentifier(), USER_0));
     }
@@ -384,7 +385,7 @@ public class OverlayManagerSettingsTests {
 
     private void insertSetting(OverlayInfo oi) throws Exception {
         mSettings.init(oi.getOverlayIdentifier(), oi.userId, oi.targetPackageName, null,
-                oi.baseCodePath, true, false,0, oi.category);
+                oi.baseCodePath, true, false,0, oi.category, oi.isFabricated);
         mSettings.setState(oi.getOverlayIdentifier(), oi.userId, oi.state);
         mSettings.setEnabled(oi.getOverlayIdentifier(), oi.userId, false);
     }
@@ -425,7 +426,8 @@ public class OverlayManagerSettingsTests {
                 STATE_DISABLED,
                 userId,
                 0,
-                true);
+                true,
+                false);
     }
 
     private static void assertContains(int[] haystack, int needle) {

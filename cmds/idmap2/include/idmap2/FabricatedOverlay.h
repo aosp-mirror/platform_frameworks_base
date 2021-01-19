@@ -55,7 +55,7 @@ struct FabricatedOverlay {
     std::vector<Entry> entries_;
   };
 
-  Result<Unit> ToBinaryStream(std::ostream& stream);
+  Result<Unit> ToBinaryStream(std::ostream& stream) const;
   static Result<FabricatedOverlay> FromBinaryStream(std::istream& stream);
 
  private:
@@ -80,6 +80,8 @@ struct FabricatedOverlay {
 struct FabricatedOverlayContainer : public OverlayResourceContainer {
   static Result<std::unique_ptr<FabricatedOverlayContainer>> FromPath(std::string path);
   static std::unique_ptr<FabricatedOverlayContainer> FromOverlay(FabricatedOverlay&& overlay);
+
+  WARN_UNUSED OverlayManifestInfo GetManifestInfo() const;
 
   // inherited from OverlayResourceContainer
   WARN_UNUSED Result<OverlayManifestInfo> FindOverlayInfo(const std::string& name) const override;

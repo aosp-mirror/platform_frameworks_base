@@ -279,7 +279,7 @@ class OverlayActorEnforcerTests {
                     null,
                     "/path",
                     OverlayInfo.STATE_UNKNOWN, 0,
-                    0, false)
+                    0, false, false)
         }
 
         private infix fun ActorState.withCases(block: TestCase.() -> Unit) =

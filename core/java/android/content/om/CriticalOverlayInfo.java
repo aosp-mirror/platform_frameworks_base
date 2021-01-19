@@ -57,4 +57,9 @@ public interface CriticalOverlayInfo {
      */
     @NonNull
     OverlayIdentifier getOverlayIdentifier();
+
+    /**
+     * Returns whether or not the overlay is a {@link FabricatedOverlay}.
+     */
+    boolean isFabricated();
 }

@@ -145,7 +145,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         assertOverlayInfoForTarget(TARGET, USER, o3, o1, o2);
 
         assertEquals(impl.setHighestPriority(IDENTIFIER3, USER),
-                Optional.of(new PackageAndUser(TARGET, USER)));
+                Set.of(new PackageAndUser(TARGET, USER)));
         assertOverlayInfoForTarget(TARGET, USER, o1, o2, o3);
 
         assertEquals(impl.setPriority(IDENTIFIER, IDENTIFIER2, USER),
@@ -166,7 +166,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         assertState(STATE_DISABLED, IDENTIFIER, USER);
 
         assertEquals(impl.setEnabled(IDENTIFIER, true, USER),
-                Optional.of(new PackageAndUser(TARGET, USER)));
+                Set.of(new PackageAndUser(TARGET, USER)));
         assertState(STATE_ENABLED, IDENTIFIER, USER);
 
         // target upgrades do not change the state of the overlay
@@ -209,10 +209,10 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
         installPackage(target(TARGET), USER);
         installPackage(overlay(OVERLAY, TARGET), USER);
         assertEquals(impl.setEnabled(IDENTIFIER, true, USER),
-                Optional.of(new PackageAndUser(TARGET, USER)));
+                Set.of(new PackageAndUser(TARGET, USER)));
 
         // request succeeded, but nothing changed
-        assertFalse(impl.setEnabled(IDENTIFIER, true, USER).isPresent());
+        assertTrue(impl.setEnabled(IDENTIFIER, true, USER).isEmpty());
     }
 
     @Test

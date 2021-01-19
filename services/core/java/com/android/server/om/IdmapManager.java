@@ -22,7 +22,10 @@ import static com.android.server.om.OverlayManagerService.TAG;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
+import android.content.pm.PackageParser;
 import android.os.Build.VERSION_CODES;
+import android.os.FabricatedOverlayInfo;
+import android.os.FabricatedOverlayInternal;
 import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
 import android.text.TextUtils;
@@ -31,6 +34,7 @@ import android.util.Slog;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Handle the creation and deletion of idmap files.
@@ -75,24 +79,25 @@ final class IdmapManager {
      * modified.
      */
     boolean createIdmap(@NonNull final AndroidPackage targetPackage,
-            @NonNull final AndroidPackage overlayPackage, int userId) {
+            @NonNull final AndroidPackage overlayPackage, String overlayBasePath,
+            String overlayName, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.getPackageName() + " and "
                     + overlayPackage.getPackageName());
         }
         final String targetPath = targetPackage.getBaseApkPath();
-        final String overlayPath = overlayPackage.getBaseApkPath();
         try {
             int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
             boolean enforce = enforceOverlayable(overlayPackage);
-            if (mIdmapDaemon.verifyIdmap(targetPath, overlayPath, policies, enforce, userId)) {
+            if (mIdmapDaemon.verifyIdmap(targetPath, overlayBasePath, overlayName, policies,
+                    enforce, userId)) {
                 return false;
             }
-            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
+            return mIdmapDaemon.createIdmap(targetPath, overlayBasePath, overlayName, policies,
                     enforce, userId) != null;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
-                    + overlayPath + ": " + e.getMessage());
+                    + overlayBasePath, e);
             return false;
         }
     }
@@ -104,13 +109,36 @@ final class IdmapManager {
         try {
             return mIdmapDaemon.removeIdmap(oi.baseCodePath, userId);
         } catch (Exception e) {
-            Slog.w(TAG, "failed to remove idmap for " + oi.baseCodePath + ": " + e.getMessage());
+            Slog.w(TAG, "failed to remove idmap for " + oi.baseCodePath, e);
             return false;
         }
     }
 
     boolean idmapExists(@NonNull final OverlayInfo oi) {
         return mIdmapDaemon.idmapExists(oi.baseCodePath, oi.userId);
+    }
+
+    /**
+     * @return the list of all fabricated overlays
+     */
+    List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
+        return mIdmapDaemon.getFabricatedOverlayInfos();
+    }
+
+    /**
+     * Creates a fabricated overlay and persists it to disk.
+     * @return the path to the fabricated overlay
+     */
+    FabricatedOverlayInfo createFabricatedOverlay(@NonNull FabricatedOverlayInternal overlay) {
+        return mIdmapDaemon.createFabricatedOverlay(overlay);
+    }
+
+    /**
+     * Deletes the fabricated overlay file on disk.
+     * @return whether the path was deleted
+     */
+    boolean deleteFabricatedOverlay(@NonNull String path) {
+        return mIdmapDaemon.deleteFabricatedOverlay(path);
     }
 
     /**

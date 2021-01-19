@@ -19,6 +19,7 @@ package com.android.server.om;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.om.FabricatedOverlay;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
@@ -27,10 +28,14 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.os.Binder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ShellCommand;
 import android.os.UserHandle;
 import android.util.TypedValue;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
 import java.util.List;
@@ -75,6 +80,8 @@ final class OverlayManagerShellCommand extends ShellCommand {
                     return runSetPriority();
                 case "lookup":
                     return runLookup();
+                case "fabricate":
+                    return runFabricate();
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -218,6 +225,83 @@ final class OverlayManagerShellCommand extends ShellCommand {
         final OverlayIdentifier overlay = OverlayIdentifier.fromString(getNextArgRequired());
         mInterface.commit(new OverlayManagerTransaction.Builder()
                 .setEnabled(overlay, enable, userId)
+                .build());
+        return 0;
+    }
+
+    private int runFabricate() throws RemoteException {
+        final PrintWriter err = getErrPrintWriter();
+        if (Binder.getCallingUid() != Process.ROOT_UID) {
+            err.println("Error: must be root to fabricate overlays through the shell");
+            return 1;
+        }
+
+        int userId = UserHandle.USER_SYSTEM;
+        String targetPackage = "";
+        String targetOverlayable = "";
+        String name = "";
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+                case "--target":
+                    targetPackage = getNextArgRequired();
+                    break;
+                case "--target-name":
+                    targetOverlayable = getNextArgRequired();
+                    break;
+                case "--name":
+                    name = getNextArgRequired();
+                    break;
+                default:
+                    err.println("Error: Unknown option: " + opt);
+                    return 1;
+            }
+        }
+
+        if (name.isEmpty()) {
+            err.println("Error: Missing required arg '--name'");
+            return 1;
+        }
+
+        if (targetPackage.isEmpty()) {
+            err.println("Error: Missing required arg '--target'");
+            return 1;
+        }
+
+        final String resourceName = getNextArgRequired();
+        final String typeStr = getNextArgRequired();
+        final int type;
+        if (typeStr.startsWith("0x")) {
+            type = Integer.parseUnsignedInt(typeStr.substring(2), 16);
+        } else {
+            type = Integer.parseUnsignedInt(typeStr);
+        }
+        final String dataStr = getNextArgRequired();
+        final int data;
+        if (dataStr.startsWith("0x")) {
+            data = Integer.parseUnsignedInt(dataStr.substring(2), 16);
+        } else {
+            data = Integer.parseUnsignedInt(dataStr);
+        }
+
+        final PackageManager pm = mContext.getPackageManager();
+        if (pm == null) {
+            err.println("Error: failed to get package manager");
+            return 1;
+        }
+
+        final String overlayPackageName = "com.android.shell";
+        final FabricatedOverlay overlay = new FabricatedOverlay.Builder(
+                overlayPackageName, name, targetPackage)
+                .setTargetOverlayable(targetOverlayable)
+                .setResourceValue(resourceName, type, data)
+                .build();
+
+        mInterface.commit(new OverlayManagerTransaction.Builder()
+                .registerFabricatedOverlay(overlay)
                 .build());
         return 0;
     }

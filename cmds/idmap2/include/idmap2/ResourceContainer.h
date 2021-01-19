@@ -46,6 +46,7 @@ struct TargetResourceContainer : public ResourceContainer {
 };
 
 struct OverlayManifestInfo {
+  std::string package_name;     // NOLINT(misc-non-private-member-variables-in-classes)
   std::string name;             // NOLINT(misc-non-private-member-variables-in-classes)
   std::string target_package;   // NOLINT(misc-non-private-member-variables-in-classes)
   std::string target_name;      // NOLINT(misc-non-private-member-variables-in-classes)

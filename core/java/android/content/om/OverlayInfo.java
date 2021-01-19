@@ -214,6 +214,12 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     private OverlayIdentifier mIdentifierCached;
 
     /**
+     *
+     * @hide
+     */
+    public final boolean isFabricated;
+
+    /**
      * Create a new OverlayInfo based on source with an updated state.
      *
      * @param source the source OverlayInfo to base the new instance on
@@ -224,7 +230,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
     public OverlayInfo(@NonNull OverlayInfo source, @State int state) {
         this(source.packageName, source.overlayName, source.targetPackageName,
                 source.targetOverlayableName, source.category, source.baseCodePath, state,
-                source.userId, source.priority, source.isMutable);
+                source.userId, source.priority, source.isMutable, source.isFabricated);
     }
 
     /** @hide */
@@ -233,14 +239,15 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
             @Nullable String targetOverlayableName, @Nullable String category,
             @NonNull String baseCodePath, int state, int userId, int priority, boolean isMutable) {
         this(packageName, null /* overlayName */, targetPackageName, targetOverlayableName,
-                category, baseCodePath, state, userId, priority, isMutable);
+                category, baseCodePath, state, userId, priority, isMutable,
+                false /* isFabricated */);
     }
 
     /** @hide */
     public OverlayInfo(@NonNull String packageName, @Nullable String overlayName,
             @NonNull String targetPackageName, @Nullable String targetOverlayableName,
             @Nullable String category, @NonNull String baseCodePath, int state, int userId,
-            int priority, boolean isMutable) {
+            int priority, boolean isMutable, boolean isFabricated) {
         this.packageName = packageName;
         this.overlayName = overlayName;
         this.targetPackageName = targetPackageName;
@@ -251,6 +258,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         this.userId = userId;
         this.priority = priority;
         this.isMutable = isMutable;
+        this.isFabricated = isFabricated;
         ensureValidState();
     }
 
@@ -266,6 +274,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         userId = source.readInt();
         priority = source.readInt();
         isMutable = source.readBoolean();
+        isFabricated = source.readBoolean();
         ensureValidState();
     }
 
@@ -339,6 +348,24 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
      * @hide
      */
     @Override
+    public boolean isFabricated() {
+        return isFabricated;
+    }
+
+    /**
+     * Full path to the base APK or fabricated overlay for this overlay package.
+     *
+     * @hide
+     */
+    public String getBaseCodePath() {
+        return baseCodePath;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @hide
+     */
+    @Override
     @NonNull
     public OverlayIdentifier getOverlayIdentifier() {
         if (mIdentifierCached == null) {
@@ -390,6 +417,7 @@ public final class OverlayInfo implements CriticalOverlayInfo, Parcelable {
         dest.writeInt(userId);
         dest.writeInt(priority);
         dest.writeBoolean(isMutable);
+        dest.writeBoolean(isFabricated);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<OverlayInfo> CREATOR =

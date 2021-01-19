@@ -18,10 +18,10 @@
 
 #include <sys/stat.h>   // umask
 #include <sys/types.h>  // umask
-#include <unistd.h>
 
 #include <cerrno>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <ostream>
@@ -35,18 +35,20 @@
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
-#include "utils/String8.h"
 
 using android::IPCThreadState;
 using android::base::StringPrintf;
 using android::binder::Status;
 using android::idmap2::BinaryStreamVisitor;
+using android::idmap2::FabricatedOverlay;
+using android::idmap2::FabricatedOverlayContainer;
 using android::idmap2::Idmap;
 using android::idmap2::IdmapHeader;
 using android::idmap2::OverlayResourceContainer;
 using android::idmap2::TargetResourceContainer;
 using android::idmap2::utils::kIdmapCacheDir;
 using android::idmap2::utils::kIdmapFilePermissionMask;
+using android::idmap2::utils::RandomStringForPath;
 using android::idmap2::utils::UidHasWriteAccessToPath;
 
 using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
@@ -67,6 +69,7 @@ Status error(const std::string& msg) {
 PolicyBitmask ConvertAidlArgToPolicyBitmask(int32_t arg) {
   return static_cast<PolicyBitmask>(arg);
 }
+
 }  // namespace
 
 namespace android::os {
@@ -99,8 +102,9 @@ Status Idmap2Service::removeIdmap(const std::string& overlay_path, int32_t user_
 }
 
 Status Idmap2Service::verifyIdmap(const std::string& target_path, const std::string& overlay_path,
-                                  int32_t fulfilled_policies, bool enforce_overlayable,
-                                  int32_t user_id ATTRIBUTE_UNUSED, bool* _aidl_return) {
+                                  const std::string& overlay_name, int32_t fulfilled_policies,
+                                  bool enforce_overlayable, int32_t user_id ATTRIBUTE_UNUSED,
+                                  bool* _aidl_return) {
   SYSTRACE << "Idmap2Service::verifyIdmap " << overlay_path;
   assert(_aidl_return);
 
@@ -128,9 +132,8 @@ Status Idmap2Service::verifyIdmap(const std::string& target_path, const std::str
     return ok();
   }
 
-  // TODO(162841629): Support passing overlay name to idmap2d verify
   auto up_to_date =
-      header->IsUpToDate(*GetPointer(*target), **overlay, "",
+      header->IsUpToDate(*GetPointer(*target), **overlay, overlay_name,
                          ConvertAidlArgToPolicyBitmask(fulfilled_policies), enforce_overlayable);
 
   *_aidl_return = static_cast<bool>(up_to_date);
@@ -142,8 +145,8 @@ Status Idmap2Service::verifyIdmap(const std::string& target_path, const std::str
 }
 
 Status Idmap2Service::createIdmap(const std::string& target_path, const std::string& overlay_path,
-                                  int32_t fulfilled_policies, bool enforce_overlayable,
-                                  int32_t user_id ATTRIBUTE_UNUSED,
+                                  const std::string& overlay_name, int32_t fulfilled_policies,
+                                  bool enforce_overlayable, int32_t user_id ATTRIBUTE_UNUSED,
                                   std::optional<std::string>* _aidl_return) {
   assert(_aidl_return);
   SYSTRACE << "Idmap2Service::createIdmap " << target_path << " " << overlay_path;
@@ -168,9 +171,8 @@ Status Idmap2Service::createIdmap(const std::string& target_path, const std::str
     return error("failed to load apk overlay '%s'" + overlay_path);
   }
 
-  // TODO(162841629): Support passing overlay name to idmap2d create
-  const auto idmap = Idmap::FromContainers(*GetPointer(*target), **overlay, "", policy_bitmask,
-                                           enforce_overlayable);
+  const auto idmap = Idmap::FromContainers(*GetPointer(*target), **overlay, overlay_name,
+                                           policy_bitmask, enforce_overlayable);
   if (!idmap) {
     return error(idmap.GetErrorMessage());
   }
@@ -216,6 +218,136 @@ idmap2::Result<Idmap2Service::TargetResourceContainerPtr> Idmap2Service::GetTarg
     return target.GetError();
   }
   return {std::move(*target)};
+}
+
+Status Idmap2Service::createFabricatedOverlay(
+    const os::FabricatedOverlayInternal& overlay,
+    std::optional<os::FabricatedOverlayInfo>* _aidl_return) {
+  idmap2::FabricatedOverlay::Builder builder(overlay.packageName, overlay.overlayName,
+                                             overlay.targetPackageName);
+  if (!overlay.targetOverlayable.empty()) {
+    builder.SetOverlayable(overlay.targetOverlayable);
+  }
+
+  for (const auto& res : overlay.entries) {
+    builder.SetResourceValue(res.resourceName, res.dataType, res.data);
+  }
+
+  // Generate the file path of the fabricated overlay and ensure it does not collide with an
+  // existing path. Re-registering a fabricated overlay will always result in an updated path.
+  std::string path;
+  std::string file_name;
+  do {
+    constexpr size_t kSuffixLength = 4;
+    const std::string random_suffix = RandomStringForPath(kSuffixLength);
+    file_name = StringPrintf("%s-%s-%s.frro", overlay.packageName.c_str(),
+                             overlay.overlayName.c_str(), random_suffix.c_str());
+    path = StringPrintf("%s/%s", kIdmapCacheDir, file_name.c_str());
+
+    // Invoking std::filesystem::exists with a file name greater than 255 characters will cause this
+    // process to abort since the name exceeds the maximum file name size.
+    const size_t kMaxFileNameLength = 255;
+    if (file_name.size() > kMaxFileNameLength) {
+      return error(
+          base::StringPrintf("fabricated overlay file name '%s' longer than %zu characters",
+                             file_name.c_str(), kMaxFileNameLength));
+    }
+  } while (std::filesystem::exists(path));
+
+  const uid_t uid = IPCThreadState::self()->getCallingUid();
+  if (!UidHasWriteAccessToPath(uid, path)) {
+    return error(base::StringPrintf("will not write to %s: calling uid %d lacks write access",
+                                    path.c_str(), uid));
+  }
+
+  // Persist the fabricated overlay.
+  umask(kIdmapFilePermissionMask);
+  std::ofstream fout(path);
+  if (fout.fail()) {
+    return error("failed to open frro path " + path);
+  }
+  const auto frro = builder.Build();
+  if (!frro) {
+    return error(StringPrintf("failed to serialize '%s:%s': %s", overlay.packageName.c_str(),
+                              overlay.overlayName.c_str(), frro.GetErrorMessage().c_str()));
+  }
+  auto result = frro->ToBinaryStream(fout);
+  if (!result) {
+    unlink(path.c_str());
+    return error("failed to write to frro path " + path + ": " + result.GetErrorMessage());
+  }
+  if (fout.fail()) {
+    unlink(path.c_str());
+    return error("failed to write to frro path " + path);
+  }
+
+  os::FabricatedOverlayInfo out_info;
+  out_info.packageName = overlay.packageName;
+  out_info.overlayName = overlay.overlayName;
+  out_info.targetPackageName = overlay.targetPackageName;
+  out_info.targetOverlayable = overlay.targetOverlayable;
+  out_info.path = path;
+  *_aidl_return = out_info;
+  return ok();
+}
+
+Status Idmap2Service::getFabricatedOverlayInfos(
+    std::vector<os::FabricatedOverlayInfo>* _aidl_return) {
+  for (const auto& entry : std::filesystem::directory_iterator(kIdmapCacheDir)) {
+    if (!android::IsFabricatedOverlay(entry.path())) {
+      continue;
+    }
+
+    const auto overlay = FabricatedOverlayContainer::FromPath(entry.path());
+    if (!overlay) {
+      // This is a sign something went wrong.
+      LOG(ERROR) << "Failed to open '" << entry.path() << "': " << overlay.GetErrorMessage();
+      continue;
+    }
+
+    const auto info = (*overlay)->GetManifestInfo();
+    os::FabricatedOverlayInfo out_info;
+    out_info.packageName = info.package_name;
+    out_info.overlayName = info.name;
+    out_info.targetPackageName = info.target_package;
+    out_info.targetOverlayable = info.target_name;
+    out_info.path = entry.path();
+    _aidl_return->emplace_back(std::move(out_info));
+  }
+
+  return ok();
+}
+
+binder::Status Idmap2Service::deleteFabricatedOverlay(const std::string& overlay_path,
+                                                      bool* _aidl_return) {
+  SYSTRACE << "Idmap2Service::deleteFabricatedOverlay " << overlay_path;
+  const uid_t uid = IPCThreadState::self()->getCallingUid();
+
+  if (!UidHasWriteAccessToPath(uid, overlay_path)) {
+    *_aidl_return = false;
+    return error(base::StringPrintf("failed to unlink %s: calling uid %d lacks write access",
+                                    overlay_path.c_str(), uid));
+  }
+
+  const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_path);
+  if (!UidHasWriteAccessToPath(uid, idmap_path)) {
+    *_aidl_return = false;
+    return error(base::StringPrintf("failed to unlink %s: calling uid %d lacks write access",
+                                    idmap_path.c_str(), uid));
+  }
+
+  if (unlink(overlay_path.c_str()) != 0) {
+    *_aidl_return = false;
+    return error("failed to unlink " + overlay_path + ": " + strerror(errno));
+  }
+
+  if (unlink(idmap_path.c_str()) != 0) {
+    *_aidl_return = false;
+    return error("failed to unlink " + idmap_path + ": " + strerror(errno));
+  }
+
+  *_aidl_return = true;
+  return ok();
 }
 
 }  // namespace android::os

@@ -24,8 +24,10 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_REASON;
+import static android.content.om.OverlayManagerTransaction.Request.TYPE_REGISTER_FABRICATED;
 import static android.content.om.OverlayManagerTransaction.Request.TYPE_SET_DISABLED;
 import static android.content.om.OverlayManagerTransaction.Request.TYPE_SET_ENABLED;
+import static android.content.om.OverlayManagerTransaction.Request.TYPE_UNREGISTER_FABRICATED;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 import static android.os.Trace.TRACE_TAG_RRO;
 import static android.os.Trace.traceBegin;
@@ -55,8 +57,10 @@ import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.FabricatedOverlayInternal;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
@@ -71,6 +75,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.content.om.OverlayConfig;
+import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.CollectionUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -97,6 +102,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -618,8 +624,7 @@ public final class OverlayManagerService extends SystemService {
                 try {
                     synchronized (mLock) {
                         try {
-                            mImpl.setEnabled(overlay, enable, realUserId)
-                                .ifPresent(OverlayManagerService.this::updateTargetPackages);
+                            updateTargetPackages(mImpl.setEnabled(overlay, enable, realUserId));
                             return true;
                         } catch (OperationFailedException e) {
                             return false;
@@ -754,8 +759,7 @@ public final class OverlayManagerService extends SystemService {
                 try {
                     synchronized (mLock) {
                         try {
-                            mImpl.setHighestPriority(overlay, realUserId)
-                                .ifPresent(OverlayManagerService.this::updateTargetPackages);
+                            updateTargetPackages(mImpl.setHighestPriority(overlay, realUserId));
                             return true;
                         } catch (OperationFailedException e) {
                             return false;
@@ -867,25 +871,63 @@ public final class OverlayManagerService extends SystemService {
             }
         }
 
-        private Optional<PackageAndUser> executeRequest(
-                @NonNull final OverlayManagerTransaction.Request request) throws Exception {
-            final int realUserId = handleIncomingUser(request.userId, request.typeToString());
-            enforceActor(request.overlay, request.typeToString(), realUserId);
+        private Set<PackageAndUser> executeRequest(
+                @NonNull final OverlayManagerTransaction.Request request)
+                throws OperationFailedException {
+            Objects.requireNonNull(request, "Transaction contains a null request");
+            Objects.requireNonNull(request.overlay,
+                    "Transaction overlay identifier must be non-null");
+
+            final int callingUid = Binder.getCallingUid();
+            final int realUserId;
+            if (request.type == TYPE_REGISTER_FABRICATED
+                    || request.type == TYPE_UNREGISTER_FABRICATED) {
+                if (request.userId != UserHandle.USER_ALL) {
+                    throw new IllegalArgumentException(request.typeToString()
+                            + " unsupported for user " + request.userId);
+                }
+                realUserId = UserHandle.USER_ALL;
+
+                // Enforce that the calling process can only register and unregister fabricated
+                // overlays using its package name.
+                final String pkgName = request.overlay.getPackageName();
+                if (callingUid != Process.ROOT_UID && !ArrayUtils.contains(
+                        mPackageManager.getPackagesForUid(callingUid), pkgName)) {
+                    throw new IllegalArgumentException("UID " + callingUid + " does own package"
+                            + "name " + pkgName);
+                }
+            } else {
+                // Enforce actor requirements for enabling, disabling, and reordering overlays.
+                realUserId = handleIncomingUser(request.userId, request.typeToString());
+                enforceActor(request.overlay, request.typeToString(), realUserId);
+            }
 
             final long ident = Binder.clearCallingIdentity();
             try {
                 switch (request.type) {
                     case TYPE_SET_ENABLED:
-                        Optional<PackageAndUser> opt1 =
-                                mImpl.setEnabled(request.overlay, true, realUserId);
-                        Optional<PackageAndUser> opt2 =
-                                mImpl.setHighestPriority(request.overlay, realUserId);
-                        // Both setEnabled and setHighestPriority affected the same
-                        // target package and user: if both return non-empty
-                        // Optionals, they are identical
-                        return opt1.isPresent() ? opt1 : opt2;
+                        Set<PackageAndUser> result = null;
+                        result = CollectionUtils.addAll(result,
+                                mImpl.setEnabled(request.overlay, true, realUserId));
+                        result = CollectionUtils.addAll(result,
+                                mImpl.setHighestPriority(request.overlay, realUserId));
+                        return CollectionUtils.emptyIfNull(result);
+
                     case TYPE_SET_DISABLED:
                         return mImpl.setEnabled(request.overlay, false, realUserId);
+
+                    case TYPE_REGISTER_FABRICATED:
+                        final FabricatedOverlayInternal fabricated =
+                                request.extras.getParcelable(
+                                        OverlayManagerTransaction.Request.BUNDLE_FABRICATED_OVERLAY
+                                );
+                        Objects.requireNonNull(fabricated,
+                                "no fabricated overlay attached to request");
+                        return mImpl.registerFabricatedOverlay(fabricated);
+
+                    case TYPE_UNREGISTER_FABRICATED:
+                        return mImpl.unregisterFabricatedOverlay(request.overlay);
+
                     default:
                         throw new IllegalArgumentException("unsupported request: " + request);
                 }
@@ -895,7 +937,7 @@ public final class OverlayManagerService extends SystemService {
         }
 
         private void executeAllRequests(@NonNull final OverlayManagerTransaction transaction)
-                throws Exception {
+                throws OperationFailedException {
             if (DEBUG) {
                 Slog.d(TAG, "commit " + transaction);
             }
@@ -905,25 +947,25 @@ public final class OverlayManagerService extends SystemService {
 
             // map: userId -> set<package-name>: target packages of overlays in
             // this transaction
-            SparseArray<Set<String>> transactionTargets = new SparseArray<>();
+            final SparseArray<Set<String>> transactionTargets = new SparseArray<>();
 
             // map: userId -> set<package-name>: packages that need to reload
             // their resources due to changes to the overlays in this
             // transaction
-            SparseArray<List<String>> affectedPackagesToUpdate = new SparseArray<>();
+            final SparseArray<List<String>> affectedPackagesToUpdate = new SparseArray<>();
 
             synchronized (mLock) {
-
                 // execute the requests (as calling user)
                 for (final OverlayManagerTransaction.Request request : transaction) {
-                    executeRequest(request).ifPresent(target -> {
-                        Set<String> userTargets = transactionTargets.get(target.userId);
-                        if (userTargets == null) {
-                            userTargets = new ArraySet<>();
-                            transactionTargets.put(target.userId, userTargets);
-                        }
-                        userTargets.add(target.packageName);
-                    });
+                    executeRequest(request).forEach(
+                            target -> {
+                                Set<String> userTargets = transactionTargets.get(target.userId);
+                                if (userTargets == null) {
+                                    userTargets = new ArraySet<>();
+                                    transactionTargets.put(target.userId, userTargets);
+                                }
+                                userTargets.add(target.packageName);
+                            });
                 }
 
                 // past the point of no return: the entire transaction has been

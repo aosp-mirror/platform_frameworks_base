@@ -118,15 +118,23 @@ Result<OverlayManifestInfo> ExtractOverlayManifestInfo(const ZipAssetsProvider* 
     return Error("root element tag is not <manifest> in AndroidManifest.xml");
   }
 
+  std::string package_name;
+  if (auto result_str = manifest_it->GetAttributeStringValue("package")) {
+    package_name = *result_str;
+  } else {
+    return result_str.GetError();
+  }
+
   for (auto&& it : manifest_it) {
     if (it.event() != XmlParser::Event::START_TAG || it.name() != "overlay") {
       continue;
     }
 
     OverlayManifestInfo info{};
+    info.package_name = package_name;
     if (auto result_str = it.GetAttributeStringValue(kAttrName, "android:name")) {
       if (*result_str != name) {
-        // A value for android:name was found, but either the name does not match the requested
+        // A value for android:name was found, but either a the name does not match the requested
         // name, or an <overlay> tag with no name was requested.
         continue;
       }

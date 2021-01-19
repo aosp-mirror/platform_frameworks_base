@@ -132,6 +132,6 @@ public class TransactionTest {
             int userId) {
         final OverlayInfo oi = mOverlayManager.getOverlayInfo(overlay, UserHandle.of(userId));
         assertNotNull(oi);
-        assertEquals(oi.isEnabled(), enabled);
+        assertEquals(enabled, oi.isEnabled());
     }
 }

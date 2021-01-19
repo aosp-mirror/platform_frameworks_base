@@ -25,6 +25,7 @@ import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.os.UserHandle;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -44,6 +45,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -71,11 +73,11 @@ final class OverlayManagerSettings {
     OverlayInfo init(@NonNull final OverlayIdentifier overlay, final int userId,
             @NonNull final String targetPackageName, @Nullable final String targetOverlayableName,
             @NonNull final String baseCodePath, boolean isMutable, boolean isEnabled, int priority,
-            @Nullable String overlayCategory) {
+            @Nullable String overlayCategory, boolean isFabricated) {
         remove(overlay, userId);
         final SettingsItem item = new SettingsItem(overlay, userId, targetPackageName,
                 targetOverlayableName, baseCodePath, OverlayInfo.STATE_UNKNOWN, isEnabled,
-                isMutable, priority, overlayCategory);
+                isMutable, priority, overlayCategory, isFabricated);
         insert(item);
         return item.getOverlayInfo();
     }
@@ -197,11 +199,10 @@ final class OverlayManagerSettings {
         return targetInfos;
     }
 
-    @NonNull List<OverlayInfo> getOverlayInfosForPackage(@NonNull final String packageName,
-            final int userId) {
-        final List<SettingsItem> items = selectWhereOverlay(packageName, userId);
-        items.removeIf(OverlayManagerSettings::isImmutableFrameworkOverlay);
-        return CollectionUtils.map(items, SettingsItem::getOverlayInfo);
+    Set<String> getAllBaseCodePaths() {
+        final Set<String> paths = new ArraySet<>();
+        mItems.forEach(item -> paths.add(item.mBaseCodePath));
+        return paths;
     }
 
     @NonNull
@@ -381,6 +382,7 @@ final class OverlayManagerSettings {
         pw.println("mIsMutable.............: " + item.isMutable());
         pw.println("mPriority..............: " + item.mPriority);
         pw.println("mCategory..............: " + item.mCategory);
+        pw.println("mIsFabricated..........: " + item.mIsFabricated);
 
         pw.decreaseIndent();
         pw.println("}");
@@ -450,6 +452,7 @@ final class OverlayManagerSettings {
         private static final String ATTR_CATEGORY = "category";
         private static final String ATTR_USER_ID = "userId";
         private static final String ATTR_VERSION = "version";
+        private static final String ATTR_IS_FABRICATED = "fabricated";
 
         @VisibleForTesting
         static final int CURRENT_VERSION = 4;
@@ -506,9 +509,11 @@ final class OverlayManagerSettings {
             final boolean isStatic = parser.getAttributeBoolean(null, ATTR_IS_STATIC, false);
             final int priority = parser.getAttributeInt(null, ATTR_PRIORITY);
             final String category = XmlUtils.readStringAttribute(parser, ATTR_CATEGORY);
+            final boolean isFabricated = parser.getAttributeBoolean(null, ATTR_IS_FABRICATED,
+                    false);
 
             return new SettingsItem(overlay, userId, targetPackageName, targetOverlayableName,
-                    baseCodePath, state, isEnabled, !isStatic, priority, category);
+                    baseCodePath, state, isEnabled, !isStatic, priority, category, isFabricated);
         }
 
         public static void persist(@NonNull final ArrayList<SettingsItem> table,
@@ -543,6 +548,7 @@ final class OverlayManagerSettings {
             XmlUtils.writeBooleanAttribute(xml, ATTR_IS_STATIC, !item.mIsMutable);
             xml.attributeInt(null, ATTR_PRIORITY, item.mPriority);
             XmlUtils.writeStringAttribute(xml, ATTR_CATEGORY, item.mCategory);
+            XmlUtils.writeBooleanAttribute(xml, ATTR_IS_FABRICATED, item.mIsFabricated);
             xml.endTag(null, TAG_ITEM);
         }
     }
@@ -559,12 +565,14 @@ final class OverlayManagerSettings {
         private boolean mIsMutable;
         private int mPriority;
         private String mCategory;
+        private boolean mIsFabricated;
 
         SettingsItem(@NonNull final OverlayIdentifier overlay, final int userId,
                 @NonNull final String targetPackageName,
                 @Nullable final String targetOverlayableName, @NonNull final String baseCodePath,
                 final @OverlayInfo.State int state, final boolean isEnabled,
-                final boolean isMutable, final int priority,  @Nullable String category) {
+                final boolean isMutable, final int priority,  @Nullable String category,
+                final boolean isFabricated) {
             mOverlay = overlay;
             mUserId = userId;
             mTargetPackageName = targetPackageName;
@@ -576,6 +584,7 @@ final class OverlayManagerSettings {
             mCache = null;
             mIsMutable = isMutable;
             mPriority = priority;
+            mIsFabricated = isFabricated;
         }
 
         private String getTargetPackageName() {
@@ -646,7 +655,7 @@ final class OverlayManagerSettings {
             if (mCache == null) {
                 mCache = new OverlayInfo(mOverlay.getPackageName(), mOverlay.getOverlayName(),
                         mTargetPackageName, mTargetOverlayableName, mCategory, mBaseCodePath,
-                        mState, mUserId, mPriority, mIsMutable);
+                        mState, mUserId, mPriority, mIsMutable, mIsFabricated);
             }
             return mCache;
         }

@@ -28,6 +28,8 @@ import android.content.om.OverlayIdentifier;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayInfo.State;
 import android.content.om.OverlayableInfo;
+import android.os.FabricatedOverlayInfo;
+import android.os.FabricatedOverlayInternal;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -418,6 +420,9 @@ class OverlayManagerServiceImplTestsBase {
     static class FakeIdmapDaemon extends IdmapDaemon {
         private final FakeDeviceState mState;
         private final ArrayMap<String, IdmapHeader> mIdmapFiles = new ArrayMap<>();
+        private final ArrayMap<String, FabricatedOverlayInfo> mFabricatedOverlays =
+                new ArrayMap<>();
+        private int mFabricatedAssetSeq = 0;
 
         FakeIdmapDaemon(FakeDeviceState state) {
             this.mState = state;
@@ -430,10 +435,10 @@ class OverlayManagerServiceImplTestsBase {
         }
 
         @Override
-        String createIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
-                int userId) {
+        String createIdmap(String targetPath, String overlayPath, String overlayName,
+                int policies, boolean enforce, int userId) {
             mIdmapFiles.put(overlayPath, new IdmapHeader(getCrc(targetPath),
-                    getCrc(overlayPath), targetPath, policies, enforce));
+                    getCrc(overlayPath), targetPath, overlayName, policies, enforce));
             return overlayPath;
         }
 
@@ -443,8 +448,8 @@ class OverlayManagerServiceImplTestsBase {
         }
 
         @Override
-        boolean verifyIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
-                int userId) {
+        boolean verifyIdmap(String targetPath, String overlayPath, String overlayName, int policies,
+                boolean enforce, int userId) {
             final IdmapHeader idmap = mIdmapFiles.get(overlayPath);
             if (idmap == null) {
                 return false;
@@ -458,6 +463,29 @@ class OverlayManagerServiceImplTestsBase {
             return mIdmapFiles.containsKey(overlayPath);
         }
 
+        @Override
+        FabricatedOverlayInfo createFabricatedOverlay(@NonNull FabricatedOverlayInternal overlay) {
+            final String path = Integer.toString(mFabricatedAssetSeq++);
+            final FabricatedOverlayInfo info = new FabricatedOverlayInfo();
+            info.path = path;
+            info.overlayName = overlay.overlayName;
+            info.packageName = overlay.packageName;
+            info.targetPackageName = overlay.targetPackageName;
+            info.targetOverlayable = overlay.targetOverlayable;
+            mFabricatedOverlays.put(path, info);
+            return info;
+        }
+
+        @Override
+        boolean deleteFabricatedOverlay(@NonNull String path) {
+            return mFabricatedOverlays.remove(path) != null;
+        }
+
+        @Override
+        List<FabricatedOverlayInfo> getFabricatedOverlayInfos() {
+            return new ArrayList<>(mFabricatedOverlays.values());
+        }
+
         IdmapHeader getIdmap(String overlayPath) {
             return mIdmapFiles.get(overlayPath);
         }
@@ -466,14 +494,16 @@ class OverlayManagerServiceImplTestsBase {
             private final int targetCrc;
             private final int overlayCrc;
             final String targetPath;
+            final String overlayName;
             final int policies;
             final boolean enforceOverlayable;
 
-            private IdmapHeader(int targetCrc, int overlayCrc, String targetPath, int policies,
-                    boolean enforceOverlayable) {
+            private IdmapHeader(int targetCrc, int overlayCrc, String targetPath,
+                    String overlayName, int policies, boolean enforceOverlayable) {
                 this.targetCrc = targetCrc;
                 this.overlayCrc = overlayCrc;
                 this.targetPath = targetPath;
+                this.overlayName = overlayName;
                 this.policies = policies;
                 this.enforceOverlayable = enforceOverlayable;
             }

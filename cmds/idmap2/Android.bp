@@ -274,6 +274,7 @@ cc_binary {
         "libziparchive",
     ],
     static_libs: [
+        "libc++fs",
         "libidmap2_protos",
         "libidmap2daidl",
     ],
@@ -282,28 +283,41 @@ cc_binary {
 
 cc_library_static {
     name: "libidmap2daidl",
-    defaults: [
-        "idmap2_defaults",
-    ],
-    tidy: false,
-    host_supported: false,
     srcs: [
         ":idmap2_aidl",
+        ":idmap2_core_aidl",
+    ],
+    header_libs: [
+        "libbinder_headers",
     ],
     shared_libs: [
         "libbase",
     ],
     aidl: {
         export_aidl_headers: true,
+        local_include_dirs: [
+            "idmap2d/aidl/core",
+            "idmap2d/aidl/services/",
+        ],
     },
+}
+
+filegroup {
+    name: "idmap2_core_aidl",
+    srcs: [
+        "idmap2d/aidl/core/android/os/FabricatedOverlayInternal.aidl",
+        "idmap2d/aidl/core/android/os/FabricatedOverlayInternalEntry.aidl",
+        "idmap2d/aidl/core/android/os/FabricatedOverlayInfo.aidl",
+    ],
+    path: "idmap2d/aidl/core/",
 }
 
 filegroup {
     name: "idmap2_aidl",
     srcs: [
-        "idmap2d/aidl/android/os/IIdmap2.aidl",
+        "idmap2d/aidl/services/android/os/IIdmap2.aidl",
     ],
-    path: "idmap2d/aidl",
+    path: "idmap2d/aidl/services/",
 }
 
 aidl_interface {
@@ -315,7 +329,7 @@ aidl_interface {
 filegroup {
     name: "overlayable_policy_aidl_files",
     srcs: [
-        "idmap2d/aidl/android/os/OverlayablePolicy.aidl",
+        "idmap2d/aidl/services/android/os/OverlayablePolicy.aidl",
     ],
-    path: "idmap2d/aidl",
+    path: "idmap2d/aidl/services/",
 }

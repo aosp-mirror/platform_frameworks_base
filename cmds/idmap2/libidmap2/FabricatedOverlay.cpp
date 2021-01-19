@@ -208,7 +208,7 @@ Result<uint32_t> FabricatedOverlay::GetCrc() const {
   return (*data)->crc;
 }
 
-Result<Unit> FabricatedOverlay::ToBinaryStream(std::ostream& stream) {
+Result<Unit> FabricatedOverlay::ToBinaryStream(std::ostream& stream) const {
   auto data = InitializeData();
   if (!data) {
     return data.GetError();
@@ -247,17 +247,22 @@ std::unique_ptr<FabricatedOverlayContainer> FabContainer::FromOverlay(Fabricated
       new FabricatedOverlayContainer(std::move(overlay), {} /* path */));
 }
 
-Result<OverlayManifestInfo> FabContainer::FindOverlayInfo(const std::string& name) const {
+OverlayManifestInfo FabContainer::GetManifestInfo() const {
   const pb::FabricatedOverlay& overlay_pb = overlay_.overlay_pb_;
-  if (name != overlay_pb.name()) {
-    return Error("Failed to find name '%s' in fabricated overlay", name.c_str());
-  }
-
   return OverlayManifestInfo{
+      .package_name = overlay_pb.package_name(),
       .name = overlay_pb.name(),
       .target_package = overlay_pb.target_package_name(),
       .target_name = overlay_pb.target_overlayable(),
   };
+}
+
+Result<OverlayManifestInfo> FabContainer::FindOverlayInfo(const std::string& name) const {
+  const OverlayManifestInfo info = GetManifestInfo();
+  if (name != info.name) {
+    return Error("Failed to find name '%s' in fabricated overlay", name.c_str());
+  }
+  return info;
 }
 
 Result<OverlayData> FabContainer::GetOverlayData(const OverlayManifestInfo& info) const {

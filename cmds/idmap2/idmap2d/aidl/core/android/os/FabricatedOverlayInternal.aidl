@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,17 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
-#define IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
+package android.os;
 
-#include <random>
-#include <string>
+import android.os.FabricatedOverlayInternalEntry;
 
-namespace android::idmap2::utils {
-
-constexpr const char* kIdmapCacheDir = "/data/resource-cache";
-constexpr const mode_t kIdmapFilePermissionMask = 0133;  // u=rw,g=r,o=r
-
-bool UidHasWriteAccessToPath(uid_t uid, const std::string& path);
-
-std::string RandomStringForPath(size_t length);
-
-}  // namespace android::idmap2::utils
-
-#endif  // IDMAP2_INCLUDE_IDMAP2_FILEUTILS_H_
+/**
+ * @hide
+ */
+parcelable FabricatedOverlayInternal {
+    @utf8InCpp String packageName;
+    @utf8InCpp String overlayName;
+    @utf8InCpp String targetPackageName;
+    @utf8InCpp String targetOverlayable;
+    List<FabricatedOverlayInternalEntry> entries;
+}

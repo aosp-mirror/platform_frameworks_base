@@ -19,6 +19,7 @@
 
 #include <android-base/unique_fd.h>
 #include <android/os/BnIdmap2.h>
+#include <android/os/FabricatedOverlayInfo.h>
 #include <binder/BinderService.h>
 #include <idmap2/ResourceContainer.h>
 #include <idmap2/Result.h>
@@ -40,17 +41,31 @@ class Idmap2Service : public BinderService<Idmap2Service>, public BnIdmap2 {
                              bool* _aidl_return) override;
 
   binder::Status verifyIdmap(const std::string& target_path, const std::string& overlay_path,
-                             int32_t fulfilled_policies, bool enforce_overlayable, int32_t user_id,
+                             const std::string& overlay_name, int32_t fulfilled_policies,
+                             bool enforce_overlayable, int32_t user_id,
                              bool* _aidl_return) override;
 
   binder::Status createIdmap(const std::string& target_path, const std::string& overlay_path,
-                             int32_t fulfilled_policies, bool enforce_overlayable, int32_t user_id,
+                             const std::string& overlay_name, int32_t fulfilled_policies,
+                             bool enforce_overlayable, int32_t user_id,
                              std::optional<std::string>* _aidl_return) override;
+
+  binder::Status createFabricatedOverlay(
+      const os::FabricatedOverlayInternal& overlay,
+      std::optional<os::FabricatedOverlayInfo>* _aidl_return) override;
+
+  binder::Status deleteFabricatedOverlay(const std::string& overlay_path,
+                                         bool* _aidl_return) override;
+
+  binder::Status getFabricatedOverlayInfos(
+      std::vector<os::FabricatedOverlayInfo>* _aidl_return) override;
 
  private:
   // idmap2d is killed after a period of inactivity, so any information stored on this class should
   // be able to be recalculated if idmap2 dies and restarts.
   std::unique_ptr<idmap2::TargetResourceContainer> framework_apk_cache_;
+
+  std::vector<os::FabricatedOverlayInfo> fabricated_overlays_;
 
   template <typename T>
   using MaybeUniquePtr = std::variant<std::unique_ptr<T>, T*>;
