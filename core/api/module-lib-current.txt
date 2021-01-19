@@ -136,10 +136,6 @@ package android.media.session {
 
 package android.net {
 
-  public class ConnectivityManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.NETWORK_SETTINGS, android.Manifest.permission.NETWORK_STACK, android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK}) public void requestBackgroundNetwork(@NonNull android.net.NetworkRequest, @Nullable android.os.Handler, @NonNull android.net.ConnectivityManager.NetworkCallback);
-  }
-
   public final class TcpRepairWindow {
     ctor public TcpRepairWindow(int, int, int, int, int, int);
     field public final int maxWindow;
