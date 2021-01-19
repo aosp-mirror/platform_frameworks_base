@@ -269,8 +269,9 @@ static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderBuilder, jlo
 static inline int ThrowIAEFmt(JNIEnv* env, const char* fmt, ...) {
     va_list args;
     va_start(args, fmt);
-    return jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", fmt, args);
+    int ret = jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", fmt, args);
     va_end(args);
+    return ret;
 }
 
 static void RuntimeShader_updateUniforms(JNIEnv* env, jobject, jlong shaderBuilder,
