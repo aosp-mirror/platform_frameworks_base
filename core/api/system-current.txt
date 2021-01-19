@@ -1927,6 +1927,7 @@ package android.content {
     field public static final String CONTEXTHUB_SERVICE = "contexthub";
     field public static final String ETHERNET_SERVICE = "ethernet";
     field public static final String EUICC_CARD_SERVICE = "euicc_card";
+    field public static final String FONT_SERVICE = "font";
     field public static final String HDMI_CONTROL_SERVICE = "hdmi_control";
     field public static final String MEDIA_TRANSCODING_SERVICE = "media_transcoding";
     field public static final String MUSIC_RECOGNITION_SERVICE = "music_recognition";
@@ -2584,6 +2585,14 @@ package android.graphics.drawable {
     method public void setColor(@ColorInt int);
     method public void setCornerRadius(float);
     method public void setCornerRadius(float, float, float, float);
+  }
+
+}
+
+package android.graphics.fonts {
+
+  public class FontManager {
+    method @Nullable public android.text.FontConfig getFontConfig();
   }
 
 }
@@ -13447,6 +13456,51 @@ package android.telephony.mbms.vendor {
     field public static final String EXTRA_TEMP_FILES_IN_USE = "android.telephony.mbms.extra.TEMP_FILES_IN_USE";
     field public static final String EXTRA_TEMP_FILE_ROOT = "android.telephony.mbms.extra.TEMP_FILE_ROOT";
     field public static final String EXTRA_TEMP_LIST = "android.telephony.mbms.extra.TEMP_LIST";
+  }
+
+}
+
+package android.text {
+
+  public final class FontConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.text.FontConfig.Alias> getAliases();
+    method @NonNull public java.util.List<android.text.FontConfig.FontFamily> getFontFamilies();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig> CREATOR;
+  }
+
+  public static final class FontConfig.Alias implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getName();
+    method @NonNull public String getOriginal();
+    method @IntRange(from=0, to=1000) public int getWeight();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.Alias> CREATOR;
+  }
+
+  public static final class FontConfig.Font implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.io.File getFile();
+    method @Nullable public String getFontFamilyName();
+    method @NonNull public String getFontVariationSettings();
+    method @NonNull public android.graphics.fonts.FontStyle getStyle();
+    method public int getTtcIndex();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.Font> CREATOR;
+  }
+
+  public static final class FontConfig.FontFamily implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.text.FontConfig.Font> getFontList();
+    method @NonNull public android.os.LocaleList getLocaleList();
+    method @Nullable public String getName();
+    method public int getVariant();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.FontFamily> CREATOR;
+    field public static final int VARIANT_COMPACT = 1; // 0x1
+    field public static final int VARIANT_DEFAULT = 0; // 0x0
+    field public static final int VARIANT_ELEGANT = 2; // 0x2
   }
 
 }

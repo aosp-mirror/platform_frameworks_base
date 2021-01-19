@@ -23,12 +23,17 @@ import android.graphics.Typeface;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.SystemFonts;
+import android.os.ParcelFileDescriptor;
+import android.os.RemoteException;
 import android.os.SharedMemory;
 import android.system.ErrnoException;
 import android.text.FontConfig;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.graphics.fonts.IFontManager;
+import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.security.FileIntegrityService;
@@ -38,6 +43,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
 import java.nio.channels.FileChannel;
@@ -46,13 +52,17 @@ import java.util.Map;
 
 /** A service for managing system fonts. */
 // TODO(b/173619554): Add API to update fonts.
-public final class FontManagerService {
-
+public final class FontManagerService extends IFontManager.Stub {
     private static final String TAG = "FontManagerService";
 
     // TODO: make this a DeviceConfig flag.
     private static final boolean ENABLE_FONT_UPDATES = false;
     private static final String FONT_FILES_DIR = "/data/fonts/files";
+
+    @Override
+    public FontConfig getFontConfig() throws RemoteException {
+        return getCurrentFontSettings().getSystemFontConfig();
+    }
 
     /** Class to manage FontManagerService's lifecycle. */
     public static final class Lifecycle extends SystemService {
@@ -60,7 +70,7 @@ public final class FontManagerService {
 
         public Lifecycle(@NonNull Context context) {
             super(context);
-            mService = new FontManagerService();
+            mService = new FontManagerService(context);
         }
 
         @Override
@@ -76,10 +86,11 @@ public final class FontManagerService {
                             return mService.getCurrentFontSettings().getSerializedSystemFontMap();
                         }
                     });
+            publishBinderService(Context.FONT_SERVICE, mService);
         }
     }
 
-    private static class OtfFontFileParser implements UpdatableFontDir.FontFileParser {
+    /* package */ static class OtfFontFileParser implements UpdatableFontDir.FontFileParser {
         @Override
         public String getPostScriptName(File file) throws IOException {
             ByteBuffer buffer = mmap(file);
@@ -133,7 +144,8 @@ public final class FontManagerService {
     @Nullable
     private SystemFontSettings mCurrentFontSettings = null;
 
-    private FontManagerService() {
+    private FontManagerService(Context context) {
+        mContext = context;
         mUpdatableFontDir = createUpdatableFontDir();
     }
 
@@ -148,8 +160,16 @@ public final class FontManagerService {
                 new OtfFontFileParser(), new FsverityUtilImpl());
     }
 
+
     @NonNull
-    private SystemFontSettings getCurrentFontSettings() {
+    private final Context mContext;
+
+    @NonNull
+    public Context getContext() {
+        return mContext;
+    }
+
+    @NonNull /* package */ SystemFontSettings getCurrentFontSettings() {
         synchronized (FontManagerService.this) {
             if (mCurrentFontSettings == null) {
                 mCurrentFontSettings = SystemFontSettings.create(mUpdatableFontDir);
@@ -174,7 +194,22 @@ public final class FontManagerService {
         }
     }
 
-    private static class SystemFontSettings {
+    @Override
+    public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer,
+            @Nullable String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, writer)) return;
+        new FontManagerShellCommand(this).dumpAll(new IndentingPrintWriter(writer, "  "));
+    }
+
+    @Override
+    public int handleShellCommand(@NonNull ParcelFileDescriptor in,
+            @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
+            @NonNull String[] args) {
+        return new FontManagerShellCommand(this).exec(this,
+                in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
+    }
+
+    /* package */ static class SystemFontSettings {
         private final @NonNull SharedMemory mSerializedSystemFontMap;
         private final @NonNull FontConfig mSystemFontConfig;
         private final @NonNull Map<String, FontFamily[]> mSystemFallbackMap;

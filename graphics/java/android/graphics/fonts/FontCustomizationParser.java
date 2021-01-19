@@ -17,7 +17,7 @@
 package android.graphics.fonts;
 
 import static android.text.FontConfig.Alias;
-import static android.text.FontConfig.Family;
+import static android.text.FontConfig.FontFamily;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -46,7 +46,7 @@ public class FontCustomizationParser {
      * Represents a customization XML
      */
     public static class Result {
-        private final Map<String, Family> mAdditionalNamedFamilies;
+        private final Map<String, FontFamily> mAdditionalNamedFamilies;
         private final List<Alias> mAdditionalAliases;
 
         public Result() {
@@ -54,13 +54,13 @@ public class FontCustomizationParser {
             mAdditionalAliases = Collections.emptyList();
         }
 
-        public Result(Map<String, Family> additionalNamedFamilies,
+        public Result(Map<String, FontFamily> additionalNamedFamilies,
                 List<Alias> additionalAliases) {
             mAdditionalNamedFamilies = additionalNamedFamilies;
             mAdditionalAliases = additionalAliases;
         }
 
-        public Map<String, Family> getAdditionalNamedFamilies() {
+        public Map<String, FontFamily> getAdditionalNamedFamilies() {
             return mAdditionalNamedFamilies;
         }
 
@@ -85,11 +85,11 @@ public class FontCustomizationParser {
         return readFamilies(parser, fontDir, updatableFontMap);
     }
 
-    private static Map<String, Family> validateAndTransformToMap(List<Family> families) {
-        HashMap<String, Family> namedFamily = new HashMap<>();
+    private static Map<String, FontFamily> validateAndTransformToMap(List<FontFamily> families) {
+        HashMap<String, FontFamily> namedFamily = new HashMap<>();
         for (int i = 0; i < families.size(); ++i) {
-            final Family family = families.get(i);
-            final String name = family.getFallbackName();
+            final FontFamily family = families.get(i);
+            final String name = family.getName();
             if (name == null) {
                 throw new IllegalArgumentException("new-named-family requires name attribute");
             }
@@ -106,7 +106,7 @@ public class FontCustomizationParser {
             @NonNull String fontDir,
             @Nullable Map<String, File> updatableFontMap
     ) throws XmlPullParserException, IOException {
-        List<Family> families = new ArrayList<>();
+        List<FontFamily> families = new ArrayList<>();
         List<Alias> aliases = new ArrayList<>();
         parser.require(XmlPullParser.START_TAG, null, "fonts-modification");
         while (parser.next() != XmlPullParser.END_TAG) {
@@ -126,7 +126,7 @@ public class FontCustomizationParser {
     private static void readFamily(
             @NonNull XmlPullParser parser,
             @NonNull String fontDir,
-            @NonNull List<Family> out,
+            @NonNull List<FontFamily> out,
             @Nullable Map<String, File> updatableFontMap)
             throws XmlPullParserException, IOException {
         final String customizationType = parser.getAttributeValue(null, "customizationType");

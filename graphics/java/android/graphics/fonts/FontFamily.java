@@ -109,7 +109,7 @@ public final class FontFamily {
          * @return a font family
          */
         public @NonNull FontFamily build() {
-            return build("", FontConfig.Family.VARIANT_DEFAULT, true /* isCustomFallback */);
+            return build("", FontConfig.FontFamily.VARIANT_DEFAULT, true /* isCustomFallback */);
         }
 
         /** @hide */
