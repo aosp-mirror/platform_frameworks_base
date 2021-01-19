@@ -137,6 +137,8 @@ public abstract class ConnectionService extends Service {
     private static final String SESSION_HOLD = "CS.h";
     private static final String SESSION_UNHOLD = "CS.u";
     private static final String SESSION_CALL_AUDIO_SC = "CS.cASC";
+    private static final String SESSION_USING_ALTERNATIVE_UI = "CS.uAU";
+    private static final String SESSION_TRACKED_BY_NON_UI_SERVICE = "CS.tBNUS";
     private static final String SESSION_PLAY_DTMF = "CS.pDT";
     private static final String SESSION_STOP_DTMF = "CS.sDT";
     private static final String SESSION_CONFERENCE = "CS.c";
@@ -200,6 +202,9 @@ public abstract class ConnectionService extends Service {
     private static final int MSG_ADD_PARTICIPANT = 39;
     private static final int MSG_EXPLICIT_CALL_TRANSFER = 40;
     private static final int MSG_EXPLICIT_CALL_TRANSFER_CONSULTATIVE = 41;
+    private static final int MSG_ON_CALL_FILTERING_COMPLETED = 42;
+    private static final int MSG_ON_USING_ALTERNATIVE_UI = 43;
+    private static final int MSG_ON_TRACKED_BY_NON_UI_SERVICE = 44;
 
     private static Connection sNullConnection;
 
@@ -578,6 +583,36 @@ public abstract class ConnectionService extends Service {
                 args.arg2 = callAudioState;
                 args.arg3 = Log.createSubsession();
                 mHandler.obtainMessage(MSG_ON_CALL_AUDIO_STATE_CHANGED, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onUsingAlternativeUi(String callId, boolean usingAlternativeUiShowing,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_USING_ALTERNATIVE_UI);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = usingAlternativeUiShowing;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_USING_ALTERNATIVE_UI, args).sendToTarget();
+            } finally {
+                Log.endSession();
+            }
+        }
+
+        @Override
+        public void onTrackedByNonUiService(String callId, boolean isTracked,
+                Session.Info sessionInfo) {
+            Log.startSession(sessionInfo, SESSION_TRACKED_BY_NON_UI_SERVICE);
+            try {
+                SomeArgs args = SomeArgs.obtain();
+                args.arg1 = callId;
+                args.arg2 = isTracked;
+                args.arg3 = Log.createSubsession();
+                mHandler.obtainMessage(MSG_ON_TRACKED_BY_NON_UI_SERVICE, args).sendToTarget();
             } finally {
                 Log.endSession();
             }
@@ -1220,6 +1255,34 @@ public abstract class ConnectionService extends Service {
                         String callId = (String) args.arg1;
                         CallAudioState audioState = (CallAudioState) args.arg2;
                         onCallAudioStateChanged(callId, new CallAudioState(audioState));
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_USING_ALTERNATIVE_UI: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_USING_ALTERNATIVE_UI);
+                    try {
+                        String callId = (String) args.arg1;
+                        boolean isUsingAlternativeUi = (boolean) args.arg2;
+                        onUsingAlternativeUi(callId, isUsingAlternativeUi);
+                    } finally {
+                        args.recycle();
+                        Log.endSession();
+                    }
+                    break;
+                }
+                case MSG_ON_TRACKED_BY_NON_UI_SERVICE: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    Log.continueSession((Session) args.arg3,
+                            SESSION_HANDLER + SESSION_TRACKED_BY_NON_UI_SERVICE);
+                    try {
+                        String callId = (String) args.arg1;
+                        boolean isTracked = (boolean) args.arg2;
+                        onTrackedByNonUiService(callId, isTracked);
                     } finally {
                         args.recycle();
                         Log.endSession();
@@ -1928,10 +1991,12 @@ public abstract class ConnectionService extends Service {
                 request.getExtras().getBoolean(TelecomManager.EXTRA_IS_HANDOVER, false);
         boolean isHandover = request.getExtras() != null && request.getExtras().getBoolean(
                 TelecomManager.EXTRA_IS_HANDOVER_CONNECTION, false);
-        Log.d(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, " +
-                        "isIncoming: %b, isUnknown: %b, isLegacyHandover: %b, isHandover: %b",
-                callManagerAccount, callId, request, isIncoming, isUnknown, isLegacyHandover,
-                isHandover);
+        boolean addSelfManaged = request.getExtras() != null && request.getExtras().getBoolean(
+                PhoneAccount.EXTRA_ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE, false);
+        Log.i(this, "createConnection, callManagerAccount: %s, callId: %s, request: %s, "
+                        + "isIncoming: %b, isUnknown: %b, isLegacyHandover: %b, isHandover: %b, "
+                        + " addSelfManaged: %b", callManagerAccount, callId, request, isIncoming,
+                isUnknown, isLegacyHandover, isHandover, addSelfManaged);
 
         Connection connection = null;
         if (isHandover) {
@@ -2203,6 +2268,22 @@ public abstract class ConnectionService extends Service {
         } else {
             findConferenceForAction(callId, "onCallAudioStateChanged").setCallAudioState(
                     callAudioState);
+        }
+    }
+
+    private void onUsingAlternativeUi(String callId, boolean isUsingAlternativeUi) {
+        Log.i(this, "onUsingAlternativeUi %s %s", callId, isUsingAlternativeUi);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "onUsingAlternativeUi")
+                    .onUsingAlternativeUi(isUsingAlternativeUi);
+        }
+    }
+
+    private void onTrackedByNonUiService(String callId, boolean isTracked) {
+        Log.i(this, "onTrackedByNonUiService %s %s", callId, isTracked);
+        if (mConnectionById.containsKey(callId)) {
+            findConnectionForAction(callId, "onTrackedByNonUiService")
+                    .onTrackedByNonUiService(isTracked);
         }
     }
 
