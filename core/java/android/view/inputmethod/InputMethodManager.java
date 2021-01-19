@@ -492,7 +492,6 @@ public final class InputMethodManager {
     static final int MSG_TIMEOUT_INPUT_EVENT = 6;
     static final int MSG_FLUSH_INPUT_EVENT = 7;
     static final int MSG_REPORT_FULLSCREEN_MODE = 10;
-    static final int MSG_APPLY_IME_VISIBILITY = 20;
     static final int MSG_UPDATE_ACTIVITY_VIEW_TO_SCREEN_MATRIX = 30;
 
     private static boolean isAutofillUIShowing(View servedView) {
@@ -954,17 +953,6 @@ public final class InputMethodManager {
                     }
                     return;
                 }
-                case MSG_APPLY_IME_VISIBILITY: {
-                    synchronized (mH) {
-                        if (mImeInsetsConsumer != null) {
-                            ImeTracing.getInstance().triggerClientDump(
-                                    "ImeInsetsSourceConsumer#applyImeVisibility",
-                                    InputMethodManager.this, null /* icProto */);
-                            mImeInsetsConsumer.applyImeVisibility(msg.arg1 != 0);
-                        }
-                    }
-                    return;
-                }
                 case MSG_UPDATE_ACTIVITY_VIEW_TO_SCREEN_MATRIX: {
                     final float[] matrixValues = (float[]) msg.obj;
                     final int bindSequence = msg.arg1;
@@ -1143,12 +1131,6 @@ public final class InputMethodManager {
         @Override
         public void reportFullscreenMode(boolean fullscreen) {
             mH.obtainMessage(MSG_REPORT_FULLSCREEN_MODE, fullscreen ? 1 : 0, 0)
-                    .sendToTarget();
-        }
-
-        @Override
-        public void applyImeVisibility(boolean setVisible) {
-            mH.obtainMessage(MSG_APPLY_IME_VISIBILITY, setVisible ? 1 : 0, 0)
                     .sendToTarget();
         }
 

@@ -878,7 +878,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         hide(types, false /* fromIme */);
     }
 
-    void hide(@InsetsType int types, boolean fromIme) {
+    @VisibleForTesting
+    public void hide(@InsetsType int types, boolean fromIme) {
         if (fromIme) {
             ImeTracing.getInstance().triggerClientDump("InsetsController#hide",
                     mHost.getInputMethodManager(), null /* icProto */);
@@ -1268,19 +1269,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      */
     public void onWindowFocusLost() {
         getSourceConsumer(ITYPE_IME).onWindowFocusLost();
-    }
-
-    /**
-     * Used by {@link ImeInsetsSourceConsumer} when IME decides to be shown/hidden.
-     * @hide
-     */
-    @VisibleForTesting
-    public void applyImeVisibility(boolean setVisible) {
-        if (setVisible) {
-            show(Type.IME, true /* fromIme */);
-        } else {
-            hide(Type.IME);
-        }
     }
 
     @VisibleForTesting

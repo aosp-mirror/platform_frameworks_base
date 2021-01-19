@@ -235,7 +235,7 @@ public class InsetsControllerTest {
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained();
             // since there is no focused view, forcefully make IME visible.
-            mController.applyImeVisibility(true /* setVisible */);
+            mController.show(Type.ime(), true /* fromIme */);
             mController.show(Type.all());
             // quickly jump to final state by cancelling it.
             mController.cancelExistingAnimations();
@@ -243,7 +243,7 @@ public class InsetsControllerTest {
             assertTrue(mController.getSourceConsumer(statusBar.getType()).isRequestedVisible());
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
 
-            mController.applyImeVisibility(false /* setVisible */);
+            mController.hide(Type.ime(), true /* fromIme */);
             mController.hide(Type.all());
             mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(navBar.getType()).isRequestedVisible());
@@ -260,10 +260,10 @@ public class InsetsControllerTest {
         mController.onControlsChanged(new InsetsSourceControl[] { ime });
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusGained();
-            mController.applyImeVisibility(true);
+            mController.show(Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertTrue(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
-            mController.applyImeVisibility(false);
+            mController.hide(Type.ime(), true /* fromIme */);
             mController.cancelExistingAnimations();
             assertFalse(mController.getSourceConsumer(ime.getType()).isRequestedVisible());
             mController.getSourceConsumer(ITYPE_IME).onWindowFocusLost();

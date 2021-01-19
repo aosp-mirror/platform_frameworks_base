@@ -255,7 +255,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_SET_ACTIVE = 3020;
     static final int MSG_SET_INTERACTIVE = 3030;
     static final int MSG_REPORT_FULLSCREEN_MODE = 3045;
-    static final int MSG_APPLY_IME_VISIBILITY = 3070;
 
     static final int MSG_HARD_KEYBOARD_SWITCH_CHANGED = 4000;
 
@@ -4619,18 +4618,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Got RemoteException sending "
                             + "reportFullscreen(" + fullscreen + ") notification to pid="
-                            + clientState.pid + " uid=" + clientState.uid);
-                }
-                return true;
-            }
-            case MSG_APPLY_IME_VISIBILITY: {
-                final boolean setVisible = msg.arg1 != 0;
-                final ClientState clientState = (ClientState) msg.obj;
-                try {
-                    clientState.client.applyImeVisibility(setVisible);
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "Got RemoteException sending "
-                            + "applyImeVisibility(" + setVisible + ") notification to pid="
                             + clientState.pid + " uid=" + clientState.uid);
                 }
                 return true;
