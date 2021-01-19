@@ -206,11 +206,11 @@ interface IConnectivityManager
     void startNattKeepalive(in Network network, int intervalSeconds,
             in ISocketKeepaliveCallback cb, String srcAddr, int srcPort, String dstAddr);
 
-    void startNattKeepaliveWithFd(in Network network, in FileDescriptor fd, int resourceId,
+    void startNattKeepaliveWithFd(in Network network, in ParcelFileDescriptor pfd, int resourceId,
             int intervalSeconds, in ISocketKeepaliveCallback cb, String srcAddr,
             String dstAddr);
 
-    void startTcpKeepalive(in Network network, in FileDescriptor fd, int intervalSeconds,
+    void startTcpKeepalive(in Network network, in ParcelFileDescriptor pfd, int intervalSeconds,
             in ISocketKeepaliveCallback cb);
 
     void stopKeepalive(in Network network, int slot);
