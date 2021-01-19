@@ -7181,6 +7181,7 @@ class Task extends WindowContainer<WindowContainer> {
                     + " mode=" + windowingModeToString(getWindowingMode()));
             pw.println("  isSleeping=" + shouldSleepActivities());
             pw.println("  mBounds=" + getRequestedOverrideBounds());
+            pw.println("  mCreatedByOrganizer=" + mCreatedByOrganizer);
         };
 
         boolean printed = false;

@@ -2674,8 +2674,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setWindowingMode(rootTask.getWindowingMode())
                         .setActivityType(rootTask.getActivityType())
                         .setActivityInfo(ainfo)
-                        .setParent(rootTask.getDisplayArea())
                         .setIntent(intent)
+                        .setTaskId(rootTask.getDisplayArea().getNextRootTaskId())
                         .build();
 
                 if (!mRecentTasks.addToBottom(task)) {
