@@ -42640,6 +42640,7 @@ package android.telephony.ims {
     field public static final int CODE_MEDIA_NO_DATA = 402; // 0x192
     field public static final int CODE_MEDIA_UNSPECIFIED = 404; // 0x194
     field public static final int CODE_MULTIENDPOINT_NOT_SUPPORTED = 902; // 0x386
+    field public static final int CODE_NETWORK_CONGESTION = 1624; // 0x658
     field public static final int CODE_NETWORK_DETACH = 1513; // 0x5e9
     field public static final int CODE_NETWORK_REJECT = 1504; // 0x5e0
     field public static final int CODE_NETWORK_RESP_TIMEOUT = 1503; // 0x5df
