@@ -18,6 +18,7 @@ package android.telecom;
 
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
+import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -3356,6 +3357,24 @@ public abstract class Connection extends Conferenceable {
      *                      the in-call app.
      */
     public void handleRttUpgradeResponse(@Nullable RttTextStream rttTextStream) {}
+
+    /**
+     * Indicates that call filtering in Telecom is complete
+     *
+     * This method is called for a connection created via
+     * {@link ConnectionService#onCreateIncomingConnection} when call filtering completes in
+     * Telecom, including checking the blocked number db, per-contact settings, and custom call
+     * filtering apps.
+     *
+     * @param isBlocked {@code true} if the call was blocked, {@code false} otherwise. If this is
+     *                  {@code true}, {@link #onDisconnect()} will be called soon after
+     *                  this is called.
+     * @param isInContacts Indicates whether the caller is in the user's contacts list.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_CONTACTS)
+    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts) { }
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.
