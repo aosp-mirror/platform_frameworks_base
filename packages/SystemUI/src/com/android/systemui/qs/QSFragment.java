@@ -186,7 +186,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     boolean sizeChanged = (oldTop - oldBottom) != (top - bottom);
                     if (sizeChanged) {
-                        setQsExpansion(mLastQSExpansion, mLastHeaderTranslation);
+                        setQsExpansion(mLastQSExpansion, mLastQSExpansion);
                     }
                 });
     }
@@ -391,9 +391,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     @Override
     public void setQsExpansion(float expansion, float headerTranslation) {
         if (DEBUG) Log.d(TAG, "setQSExpansion " + expansion + " " + headerTranslation);
-        if (mQSAnimator != null) {
-            mQSAnimator.startAlphaAnimation(headerTranslation == 0 /* show */);
-        }
         mContainer.setExpansion(expansion);
         final float translationScaleY = expansion - 1;
         boolean onKeyguardAndExpanded = isKeyguardShowing() && !mShowCollapsedOnKeyguard;
