@@ -8,9 +8,17 @@ xsd_config {
 
 xsd_config {
     name: "platform-compat-config",
-    srcs: ["platform-compat-config.xsd"],
-    api_dir: "platform-compat-schema",
+    srcs: ["platform-compat/config/platform-compat-config.xsd"],
+    api_dir: "platform-compat/config/schema",
     package_name: "com.android.server.compat.config",
+}
+
+xsd_config {
+    name: "platform-compat-overrides",
+    srcs: ["platform-compat/overrides/platform-compat-overrides.xsd"],
+    api_dir: "platform-compat/overrides/schema",
+    package_name: "com.android.server.compat.overrides",
+    gen_writer: true,
 }
 
 
