@@ -3643,7 +3643,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 // An activity with override bounds should be letterboxed inside its parent bounds,
                 // so it doesn't fill the screen.
-                && mImeLayeringTarget.mActivityRecord.matchParentBounds();
+                && mImeLayeringTarget.mActivityRecord.matchParentBounds()
+                // IME is attached to non-Letterboxed app windows, other than windows with
+                // LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER flag. (Refer to WS.isLetterboxedAppWindow())
+                && mImeLayeringTarget.matchesRootDisplayAreaBounds();
     }
 
     /**
