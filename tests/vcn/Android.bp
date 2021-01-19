@@ -16,6 +16,7 @@ android_test {
         "frameworks-base-testutils",
         "framework-protos",
         "mockito-target-minus-junit4",
+        "net-tests-utils",
         "platform-test-annotations",
         "services.core",
     ],
