@@ -32,6 +32,7 @@ import static android.app.ActivityManager.PROCESS_STATE_TOP;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_SHARED_LIBRARY_FILES;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -1085,11 +1086,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         final int targetUid;
         final long duration;
         final String tag;
+        final int type;
 
-        PendingTempWhitelist(int _targetUid, long _duration, String _tag) {
+        PendingTempWhitelist(int _targetUid, long _duration, String _tag, int _type) {
             targetUid = _targetUid;
             duration = _duration;
             tag = _tag;
+            type = _type;
         }
 
         void dumpDebug(ProtoOutputStream proto, long fieldId) {
@@ -1097,6 +1100,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TARGET_UID, targetUid);
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.DURATION_MS, duration);
             proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TAG, tag);
+            proto.write(ActivityManagerServiceDumpProcessesProto.PendingTempWhitelist.TYPE, type);
             proto.end(token);
         }
     }
@@ -5526,8 +5530,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     boolean isWhitelistedForFgsStartLocked(int uid) {
-        final int appId = UserHandle.getAppId(uid);
-        return Arrays.binarySearch(mDeviceIdleExceptIdleWhitelist, appId) >= 0
+        return Arrays.binarySearch(mDeviceIdleExceptIdleWhitelist, UserHandle.getAppId(uid)) >= 0
                 || mFgsStartTempAllowList.isAllowed(uid);
     }
 
@@ -9298,6 +9301,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     TimeUtils.formatDuration(ptw.duration, pw);
                     pw.print(" ");
                     pw.println(ptw.tag);
+                    pw.print(" ");
+                    pw.print(ptw.type);
                 }
             }
         }
@@ -15359,11 +15364,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     void tempWhitelistUidLocked(int targetUid, long duration, String tag, int type) {
-        mPendingTempWhitelist.put(targetUid, new PendingTempWhitelist(targetUid, duration, tag));
+        mPendingTempWhitelist.put(targetUid,
+                new PendingTempWhitelist(targetUid, duration, tag, type));
         setUidTempWhitelistStateLocked(targetUid, true);
         mUiHandler.obtainMessage(PUSH_TEMP_WHITELIST_UI_MSG).sendToTarget();
 
-        if (type == BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+        if (type == TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
             mFgsStartTempAllowList.add(targetUid, duration);
         }
     }
@@ -15389,7 +15395,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             for (int i = 0; i < N; i++) {
                 PendingTempWhitelist ptw = list[i];
                 mLocalDeviceIdleController.addPowerSaveTempWhitelistAppDirect(ptw.targetUid,
-                        ptw.duration, true, ptw.tag);
+                        ptw.duration, ptw.type, true, ptw.tag);
             }
         }
 
@@ -15406,8 +15412,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    final void setAppIdTempWhitelistStateLocked(int appId, boolean onWhitelist) {
-        mOomAdjuster.setAppIdTempWhitelistStateLocked(appId, onWhitelist);
+    final void setAppIdTempWhitelistStateLocked(int uid, boolean onWhitelist) {
+        mOomAdjuster.setAppIdTempWhitelistStateLocked(uid, onWhitelist);
     }
 
     @GuardedBy("this")
@@ -16009,10 +16015,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId, boolean adding) {
+        public void updateDeviceIdleTempWhitelist(int[] appids, int changingUid, boolean adding,
+                long durationMs, @BroadcastOptions.TempAllowListType int type) {
             synchronized (ActivityManagerService.this) {
                 mDeviceIdleTempWhitelist = appids;
-                setAppIdTempWhitelistStateLocked(changingAppId, adding);
+                if (adding) {
+                    if (type == TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED) {
+                        mFgsStartTempAllowList.add(changingUid, durationMs);
+                    }
+                }
+                setAppIdTempWhitelistStateLocked(changingUid, adding);
             }
         }
 

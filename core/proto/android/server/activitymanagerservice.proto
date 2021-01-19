@@ -626,6 +626,7 @@ message ActivityManagerServiceDumpProcessesProto {
         optional int32 target_uid = 1;
         optional int64 duration_ms = 2;
         optional string tag = 3;
+        optional int32 type = 4;
     }
     repeated PendingTempWhitelist pending_temp_whitelist = 26;
 
