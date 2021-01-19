@@ -79,6 +79,7 @@ import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -1446,6 +1447,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.safelyDestroy("test");
 
         verify(activity).destroyImmediately(anyString());
+    }
+
+    @Test
+    public void testRemoveImmediately() throws RemoteException {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowProcessController wpc = activity.app;
+        activity.getTask().removeImmediately("test");
+
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
+                isA(DestroyActivityItem.class));
+        assertNull(activity.app);
+        assertEquals(DESTROYED, activity.getState());
+        assertFalse(wpc.hasActivities());
     }
 
     @Test
