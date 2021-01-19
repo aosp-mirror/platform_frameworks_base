@@ -23,7 +23,11 @@ import android.annotation.Nullable;
 import android.annotation.StringDef;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
+import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.media.metrics.PlaybackComponent;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -39,7 +43,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.time.Instant;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -144,6 +151,7 @@ public final class MediaDrm implements AutoCloseable {
     private static final String PERMISSION = android.Manifest.permission.ACCESS_DRM_CERTIFICATES;
 
     private long mNativeContext;
+    private final String mAppPackageName;
 
     /**
      * Specify no certificate type
@@ -281,8 +289,9 @@ public final class MediaDrm implements AutoCloseable {
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
          */
+        mAppPackageName = ActivityThread.currentOpPackageName();
         native_setup(new WeakReference<MediaDrm>(this),
-                getByteArrayFromUUID(uuid),  ActivityThread.currentOpPackageName());
+                getByteArrayFromUUID(uuid), mAppPackageName);
 
         mCloseGuard.open("release");
     }
@@ -1144,12 +1153,78 @@ public final class MediaDrm implements AutoCloseable {
      * problem with the certifcate
      */
     @NonNull
-    public native KeyRequest getKeyRequest(
+    public KeyRequest getKeyRequest(
+            @NonNull byte[] scope, @Nullable byte[] init,
+            @Nullable String mimeType, @KeyType int keyType,
+            @Nullable HashMap<String, String> optionalParameters)
+            throws NotProvisionedException {
+        HashMap<String, String> internalParams;
+        if (optionalParameters == null) {
+            internalParams = new HashMap<>();
+        } else {
+            internalParams = new HashMap<>(optionalParameters);
+        }
+        byte[] rawBytes = getNewestAvailablePackageCertificateRawBytes();
+        byte[] hashBytes = null;
+        if (rawBytes != null) {
+            hashBytes = getDigestBytes(rawBytes, "SHA-256");
+        }
+        if (hashBytes != null) {
+            Base64.Encoder encoderB64 = Base64.getEncoder();
+            String hashBytesB64 = encoderB64.encodeToString(hashBytes);
+            internalParams.put("package_certificate_hash_bytes", hashBytesB64);
+        }
+        return getKeyRequestNative(scope, init, mimeType, keyType, internalParams);
+    }
+
+    @Nullable
+    private byte[] getNewestAvailablePackageCertificateRawBytes() {
+        Application application = ActivityThread.currentApplication();
+        if (application == null) {
+            Log.w(TAG, "pkg cert: Application is null");
+            return null;
+        }
+        PackageManager pm = application.getPackageManager();
+        if (pm == null) {
+            Log.w(TAG, "pkg cert: PackageManager is null");
+            return null;
+        }
+        PackageInfo packageInfo = null;
+        try {
+            packageInfo = pm.getPackageInfo(mAppPackageName,
+                    PackageManager.GET_SIGNING_CERTIFICATES);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, mAppPackageName, e);
+        }
+        if (packageInfo == null || packageInfo.signingInfo == null) {
+            Log.w(TAG, "pkg cert: PackageInfo or SigningInfo is null");
+            return null;
+        }
+        Signature[] signers = packageInfo.signingInfo.getApkContentsSigners();
+        if (signers != null && signers.length == 1) {
+            return signers[0].toByteArray();
+        }
+        Log.w(TAG, "pkg cert: " + signers.length + " signers");
+        return null;
+    }
+
+    @Nullable
+    private static byte[] getDigestBytes(@NonNull byte[] rawBytes, @NonNull String algorithm) {
+        try {
+            MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+            return messageDigest.digest(rawBytes);
+        } catch (NoSuchAlgorithmException e) {
+            Log.w(TAG, algorithm, e);
+        }
+        return null;
+    }
+
+    @NonNull
+    private native KeyRequest getKeyRequestNative(
             @NonNull byte[] scope, @Nullable byte[] init,
             @Nullable String mimeType, @KeyType int keyType,
             @Nullable HashMap<String, String> optionalParameters)
             throws NotProvisionedException;
-
 
     /**
      * A key response is received from the license server by the app, then it is
