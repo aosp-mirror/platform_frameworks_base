@@ -30,7 +30,6 @@ import android.os.Trace;
 import android.util.LongSparseArray;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
@@ -210,8 +209,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private SurfaceControl.DisplayMode[] mSfDisplayModes;
         // The active display mode in SurfaceFlinger
         private SurfaceControl.DisplayMode mActiveSfDisplayMode;
-        private Spline mSystemBrightnessToNits;
-        private Spline mNitsToHalBrightness;
+        private DisplayDeviceConfig mDisplayDeviceConfig;
 
         private DisplayEventReceiver.FrameRateOverride[] mFrameRateOverrides =
                 new DisplayEventReceiver.FrameRateOverride[0];
@@ -410,16 +408,13 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         @Override
         public DisplayDeviceConfig getDisplayDeviceConfig() {
             if (mDisplayDeviceConfig == null) {
-                loadDisplayConfiguration();
+                loadDisplayDeviceConfig();
             }
             return mDisplayDeviceConfig;
         }
 
-        private void loadDisplayConfiguration() {
-            Spline nitsToHal = null;
-            Spline sysToNits = null;
-
-            // Load the mapping from nits to HAL brightness range (display-device-config.xml)
+        private void loadDisplayDeviceConfig() {
+            // Load display device config
             final Context context = getOverlayContext();
             mDisplayDeviceConfig = DisplayDeviceConfig.create(context, mPhysicalDisplayId,
                     mIsDefaultDisplay);
@@ -427,33 +422,9 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                 return;
             }
 
+            // Load brightness HWC quirk
             mBacklightAdapter.setForceSurfaceControl(mDisplayDeviceConfig.hasQuirk(
                     DisplayDeviceConfig.QUIRK_CAN_SET_BRIGHTNESS_VIA_HWC));
-
-            final float[] halNits = mDisplayDeviceConfig.getNits();
-            final float[] halBrightness = mDisplayDeviceConfig.getBrightness();
-            if (halNits == null || halBrightness == null) {
-                return;
-            }
-            nitsToHal = Spline.createSpline(halNits, halBrightness);
-
-            // Load the mapping from system brightness range to nits (config.xml)
-            final Resources res = context.getResources();
-            final float[] sysNits = BrightnessMappingStrategy.getFloatArray(res.obtainTypedArray(
-                    com.android.internal.R.array.config_screenBrightnessNits));
-            final int[] sysBrightness = res.getIntArray(
-                    com.android.internal.R.array.config_screenBrightnessBacklight);
-            if (sysNits.length == 0 || sysBrightness.length != sysNits.length) {
-                return;
-            }
-            final float[] sysBrightnessFloat = new float[sysBrightness.length];
-            for (int i = 0; i < sysBrightness.length; i++) {
-                sysBrightnessFloat[i] = sysBrightness[i];
-            }
-            sysToNits = Spline.createSpline(sysBrightnessFloat, sysNits);
-
-            mNitsToHalBrightness = nitsToHal;
-            mSystemBrightnessToNits = sysToNits;
         }
 
         private boolean updateStaticInfo(SurfaceControl.StaticDisplayInfo info) {
@@ -649,13 +620,11 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
                 // The display is trusted since it is created by system.
                 mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
+                mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
+                mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
                 if (mDisplayDeviceConfig != null) {
-                    mInfo.brightnessMinimum = mDisplayDeviceConfig.getBrightnessMinimum();
-                    mInfo.brightnessMaximum = mDisplayDeviceConfig.getBrightnessMaximum();
                     mInfo.brightnessDefault = mDisplayDeviceConfig.getBrightnessDefault();
                 } else {
-                    mInfo.brightnessMinimum = PowerManager.BRIGHTNESS_MIN;
-                    mInfo.brightnessMaximum = PowerManager.BRIGHTNESS_MAX;
                     mInfo.brightnessDefault = 0.5f;
                 }
             }
@@ -790,8 +759,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         Trace.traceBegin(Trace.TRACE_TAG_POWER, "setDisplayBrightness("
                                 + "id=" + physicalDisplayId + ", brightness=" + brightness + ")");
                         try {
-                            brightness = displayBrightnessToHalBrightness(brightness);
-                            mBacklightAdapter.setBrightness(brightness);
+                            float backlight = brightnessToBacklight(brightness);
+                            mBacklightAdapter.setBacklight(backlight);
                             Trace.traceCounter(Trace.TRACE_TAG_POWER,
                                     "ScreenBrightness",
                                     BrightnessSynchronizer.brightnessFloatToInt(brightness));
@@ -800,35 +769,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         }
                     }
 
-                    /**
-                     * Converts brightness range from the framework's brightness space to the
-                     * Hal brightness space if the HAL brightness space has been provided via
-                     * a display device configuration file.
-                     */
-                    private float displayBrightnessToHalBrightness(float brightness) {
-                        // TODO: b/171380847 - This needs to be deprecated. The nits-to-brightness
-                        // relationship should be specified in display-config OR config.xml, but not
-                        // both, and no nits-space conversion should be necessary.
-                        //
-                        // Only do a conversion if there exists a unique system brightness and a
-                        // unique HAL brightness-to-nits range defined.
-                        if (mSystemBrightnessToNits == null || mNitsToHalBrightness == null) {
-                            return brightness;
-                        }
-
-                        // Sys brightness in this conversion is always specified in the old 1-255
-                        // range, so convert that here before the translation.
-                        final float brightnessInt =
-                                BrightnessSynchronizer.brightnessFloatToIntRange(brightness);
-
-                        if (BrightnessSynchronizer.floatEquals(
-                                brightnessInt, PowerManager.BRIGHTNESS_OFF)) {
-                            return PowerManager.BRIGHTNESS_OFF_FLOAT;
-                        }
-
-                        final float nits = mSystemBrightnessToNits.interpolate(brightnessInt);
-                        final float halBrightness = mNitsToHalBrightness.interpolate(nits);
-                        return halBrightness;
+                    private float brightnessToBacklight(float brightness) {
+                        return getDisplayDeviceConfig().getBacklightFromBrightness(brightness);
                     }
                 };
             }
@@ -1317,11 +1259,12 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             }
         }
 
-        void setBrightness(float brightness) {
+        // Set backlight within min and max backlight values
+        void setBacklight(float backlight) {
             if (mUseSurfaceControlBrightness || mForceSurfaceControl) {
-                mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, brightness);
+                mSurfaceControlProxy.setDisplayBrightness(mDisplayToken, backlight);
             } else if (mBacklight != null) {
-                mBacklight.setBrightness(brightness);
+                mBacklight.setBrightness(backlight);
             }
         }
 
