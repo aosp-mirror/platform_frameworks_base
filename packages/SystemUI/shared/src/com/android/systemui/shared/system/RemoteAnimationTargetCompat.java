@@ -22,6 +22,10 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
+import android.view.WindowManager;
+import android.window.TransitionInfo;
+
+import java.util.ArrayList;
 
 /**
  * @see RemoteAnimationTarget
@@ -73,6 +77,45 @@ public class RemoteAnimationTargetCompat {
         mStartLeash = app.startLeash;
     }
 
+    private static int newModeToLegacyMode(int newMode) {
+        switch (newMode) {
+            case WindowManager.TRANSIT_OPEN:
+            case WindowManager.TRANSIT_TO_FRONT:
+                return MODE_OPENING;
+            case WindowManager.TRANSIT_CLOSE:
+            case WindowManager.TRANSIT_TO_BACK:
+                return MODE_CLOSING;
+            default:
+                return 2; // MODE_CHANGING
+        }
+    }
+
+    public RemoteAnimationTargetCompat(TransitionInfo.Change change, int order) {
+        taskId = change.getTaskInfo() != null ? change.getTaskInfo().taskId : -1;
+        mode = newModeToLegacyMode(change.getMode());
+        leash = new SurfaceControlCompat(change.getLeash());
+        isTranslucent = (change.getFlags() & TransitionInfo.FLAG_TRANSLUCENT) != 0
+                || (change.getFlags() & TransitionInfo.FLAG_SHOW_WALLPAPER) != 0;
+        clipRect = null;
+        position = null;
+        localBounds = new Rect(change.getEndAbsBounds());
+        localBounds.offsetTo(change.getEndRelOffset().x, change.getEndRelOffset().y);
+        sourceContainerBounds = null;
+        screenSpaceBounds = change.getEndAbsBounds();
+        prefixOrderIndex = order;
+        // TODO(shell-transitions): I guess we need to send content insets? evaluate how its used.
+        contentInsets = new Rect(0, 0, 0, 0);
+        if (change.getTaskInfo() != null) {
+            isNotInRecents = !change.getTaskInfo().isRunning;
+            activityType = change.getTaskInfo().getActivityType();
+        } else {
+            isNotInRecents = true;
+            activityType = ACTIVITY_TYPE_UNDEFINED;
+        }
+        pictureInPictureParams = null;
+        mStartLeash = null;
+    }
+
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
         final RemoteAnimationTargetCompat[] appsCompat =
                 new RemoteAnimationTargetCompat[apps != null ? apps.length : 0];
@@ -80,6 +123,24 @@ public class RemoteAnimationTargetCompat {
             appsCompat[i] = new RemoteAnimationTargetCompat(apps[i]);
         }
         return appsCompat;
+    }
+
+    /**
+     * Represents a TransitionInfo object as an array of old-style targets
+     *
+     * @param wallpapers If true, this will return wallpaper targets; otherwise it returns
+     *                   non-wallpaper targets.
+     */
+    public static RemoteAnimationTargetCompat[] wrap(TransitionInfo info, boolean wallpapers) {
+        final ArrayList<RemoteAnimationTargetCompat> out = new ArrayList<>();
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            boolean changeIsWallpaper =
+                    (info.getChanges().get(i).getFlags() & TransitionInfo.FLAG_IS_WALLPAPER) != 0;
+            if (wallpapers != changeIsWallpaper) continue;
+            out.add(new RemoteAnimationTargetCompat(info.getChanges().get(i),
+                    info.getChanges().size() - i));
+        }
+        return out.toArray(new RemoteAnimationTargetCompat[out.size()]);
     }
 
     /**

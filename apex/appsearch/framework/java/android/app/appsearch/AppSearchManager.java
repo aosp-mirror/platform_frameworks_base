@@ -17,7 +17,6 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Bundle;
@@ -123,8 +122,8 @@ public class AppSearchManager {
     /**
      * Creates a new {@link AppSearchSession}.
      *
-     * <p>This process requires an AppSearch native indexing file system for each user. If it's not
-     * created for this user, the initialization process will create one under user's directory.
+     * <p>This process requires an AppSearch native indexing file system. If it's not created, the
+     * initialization process will create one under the user's credential encrypted directory.
      *
      * @param searchContext The {@link SearchContext} contains all information to create a new
      *                      {@link AppSearchSession}
@@ -147,16 +146,14 @@ public class AppSearchManager {
     /**
      * Creates a new {@link GlobalSearchSession}.
      *
-     * <p>This process requires an AppSearch native indexing file system for each user. If it's not
-     * created for this user, the initialization process will create one under user's directory.
+     * <p>This process requires an AppSearch native indexing file system. If it's not created, the
+     * initialization process will create one under the user's credential encrypted directory.
      *
      * @param executor      Executor on which to invoke the callback.
      * @param callback      The {@link AppSearchResult}&lt;{@link GlobalSearchSession}&gt; of
      *                      performing this operation. Or a {@link AppSearchResult} with failure
      *                      reason code and error information.
-     * @hide
      */
-    @SystemApi
     public void createGlobalSearchSession(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {

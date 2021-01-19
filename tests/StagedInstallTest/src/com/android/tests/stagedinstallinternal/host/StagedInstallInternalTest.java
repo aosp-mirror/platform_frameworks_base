@@ -279,6 +279,21 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         assertThat(getStagingDirectories()).isEmpty();
     }
 
+    @Test
+    public void testFailStagedSessionIfStagingDirectoryDeleted() throws Exception {
+        // Create a staged session
+        runPhase("testFailStagedSessionIfStagingDirectoryDeleted_Commit");
+
+        // Delete the staging directory
+        getDevice().enableAdbRoot();
+        getDevice().executeShellCommand("rm -r /data/app-staging");
+        getDevice().disableAdbRoot();
+
+        getDevice().reboot();
+
+        runPhase("testFailStagedSessionIfStagingDirectoryDeleted_Verify");
+    }
+
     private List<String> getStagingDirectories() throws DeviceNotAvailableException {
         String baseDir = "/data/app-staging";
         try {

@@ -2194,6 +2194,33 @@ public final class StrictMode {
         onVmPolicyViolation(new IncorrectContextUseViolation(message, originStack));
     }
 
+    /**
+     * A helper method to verify if the {@code context} is a UI context and throw
+     * {@link IncorrectContextUseViolation} if the {@code context} is not a UI context.
+     *
+     * @param context The context to verify if it is a UI context
+     * @param methodName The asserted method name
+     *
+     * @see Context#isUiContext()
+     * @see IncorrectContextUseViolation
+     *
+     * @hide
+     */
+    public static void assertUiContext(@NonNull Context context, @NonNull String methodName) {
+        if (vmIncorrectContextUseEnabled() && !context.isUiContext()) {
+            final String errorMessage = "Tried to access UI related API" + methodName
+                    + " from a non-UI Context:" + context;
+            final String message = "UI-related services, such as WindowManager, WallpaperService "
+                    + "or LayoutInflater should be accessed from Activity or other UI "
+                    + "Contexts. Use an Activity or a Context created with "
+                    + "Context#createWindowContext(int, Bundle), which are adjusted to "
+                    + "the configuration and visual bounds of an area on screen.";
+            final Exception exception = new IllegalAccessException(errorMessage);
+            StrictMode.onIncorrectContextUsed(message, exception);
+            Log.e(TAG, errorMessage + " " + message, exception);
+        }
+    }
+
     /** Assume locked until we hear otherwise */
     private static volatile boolean sUserKeyUnlocked = false;
 

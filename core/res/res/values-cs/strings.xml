@@ -59,7 +59,8 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Příchozí ID volajícího"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"Odchozí ID volajícího"</string>
+    <!-- no translation found for ClirMmi (6752346475055446417) -->
+    <skip />
     <string name="ColpMmi" msgid="4736462893284419302">"ID připojené linky"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Omezení ID připojené linky"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Přesměrování hovorů"</string>

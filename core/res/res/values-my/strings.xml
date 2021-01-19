@@ -57,7 +57,8 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEIDနံပါတ်"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"အဝင်ခေါ်ဆိုမှုID"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"အထွက်ခေါ်ဆိုခြင်းအိုင်ဒီ"</string>
+    <!-- no translation found for ClirMmi (6752346475055446417) -->
+    <skip />
     <string name="ColpMmi" msgid="4736462893284419302">"လိုင်း ID ချိတ်ဆက်သည်"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"လိုင်း ID ချိတ်ဆက်မှု ကန့်သတ်ချက်များ"</string>
     <string name="CfMmi" msgid="8390012691099787178">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
@@ -148,8 +149,7 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"ကြိုးမဲ့အင်တာနက် သာလျှင်"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (779976494687695991) -->
-    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> Cross-SIM ခေါ်ဆိုမှု"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ထပ်ဆင့်မပို့နိုင်ပါ"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> နောက် <xliff:g id="TIME_DELAY">{2}</xliff:g> စက္ကန့်"</string>

@@ -46,8 +46,6 @@ import com.android.server.ConnectivityService
 import com.android.server.LocalServices
 import com.android.server.NetworkAgentWrapper
 import com.android.server.TestNetIdManager
-import com.android.server.connectivity.DefaultNetworkMetrics
-import com.android.server.connectivity.IpConnectivityMetrics
 import com.android.server.connectivity.MockableSystemProperties
 import com.android.server.connectivity.ProxyTracker
 import com.android.server.net.NetworkPolicyManagerInternal
@@ -92,10 +90,6 @@ class ConnectivityServiceIntegrationTest {
     private lateinit var netd: INetd
     @Mock
     private lateinit var dnsResolver: IDnsResolver
-    @Mock
-    private lateinit var metricsLogger: IpConnectivityMetrics.Logger
-    @Mock
-    private lateinit var defaultMetrics: DefaultNetworkMetrics
     @Spy
     private var context = TestableContext(realContext)
 
@@ -149,7 +143,6 @@ class ConnectivityServiceIntegrationTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        doReturn(defaultMetrics).`when`(metricsLogger).defaultNetworkMetrics()
         doNothing().`when`(context).sendStickyBroadcastAsUser(any(), any(), any())
 
         networkStackClient = TestNetworkStackClient(realContext)
@@ -173,7 +166,6 @@ class ConnectivityServiceIntegrationTest {
     private fun makeDependencies(): ConnectivityService.Dependencies {
         val deps = spy(ConnectivityService.Dependencies())
         doReturn(networkStackClient).`when`(deps).networkStack
-        doReturn(metricsLogger).`when`(deps).metricsLogger
         doReturn(mock(ProxyTracker::class.java)).`when`(deps).makeProxyTracker(any(), any())
         doReturn(mock(MockableSystemProperties::class.java)).`when`(deps).systemProperties
         doReturn(TestNetIdManager()).`when`(deps).makeNetIdManager()
