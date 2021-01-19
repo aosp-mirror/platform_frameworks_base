@@ -143,11 +143,25 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+        if (getListener() != null) {
+            try {
+                getListener().onUdfpsPointerDown(getSensorId(), getCookie());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            }
+        }
     }
 
     @Override
     public void onPointerUp() {
         UdfpsHelper.onFingerUp(getFreshDaemon());
+        if (getListener() != null) {
+            try {
+                getListener().onUdfpsPointerUp(getSensorId(), getCookie());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            }
+        }
     }
 
     public boolean isKeyguard() {

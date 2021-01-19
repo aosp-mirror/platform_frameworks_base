@@ -1314,6 +1314,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         public void onAuthenticationAcquired(int acquireInfo) {
             handleFingerprintAcquired(acquireInfo);
         }
+
+        @Override
+        public void onUdfpsPointerDown(int sensorId) {
+            Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
+        }
+
+        @Override
+        public void onUdfpsPointerUp(int sensorId) {
+            Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
+        }
     };
 
     private final FaceManager.FaceDetectionCallback mFaceDetectionCallback
