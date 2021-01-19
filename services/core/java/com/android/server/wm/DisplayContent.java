@@ -3607,7 +3607,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget.mActivityRecord.matchParentBounds()
                 // IME is attached to non-Letterboxed app windows, other than windows with
                 // LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER flag. (Refer to WS.isLetterboxedAppWindow())
-                && mImeLayeringTarget.matchesRootDisplayAreaBounds();
+                && mImeLayeringTarget.matchesDisplayAreaBounds();
     }
 
     /**

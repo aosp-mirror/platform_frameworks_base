@@ -35,6 +35,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
+import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
@@ -2865,41 +2866,61 @@ class Task extends WindowContainer<WindowContainer> {
 
         adjustForMinimalTaskDimensions(outOverrideBounds, previousBounds, newParentConfig);
         if (windowingMode == WINDOWING_MODE_FREEFORM) {
-            // by policy, make sure the window remains within parent somewhere
-            final float density =
-                    ((float) newParentConfig.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
-            final Rect parentBounds =
-                    new Rect(newParentConfig.windowConfiguration.getBounds());
-            final DisplayContent display = getDisplayContent();
-            if (display != null) {
-                // If a freeform window moves below system bar, there is no way to move it again
-                // by touch. Because its caption is covered by system bar. So we exclude them
-                // from root task bounds. and then caption will be shown inside stable area.
-                final Rect stableBounds = new Rect();
-                display.getStableRect(stableBounds);
-                parentBounds.intersect(stableBounds);
-            }
+            computeFreeformBounds(outOverrideBounds, newParentConfig);
+            return;
+        }
 
-            fitWithinBounds(outOverrideBounds, parentBounds,
-                    (int) (density * WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP),
-                    (int) (density * WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP));
+        if (isSplitScreenWindowingMode(windowingMode)
+                || windowingMode == WINDOWING_MODE_MULTI_WINDOW) {
+            // This is to compute whether the task should be letterboxed to handle non-resizable app
+            // in multi window. There is no split screen only logic.
+            computeLetterboxBounds(outOverrideBounds, newParentConfig);
+        }
+    }
 
-            // Prevent to overlap caption with stable insets.
-            final int offsetTop = parentBounds.top - outOverrideBounds.top;
-            if (offsetTop > 0) {
-                outOverrideBounds.offset(0, offsetTop);
-            }
+    /** Computes bounds for {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN}. */
+    @VisibleForTesting
+    void computeFullscreenBounds(@NonNull Rect outBounds, @NonNull Configuration newParentConfig) {
+        // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent".
+        outBounds.setEmpty();
+        computeLetterboxBounds(outBounds, newParentConfig);
+    }
+
+    /** Computes bounds for {@link WindowConfiguration#WINDOWING_MODE_FREEFORM}. */
+    private void computeFreeformBounds(@NonNull Rect outBounds,
+            @NonNull Configuration newParentConfig) {
+        // by policy, make sure the window remains within parent somewhere
+        final float density =
+                ((float) newParentConfig.densityDpi) / DisplayMetrics.DENSITY_DEFAULT;
+        final Rect parentBounds =
+                new Rect(newParentConfig.windowConfiguration.getBounds());
+        final DisplayContent display = getDisplayContent();
+        if (display != null) {
+            // If a freeform window moves below system bar, there is no way to move it again
+            // by touch. Because its caption is covered by system bar. So we exclude them
+            // from root task bounds. and then caption will be shown inside stable area.
+            final Rect stableBounds = new Rect();
+            display.getStableRect(stableBounds);
+            parentBounds.intersect(stableBounds);
+        }
+
+        fitWithinBounds(outBounds, parentBounds,
+                (int) (density * WindowState.MINIMUM_VISIBLE_WIDTH_IN_DP),
+                (int) (density * WindowState.MINIMUM_VISIBLE_HEIGHT_IN_DP));
+
+        // Prevent to overlap caption with stable insets.
+        final int offsetTop = parentBounds.top - outBounds.top;
+        if (offsetTop > 0) {
+            outBounds.offset(0, offsetTop);
         }
     }
 
     /**
-     * Compute bounds (letterbox or pillarbox) for
-     * {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN} when the parent doesn't handle the
-     * orientation change and the requested orientation is different from the parent.
+     * Computes bounds (letterbox or pillarbox) when the parent doesn't handle the orientation
+     * change and the requested orientation is different from the parent.
      */
-    void computeFullscreenBounds(@NonNull Rect outBounds, @NonNull Configuration newParentConfig) {
-        // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent".
-        outBounds.setEmpty();
+    private void computeLetterboxBounds(@NonNull Rect outBounds,
+            @NonNull Configuration newParentConfig) {
         if (handlesOrientationChangeFromDescendant()) {
             // No need to letterbox at task level. Display will handle fixed-orientation requests.
             return;
@@ -2957,6 +2978,8 @@ class Task extends WindowContainer<WindowContainer> {
         aspect = letterboxAspectRatioOverride > MIN_TASK_LETTERBOX_ASPECT_RATIO
                 ? letterboxAspectRatioOverride : aspect;
 
+        // Store the current bounds to be able to revert to size compat mode values below if needed.
+        mTmpFullBounds.set(outBounds);
         if (forcedOrientation == ORIENTATION_LANDSCAPE) {
             final int height = (int) Math.rint(parentWidth / aspect);
             final int top = parentBounds.centerY() - height / 2;
@@ -2975,7 +2998,7 @@ class Task extends WindowContainer<WindowContainer> {
                 // The app shouldn't be resized, we only do task letterboxing if the compat bounds
                 // is also from the same task letterbox. Otherwise, clear the task bounds to show
                 // app in size compat mode.
-                outBounds.setEmpty();
+                outBounds.set(mTmpFullBounds);
             }
         }
     }
@@ -3361,8 +3384,9 @@ class Task extends WindowContainer<WindowContainer> {
     @Override
     boolean handlesOrientationChangeFromDescendant() {
         return super.handlesOrientationChangeFromDescendant()
-                // Display won't rotate for the orientation request if the TaskDisplayArea can't
-                // specify orientation.
+                // Display won't rotate for the orientation request if the Task/TaskDisplayArea
+                // can't specify orientation.
+                && canSpecifyOrientation()
                 && getDisplayArea().canSpecifyOrientation();
     }
 
@@ -3875,7 +3899,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     boolean isTaskLetterboxed() {
-        return getWindowingMode() == WINDOWING_MODE_FULLSCREEN && !matchParentBounds();
+        // No letterbox for multi window root task
+        return !matchParentBounds()
+                && (getWindowingMode() == WINDOWING_MODE_FULLSCREEN || !isRootTask());
     }
 
     @Override

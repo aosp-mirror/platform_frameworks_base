@@ -2108,12 +2108,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
-    boolean matchesRootDisplayAreaBounds() {
-        RootDisplayArea root = getRootDisplayArea();
-        if (root == null || root == getDisplayContent()) {
+    boolean matchesDisplayAreaBounds() {
+        final DisplayArea displayArea = getDisplayArea();
+        if (displayArea == null) {
             return matchesDisplayBounds();
         }
-        return root.getBounds().equals(getBounds());
+        return displayArea.getBounds().equals(getBounds());
     }
 
     /**
@@ -3760,16 +3760,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().mCurrentFocus == this;
     }
 
-
     /** Is this window in a container that takes up the entire screen space? */
     private boolean inAppWindowThatMatchesParentBounds() {
         return mActivityRecord == null || (mActivityRecord.matchParentBounds() && !inMultiWindowMode());
     }
 
-    /** @return true when the window is in fullscreen mode, but has non-fullscreen bounds set, or
-     *          is transitioning into/out-of fullscreen. */
+    /** @return true when the window should be letterboxed. */
     boolean isLetterboxedAppWindow() {
-        return !inMultiWindowMode() && !matchesRootDisplayAreaBounds()
+        // Fullscreen mode but doesn't fill display area.
+        return (!inMultiWindowMode() && !matchesDisplayAreaBounds())
+                // Activity in size compat.
+                || (mActivityRecord != null && mActivityRecord.inSizeCompatMode())
+                // Task letterboxed.
+                || (getTask() != null && getTask().isTaskLetterboxed())
+                // Letterboxed for display cutout.
                 || isLetterboxedForDisplayCutout();
     }
 
