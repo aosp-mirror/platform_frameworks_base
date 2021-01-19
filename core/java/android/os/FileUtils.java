@@ -1442,11 +1442,13 @@ public final class FileUtils {
     public static FileDescriptor convertToModernFd(FileDescriptor fd) {
         try {
             Context context = AppGlobals.getInitialApplication();
-            File realFile = ParcelFileDescriptor.getFile(fd);
+            // /mnt/user paths are not accessible directly so convert to a /storage path
+            String filePath = Os.readlink("/proc/self/fd/" + fd.getInt$()).replace(
+                    "/mnt/user/" + UserHandle.myUserId(), "/storage");
+            File realFile = new File(filePath);
             String fileName = realFile.getName();
             boolean isCameraVideo = !fileName.startsWith(".") && fileName.endsWith(".mp4")
-                    && contains(CAMERA_DIR_LOWER_CASE, realFile.getAbsolutePath().toLowerCase(
-                                    Locale.ROOT));
+                    && contains(CAMERA_DIR_LOWER_CASE, filePath.toLowerCase(Locale.ROOT));
 
             if (!SystemProperties.getBoolean("sys.fuse.transcode_enabled", false)
                     || UserHandle.getAppId(Process.myUid()) == getMediaProviderAppId(context)
@@ -1471,7 +1473,7 @@ public final class FileUtils {
                 Log.i(TAG, "Failed to change to modern format dataSource for: " + realFile);
             }
         } catch (Exception e) {
-            Log.w(TAG, "Failed to change to modern format dataSource");
+            Log.w(TAG, "Failed to change to modern format dataSource", e);
         }
         return null;
     }
