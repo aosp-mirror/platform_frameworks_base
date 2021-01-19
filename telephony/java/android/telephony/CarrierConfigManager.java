@@ -4077,6 +4077,18 @@ public class CarrierConfigManager {
             "use_lower_mtu_value_if_both_received";
 
     /**
+     * Determines the default RTT mode.
+     *
+     * Upon first boot, when the user has not yet set a value for their preferred RTT mode,
+     * the value of this config will be sent to the IMS stack. Valid values are the same as for
+     * {@link Settings.Secure#RTT_CALLING_MODE}.
+     *
+     * @hide
+     */
+    public static final String KEY_DEFAULT_RTT_MODE_INT =
+            "default_rtt_mode_int";
+
+    /**
      * Indicates if auto-configuration server is used for the RCS config
      * Reference: GSMA RCC.14
      */
@@ -4628,6 +4640,7 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
+        sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
     }
 
     /**
