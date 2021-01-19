@@ -72,6 +72,7 @@ import static com.android.server.am.AppProfiler.TAG_PSS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 
 import android.app.ActivityManager;
+import android.app.ActivityThread;
 import android.app.ApplicationExitInfo;
 import android.app.usage.UsageEvents;
 import android.compat.annotation.ChangeId;
@@ -119,7 +120,7 @@ import java.util.Arrays;
  * All of the code required to compute proc states and oom_adj values.
  */
 public final class OomAdjuster {
-    private static final String TAG = "OomAdjuster";
+    static final String TAG = "OomAdjuster";
     static final String OOM_ADJ_REASON_METHOD = "updateOomAdj";
     static final String OOM_ADJ_REASON_NONE = OOM_ADJ_REASON_METHOD + "_meh";
     static final String OOM_ADJ_REASON_ACTIVITY = OOM_ADJ_REASON_METHOD + "_activityChange";
@@ -168,6 +169,12 @@ public final class OomAdjuster {
      * Service for optimizing resource usage from background apps.
      */
     CachedAppOptimizer mCachedAppOptimizer;
+
+    /**
+     * Re-rank apps getting a cache oom adjustment from lru to weighted order
+     * based on weighted scores for LRU, PSS and cache use count.
+     */
+    CacheOomRanker mCacheOomRanker;
 
     ActivityManagerConstants mConstants;
 
@@ -331,6 +338,7 @@ public final class OomAdjuster {
         mLocalPowerManager = LocalServices.getService(PowerManagerInternal.class);
         mConstants = mService.mConstants;
         mCachedAppOptimizer = new CachedAppOptimizer(mService);
+        mCacheOomRanker = new CacheOomRanker();
 
         mProcessGroupHandler = new Handler(adjusterThread.getLooper(), msg -> {
             final int pid = msg.arg1;
@@ -361,6 +369,7 @@ public final class OomAdjuster {
 
     void initSettings() {
         mCachedAppOptimizer.init();
+        mCacheOomRanker.init(ActivityThread.currentApplication().getMainExecutor());
         if (mService.mConstants.KEEP_WARMING_SERVICES.size() > 0) {
             final IntentFilter filter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
             mService.mContext.registerReceiverForAllUsers(new BroadcastReceiver() {
@@ -769,6 +778,9 @@ public final class OomAdjuster {
             }
         }
 
+        if (mCacheOomRanker.useOomReranking()) {
+            mCacheOomRanker.reRankLruCachedApps(mProcessList);
+        }
         assignCachedAdjIfNecessary(mProcessList.mLruProcesses);
 
         if (computeClients) { // There won't be cycles if we didn't compute clients above.
@@ -2772,6 +2784,11 @@ public final class OomAdjuster {
     @GuardedBy("mService")
     void dumpCachedAppOptimizerSettings(PrintWriter pw) {
         mCachedAppOptimizer.dump(pw);
+    }
+
+    @GuardedBy("mService")
+    void dumpCacheOomRankerSettings(PrintWriter pw) {
+        mCacheOomRanker.dump(pw);
     }
 
     @GuardedBy("mService")

@@ -360,6 +360,13 @@ class ProcessRecord implements WindowProcessListener {
     int mCachedProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
     int mCachedSchedGroup = ProcessList.SCHED_GROUP_BACKGROUND;
 
+    // Approximates the usage count of the app, used for cache re-ranking by CacheOomRanker.
+    //
+    // Counts the number of times the process is re-added to the cache (i.e. setCached(false);
+    // setCached(true)). This over counts, as setCached is sometimes reset while remaining in the
+    // cache. However, this happens uniformly across processes, so ranking is not affected.
+    private int mCacheOomRankerUseCount;
+
     boolean mReachable; // Whether or not this process is reachable from given process
 
     long mKillTime; // The timestamp in uptime when this process was killed.
@@ -828,12 +835,21 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     void setCached(boolean cached) {
-        mCached = cached;
+        if (mCached != cached) {
+            mCached = cached;
+            if (cached) {
+                ++mCacheOomRankerUseCount;
+            }
+        }
     }
 
     @Override
     public boolean isCached() {
         return mCached;
+    }
+
+    int getCacheOomRankerUseCount() {
+        return mCacheOomRankerUseCount;
     }
 
     boolean hasActivities() {
