@@ -81,7 +81,7 @@ import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.List;
@@ -115,17 +115,17 @@ public class ScreenshotController {
      */
     static class SavedImageData {
         public Uri uri;
-        public Supplier<ShareTransition> shareTransition;
-        public Notification.Action editAction;
+        public Supplier<ActionTransition> shareTransition;
+        public Supplier<ActionTransition> editTransition;
         public Notification.Action deleteAction;
         public List<Notification.Action> smartActions;
 
         /**
-         * POD for shared element transition to share sheet.
+         * POD for shared element transition.
          */
-        static class ShareTransition {
+        static class ActionTransition {
             public Bundle bundle;
-            public Notification.Action shareAction;
+            public Notification.Action action;
             public Runnable onCancelRunnable;
         }
 
@@ -135,7 +135,7 @@ public class ScreenshotController {
         public void reset() {
             uri = null;
             shareTransition = null;
-            editAction = null;
+            editTransition = null;
             deleteAction = null;
             smartActions = null;
         }
@@ -350,6 +350,10 @@ public class ScreenshotController {
         } else {
             mScreenshotView.animateDismissal();
         }
+    }
+
+    boolean isPendingSharedTransition() {
+        return mScreenshotView.isPendingSharedTransition();
     }
 
     /**
@@ -626,7 +630,7 @@ public class ScreenshotController {
         }
 
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mImageExporter,
-                mScreenshotSmartActions, data, getShareTransitionSupplier());
+                mScreenshotSmartActions, data, getActionTransitionSupplier());
         mSaveInBgTask.execute();
     }
 
@@ -680,7 +684,7 @@ public class ScreenshotController {
      * Supplies the necessary bits for the shared element transition to share sheet.
      * Note that once supplied, the action intent to share must be sent immediately after.
      */
-    private Supplier<ShareTransition> getShareTransitionSupplier() {
+    private Supplier<ActionTransition> getActionTransitionSupplier() {
         return () -> {
             ExitTransitionCallbacks cb = new ExitTransitionCallbacks() {
                 @Override
@@ -689,7 +693,13 @@ public class ScreenshotController {
                 }
 
                 @Override
-                public void onFinish() { }
+                public void hideSharedElements() {
+                    resetScreenshotView();
+                }
+
+                @Override
+                public void onFinish() {
+                }
             };
 
             Pair<ActivityOptions, ExitTransitionCoordinator> transition =
@@ -698,7 +708,7 @@ public class ScreenshotController {
                                     ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
             transition.second.startExit();
 
-            ShareTransition supply = new ShareTransition();
+            ActionTransition supply = new ActionTransition();
             supply.bundle = transition.first.toBundle();
             supply.onCancelRunnable = () -> ActivityOptions.stopSharedElementAnimation(mWindow);
             return supply;
