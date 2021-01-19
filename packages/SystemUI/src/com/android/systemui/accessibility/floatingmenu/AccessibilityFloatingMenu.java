@@ -16,7 +16,9 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE;
+import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY;
 import static android.provider.Settings.Secure.ACCESSIBILITY_FLOATING_MENU_SIZE;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 
@@ -37,6 +39,8 @@ import com.android.internal.annotations.VisibleForTesting;
  * Contains logic for an accessibility floating menu view.
  */
 public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
+    private static final int DEFAULT_FADE_EFFECT_ENABLED = 1;
+    private static final float DEFAULT_OPACITY_VALUE = 0.55f;
     private final Context mContext;
     private final AccessibilityFloatingMenuView mMenuView;
 
@@ -64,6 +68,15 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 }
             };
 
+    private final ContentObserver mFadeOutContentObserver =
+            new ContentObserver(new Handler(Looper.getMainLooper())) {
+                @Override
+                public void onChange(boolean selfChange) {
+                    mMenuView.updateOpacityWith(isFadeEffectEnabled(mContext),
+                            getOpacityValue(mContext));
+                }
+            };
+
     public AccessibilityFloatingMenu(Context context) {
         mContext = context;
         mMenuView = new AccessibilityFloatingMenuView(context);
@@ -88,6 +101,8 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
 
         mMenuView.show();
         mMenuView.onTargetsChanged(getTargets(mContext, ACCESSIBILITY_BUTTON));
+        mMenuView.updateOpacityWith(isFadeEffectEnabled(mContext),
+                getOpacityValue(mContext));
         mMenuView.setSizeType(getSizeType(mContext));
         mMenuView.setShapeType(getShapeType(mContext));
 
@@ -103,6 +118,18 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
         mMenuView.hide();
 
         unregisterContentObservers();
+    }
+
+    private static boolean isFadeEffectEnabled(Context context) {
+        return Settings.Secure.getInt(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+                DEFAULT_FADE_EFFECT_ENABLED) == /* enable */ 1;
+    }
+
+    private static float getOpacityValue(Context context) {
+        return Settings.Secure.getFloat(
+                context.getContentResolver(), ACCESSIBILITY_FLOATING_MENU_OPACITY,
+                DEFAULT_OPACITY_VALUE);
     }
 
     private static int getSizeType(Context context) {
@@ -129,11 +156,20 @@ public class AccessibilityFloatingMenu implements IAccessibilityFloatingMenu {
                 Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_ICON_TYPE),
                 /* notifyForDescendants */ false, mShapeContentObserver,
                 UserHandle.USER_CURRENT);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED),
+                /* notifyForDescendants */ false, mFadeOutContentObserver,
+                UserHandle.USER_CURRENT);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY),
+                /* notifyForDescendants */ false, mFadeOutContentObserver,
+                UserHandle.USER_CURRENT);
     }
 
     private void unregisterContentObservers() {
         mContext.getContentResolver().unregisterContentObserver(mContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mSizeContentObserver);
         mContext.getContentResolver().unregisterContentObserver(mShapeContentObserver);
+        mContext.getContentResolver().unregisterContentObserver(mFadeOutContentObserver);
     }
 }

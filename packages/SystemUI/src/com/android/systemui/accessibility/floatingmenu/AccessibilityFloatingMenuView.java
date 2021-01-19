@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -25,6 +26,8 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -33,6 +36,7 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import androidx.annotation.DimenRes;
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -52,9 +56,14 @@ import java.util.List;
  * <p>The number of items would depend on strings key
  * {@link android.provider.Settings.Secure#ACCESSIBILITY_BUTTON_TARGETS}.
  */
-public class AccessibilityFloatingMenuView extends FrameLayout {
+public class AccessibilityFloatingMenuView extends FrameLayout
+        implements RecyclerView.OnItemTouchListener {
     private static final float DEFAULT_LOCATION_Y_PERCENTAGE = 0.8f;
     private static final int INDEX_MENU_ITEM = 0;
+    private static final int FADE_OUT_DURATION_MS = 1000;
+    private static final int FADE_EFFECT_DURATION_MS = 3000;
+
+    private boolean mIsFadeEffectEnabled;
     private boolean mIsShowing;
     @SizeType
     private int mSizeType = SizeType.SMALL;
@@ -66,6 +75,9 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
     private int mIconHeight;
     private final RecyclerView mListView;
     private final AccessibilityTargetAdapter mAdapter;
+    private float mFadeOutValue;
+    private final ValueAnimator mFadeOutAnimator;
+    private final Handler mUiHandler;
     private final WindowManager.LayoutParams mLayoutParams;
     private final WindowManager mWindowManager;
     private final List<AccessibilityTarget> mTargets = new ArrayList<>();
@@ -103,12 +115,48 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
         mWindowManager = context.getSystemService(WindowManager.class);
         mLayoutParams = createDefaultLayoutParams();
         mAdapter = new AccessibilityTargetAdapter(mTargets);
+        mUiHandler = createUiHandler();
+
+        mFadeOutAnimator = ValueAnimator.ofFloat(1.0f, mFadeOutValue);
+        mFadeOutAnimator.setDuration(FADE_OUT_DURATION_MS);
+        mFadeOutAnimator.addUpdateListener(
+                (animation) -> setAlpha((float) animation.getAnimatedValue()));
 
         updateDimensions();
         initListView();
 
         final int uiMode = context.getResources().getConfiguration().uiMode;
         updateStrokeWith(uiMode);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView,
+            @NonNull MotionEvent event) {
+
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                fadeIn();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                // Do nothing
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                fadeOut();
+                break;
+            default: // Do nothing
+        }
+        return false;
+    }
+
+    @Override
+    public void onTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent motionEvent) {
+        // Do Nothing
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean b) {
+        // Do Nothing
     }
 
     void show() {
@@ -134,14 +182,20 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
     }
 
     void onTargetsChanged(List<AccessibilityTarget> newTargets) {
+        fadeIn();
+
         mTargets.clear();
         mTargets.addAll(newTargets);
         mAdapter.notifyDataSetChanged();
 
         updateRadiusWith(mSizeType, mTargets.size());
+
+        fadeOut();
     }
 
     void setSizeType(@SizeType int newSizeType) {
+        fadeIn();
+
         mSizeType = newSizeType;
 
         updateIconSizeWith(newSizeType);
@@ -149,9 +203,13 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
 
         // When the icon sized changed, the menu size and location will be impacted.
         updateLocation();
+
+        fadeOut();
     }
 
     void setShapeType(@ShapeType int newShapeType) {
+        fadeIn();
+
         final boolean isCircleShape =
                 newShapeType == ShapeType.CIRCLE;
         final float offset =
@@ -164,6 +222,36 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
                 isCircleShape
                         ? null
                         : (view, event) -> onTouched(event));
+
+        fadeOut();
+    }
+
+    void updateOpacityWith(boolean isFadeEffectEnabled, float newOpacityValue) {
+        mIsFadeEffectEnabled = isFadeEffectEnabled;
+        mFadeOutValue = newOpacityValue;
+
+        mFadeOutAnimator.cancel();
+        mFadeOutAnimator.setFloatValues(1.0f, mFadeOutValue);
+        setAlpha(mIsFadeEffectEnabled ? mFadeOutValue : /* completely opaque */ 1.0f);
+    }
+
+    @VisibleForTesting
+    void fadeIn() {
+        if (!mIsFadeEffectEnabled) {
+            return;
+        }
+
+        mUiHandler.removeCallbacksAndMessages(null);
+        mUiHandler.post(() -> setAlpha(/* completely opaque */ 1.0f));
+    }
+
+    @VisibleForTesting
+    void fadeOut() {
+        if (!mIsFadeEffectEnabled) {
+            return;
+        }
+
+        mUiHandler.postDelayed(() -> mFadeOutAnimator.start(), FADE_EFFECT_DURATION_MS);
     }
 
     private boolean onTouched(MotionEvent event) {
@@ -185,6 +273,14 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
     private void setRadius(float radius) {
         final float[] radii = new float[]{radius, radius, 0.0f, 0.0f, 0.0f, 0.0f, radius, radius};
         getMenuGradientDrawable().setCornerRadii(radii);
+    }
+
+    private Handler createUiHandler() {
+        final Looper looper = Looper.myLooper();
+        if (looper == null) {
+            throw new IllegalArgumentException("looper must not be null");
+        }
+        return new Handler(looper);
     }
 
     private void updateDimensions() {
@@ -218,6 +314,7 @@ public class AccessibilityFloatingMenuView extends FrameLayout {
         mListView.setBackground(listViewBackground);
         mListView.setAdapter(mAdapter);
         mListView.setLayoutManager(layoutManager);
+        mListView.addOnItemTouchListener(this);
         updateListView();
 
         addView(mListView);
