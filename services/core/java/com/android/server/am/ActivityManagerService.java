@@ -7609,10 +7609,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 crashInfo.throwLineNumber);
 
         FrameworkStatsLog.write(FrameworkStatsLog.APP_CRASH_OCCURRED,
-                Binder.getCallingUid(),
+                (r != null) ? r.uid : -1,
                 eventType,
                 processName,
-                Binder.getCallingPid(),
+                (r != null) ? r.pid : -1,
                 (r != null && r.info != null) ? r.info.packageName : "",
                 (r != null && r.info != null) ? (r.info.isInstantApp()
                         ? FrameworkStatsLog.APP_CRASH_OCCURRED__IS_INSTANT_APP__TRUE
