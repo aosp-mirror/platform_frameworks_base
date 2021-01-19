@@ -21,6 +21,7 @@ import android.telephony.CallAttributes;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.DataConnectionRealTimeInfo;
+import android.telephony.LinkCapacityEstimate;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
@@ -73,4 +74,5 @@ oneway interface IPhoneStateListener {
     void onPhysicalChannelConfigChanged(in List<PhysicalChannelConfig> configs);
     void onDataEnabledChanged(boolean enabled, int reason);
     void onAllowedNetworkTypesChanged(in int reason, in long allowedNetworkType);
+    void onLinkCapacityEstimateChanged(in List<LinkCapacityEstimate> linkCapacityEstimateList);
 }

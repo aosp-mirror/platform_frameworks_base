@@ -1261,6 +1261,8 @@ public class PhoneStateListener {
         // default implementation empty
     }
 
+
+
     /**
      * The callback methods need to be called on the handler thread where
      * this object was created.  If the binder did that for us it'd be nice.
@@ -1577,6 +1579,11 @@ public class PhoneStateListener {
         }
 
         public void onAllowedNetworkTypesChanged(int reason, long allowedNetworkType) {
+            // default implementation empty
+        }
+
+        public void onLinkCapacityEstimateChanged(
+                List<LinkCapacityEstimate> linkCapacityEstimateList) {
             // default implementation empty
         }
     }
