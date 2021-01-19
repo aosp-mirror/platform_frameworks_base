@@ -294,6 +294,8 @@ public class BluetoothEventManager {
                 BluetoothDevice device) {
             short rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
             String name = intent.getStringExtra(BluetoothDevice.EXTRA_NAME);
+            final boolean isCoordinatedSetMember =
+                    intent.getBooleanExtra(BluetoothDevice.EXTRA_IS_COORDINATED_SET_MEMBER, false);
             // TODO Pick up UUID. They should be available for 2.1 devices.
             // Skip for now, there's a bluez problem and we are not getting uuids even for 2.1.
             CachedBluetoothDevice cachedDevice = mDeviceManager.findDevice(device);
@@ -308,6 +310,7 @@ public class BluetoothEventManager {
             }
             cachedDevice.setRssi(rssi);
             cachedDevice.setJustDiscovered(true);
+            cachedDevice.setIsCoordinatedSetMember(isCoordinatedSetMember);
         }
     }
 
