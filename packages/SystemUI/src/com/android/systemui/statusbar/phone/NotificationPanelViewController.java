@@ -50,6 +50,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.DisplayCutout;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -344,6 +345,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mEmptyDragAmount;
     private float mDownX;
     private float mDownY;
+    private int mDisplayCutoutTopInset = 0; // in pixels
 
     private final KeyguardClockPositionAlgorithm
             mClockPositionAlgorithm =
@@ -909,7 +911,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding(),
                     mUpdateMonitor.shouldShowLockIcon(),
-                    getQsExpansionFraction());
+                    getQsExpansionFraction(),
+                    mDisplayCutoutTopInset);
             mClockPositionAlgorithm.run(mClockPositionResult);
             mKeyguardStatusViewController.updatePosition(
                     mClockPositionResult.clockX, mClockPositionResult.clockY,
@@ -3830,6 +3833,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private class OnApplyWindowInsetsListener implements View.OnApplyWindowInsetsListener {
         public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+            final DisplayCutout displayCutout = v.getRootWindowInsets().getDisplayCutout();
+            mDisplayCutoutTopInset = displayCutout != null ? displayCutout.getSafeInsetTop() : 0;
+
             mNavigationBarBottomHeight = insets.getStableInsetBottom();
             updateMaxHeadsUpTranslation();
             return insets;
