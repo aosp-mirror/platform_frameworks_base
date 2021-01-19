@@ -82,6 +82,7 @@ public class PowerStatsServiceTest {
     private PowerStatsLogger mPowerStatsLogger;
 
     private final PowerStatsService.Injector mInjector = new PowerStatsService.Injector() {
+        private TestPowerStatsHALWrapper mTestPowerStatsHALWrapper = new TestPowerStatsHALWrapper();
         @Override
         File createDataStoragePath() {
             mDataStorageDir = null;
@@ -111,8 +112,8 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
-            return new TestPowerStatsHALWrapper();
+        IPowerStatsHALWrapper getPowerStatsHALWrapperImpl() {
+            return mTestPowerStatsHALWrapper;
         }
 
         @Override

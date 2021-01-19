@@ -130,12 +130,16 @@ public class MeasuredEnergyStats {
      * Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if summary
      *       parceling changes.
      */
-    private void readSummaryFromParcel(Parcel in) {
+    private void readSummaryFromParcel(Parcel in, boolean overwriteAvailability) {
         final int size = in.readInt();
         for (int i = 0; i < size; i++) {
             final int bucket = in.readInt();
             final long energyUJ = in.readLong();
-            setValueIfSupported(bucket, energyUJ);
+            if (overwriteAvailability) {
+                mAccumulatedEnergiesMicroJoules[bucket] = energyUJ;
+            } else {
+                setValueIfSupported(bucket, energyUJ);
+            }
         }
     }
 
@@ -143,14 +147,15 @@ public class MeasuredEnergyStats {
      * Write to summary parcel.
      * Note: Measured subsystem availability may be different when the summary parcel is read.
      */
-    private void writeSummaryToParcel(Parcel out) {
+    private void writeSummaryToParcel(Parcel out, boolean skipZero) {
         final int sizePos = out.dataPosition();
         out.writeInt(0);
         int size = 0;
         // Write only the supported buckets with non-zero energy.
         for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
             final long energy = mAccumulatedEnergiesMicroJoules[i];
-            if (energy <= 0) continue;
+            if (energy < 0) continue;
+            if (energy == 0 && skipZero) continue;
 
             out.writeInt(i);
             out.writeLong(mAccumulatedEnergiesMicroJoules[i]);
@@ -197,16 +202,19 @@ public class MeasuredEnergyStats {
     }
 
     /**
-     * Populate a MeasuredEnergyStats from a parcel. If the stats is null, consume and
-     * ignore the parcelled data.
+     * Create a MeasuredEnergyStats object from a summary parcel.
+     *
+     * @return a new MeasuredEnergyStats object as described.
+     *         Returns null if the parcel indicates there is no data to populate.
      */
-    public static void readSummaryFromParcel(@Nullable MeasuredEnergyStats stats, Parcel in) {
+    public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(Parcel in) {
         // Check if any MeasuredEnergyStats exists on the parcel
-        if (in.readInt() == 0) return;
+        if (in.readInt() == 0) return null;
 
-        // If stats is null, create a placeholder MeasuredEnergyStats to consume the parcel data
-        final MeasuredEnergyStats mes = stats != null ? stats : new MeasuredEnergyStats();
-        mes.readSummaryFromParcel(in);
+        final MeasuredEnergyStats stats =
+                new MeasuredEnergyStats(new boolean[NUMBER_ENERGY_BUCKETS]);
+        stats.readSummaryFromParcel(in, true);
+        return stats;
     }
 
     /**
@@ -227,12 +235,12 @@ public class MeasuredEnergyStats {
         if (template == null) {
             // Nothing supported now. Create placeholder object just to consume the parcel data.
             final MeasuredEnergyStats mes = new MeasuredEnergyStats();
-            mes.readSummaryFromParcel(in);
+            mes.readSummaryFromParcel(in, false);
             return null;
         }
 
         final MeasuredEnergyStats stats = createFromTemplate(template);
-        stats.readSummaryFromParcel(in);
+        stats.readSummaryFromParcel(in, false);
         if (stats.containsInterestingData()) {
             return stats;
         } else {
@@ -253,13 +261,13 @@ public class MeasuredEnergyStats {
      * Write a MeasuredEnergyStats to a parcel. If the stats is null, just write a 0.
      */
     public static void writeSummaryToParcel(@Nullable MeasuredEnergyStats stats,
-            Parcel dest) {
+            Parcel dest, boolean skipZero) {
         if (stats == null) {
             dest.writeInt(0);
             return;
         }
         dest.writeInt(1);
-        stats.writeSummaryToParcel(dest);
+        stats.writeSummaryToParcel(dest, skipZero);
     }
 
     /** Reset accumulated energy. */
