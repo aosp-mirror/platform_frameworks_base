@@ -105,6 +105,8 @@ public final class Sm {
             runStartCheckpoint();
         } else if ("supports-checkpoint".equals(op)) {
             runSupportsCheckpoint();
+        } else if ("unmount-app-data-dirs".equals(op)) {
+            runDisableAppDataIsolation();
         } else {
             throw new IllegalArgumentException();
         }
@@ -251,6 +253,13 @@ public final class Sm {
         System.out.println(result.get());
     }
 
+    public void runDisableAppDataIsolation() throws RemoteException {
+        final String pkgName = nextArg();
+        final int pid = Integer.parseInt(nextArg());
+        final int userId = Integer.parseInt(nextArg());
+        mSm.disableAppDataIsolation(pkgName, pid, userId);
+    }
+
     public void runForget() throws RemoteException {
         final String fsUuid = nextArg();
         if ("all".equals(fsUuid)) {
@@ -346,6 +355,8 @@ public final class Sm {
         System.err.println("       sm start-checkpoint <num-retries>");
         System.err.println("");
         System.err.println("       sm supports-checkpoint");
+        System.err.println("");
+        System.err.println("       sm unmount-app-data-dirs PACKAGE_NAME PID USER_ID");
         System.err.println("");
         return 1;
     }

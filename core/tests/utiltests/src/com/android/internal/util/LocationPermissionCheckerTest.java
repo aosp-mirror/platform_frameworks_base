@@ -15,6 +15,8 @@
  */
 package com.android.internal.util;
 
+import static android.Manifest.permission.NETWORK_SETTINGS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,6 +84,7 @@ public class LocationPermissionCheckerTest {
     private int mAllowCoarseLocationApps;
     private int mFineLocationPermission;
     private int mAllowFineLocationApps;
+    private int mNetworkSettingsPermission;
     private int mCurrentUser;
     private boolean mIsLocationEnabled;
     private boolean mThrowSecurityException;
@@ -138,6 +141,7 @@ public class LocationPermissionCheckerTest {
         mFineLocationPermission = PackageManager.PERMISSION_DENIED;
         mAllowCoarseLocationApps = AppOpsManager.MODE_ERRORED;
         mAllowFineLocationApps = AppOpsManager.MODE_ERRORED;
+        mNetworkSettingsPermission = PackageManager.PERMISSION_DENIED;
     }
 
     private void setupMockInterface() {
@@ -151,6 +155,8 @@ public class LocationPermissionCheckerTest {
                 .thenReturn(mCoarseLocationPermission);
         when(mMockContext.checkPermission(mManifestStringFine, -1, mUid))
                 .thenReturn(mFineLocationPermission);
+        when(mMockContext.checkPermission(NETWORK_SETTINGS, -1, mUid))
+                .thenReturn(mNetworkSettingsPermission);
         when(mLocationManager.isLocationEnabledForUser(any())).thenReturn(mIsLocationEnabled);
     }
 
@@ -263,6 +269,21 @@ public class LocationPermissionCheckerTest {
                         TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
         assertEquals(LocationPermissionChecker.ERROR_LOCATION_MODE_OFF, result);
     }
+
+    @Test
+    public void testenforceCanAccessScanResults_LocationModeDisabledHasNetworkSettings()
+            throws Exception {
+        mThrowSecurityException = false;
+        mIsLocationEnabled = false;
+        mNetworkSettingsPermission = PackageManager.PERMISSION_GRANTED;
+        setupTestCase();
+
+        final int result =
+                mChecker.checkLocationPermissionWithDetailInfo(
+                        TEST_PKG_NAME, TEST_FEATURE_ID, mUid, null);
+        assertEquals(LocationPermissionChecker.SUCCEEDED, result);
+    }
+
 
     private static void assertThrows(Class<? extends Exception> exceptionClass, Runnable r) {
         try {

@@ -17,10 +17,13 @@ package android.security;
 
 import static android.security.Credentials.ACTION_MANAGE_CREDENTIALS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.PendingIntent;
@@ -41,6 +44,7 @@ import android.os.UserManager;
 import android.security.keystore.AndroidKeyStoreProvider;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.security.keystore.KeyProperties;
+import android.util.Log;
 
 import com.android.org.conscrypt.TrustedCertificateStore;
 
@@ -103,6 +107,11 @@ import javax.security.auth.x500.X500Principal;
  */
 // TODO reference intent for credential installation when public
 public final class KeyChain {
+
+    /**
+     * @hide
+     */
+    public static final String LOG = "KeyChain";
 
     /**
      * @hide Also used by KeyChainService implementation
@@ -577,6 +586,55 @@ public final class KeyChain {
         intent.putExtra(EXTRA_SENDER, PendingIntent.getActivity(activity, 0, new Intent(),
                 PendingIntent.FLAG_IMMUTABLE));
         activity.startActivity(intent);
+    }
+
+    /**
+     * Set a credential management app. The credential management app has the ability to manage
+     * the user's KeyChain credentials on unmanaged devices.
+     *
+     * <p>There can only be one credential management on the device. If another app requests to
+     * become the credential management app, then the existing credential management app will
+     * no longer be able to manage credentials.
+     *
+     * @param packageName The package name of the credential management app
+     * @param authenticationPolicy The authentication policy of the credential management app. This
+     *                             policy determines which alias for a private key and certificate
+     *                             pair should be used for authentication.
+     * @return {@code true} if the credential management app was successfully added.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP)
+    public static boolean setCredentialManagementApp(@NonNull Context context,
+            @NonNull String packageName, @NonNull AppUriAuthenticationPolicy authenticationPolicy) {
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            keyChainConnection.getService()
+                    .setCredentialManagementApp(packageName, authenticationPolicy);
+            return true;
+        } catch (RemoteException | InterruptedException e) {
+            Log.w(LOG, "Set credential management app failed", e);
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    /**
+     * Remove the user's KeyChain credentials on unmanaged devices.
+     *
+     * @return {@code true} if the credential management app was successfully removed.
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP)
+    public static boolean removeCredentialManagementApp(@NonNull Context context) {
+        try (KeyChainConnection keyChainConnection = KeyChain.bind(context)) {
+            keyChainConnection.getService().removeCredentialManagementApp();
+            return true;
+        } catch (RemoteException | InterruptedException e) {
+            Log.w(LOG, "Remove credential management app failed", e);
+            Thread.currentThread().interrupt();
+            return false;
+        }
     }
 
     private static class AliasResponse extends IKeyChainAliasCallback.Stub {

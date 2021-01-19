@@ -136,12 +136,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
     // This Network object is always valid.
-    public final Network network;
-    public LinkProperties linkProperties;
+    @NonNull public final Network network;
+    @NonNull public LinkProperties linkProperties;
     // This should only be modified by ConnectivityService, via setNetworkCapabilities().
     // TODO: make this private with a getter.
-    public NetworkCapabilities networkCapabilities;
-    public final NetworkAgentConfig networkAgentConfig;
+    @NonNull public NetworkCapabilities networkCapabilities;
+    @NonNull public final NetworkAgentConfig networkAgentConfig;
 
     // Underlying networks declared by the agent. Only set if supportsUnderlyingNetworks is true.
     // The networks in this list might be declared by a VPN app using setUnderlyingNetworks and are
@@ -329,6 +329,12 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
             int creatorUid) {
+        Objects.requireNonNull(net);
+        Objects.requireNonNull(info);
+        Objects.requireNonNull(lp);
+        Objects.requireNonNull(nc);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(config);
         networkAgent = na;
         network = net;
         networkInfo = info;
@@ -536,19 +542,22 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         }
 
         @Override
-        public void sendNetworkCapabilities(NetworkCapabilities nc) {
+        public void sendNetworkCapabilities(@NonNull NetworkCapabilities nc) {
+            Objects.requireNonNull(nc);
             mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED,
                     new Pair<>(NetworkAgentInfo.this, nc)).sendToTarget();
         }
 
         @Override
-        public void sendLinkProperties(LinkProperties lp) {
+        public void sendLinkProperties(@NonNull LinkProperties lp) {
+            Objects.requireNonNull(lp);
             mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED,
                     new Pair<>(NetworkAgentInfo.this, lp)).sendToTarget();
         }
 
         @Override
-        public void sendNetworkInfo(NetworkInfo info) {
+        public void sendNetworkInfo(@NonNull NetworkInfo info) {
+            Objects.requireNonNull(info);
             mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_INFO_CHANGED,
                     new Pair<>(NetworkAgentInfo.this, info)).sendToTarget();
         }
@@ -603,7 +612,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      *
      * @return the old capabilities of this network.
      */
-    public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
+    @NonNull public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
