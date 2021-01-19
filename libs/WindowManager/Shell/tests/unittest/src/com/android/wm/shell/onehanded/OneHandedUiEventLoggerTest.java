@@ -33,7 +33,7 @@ import java.util.Collection;
 
 @RunWith(Parameterized.class)
 @SmallTest
-public class OneHandedEventsTest extends OneHandedTestCase {
+public class OneHandedUiEventLoggerTest extends OneHandedTestCase {
 
     private UiEventLoggerFake mUiEventLogger;
 
@@ -48,7 +48,6 @@ public class OneHandedEventsTest extends OneHandedTestCase {
     @Before
     public void setFakeLoggers() {
         mUiEventLogger = new UiEventLoggerFake();
-        OneHandedEvents.sUiEventLogger = mUiEventLogger;
     }
 
     @Test
@@ -63,42 +62,42 @@ public class OneHandedEventsTest extends OneHandedTestCase {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 // Triggers
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN,
                         "writeEvent one_handed_trigger_gesture_in"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT,
                         "writeEvent one_handed_trigger_gesture_out"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_OVERSPACE_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_OVERSPACE_OUT,
                         "writeEvent one_handed_trigger_overspace_out"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT,
                         "writeEvent one_handed_trigger_pop_ime_out"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT,
                         "writeEvent one_handed_trigger_rotation_out"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT,
                         "writeEvent one_handed_trigger_app_taps_out"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT,
                         "writeEvent one_handed_trigger_timeout_out"},
-                {OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT,
                         "writeEvent one_handed_trigger_screen_off_out"},
                 // Settings toggles
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON,
                         "writeEvent one_handed_settings_enabled_on"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF,
                         "writeEvent one_handed_settings_enabled_off"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON,
                         "writeEvent one_handed_settings_app_taps_exit_on"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF,
                         "writeEvent one_handed_settings_app_taps_exit_off"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_ON,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_ON,
                         "writeEvent one_handed_settings_timeout_exit_on"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_OFF,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_OFF,
                         "writeEvent one_handed_settings_timeout_exit_off"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER,
                         "writeEvent one_handed_settings_timeout_seconds_never"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4,
                         "writeEvent one_handed_settings_timeout_seconds_4"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8,
                         "writeEvent one_handed_settings_timeout_seconds_8"},
-                {OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12,
+                {OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12,
                         "writeEvent one_handed_settings_timeout_seconds_12"}
         });
     }
