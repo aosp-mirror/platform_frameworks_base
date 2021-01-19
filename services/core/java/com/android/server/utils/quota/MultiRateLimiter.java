@@ -19,8 +19,6 @@ package com.android.server.utils.quota;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.pm.PackageManager;
-import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -57,11 +55,9 @@ public class MultiRateLimiter {
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final CountQuotaTracker[] mQuotaTrackers;
-    private final PackageManager mPackageManager;
 
-    private MultiRateLimiter(List<CountQuotaTracker> quotaTrackers, PackageManager packageManager) {
+    private MultiRateLimiter(List<CountQuotaTracker> quotaTrackers) {
         mQuotaTrackers = quotaTrackers.toArray(EMPTY_TRACKER_ARRAY);
-        mPackageManager = packageManager;
     }
 
     /** Record that an event happened and count it towards the given quota. */
@@ -105,17 +101,11 @@ public class MultiRateLimiter {
 
     @GuardedBy("mLock")
     private void clearLocked(int userId, @NonNull String packageName) {
-        try {
-            int uid = mPackageManager.getApplicationInfoAsUser(packageName, 0, userId).uid;
-            for (CountQuotaTracker quotaTracker : mQuotaTrackers) {
-                // This method behaves as if the package has been removed from the device, which
-                // isn't the case here, but it does similar clean-up to what we are aiming for here,
-                // so it works for this use case.
-                quotaTracker.onAppRemovedLocked(packageName, uid);
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            Slog.e(TAG, "clear(userId, packageName) called with unrecognized arguments, no "
-                    + "action taken");
+        for (CountQuotaTracker quotaTracker : mQuotaTrackers) {
+            // This method behaves as if the package has been removed from the device, which
+            // isn't the case here, but it does similar clean-up to what we are aiming for here,
+            // so it works for this use case.
+            quotaTracker.onAppRemovedLocked(userId, packageName);
         }
     }
 
@@ -126,7 +116,8 @@ public class MultiRateLimiter {
         private final Context mContext;
         private final Categorizer mCategorizer;
         private final Category mCategory;
-        @Nullable private final QuotaTracker.Injector mInjector;
+        @Nullable
+        private final QuotaTracker.Injector mInjector;
 
         /**
          * Creates a new builder and allows to inject an object that can be used
@@ -149,7 +140,7 @@ public class MultiRateLimiter {
         /**
          * Adds another rate limit to be used in {@link MultiRateLimiter}.
          *
-         * @param limit The maximum event count an app can have in the rolling time window.
+         * @param limit      The maximum event count an app can have in the rolling time window.
          * @param windowSize The rolling time window to use when checking quota usage.
          */
         public Builder addRateLimit(int limit, Duration windowSize) {
@@ -182,7 +173,7 @@ public class MultiRateLimiter {
          * limit.
          */
         public MultiRateLimiter build() {
-            return new MultiRateLimiter(mQuotaTrackers, mContext.getPackageManager());
+            return new MultiRateLimiter(mQuotaTrackers);
         }
     }
 
@@ -192,7 +183,7 @@ public class MultiRateLimiter {
         public final Duration mWindowSize;
 
         /**
-         * @param limit The maximum count of some occurrence in the rolling time window.
+         * @param limit      The maximum count of some occurrence in the rolling time window.
          * @param windowSize The rolling time window to use when checking quota usage.
          */
         private RateLimit(int limit, Duration windowSize) {
@@ -201,7 +192,7 @@ public class MultiRateLimiter {
         }
 
         /**
-         * @param limit The maximum count of some occurrence in the rolling time window.
+         * @param limit      The maximum count of some occurrence in the rolling time window.
          * @param windowSize The rolling time window to use when checking quota usage.
          */
         public static RateLimit create(int limit, Duration windowSize) {
