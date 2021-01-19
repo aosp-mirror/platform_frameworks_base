@@ -91,11 +91,6 @@ public class QSContainerImpl extends FrameLayout {
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
 
-    @Override
-    public boolean hasOverlappingRendering() {
-        return false;
-    }
-
     void onMediaVisibilityChanged(boolean qsVisible) {
         mAnimateBottomOnNextLayout = qsVisible;
     }
