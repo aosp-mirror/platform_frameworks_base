@@ -102,7 +102,7 @@ static void android_view_DisplayListCanvas_finishRecording(
         CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong renderNodePtr) {
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
-    renderNode->setStagingDisplayList(canvas->finishRecording());
+    canvas->finishRecording(renderNode);
 }
 
 static void android_view_DisplayListCanvas_drawRenderNode(CRITICAL_JNI_PARAMS_COMMA jlong canvasPtr, jlong renderNodePtr) {
