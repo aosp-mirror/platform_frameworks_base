@@ -254,6 +254,7 @@ package android.app {
     method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
+    method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);

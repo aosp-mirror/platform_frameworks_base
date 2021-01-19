@@ -95,6 +95,7 @@ import android.provider.Settings.Secure;
 import android.service.notification.ConversationChannelWrapper;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.TestableContentResolver;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
@@ -3290,6 +3291,95 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.readXml(parser, false, UserHandle.USER_ALL);
 
         assertNotNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
+    }
+
+    @Test
+    public void testDeleted_noTime() throws Exception {
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"id\" name=\"hi\" importance=\"3\" deleted=\"true\"/>"
+                + "</package>"
+                + "</ranking>";
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertNull(mHelper.getNotificationChannel(PKG_O, UID_O, "id", true));
+    }
+
+    @Test
+    public void testDeleted_recentTime() throws Exception {
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+
+        mHelper.createNotificationChannel(
+                PKG_P, UID_P, new NotificationChannel("id", "id", 2), true, false);
+        mHelper.deleteNotificationChannel(PKG_P, UID_P, "id");
+        NotificationChannel nc1 = mHelper.getNotificationChannel(PKG_P, UID_P, "id", true);
+        assertTrue(DateUtils.isToday(nc1.getDeletedTimeMs()));
+        assertTrue(nc1.isDeleted());
+
+        ByteArrayOutputStream baos = writeXmlAndPurge(PKG_P, UID_P, false,
+                UserHandle.USER_SYSTEM, "id", NotificationChannel.DEFAULT_CHANNEL_ID);
+
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(baos.toByteArray())),
+                null);
+        parser.nextTag();
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+        mHelper.readXml(parser, true, UserHandle.USER_SYSTEM);
+
+        NotificationChannel nc = mHelper.getNotificationChannel(PKG_P, UID_P, "id", true);
+        assertTrue(DateUtils.isToday(nc.getDeletedTimeMs()));
+        assertTrue(nc.isDeleted());
+    }
+
+    @Test
+    public void testUnDelete_time() throws Exception {
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+
+        mHelper.createNotificationChannel(
+                PKG_P, UID_P, new NotificationChannel("id", "id", 2), true, false);
+        mHelper.deleteNotificationChannel(PKG_P, UID_P, "id");
+        NotificationChannel nc1 = mHelper.getNotificationChannel(PKG_P, UID_P, "id", true);
+        assertTrue(DateUtils.isToday(nc1.getDeletedTimeMs()));
+        assertTrue(nc1.isDeleted());
+
+        mHelper.createNotificationChannel(
+                PKG_P, UID_P, new NotificationChannel("id", "id", 2), true, false);
+        nc1 = mHelper.getNotificationChannel(PKG_P, UID_P, "id", true);
+        assertEquals(-1, nc1.getDeletedTimeMs());
+        assertFalse(nc1.isDeleted());
+    }
+
+    @Test
+    public void testDeleted_longTime() throws Exception {
+        mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
+                mAppOpsManager, mStatsEventBuilderFactory);
+
+        long time = System.currentTimeMillis() - (DateUtils.DAY_IN_MILLIS * 30);
+
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
+                + "<channel id=\"id\" name=\"hi\" importance=\"3\" deleted=\"true\" del_time=\""
+                + time + "\"/>"
+                + "</package>"
+                + "</ranking>";
+        TypedXmlPullParser parser = Xml.newFastPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        NotificationChannel nc = mHelper.getNotificationChannel(PKG_O, UID_O, "id", true);
+        assertNull(nc);
     }
 
     @Test

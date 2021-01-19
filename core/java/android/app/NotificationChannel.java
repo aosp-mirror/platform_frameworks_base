@@ -32,6 +32,7 @@ import android.os.Parcelable;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.text.TextUtils;
+import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.proto.ProtoOutputStream;
@@ -111,6 +112,7 @@ public final class NotificationChannel implements Parcelable {
     private static final String ATT_CONVERSATION_ID = "conv_id";
     private static final String ATT_IMP_CONVERSATION = "imp_conv";
     private static final String ATT_DEMOTE = "dem";
+    private static final String ATT_DELETED_TIME_MS = "del_time";
     private static final String DELIMITER = ",";
 
     /**
@@ -183,6 +185,7 @@ public final class NotificationChannel implements Parcelable {
             NotificationManager.IMPORTANCE_UNSPECIFIED;
     private static final boolean DEFAULT_DELETED = false;
     private static final boolean DEFAULT_SHOW_BADGE = true;
+    private static final long DEFAULT_DELETION_TIME_MS = -1;
 
     @UnsupportedAppUsage
     private String mId;
@@ -214,6 +217,7 @@ public final class NotificationChannel implements Parcelable {
     private String mConversationId = null;
     private boolean mDemoted = false;
     private boolean mImportantConvo = false;
+    private long mDeletedTime = DEFAULT_DELETION_TIME_MS;
 
     /**
      * Creates a notification channel.
@@ -282,6 +286,7 @@ public final class NotificationChannel implements Parcelable {
         mConversationId = in.readString();
         mDemoted = in.readBoolean();
         mImportantConvo = in.readBoolean();
+        mDeletedTime = in.readLong();
     }
 
     @Override
@@ -341,6 +346,7 @@ public final class NotificationChannel implements Parcelable {
         dest.writeString(mConversationId);
         dest.writeBoolean(mDemoted);
         dest.writeBoolean(mImportantConvo);
+        dest.writeLong(mDeletedTime);
     }
 
     /**
@@ -372,6 +378,14 @@ public final class NotificationChannel implements Parcelable {
     @TestApi
     public void setDeleted(boolean deleted) {
         mDeleted = deleted;
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    public void setDeletedTimeMs(long time) {
+        mDeletedTime = time;
     }
 
     /**
@@ -766,6 +780,13 @@ public final class NotificationChannel implements Parcelable {
     /**
      * @hide
      */
+    public long getDeletedTimeMs() {
+        return mDeletedTime;
+    }
+
+    /**
+     * @hide
+     */
     @SystemApi
     public int getUserLockedFields() {
         return mUserLockedFields;
@@ -906,6 +927,8 @@ public final class NotificationChannel implements Parcelable {
         enableVibration(safeBool(parser, ATT_VIBRATION_ENABLED, false));
         setShowBadge(safeBool(parser, ATT_SHOW_BADGE, false));
         setDeleted(safeBool(parser, ATT_DELETED, false));
+        setDeletedTimeMs(XmlUtils.readLongAttribute(
+                parser, ATT_DELETED_TIME_MS, DEFAULT_DELETION_TIME_MS));
         setGroup(parser.getAttributeValue(null, ATT_GROUP));
         lockFields(safeInt(parser, ATT_USER_LOCKED, 0));
         setFgServiceShown(safeBool(parser, ATT_FG_SERVICE_SHOWN, false));
@@ -1024,6 +1047,9 @@ public final class NotificationChannel implements Parcelable {
         if (isDeleted()) {
             out.attributeBoolean(null, ATT_DELETED, isDeleted());
         }
+        if (getDeletedTimeMs() >= 0) {
+            out.attributeLong(null, ATT_DELETED_TIME_MS, getDeletedTimeMs());
+        }
         if (getGroup() != null) {
             out.attribute(null, ATT_GROUP, getGroup());
         }
@@ -1091,6 +1117,7 @@ public final class NotificationChannel implements Parcelable {
         record.put(ATT_VIBRATION, longArrayToString(getVibrationPattern()));
         record.put(ATT_SHOW_BADGE, Boolean.toString(canShowBadge()));
         record.put(ATT_DELETED, Boolean.toString(isDeleted()));
+        record.put(ATT_DELETED_TIME_MS, Long.toString(getDeletedTimeMs()));
         record.put(ATT_GROUP, getGroup());
         record.put(ATT_BLOCKABLE_SYSTEM, isBlockable());
         record.put(ATT_ALLOW_BUBBLE, getAllowBubbles());
@@ -1182,6 +1209,7 @@ public final class NotificationChannel implements Parcelable {
                 && mVibrationEnabled == that.mVibrationEnabled
                 && mShowBadge == that.mShowBadge
                 && isDeleted() == that.isDeleted()
+                && getDeletedTimeMs() == that.getDeletedTimeMs()
                 && isBlockable() == that.isBlockable()
                 && mAllowBubbles == that.mAllowBubbles
                 && Objects.equals(getId(), that.getId())
@@ -1205,8 +1233,8 @@ public final class NotificationChannel implements Parcelable {
         int result = Objects.hash(getId(), getName(), mDesc, getImportance(), mBypassDnd,
                 getLockscreenVisibility(), getSound(), mLights, getLightColor(),
                 getUserLockedFields(),
-                isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getGroup(),
-                getAudioAttributes(), isBlockable(), mAllowBubbles,
+                isFgServiceShown(), mVibrationEnabled, mShowBadge, isDeleted(), getDeletedTimeMs(),
+                getGroup(), getAudioAttributes(), isBlockable(), mAllowBubbles,
                 mImportanceLockedByOEM, mImportanceLockedDefaultApp, mOriginalImportance,
                 mParentId, mConversationId, mDemoted, mImportantConvo);
         result = 31 * result + Arrays.hashCode(mVibration);
@@ -1247,6 +1275,7 @@ public final class NotificationChannel implements Parcelable {
                 + ", mVibrationEnabled=" + mVibrationEnabled
                 + ", mShowBadge=" + mShowBadge
                 + ", mDeleted=" + mDeleted
+                + ", mDeletedTimeMs=" + mDeletedTime
                 + ", mGroup='" + mGroup + '\''
                 + ", mAudioAttributes=" + mAudioAttributes
                 + ", mBlockableSystem=" + mBlockableSystem
