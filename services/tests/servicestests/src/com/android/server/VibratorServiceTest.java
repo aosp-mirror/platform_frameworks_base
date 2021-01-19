@@ -64,6 +64,7 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.util.test.FakeSettingsProviderRule;
+import com.android.server.vibrator.FakeVibrator;
 import com.android.server.vibrator.FakeVibratorControllerProvider;
 import com.android.server.vibrator.VibratorController;
 
@@ -114,8 +115,6 @@ public class VibratorServiceTest {
 
     @Mock private PackageManagerInternal mPackageManagerInternalMock;
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
-    // TODO(b/131311651): replace with a FakeVibrator instead.
-    @Mock private Vibrator mVibratorMock;
     @Mock private AppOpsManager mAppOpsManagerMock;
     @Mock private IVibratorStateListener mVibratorStateListenerMock;
     @Mock private IInputManager mIInputManagerMock;
@@ -124,26 +123,22 @@ public class VibratorServiceTest {
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
+    private FakeVibrator mFakeVibrator;
     private FakeVibratorControllerProvider mVibratorProvider;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
+        mFakeVibrator = new FakeVibrator();
         mVibratorProvider = new FakeVibratorControllerProvider(mTestLooper.getLooper());
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
         InputManager inputManager = InputManager.resetInstance(mIInputManagerMock);
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
-        when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibratorMock);
+        when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mFakeVibrator);
         when(mContextSpy.getSystemService(eq(Context.INPUT_SERVICE))).thenReturn(inputManager);
         when(mContextSpy.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mAppOpsManagerMock);
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
-        when(mVibratorMock.getDefaultRingVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
         when(mVibratorStateListenerMock.asBinder()).thenReturn(mVibratorStateListenerBinderMock);
         when(mPackageManagerInternalMock.getSystemUiServiceComponent())
                 .thenReturn(new ComponentName("", ""));
@@ -586,8 +581,7 @@ public class VibratorServiceTest {
 
     @Test
     public void scale_withOneShotAndWaveform_usesScaleLevelOnAmplitude() throws Exception {
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
@@ -617,8 +611,7 @@ public class VibratorServiceTest {
 
     @Test
     public void scale_withComposed_usesScaleLevelOnPrimitiveScaleValues() throws Exception {
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
