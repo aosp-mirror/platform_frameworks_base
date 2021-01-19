@@ -6,7 +6,7 @@ per-file VibratorService.java, DisplayThread.java = michaelwr@google.com
 per-file VibratorService.java, DisplayThread.java = ogunwale@google.com
 
 # Zram writeback
-per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com, srnvs@google.com
+per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com
 
 # Userspace reboot
 per-file UserspaceRebootLogger.java = ioffe@google.com, tomcherry@google.com
@@ -31,6 +31,7 @@ per-file IpSecService.java = file:/services/core/java/com/android/server/net/OWN
 per-file MmsServiceBroker.java = file:/telephony/OWNERS
 per-file NetIdManager.java = file:/services/core/java/com/android/server/net/OWNERS
 per-file PackageWatchdog.java = file:/services/core/java/com/android/server/rollback/OWNERS
+per-file PinnerService.java = file:/apct-tests/perftests/OWNERS
 per-file TelephonyRegistry.java = file:/telephony/OWNERS
 per-file UiModeManagerService.java = file:/packages/SystemUI/OWNERS
 per-file VcnManagementService.java = file:/services/core/java/com/android/server/vcn/OWNERS
