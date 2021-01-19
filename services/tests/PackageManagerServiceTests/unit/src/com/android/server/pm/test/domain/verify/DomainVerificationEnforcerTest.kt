@@ -149,6 +149,7 @@ class DomainVerificationEnforcerTest {
                                         whenever(getPackageSettingLocked(TEST_PKG)) { mockPkgSetting }
                                         whenever(getPackageLocked(TEST_PKG)) { mockPkg }
                                         whenever(schedule(anyInt(), any()))
+                                        whenever(scheduleWriteSettings())
                                     }
                             })
                     )

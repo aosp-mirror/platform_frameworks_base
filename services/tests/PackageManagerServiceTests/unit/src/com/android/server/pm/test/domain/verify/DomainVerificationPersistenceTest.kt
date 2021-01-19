@@ -18,6 +18,7 @@ package com.android.server.pm.test.domain.verify
 
 import android.content.pm.domain.verify.DomainVerificationManager
 import android.util.ArrayMap
+import android.util.TypedXmlPullParser
 import android.util.TypedXmlSerializer
 import android.util.Xml
 import com.android.server.pm.domain.verify.DomainVerificationPersistence
@@ -29,12 +30,33 @@ import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.UUID
 
 class DomainVerificationPersistenceTest {
 
     companion object {
         private val PKG_PREFIX = DomainVerificationPersistenceTest::class.java.`package`!!.name
+
+        internal fun File.writeXml(block: (serializer: TypedXmlSerializer) -> Unit) = apply {
+            outputStream().use {
+                // Explicitly use string based XML so it can printed in the test failure output
+                Xml.newFastSerializer()
+                    .apply {
+                        setOutput(it, StandardCharsets.UTF_8.name())
+                        startDocument(null, true)
+                        setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
+                    }
+                    .apply(block)
+                    .endDocument()
+            }
+        }
+
+        internal fun <T> File.readXml(block: (parser: TypedXmlPullParser) -> T) =
+            inputStream().use {
+                block(Xml.resolvePullParser(it))
+            }
     }
 
     @Rule
@@ -56,17 +78,18 @@ class DomainVerificationPersistenceTest {
             mockPkgState(5).let { put(it.packageName, it) }
         }
 
-        val file = writeXml {
+        val file = tempFolder.newFile().writeXml {
             DomainVerificationPersistence.writeToXml(it, attached, pending, restored)
         }
 
         val xml = file.readText()
 
-        val (readActive, readRestored) = file.inputStream()
-                .use { DomainVerificationPersistence.readFromXml(Xml.resolvePullParser(it)) }
+        val (readActive, readRestored) = file.readXml {
+            DomainVerificationPersistence.readFromXml(it)
+        }
 
         assertWithMessage(xml).that(readActive.values)
-                .containsExactlyElementsIn(attached.values() + pending.values)
+            .containsExactlyElementsIn(attached.values() + pending.values)
         assertWithMessage(xml).that(readRestored.values).containsExactlyElementsIn(restored.values)
     }
 
@@ -172,24 +195,11 @@ class DomainVerificationPersistenceTest {
         """.trimIndent()
 
         val (active, restored) = DomainVerificationPersistence
-                .readFromXml(Xml.resolvePullParser(xml.byteInputStream()))
+            .readFromXml(Xml.resolvePullParser(xml.byteInputStream()))
 
         assertThat(active.values).containsExactly(stateZero)
         assertThat(restored.values).containsExactly(stateOne, stateTwo)
     }
-
-    private fun writeXml(block: (TypedXmlSerializer) -> Unit) = tempFolder.newFile()
-            .apply {
-                outputStream().use {
-                    Xml.resolveSerializer(it)
-                            .apply {
-                                startDocument(null, true)
-                                setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", true)
-                            }
-                            .apply(block)
-                            .endDocument()
-                }
-            }
 
     private fun mockEmptyPkgState(
         id: Int,

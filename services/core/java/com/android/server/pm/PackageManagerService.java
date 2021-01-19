@@ -238,7 +238,6 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
-import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -386,7 +385,6 @@ import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyV2;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationParams;
 import com.android.server.pm.intent.verify.legacy.IntentVerifierProxy;
-import com.android.server.pm.intent.verify.legacy.IntentVerifyUtils;
 import com.android.server.pm.parsing.PackageCacher;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.PackageParser2;
@@ -1814,7 +1812,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 @NonNull
                 @Override
                 public WatchedSparseIntArray getNextAppLinkGeneration() {
-                    return mSettings.mNextAppLinkGeneration;
+                    return null;
                 }
 
                 @NonNull
@@ -2753,7 +2751,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     // Try to get the status from User settings first
-                    long packedStatus = IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
+                    long packedStatus = 0;
+                    //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
                     int status = (int)(packedStatus >> 32);
                     int linkGeneration = (int)(packedStatus & 0xFFFFFFFF);
                     if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
@@ -2980,8 +2979,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     result.wereAnyDomainsVerificationApproved |= mDomainVerificationManager
                             .isApprovedForDomain(ps, intent, riTargetUser.targetUserId);
                 } else {
-                    long verificationState =
-                            IntentVerifyUtils.getDomainVerificationStatus(ps, parentUserId);
+                    long verificationState = 0;
+                    //IntentVerifyUtils.getDomainVerificationStatus(ps, parentUserId);
                     int status = (int) (verificationState >> 32);
                     result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
                             result.bestDomainVerificationStatus);
@@ -3257,8 +3256,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         }
 
-                        final long packedStatus =
-                                IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
+                        final long packedStatus = 0;
+                        //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
                         final int status = (int)(packedStatus >> 32);
                         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
                             // there's a local instant application installed, but, the user has
@@ -4202,8 +4201,8 @@ public class PackageManagerService extends IPackageManager.Stub
                             }
                         } else {
                             // Try to get the status from User settings first
-                            final long packedStatus =
-                                    IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
+                            final long packedStatus = 0;
+                            //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
                             final int status = (int) (packedStatus >> 32);
                             if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
                                     || status
@@ -9655,8 +9654,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 return ri;
                             }
                         } else {
-                            final long packedStatus =
-                                    IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
+                            final long packedStatus = 0;
+                            //IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
                             final int status = (int) (packedStatus >> 32);
                             if (status != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
                                 return ri;
@@ -16447,13 +16446,13 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public int getIntentVerificationStatus(String packageName, int userId) {
-        return mIntentFilterVerificationManager.getIntentVerificationStatus(packageName, userId);
+        return mDomainVerificationManager.getLegacyState(packageName, userId);
     }
 
     @Override
     public boolean updateIntentVerificationStatus(String packageName, int status, int userId) {
-        return mIntentFilterVerificationManager.updateIntentVerificationStatus(packageName, status,
-                userId);
+        mDomainVerificationManager.setLegacyUserState(packageName, userId, status);
+        return true;
     }
 
     @Override
@@ -21681,8 +21680,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     null /*lastDisableAppCaller*/,
                     null /*enabledComponents*/,
                     null /*disabledComponents*/,
-                    ps.readUserState(nextUserId).domainVerificationStatus,
-                    0 /*linkGeneration*/,
                     PackageManager.INSTALL_REASON_UNKNOWN,
                     PackageManager.UNINSTALL_REASON_UNKNOWN,
                     null /*harmfulAppWarning*/);
