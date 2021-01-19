@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.testing.AndroidTestingRunner;
@@ -30,6 +31,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -57,6 +59,9 @@ public class AccessibilityFloatingMenuTest extends SysuiTestCase {
     @Before
     public void initMenu() {
         MockitoAnnotations.initMocks(this);
+
+        final List<AccessibilityTarget> mTargets = new ArrayList<>();
+        mTargets.add(mock(AccessibilityTarget.class));
 
         final List<String> assignedTargets = new ArrayList<>();
         mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
