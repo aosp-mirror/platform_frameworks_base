@@ -2606,7 +2606,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             finishActivityResults(resultCode, resultData, resultGrants);
 
-            final boolean endTask = task.getActivityBelow(this) == null
+            final boolean endTask = task.getTopNonFinishingActivity() == null
                     && !task.isClearingToReuseTask();
             final int transit = endTask ? TRANSIT_OLD_TASK_CLOSE : TRANSIT_OLD_ACTIVITY_CLOSE;
             if (isState(RESUMED)) {
