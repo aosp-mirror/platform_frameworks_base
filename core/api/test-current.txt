@@ -2396,10 +2396,6 @@ package android.view.textservice {
     field public static final int SUBTYPE_ID_NONE = 0; // 0x0
   }
 
-  public final class TextServicesManager {
-    method public boolean isSpellCheckerEnabled();
-  }
-
 }
 
 package android.widget {
