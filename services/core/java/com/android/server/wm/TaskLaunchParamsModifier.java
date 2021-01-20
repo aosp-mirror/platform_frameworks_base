@@ -180,6 +180,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         } else if (launchMode == WINDOWING_MODE_FULLSCREEN) {
             if (DEBUG) appendLog("activity-options-fullscreen=" + outParams.mBounds);
         } else if (layout != null && canApplyFreeformPolicy) {
+            mTmpBounds.set(currentParams.mBounds);
             getLayoutBounds(display, root, layout, mTmpBounds);
             if (!mTmpBounds.isEmpty()) {
                 launchMode = WINDOWING_MODE_FREEFORM;
@@ -500,11 +501,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     private void getLayoutBounds(@NonNull DisplayContent display, @NonNull ActivityRecord root,
-            @NonNull ActivityInfo.WindowLayout windowLayout, @NonNull Rect outBounds) {
+            @NonNull ActivityInfo.WindowLayout windowLayout, @NonNull Rect inOutBounds) {
         final int verticalGravity = windowLayout.gravity & Gravity.VERTICAL_GRAVITY_MASK;
         final int horizontalGravity = windowLayout.gravity & Gravity.HORIZONTAL_GRAVITY_MASK;
         if (!windowLayout.hasSpecifiedSize() && verticalGravity == 0 && horizontalGravity == 0) {
-            outBounds.setEmpty();
+            inOutBounds.setEmpty();
             return;
         }
 
@@ -518,11 +519,17 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         int width;
         int height;
         if (!windowLayout.hasSpecifiedSize()) {
-            outBounds.setEmpty();
-            getTaskBounds(root, display, windowLayout, WINDOWING_MODE_FREEFORM,
-                    /* hasInitialBounds */ false, outBounds);
-            width = outBounds.width();
-            height = outBounds.height();
+            if (!inOutBounds.isEmpty()) {
+                // If the bounds is resolved already and WindowLayout doesn't have any opinion on
+                // its size, use the already resolved size and apply the gravity to it.
+                width = inOutBounds.width();
+                height = inOutBounds.height();
+            } else {
+                getTaskBounds(root, display, windowLayout, WINDOWING_MODE_FREEFORM,
+                        /* hasInitialBounds */ false, inOutBounds);
+                width = inOutBounds.width();
+                height = inOutBounds.height();
+            }
         } else {
             width = defaultWidth;
             if (windowLayout.width > 0 && windowLayout.width < defaultWidth) {
@@ -563,11 +570,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                 fractionOfVerticalOffset = 0.5f;
         }
 
-        outBounds.set(0, 0, width, height);
-        outBounds.offset(displayStableBounds.left, displayStableBounds.top);
+        inOutBounds.set(0, 0, width, height);
+        inOutBounds.offset(displayStableBounds.left, displayStableBounds.top);
         final int xOffset = (int) (fractionOfHorizontalOffset * (defaultWidth - width));
         final int yOffset = (int) (fractionOfVerticalOffset * (defaultHeight - height));
-        outBounds.offset(xOffset, yOffset);
+        inOutBounds.offset(xOffset, yOffset);
     }
 
     private boolean shouldLaunchUnresizableAppInFreeform(ActivityRecord activity,
