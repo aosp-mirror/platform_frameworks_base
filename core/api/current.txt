@@ -33017,6 +33017,7 @@ package android.provider {
     field public static final String CACHED_PHOTO_URI = "photo_uri";
     field public static final String CALL_SCREENING_APP_NAME = "call_screening_app_name";
     field public static final String CALL_SCREENING_COMPONENT_NAME = "call_screening_component_name";
+    field public static final String COMPOSER_PHOTO_URI = "composer_photo_uri";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/calls";
@@ -33041,6 +33042,7 @@ package android.provider {
     field public static final String IS_READ = "is_read";
     field public static final String LAST_MODIFIED = "last_modified";
     field public static final String LIMIT_PARAM_KEY = "limit";
+    field public static final String LOCATION = "location";
     field public static final String MISSED_REASON = "missed_reason";
     field public static final long MISSED_REASON_NOT_MISSED = 0L; // 0x0L
     field public static final int MISSED_TYPE = 3; // 0x3
@@ -33056,7 +33058,11 @@ package android.provider {
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final String PRIORITY = "priority";
+    field public static final int PRIORITY_NORMAL = 0; // 0x0
+    field public static final int PRIORITY_URGENT = 1; // 0x1
     field public static final int REJECTED_TYPE = 5; // 0x5
+    field public static final String SUBJECT = "subject";
     field public static final String TRANSCRIPTION = "transcription";
     field public static final String TYPE = "type";
     field public static final long USER_MISSED_CALL_FILTERS_TIMEOUT = 4194304L; // 0x400000L
@@ -33069,6 +33075,15 @@ package android.provider {
     field public static final String VIA_NUMBER = "via_number";
     field public static final int VOICEMAIL_TYPE = 4; // 0x4
     field public static final String VOICEMAIL_URI = "voicemail_uri";
+  }
+
+  public static class CallLog.Locations implements android.provider.BaseColumns {
+    field public static final String AUTHORITY = "call_composer_locations";
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/call_composer_location";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/call_composer_location";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final String LATITUDE = "latitude";
+    field public static final String LONGITUDE = "longitude";
   }
 
   @Deprecated public class Contacts {
