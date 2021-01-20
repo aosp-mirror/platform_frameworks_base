@@ -955,10 +955,16 @@ public class DisplayRotation {
                 keyguardDrawComplete, windowManagerDrawComplete);
 
         boolean disable = true;
+
+        // If the orientation listener uses a wake sensor, keep the orientation listener on if the
+        // screen is on (regardless of wake state). This allows the AoD to rotate.
+        //
         // Note: We postpone the rotating of the screen until the keyguard as well as the
         // window manager have reported a draw complete or the keyguard is going away in dismiss
         // mode.
-        if (screenOnEarly && awake && ((keyguardDrawComplete && windowManagerDrawComplete))) {
+        if (screenOnEarly
+                && (awake || mOrientationListener.shouldStayEnabledWhileDreaming())
+                && ((keyguardDrawComplete && windowManagerDrawComplete))) {
             if (needSensorRunning()) {
                 disable = false;
                 // Enable listener if not already enabled.
@@ -974,7 +980,7 @@ public class DisplayRotation {
             }
         }
         // Check if sensors need to be disabled.
-        if (disable && mOrientationListener.mEnabled) {
+        if (disable) {
             mOrientationListener.disable();
         }
     }

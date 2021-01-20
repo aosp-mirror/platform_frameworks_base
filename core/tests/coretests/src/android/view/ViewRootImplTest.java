@@ -35,6 +35,7 @@ import static androidx.test.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.os.Binder;
@@ -49,6 +50,9 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link ViewRootImpl}
@@ -193,6 +197,26 @@ public class ViewRootImplTest {
 
         // Behavior must not be adjusted due to setting new LayoutParams.
         assertEquals(behavior, controller.getSystemBarsBehavior());
+    }
+
+    /**
+     * Ensure scroll capture request handles a ViewRootImpl with no view tree.
+     */
+    @Test
+    public void requestScrollCapture_withoutContentRoot() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureCallbacks.Default() {
+            @Override
+            public void onUnavailable() {
+                latch.countDown();
+            }
+        });
+        try {
+            if (latch.await(100, TimeUnit.MILLISECONDS)) {
+                return; // pass
+            }
+        } catch (InterruptedException e) { /* ignore */ }
+        fail("requestScrollCapture did not respond");
     }
 
     /**

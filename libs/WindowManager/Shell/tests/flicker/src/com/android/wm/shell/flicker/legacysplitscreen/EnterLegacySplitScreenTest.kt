@@ -155,7 +155,9 @@ class EnterLegacySplitScreenTest(
                         showsAppWindow(splitScreenApp.defaultWindowName)
                                 .and().showsAppWindow(secondaryApp.defaultWindowName)
                     }
-                    visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(LAUNCHER_PACKAGE_NAME))
+                    visibleWindowsShownMoreThanOneConsecutiveEntry(
+                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                                    secondaryApp.defaultWindowName))
                 }
             }
         }
@@ -187,7 +189,8 @@ class EnterLegacySplitScreenTest(
                     end {
                         hidesAppWindow(nonResizeableApp.defaultWindowName)
                     }
-                    visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(LAUNCHER_PACKAGE_NAME))
+                    visibleWindowsShownMoreThanOneConsecutiveEntry(
+                            listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName))
                 }
             }
         }

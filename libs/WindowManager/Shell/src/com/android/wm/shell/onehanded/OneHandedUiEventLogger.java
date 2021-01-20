@@ -19,17 +19,13 @@ package com.android.wm.shell.onehanded;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
-import com.android.internal.logging.UiEventLoggerImpl;
 
 /**
- *  Interesting events related to the One-Handed.
+ *  Helper class that ends OneHanded mode log to UiEvent, see also go/uievent
  */
-public class OneHandedEvents {
-    private static final String TAG = "OneHandedEvents";
-
-    public static Callback sCallback;
-    @VisibleForTesting
-    static UiEventLogger sUiEventLogger = new UiEventLoggerImpl();
+public class OneHandedUiEventLogger {
+    private static final String TAG = "OneHandedUiEventLogger";
+    private final UiEventLogger mUiEventLogger;
 
     /**
      * One-Handed event types
@@ -76,6 +72,10 @@ public class OneHandedEvents {
             "one_handed_settings_timeout_seconds_12"
     };
 
+    public OneHandedUiEventLogger(UiEventLogger uiEventLogger) {
+        mUiEventLogger = uiEventLogger;
+    }
+
     /**
      * Events definition that related to One-Handed gestures.
      */
@@ -112,6 +112,7 @@ public class OneHandedEvents {
             mId = id;
         }
 
+        @Override
         public int getId() {
             return mId;
         }
@@ -159,6 +160,7 @@ public class OneHandedEvents {
             mId = id;
         }
 
+        @Override
         public int getId() {
             return mId;
         }
@@ -169,12 +171,8 @@ public class OneHandedEvents {
      * Logs an event to the system log, to sCallback if present, and to the logEvent destinations.
      * @param tag One of the EVENT_* codes above.
      */
-    public static void writeEvent(int tag) {
-        final long time = System.currentTimeMillis();
+    public void writeEvent(int tag) {
         logEvent(tag);
-        if (sCallback != null) {
-            sCallback.writeEvent(time, tag);
-        }
     }
 
     /**
@@ -183,94 +181,75 @@ public class OneHandedEvents {
      * @return String a readable description of the event.  Begins "writeEvent <tag_description>"
      * if the tag is valid.
      */
-    public static String logEvent(int event) {
-        if (event >= EVENT_TAGS.length) {
-            return "";
-        }
-        final StringBuilder sb = new StringBuilder("writeEvent ").append(EVENT_TAGS[event]);
+    private void logEvent(int event) {
         switch (event) {
-            // Triggers
             case EVENT_ONE_HANDED_TRIGGER_GESTURE_IN:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_GESTURE_IN);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_GESTURE_IN);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_GESTURE_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_GESTURE_OUT);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_OVERSPACE_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_OVERSPACE_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_OVERSPACE_OUT);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_POP_IME_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_POP_IME_OUT);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_ROTATION_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_ROTATION_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_ROTATION_OUT);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_APP_TAPS_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_APP_TAPS_OUT);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_TIMEOUT_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_TIMEOUT_OUT);
                 break;
             case EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT:
-                sUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
+                mUiEventLogger.log(OneHandedTriggerEvent.ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
                 break;
-            // Settings
             case EVENT_ONE_HANDED_SETTINGS_ENABLED_ON:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_ENABLED_ON);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_ENABLED_OFF);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_APP_TAPS_EXIT_ON);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_APP_TAPS_EXIT_OFF);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_ON:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_EXIT_ON);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_EXIT_OFF:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_EXIT_OFF);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_NEVER);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_4);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_8);
                 break;
             case EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12:
-                sUiEventLogger.log(OneHandedSettingsTogglesEvent
+                mUiEventLogger.log(OneHandedSettingsTogglesEvent
                         .ONE_HANDED_SETTINGS_TOGGLES_TIMEOUT_SECONDS_12);
                 break;
             default:
                 // Do nothing
                 break;
         }
-        return sb.toString();
-    }
-
-    /**
-     * An interface for logging an event to the system log, if Callback present.
-     */
-    public interface Callback {
-        /**
-         *
-         * @param time System current time.
-         * @param tag Event tag.
-         */
-        void writeEvent(long time, int tag);
     }
 }

@@ -33,7 +33,6 @@ import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.window.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -54,6 +53,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -146,6 +146,9 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mCancelOnNextTransitionStart;
     // Whether to take a screenshot when handling a deferred cancel
     private boolean mCancelDeferredWithScreenshot;
+
+    @VisibleForTesting
+    boolean mShouldAttachNavBarToAppDuringTransition;
 
     /**
      * Animates the screenshot of task that used to be controlled by RecentsAnimation.
@@ -390,6 +393,8 @@ public class RecentsAnimationController implements DeathRecipient {
         mDisplayId = displayId;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
         mDisplayContent = service.mRoot.getDisplayContent(displayId);
+        mShouldAttachNavBarToAppDuringTransition =
+                mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition();
     }
 
     /**
@@ -437,6 +442,10 @@ public class RecentsAnimationController implements DeathRecipient {
         } catch (RemoteException e) {
             cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "initialize-failedToLinkToDeath");
             return;
+        }
+
+        if (mShouldAttachNavBarToAppDuringTransition) {
+            attachNavBarToApp();
         }
 
         // Adjust the wallpaper visibility for the showing target activity
@@ -569,6 +578,63 @@ public class RecentsAnimationController implements DeathRecipient {
             reasons.put(mTargetActivityRecord, APP_TRANSITION_RECENTS_ANIM);
             mService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
                     .notifyTransitionStarting(reasons);
+        }
+    }
+
+    @VisibleForTesting
+    WindowToken getNavigationBarWindowToken() {
+        WindowState navBar = mDisplayContent.getDisplayPolicy().getNavigationBar();
+        if (navBar != null) {
+            return navBar.mToken;
+        }
+        return null;
+    }
+
+    private void attachNavBarToApp() {
+        ActivityRecord topActivity = null;
+        for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
+            final Task task = adapter.mTask;
+            if (!task.isHomeOrRecentsRootTask()) {
+                topActivity = task.getTopVisibleActivity();
+                break;
+            }
+        }
+        final WindowToken navToken = getNavigationBarWindowToken();
+        if (topActivity == null || navToken == null) {
+            return;
+        }
+
+        final SurfaceControl.Transaction t = navToken.getPendingTransaction();
+        final SurfaceControl navSurfaceControl = navToken.getSurfaceControl();
+        t.reparent(navSurfaceControl, topActivity.getSurfaceControl());
+        t.show(navSurfaceControl);
+
+        final WindowContainer imeContainer = mDisplayContent.getImeContainer();
+        if (imeContainer.isVisible()) {
+            t.setRelativeLayer(navSurfaceControl, imeContainer.getSurfaceControl(), 1);
+        } else {
+            // Place the nav bar on top of anything else in the top activity.
+            t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
+        }
+    }
+
+    private void restoreNavBarFromApp(boolean animate) {
+        // Reparent the SurfaceControl of nav bar token back.
+        final WindowToken navToken = getNavigationBarWindowToken();
+        final SurfaceControl.Transaction t = mDisplayContent.getPendingTransaction();
+        if (navToken != null) {
+            final WindowContainer parent = navToken.getParent();
+            t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
+        }
+
+        if (animate) {
+            // Run fade-in animation to show navigation bar back to bottom of the display.
+            final NavBarFadeAnimationController controller =
+                    mDisplayContent.getDisplayPolicy().getNavBarFadeAnimationController();
+            if (controller != null) {
+                controller.fadeWindowToken(true);
+            }
         }
     }
 
@@ -788,6 +854,10 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
             final WallpaperAnimationAdapter wallpaperAdapter = mPendingWallpaperAnimations.get(i);
             removeWallpaperAnimation(wallpaperAdapter);
+        }
+
+        if (mShouldAttachNavBarToAppDuringTransition) {
+            restoreNavBarFromApp(reorderMode == REORDER_MOVE_TO_TOP);
         }
 
         // Clear any pending failsafe runnables

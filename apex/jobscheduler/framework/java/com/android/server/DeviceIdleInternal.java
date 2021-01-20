@@ -16,6 +16,8 @@
 
 package com.android.server;
 
+import android.app.BroadcastOptions;
+
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 
 public interface DeviceIdleInternal {
@@ -32,8 +34,17 @@ public interface DeviceIdleInternal {
     void addPowerSaveTempWhitelistApp(int callingUid, String packageName,
             long duration, int userId, boolean sync, String reason);
 
-    // duration in milliseconds
-    void addPowerSaveTempWhitelistAppDirect(int uid, long duration, boolean sync,
+    /**
+     * Called by ActivityManagerService to directly add UID to DeviceIdleController's temp
+     * allowlist.
+     * @param uid
+     * @param duration duration in milliseconds
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param sync
+     * @param reason
+     */
+    void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
+            @BroadcastOptions.TempAllowListType int type, boolean sync,
             String reason);
 
     // duration in milliseconds

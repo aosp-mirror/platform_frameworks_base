@@ -540,6 +540,25 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
     }
 
+    @Test
+    public void testImeIsAttachedToDisplayForLetterboxedApp() {
+        final DisplayContent dc = mDisplayContent;
+        final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");
+        dc.setImeLayeringTarget(ws);
+
+        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false and
+        // hence isLetterboxedAppWindow() returns true.
+        ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
+        assertFalse("matchesRootDisplayAreaBounds() should return false",
+                ws.matchesRootDisplayAreaBounds());
+        assertTrue("isLetterboxedAppWindow() should return true", ws.isLetterboxedAppWindow());
+        assertTrue("IME shouldn't be attached to app",
+                dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
+                        .mActivityRecord.getSurfaceControl());
+        assertEquals("IME should be attached to display",
+                dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
+    }
+
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
         final WindowState[] windows = new WindowState[types.length];
         for (int i = 0; i < types.length; i++) {

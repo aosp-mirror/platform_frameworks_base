@@ -353,7 +353,7 @@ int AImageDecoder_computeSampledSize(const AImageDecoder* decoder, int sampleSiz
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    SkISize size = toDecoder(decoder)->mCodec->getSampledDimensions(sampleSize);
+    SkISize size = toDecoder(decoder)->getSampledDimensions(sampleSize);
     *width = size.width();
     *height = size.height();
     return ANDROID_IMAGE_DECODER_SUCCESS;

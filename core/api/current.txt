@@ -8163,6 +8163,7 @@ package android.app.usage {
     method public long getAppBytes();
     method public long getCacheBytes();
     method public long getDataBytes();
+    method public long getExternalCacheBytes();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.usage.StorageStats> CREATOR;
   }
@@ -10838,6 +10839,8 @@ package android.content {
     field public static final String ACTION_POWER_DISCONNECTED = "android.intent.action.ACTION_POWER_DISCONNECTED";
     field public static final String ACTION_POWER_USAGE_SUMMARY = "android.intent.action.POWER_USAGE_SUMMARY";
     field public static final String ACTION_PROCESS_TEXT = "android.intent.action.PROCESS_TEXT";
+    field public static final String ACTION_PROFILE_ACCESSIBLE = "android.intent.action.PROFILE_ACCESSIBLE";
+    field public static final String ACTION_PROFILE_INACCESSIBLE = "android.intent.action.PROFILE_INACCESSIBLE";
     field public static final String ACTION_PROVIDER_CHANGED = "android.intent.action.PROVIDER_CHANGED";
     field public static final String ACTION_QUICK_CLOCK = "android.intent.action.QUICK_CLOCK";
     field public static final String ACTION_QUICK_VIEW = "android.intent.action.QUICK_VIEW";
@@ -51759,6 +51762,10 @@ package android.view.textservice {
   }
 
   public final class TextServicesManager {
+    method @Nullable public android.view.textservice.SpellCheckerInfo getCurrentSpellChecker();
+    method @Nullable public android.view.textservice.SpellCheckerSubtype getCurrentSpellCheckerSubtype(boolean);
+    method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckersList();
+    method public boolean isSpellCheckerEnabled();
     method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
   }
 

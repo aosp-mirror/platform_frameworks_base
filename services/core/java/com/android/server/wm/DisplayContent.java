@@ -664,8 +664,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     // Used in updating override configurations
     private final Configuration mTempConfig = new Configuration();
 
-    // Used in performing layout
-    private boolean mTmpWindowsBehindIme;
+    // Used in performing layout, to record the insets provided by other windows above the current
+    // window.
+    private InsetsState mTmpAboveInsetsState = new InsetsState();
 
     /**
      * Used to prevent recursions when calling
@@ -765,17 +766,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     + " parentHidden=" + w.isParentWindowHidden());
         }
 
-        // Sets mBehindIme for each window. Windows behind IME can get IME insets.
-        if (w.mBehindIme != mTmpWindowsBehindIme) {
-            w.mBehindIme = mTmpWindowsBehindIme;
-            if (getInsetsStateController().getRawInsetsState().getSourceOrDefaultVisibility(
-                    ITYPE_IME)) {
-                // If IME is invisible, behind IME or not doesn't make the insets different.
-                mWinInsetsChanged.add(w);
-            }
-        }
-        if (w == mInputMethodWindow) {
-            mTmpWindowsBehindIme = true;
+        // Sets mAboveInsets for each window. Windows behind the window providing the insets can
+        // receive the insets.
+        if (!w.mAboveInsetsState.equals(mTmpAboveInsetsState)) {
+            w.mAboveInsetsState.set(mTmpAboveInsetsState);
+            mWinInsetsChanged.add(w);
         }
 
         // If this view is GONE, then skip it -- keep the current frame, and let the caller know
@@ -811,7 +806,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     + " mContainingFrame=" + w.getContainingFrame()
                     + " mDisplayFrame=" + w.getDisplayFrame());
         }
+        provideInsetsByWindow(w);
     };
+
+    private void provideInsetsByWindow(WindowState w) {
+        for (int i = 0; i < w.mProvidedInsetsSources.size(); i++) {
+            final InsetsSource providedSource = w.mProvidedInsetsSources.valueAt(i);
+            mTmpAboveInsetsState.addSource(providedSource);
+        }
+    }
 
     private final Consumer<WindowState> mPerformLayoutAttached = w -> {
         if (w.mLayoutAttached) {
@@ -3643,7 +3646,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
                 // An activity with override bounds should be letterboxed inside its parent bounds,
                 // so it doesn't fill the screen.
-                && mImeLayeringTarget.mActivityRecord.matchParentBounds();
+                && mImeLayeringTarget.mActivityRecord.matchParentBounds()
+                // IME is attached to non-Letterboxed app windows, other than windows with
+                // LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER flag. (Refer to WS.isLetterboxedAppWindow())
+                && mImeLayeringTarget.matchesRootDisplayAreaBounds();
     }
 
     /**
@@ -4191,6 +4197,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         mDisplayPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
 
+        // Used to indicate that we have processed the insets windows. This needs to be after
+        // beginLayoutLw to ensure the raw insets state display related info is initialized.
+        final InsetsState rawInsetsState = getInsetsStateController().getRawInsetsState();
+        mTmpAboveInsetsState = new InsetsState();
+        mTmpAboveInsetsState.setDisplayFrame(rawInsetsState.getDisplayFrame());
+        mTmpAboveInsetsState.setDisplayCutout(rawInsetsState.getDisplayCutout());
+        mTmpAboveInsetsState.mirrorAlwaysVisibleInsetsSources(rawInsetsState);
+
         int seq = mLayoutSeq + 1;
         if (seq < 0) seq = 0;
         mLayoutSeq = seq;
@@ -4200,8 +4214,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mTmpWindow = null;
         mTmpInitial = initial;
 
-        // Used to indicate that we have processed the IME window.
-        mTmpWindowsBehindIme = false;
 
         // First perform layout of any root windows (not attached to another window).
         forAllWindows(mPerformLayout, true /* traverseTopToBottom */);

@@ -3466,6 +3466,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // available until we've told netd to delete it below.
             mNetworkForNetId.remove(nai.network.getNetId());
         }
+        propagateUnderlyingNetworkCapabilities(nai.network);
         // Remove all previously satisfied requests.
         for (int i = 0; i < nai.numNetworkRequests(); i++) {
             NetworkRequest request = nai.requestAt(i);
@@ -3478,7 +3479,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         nai.clearLingerState();
-        propagateUnderlyingNetworkCapabilities(nai.network);
+        // TODO: this loop, and the mLegacyTypeTracker.remove just below it, seem redundant given
+        // there's a full rematch right after. Currently, deleting it breaks tests that check for
+        // the default network disconnecting. Find out why, fix the rematch code, and delete this.
         if (nai.isSatisfyingRequest(mDefaultRequest.requestId)) {
             mDefaultNetworkNai = null;
             updateDataActivityTracking(null /* newNetwork */, nai);
@@ -4995,6 +4998,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public boolean updateLockdownVpn() {
+        // Allow the system UID for the system server and for Settings.
+        // Also, for unit tests, allow the process that ConnectivityService is running in.
         if (mDeps.getCallingUid() != Process.SYSTEM_UID
                 && Binder.getCallingPid() != Process.myPid()) {
             logw("Lockdown VPN only available to system process or AID_SYSTEM");

@@ -254,6 +254,7 @@ package android.app {
     method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
+    method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
@@ -1366,11 +1367,10 @@ package android.os {
 
   public static class VibrationEffect.Prebaked extends android.os.VibrationEffect implements android.os.Parcelable {
     ctor public VibrationEffect.Prebaked(android.os.Parcel);
-    ctor public VibrationEffect.Prebaked(int, boolean);
+    ctor public VibrationEffect.Prebaked(int, boolean, int);
     method public long getDuration();
     method public int getEffectStrength();
     method public int getId();
-    method public void setEffectStrength(int);
     method public boolean shouldFallback();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;
@@ -2394,10 +2394,6 @@ package android.view.textservice {
 
   public final class SpellCheckerSubtype implements android.os.Parcelable {
     field public static final int SUBTYPE_ID_NONE = 0; // 0x0
-  }
-
-  public final class TextServicesManager {
-    method public boolean isSpellCheckerEnabled();
   }
 
 }

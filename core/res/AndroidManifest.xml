@@ -617,6 +617,9 @@
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNAVAILABLE" />
     <protected-broadcast android:name="com.android.server.pm.DISABLE_QUIET_MODE_AFTER_UNLOCK" />
 
+    <protected-broadcast android:name="android.intent.action.PROFILE_ACCESSIBLE" />
+    <protected-broadcast android:name="android.intent.action.PROFILE_INACCESSIBLE" />
+
     <protected-broadcast android:name="com.android.server.retaildemo.ACTION_RESET_DEMO" />
 
     <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
@@ -3105,7 +3108,7 @@
     <!-- @SystemApi Allows an application to read system update info.
          @hide -->
     <permission android:name="android.permission.READ_SYSTEM_UPDATE_INFO"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- Allows the system to bind to an application's task services
          @hide -->
@@ -4315,7 +4318,7 @@
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-        android:protectionLevel="signature|recents" />
+        android:protectionLevel="signature|privileged|recents" />
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- Allows an application to broadcast a notification that an application

@@ -464,7 +464,7 @@ import java.util.function.Predicate;
 /**
  * Keep track of all those APKs everywhere.
  * <p>
- * Internally there are two important locks:
+ * Internally there are three important locks:
  * <ul>
  * <li>{@link #mLock} is used to guard all in-memory parsed package details
  * and other related state. It is a fine-grained lock that should only be held
@@ -475,6 +475,10 @@ import java.util.function.Predicate;
  * this lock should never be acquired while already holding {@link #mLock}.
  * Conversely, it's safe to acquire {@link #mLock} momentarily while already
  * holding {@link #mInstallLock}.
+ * <li>{@link #mSnapshotLock} is used to guard access to two snapshot fields: the snapshot
+ * itself and the snapshot invalidation flag.  This lock should never be acquired while
+ * already holding {@link #mLock}. Conversely, it's safe to acquire {@link #mLock}
+ * momentarily while already holding {@link #mSnapshotLock}.
  * </ul>
  * Many internal methods rely on the caller to hold the appropriate locks, and
  * this contract is expressed through method name suffixes:
@@ -485,6 +489,8 @@ import java.util.function.Predicate;
  * <li>fooLPr(): the caller must hold {@link #mLock} for reading
  * <li>fooLPw(): the caller must hold {@link #mLock} for writing
  * </ul>
+ * {@link #mSnapshotLock} is taken in exactly one place - {@code snapshotComputer()}.  It
+ * should not be taken anywhere else or used for any other purpose.
  * <p>
  * Because this class is very central to the platform's security; please run all
  * CTS and unit tests whenever making modifications:
@@ -4727,10 +4733,18 @@ public class PackageManagerService extends IPackageManager.Stub
     // If true, the cached computer object is invalid (the cache is stale).
     // The attribute is static since it may be set from outside classes.
     private static volatile boolean sSnapshotInvalid = true;
-     // If true, the cache is corked.  Do not create a new cache but continue to use the
+    // If true, the cache is corked.  Do not create a new cache but continue to use the
     // existing one.  This throttles cache creation during periods of churn in Package
     // Manager.
     private static volatile boolean sSnapshotCorked = false;
+
+    /**
+     * This lock is used to make reads from {@link #sSnapshotInvalid} and
+     * {@link #mSnapshotComputer} atomic inside {@code snapshotComputer()}.  This lock is
+     * not meant to be used outside that method.  This lock must be taken before
+     * {@link #mLock} is taken.
+     */
+    private final Object mSnapshotLock = new Object();
 
     // A counter of all queries that hit the cache.
     private AtomicInteger mSnapshotHits = new AtomicInteger(0);
@@ -4759,35 +4773,42 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!SNAPSHOT_ENABLED) {
             return mLiveComputer;
         }
+        if (Thread.holdsLock(mLock)) {
+            // If the current thread holds mLock then it may have modified state but not
+            // yet invalidated the snapshot.  Always give the thread the live computer.
+            return mLiveComputer;
+        }
         int hits = 0;
         if (TRACE_CACHES) {
             hits = mSnapshotHits.incrementAndGet();
         }
-        Computer c = mSnapshotComputer;
-        if (sSnapshotCorked && (c != null)) {
-            // Snapshots are corked, which means new ones should not be built right now.
+        synchronized (mSnapshotLock) {
+            Computer c = mSnapshotComputer;
+            if (sSnapshotCorked && (c != null)) {
+                // Snapshots are corked, which means new ones should not be built right now.
+                return c;
+            }
+            if (sSnapshotInvalid || (c == null)) {
+                // The snapshot is invalid if it is marked as invalid or if it is null.  If it
+                // is null, then it is currently being rebuilt by rebuildSnapshot().
+                synchronized (mLock) {
+                    // Rebuild the snapshot if it is invalid.  Note that the snapshot might be
+                    // invalidated as it is rebuilt.  However, the snapshot is still
+                    // self-consistent (the lock is being held)and is current as of the time
+                    // this function is entered.
+                    if (sSnapshotInvalid) {
+                        rebuildSnapshot(hits);
+                    }
+
+                    // Guaranteed to be non-null.  mSnapshotComputer is only be set to null
+                    // temporarily in rebuildSnapshot(), which is guarded by mLock().  Since
+                    // the mLock is held in this block and since rebuildSnapshot() is
+                    // complete, the attribute can not now be null.
+                    c = mSnapshotComputer;
+                }
+            }
             return c;
         }
-        if (sSnapshotInvalid || (c == null)) {
-            // The snapshot is invalid if it is marked as invalid or if it is null.  If it
-            // is null, then it is currently being rebuilt by rebuildSnapshot().
-            synchronized (mLock) {
-                // Rebuild the snapshot if it is invalid.  Note that the snapshot might be
-                // invalidated as it is rebuilt.  However, the snapshot is still
-                // self-consistent (the lock is being held)and is current as of the time
-                // this function is entered.
-                if (sSnapshotInvalid) {
-                    rebuildSnapshot(hits);
-                }
-
-                // Guaranteed to be non-null.  mSnapshotComputer is only be set to null
-                // temporarily in rebuildSnapshot(), which is guarded by mLock().  Since
-                // the mLock is held in this block and since rebuildSnapshot() is
-                // complete, the attribute can not now be null.
-                c = mSnapshotComputer;
-            }
-        }
-        return c;
     }
 
     /**

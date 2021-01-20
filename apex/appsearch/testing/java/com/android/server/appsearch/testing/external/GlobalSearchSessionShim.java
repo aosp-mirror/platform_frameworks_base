@@ -18,12 +18,14 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 
+import java.io.Closeable;
+
 /**
  * This class provides global access to the centralized AppSearch index maintained by the system.
  *
  * <p>Apps can retrieve indexed documents through the query API.
  */
-public interface GlobalSearchSessionShim {
+public interface GlobalSearchSessionShim extends Closeable {
     /**
      * Searches across all documents in the storage based on a given query string.
      *
@@ -65,4 +67,8 @@ public interface GlobalSearchSessionShim {
      */
     @NonNull
     SearchResultsShim query(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+
+    /** Closes the {@link GlobalSearchSessionShim}. */
+    @Override
+    void close();
 }

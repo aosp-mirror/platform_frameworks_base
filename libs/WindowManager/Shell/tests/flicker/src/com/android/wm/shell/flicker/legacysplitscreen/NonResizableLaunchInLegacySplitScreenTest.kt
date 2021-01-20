@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.runWithFlicker
@@ -34,6 +35,7 @@ import org.junit.runners.Parameterized
  * Test open app to split screen.
  * To run this test: `atest WMShellFlickerTests:NonResizableLaunchInLegacySplitScreenTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -44,7 +46,7 @@ class NonResizableLaunchInLegacySplitScreenTest(
 
     @Test
     fun testNonResizableLaunchInLegacySplitScreenTest() {
-        val testTag = "NonResizableLaunchInLegacySplitScreenTest"
+        val testTag = "testNonResizableLaunchInLegacySplitScreenTest"
 
         runWithFlicker(transitionSetup) {
             withTestName { testTag }
@@ -64,7 +66,8 @@ class NonResizableLaunchInLegacySplitScreenTest(
                     }
                     visibleLayersShownMoreThanOneConsecutiveEntry(
                             listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                    nonResizeableApp.defaultWindowName, LETTER_BOX_NAME)
+                                    nonResizeableApp.defaultWindowName, LETTER_BOX_NAME,
+                                    TOAST_NAME, LIVE_WALLPAPER_PACKAGE_NAME)
                     )
                 }
                 windowManagerTrace {

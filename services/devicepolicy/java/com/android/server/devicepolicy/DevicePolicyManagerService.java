@@ -8650,11 +8650,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isCallerProfileOwnerOrDelegate && isProfileOwnerOfOrganizationOwnedDevice(userId)) {
             return true;
         }
-        //TODO(b/130844684): Temporarily allow profile owner on non-organization-owned devices
-        //to read device identifiers.
-        if (isCallerProfileOwnerOrDelegate) {
-            return true;
-        }
 
         return false;
     }

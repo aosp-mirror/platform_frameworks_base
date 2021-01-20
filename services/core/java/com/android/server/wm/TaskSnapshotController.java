@@ -370,14 +370,26 @@ class TaskSnapshotController {
         SurfaceControl[] excludeLayers;
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
         // Exclude IME window snapshot when IME isn't proper to attach to app.
-        if (imeWindow != null && imeWindow.getSurfaceControl() != null
-                && !task.getDisplayContent().isImeAttachedToApp()) {
-            excludeLayers = new SurfaceControl[1];
+        final boolean excludeIme = imeWindow != null && imeWindow.getSurfaceControl() != null
+                && !task.getDisplayContent().isImeAttachedToApp();
+        final WindowState navWindow =
+                task.getDisplayContent().getDisplayPolicy().getNavigationBar();
+        // If config_attachNavBarToAppDuringTransition is true, the nav bar will be reparent to the
+        // the swiped app when entering recent app, therefore the task will contain the navigation
+        // bar and we should exclude it from snapshot.
+        final boolean excludeNavBar = navWindow != null;
+        if (excludeIme && excludeNavBar) {
+            excludeLayers = new SurfaceControl[2];
             excludeLayers[0] = imeWindow.getSurfaceControl();
+            excludeLayers[1] = navWindow.getSurfaceControl();
+        } else if (excludeIme || excludeNavBar) {
+            excludeLayers = new SurfaceControl[1];
+            excludeLayers[0] =
+                    excludeIme ? imeWindow.getSurfaceControl() : navWindow.getSurfaceControl();
         } else {
             excludeLayers = new SurfaceControl[0];
-            builder.setHasImeSurface(imeWindow != null && imeWindow.isDrawn());
         }
+        builder.setHasImeSurface(!excludeIme && imeWindow != null && imeWindow.isDrawn());
         final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                 SurfaceControl.captureLayersExcluding(
                         task.getSurfaceControl(), mTmpRect, scaleFraction,

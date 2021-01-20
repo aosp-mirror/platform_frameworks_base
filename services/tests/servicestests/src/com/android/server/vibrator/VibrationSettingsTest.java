@@ -76,26 +76,25 @@ public class VibrationSettingsTest {
     @Rule public MockitoRule mMockitoRule = MockitoJUnit.rule();
     @Rule public FakeSettingsProviderRule mSettingsProviderRule = FakeSettingsProvider.rule();
 
-    // TODO(b/131311651): replace with a FakeVibrator instead.
-    @Mock private Vibrator mVibratorMock;
     @Mock private VibrationSettings.OnVibratorSettingsChanged mListenerMock;
     @Mock private PowerManagerInternal mPowerManagerInternalMock;
 
     private TestLooper mTestLooper;
     private ContextWrapper mContextSpy;
     private AudioManager mAudioManager;
+    private FakeVibrator mFakeVibrator;
     private VibrationSettings mVibrationSettings;
     private PowerManagerInternal.LowPowerModeListener mRegisteredPowerModeListener;
 
     @Before
     public void setUp() throws Exception {
         mTestLooper = new TestLooper();
+        mFakeVibrator = new FakeVibrator();
         mContextSpy = spy(new ContextWrapper(InstrumentationRegistry.getContext()));
 
         ContentResolver contentResolver = mSettingsProviderRule.mockContentResolver(mContextSpy);
         when(mContextSpy.getContentResolver()).thenReturn(contentResolver);
-        when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mVibratorMock);
-        when(mVibratorMock.hasVibrator()).thenReturn(true);
+        when(mContextSpy.getSystemService(eq(Context.VIBRATOR_SERVICE))).thenReturn(mFakeVibrator);
         doAnswer(invocation -> {
             mRegisteredPowerModeListener = invocation.getArgument(0);
             return null;
@@ -305,12 +304,9 @@ public class VibrationSettingsTest {
 
     @Test
     public void getDefaultIntensity_returnsIntensityFromVibratorService() {
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_HIGH);
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_MEDIUM);
-        when(mVibratorMock.getDefaultRingVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_LOW);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_HIGH);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_MEDIUM);
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_LOW);
 
         setUserSetting(Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_OFF);
@@ -336,12 +332,9 @@ public class VibrationSettingsTest {
 
     @Test
     public void getCurrentIntensity_returnsIntensityFromSettings() {
-        when(mVibratorMock.getDefaultHapticFeedbackIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_OFF);
-        when(mVibratorMock.getDefaultNotificationVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_OFF);
-        when(mVibratorMock.getDefaultRingVibrationIntensity())
-                .thenReturn(Vibrator.VIBRATION_INTENSITY_OFF);
+        mFakeVibrator.setDefaultHapticFeedbackIntensity(Vibrator.VIBRATION_INTENSITY_OFF);
+        mFakeVibrator.setDefaultNotificationVibrationIntensity(Vibrator.VIBRATION_INTENSITY_OFF);
+        mFakeVibrator.setDefaultRingVibrationIntensity(Vibrator.VIBRATION_INTENSITY_OFF);
 
         setUserSetting(Settings.System.HAPTIC_FEEDBACK_INTENSITY,
                 Vibrator.VIBRATION_INTENSITY_HIGH);

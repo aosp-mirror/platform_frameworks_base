@@ -73,7 +73,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.SortedSet;
@@ -446,7 +445,10 @@ public final class DropBoxManagerService extends SystemService {
             // from an in-memory buffer, or another file on disk; if we buffered
             // we'd lose out on sendfile() optimizations
             if (forceCompress) {
-                FileUtils.copy(in, new GZIPOutputStream(new FileOutputStream(fd)));
+                final GZIPOutputStream gzipOutputStream =
+                        new GZIPOutputStream(new FileOutputStream(fd));
+                FileUtils.copy(in, gzipOutputStream);
+                gzipOutputStream.finish();
             } else {
                 FileUtils.copy(in, new FileOutputStream(fd));
             }

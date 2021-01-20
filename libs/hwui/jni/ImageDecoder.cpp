@@ -465,7 +465,7 @@ static jobject ImageDecoder_nDecodeBitmap(JNIEnv* env, jobject /*clazz*/, jlong 
 static jobject ImageDecoder_nGetSampledSize(JNIEnv* env, jobject /*clazz*/, jlong nativePtr,
                                             jint sampleSize) {
     auto* decoder = reinterpret_cast<ImageDecoder*>(nativePtr);
-    SkISize size = decoder->mCodec->getSampledDimensions(sampleSize);
+    SkISize size = decoder->getSampledDimensions(sampleSize);
     return env->NewObject(gSize_class, gSize_constructorMethodID, size.width(), size.height());
 }
 

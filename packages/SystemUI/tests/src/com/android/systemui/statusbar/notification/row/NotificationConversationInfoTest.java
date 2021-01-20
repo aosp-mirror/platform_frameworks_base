@@ -241,6 +241,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_SetsShortcutIcon() {
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -265,6 +266,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     public void testBindNotification_SetsTextApplicationName() {
         when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -289,6 +291,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_SetsTextChannelName() {
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mLauncherApps,
                 mMockPackageManager,
@@ -316,6 +319,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setGroup(group.getId());
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -341,6 +345,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_GroupNameHiddenIfNoGroup() {
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -365,6 +370,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_noDelegate() {
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -400,6 +406,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 .setShortcutInfo(mShortcutInfo)
                 .build();
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -425,6 +432,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     public void testBindNotification_SetsOnClickListenerForSettings() {
         final CountDownLatch latch = new CountDownLatch(1);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -454,6 +462,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_SettingsButtonInvisibleWhenNoClickListener() {
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -478,6 +487,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     public void testBindNotification_SettingsButtonInvisibleWhenDeviceUnprovisioned() {
         final CountDownLatch latch = new CountDownLatch(1);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -506,6 +516,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportance(IMPORTANCE_LOW);
         mConversationChannel.setImportantConversation(true);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -534,6 +545,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportantConversation(false);
         mConversationChannel.setAllowBubbles(true);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -565,6 +577,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportantConversation(false);
         mConversationChannel.setAllowBubbles(true);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -595,6 +608,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportantConversation(false);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -639,6 +653,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportance(IMPORTANCE_LOW);
         mConversationChannel.setImportantConversation(false);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -682,6 +697,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportantConversation(false);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -726,6 +742,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportantConversation(false);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -763,6 +780,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportance(9);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -799,6 +817,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setImportantConversation(true);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -832,11 +851,75 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
+    public void testDefaultSelectedWhenChannelIsDefault() throws Exception {
+        // GIVEN channel importance indicates "Default" priority
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(false);
+
+        // WHEN we indicate no selected action
+        mNotificationInfo.bindNotification(
+                -1, // no action selected by default
+                mShortcutManager,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                mBubbleMetadata,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                mBuilderProvider,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager));
+
+        // THEN the selected action is -1, so the selected option is "Default" priority
+        assertEquals(mNotificationInfo.getSelectedAction(), -1);
+        assertTrue(mNotificationInfo.findViewById(R.id.default_behavior).isSelected());
+    }
+
+    @Test
+    public void testFavoriteSelectedWhenChannelIsDefault() throws Exception {
+        // GIVEN channel importance indicates "Default" priority
+        mConversationChannel.setImportance(IMPORTANCE_HIGH);
+        mConversationChannel.setImportantConversation(false);
+
+        // WHEN we indicate the selected action should be "Favorite"
+        mNotificationInfo.bindNotification(
+                NotificationConversationInfo.ACTION_FAVORITE, // "Favorite" selected by default
+                mShortcutManager,
+                mMockPackageManager,
+                mMockINotificationManager,
+                mOnUserInteractionCallback,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mEntry,
+                mBubbleMetadata,
+                null,
+                null,
+                mIconFactory,
+                mContext,
+                mBuilderProvider,
+                true,
+                mTestHandler,
+                mTestHandler, null, Optional.of(mBubblesManager));
+
+        // THEN the selected action is "Favorite", so the selected option is "priority" priority
+        assertEquals(mNotificationInfo.getSelectedAction(),
+                NotificationConversationInfo.ACTION_FAVORITE);
+        assertTrue(mNotificationInfo.findViewById(R.id.priority).isSelected());
+    }
+
+    @Test
     public void testDefault_andSave() throws Exception {
         mConversationChannel.setAllowBubbles(true);
         mConversationChannel.setOriginalImportance(IMPORTANCE_HIGH);
         mConversationChannel.setImportantConversation(true);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -873,6 +956,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setOriginalImportance(IMPORTANCE_HIGH);
         mConversationChannel.setImportantConversation(false);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -909,6 +993,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setOriginalImportance(IMPORTANCE_HIGH);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -944,6 +1029,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         mConversationChannel.setAllowBubbles(true);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -978,6 +1064,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     @Test
     public void testBindNotification_createsNewChannel() throws Exception {
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -1003,6 +1090,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     public void testBindNotification_doesNotCreateNewChannelIfExists() throws Exception {
         mNotificationChannel.setConversationId("", CONVERSATION_ID);
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -1038,6 +1126,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
 
         // GIVEN the user is changing conversation settings
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,
@@ -1078,6 +1167,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(b.build()).thenReturn(controller);
 
         mNotificationInfo.bindNotification(
+                -1,
                 mShortcutManager,
                 mMockPackageManager,
                 mMockINotificationManager,

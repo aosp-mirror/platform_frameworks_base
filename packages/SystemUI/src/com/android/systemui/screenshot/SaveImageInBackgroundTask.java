@@ -47,7 +47,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -79,13 +79,13 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final String mScreenshotId;
     private final boolean mSmartActionsEnabled;
     private final Random mRandom = new Random();
-    private final Supplier<ShareTransition> mSharedElementTransition;
+    private final Supplier<ActionTransition> mSharedElementTransition;
     private final ImageExporter mImageExporter;
 
     SaveImageInBackgroundTask(Context context, ImageExporter exporter,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotController.SaveImageInBackgroundData data,
-            Supplier<ShareTransition> sharedElementTransition) {
+            Supplier<ActionTransition> sharedElementTransition) {
         mContext = context;
         mScreenshotSmartActions = screenshotSmartActions;
         mImageData = new ScreenshotController.SavedImageData();
@@ -150,7 +150,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mImageData.uri = uri;
             mImageData.smartActions = smartActions;
             mImageData.shareTransition = createShareAction(mContext, mContext.getResources(), uri);
-            mImageData.editAction = createEditAction(mContext, mContext.getResources(), uri);
+            mImageData.editTransition = createEditAction(mContext, mContext.getResources(), uri);
             mImageData.deleteAction = createDeleteAction(mContext, mContext.getResources(), uri);
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
@@ -204,9 +204,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
      * Assumes that the action intent is sent immediately after being supplied.
      */
     @VisibleForTesting
-    Supplier<ShareTransition> createShareAction(Context context, Resources r, Uri uri) {
+    Supplier<ActionTransition> createShareAction(Context context, Resources r, Uri uri) {
         return () -> {
-            ShareTransition transition = mSharedElementTransition.get();
+            ActionTransition transition = mSharedElementTransition.get();
 
             // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
             // order to do some common work like dismissing the keyguard and sending
@@ -259,52 +259,57 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     Icon.createWithResource(r, R.drawable.ic_screenshot_share),
                     r.getString(com.android.internal.R.string.share), shareAction);
 
-            transition.shareAction = shareActionBuilder.build();
+            transition.action = shareActionBuilder.build();
             return transition;
         };
     }
 
     @VisibleForTesting
-    Notification.Action createEditAction(Context context, Resources r, Uri uri) {
-        // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
-        // order to do some common work like dismissing the keyguard and sending
-        // closeSystemWindows
+    Supplier<ActionTransition> createEditAction(Context context, Resources r, Uri uri) {
+        return () -> {
+            ActionTransition transition = mSharedElementTransition.get();
+            // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
+            // order to do some common work like dismissing the keyguard and sending
+            // closeSystemWindows
 
-        // Create an edit intent, if a specific package is provided as the editor, then
-        // launch that directly
-        String editorPackage = context.getString(R.string.config_screenshotEditor);
-        Intent editIntent = new Intent(Intent.ACTION_EDIT);
-        if (!TextUtils.isEmpty(editorPackage)) {
-            editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
-        }
-        editIntent.setDataAndType(uri, "image/png");
-        editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            // Create an edit intent, if a specific package is provided as the editor, then
+            // launch that directly
+            String editorPackage = context.getString(R.string.config_screenshotEditor);
+            Intent editIntent = new Intent(Intent.ACTION_EDIT);
+            if (!TextUtils.isEmpty(editorPackage)) {
+                editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
+            }
+            editIntent.setDataAndType(uri, "image/png");
+            editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
-                editIntent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                    context, 0, editIntent, PendingIntent.FLAG_IMMUTABLE,
+                    transition.bundle, UserHandle.CURRENT);
 
-        // Make sure pending intents for the system user are still unique across users
-        // by setting the (otherwise unused) request code to the current user id.
-        int requestCode = mContext.getUserId();
+            // Make sure pending intents for the system user are still unique across users
+            // by setting the (otherwise unused) request code to the current user id.
+            int requestCode = mContext.getUserId();
 
-        // Create a edit action
-        PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
-                new Intent(context, ActionProxyReceiver.class)
-                        .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
-                        .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
-                        .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
-                                mSmartActionsEnabled)
-                        .setAction(Intent.ACTION_EDIT)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                UserHandle.SYSTEM);
-        Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
-                Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
-                r.getString(com.android.internal.R.string.screenshot_edit), editAction);
+            // Create a edit action
+            PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
+                    new Intent(context, ActionProxyReceiver.class)
+                            .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
+                            .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                            .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
+                                    mSmartActionsEnabled)
+                            .setAction(Intent.ACTION_EDIT)
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    UserHandle.SYSTEM);
+            Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
+                    Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
+                    r.getString(com.android.internal.R.string.screenshot_edit), editAction);
 
-        return editActionBuilder.build();
+            transition.action = editActionBuilder.build();
+            return transition;
+        };
     }
 
     @VisibleForTesting

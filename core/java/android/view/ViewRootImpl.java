@@ -9154,14 +9154,14 @@ public final class ViewRootImpl implements ViewParent,
      * Handles an inbound request for scroll capture from the system. If a client is not already
      * active, a search will be dispatched through the view tree to locate scrolling content.
      * <p>
-     * Either {@link IScrollCaptureCallbacks#onClientConnected(IScrollCaptureConnection, Rect,
+     * Either {@link IScrollCaptureCallbacks#onConnected(IScrollCaptureConnection, Rect,
      * Point)} or {@link IScrollCaptureCallbacks#onUnavailable()} will be returned
      * depending on the results of the search.
      *
      * @param callbacks to receive responses
      * @see ScrollCaptureTargetResolver
      */
-    private void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
+    public void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
         LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Window (root) level callbacks
@@ -9169,10 +9169,12 @@ public final class ViewRootImpl implements ViewParent,
 
         // Search through View-tree
         View rootView = getView();
-        Point point = new Point();
-        Rect rect = new Rect(0, 0, rootView.getWidth(), rootView.getHeight());
-        getChildVisibleRect(rootView, rect, point);
-        rootView.dispatchScrollCaptureSearch(rect, point, targetList);
+        if (rootView != null) {
+            Point point = new Point();
+            Rect rect = new Rect(0, 0, rootView.getWidth(), rootView.getHeight());
+            getChildVisibleRect(rootView, rect, point);
+            rootView.dispatchScrollCaptureSearch(rect, point, targetList);
+        }
 
         // No-op path. Scroll capture not offered for this window.
         if (targetList.isEmpty()) {

@@ -380,6 +380,14 @@ public class DisplayPolicy {
 
     private RefreshRatePolicy mRefreshRatePolicy;
 
+    /**
+     * If true, attach the navigation bar to the current transition app.
+     * The value is read from config_attachNavBarToAppDuringTransition and could be overlaid by RRO
+     * when the navigation bar mode is changed.
+     */
+    private boolean mShouldAttachNavBarToAppDuringTransition;
+    private NavBarFadeAnimationController mNavBarFadeAnimationController;
+
     // -------- PolicyHandler --------
     private static final int MSG_REQUEST_TRANSIENT_BARS = 2;
     private static final int MSG_DISPOSE_INPUT_CONSUMER = 3;
@@ -1086,6 +1094,7 @@ public class DisplayPolicy {
                 break;
             case TYPE_NAVIGATION_BAR:
                 mNavigationBar = win;
+                updateNavBarFadeController();
                 mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, win,
                         (displayFrames, windowState, inOutFrame) -> {
 
@@ -1231,6 +1240,7 @@ public class DisplayPolicy {
             mDisplayContent.setInsetProvider(ITYPE_STATUS_BAR, null, null);
         } else if (mNavigationBar == win || mNavigationBarAlt == win) {
             mNavigationBar = null;
+            updateNavBarFadeController();
             mNavigationBarAlt = null;
             mDisplayContent.setInsetProvider(ITYPE_NAVIGATION_BAR, null, null);
         } else if (mNotificationShade == win) {
@@ -2195,6 +2205,13 @@ public class DisplayPolicy {
                         - getNavigationBarFrameHeight(portraitRotation, uiMode);
 
         updateConfigurationAndScreenSizeDependentBehaviors();
+
+        final boolean shouldAttach =
+                res.getBoolean(R.bool.config_attachNavBarToAppDuringTransition);
+        if (mShouldAttachNavBarToAppDuringTransition != shouldAttach) {
+            mShouldAttachNavBarToAppDuringTransition = shouldAttach;
+            updateNavBarFadeController();
+        }
     }
 
     void updateConfigurationAndScreenSizeDependentBehaviors() {
@@ -3176,5 +3193,27 @@ public class DisplayPolicy {
         }
 
         return Rect.intersects(targetWindow.getFrame(), navBarWindow.getFrame());
+    }
+
+    /**
+     * @return Whether we should attach navigation bar to the app during transition.
+     */
+    boolean shouldAttachNavBarToAppDuringTransition() {
+        return mShouldAttachNavBarToAppDuringTransition && mNavigationBar != null;
+    }
+
+    @Nullable NavBarFadeAnimationController getNavBarFadeAnimationController() {
+        return mNavBarFadeAnimationController;
+    }
+
+    private void updateNavBarFadeController() {
+        if (shouldAttachNavBarToAppDuringTransition()) {
+            if (mNavBarFadeAnimationController == null) {
+                mNavBarFadeAnimationController =
+                        new NavBarFadeAnimationController(mDisplayContent);
+            }
+        } else {
+            mNavBarFadeAnimationController = null;
+        }
     }
 }

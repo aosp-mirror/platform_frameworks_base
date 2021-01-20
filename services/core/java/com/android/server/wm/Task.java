@@ -424,6 +424,9 @@ class Task extends WindowContainer<WindowContainer> {
     /** If original intent did not allow relinquishing task identity, save that information */
     private boolean mNeverRelinquishIdentity = true;
 
+    /** Avoid reentrant of {@link #removeImmediately(String)}. */
+    private boolean mRemoving;
+
     // Used in the unique case where we are clearing the task in order to reuse it. In that case we
     // do not want to delete the stack when the task goes empty.
     private boolean mReuseTask = false;
@@ -3239,12 +3242,18 @@ class Task extends WindowContainer<WindowContainer> {
 
     void removeImmediately(String reason) {
         if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask:" + reason + " removing taskId=" + mTaskId);
+        if (mRemoving) {
+            return;
+        }
+        mRemoving = true;
+
         EventLogTags.writeWmTaskRemoved(mTaskId, reason);
 
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
 
         super.removeImmediately();
+        mRemoving = false;
     }
 
     // TODO: Consolidate this with Task.reparent()
@@ -5009,7 +5018,6 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } else {
             // No longer managed by any organizer.
-            mTaskAppearedSent = false;
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
                 removeImmediately("setTaskOrganizer");
@@ -5035,7 +5043,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
         if (getSurfaceControl() == null) {
-            // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
+            // Can't call onTaskAppeared without a surfacecontrol, so defer this until next one
             // is created.
             return false;
         }
@@ -7181,6 +7189,7 @@ class Task extends WindowContainer<WindowContainer> {
                     + " mode=" + windowingModeToString(getWindowingMode()));
             pw.println("  isSleeping=" + shouldSleepActivities());
             pw.println("  mBounds=" + getRequestedOverrideBounds());
+            pw.println("  mCreatedByOrganizer=" + mCreatedByOrganizer);
         };
 
         boolean printed = false;
@@ -7686,7 +7695,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void dispatchTaskInfoChangedIfNeeded(boolean force) {
         if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, force);
+            mAtmService.mTaskOrganizerController.onTaskInfoChanged(this, force);
         }
     }
 

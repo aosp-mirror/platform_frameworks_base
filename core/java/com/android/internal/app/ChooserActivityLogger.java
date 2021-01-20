@@ -120,7 +120,7 @@ public interface ChooserActivityLogger {
         @UiEvent(doc = "User selected the nearby target.")
         SHARESHEET_NEARBY_TARGET_SELECTED(626),
         @UiEvent(doc = "User selected the edit target.")
-        SHARESHEET_EDIT_TARGET_SELECTED(627);
+        SHARESHEET_EDIT_TARGET_SELECTED(669);
 
         private final int mId;
         SharesheetTargetSelectedEvent(int id) {

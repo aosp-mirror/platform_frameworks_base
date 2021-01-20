@@ -98,7 +98,7 @@ public abstract class ActivityManagerInternal {
     public abstract void killForegroundAppsForUser(@UserIdInt int userId);
 
     /**
-     * Sets how long a {@link PendingIntent} can be temporarily whitelist to by bypass restrictions
+     * Sets how long a {@link PendingIntent} can be temporarily allowlisted to bypass restrictions
      * such as Power Save mode.
      * @param target
      * @param whitelistToken
@@ -132,9 +132,14 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Update information about which app IDs are on the temp whitelist.
+     * @param appids the updated list of appIds in temp allowlist.
+     * @param changingUid uid to add or remove to temp allowlist.
+     * @param adding true to add to temp allowlist, false to remove from temp allowlist.
+     * @param durationMs when adding is true, the duration to be in temp allowlist.
+     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}.
      */
-    public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingAppId,
-            boolean adding);
+    public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingUid,
+            boolean adding, long durationMs, @BroadcastOptions.TempAllowListType int type);
 
     /**
      * Get the procstate for the UID.  The return value will be between

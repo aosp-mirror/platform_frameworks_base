@@ -1230,14 +1230,14 @@ public class AppSearchImplTest {
 
     @Test
     public void testRewriteSearchResultProto() throws Exception {
-        final String database =
+        final String prefix =
                 "com.package.foo"
                         + AppSearchImpl.PACKAGE_DELIMITER
                         + "databaseName"
                         + AppSearchImpl.DATABASE_DELIMITER;
         final String uri = "uri";
-        final String namespace = database + "namespace";
-        final String schemaType = database + "schema";
+        final String namespace = prefix + "namespace";
+        final String schemaType = prefix + "schema";
 
         // Building the SearchResult received from query.
         DocumentProto documentProto =
@@ -1257,6 +1257,7 @@ public class AppSearchImplTest {
                 AppSearchImpl.rewriteSearchResultProto(searchResultProto);
         for (SearchResult result : searchResultPage.getResults()) {
             assertThat(result.getPackageName()).isEqualTo("com.package.foo");
+            assertThat(result.getDatabaseName()).isEqualTo("databaseName");
             assertThat(result.getDocument())
                     .isEqualTo(
                             GenericDocumentToProtoConverter.toGenericDocument(

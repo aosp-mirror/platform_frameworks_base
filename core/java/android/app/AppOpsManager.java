@@ -1645,7 +1645,7 @@ public class AppOpsManager {
      */
     private static int[] sOpToSwitch = new int[] {
             OP_COARSE_LOCATION,                 // COARSE_LOCATION
-            OP_COARSE_LOCATION,                 // FINE_LOCATION
+            OP_FINE_LOCATION,                   // FINE_LOCATION
             OP_COARSE_LOCATION,                 // GPS
             OP_VIBRATE,                         // VIBRATE
             OP_READ_CONTACTS,                   // READ_CONTACTS

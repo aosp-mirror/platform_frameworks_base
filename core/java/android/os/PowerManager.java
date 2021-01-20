@@ -612,12 +612,14 @@ public final class PowerManager {
      * @hide
      */
     public static class WakeData {
-        public WakeData(long wakeTime, @WakeReason int wakeReason) {
+        public WakeData(long wakeTime, @WakeReason int wakeReason, long sleepDuration) {
             this.wakeTime = wakeTime;
             this.wakeReason = wakeReason;
+            this.sleepDuration = sleepDuration;
         }
         public long wakeTime;
         public @WakeReason int wakeReason;
+        public long sleepDuration;
     }
 
     /**
