@@ -769,10 +769,12 @@ public class MtpDatabase implements AutoCloseable {
 
         try {
             Log.i(TAG, "openFile with transcode support: " + path);
-            // TODO(b/158466651): Pass the |transcode| variable as flag to openFile
-            Bundle bundle = null;
-            if (!transcode) {
-                bundle = new Bundle();
+            Bundle bundle = new Bundle();
+            if (transcode) {
+                bundle.putParcelable(MediaStore.EXTRA_MEDIA_CAPABILITIES,
+                        new ApplicationMediaCapabilities.Builder().addUnsupportedVideoMimeType(
+                                MediaFormat.MIMETYPE_VIDEO_HEVC).build());
+            } else {
                 bundle.putParcelable(MediaStore.EXTRA_MEDIA_CAPABILITIES,
                         new ApplicationMediaCapabilities.Builder().addSupportedVideoMimeType(
                                 MediaFormat.MIMETYPE_VIDEO_HEVC).build());
