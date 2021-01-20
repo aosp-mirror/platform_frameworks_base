@@ -173,6 +173,17 @@ interface IPlatformCompat {
     boolean clearOverride(long changeId, String packageName);
 
     /**
+     * Restores the default behaviour for the given change and app.
+     *
+     * <p>Does not kill the app; to be only used in tests.
+     *
+     * @param changeId    the ID of the change that was overridden
+     * @param packageName the app package name that was overridden
+     * @throws SecurityException if overriding changes is not permitted
+     */
+    void clearOverrideForTest(long changeId, String packageName);
+
+    /**
      * Enables all compatibility changes that have enabledSinceTargetSdk ==
      * {@param targetSdkVersion} for an app, subject to the policy.
      *

@@ -211,6 +211,12 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
+    public void clearOverrideForTest(long changeId, String packageName) {
+        checkCompatChangeOverridePermission();
+        mCompatConfig.removeOverride(changeId, packageName);
+    }
+
+    @Override
     public CompatibilityChangeConfig getAppConfig(ApplicationInfo appInfo) {
         checkCompatChangeReadAndLogPermission();
         return mCompatConfig.getAppConfig(appInfo);
