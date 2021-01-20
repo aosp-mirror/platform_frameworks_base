@@ -434,6 +434,8 @@
 
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
     <protected-broadcast android:name="android.location.MODE_CHANGED" />
+    <protected-broadcast android:name="android.location.action.GNSS_CAPABILITIES_CHANGED" />
+
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
