@@ -142,7 +142,6 @@ class InsetsPolicy {
                 getFakeControlTarget(focusedWin, navControlTarget));
         mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
         mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
-        mPolicy.updateHideNavInputEventReceiver();
     }
 
     boolean isHidden(@InternalInsetsType int type) {

@@ -3790,7 +3790,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * <p>Since this flag is a modifier for {@link #SYSTEM_UI_FLAG_HIDE_NAVIGATION}, it only
      * has an effect when used in combination with that flag.</p>
      *
-     * @deprecated Use {@link WindowInsetsController#BEHAVIOR_SHOW_BARS_BY_SWIPE} instead.
+     * @deprecated Use {@link WindowInsetsController#BEHAVIOR_DEFAULT} instead.
      */
     @Deprecated
     public static final int SYSTEM_UI_FLAG_IMMERSIVE = 0x00000800;

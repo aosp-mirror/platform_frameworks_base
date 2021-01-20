@@ -49398,8 +49398,9 @@ package android.view {
     method public void show(int);
     field public static final int APPEARANCE_LIGHT_NAVIGATION_BARS = 16; // 0x10
     field public static final int APPEARANCE_LIGHT_STATUS_BARS = 8; // 0x8
-    field public static final int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1; // 0x1
-    field public static final int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0; // 0x0
+    field public static final int BEHAVIOR_DEFAULT = 1; // 0x1
+    field @Deprecated public static final int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1; // 0x1
+    field @Deprecated public static final int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0; // 0x0
     field public static final int BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE = 2; // 0x2
   }
 
