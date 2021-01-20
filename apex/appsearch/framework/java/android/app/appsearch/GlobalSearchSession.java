@@ -37,16 +37,25 @@ import java.util.function.Consumer;
 public class GlobalSearchSession implements Closeable {
 
     private final IAppSearchManager mService;
+
     @UserIdInt
     private final int mUserId;
     private boolean mIsClosed = false;
 
+    private final String mPackageName;
+
+    /**
+     * Creates a search session for the client, defined by the {@code userId} and
+     * {@code packageName}.
+     */
     static void createGlobalSearchSession(
             @NonNull IAppSearchManager service,
             @UserIdInt int userId,
+            @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
-        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userId);
+        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userId,
+                packageName);
         globalSearchSession.initialize(executor, callback);
     }
 
@@ -73,9 +82,11 @@ public class GlobalSearchSession implements Closeable {
         }
     }
 
-    private GlobalSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId) {
+    private GlobalSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId,
+            @NonNull String packageName) {
         mService = service;
         mUserId = userId;
+        mPackageName = packageName;
     }
 
     /**
@@ -131,7 +142,7 @@ public class GlobalSearchSession implements Closeable {
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
         Preconditions.checkState(!mIsClosed, "GlobalSearchSession has already been closed");
-        return new SearchResults(mService, /*databaseName=*/null, queryExpression,
+        return new SearchResults(mService, mPackageName, /*databaseName=*/null, queryExpression,
                 searchSpec, mUserId, executor);
     }
 
