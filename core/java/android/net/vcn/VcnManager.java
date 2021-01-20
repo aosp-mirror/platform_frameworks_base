@@ -39,12 +39,12 @@ import java.util.concurrent.Executor;
 /**
  * VcnManager publishes APIs for applications to configure and manage Virtual Carrier Networks.
  *
- * <p>A VCN creates a virtualization layer to allow MVNOs to aggregate heterogeneous physical
+ * <p>A VCN creates a virtualization layer to allow carriers to aggregate heterogeneous physical
  * networks, unifying them as a single carrier network. This enables infrastructure flexibility on
- * the part of MVNOs without impacting user connectivity, abstracting the physical network
+ * the part of carriers without impacting user connectivity, abstracting the physical network
  * technologies as an implementation detail of their public network.
  *
- * <p>Each VCN virtualizes an Carrier's network by building tunnels to a carrier's core network over
+ * <p>Each VCN virtualizes a carrier's network by building tunnels to a carrier's core network over
  * carrier-managed physical links and supports a IP mobility layer to ensure seamless transitions
  * between the underlying networks. Each VCN is configured based on a Subscription Group (see {@link
  * android.telephony.SubscriptionManager}) and aggregates all networks that are brought up based on
@@ -62,8 +62,6 @@ import java.util.concurrent.Executor;
  * tasks. In Safe Mode, the system will allow underlying cellular networks to be used as default.
  * Additionally, during Safe Mode, the VCN will continue to retry the connections, and will
  * automatically exit Safe Mode if all active tunnels connect successfully.
- *
- * @hide
  */
 @SystemService(Context.VCN_MANAGEMENT_SERVICE)
 public class VcnManager {
@@ -101,7 +99,6 @@ public class VcnManager {
         return Collections.unmodifiableMap(REGISTERED_POLICY_LISTENERS);
     }
 
-    // TODO: Make setVcnConfig(), clearVcnConfig() Public API
     /**
      * Sets the VCN configuration for a given subscription group.
      *
@@ -113,11 +110,10 @@ public class VcnManager {
      *
      * @param subscriptionGroup the subscription group that the configuration should be applied to
      * @param config the configuration parameters for the VCN
-     * @throws SecurityException if the caller does not have carrier privileges, or is not running
-     *     as the primary user
-     * @throws IOException if the configuration failed to be persisted. A caller encountering this
-     *     exception should attempt to retry (possibly after a delay).
-     * @hide
+     * @throws SecurityException if the caller does not have carrier privileges for the provided
+     *     subscriptionGroup, or is not running as the primary user
+     * @throws IOException if the configuration failed to be saved and persisted to disk. This may
+     *     occur due to temporary disk errors, or more permanent conditions such as a full disk.
      */
     @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
     public void setVcnConfig(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config)
@@ -134,7 +130,6 @@ public class VcnManager {
         }
     }
 
-    // TODO: Make setVcnConfig(), clearVcnConfig() Public API
     /**
      * Clears the VCN configuration for a given subscription group.
      *
@@ -145,9 +140,8 @@ public class VcnManager {
      * @param subscriptionGroup the subscription group that the configuration should be applied to
      * @throws SecurityException if the caller does not have carrier privileges, or is not running
      *     as the primary user
-     * @throws IOException if the configuration failed to be cleared. A caller encountering this
-     *     exception should attempt to retry (possibly after a delay).
-     * @hide
+     * @throws IOException if the configuration failed to be cleared from disk. This may occur due
+     *     to temporary disk errors, or more permanent conditions such as a full disk.
      */
     @RequiresPermission("carrier privileges") // TODO (b/72967236): Define a system-wide constant
     public void clearVcnConfig(@NonNull ParcelUuid subscriptionGroup) throws IOException {
