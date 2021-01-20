@@ -4726,17 +4726,23 @@ public class SettingsProvider extends ContentProvider {
                 }
 
                 if (currentVersion == 192) {
-                    // Version 192: set the default value for magnification capabilities. If
-                    // magnification is enabled by the user, set it to full-screen, and set a value
-                    // to show a prompt when using the magnification first time after upgrading.
+                    // Version 192: set the default value for magnification capabilities.
+                    // If the device supports magnification area and magnification is enabled
+                    // by the user, set it to full-screen, and set a value to show a prompt
+                    // when using the magnification first time after upgrading.
                     final SettingsState secureSettings = getSecureSettingsLocked(userId);
                     final Setting magnificationCapabilities = secureSettings.getSettingLocked(
                             Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY);
+                    final boolean supportMagnificationArea = getContext().getResources().getBoolean(
+                            com.android.internal.R.bool.config_magnification_area);
+                    final int capability = supportMagnificationArea
+                            ? R.integer.def_accessibility_magnification_capabilities
+                            : Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
+                    final String supportShowPrompt = supportMagnificationArea ? "1" : "0";
                     if (magnificationCapabilities.isNull()) {
                         secureSettings.insertSettingLocked(
                                 Secure.ACCESSIBILITY_MAGNIFICATION_CAPABILITY,
-                                String.valueOf(getContext().getResources().getInteger(
-                                        R.integer.def_accessibility_magnification_capabilities)),
+                                String.valueOf(getContext().getResources().getInteger(capability)),
                                 null, true, SettingsState.SYSTEM_PACKAGE_NAME);
 
                         if (isMagnificationSettingsOn(secureSettings)) {
@@ -4746,7 +4752,8 @@ public class SettingsProvider extends ContentProvider {
                                     null, false  /* makeDefault */,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                             secureSettings.insertSettingLocked(
-                                    Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT, "1",
+                                    Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
+                                    supportShowPrompt,
                                     null, false /* makeDefault */,
                                     SettingsState.SYSTEM_PACKAGE_NAME);
                         }
