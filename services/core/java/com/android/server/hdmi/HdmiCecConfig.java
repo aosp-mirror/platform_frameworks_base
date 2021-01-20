@@ -291,6 +291,8 @@ public class HdmiCecConfig {
                 return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return STORAGE_GLOBAL_SETTINGS;
+            case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
+                return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
@@ -309,6 +311,8 @@ public class HdmiCecConfig {
                 return Global.HDMI_CEC_VERSION;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE:
                 return Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP;
+            case HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE:
+                return Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
@@ -366,6 +370,9 @@ public class HdmiCecConfig {
             case Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP:
                 notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE);
                 break;
+            case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
+                notifySettingChanged(HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE);
+                break;
         }
     }
 
@@ -399,6 +406,7 @@ public class HdmiCecConfig {
                 Global.HDMI_CONTROL_ENABLED,
                 Global.HDMI_CEC_VERSION,
                 Global.HDMI_CONTROL_SEND_STANDBY_ON_SLEEP,
+                Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
         };
         for (String setting: settings) {
             resolver.registerContentObserver(Global.getUriFor(setting), false,

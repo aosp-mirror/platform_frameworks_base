@@ -7734,10 +7734,12 @@ public class AudioService extends IAudioService.Stub
 
     private class MyHdmiCecVolumeControlFeatureListener
             implements HdmiControlManager.HdmiCecVolumeControlFeatureListener {
-        public void onHdmiCecVolumeControlFeature(boolean enabled) {
+        public void onHdmiCecVolumeControlFeature(
+                @HdmiControlManager.VolumeControl int hdmiCecVolumeControl) {
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager == null) return;
-                mHdmiCecVolumeControlEnabled = enabled;
+                mHdmiCecVolumeControlEnabled =
+                        hdmiCecVolumeControl == HdmiControlManager.VOLUME_CONTROL_ENABLED;
             }
         }
     };

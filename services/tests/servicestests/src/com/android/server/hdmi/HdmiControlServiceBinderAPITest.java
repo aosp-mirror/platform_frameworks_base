@@ -136,6 +136,8 @@ public class HdmiControlServiceBinderAPITest {
         // Some tests expect no logical addresses being allocated at the beginning of the test.
         setHdmiControlEnabled(false);
 
+        HdmiCecConfig hdmiCecConfig = new FakeHdmiCecConfig(mContext);
+
         mHdmiControlService =
             new HdmiControlService(mContext) {
                 @Override
@@ -157,6 +159,11 @@ public class HdmiControlServiceBinderAPITest {
                 @Override
                 boolean isPowerStandby() {
                     return mPowerStatus == HdmiControlManager.POWER_STATUS_STANDBY;
+                }
+
+                @Override
+                protected HdmiCecConfig getHdmiCecConfig() {
+                    return hdmiCecConfig;
                 }
             };
         mMyLooper = mTestLooper.getLooper();
