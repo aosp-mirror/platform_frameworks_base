@@ -35,7 +35,6 @@ import android.net.Network;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.os.Handler;
-import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -63,7 +62,6 @@ public class LockdownVpnTracker {
     @NonNull private final Handler mHandler;
     @NonNull private final Vpn mVpn;
     @NonNull private final VpnProfile mProfile;
-    @NonNull private final KeyStore mKeyStore;
 
     @NonNull private final Object mStateLock = new Object();
 
@@ -132,7 +130,6 @@ public class LockdownVpnTracker {
 
     public LockdownVpnTracker(@NonNull Context context,
             @NonNull Handler handler,
-            @NonNull KeyStore keyStore,
             @NonNull Vpn vpn,
             @NonNull VpnProfile profile) {
         mContext = Objects.requireNonNull(context);
@@ -140,7 +137,6 @@ public class LockdownVpnTracker {
         mHandler = Objects.requireNonNull(handler);
         mVpn = Objects.requireNonNull(vpn);
         mProfile = Objects.requireNonNull(profile);
-        mKeyStore = Objects.requireNonNull(keyStore);
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
 
         final Intent configIntent = new Intent(ACTION_VPN_SETTINGS);
@@ -212,7 +208,7 @@ public class LockdownVpnTracker {
                 //    network is the system default. So, if the VPN  is up and underlying network
                 //    (e.g., wifi) disconnects, CS will inform apps that the VPN's capabilities have
                 //    changed to match the new default network (e.g., cell).
-                mVpn.startLegacyVpnPrivileged(mProfile, mKeyStore, network, egressProp);
+                mVpn.startLegacyVpnPrivileged(mProfile, network, egressProp);
             } catch (IllegalStateException e) {
                 mAcceptedEgressIface = null;
                 Log.e(TAG, "Failed to start VPN", e);
