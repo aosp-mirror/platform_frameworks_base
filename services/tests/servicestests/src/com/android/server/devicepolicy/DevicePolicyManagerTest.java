@@ -2334,6 +2334,32 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     }
 
     @Test
+    public void testSetPermittedInputMethodsWithPOOfOrganizationOwnedDevice()
+            throws Exception {
+        String packageName = "com.google.pkg.one";
+        setupProfileOwner();
+        configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
+
+        // Allow all input methods
+        parentDpm.setPermittedInputMethods(admin1, null);
+
+        assertThat(parentDpm.getPermittedInputMethods(admin1)).isNull();
+
+        // Allow only system input methods
+        parentDpm.setPermittedInputMethods(admin1, new ArrayList<>());
+
+        assertThat(parentDpm.getPermittedInputMethods(admin1)).isEmpty();
+
+        // Don't allow specific third party input methods
+        final List<String> inputMethods = Collections.singletonList(packageName);
+
+        assertExpectException(IllegalArgumentException.class, /* messageRegex= */ "Permitted "
+                        + "input methods must allow all input methods or only system input methods "
+                        + "when called on the parent instance of an organization-owned device",
+                () -> parentDpm.setPermittedInputMethods(admin1, inputMethods));
+    }
+
+    @Test
     public void testSetKeyguardDisabledFeaturesWithDO() throws Exception {
         mContext.binder.callingUid = DpmMockContext.CALLER_SYSTEM_USER_UID;
         setupDeviceOwner();
