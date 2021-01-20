@@ -237,7 +237,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
      */
     @NonNull
     public List<String> getUnsupportedVideoMimeTypes() {
-        return new ArrayList<>(mSupportedVideoMimeTypes);
+        return new ArrayList<>(mUnsupportedVideoMimeTypes);
     }
 
     /*
