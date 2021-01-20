@@ -398,11 +398,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
         boolean report = false;
         synchronized (mIdleTimerLock) {
-            if (mActiveIdleTimers.isEmpty()) {
-                // If there are no idle timers, we are not monitoring activity, so we
-                // are always considered active.
-                isActive = true;
-            }
             if (mNetworkActive != isActive) {
                 mNetworkActive = isActive;
                 report = isActive;
