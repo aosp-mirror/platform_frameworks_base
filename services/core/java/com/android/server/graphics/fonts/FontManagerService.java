@@ -31,6 +31,8 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.security.FileIntegrityService;
+import com.android.server.security.VerityUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.NioUtils;
 import java.nio.channels.FileChannel;
+import java.util.Arrays;
 import java.util.Map;
 
 /** A service for managing system fonts. */
@@ -78,7 +81,17 @@ public final class FontManagerService {
 
     private static class OtfFontFileParser implements UpdatableFontDir.FontFileParser {
         @Override
-        public long getVersion(File file) throws IOException {
+        public String getPostScriptName(File file) throws IOException {
+            ByteBuffer buffer = mmap(file);
+            try {
+                return FontFileUtil.getPostScriptName(buffer, 0);
+            } finally {
+                NioUtils.freeDirectBuffer(buffer);
+            }
+        }
+
+        @Override
+        public long getRevision(File file) throws IOException {
             ByteBuffer buffer = mmap(file);
             try {
                 return FontFileUtil.getRevision(buffer, 0);
@@ -95,18 +108,48 @@ public final class FontManagerService {
         }
     }
 
+    private static class FsverityUtilImpl implements UpdatableFontDir.FsverityUtil {
+        @Override
+        public boolean hasFsverity(String filePath) {
+            return VerityUtils.hasFsverity(filePath);
+        }
+
+        @Override
+        public void setUpFsverity(String filePath, byte[] pkcs7Signature) throws IOException {
+            VerityUtils.setUpFsverity(filePath, pkcs7Signature);
+        }
+
+        @Override
+        public boolean rename(File src, File dest) {
+            // rename system call preserves fs-verity bit.
+            return src.renameTo(dest);
+        }
+    }
+
     @Nullable
     private final UpdatableFontDir mUpdatableFontDir;
 
     @GuardedBy("FontManagerService.this")
-    @Nullable SystemFontSettings mCurrentFontSettings = null;
+    @Nullable
+    private SystemFontSettings mCurrentFontSettings = null;
 
     private FontManagerService() {
-        mUpdatableFontDir = ENABLE_FONT_UPDATES
-                ? new UpdatableFontDir(new File(FONT_FILES_DIR), new OtfFontFileParser()) : null;
+        mUpdatableFontDir = createUpdatableFontDir();
     }
 
-    @NonNull private SystemFontSettings getCurrentFontSettings() {
+    @Nullable
+    private static UpdatableFontDir createUpdatableFontDir() {
+        if (!ENABLE_FONT_UPDATES) return null;
+        // If apk verity is supported, fs-verity should be available.
+        if (!FileIntegrityService.isApkVeritySupported()) return null;
+        return new UpdatableFontDir(new File(FONT_FILES_DIR),
+                Arrays.asList(new File(SystemFonts.SYSTEM_FONT_DIR),
+                        new File(SystemFonts.OEM_FONT_DIR)),
+                new OtfFontFileParser(), new FsverityUtilImpl());
+    }
+
+    @NonNull
+    private SystemFontSettings getCurrentFontSettings() {
         synchronized (FontManagerService.this) {
             if (mCurrentFontSettings == null) {
                 mCurrentFontSettings = SystemFontSettings.create(mUpdatableFontDir);
@@ -115,13 +158,14 @@ public final class FontManagerService {
         }
     }
 
-    private boolean installFontFile(String name, FileDescriptor fd) {
+    // TODO(b/173619554): Expose as API.
+    private boolean installFontFile(FileDescriptor fd, byte[] pkcs7Signature) {
         if (mUpdatableFontDir == null) return false;
         synchronized (FontManagerService.this) {
             try {
-                mUpdatableFontDir.installFontFile(name, fd);
+                mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
             } catch (IOException e) {
-                Slog.w(TAG, "Failed to install font file: " + name, e);
+                Slog.w(TAG, "Failed to install font file");
                 return false;
             }
             // Create updated font map in the next getSerializedSystemFontMap() call.
@@ -194,5 +238,5 @@ public final class FontManagerService {
             }
             return null;
         }
-    };
+    }
 }
