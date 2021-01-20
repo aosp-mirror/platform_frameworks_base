@@ -171,6 +171,36 @@ interface IAppSearchManager {
     void invalidateNextPageToken(in long nextPageToken, in int userId);
 
     /**
+     * Reports usage of a particular document by URI and namespace.
+     *
+     * <p>A usage report represents an event in which a user interacted with or viewed a document.
+     *
+     * <p>For each call to {@link #reportUsage}, AppSearch updates usage count and usage recency
+     * metrics for that particular document. These metrics are used for ordering {@link #query}
+     * results by the {@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} and
+     * {@link SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} ranking strategies.
+     *
+     * <p>Reporting usage of a document is optional.
+     *
+     * @param packageName The name of the package that owns this document.
+     * @param databaseName  The name of the database to report usage against.
+     * @param namespace Namespace the document being used belongs to.
+     * @param uri URI of the document being used.
+     * @param usageTimeMillis The timestamp at which the document was used.
+     * @param userId Id of the calling user
+     * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
+     *     {@link AppSearchResult}&lt;{@link Void}&gt;.
+     */
+     void reportUsage(
+         in String packageName,
+         in String databaseName,
+         in String namespace,
+         in String uri,
+         in long usageTimeMillis,
+         in int userId,
+         in IAppSearchResultCallback callback);
+
+    /**
      * Removes documents by URI.
      *
      * @param packageName The name of the package the document is in.

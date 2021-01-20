@@ -22,10 +22,14 @@ import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.exceptions.AppSearchException;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Process;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 
-import com.android.internal.annotations.VisibleForTesting;
+import androidx.annotation.RequiresApi;
+
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -55,7 +59,7 @@ import java.util.Set;
  */
 class VisibilityStore {
     /** Schema type for documents that hold AppSearch's metadata, e.g. visibility settings */
-    @VisibleForTesting static final String VISIBILITY_TYPE = "VisibilityType";
+    private static final String VISIBILITY_TYPE = "VisibilityType";
 
     /**
      * Property that holds the list of platform-hidden schemas, as part of the visibility settings.
@@ -148,6 +152,12 @@ class VisibilityStore {
 
     private final AppSearchImpl mAppSearchImpl;
 
+    private final Context mContext;
+
+    // UID of the package that has platform-query privileges, i.e. can query for all
+    // platform-surfaceable content.
+    private int mGlobalQuerierPackageUid;
+
     /**
      * Maps prefixes to the set of schemas that are platform-hidden within that prefix. All schemas
      * in the map are prefixed.
@@ -173,8 +183,20 @@ class VisibilityStore {
      *
      * @param appSearchImpl AppSearchImpl instance
      */
-    VisibilityStore(@NonNull AppSearchImpl appSearchImpl) {
+    VisibilityStore(
+            @NonNull AppSearchImpl appSearchImpl,
+            @NonNull Context context,
+            @NonNull String globalQuerierPackage) {
         mAppSearchImpl = appSearchImpl;
+        mContext = context;
+        mGlobalQuerierPackageUid = Process.INVALID_UID;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            // This should always pass since we should only allow platform access on S+ (the first
+            // version that AppSearch is offered on).
+            mGlobalQuerierPackageUid =
+                    Api24Impl.getGlobalQuerierPackageUid(context, globalQuerierPackage);
+        }
     }
 
     /**
@@ -302,8 +324,7 @@ class VisibilityStore {
                 schemasPackageAccessible.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 // TODO(b/169883602): remove the "placeholder" uri once upstream changes to relax
-                // nested
-                // document uri rules gets synced down.
+                // nested document uri rules gets synced down.
                 GenericDocument packageAccessibleDocument =
                         new GenericDocument.Builder(/*uri=*/ "placeholder", PACKAGE_ACCESSIBLE_TYPE)
                                 .setNamespace(NAMESPACE)
@@ -332,42 +353,96 @@ class VisibilityStore {
         mPackageAccessibleMap.put(prefix, schemaToPackageIdentifierMap);
     }
 
-    /** Returns if the schema is surfaceable by the platform. */
-    // TODO(b/169883602): check permissions against the allowlisted global querier package name.
-    public boolean isSchemaPlatformSurfaceable(
-            @NonNull String prefix, @NonNull String prefixedSchema) {
+    /** Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}. */
+    public boolean isSchemaSearchableByCaller(
+            @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
         Preconditions.checkNotNull(prefix);
         Preconditions.checkNotNull(prefixedSchema);
-        Set<String> notPlatformSurfaceableSchemas = mNotPlatformSurfaceableMap.get(prefix);
-        if (notPlatformSurfaceableSchemas == null) {
+
+        if (callerUid == mGlobalQuerierPackageUid
+                && isSchemaPlatformSurfaceable(prefix, prefixedSchema)) {
             return true;
         }
+
+        // May not be platform surfaceable, but might still be accessible through 3p access.
+        return isSchemaPackageAccessible(prefix, prefixedSchema, callerUid);
+    }
+
+    /**
+     * Returns whether the caller has platform query privileges, and if so, that the schema is
+     * surfaceable on the platform.
+     */
+    private boolean isSchemaPlatformSurfaceable(
+            @NonNull String prefix, @NonNull String prefixedSchema) {
+        if (prefix.equals(VISIBILITY_STORE_PREFIX)) {
+            // VisibilityStore schemas are for internal bookkeeping.
+            return false;
+        }
+
+        Set<String> notPlatformSurfaceableSchemas = mNotPlatformSurfaceableMap.get(prefix);
+        if (notPlatformSurfaceableSchemas == null) {
+            // No schemas were opted out of being platform-surfaced. So by default, it can be
+            // surfaced.
+            return true;
+        }
+
+        // Some schemas were opted out of being platform-surfaced. As long as this schema
+        // isn't one of those opt-outs, it's surfaceable.
         return !notPlatformSurfaceableSchemas.contains(prefixedSchema);
     }
 
-    /** Returns whether the schema is accessible by {@code accessingPackage}. */
-    // TODO(b/169883602): check certificate and package against the incoming querier's uid/package.
-    public boolean isSchemaPackageAccessible(
-            @NonNull String prefix,
-            @NonNull String prefixedSchema,
-            @NonNull PackageIdentifier accessingPackage) {
-        Preconditions.checkNotNull(prefix);
-        Preconditions.checkNotNull(prefixedSchema);
-        Preconditions.checkNotNull(accessingPackage);
-
+    /**
+     * Returns whether the schema is accessible by the {@code callerUid}. Checks that the callerUid
+     * has one of the allowed PackageIdentifier's package. And if so, that the package also has the
+     * matching certificate.
+     *
+     * <p>This supports packages that have certificate rotation. As long as the specified
+     * certificate was once used to sign the package, the package will still be granted access. This
+     * does not handle packages that have been signed by multiple certificates.
+     */
+    private boolean isSchemaPackageAccessible(
+            @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
         Map<String, Set<PackageIdentifier>> schemaToPackageIdentifierMap =
                 mPackageAccessibleMap.get(prefix);
         if (schemaToPackageIdentifierMap == null) {
+            // No schemas under this prefix have granted package access, return early.
             return false;
         }
 
         Set<PackageIdentifier> packageIdentifiers =
                 schemaToPackageIdentifierMap.get(prefixedSchema);
         if (packageIdentifiers == null) {
+            // No package identifiers were granted access for this schema, return early.
             return false;
         }
 
-        return packageIdentifiers.contains(accessingPackage);
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) {
+            // PackageManager.hasSigningCertificate is only available on P+
+            // This should never fail since we should only allow package access on S+ (the first
+            // version that AppSearch is offered on). But just in case, default to no package
+            // access.
+            return false;
+        }
+
+        for (PackageIdentifier packageIdentifier : packageIdentifiers) {
+            // Check that the caller uid matches this allowlisted PackageIdentifier.
+            if (Api24Impl.getPackageUid(mContext, packageIdentifier.getPackageName())
+                    != callerUid) {
+                continue;
+            }
+
+            // Check that the package also has the matching certificate
+            if (Api28Impl.hasSigningCertificate(
+                    mContext,
+                    packageIdentifier.getPackageName(),
+                    packageIdentifier.getSha256Certificate())) {
+                // The caller has the right package name and right certificate!
+                return true;
+            }
+        }
+
+        // If we can't verify the schema is package accessible, default to no access.
+        return false;
     }
 
     /**
@@ -388,5 +463,86 @@ class VisibilityStore {
      */
     private static String addUriPrefix(String uri) {
         return URI_PREFIX + uri;
+    }
+
+    /**
+     * Wrapper class around API 24 methods.
+     *
+     * <p>Even though wrapping a call to a method from an API above minSdk inside an SDK_INT check
+     * makes it runtime safe, it is not optimal. When ART tries to optimize a class, it will do so
+     * regardless of the execution path, and will fail if it tries to resolve a method at a higher
+     * API if that method is being referenced somewhere in the class, even if that method would
+     * never be called at runtime due to the SDK_INT check. ART will however only try to optimize a
+     * class the first time it's referenced at runtime, this means if we wrap our above minSdk
+     * method calls inside classes that are only referenced at runtime at the appropriate API level,
+     * then we guarantee the ability to resolve all the methods.
+     */
+    @RequiresApi(24)
+    private static class Api24Impl {
+        private Api24Impl() {}
+
+        /**
+         * Finds the UID of the {@code globalQuerierPackage}. {@code globalQuerierPackage} must be a
+         * pre-installed, system app. Returns {@link Process#INVALID_UID} if unable to find the UID.
+         */
+        static int getGlobalQuerierPackageUid(
+                @NonNull Context context, @NonNull String globalQuerierPackage) {
+            try {
+                // TODO(b/169883602): In framework, this should be UserHandle.isSameApp or
+                //  packageManager.getPackageUidAsUser().
+                int flags =
+                        PackageManager.MATCH_DISABLED_COMPONENTS
+                                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                                | PackageManager.MATCH_SYSTEM_ONLY;
+                return context.getPackageManager().getPackageUid(globalQuerierPackage, flags);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Global querier doesn't exist.
+            }
+            return Process.INVALID_UID;
+        }
+
+        /**
+         * Finds the UID of the {@code packageName}. Returns {@link Process#INVALID_UID} if unable
+         * to find the UID.
+         */
+        static int getPackageUid(@NonNull Context context, @NonNull String packageName) {
+            try {
+                // TODO(b/169883602): In framework, this should be UserHandle.isSameApp or
+                //  packageManager.getPackageUidAsUser().
+                return context.getPackageManager().getPackageUid(packageName, /*flags=*/ 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                // Global querier doesn't exist.
+            }
+            return Process.INVALID_UID;
+        }
+    }
+
+    /**
+     * Wrapper class around API 28 methods.
+     *
+     * <p>Even though wrapping a call to a method from an API above minSdk inside an SDK_INT check
+     * makes it runtime safe, it is not optimal. When ART tries to optimize a class, it will do so
+     * regardless of the execution path, and will fail if it tries to resolve a method at a higher
+     * API if that method is being referenced somewhere in the class, even if that method would
+     * never be called at runtime due to the SDK_INT check. ART will however only try to optimize a
+     * class the first time it's referenced at runtime, this means if we wrap our above minSdk
+     * method calls inside classes that are only referenced at runtime at the appropriate API level,
+     * then we guarantee the ability to resolve all the methods.
+     */
+    @RequiresApi(28)
+    private static class Api28Impl {
+        private Api28Impl() {}
+
+        /**
+         * Returns whether the {@code packageName} has been signed with {@code sha256Certificate}.
+         */
+        static boolean hasSigningCertificate(
+                @NonNull Context context,
+                @NonNull String packageName,
+                @NonNull byte[] sha256Certificate) {
+            return context.getPackageManager()
+                    .hasSigningCertificate(
+                            packageName, sha256Certificate, PackageManager.CERT_INPUT_SHA256);
+        }
     }
 }

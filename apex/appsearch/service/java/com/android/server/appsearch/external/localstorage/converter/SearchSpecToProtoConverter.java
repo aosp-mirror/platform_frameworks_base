@@ -109,6 +109,10 @@ public final class SearchSpecToProtoConverter {
                 return ScoringSpecProto.RankingStrategy.Code.CREATION_TIMESTAMP;
             case SearchSpec.RANKING_STRATEGY_RELEVANCE_SCORE:
                 return ScoringSpecProto.RankingStrategy.Code.RELEVANCE_SCORE;
+            case SearchSpec.RANKING_STRATEGY_USAGE_COUNT:
+                return ScoringSpecProto.RankingStrategy.Code.USAGE_TYPE1_COUNT;
+            case SearchSpec.RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP:
+                return ScoringSpecProto.RankingStrategy.Code.USAGE_TYPE1_LAST_USED_TIMESTAMP;
             default:
                 throw new IllegalArgumentException(
                         "Invalid result ranking strategy: " + rankingStrategyCode);

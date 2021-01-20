@@ -420,6 +420,51 @@ public final class AppSearchSession implements Closeable {
     }
 
     /**
+     * Reports usage of a particular document by URI and namespace.
+     *
+     * <p>A usage report represents an event in which a user interacted with or viewed a document.
+     *
+     * <p>For each call to {@link #reportUsage}, AppSearch updates usage count and usage recency
+     * metrics for that particular document. These metrics are used for ordering {@link #query}
+     * results by the {@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} and
+     * {@link SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} ranking strategies.
+     *
+     * <p>Reporting usage of a document is optional.
+     *
+     * @param request The usage reporting request.
+     * @param executor Executor on which to invoke the callback.
+     * @param callback Callback to receive errors. If the operation succeeds, the callback will be
+     *                 invoked with {@code null}.
+     */
+    @NonNull
+    public void reportUsage(
+            @NonNull ReportUsageRequest request,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Consumer<AppSearchResult<Void>> callback) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(executor);
+        Objects.requireNonNull(callback);
+        Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
+        try {
+            mService.reportUsage(
+                    mPackageName,
+                    mDatabaseName,
+                    request.getNamespace(),
+                    request.getUri(),
+                    request.getUsageTimeMillis(),
+                    mUserId,
+                    new IAppSearchResultCallback.Stub() {
+                        public void onResult(AppSearchResult result) {
+                            executor.execute(() -> callback.accept(result));
+                        }
+                    });
+            mIsMutated = true;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Removes {@link GenericDocument}s from the index by URI.
      *
      * @param request  Request containing URIs to be removed.

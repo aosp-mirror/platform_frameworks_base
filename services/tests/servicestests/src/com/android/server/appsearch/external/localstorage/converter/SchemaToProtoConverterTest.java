@@ -32,6 +32,7 @@ public class SchemaToProtoConverterTest {
     public void testGetProto_Email() {
         AppSearchSchema emailSchema =
                 new AppSearchSchema.Builder("Email")
+                        .setVersion(12345)
                         .addProperty(
                                 new AppSearchSchema.PropertyConfig.Builder("subject")
                                         .setDataType(
@@ -61,6 +62,7 @@ public class SchemaToProtoConverterTest {
         SchemaTypeConfigProto expectedEmailProto =
                 SchemaTypeConfigProto.newBuilder()
                         .setSchemaType("Email")
+                        .setVersion(12345)
                         .addProperties(
                                 PropertyConfigProto.newBuilder()
                                         .setPropertyName("subject")
@@ -126,6 +128,7 @@ public class SchemaToProtoConverterTest {
         SchemaTypeConfigProto expectedMusicRecordingProto =
                 SchemaTypeConfigProto.newBuilder()
                         .setSchemaType("MusicRecording")
+                        .setVersion(0)
                         .addProperties(
                                 PropertyConfigProto.newBuilder()
                                         .setPropertyName("artist")

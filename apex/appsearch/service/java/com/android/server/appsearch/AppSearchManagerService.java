@@ -48,6 +48,7 @@ import com.android.server.appsearch.external.localstorage.AppSearchImpl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /** TODO(b/142567528): add comments when implement this class */
 public class AppSearchManagerService extends SystemService {
@@ -275,8 +276,11 @@ public class AppSearchManagerService extends SystemService {
             try {
                 verifyCallingPackage(callingUid, packageName);
                 AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
-                SearchResultPage searchResultPage =
-                        impl.globalQuery(queryExpression, new SearchSpec(searchSpecBundle));
+                SearchResultPage searchResultPage = impl.globalQuery(
+                        queryExpression,
+                        new SearchSpec(searchSpecBundle),
+                        packageName,
+                        callingUid);
                 invokeCallbackOnResult(
                         callback,
                         AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -321,6 +325,39 @@ public class AppSearchManagerService extends SystemService {
                 impl.invalidateNextPageToken(nextPageToken);
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to invalidate the query page token", t);
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
+            }
+        }
+
+        @Override
+        public void reportUsage(
+                @NonNull String packageName,
+                @NonNull String databaseName,
+                @NonNull String namespace,
+                @NonNull String uri,
+                long usageTimeMillis,
+                @UserIdInt int userId,
+                @NonNull IAppSearchResultCallback callback) {
+            Objects.requireNonNull(databaseName);
+            Objects.requireNonNull(namespace);
+            Objects.requireNonNull(uri);
+            Objects.requireNonNull(callback);
+            int callingUid = Binder.getCallingUid();
+            int callingUserId = handleIncomingUser(userId, callingUid);
+            final long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                AppSearchImpl impl = ImplInstanceManager.getInstance(getContext(), callingUserId);
+                impl.reportUsage(
+                        packageName,
+                        databaseName,
+                        namespace,
+                        uri,
+                        usageTimeMillis);
+                invokeCallbackOnResult(callback,
+                        AppSearchResult.newSuccessfulResult(/*result=*/ null));
+            } catch (Throwable t) {
+                invokeCallbackOnError(callback, t);
             } finally {
                 Binder.restoreCallingIdentity(callingIdentity);
             }
