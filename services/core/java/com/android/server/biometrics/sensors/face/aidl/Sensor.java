@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.face.AuthenticationFrame;
+import android.hardware.biometrics.face.EnrollmentFrame;
 import android.hardware.biometrics.face.Error;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
@@ -167,7 +169,8 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onAcquired(byte info, int vendorCode) {
+        public void onAuthenticationFrame(AuthenticationFrame frame) {
+            // TODO(b/174619156): propagate the frame to an AuthenticationClient
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof AcquisitionClient)) {
@@ -177,7 +180,23 @@ public class Sensor implements IBinder.DeathRecipient {
                 }
 
                 final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(info, vendorCode);
+                acquisitionClient.onAcquired(frame.data.acquiredInfo, frame.data.vendorCode);
+            });
+        }
+
+        @Override
+        public void onEnrollmentFrame(EnrollmentFrame frame) {
+            // TODO(b/174619156): propagate the frame to an EnrollmentClient
+            mHandler.post(() -> {
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
+                if (!(client instanceof AcquisitionClient)) {
+                    Slog.e(mTag, "onAcquired for non-acquisition client: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+
+                final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
+                acquisitionClient.onAcquired(frame.data.acquiredInfo, frame.data.vendorCode);
             });
         }
 
