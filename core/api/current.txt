@@ -21520,6 +21520,8 @@ package android.media {
     method public void removeKeys(@NonNull byte[]);
     method public void removeOfflineLicense(@NonNull byte[]);
     method public void removeSecureStop(@NonNull byte[]);
+    method public boolean requiresSecureDecoder(@NonNull String);
+    method public boolean requiresSecureDecoder(@NonNull String, @android.media.MediaDrm.SecurityLevel int);
     method public void restoreKeys(@NonNull byte[], @NonNull byte[]);
     method public void setOnEventListener(@Nullable android.media.MediaDrm.OnEventListener);
     method public void setOnEventListener(@Nullable android.media.MediaDrm.OnEventListener, @Nullable android.os.Handler);
