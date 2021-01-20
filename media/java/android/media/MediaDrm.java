@@ -1993,6 +1993,32 @@ public final class MediaDrm implements AutoCloseable {
         return signRSANative(this, sessionId, algorithm, wrappedKey, message);
     }
 
+    /**
+     * Query if the crypto scheme requires the use of a secure decoder
+     * to decode data of the given mime type at the default security level.
+     * The default security level is defined as the highest security level
+     * supported on the device.
+     *
+     * @param mime The mime type of the media data
+     */
+    public boolean requiresSecureDecoder(@NonNull String mime) {
+        return requiresSecureDecoder(mime, getMaxSecurityLevel());
+    }
+
+    /**
+     * Query if the crypto scheme requires the use of a secure decoder
+     * to decode data of the given mime type at the given security level.
+     *
+     * @param level a security level between {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO}
+     *              and {@link #SECURITY_LEVEL_HW_SECURE_ALL}. Otherwise the special value
+     *              {@link #getMaxSecurityLevel()} is also permitted;
+     *              use {@link #getMaxSecurityLevel()} to indicate the maximum security level
+     *              supported by the device.
+     * @throws IllegalArgumentException if the requested security level is none of the documented
+     * values for the parameter {@code level}.
+     */
+    public native boolean requiresSecureDecoder(@NonNull String mime, @SecurityLevel int level);
+
     @Override
     protected void finalize() throws Throwable {
         try {

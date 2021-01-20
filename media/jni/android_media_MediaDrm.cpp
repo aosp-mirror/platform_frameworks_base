@@ -1953,6 +1953,30 @@ static jbyteArray android_media_MediaDrm_signRSANative(
     return VectorToJByteArray(env, signature);
 }
 
+static jboolean android_media_MediaDrm_requiresSecureDecoder(
+        JNIEnv *env, jobject thiz, jstring jmimeType,
+        jint jSecurityLevel) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+    if (!CheckDrm(env, drm)) {
+        return JNI_FALSE;
+    }
+
+    String8 mimeType;
+    if (jmimeType != NULL) {
+        mimeType = JStringToString8(env, jmimeType);
+    }
+
+    DrmPlugin::SecurityLevel securityLevel = jintToSecurityLevel(jSecurityLevel);
+    if (securityLevel == DrmPlugin::kSecurityLevelUnknown) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Invalid security level");
+        return JNI_FALSE;
+    }
+
+    if (securityLevel == DrmPlugin::kSecurityLevelMax) {
+        return drm->requiresSecureDecoder(mimeType.c_str());
+    }
+    return drm->requiresSecureDecoder(mimeType.c_str(), securityLevel);
+}
 
 static const JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaDrm_native_release },
@@ -2075,6 +2099,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "getMetricsNative", "()Landroid/os/PersistableBundle;",
       (void *)android_media_MediaDrm_native_getMetrics },
+
+    { "requiresSecureDecoder", "(Ljava/lang/String;I)Z",
+      (void *)android_media_MediaDrm_requiresSecureDecoder },
 };
 
 int register_android_media_Drm(JNIEnv *env) {
