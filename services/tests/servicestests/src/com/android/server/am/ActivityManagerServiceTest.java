@@ -69,7 +69,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
@@ -105,7 +104,6 @@ import java.util.function.Function;
  *  atest FrameworksServicesTests:ActivityManagerServiceTest
  */
 @SmallTest
-@FlakyTest(bugId = 113616538)
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
 
