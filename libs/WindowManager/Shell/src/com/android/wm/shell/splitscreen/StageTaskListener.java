@@ -70,9 +70,9 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @CallSuper
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         if (!taskInfo.hasParentTask()) {
-            mCallbacks.onRootTaskAppeared();
             mRootLeash = leash;
             mRootTaskInfo = taskInfo;
+            mCallbacks.onRootTaskAppeared();
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             mChildrenLeashes.put(taskInfo.taskId, leash);
             mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);

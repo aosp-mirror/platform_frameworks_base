@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -433,6 +434,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     CharSequence lastDescription; // Last description captured for this item.
 
+    Task mAdjacentTask; // Task adjacent to this one.
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
     Task mPrevAffiliate; // previous task in affiliated chain.
     int mPrevAffiliateTaskId = INVALID_TASK_ID; // previous id for persistence.
@@ -1562,6 +1564,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         mAtmService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
                 mTaskId, mUserId);
+    }
+
+    void setAdjacentTask(Task adjacent) {
+        mAdjacentTask = adjacent;
+        adjacent.mAdjacentTask = this;
     }
 
     void setTaskToAffiliateWith(Task taskToAffiliateWith) {
@@ -4244,6 +4251,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
         }
 
+        final List<Task> adjacentTasks = new ArrayList<>();
         final int windowingMode = getWindowingMode();
         final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
@@ -4272,6 +4280,15 @@ class Task extends WindowContainer<WindowContainer> {
                     gotTranslucentFullscreen = true;
                     continue;
                 }
+                return TASK_VISIBILITY_INVISIBLE;
+            } else if (otherWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                    && other.matchParentBounds()) {
+                if (other.isTranslucent(starting)) {
+                    // Can be visible behind a translucent task.
+                    gotTranslucentFullscreen = true;
+                    continue;
+                }
+                // Multi-window task that matches parent bounds would occlude other children.
                 return TASK_VISIBILITY_INVISIBLE;
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
@@ -4304,6 +4321,20 @@ class Task extends WindowContainer<WindowContainer> {
                 // making sense, it also works around an issue here we boost the z-order of the
                 // assistant window surfaces in window manager whenever it is visible.
                 return TASK_VISIBILITY_INVISIBLE;
+            }
+            if (other.mAdjacentTask != null) {
+                if (adjacentTasks.contains(other.mAdjacentTask)) {
+                    if (other.isTranslucent(starting)
+                            || other.mAdjacentTask.isTranslucent(starting)) {
+                        // Can be visible behind a translucent adjacent tasks.
+                        gotTranslucentFullscreen = true;
+                        continue;
+                    }
+                    // Can not be visible behind adjacent tasks.
+                    return TASK_VISIBILITY_INVISIBLE;
+                } else {
+                    adjacentTasks.add(other);
+                }
             }
         }
 
