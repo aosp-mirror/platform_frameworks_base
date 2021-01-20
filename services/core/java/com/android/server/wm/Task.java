@@ -3329,6 +3329,14 @@ class Task extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    @Override
+    boolean handlesOrientationChangeFromDescendant() {
+        return super.handlesOrientationChangeFromDescendant()
+                // Display won't rotate for the orientation request if the TaskDisplayArea can't
+                // specify orientation.
+                && getDisplayArea().canSpecifyOrientation();
+    }
+
     void resize(boolean relayout, boolean forced) {
         if (setBounds(getRequestedOverrideBounds(), forced) != BOUNDS_CHANGE_NONE && relayout) {
             getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
