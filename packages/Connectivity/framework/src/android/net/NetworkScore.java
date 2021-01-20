@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 /**
  * Object representing the quality of a network as perceived by the user.
  *
@@ -35,6 +37,10 @@ public final class NetworkScore implements Parcelable {
 
     // Agent-managed policies
     // TODO : add them here, starting from 1
+    /** @hide */
+    public static final int MIN_AGENT_MANAGED_POLICY = 0;
+    /** @hide */
+    public static final int MAX_AGENT_MANAGED_POLICY = -1;
 
     // Bitmask of all the policies applied to this score.
     private final long mPolicies;
@@ -52,6 +58,14 @@ public final class NetworkScore implements Parcelable {
 
     public int getLegacyInt() {
         return mLegacyInt;
+    }
+
+    /**
+     * @return whether this score has a particular policy.
+     */
+    @VisibleForTesting
+    public boolean hasPolicy(final int policy) {
+        return 0 != (mPolicies & (1L << policy));
     }
 
     @Override
