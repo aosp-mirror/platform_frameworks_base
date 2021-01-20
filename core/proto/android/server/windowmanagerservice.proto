@@ -68,7 +68,7 @@ message RootWindowContainerProto {
     // Whether or not the home activity is the recents activity. This is needed for the CTS tests to
     // know what activity types to check for when invoking splitscreen multi-window.
     optional bool is_home_recents_component = 6;
-    repeated IdentifierProto pending_activities = 7;
+    repeated IdentifierProto pending_activities = 7 [deprecated=true];
 }
 
 message BarControllerProto {
