@@ -213,6 +213,60 @@ public class VibrationThreadTest {
     }
 
     @Test
+    public void vibrate_singleVibratorPredefinedCancel_cancelsVibrationImmediately()
+            throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.startComposition()
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
+                .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
+                .compose();
+        VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
+
+        Thread.sleep(20);
+        assertTrue(vibrationThread.isAlive());
+        assertTrue(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
+
+        // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
+        // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
+        Thread cancellingThread = new Thread(() -> vibrationThread.cancel());
+        cancellingThread.start();
+
+        waitForCompletion(vibrationThread, 20);
+        waitForCompletion(cancellingThread);
+
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        assertFalse(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
+    }
+
+    @Test
+    public void vibrate_singleVibratorWaveformCancel_cancelsVibrationImmediately()
+            throws Exception {
+        mVibratorProviders.get(VIBRATOR_ID).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+
+        long vibrationId = 1;
+        VibrationEffect effect = VibrationEffect.createWaveform(new long[]{100}, new int[]{100}, 0);
+        VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
+
+        Thread.sleep(20);
+        assertTrue(vibrationThread.isAlive());
+        assertTrue(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
+
+        // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
+        // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
+        Thread cancellingThread = new Thread(() -> vibrationThread.cancel());
+        cancellingThread.start();
+
+        waitForCompletion(vibrationThread, 20);
+        waitForCompletion(cancellingThread);
+
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        assertFalse(vibrationThread.getVibrators().get(VIBRATOR_ID).isVibrating());
+    }
+
+    @Test
     public void vibrate_singleVibratorPrebaked_runsVibration() throws Exception {
         mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_THUD);
 
@@ -544,36 +598,70 @@ public class VibrationThreadTest {
     }
 
     @Test
-    public void vibrate_multipleCancelled_allVibratorsStopped() throws Exception {
-        mockVibrators(1, 2, 3);
+    public void vibrate_multiplePredefinedCancel_cancelsVibrationImmediately() throws Exception {
+        mockVibrators(1, 2);
+        mVibratorProviders.get(1).setSupportedEffects(VibrationEffect.EFFECT_CLICK);
+        mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_COMPOSE_EFFECTS);
+
+        long vibrationId = 1;
+        CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
+                .addVibrator(1, VibrationEffect.get(VibrationEffect.EFFECT_CLICK))
+                .addVibrator(2, VibrationEffect.startComposition()
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
+                        .addPrimitive(VibrationEffect.Composition.PRIMITIVE_CLICK, 1f, 100)
+                        .compose())
+                .combine();
+        VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
+
+        Thread.sleep(10);
+        assertTrue(vibrationThread.isAlive());
+        assertTrue(vibrationThread.getVibrators().get(1).isVibrating());
+        assertTrue(vibrationThread.getVibrators().get(2).isVibrating());
+
+        // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
+        // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
+        Thread cancellingThread = new Thread(() -> vibrationThread.cancel());
+        cancellingThread.start();
+
+        waitForCompletion(vibrationThread, 20);
+        waitForCompletion(cancellingThread);
+
+        verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        assertFalse(vibrationThread.getVibrators().get(1).isVibrating());
+        assertFalse(vibrationThread.getVibrators().get(2).isVibrating());
+    }
+
+    @Test
+    public void vibrate_multipleWaveformCancel_cancelsVibrationImmediately() throws Exception {
+        mockVibrators(1, 2);
         mVibratorProviders.get(1).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
         mVibratorProviders.get(2).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
-        mVibratorProviders.get(3).setCapabilities(IVibrator.CAP_AMPLITUDE_CONTROL);
 
         long vibrationId = 1;
         CombinedVibrationEffect effect = CombinedVibrationEffect.startSynced()
                 .addVibrator(1, VibrationEffect.createWaveform(
-                        new long[]{5, 10}, new int[]{1, 2}, 0))
-                .addVibrator(2, VibrationEffect.createWaveform(
-                        new long[]{20, 30}, new int[]{3, 4}, 0))
-                .addVibrator(3, VibrationEffect.createWaveform(
-                        new long[]{10, 40}, new int[]{5, 6}, 0))
+                        new long[]{100, 100}, new int[]{1, 2}, 0))
+                .addVibrator(2, VibrationEffect.createOneShot(100, 100))
                 .combine();
-        VibrationThread thread = startThreadAndDispatcher(vibrationId, effect);
+        VibrationThread vibrationThread = startThreadAndDispatcher(vibrationId, effect);
 
-        Thread.sleep(15);
-        assertTrue(thread.isAlive());
-        assertTrue(thread.getVibrators().get(1).isVibrating());
-        assertTrue(thread.getVibrators().get(2).isVibrating());
-        assertTrue(thread.getVibrators().get(3).isVibrating());
+        Thread.sleep(10);
+        assertTrue(vibrationThread.isAlive());
+        assertTrue(vibrationThread.getVibrators().get(1).isVibrating());
+        assertTrue(vibrationThread.getVibrators().get(2).isVibrating());
 
-        thread.cancel();
-        waitForCompletion(thread);
-        assertFalse(thread.getVibrators().get(1).isVibrating());
-        assertFalse(thread.getVibrators().get(2).isVibrating());
-        assertFalse(thread.getVibrators().get(3).isVibrating());
+        // Run cancel in a separate thread so if VibrationThread.cancel blocks then this test should
+        // fail at waitForCompletion(vibrationThread) if the vibration not cancelled immediately.
+        Thread cancellingThread = new Thread(() -> vibrationThread.cancel());
+        cancellingThread.start();
+
+        waitForCompletion(vibrationThread, 20);
+        waitForCompletion(cancellingThread);
 
         verify(mThreadCallbacks).onVibrationEnded(eq(vibrationId), eq(Vibration.Status.CANCELLED));
+        assertFalse(vibrationThread.getVibrators().get(1).isVibrating());
+        assertFalse(vibrationThread.getVibrators().get(2).isVibrating());
     }
 
     @Test
@@ -621,11 +709,11 @@ public class VibrationThreadTest {
         return thread;
     }
 
-    private void waitForCompletion(VibrationThread thread) {
+    private void waitForCompletion(Thread thread) {
         waitForCompletion(thread, TEST_TIMEOUT_MILLIS);
     }
 
-    private void waitForCompletion(VibrationThread thread, long timeout) {
+    private void waitForCompletion(Thread thread, long timeout) {
         try {
             thread.join(timeout);
         } catch (InterruptedException e) {
