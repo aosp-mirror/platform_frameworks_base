@@ -82,7 +82,7 @@ public abstract class AuthBiometricView extends LinearLayout {
      * Authenticated, dialog animating away soon.
      */
     protected static final int STATE_AUTHENTICATED = 6;
-    
+
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({STATE_IDLE, STATE_AUTHENTICATING_ANIMATING_IN, STATE_AUTHENTICATING, STATE_HELP,
             STATE_ERROR, STATE_PENDING_CONFIRMATION, STATE_AUTHENTICATED})
@@ -155,8 +155,8 @@ public abstract class AuthBiometricView extends LinearLayout {
     private final Injector mInjector;
     private final Handler mHandler;
     private final AccessibilityManager mAccessibilityManager;
-    private final int mTextColorError;
-    private final int mTextColorHint;
+    protected final int mTextColorError;
+    protected final int mTextColorHint;
 
     private AuthPanelController mPanelController;
     private Bundle mBiometricPromptBundle;
@@ -169,7 +169,7 @@ public abstract class AuthBiometricView extends LinearLayout {
     private TextView mSubtitleView;
     private TextView mDescriptionView;
     protected ImageView mIconView;
-    @VisibleForTesting protected TextView mIndicatorView;
+    protected TextView mIndicatorView;
     @VisibleForTesting Button mNegativeButton;
     @VisibleForTesting Button mPositiveButton;
     @VisibleForTesting Button mTryAgainButton;
