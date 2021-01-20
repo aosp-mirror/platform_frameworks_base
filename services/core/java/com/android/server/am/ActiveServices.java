@@ -1046,9 +1046,11 @@ public final class ActiveServices {
 
     @GuardedBy("mAm")
     void schedulePendingServiceStartLocked(String packageName, int userId) {
-        for (int i = mPendingBringups.size() - 1; i >= 0; i--) {
+        int totalPendings = mPendingBringups.size();
+        for (int i = totalPendings - 1; i >= 0 && totalPendings > 0;) {
             final ServiceRecord r = mPendingBringups.keyAt(i);
             if (r.userId != userId || !TextUtils.equals(r.packageName, packageName)) {
+                i--;
                 continue;
             }
             final ArrayList<Runnable> curPendingBringups = mPendingBringups.valueAt(i);
@@ -1056,8 +1058,22 @@ public final class ActiveServices {
                 for (int j = curPendingBringups.size() - 1; j >= 0; j--) {
                     curPendingBringups.get(j).run();
                 }
+                curPendingBringups.clear();
             }
-            mPendingBringups.removeAt(i);
+            // Now, how many remaining ones we have after calling into above runnables
+            final int curTotalPendings = mPendingBringups.size();
+            // Don't call removeAt() here, as it could have been removed already by above runnables
+            mPendingBringups.remove(r);
+            if (totalPendings != curTotalPendings) {
+                // Okay, within the above Runnable.run(), the mPendingBringups is altered.
+                // Restart the loop, it won't call into those finished runnables
+                // since we've cleared the curPendingBringups above.
+                totalPendings = mPendingBringups.size();
+                i = totalPendings - 1;
+            } else {
+                totalPendings = mPendingBringups.size();
+                i--;
+            }
         }
     }
 
