@@ -112,7 +112,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -1069,10 +1068,13 @@ public final class ActiveServices {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
         }
         r.callStart = false;
-        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
-                r.name.getPackageName(), r.name.getClassName(),
-                FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
-        mAm.mBatteryStatsService.noteServiceStartRunning(r.stats);
+
+        final int uid = r.appInfo.uid;
+        final String packageName = r.name.getPackageName();
+        final String serviceName = r.name.getClassName();
+        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
+        mAm.mBatteryStatsService.noteServiceStartRunning(uid, packageName, serviceName);
         String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false, false);
         if (error != null) {
             return new ComponentName("!!", error);
@@ -1108,10 +1110,13 @@ public final class ActiveServices {
             service.delayedStop = true;
             return;
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, service.appInfo.uid,
-                service.name.getPackageName(), service.name.getClassName(),
-                FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-        mAm.mBatteryStatsService.noteServiceStopRunning(service.stats);
+
+        final int uid = service.appInfo.uid;
+        final String packageName = service.name.getPackageName();
+        final String serviceName = service.name.getClassName();
+        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+        mAm.mBatteryStatsService.noteServiceStopRunning(uid, packageName, serviceName);
         service.startRequested = false;
         if (service.tracker != null) {
             service.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -1267,10 +1272,12 @@ public final class ActiveServices {
                 }
             }
 
-            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
-                    r.name.getPackageName(), r.name.getClassName(),
-                    FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-            mAm.mBatteryStatsService.noteServiceStopRunning(r.stats);
+            final int uid = r.appInfo.uid;
+            final String packageName = r.name.getPackageName();
+            final String serviceName = r.name.getClassName();
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                    serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+            mAm.mBatteryStatsService.noteServiceStopRunning(uid, packageName, serviceName);
             r.startRequested = false;
             if (r.tracker != null) {
                 r.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -2876,15 +2883,7 @@ public final class ActiveServices {
                     final Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
-                    final BatteryStatsImpl.Uid.Pkg.Serv ss;
-                    final BatteryStatsImpl stats = mAm.mBatteryStatsService.getActiveStatistics();
-                    synchronized (stats) {
-                        ss = stats.getServiceStatsLocked(
-                                sInfo.applicationInfo.uid, name.getPackageName(),
-                                name.getClassName(), SystemClock.elapsedRealtime(),
-                                SystemClock.uptimeMillis());
-                    }
-                    r = new ServiceRecord(mAm, ss, className, name, definingPackageName,
+                    r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res);
                     r.mRecentCallingPackage = callingPackage;
                     res.setService(r);
@@ -3428,9 +3427,13 @@ public final class ActiveServices {
                 EventLogTags.writeAmCreateService(
                         r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_LAUNCH_REPORTED, r.appInfo.uid,
-                    r.name.getPackageName(), r.name.getClassName());
-            mAm.mBatteryStatsService.noteServiceStartLaunch(r.stats);
+
+            final int uid = r.appInfo.uid;
+            final String packageName = r.name.getPackageName();
+            final String serviceName = r.name.getClassName();
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_LAUNCH_REPORTED, uid, packageName,
+                    serviceName);
+            mAm.mBatteryStatsService.noteServiceStartLaunch(uid, packageName, serviceName);
             mAm.notifyPackageUse(r.serviceInfo.packageName,
                                  PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
@@ -3777,7 +3780,8 @@ public final class ActiveServices {
         smap.mDelayedStartList.remove(r);
 
         if (r.app != null) {
-            mAm.mBatteryStatsService.noteServiceStopLaunch(r.stats);
+            mAm.mBatteryStatsService.noteServiceStopLaunch(r.appInfo.uid, r.name.getPackageName(),
+                    r.name.getClassName());
             r.app.stopService(r);
             r.app.updateBoundClientUids();
             if (r.whitelistManager) {
@@ -4323,7 +4327,8 @@ public final class ActiveServices {
         // Clear app state from services.
         for (int i = app.numberOfRunningServices() - 1; i >= 0; i--) {
             ServiceRecord sr = app.getRunningServiceAt(i);
-            mAm.mBatteryStatsService.noteServiceStopLaunch(sr.stats);
+            mAm.mBatteryStatsService.noteServiceStopLaunch(sr.appInfo.uid, sr.name.getPackageName(),
+                    sr.name.getClassName());
             if (sr.app != app && sr.app != null && !sr.app.isPersistent()) {
                 sr.app.stopService(sr);
                 sr.app.updateBoundClientUids();
