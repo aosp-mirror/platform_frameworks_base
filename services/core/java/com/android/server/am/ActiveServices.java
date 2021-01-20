@@ -2815,12 +2815,24 @@ public final class ActiveServices {
             r = smap.mServicesByIntent.get(filter);
             if (DEBUG_SERVICE && r != null) Slog.v(TAG_SERVICE, "Retrieved by intent: " + r);
         }
-        if (r != null && (r.serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0
-                && !callingPackage.equals(r.packageName)) {
-            // If an external service is running within its own package, other packages
-            // should not bind to that instance.
-            r = null;
-            if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Whoops, can't use existing external service");
+        if (r != null) {
+            // Compared to resolveService below, the ServiceRecord here is retrieved from
+            // ServiceMap so the package visibility doesn't apply to it. We need to filter it.
+            if (mAm.getPackageManagerInternal().filterAppAccess(r.packageName, callingUid,
+                    userId)) {
+                Slog.w(TAG_SERVICE, "Unable to start service " + service + " U=" + userId
+                        + ": not found");
+                return null;
+            }
+            if ((r.serviceInfo.flags & ServiceInfo.FLAG_EXTERNAL_SERVICE) != 0
+                    && !callingPackage.equals(r.packageName)) {
+                // If an external service is running within its own package, other packages
+                // should not bind to that instance.
+                r = null;
+                if (DEBUG_SERVICE) {
+                    Slog.v(TAG_SERVICE, "Whoops, can't use existing external service");
+                }
+            }
         }
         if (r == null) {
             try {
