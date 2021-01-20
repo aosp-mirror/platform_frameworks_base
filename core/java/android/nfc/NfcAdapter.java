@@ -350,6 +350,22 @@ public final class NfcAdapter {
             "android.nfc.extra.HANDOVER_TRANSFER_STATUS";
 
     /** @hide */
+    public static final String ACTION_ALWAYS_ON_STATE_CHANGED =
+            "android.nfc.action.ALWAYS_ON_STATE_CHANGED";
+
+    /**
+     * Used as an int extra field in {@link #ACTION_ALWAYS_ON_STATE_CHANGED}
+     * intents to request the current power state. Possible values are:
+     * {@link #STATE_OFF},
+     * {@link #STATE_TURNING_ON},
+     * {@link #STATE_ON},
+     * {@link #STATE_TURNING_OFF},
+     * @hide
+     */
+    public static final String EXTRA_ALWAYS_ON_STATE =
+            "android.nfc.extra.ALWAYS_ON_STATE";
+
+    /** @hide */
     public static final int HANDOVER_TRANSFER_STATUS_SUCCESS = 0;
     /** @hide */
     public static final int HANDOVER_TRANSFER_STATUS_FAILURE = 1;
@@ -2217,6 +2233,108 @@ public final class NfcAdapter {
             return android.os.Build.VERSION_CODES.GINGERBREAD; // best guess
         } else {
             return mContext.getApplicationInfo().targetSdkVersion;
+        }
+    }
+
+    /**
+     * Sets NFC controller always on feature.
+     * <p>This API is for the NFCC internal state management. It allows to discriminate
+     * the controller function from the NFC function by keeping the NFC Controller on without
+     * any NFC RF enabled if necessary.
+     * <p>This call is asynchronous. Listen for {@link #ACTION_ALWAYS_ON_STATE_CHANGED}
+     * broadcasts to find out when the operation is complete.
+     * <p>If this returns true, then either NFCC is already on, or
+     * a {@link #ACTION_ALWAYS_ON_STATE_CHANGED} broadcast will be sent to indicate
+     * a state transition.
+     * If this returns false, then there is some problem that prevents an attempt to turn NFCC on.
+     * @param value if true the NFCC will be kept on (with no RF enabled if NFC adapter is
+     * disabled), if false the NFCC will follow completely the Nfc adapter state.
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @return void
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean setAlwaysOn(boolean value) {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.setAlwaysOn(value);
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.setAlwaysOn(value);
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks NFC controller always on feature is enabled.
+     *
+     * @return True if NFC controller always on is enabled, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @hide
+     */
+
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean isAlwaysOnEnabled() {
+        try {
+            return sService.isAlwaysOnEnabled();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isAlwaysOnEnabled();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Checks if the device supports NFC controller always on functionality.
+     *
+     * @return True if device supports NFC controller always on, false otherwise
+     * @throws UnsupportedOperationException if FEATURE_NFC is unavailable.
+     * @hide
+     */
+
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+    public boolean isAlwaysOnSupported() {
+        if (!sHasNfcFeature) {
+            throw new UnsupportedOperationException();
+        }
+        try {
+            return sService.isAlwaysOnSupported();
+        } catch (RemoteException e) {
+            attemptDeadServiceRecovery(e);
+            // Try one more time
+            if (sService == null) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+                return false;
+            }
+            try {
+                return sService.isAlwaysOnSupported();
+            } catch (RemoteException ee) {
+                Log.e(TAG, "Failed to recover NFC Service.");
+            }
+            return false;
         }
     }
 }
