@@ -36,6 +36,7 @@ import android.provider.Settings;
 import android.util.FeatureFlagUtils;
 
 import com.android.settingslib.R;
+import com.android.settingslib.Utils;
 
 import java.util.List;
 
@@ -60,17 +61,25 @@ public class WifiStatusTracker {
     private final NetworkRequest mNetworkRequest = new NetworkRequest.Builder()
             .clearCapabilities()
             .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build();
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR).build();
     private final NetworkCallback mNetworkCallback = new NetworkCallback() {
         // Note: onCapabilitiesChanged is guaranteed to be called "immediately" after onAvailable
         // and onLinkPropertiesChanged.
         @Override
         public void onCapabilitiesChanged(
                 Network network, NetworkCapabilities networkCapabilities) {
-            WifiInfo wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
-            updateWifiInfo(wifiInfo);
-            updateStatusLabel();
-            mCallback.run();
+            WifiInfo wifiInfo = null;
+            if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                wifiInfo = Utils.tryGetWifiInfoForVcn(networkCapabilities);
+            } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
+            }
+            if (wifiInfo != null) {
+                updateWifiInfo(wifiInfo);
+                updateStatusLabel();
+                mCallback.run();
+            }
         }
 
         @Override
@@ -238,8 +247,14 @@ public class WifiStatusTracker {
         NetworkCapabilities networkCapabilities;
         isDefaultNetwork = false;
         if (mDefaultNetworkCapabilities != null) {
-            isDefaultNetwork = mDefaultNetworkCapabilities.hasTransport(
+            boolean isWifi = mDefaultNetworkCapabilities.hasTransport(
                     NetworkCapabilities.TRANSPORT_WIFI);
+            boolean isVcnOverWifi = mDefaultNetworkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_CELLULAR)
+                            && (Utils.tryGetWifiInfoForVcn(mDefaultNetworkCapabilities) != null);
+            if (isWifi || isVcnOverWifi) {
+                isDefaultNetwork = true;
+            }
         }
         if (isDefaultNetwork) {
             // Wifi is connected and the default network.
