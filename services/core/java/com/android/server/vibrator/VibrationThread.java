@@ -39,8 +39,6 @@ import com.google.android.collect.Lists;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /** Plays a {@link Vibration} in dedicated thread. */
 // TODO(b/159207608): Make this package-private once vibrator services are moved to this package
@@ -76,7 +74,6 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
         void onVibrationEnded(long vibrationId, Vibration.Status status);
     }
 
-    private final Object mLock = new Object();
     private final WorkSource mWorkSource = new WorkSource();
     private final PowerManager.WakeLock mWakeLock;
     private final IBatteryStats mBatteryStatsService;
@@ -84,7 +81,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     private final VibrationCallbacks mCallbacks;
     private final SparseArray<VibratorController> mVibrators;
 
-    @GuardedBy("mLock")
+    @GuardedBy("this")
     @Nullable
     private VibrateStep mCurrentVibrateStep;
     @GuardedBy("this")
@@ -147,7 +144,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
 
     /** Notify current vibration that a step has completed on given vibrator. */
     public void vibratorComplete(int vibratorId) {
-        synchronized (mLock) {
+        synchronized (this) {
             if (mCurrentVibrateStep != null) {
                 mCurrentVibrateStep.vibratorComplete(vibratorId);
             }
@@ -171,7 +168,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
             final int stepCount = steps.size();
             for (int i = 0; i < stepCount; i++) {
                 Step step = steps.get(i);
-                synchronized (mLock) {
+                synchronized (this) {
                     if (step instanceof VibrateStep) {
                         mCurrentVibrateStep = (VibrateStep) step;
                     } else {
@@ -315,27 +312,6 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
         }
     }
 
-    /**
-     * Sleeps until given {@link CountDownLatch} has finished or {@code wakeUpTime} was reached.
-     *
-     * <p>This stops immediately when {@link #cancel()} is called.
-     */
-    private void awaitUntil(CountDownLatch counter, long wakeUpTime) {
-        synchronized (this) {
-            long durationRemaining = wakeUpTime - SystemClock.uptimeMillis();
-            while (counter.getCount() > 0 && durationRemaining > 0) {
-                try {
-                    counter.await(durationRemaining, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e) {
-                }
-                if (mForceStop) {
-                    break;
-                }
-                durationRemaining = wakeUpTime - SystemClock.uptimeMillis();
-            }
-        }
-    }
-
     private void noteVibratorOn(long duration) {
         try {
             mBatteryStatsService.noteVibratorOn(mVibration.uid, duration);
@@ -371,12 +347,10 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     private final class SingleVibrateStep implements VibrateStep {
         private final VibratorController mVibrator;
         private final VibrationEffect mEffect;
-        private final CountDownLatch mCounter;
 
         SingleVibrateStep(VibratorController vibrator, VibrationEffect effect) {
             mVibrator = vibrator;
             mEffect = effect;
-            mCounter = new CountDownLatch(1);
         }
 
         @Override
@@ -390,7 +364,9 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                 return;
             }
             mVibrator.off();
-            mCounter.countDown();
+            synchronized (VibrationThread.this) {
+                VibrationThread.this.notify();
+            }
         }
 
         @Override
@@ -408,7 +384,11 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                     noteVibratorOn(duration);
                     // Vibration is playing with no need to control amplitudes, just wait for native
                     // callback or timeout.
-                    awaitUntil(mCounter, startTime + duration + CALLBACKS_EXTRA_TIMEOUT);
+                    waitUntil(startTime + duration + CALLBACKS_EXTRA_TIMEOUT);
+                    if (mForceStop) {
+                        mVibrator.off();
+                        return Vibration.Status.CANCELLED;
+                    }
                     return Vibration.Status.FINISHED;
                 }
 
@@ -499,14 +479,15 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
     /** Represent a synchronized vibration step on multiple vibrators. */
     private final class SyncedVibrateStep implements VibrateStep {
         private final SparseArray<VibrationEffect> mEffects;
-        private final CountDownLatch mActiveVibratorCounter;
-
         private final int mRequiredCapabilities;
         private final int[] mVibratorIds;
 
+        @GuardedBy("VibrationThread.this")
+        private int mActiveVibratorCounter;
+
         SyncedVibrateStep(SparseArray<VibrationEffect> effects) {
             mEffects = effects;
-            mActiveVibratorCounter = new CountDownLatch(mEffects.size());
+            mActiveVibratorCounter = mEffects.size();
             // TODO(b/159207608): Calculate required capabilities for syncing this step.
             mRequiredCapabilities = 0;
             mVibratorIds = new int[effects.size()];
@@ -527,7 +508,11 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                 return;
             }
             mVibrators.get(vibratorId).off();
-            mActiveVibratorCounter.countDown();
+            synchronized (VibrationThread.this) {
+                if (--mActiveVibratorCounter <= 0) {
+                    VibrationThread.this.notify();
+                }
+            }
         }
 
         @Override
@@ -556,7 +541,9 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                     AmplitudeStep nextStep = step.nextStep();
                     if (nextStep == null) {
                         // This vibrator has finished playing the effect for this step.
-                        mActiveVibratorCounter.countDown();
+                        synchronized (VibrationThread.this) {
+                            mActiveVibratorCounter--;
+                        }
                     } else {
                         nextSteps.add(nextStep);
                     }
@@ -564,7 +551,16 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
 
                 // All OneShot and Waveform effects have finished. Just wait for the other effects
                 // to end via native callbacks before finishing this synced step.
-                awaitUntil(mActiveVibratorCounter, startTime + timeout + CALLBACKS_EXTRA_TIMEOUT);
+                synchronized (VibrationThread.this) {
+                    if (mActiveVibratorCounter > 0) {
+                        waitUntil(startTime + timeout + CALLBACKS_EXTRA_TIMEOUT);
+                    }
+                }
+                if (mForceStop) {
+                    stopAllVibrators();
+                    return Vibration.Status.CANCELLED;
+                }
+
                 return Vibration.Status.FINISHED;
             } finally {
                 if (timeout > 0) {
@@ -779,7 +775,7 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                     Slog.d(TAG, "DelayStep of " + mDelay + "ms starting...");
                 }
                 waitUntil(SystemClock.uptimeMillis() + mDelay);
-                return Vibration.Status.FINISHED;
+                return mForceStop ? Vibration.Status.CANCELLED : Vibration.Status.FINISHED;
             } finally {
                 if (DEBUG) {
                     Slog.d(TAG, "DelayStep done.");

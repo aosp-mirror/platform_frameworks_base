@@ -272,12 +272,18 @@ public final class VibratorController {
             return 0;
         }
         synchronized (mLock) {
-            mNativeWrapper.compose(effect.getPrimitiveEffects().toArray(
-                    new VibrationEffect.Composition.PrimitiveEffect[0]), vibrationId);
+            VibrationEffect.Composition.PrimitiveEffect[] primitives =
+                    effect.getPrimitiveEffects().toArray(
+                            new VibrationEffect.Composition.PrimitiveEffect[0]);
+            mNativeWrapper.compose(primitives, vibrationId);
             notifyVibratorOnLocked();
             // Compose don't actually give us an estimated duration, so we just guess here.
-            // TODO(b/177807015): use exposed durations from IVibrator here instead
-            return 20 * effect.getPrimitiveEffects().size();
+            long duration = 0;
+            for (VibrationEffect.Composition.PrimitiveEffect primitive : primitives) {
+                // TODO(b/177807015): use exposed durations from IVibrator here instead
+                duration += 20 + primitive.delay;
+            }
+            return duration;
         }
     }
 
