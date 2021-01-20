@@ -80,7 +80,6 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
-import android.telephony.DataConnectionRealTimeInfo;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
@@ -247,10 +246,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private volatile boolean mFirewallEnabled;
     private volatile boolean mStrictEnabled;
 
-    private boolean mMobileActivityFromRadio = false;
-    private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
-    private int mLastPowerStateFromWifi = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
-
     private final RemoteCallbackList<INetworkActivityListener> mNetworkActivityListeners =
             new RemoteCallbackList<>();
     private boolean mNetworkActive;
@@ -397,36 +392,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      */
     private void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
             int uid) {
-        final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
-        int powerState = isActive
-                ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
-                : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
-        if (isMobile) {
-            if (mLastPowerStateFromRadio != powerState) {
-                mLastPowerStateFromRadio = powerState;
-                try {
-                    // TODO: The interface changes that comes from netd are handled by BSS itself.
-                    // There are still events caused by setting or removing idle timer, so keep
-                    // reporting from here until setting idler timer moved to CS.
-                    getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
-        if (ConnectivityManager.isNetworkTypeWifi(type)) {
-            if (mLastPowerStateFromWifi != powerState) {
-                mLastPowerStateFromWifi = powerState;
-                try {
-                    // TODO: The interface changes that comes from netd are handled by BSS itself.
-                    // There are still events caused by setting or removing idle timer, so keep
-                    // reporting from here until setting idler timer moved to CS.
-                    getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
-                } catch (RemoteException e) {
-                }
-            }
-        }
-
         final boolean active = isActive;
         invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
                 type, active, tsNanos, uid));
@@ -1847,8 +1812,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
 
-        pw.print("mMobileActivityFromRadio="); pw.print(mMobileActivityFromRadio);
-                pw.print(" mLastPowerStateFromRadio="); pw.println(mLastPowerStateFromRadio);
         pw.print("mNetworkActive="); pw.println(mNetworkActive);
 
         synchronized (mQuotaLock) {

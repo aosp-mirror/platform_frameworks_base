@@ -147,6 +147,7 @@ import android.net.netlink.InetDiagMessage;
 import android.net.shared.PrivateDnsConfig;
 import android.net.util.MultinetworkPolicyTracker;
 import android.net.util.NetdService;
+import android.os.BatteryStatsManager;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -8634,6 +8635,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * changes.
      */
     private static final class LegacyNetworkActivityTracker {
+        private static final int NO_UID = -1;
         private final Context mContext;
         private final INetworkManagementService mNMS;
 
@@ -8723,6 +8725,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 return; // do not track any other networks
             }
 
+            updateRadioPowerState(true /* isActive */, type);
+
             if (timeout > 0 && iface != null) {
                 try {
                     // TODO: Access INetd directly instead of NMS
@@ -8741,16 +8745,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final String iface = networkAgent.linkProperties.getInterfaceName();
             final NetworkCapabilities caps = networkAgent.networkCapabilities;
 
-            if (iface != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                    || caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))) {
-                try {
-                    // the call fails silently if no idle timer setup for this interface
-                    // TODO: Access INetd directly instead of NMS
-                    mNMS.removeIdleTimer(iface);
-                } catch (Exception e) {
-                    // You shall not crash!
-                    loge("Exception in removeDataActivityTracking " + e);
-                }
+            if (iface == null) return;
+
+            final int type;
+            if (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                type = NetworkCapabilities.TRANSPORT_CELLULAR;
+            } else if (caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
+                type = NetworkCapabilities.TRANSPORT_WIFI;
+            } else {
+                return; // do not track any other networks
+            }
+
+            try {
+                updateRadioPowerState(false /* isActive */, type);
+                // The call fails silently if no idle timer setup for this interface.
+                // TODO: Access INetd directly instead of NMS
+                mNMS.removeIdleTimer(iface);
+            } catch (Exception e) {
+                // You shall not crash!
+                loge("Exception in removeDataActivityTracking " + e);
             }
         }
 
@@ -8764,6 +8777,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             if (oldNetwork != null) {
                 removeDataActivityTracking(oldNetwork);
+            }
+        }
+
+        private void updateRadioPowerState(boolean isActive, int transportType) {
+            final BatteryStatsManager bs = mContext.getSystemService(BatteryStatsManager.class);
+            switch (transportType) {
+                case NetworkCapabilities.TRANSPORT_CELLULAR:
+                    bs.reportMobileRadioPowerState(isActive, NO_UID);
+                    break;
+                case NetworkCapabilities.TRANSPORT_WIFI:
+                    bs.reportWifiRadioPowerState(isActive, NO_UID);
+                    break;
+                default:
+                    logw("Untracked transport type:" + transportType);
             }
         }
     }
