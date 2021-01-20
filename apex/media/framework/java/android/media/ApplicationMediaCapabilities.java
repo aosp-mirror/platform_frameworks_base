@@ -192,10 +192,23 @@ public final class ApplicationMediaCapabilities implements Parcelable {
                     for (int readCount = 0; readCount < count; ++readCount) {
                         builder.addSupportedVideoMimeType(in.readString());
                     }
+
+                    // Parse unsupported video codec mime types.
+                    count = in.readInt();
+                    for (int readCount = 0; readCount < count; ++readCount) {
+                        builder.addUnsupportedVideoMimeType(in.readString());
+                    }
+
                     // Parse supported hdr types.
                     count = in.readInt();
                     for (int readCount = 0; readCount < count; ++readCount) {
                         builder.addSupportedHdrType(in.readString());
+                    }
+
+                    // Parse unsupported hdr types.
+                    count = in.readInt();
+                    for (int readCount = 0; readCount < count; ++readCount) {
+                        builder.addUnsupportedHdrType(in.readString());
                     }
 
                     boolean supported = in.readBoolean();
