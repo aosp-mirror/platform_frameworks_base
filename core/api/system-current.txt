@@ -7331,157 +7331,157 @@ package android.net.apf {
 
 package android.net.metrics {
 
-  public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class ApfProgramEvent.Builder {
-    ctor public ApfProgramEvent.Builder();
-    method @NonNull public android.net.metrics.ApfProgramEvent build();
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
+  @Deprecated public static final class ApfProgramEvent.Builder {
+    ctor @Deprecated public ApfProgramEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent build();
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
   }
 
-  public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class ApfStats.Builder {
-    ctor public ApfStats.Builder();
-    method @NonNull public android.net.metrics.ApfStats build();
-    method @NonNull public android.net.metrics.ApfStats.Builder setDroppedRas(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setDurationMs(long);
-    method @NonNull public android.net.metrics.ApfStats.Builder setMatchingRas(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setParseErrors(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setReceivedRas(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
+  @Deprecated public static final class ApfStats.Builder {
+    ctor @Deprecated public ApfStats.Builder();
+    method @Deprecated @NonNull public android.net.metrics.ApfStats build();
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setDroppedRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setDurationMs(long);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setMatchingRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setParseErrors(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setReceivedRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
   }
 
-  public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class DhcpClientEvent.Builder {
-    ctor public DhcpClientEvent.Builder();
-    method @NonNull public android.net.metrics.DhcpClientEvent build();
-    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
-    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
+  @Deprecated public static final class DhcpClientEvent.Builder {
+    ctor @Deprecated public DhcpClientEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.DhcpClientEvent build();
+    method @Deprecated @NonNull public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
+    method @Deprecated @NonNull public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
   }
 
-  public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public DhcpErrorEvent(int);
-    method public static int errorCodeWithOption(int, int);
-    field public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
-    field public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
-    field public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
-    field public static final int DHCP_ERROR = 4; // 0x4
-    field public static final int DHCP_INVALID_OPTION_LENGTH = 67305472; // 0x4030000
-    field public static final int DHCP_NO_COOKIE = 67502080; // 0x4060000
-    field public static final int DHCP_NO_MSG_TYPE = 67371008; // 0x4040000
-    field public static final int DHCP_UNKNOWN_MSG_TYPE = 67436544; // 0x4050000
-    field public static final int L2_ERROR = 1; // 0x1
-    field public static final int L2_TOO_SHORT = 16842752; // 0x1010000
-    field public static final int L2_WRONG_ETH_TYPE = 16908288; // 0x1020000
-    field public static final int L3_ERROR = 2; // 0x2
-    field public static final int L3_INVALID_IP = 33751040; // 0x2030000
-    field public static final int L3_NOT_IPV4 = 33685504; // 0x2020000
-    field public static final int L3_TOO_SHORT = 33619968; // 0x2010000
-    field public static final int L4_ERROR = 3; // 0x3
-    field public static final int L4_NOT_UDP = 50397184; // 0x3010000
-    field public static final int L4_WRONG_PORT = 50462720; // 0x3020000
-    field public static final int MISC_ERROR = 5; // 0x5
-    field public static final int PARSING_ERROR = 84082688; // 0x5030000
-    field public static final int RECEIVE_ERROR = 84017152; // 0x5020000
+  @Deprecated public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public DhcpErrorEvent(int);
+    method @Deprecated public static int errorCodeWithOption(int, int);
+    field @Deprecated public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
+    field @Deprecated public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
+    field @Deprecated public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
+    field @Deprecated public static final int DHCP_ERROR = 4; // 0x4
+    field @Deprecated public static final int DHCP_INVALID_OPTION_LENGTH = 67305472; // 0x4030000
+    field @Deprecated public static final int DHCP_NO_COOKIE = 67502080; // 0x4060000
+    field @Deprecated public static final int DHCP_NO_MSG_TYPE = 67371008; // 0x4040000
+    field @Deprecated public static final int DHCP_UNKNOWN_MSG_TYPE = 67436544; // 0x4050000
+    field @Deprecated public static final int L2_ERROR = 1; // 0x1
+    field @Deprecated public static final int L2_TOO_SHORT = 16842752; // 0x1010000
+    field @Deprecated public static final int L2_WRONG_ETH_TYPE = 16908288; // 0x1020000
+    field @Deprecated public static final int L3_ERROR = 2; // 0x2
+    field @Deprecated public static final int L3_INVALID_IP = 33751040; // 0x2030000
+    field @Deprecated public static final int L3_NOT_IPV4 = 33685504; // 0x2020000
+    field @Deprecated public static final int L3_TOO_SHORT = 33619968; // 0x2010000
+    field @Deprecated public static final int L4_ERROR = 3; // 0x3
+    field @Deprecated public static final int L4_NOT_UDP = 50397184; // 0x3010000
+    field @Deprecated public static final int L4_WRONG_PORT = 50462720; // 0x3020000
+    field @Deprecated public static final int MISC_ERROR = 5; // 0x5
+    field @Deprecated public static final int PARSING_ERROR = 84082688; // 0x5030000
+    field @Deprecated public static final int RECEIVE_ERROR = 84017152; // 0x5020000
   }
 
-  public class IpConnectivityLog {
-    ctor public IpConnectivityLog();
-    method public boolean log(long, @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(@NonNull String, @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(@NonNull android.net.Network, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(int, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(@NonNull android.net.metrics.IpConnectivityLog.Event);
+  @Deprecated public class IpConnectivityLog {
+    ctor @Deprecated public IpConnectivityLog();
+    method @Deprecated public boolean log(long, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(@NonNull String, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(@NonNull android.net.Network, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(int, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(@NonNull android.net.metrics.IpConnectivityLog.Event);
   }
 
-  public static interface IpConnectivityLog.Event extends android.os.Parcelable {
+  @Deprecated public static interface IpConnectivityLog.Event extends android.os.Parcelable {
   }
 
-  public final class IpManagerEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public IpManagerEvent(int, long);
-    field public static final int COMPLETE_LIFECYCLE = 3; // 0x3
-    field public static final int ERROR_INTERFACE_NOT_FOUND = 8; // 0x8
-    field public static final int ERROR_INVALID_PROVISIONING = 7; // 0x7
-    field public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6; // 0x6
-    field public static final int ERROR_STARTING_IPV4 = 4; // 0x4
-    field public static final int ERROR_STARTING_IPV6 = 5; // 0x5
-    field public static final int PROVISIONING_FAIL = 2; // 0x2
-    field public static final int PROVISIONING_OK = 1; // 0x1
+  @Deprecated public final class IpManagerEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public IpManagerEvent(int, long);
+    field @Deprecated public static final int COMPLETE_LIFECYCLE = 3; // 0x3
+    field @Deprecated public static final int ERROR_INTERFACE_NOT_FOUND = 8; // 0x8
+    field @Deprecated public static final int ERROR_INVALID_PROVISIONING = 7; // 0x7
+    field @Deprecated public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6; // 0x6
+    field @Deprecated public static final int ERROR_STARTING_IPV4 = 4; // 0x4
+    field @Deprecated public static final int ERROR_STARTING_IPV6 = 5; // 0x5
+    field @Deprecated public static final int PROVISIONING_FAIL = 2; // 0x2
+    field @Deprecated public static final int PROVISIONING_OK = 1; // 0x1
   }
 
-  public final class IpReachabilityEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public IpReachabilityEvent(int);
-    field public static final int NUD_FAILED = 512; // 0x200
-    field public static final int NUD_FAILED_ORGANIC = 1024; // 0x400
-    field public static final int PROBE = 256; // 0x100
-    field public static final int PROVISIONING_LOST = 768; // 0x300
-    field public static final int PROVISIONING_LOST_ORGANIC = 1280; // 0x500
+  @Deprecated public final class IpReachabilityEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public IpReachabilityEvent(int);
+    field @Deprecated public static final int NUD_FAILED = 512; // 0x200
+    field @Deprecated public static final int NUD_FAILED_ORGANIC = 1024; // 0x400
+    field @Deprecated public static final int PROBE = 256; // 0x100
+    field @Deprecated public static final int PROVISIONING_LOST = 768; // 0x300
+    field @Deprecated public static final int PROVISIONING_LOST_ORGANIC = 1280; // 0x500
   }
 
-  public final class NetworkEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public NetworkEvent(int, long);
-    ctor public NetworkEvent(int);
-    field public static final int NETWORK_CAPTIVE_PORTAL_FOUND = 4; // 0x4
-    field public static final int NETWORK_CONNECTED = 1; // 0x1
-    field public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12; // 0xc
-    field public static final int NETWORK_DISCONNECTED = 7; // 0x7
-    field public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
-    field public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
-    field public static final int NETWORK_LINGER = 5; // 0x5
-    field public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
-    field public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
-    field public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
-    field public static final int NETWORK_UNLINGER = 6; // 0x6
-    field public static final int NETWORK_VALIDATED = 2; // 0x2
-    field public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
+  @Deprecated public final class NetworkEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public NetworkEvent(int, long);
+    ctor @Deprecated public NetworkEvent(int);
+    field @Deprecated public static final int NETWORK_CAPTIVE_PORTAL_FOUND = 4; // 0x4
+    field @Deprecated public static final int NETWORK_CONNECTED = 1; // 0x1
+    field @Deprecated public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12; // 0xc
+    field @Deprecated public static final int NETWORK_DISCONNECTED = 7; // 0x7
+    field @Deprecated public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
+    field @Deprecated public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
+    field @Deprecated public static final int NETWORK_LINGER = 5; // 0x5
+    field @Deprecated public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
+    field @Deprecated public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
+    field @Deprecated public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
+    field @Deprecated public static final int NETWORK_UNLINGER = 6; // 0x6
+    field @Deprecated public static final int NETWORK_VALIDATED = 2; // 0x2
+    field @Deprecated public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
   }
 
-  public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class RaEvent.Builder {
-    ctor public RaEvent.Builder();
-    method @NonNull public android.net.metrics.RaEvent build();
-    method @NonNull public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
+  @Deprecated public static final class RaEvent.Builder {
+    ctor @Deprecated public RaEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.RaEvent build();
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
   }
 
-  public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
-    method @NonNull public static String getProbeName(int);
-    field public static final int DNS_FAILURE = 0; // 0x0
-    field public static final int DNS_SUCCESS = 1; // 0x1
-    field public static final int PROBE_DNS = 0; // 0x0
-    field public static final int PROBE_FALLBACK = 4; // 0x4
-    field public static final int PROBE_HTTP = 1; // 0x1
-    field public static final int PROBE_HTTPS = 2; // 0x2
-    field public static final int PROBE_PAC = 3; // 0x3
-    field public static final int PROBE_PRIVDNS = 5; // 0x5
+  @Deprecated public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated @NonNull public static String getProbeName(int);
+    field @Deprecated public static final int DNS_FAILURE = 0; // 0x0
+    field @Deprecated public static final int DNS_SUCCESS = 1; // 0x1
+    field @Deprecated public static final int PROBE_DNS = 0; // 0x0
+    field @Deprecated public static final int PROBE_FALLBACK = 4; // 0x4
+    field @Deprecated public static final int PROBE_HTTP = 1; // 0x1
+    field @Deprecated public static final int PROBE_HTTPS = 2; // 0x2
+    field @Deprecated public static final int PROBE_PAC = 3; // 0x3
+    field @Deprecated public static final int PROBE_PRIVDNS = 5; // 0x5
   }
 
-  public static final class ValidationProbeEvent.Builder {
-    ctor public ValidationProbeEvent.Builder();
-    method @NonNull public android.net.metrics.ValidationProbeEvent build();
-    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
-    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
-    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
+  @Deprecated public static final class ValidationProbeEvent.Builder {
+    ctor @Deprecated public ValidationProbeEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent build();
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
   }
 
 }
