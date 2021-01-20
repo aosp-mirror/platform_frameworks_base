@@ -244,7 +244,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.security.Credentials;
-import android.security.KeyStore;
 import android.system.Os;
 import android.telephony.TelephonyManager;
 import android.telephony.data.EpsBearerQosSessionAttributes;
@@ -276,6 +275,7 @@ import com.android.server.connectivity.NetworkNotificationManager.NotificationTy
 import com.android.server.connectivity.ProxyTracker;
 import com.android.server.connectivity.QosCallbackTracker;
 import com.android.server.connectivity.Vpn;
+import com.android.server.connectivity.VpnProfileStore;
 import com.android.server.net.NetworkPinner;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.testutils.ExceptionUtils;
@@ -431,7 +431,7 @@ public class ConnectivityServiceTest {
     @Mock MockableSystemProperties mSystemProperties;
     @Mock EthernetManager mEthernetManager;
     @Mock NetworkPolicyManager mNetworkPolicyManager;
-    @Mock KeyStore mKeyStore;
+    @Mock VpnProfileStore mVpnProfileStore;
     @Mock SystemConfigManager mSystemConfigManager;
 
     private ArgumentCaptor<ResolverParamsParcel> mResolverParamsParcelCaptor =
@@ -1115,7 +1115,7 @@ public class ConnectivityServiceTest {
                             return mDeviceIdleInternal;
                         }
                     },
-                    mNetworkManagementService, mMockNetd, userId, mKeyStore);
+                    mNetworkManagementService, mMockNetd, userId, mVpnProfileStore);
         }
 
         public void setUids(Set<UidRange> uids) {
@@ -1294,8 +1294,9 @@ public class ConnectivityServiceTest {
                 return mVMSHandlerThread;
             }
 
-            public KeyStore getKeyStore() {
-                return mKeyStore;
+            @Override
+            public VpnProfileStore getVpnProfileStore() {
+                return mVpnProfileStore;
             }
 
             public INetd getNetd() {
@@ -7487,8 +7488,7 @@ public class ConnectivityServiceTest {
     private void setupLegacyLockdownVpn() {
         final String profileName = "testVpnProfile";
         final byte[] profileTag = profileName.getBytes(StandardCharsets.UTF_8);
-        when(mKeyStore.contains(Credentials.LOCKDOWN_VPN)).thenReturn(true);
-        when(mKeyStore.get(Credentials.LOCKDOWN_VPN)).thenReturn(profileTag);
+        when(mVpnProfileStore.get(Credentials.LOCKDOWN_VPN)).thenReturn(profileTag);
 
         final VpnProfile profile = new VpnProfile(profileName);
         profile.name = "My VPN";
@@ -7496,7 +7496,7 @@ public class ConnectivityServiceTest {
         profile.dnsServers = "8.8.8.8";
         profile.type = VpnProfile.TYPE_IPSEC_XAUTH_PSK;
         final byte[] encodedProfile = profile.encode();
-        when(mKeyStore.get(Credentials.VPN + profileName)).thenReturn(encodedProfile);
+        when(mVpnProfileStore.get(Credentials.VPN + profileName)).thenReturn(encodedProfile);
     }
 
     private void establishLegacyLockdownVpn(Network underlying) throws Exception {
