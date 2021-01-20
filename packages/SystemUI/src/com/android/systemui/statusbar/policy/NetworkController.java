@@ -66,12 +66,13 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
          * @param isWide //TODO: unused?
          * @param subId subscription ID for which to update the UI
          * @param roaming indicates roaming
+         * @param showTriangle whether to show the mobile triangle the in status bar
          */
         default void setMobileDataIndicators(IconState statusIcon, IconState qsIcon, int statusType,
                 int qsType, boolean activityIn, boolean activityOut,
                 CharSequence typeContentDescription,
                 CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming) {
+                boolean isWide, int subId, boolean roaming, boolean showTriangle) {
         }
 
         default void setSubs(List<SubscriptionInfo> subs) {}
