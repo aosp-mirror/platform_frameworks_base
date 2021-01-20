@@ -4142,6 +4142,8 @@
   <java-symbol type="string" name="turn_on_magnification_settings_action" />
   <java-symbol type="string" name="dismiss_action" />
 
+  <java-symbol type="bool" name="config_magnification_area" />
+
   <java-symbol type="bool" name="config_trackerAppNeedsPermissions"/>
 
   <!-- Package with global data query permissions for AppSearch -->
