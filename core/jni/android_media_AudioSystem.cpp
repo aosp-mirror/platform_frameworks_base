@@ -1945,6 +1945,7 @@ static jint convertAudioMixToNative(JNIEnv *env,
     nAudioMix->mCbFlags = env->GetIntField(jAudioMix, gAudioMixFields.mCallbackFlags);
 
     jobject jFormat = env->GetObjectField(jAudioMix, gAudioMixFields.mFormat);
+    nAudioMix->mFormat = AUDIO_CONFIG_INITIALIZER;
     nAudioMix->mFormat.sample_rate = env->GetIntField(jFormat,
                                                      gAudioFormatFields.mSampleRate);
     nAudioMix->mFormat.channel_mask = outChannelMaskToNative(env->GetIntField(jFormat,
