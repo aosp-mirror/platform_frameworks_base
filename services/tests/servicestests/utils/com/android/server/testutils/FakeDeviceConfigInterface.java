@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.utils;
+package com.android.server.testutils;
 
 import android.annotation.NonNull;
 import android.provider.DeviceConfig;
@@ -22,6 +22,7 @@ import android.util.ArrayMap;
 import android.util.Pair;
 
 import com.android.internal.util.Preconditions;
+import com.android.server.utils.DeviceConfigInterface;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -116,6 +117,19 @@ public class FakeDeviceConfigInterface implements DeviceConfigInterface {
         }
         try {
             return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    @Override
+    public float getFloat(String namespace, String name, float defaultValue) {
+        String value = getProperty(namespace, name);
+        if (value == null) {
+            return defaultValue;
+        }
+        try {
+            return Float.parseFloat(value);
         } catch (NumberFormatException e) {
             return defaultValue;
         }
