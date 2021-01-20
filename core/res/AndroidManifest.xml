@@ -3620,6 +3620,15 @@
     <permission android:name="android.permission.BIND_TRANSLATION_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows apps to use ui translation functions.
+         <p>Protection level: signature|privileged
+         <p> TODO(b/177703453): Restrict to a specific Role instead of allowing access to any
+         privileged app.
+         @hide Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.MANAGE_UI_TRANSLATION"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).

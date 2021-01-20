@@ -26,7 +26,9 @@ import android.content.pm.ServiceInfo;
 import android.os.RemoteException;
 import android.service.translation.TranslationServiceInfo;
 import android.util.Slog;
+import android.view.autofill.AutofillId;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationManager.UiTranslationState;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -34,6 +36,7 @@ import com.android.internal.util.SyncResultReceiver;
 import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 final class TranslationManagerServiceImpl extends
         AbstractPerUserSystemService<TranslationManagerServiceImpl, TranslationManagerService> {
@@ -121,5 +124,12 @@ final class TranslationManagerServiceImpl extends
         if (remoteService != null) {
             remoteService.onSessionCreated(sourceSpec, destSpec, sessionId, resultReceiver);
         }
+    }
+
+    @GuardedBy("mLock")
+    public void updateUiTranslationState(@UiTranslationState int state,
+            TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+            int taskId) {
+        // TODO: implement this in next change
     }
 }
