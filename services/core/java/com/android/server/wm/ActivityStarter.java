@@ -122,7 +122,6 @@ import com.android.server.power.ShutdownCheckPoints;
 import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
-import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
 
 import java.io.PrintWriter;
@@ -1171,41 +1170,18 @@ class ActivityStarter {
             r.appTimeTracker = sourceRecord.appTimeTracker;
         }
 
-        final Task rootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
-
-        // If we are starting an activity that is not from the same uid as the currently resumed
-        // one, check whether app switches are allowed.
-        if (voiceSession == null && rootTask != null && (rootTask.getResumedActivity() == null
-                || rootTask.getResumedActivity().info.applicationInfo.uid != realCallingUid)) {
-            if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
-                    realCallingPid, realCallingUid, "Activity start")) {
-                if (!(restrictedBgActivity && handleBackgroundActivityAbort(r))) {
-                    mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
-                            sourceRecord, startFlags, rootTask, callerApp, intentGrants));
-                }
-                ActivityOptions.abort(checkedOptions);
-                return ActivityManager.START_SWITCHES_CANCELED;
-            }
+        // Only allow app switching to be resumed if activity is not a restricted background
+        // activity and target app is not home process, otherwise any background activity
+        // started in background task can stop home button protection mode.
+        // As the targeted app is not a home process and we don't need to wait for the 2nd
+        // activity to be started to resume app switching, we can just enable app switching
+        // directly.
+        WindowProcessController homeProcess = mService.mHomeProcess;
+        boolean isHomeProcess = homeProcess != null
+                && aInfo.applicationInfo.uid == homeProcess.mUid;
+        if (!restrictedBgActivity && !isHomeProcess) {
+            mService.resumeAppSwitches();
         }
-
-        if (mService.getBalAppSwitchesProtectionEnabled()) {
-            // Only allow app switching to be resumed if activity is not a restricted background
-            // activity and target app is not home process, otherwise any background activity
-            // started in background task can stop home button protection mode.
-            // As the targeted app is not a home process and we don't need to wait for the 2nd
-            // activity to be started to resume app switching, we can just enable app switching
-            // directly.
-            WindowProcessController homeProcess = mService.mHomeProcess;
-            boolean isHomeProcess = homeProcess != null
-                    && aInfo.applicationInfo.uid == homeProcess.mUid;
-            if (!restrictedBgActivity && !isHomeProcess) {
-                mService.resumeAppSwitches();
-            }
-        } else {
-            mService.onStartActivitySetDidAppSwitch();
-        }
-
-        mController.doPendingActivityLaunches(false);
 
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                 request.voiceInteractor, startFlags, true /* doResume */, checkedOptions, inTask,
@@ -1286,8 +1262,6 @@ class ActivityStarter {
             return false;
         }
 
-        // App switching will be allowed if BAL app switching flag is not enabled, or if
-        // its app switching rule allows it.
         // This is used to block background activity launch even if the app is still
         // visible to user after user clicking home button.
         final boolean appSwitchAllowed = mService.getBalAppSwitchesAllowed();
@@ -1438,7 +1412,6 @@ class ActivityStarter {
         Slog.w(TAG, "Background activity start [callingPackage: " + callingPackage
                 + "; callingUid: " + callingUid
                 + "; appSwitchAllowed: " + appSwitchAllowed
-                + "; balAppSwitchEnabled: " + mService.getBalAppSwitchesProtectionEnabled()
                 + "; isCallingUidForeground: " + isCallingUidForeground
                 + "; callingUidHasAnyVisibleWindow: " + callingUidHasAnyVisibleWindow
                 + "; callingUidProcState: " + DebugUtils.valueToString(ActivityManager.class,
