@@ -324,6 +324,7 @@
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="android.nfc.action.REQUIRE_UNLOCK_FOR_NFC" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_UP" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_DOWN" />
     <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
