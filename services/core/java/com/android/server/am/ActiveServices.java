@@ -1692,7 +1692,7 @@ public final class ActiveServices {
             }
 
             try {
-                String ignoreForeground = null;
+                boolean ignoreForeground = false;
                 final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
                 switch (mode) {
@@ -1702,9 +1702,9 @@ public final class ActiveServices {
                         break;
                     case AppOpsManager.MODE_IGNORED:
                         // Whoops, silently ignore this.
-                        ignoreForeground = "Service.startForeground() not allowed due to app op: "
-                                + "service " + r.shortInstanceName;
-                        Slog.w(TAG, ignoreForeground);
+                        Slog.w(TAG, "Service.startForeground() not allowed due to app op: service "
+                                + r.shortInstanceName);
+                        ignoreForeground = true;
                         break;
                     default:
                         throw new SecurityException("Foreground not allowed as per app op");
@@ -1712,18 +1712,19 @@ public final class ActiveServices {
 
                 // Apps that are TOP or effectively similar may call startForeground() on
                 // their services even if they are restricted from doing that while in bg.
-                if (ignoreForeground == null
+                if (!ignoreForeground
                         && !appIsTopLocked(r.appInfo.uid)
                         && appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
-                    ignoreForeground = "Service.startForeground() not allowed due to bg restriction"
-                            + ":service " + r.shortInstanceName;
-                    Slog.w(TAG, ignoreForeground);
+                    Slog.w(TAG,
+                            "Service.startForeground() not allowed due to bg restriction: service "
+                                    + r.shortInstanceName);
                     // Back off of any foreground expectations around this service, since we've
                     // just turned down its fg request.
                     updateServiceForegroundLocked(r.app, false);
+                    ignoreForeground = true;
                 }
 
-                if (ignoreForeground == null) {
+                if (!ignoreForeground) {
                     if (isFgsBgStart(r.mAllowStartForeground)) {
                         if (!r.mLoggedInfoAllowStartForeground) {
                             Slog.wtf(TAG, "Background started FGS "
@@ -1732,12 +1733,17 @@ public final class ActiveServices {
                         }
                         if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                                 && isBgFgsRestrictionEnabled(r)) {
-                            ignoreForeground = "Service.startForeground() not allowed due to "
+                            final String msg = "Service.startForeground() not allowed due to "
                                     + "mAllowStartForeground false: service "
                                     + r.shortInstanceName;
-                            Slog.w(TAG, ignoreForeground);
+                            Slog.w(TAG, msg);
                             showFgsBgRestrictedNotificationLocked(r);
                             updateServiceForegroundLocked(r.app, true);
+                            ignoreForeground = true;
+                            if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
+                                    r.appInfo.uid)) {
+                                throw new IllegalStateException(msg);
+                            }
                         }
                     }
                 }
@@ -1746,7 +1752,7 @@ public final class ActiveServices {
                 // services, so now that we've enforced the startForegroundService() contract
                 // we only do the machinery of making the service foreground when the app
                 // is not restricted.
-                if (ignoreForeground == null) {
+                if (!ignoreForeground) {
                     if (r.foregroundId != id) {
                         cancelForegroundNotificationLocked(r);
                         r.foregroundId = id;
@@ -1807,10 +1813,6 @@ public final class ActiveServices {
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
-                    }
-                    if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, r.appInfo.uid)
-                            && isBgFgsRestrictionEnabled(r)) {
-                        throw new IllegalStateException(ignoreForeground);
                     }
                 }
             } finally {
