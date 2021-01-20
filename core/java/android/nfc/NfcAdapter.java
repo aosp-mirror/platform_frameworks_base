@@ -358,6 +358,14 @@ public final class NfcAdapter {
     public static final String EXTRA_HANDOVER_TRANSFER_URI =
             "android.nfc.extra.HANDOVER_TRANSFER_URI";
 
+    /**
+     * Broadcast Action: Notify possible NFC transaction blocked because device is locked.
+     * <p>An external NFC field detected when device locked and SecureNfc enabled.
+     * @hide
+     */
+    public static final String ACTION_REQUIRE_UNLOCK_FOR_NFC =
+            "android.nfc.action.REQUIRE_UNLOCK_FOR_NFC";
+
     // Guarded by NfcAdapter.class
     static boolean sIsInitialized = false;
     static boolean sHasNfcFeature;
