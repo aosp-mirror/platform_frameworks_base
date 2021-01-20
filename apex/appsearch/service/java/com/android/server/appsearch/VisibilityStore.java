@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
+// TODO(b/169883602): This is purposely a different package from the path so that it can access
+// AppSearchImpl's methods without having to make them public. This should be moved into a proper
+// package once AppSearchImpl-VisibilityStore's dependencies are refactored.
 package com.android.server.appsearch.external.localstorage;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
@@ -25,10 +29,10 @@ import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Process;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-
-import androidx.annotation.RequiresApi;
+import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
@@ -56,8 +60,16 @@ import java.util.Set;
  *
  * <p>NOTE: This class holds an instance of AppSearchImpl and AppSearchImpl holds an instance of
  * this class. Take care to not cause any circular dependencies.
+ *
+ * @hide
  */
-class VisibilityStore {
+public class VisibilityStore {
+
+    private static final String TAG = "AppSearchVisibilityStore";
+
+    /** No-op user id that won't have any visibility settings. */
+    public static final int NO_OP_USER_ID = -1;
+
     /** Schema type for documents that hold AppSearch's metadata, e.g. visibility settings */
     private static final String VISIBILITY_TYPE = "VisibilityType";
 
@@ -124,8 +136,8 @@ class VisibilityStore {
                     .build();
 
     /**
-     * These cannot have any of the special characters used by AppSearchImpl (e.g. {@link
-     * AppSearchImpl#PACKAGE_DELIMITER} or {@link AppSearchImpl#DATABASE_DELIMITER}.
+     * These cannot have any of the special characters used by AppSearchImpl (e.g. {@code
+     * AppSearchImpl#PACKAGE_DELIMITER} or {@code AppSearchImpl#DATABASE_DELIMITER}.
      */
     static final String PACKAGE_NAME = "VS#Pkg";
 
@@ -149,11 +161,15 @@ class VisibilityStore {
 
     private final AppSearchImpl mAppSearchImpl;
 
+    // Context of the system service.
     private final Context mContext;
+
+    // User ID of the caller who we're checking visibility settings for.
+    private final int mUserId;
 
     // UID of the package that has platform-query privileges, i.e. can query for all
     // platform-surfaceable content.
-    private int mGlobalQuerierPackageUid;
+    private int mGlobalQuerierUid;
 
     /**
      * Maps prefixes to the set of schemas that are platform-hidden within that prefix. All schemas
@@ -180,20 +196,15 @@ class VisibilityStore {
      *
      * @param appSearchImpl AppSearchImpl instance
      */
-    VisibilityStore(
+    public VisibilityStore(
             @NonNull AppSearchImpl appSearchImpl,
             @NonNull Context context,
+            @UserIdInt int userId,
             @NonNull String globalQuerierPackage) {
         mAppSearchImpl = appSearchImpl;
         mContext = context;
-        mGlobalQuerierPackageUid = Process.INVALID_UID;
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            // This should always pass since we should only allow platform access on S+ (the first
-            // version that AppSearch is offered on).
-            mGlobalQuerierPackageUid =
-                    Api24Impl.getGlobalQuerierPackageUid(context, globalQuerierPackage);
-        }
+        mUserId = userId;
+        mGlobalQuerierUid = getGlobalQuerierUid(globalQuerierPackage);
     }
 
     /**
@@ -357,7 +368,9 @@ class VisibilityStore {
         Preconditions.checkNotNull(prefix);
         Preconditions.checkNotNull(prefixedSchema);
 
-        if (callerUid == mGlobalQuerierPackageUid
+        // We compare appIds here rather than direct uids because the package's uid may change based
+        // on the user that's running.
+        if (UserHandle.isSameApp(mGlobalQuerierUid, callerUid)
                 && isSchemaPlatformSurfaceable(prefix, prefixedSchema)) {
             return true;
         }
@@ -414,26 +427,21 @@ class VisibilityStore {
             return false;
         }
 
-        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.P) {
-            // PackageManager.hasSigningCertificate is only available on P+
-            // This should never fail since we should only allow package access on S+ (the first
-            // version that AppSearch is offered on). But just in case, default to no package
-            // access.
-            return false;
-        }
-
         for (PackageIdentifier packageIdentifier : packageIdentifiers) {
             // Check that the caller uid matches this allowlisted PackageIdentifier.
-            if (Api24Impl.getPackageUid(mContext, packageIdentifier.getPackageName())
-                    != callerUid) {
+            // TODO(b/169883602): Consider caching the UIDs of packages. Looking this up in the
+            // package manager could be costly. We would also need to update the cache on
+            // package-removals.
+            if (getPackageUidAsUser(packageIdentifier.getPackageName()) != callerUid) {
                 continue;
             }
 
             // Check that the package also has the matching certificate
-            if (Api28Impl.hasSigningCertificate(
-                    mContext,
-                    packageIdentifier.getPackageName(),
-                    packageIdentifier.getSha256Certificate())) {
+            if (mContext.getPackageManager()
+                    .hasSigningCertificate(
+                            packageIdentifier.getPackageName(),
+                            packageIdentifier.getSha256Certificate(),
+                            PackageManager.CERT_INPUT_SHA256)) {
                 // The caller has the right package name and right certificate!
                 return true;
             }
@@ -448,7 +456,7 @@ class VisibilityStore {
      *
      * <p>{@link #initialize()} must be called after this.
      */
-    void handleReset() {
+    public void handleReset() {
         mNotPlatformSurfaceableMap.clear();
         mPackageAccessibleMap.clear();
     }
@@ -464,83 +472,40 @@ class VisibilityStore {
     }
 
     /**
-     * Wrapper class around API 24 methods.
-     *
-     * <p>Even though wrapping a call to a method from an API above minSdk inside an SDK_INT check
-     * makes it runtime safe, it is not optimal. When ART tries to optimize a class, it will do so
-     * regardless of the execution path, and will fail if it tries to resolve a method at a higher
-     * API if that method is being referenced somewhere in the class, even if that method would
-     * never be called at runtime due to the SDK_INT check. ART will however only try to optimize a
-     * class the first time it's referenced at runtime, this means if we wrap our above minSdk
-     * method calls inside classes that are only referenced at runtime at the appropriate API level,
-     * then we guarantee the ability to resolve all the methods.
+     * Finds the uid of the {@code globalQuerierPackage}. {@code globalQuerierPackage} must be a
+     * pre-installed, system app. Returns {@link Process#INVALID_UID} if unable to find the UID.
      */
-    @RequiresApi(24)
-    private static class Api24Impl {
-        private Api24Impl() {}
-
-        /**
-         * Finds the UID of the {@code globalQuerierPackage}. {@code globalQuerierPackage} must be a
-         * pre-installed, system app. Returns {@link Process#INVALID_UID} if unable to find the UID.
-         */
-        static int getGlobalQuerierPackageUid(
-                @NonNull Context context, @NonNull String globalQuerierPackage) {
-            try {
-                // TODO(b/169883602): In framework, this should be UserHandle.isSameApp or
-                //  packageManager.getPackageUidAsUser().
-                int flags =
-                        PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
-                                | PackageManager.MATCH_SYSTEM_ONLY;
-                return context.getPackageManager().getPackageUid(globalQuerierPackage, flags);
-            } catch (PackageManager.NameNotFoundException e) {
-                // Global querier doesn't exist.
-            }
-            return Process.INVALID_UID;
+    private int getGlobalQuerierUid(@NonNull String globalQuerierPackage) {
+        try {
+            int flags =
+                    PackageManager.MATCH_DISABLED_COMPONENTS
+                            | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                            | PackageManager.MATCH_SYSTEM_ONLY;
+            // It doesn't matter that we're using the caller's userId here. We'll eventually check
+            // that the two uids in question belong to the same appId.
+            return mContext.getPackageManager()
+                    .getPackageUidAsUser(globalQuerierPackage, flags, mUserId);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Global querier doesn't exist.
+            Log.i(
+                    TAG,
+                    "AppSearch global querier package not found on device:  '"
+                            + globalQuerierPackage
+                            + "'");
         }
-
-        /**
-         * Finds the UID of the {@code packageName}. Returns {@link Process#INVALID_UID} if unable
-         * to find the UID.
-         */
-        static int getPackageUid(@NonNull Context context, @NonNull String packageName) {
-            try {
-                // TODO(b/169883602): In framework, this should be UserHandle.isSameApp or
-                //  packageManager.getPackageUidAsUser().
-                return context.getPackageManager().getPackageUid(packageName, /*flags=*/ 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                // Global querier doesn't exist.
-            }
-            return Process.INVALID_UID;
-        }
+        return Process.INVALID_UID;
     }
 
     /**
-     * Wrapper class around API 28 methods.
-     *
-     * <p>Even though wrapping a call to a method from an API above minSdk inside an SDK_INT check
-     * makes it runtime safe, it is not optimal. When ART tries to optimize a class, it will do so
-     * regardless of the execution path, and will fail if it tries to resolve a method at a higher
-     * API if that method is being referenced somewhere in the class, even if that method would
-     * never be called at runtime due to the SDK_INT check. ART will however only try to optimize a
-     * class the first time it's referenced at runtime, this means if we wrap our above minSdk
-     * method calls inside classes that are only referenced at runtime at the appropriate API level,
-     * then we guarantee the ability to resolve all the methods.
+     * Finds the UID of the {@code packageName}. Returns {@link Process#INVALID_UID} if unable to
+     * find the UID.
      */
-    @RequiresApi(28)
-    private static class Api28Impl {
-        private Api28Impl() {}
-
-        /**
-         * Returns whether the {@code packageName} has been signed with {@code sha256Certificate}.
-         */
-        static boolean hasSigningCertificate(
-                @NonNull Context context,
-                @NonNull String packageName,
-                @NonNull byte[] sha256Certificate) {
-            return context.getPackageManager()
-                    .hasSigningCertificate(
-                            packageName, sha256Certificate, PackageManager.CERT_INPUT_SHA256);
+    private int getPackageUidAsUser(@NonNull String packageName) {
+        try {
+            return mContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Package doesn't exist, continue
         }
+        return Process.INVALID_UID;
     }
 }

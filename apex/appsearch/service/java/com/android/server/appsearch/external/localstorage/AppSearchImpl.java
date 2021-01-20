@@ -192,7 +192,8 @@ public final class AppSearchImpl {
             mIcingSearchEngineLocked = new IcingSearchEngine(options);
 
             mVisibilityStoreLocked =
-                    new VisibilityStore(this, context, globalQuerierPackage);
+                    new VisibilityStore(
+                            this, context, userId, globalQuerierPackage);
 
             InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
             SchemaProto schemaProto;
