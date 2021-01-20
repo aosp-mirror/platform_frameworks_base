@@ -4277,7 +4277,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int parentUser = getProfileParentId(profileUserId);
         enforceUserUnlocked(parentUser);
 
+        final boolean isSufficient;
         synchronized (getLockObject()) {
+
             int complexity = getAggregatedPasswordComplexityLocked(parentUser, true);
             PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(parentUser, true);
 
@@ -4285,8 +4287,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             final List<PasswordValidationError> passwordValidationErrors =
                     PasswordMetrics.validatePasswordMetrics(
                             minMetrics, complexity, false, metrics);
-            return passwordValidationErrors.isEmpty();
+            isSufficient = passwordValidationErrors.isEmpty();
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.IS_ACTIVE_PASSWORD_SUFFICIENT_FOR_DEVICE)
+                .setStrings(mOwners.getProfileOwnerComponent(caller.getUserId()).getPackageName())
+                .write();
+        return isSufficient;
     }
 
     @Override
