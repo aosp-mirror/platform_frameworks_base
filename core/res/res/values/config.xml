@@ -3994,13 +3994,13 @@
     <string name="config_misprovisionedBrandValue" translatable="false"></string>
 
     <!-- Pre-scale volume at volume step 1 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index1">50%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index1">60%</fraction>
 
     <!-- Pre-scale volume at volume step 2 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index2">70%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index2">80%</fraction>
 
     <!-- Pre-scale volume at volume step 3 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index3">85%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index3">90%</fraction>
 
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
