@@ -18,6 +18,7 @@ package com.android.server.hdmi;
 
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
+import static android.hardware.hdmi.HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
 
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.DISABLED;
@@ -325,7 +326,8 @@ public class HdmiControlService extends SystemService {
     // Set to true while HDMI control is enabled. If set to false, HDMI-CEC/MHL protocol
     // handling will be disabled and no request will be handled.
     @GuardedBy("mLock")
-    private boolean mHdmiControlEnabled;
+    @HdmiControlManager.HdmiCecControl
+    private int mHdmiControlEnabled;
 
     // Set to true while the service is in normal mode. While set to false, no input change is
     // allowed. Used for situations where input change can confuse users such as channel auto-scan,
@@ -477,8 +479,7 @@ public class HdmiControlService extends SystemService {
         mPowerStatusController.setPowerStatus(getInitialPowerStatus());
         mProhibitMode = false;
         mHdmiControlEnabled = mHdmiCecConfig.getIntValue(
-                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED)
-                                    == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
         setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
                 HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
         mMhlInputChangeEnabled = readBooleanSetting(Global.MHL_INPUT_SWITCHING_ENABLED, true);
@@ -497,7 +498,7 @@ public class HdmiControlService extends SystemService {
             Slog.i(TAG, "Device does not support MHL-control.");
         }
         mHdmiCecNetwork = new HdmiCecNetwork(this, mCecController, mMhlController);
-        if (mHdmiControlEnabled) {
+        if (mHdmiControlEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED) {
             initializeCec(INITIATED_BY_BOOT_UP);
         } else {
             mCecController.setOption(OptionKey.ENABLE_CEC, false);
@@ -513,9 +514,8 @@ public class HdmiControlService extends SystemService {
                 new HdmiCecConfig.SettingChangeListener() {
                     @Override
                     public void onChange(String setting) {
-                        boolean enabled = mHdmiCecConfig.getIntValue(
-                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED)
-                                    == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
+                        @HdmiControlManager.HdmiCecControl int enabled = mHdmiCecConfig.getIntValue(
+                                HdmiControlManager.CEC_SETTING_NAME_HDMI_CEC_ENABLED);
                         setControlEnabled(enabled);
                     }
                 });
@@ -630,7 +630,7 @@ public class HdmiControlService extends SystemService {
         }
         if (reason != -1) {
             invokeVendorCommandListenersOnControlStateChanged(true, reason);
-            announceHdmiControlStatusChange(true);
+            announceHdmiControlStatusChange(HDMI_CEC_CONTROL_ENABLED);
         }
     }
 
@@ -2193,7 +2193,6 @@ public class HdmiControlService extends SystemService {
             // System settings
             pw.println("System_settings:");
             pw.increaseIndent();
-            pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
             pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
             pw.println("mSystemAudioActivated: " + isSystemAudioActivated());
             pw.println("mHdmiCecVolumeControlEnabled: " + mHdmiCecVolumeControl);
@@ -2773,7 +2772,7 @@ public class HdmiControlService extends SystemService {
         }
     }
 
-    private void announceHdmiControlStatusChange(boolean isEnabled) {
+    private void announceHdmiControlStatusChange(@HdmiControlManager.HdmiCecControl int isEnabled) {
         assertRunOnServiceThread();
         synchronized (mLock) {
             List<IHdmiControlStatusChangeListener> listeners = new ArrayList<>(
@@ -2787,16 +2786,18 @@ public class HdmiControlService extends SystemService {
     }
 
     private void invokeHdmiControlStatusChangeListenerLocked(
-            IHdmiControlStatusChangeListener listener, boolean isEnabled) {
+            IHdmiControlStatusChangeListener listener,
+            @HdmiControlManager.HdmiCecControl int isEnabled) {
         invokeHdmiControlStatusChangeListenerLocked(Collections.singletonList(listener), isEnabled);
     }
 
     private void invokeHdmiControlStatusChangeListenerLocked(
-            Collection<IHdmiControlStatusChangeListener> listeners, boolean isEnabled) {
+            Collection<IHdmiControlStatusChangeListener> listeners,
+            @HdmiControlManager.HdmiCecControl int isEnabled) {
         if (listeners.isEmpty()) {
             return;
         }
-        if (isEnabled) {
+        if (isEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED) {
             queryDisplayStatus(new IHdmiControlCallback.Stub() {
                 public void onComplete(int status) {
                     boolean isAvailable = true;
@@ -2814,7 +2815,8 @@ public class HdmiControlService extends SystemService {
     }
 
     private void invokeHdmiControlStatusChangeListenerLocked(
-            Collection<IHdmiControlStatusChangeListener> listeners, boolean isEnabled,
+            Collection<IHdmiControlStatusChangeListener> listeners,
+            @HdmiControlManager.HdmiCecControl int isEnabled,
             boolean isCecAvailable) {
         for (IHdmiControlStatusChangeListener listener : listeners) {
             try {
@@ -2881,7 +2883,7 @@ public class HdmiControlService extends SystemService {
 
     boolean isControlEnabled() {
         synchronized (mLock) {
-            return mHdmiControlEnabled;
+            return mHdmiControlEnabled == HdmiControlManager.HDMI_CEC_CONTROL_ENABLED;
         }
     }
 
@@ -2955,7 +2957,7 @@ public class HdmiControlService extends SystemService {
         mPowerStatusController.setPowerStatus(HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON,
                 false);
         if (mCecController != null) {
-            if (mHdmiControlEnabled) {
+            if (mHdmiControlEnabled == HDMI_CEC_CONTROL_ENABLED) {
                 int startReason = -1;
                 switch (wakeUpAction) {
                     case WAKE_UP_SCREEN_ON:
@@ -3224,14 +3226,14 @@ public class HdmiControlService extends SystemService {
     }
 
     @ServiceThreadOnly
-    void setControlEnabled(boolean enabled) {
+    void setControlEnabled(@HdmiControlManager.HdmiCecControl int enabled) {
         assertRunOnServiceThread();
 
         synchronized (mLock) {
             mHdmiControlEnabled = enabled;
         }
 
-        if (enabled) {
+        if (enabled == HDMI_CEC_CONTROL_ENABLED) {
             enableHdmiControlService();
             setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
                     HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));

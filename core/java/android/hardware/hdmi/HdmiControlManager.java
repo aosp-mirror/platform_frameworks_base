@@ -1110,7 +1110,8 @@ public final class HdmiControlManager {
          *
          * Note: Value of isCecAvailable is only valid when isCecEnabled is true.
          **/
-        void onStatusChange(boolean isCecEnabled, boolean isCecAvailable);
+        void onStatusChange(@HdmiControlManager.HdmiCecControl int isCecEnabled,
+                boolean isCecAvailable);
     }
 
     private final ArrayMap<HdmiControlStatusChangeListener, IHdmiControlStatusChangeListener>
@@ -1351,7 +1352,7 @@ public final class HdmiControlManager {
             Executor executor, final HdmiControlStatusChangeListener listener) {
         return new IHdmiControlStatusChangeListener.Stub() {
             @Override
-            public void onStatusChange(boolean isCecEnabled, boolean isCecAvailable) {
+            public void onStatusChange(@HdmiCecControl int isCecEnabled, boolean isCecAvailable) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> listener.onStatusChange(isCecEnabled, isCecAvailable));
