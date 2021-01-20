@@ -6456,6 +6456,9 @@ public class PackageManagerService extends IPackageManager.Stub
         mAppInstallDir = new File(Environment.getDataDirectory(), "app");
         mAppLib32InstallDir = getAppLib32InstallDir();
 
+        mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
+        mDomainVerificationManager.setConnection(mDomainVerificationConnection);
+
         // Link up the watchers
         mPackages.registerObserver(mWatcher);
         mSharedLibraries.registerObserver(mWatcher);
@@ -6482,7 +6485,6 @@ public class PackageManagerService extends IPackageManager.Stub
             mProcessLoggingHandler = new ProcessLoggingHandler();
             Watchdog.getInstance().addThread(mHandler, WATCHDOG_TIMEOUT);
             mIntentFilterVerificationManager = injector.getIntentFilterVerificationManager();
-            mDomainVerificationManager = injector.getDomainVerificationManagerInternal();
 
             ArrayMap<String, SystemConfig.SharedLibraryEntry> libConfig
                     = systemConfig.getSharedLibraries();

@@ -25,10 +25,14 @@ import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.pm.domain.verify.DomainVerificationSet;
+import android.os.Binder;
+import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
+import com.android.internal.annotations.GuardedBy;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
@@ -49,6 +53,8 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     @NonNull
     UUID generateNewId();
+
+    void setConnection(@NonNull Connection connection);
 
     @NonNull
     DomainVerificationProxy getProxy();
@@ -219,4 +225,36 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
     void setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
             @NonNull Set<String> domains, int state)
             throws InvalidDomainSetException, NameNotFoundException;
+
+
+    interface Connection {
+
+        /**
+         * Notify that a settings change has been made and that eventually
+         * {@link #writeSettings(TypedXmlSerializer)} should be invoked by the parent.
+         */
+        void scheduleWriteSettings();
+
+        /**
+         * Delegate to {@link Binder#getCallingUid()} to allow mocking in tests.
+         */
+        int getCallingUid();
+
+        /**
+         * Delegate to {@link UserHandle#getCallingUserId()} to allow mocking in tests.
+         */
+        @UserIdInt
+        int getCallingUserId();
+
+        /**
+         * @see DomainVerificationProxy.BaseConnection#schedule(int, java.lang.Object)
+         */
+        void schedule(int code, @Nullable Object object);
+
+        @Nullable
+        PackageSetting getPackageSettingLocked(@NonNull String pkgName);
+
+        @Nullable
+        AndroidPackage getPackageLocked(@NonNull String pkgName);
+    }
 }
