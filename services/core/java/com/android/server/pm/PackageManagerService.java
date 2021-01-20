@@ -20583,7 +20583,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         final Intent intent = getHomeIntent();
         final List<ResolveInfo> resolveInfos = queryIntentActivitiesInternal(intent, null,
-                PackageManager.GET_META_DATA, userId);
+                MATCH_DIRECT_BOOT_AWARE | MATCH_DIRECT_BOOT_UNAWARE, userId);
         final ResolveInfo preferredResolveInfo = findPreferredActivityNotLocked(
                 intent, null, 0, resolveInfos, 0, true, false, false, userId);
         final String packageName = preferredResolveInfo != null
