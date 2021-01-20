@@ -15868,8 +15868,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Log.i(LOG_TAG,
                 String.format("Setting Enterprise ID to %s for user %d", organizationId, userId));
 
+        final String ownerPackage;
         synchronized (getLockObject()) {
-            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            final ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             // As the caller is the system, it must specify the component name of the profile owner
             // as a safety check.
             Preconditions.checkCallAuthorization(
@@ -15877,6 +15878,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     String.format("The Profile Owner or Device Owner may only set the Enterprise ID"
                             + " on its own user, called on user %d but owner user is %d", userId,
                             owner.getUserHandle().getIdentifier()));
+            ownerPackage = owner.info.getPackageName();
             Preconditions.checkState(
                     TextUtils.isEmpty(owner.mOrganizationId) || owner.mOrganizationId.equals(
                             organizationId),
@@ -15894,5 +15896,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 saveSettingsLocked(userId);
             });
         }
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_ORGANIZATION_ID)
+                .setAdmin(ownerPackage)
+                .setBoolean(isManagedProfile(userId))
+                .write();
     }
 }
