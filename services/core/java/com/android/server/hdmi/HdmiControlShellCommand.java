@@ -84,6 +84,8 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("                --args <vendor specific arguments>");
         pw.println("                [--id <true if vendor command should be sent with vendor id>]");
         pw.println("      Send a Vendor Command to the given target device");
+        pw.println("  setsystemaudiomode, setsam [on|off]");
+        pw.println("      Sets the System Audio Mode feature on or off on TV devices");
     }
 
     private int handleShellCommand(String cmd) throws RemoteException {
@@ -95,6 +97,9 @@ final class HdmiControlShellCommand extends ShellCommand {
                 return oneTouchPlay(pw);
             case "vendorcommand":
                 return vendorCommand(pw);
+            case "setsystemaudiomode":
+            case "setsam":
+                return setSystemAudioMode(pw);
         }
 
         getErrPrintWriter().println("Unhandled command: " + cmd);
@@ -156,6 +161,31 @@ final class HdmiControlShellCommand extends ShellCommand {
         pw.println("Sending <Vendor Command>");
         mBinderService.sendVendorCommand(deviceType, destination, params, hasVendorId);
         return 0;
+    }
+
+    private int setSystemAudioMode(PrintWriter pw) throws RemoteException {
+        if (1 > getRemainingArgsCount()) {
+            throw new IllegalArgumentException(
+                    "Please indicate if System Audio Mode should be turned \"on\" or \"off\".");
+        }
+
+        String arg = getNextArg();
+        if (arg.equals("on")) {
+            pw.println("Setting System Audio Mode on");
+            mBinderService.setSystemAudioMode(true, mHdmiControlCallback);
+        } else if (arg.equals("off")) {
+            pw.println("Setting System Audio Mode off");
+            mBinderService.setSystemAudioMode(false, mHdmiControlCallback);
+        } else {
+            throw new IllegalArgumentException(
+                    "Please indicate if System Audio Mode should be turned \"on\" or \"off\".");
+        }
+
+        if (!receiveCallback("Set System Audio Mode")) {
+            return 1;
+        }
+
+        return mCecResult.get() == HdmiControlManager.RESULT_SUCCESS ? 0 : 1;
     }
 
     private boolean receiveCallback(String command) {
