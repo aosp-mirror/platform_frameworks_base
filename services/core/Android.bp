@@ -1,4 +1,11 @@
 filegroup {
+    name: "services.core-sources-deviceconfig-interface",
+    srcs: [
+         "java/com/android/server/utils/DeviceConfigInterface.java"
+    ],
+}
+
+filegroup {
     name: "services.core-sources",
     srcs: ["java/**/*.java"],
     path: "java",
