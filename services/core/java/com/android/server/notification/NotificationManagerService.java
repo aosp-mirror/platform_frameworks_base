@@ -3085,8 +3085,23 @@ public class NotificationManagerService extends SystemService {
 
             synchronized (mToastQueue) {
                 int uid = Binder.getCallingUid();
+                int userId = UserHandle.getUserId(uid);
                 if (enable) {
                     mToastRateLimitingDisabledUids.remove(uid);
+                    try {
+                        String[] packages = mPackageManager.getPackagesForUid(uid);
+                        if (packages == null) {
+                            Slog.e(TAG, "setToastRateLimitingEnabled method haven't found any "
+                                    + "packages for the  given uid: " + uid + ", toast rate "
+                                    + "limiter not reset for that uid.");
+                            return;
+                        }
+                        for (String pkg : packages) {
+                            mToastRateLimiter.clear(userId, pkg);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to reset toast rate limiter for given uid", e);
+                    }
                 } else {
                     mToastRateLimitingDisabledUids.add(uid);
                 }

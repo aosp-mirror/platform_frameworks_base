@@ -58,7 +58,7 @@ import java.util.PriorityQueue;
  * of quota until it is below that limit again. Limits are applied according to the category
  * the UPTC is placed in. Categories are basic constructs to apply different limits to
  * different groups of UPTCs. For example, standby buckets can be a set of categories, or
- * foreground & background could be two categories. If every UPTC should have the limits
+ * foreground & background could be two categories. If every UPTC should have the same limits
  * applied, then only one category is needed.
  *
  * Note: all limits are enforced per category unless explicitly stated otherwise.
@@ -361,7 +361,7 @@ abstract class QuotaTracker {
     abstract void handleRemovedAppLocked(String packageName, int uid);
 
     @GuardedBy("mLock")
-    private void onAppRemovedLocked(String packageName, int uid) {
+    void onAppRemovedLocked(String packageName, int uid) {
         if (packageName == null) {
             Slog.wtf(TAG, "Told app removed but given null package name.");
             return;

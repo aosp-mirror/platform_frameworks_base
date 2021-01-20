@@ -19,6 +19,8 @@ package com.android.server.utils.quota;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -48,15 +50,18 @@ import java.util.List;
  * @hide
  */
 public class MultiRateLimiter {
+    private static final String TAG = "MultiRateLimiter";
 
     private static final CountQuotaTracker[] EMPTY_TRACKER_ARRAY = {};
 
     private final Object mLock = new Object();
     @GuardedBy("mLock")
     private final CountQuotaTracker[] mQuotaTrackers;
+    private final PackageManager mPackageManager;
 
-    private MultiRateLimiter(List<CountQuotaTracker> quotaTrackers) {
+    private MultiRateLimiter(List<CountQuotaTracker> quotaTrackers, PackageManager packageManager) {
         mQuotaTrackers = quotaTrackers.toArray(EMPTY_TRACKER_ARRAY);
+        mPackageManager = packageManager;
     }
 
     /** Record that an event happened and count it towards the given quota. */
@@ -70,6 +75,13 @@ public class MultiRateLimiter {
     public boolean isWithinQuota(int userId, @NonNull String packageName, @Nullable String tag) {
         synchronized (mLock) {
             return isWithinQuotaLocked(userId, packageName, tag);
+        }
+    }
+
+    /** Remove all saved events from the rate limiter for the given app (reset it). */
+    public void clear(int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            clearLocked(userId, packageName);
         }
     }
 
@@ -89,6 +101,22 @@ public class MultiRateLimiter {
             }
         }
         return true;
+    }
+
+    @GuardedBy("mLock")
+    private void clearLocked(int userId, @NonNull String packageName) {
+        try {
+            int uid = mPackageManager.getApplicationInfoAsUser(packageName, 0, userId).uid;
+            for (CountQuotaTracker quotaTracker : mQuotaTrackers) {
+                // This method behaves as if the package has been removed from the device, which
+                // isn't the case here, but it does similar clean-up to what we are aiming for here,
+                // so it works for this use case.
+                quotaTracker.onAppRemovedLocked(packageName, uid);
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            Slog.e(TAG, "clear(userId, packageName) called with unrecognized arguments, no "
+                    + "action taken");
+        }
     }
 
     /** Can create a new {@link MultiRateLimiter}. */
@@ -154,7 +182,7 @@ public class MultiRateLimiter {
          * limit.
          */
         public MultiRateLimiter build() {
-            return new MultiRateLimiter(mQuotaTrackers);
+            return new MultiRateLimiter(mQuotaTrackers, mContext.getPackageManager());
         }
     }
 
