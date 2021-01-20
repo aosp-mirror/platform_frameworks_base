@@ -42,8 +42,9 @@ import android.net.TelephonyNetworkSpecifier;
 import android.os.ParcelUuid;
 import android.os.test.TestLooper;
 import android.telephony.SubscriptionInfo;
-import android.telephony.SubscriptionManager;
+import android.util.ArraySet;
 
+import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.UnderlyingNetworkTracker.NetworkBringupCallback;
 import com.android.server.vcn.UnderlyingNetworkTracker.RouteSelectionCallback;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
@@ -58,7 +59,7 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class UnderlyingNetworkTrackerTest {
@@ -90,7 +91,7 @@ public class UnderlyingNetworkTrackerTest {
     @Mock private Context mContext;
     @Mock private VcnNetworkProvider mVcnNetworkProvider;
     @Mock private ConnectivityManager mConnectivityManager;
-    @Mock private SubscriptionManager mSubscriptionManager;
+    @Mock private TelephonySubscriptionSnapshot mSubscriptionSnapshot;
     @Mock private UnderlyingNetworkTrackerCallback mNetworkTrackerCb;
     @Mock private Network mNetwork;
 
@@ -113,23 +114,16 @@ public class UnderlyingNetworkTrackerTest {
                 mConnectivityManager,
                 Context.CONNECTIVITY_SERVICE,
                 ConnectivityManager.class);
-        setupSystemService(
-                mContext,
-                mSubscriptionManager,
-                Context.TELEPHONY_SUBSCRIPTION_SERVICE,
-                SubscriptionManager.class);
 
-        List<SubscriptionInfo> initialSubInfos =
-                Arrays.asList(
-                        getSubscriptionInfoForSubId(INITIAL_SUB_ID_1),
-                        getSubscriptionInfoForSubId(INITIAL_SUB_ID_2));
-        when(mSubscriptionManager.getSubscriptionsInGroup(eq(SUB_GROUP)))
-                .thenReturn(initialSubInfos);
+        Set<Integer> initialSubIds =
+                new ArraySet<>(Arrays.asList(INITIAL_SUB_ID_1, INITIAL_SUB_ID_2));
+        when(mSubscriptionSnapshot.getAllSubIdsInGroup(eq(SUB_GROUP))).thenReturn(initialSubIds);
 
         mUnderlyingNetworkTracker =
                 new UnderlyingNetworkTracker(
                         mVcnContext,
                         SUB_GROUP,
+                        mSubscriptionSnapshot,
                         Collections.singleton(NetworkCapabilities.NET_CAPABILITY_INTERNET),
                         mNetworkTrackerCb);
     }
@@ -170,7 +164,7 @@ public class UnderlyingNetworkTrackerTest {
                         any(),
                         any(RouteSelectionCallback.class));
 
-        verify(mSubscriptionManager).getSubscriptionsInGroup(eq(SUB_GROUP));
+        verify(mSubscriptionSnapshot).getAllSubIdsInGroup(eq(SUB_GROUP));
     }
 
     private NetworkRequest getWifiRequest() {

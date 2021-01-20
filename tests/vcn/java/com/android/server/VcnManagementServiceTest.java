@@ -184,7 +184,7 @@ public class VcnManagementServiceTest {
         doAnswer((invocation) -> {
             // Mock-within a doAnswer is safe, because it doesn't actually run nested.
             return mock(Vcn.class);
-        }).when(mMockDeps).newVcn(any(), any(), any());
+        }).when(mMockDeps).newVcn(any(), any(), any(), any());
 
         final PersistableBundle bundle =
                 PersistableBundleUtils.fromMap(
@@ -304,8 +304,10 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testTelephonyNetworkTrackerCallbackStartsInstances() throws Exception {
-        triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
-        verify(mMockDeps).newVcn(eq(mVcnContext), eq(TEST_UUID_1), eq(TEST_VCN_CONFIG));
+        TelephonySubscriptionSnapshot snapshot =
+                triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_1));
+        verify(mMockDeps)
+                .newVcn(eq(mVcnContext), eq(TEST_UUID_1), eq(TEST_VCN_CONFIG), eq(snapshot));
     }
 
     @Test
@@ -473,7 +475,12 @@ public class VcnManagementServiceTest {
         verify(mConfigReadWriteHelper).writeToDisk(any(PersistableBundle.class));
 
         // Verify Vcn is started
-        verify(mMockDeps).newVcn(eq(mVcnContext), eq(TEST_UUID_2), eq(TEST_VCN_CONFIG));
+        verify(mMockDeps)
+                .newVcn(
+                        eq(mVcnContext),
+                        eq(TEST_UUID_2),
+                        eq(TEST_VCN_CONFIG),
+                        eq(TelephonySubscriptionSnapshot.EMPTY_SNAPSHOT));
 
         // Verify Vcn is updated if it was previously started
         mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);

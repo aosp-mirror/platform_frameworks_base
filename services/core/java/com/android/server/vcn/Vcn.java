@@ -27,6 +27,8 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.util.Slog;
 
+import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -63,6 +65,15 @@ public class Vcn extends Handler {
      */
     private static final int MSG_EVENT_NETWORK_REQUESTED = MSG_EVENT_BASE + 1;
 
+    /**
+     * The TelephonySubscriptionSnapshot tracked by VcnManagementService has changed.
+     *
+     * <p>This updated snapshot should be cached locally and passed to all VcnGatewayConnections.
+     *
+     * @param obj TelephonySubscriptionSnapshot
+     */
+    private static final int MSG_EVENT_SUBSCRIPTIONS_CHANGED = MSG_EVENT_BASE + 2;
+
     /** Triggers an immediate teardown of the entire Vcn, including GatewayConnections. */
     private static final int MSG_CMD_TEARDOWN = MSG_CMD_BASE;
 
@@ -76,20 +87,23 @@ public class Vcn extends Handler {
             new HashMap<>();
 
     @NonNull private VcnConfig mConfig;
+    @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
 
     private boolean mIsRunning = true;
 
     public Vcn(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
-            @NonNull VcnConfig config) {
-        this(vcnContext, subscriptionGroup, config, new Dependencies());
+            @NonNull VcnConfig config,
+            @NonNull TelephonySubscriptionSnapshot snapshot) {
+        this(vcnContext, subscriptionGroup, config, snapshot, new Dependencies());
     }
 
     private Vcn(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull VcnConfig config,
+            @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull Dependencies deps) {
         super(Objects.requireNonNull(vcnContext, "Missing vcnContext").getLooper());
         mVcnContext = vcnContext;
@@ -98,6 +112,7 @@ public class Vcn extends Handler {
         mRequestListener = new VcnNetworkRequestListener();
 
         mConfig = Objects.requireNonNull(config, "Missing config");
+        mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
 
         // Register to receive cached and future NetworkRequests
         mVcnContext.getVcnNetworkProvider().registerListener(mRequestListener);
@@ -108,6 +123,13 @@ public class Vcn extends Handler {
         Objects.requireNonNull(config, "Missing config");
 
         sendMessage(obtainMessage(MSG_EVENT_CONFIG_UPDATED, config));
+    }
+
+    /** Asynchronously updates the Subscription snapshot for this VCN. */
+    public void updateSubscriptionSnapshot(@NonNull TelephonySubscriptionSnapshot snapshot) {
+        Objects.requireNonNull(snapshot, "Missing snapshot");
+
+        sendMessage(obtainMessage(MSG_EVENT_SUBSCRIPTIONS_CHANGED, snapshot));
     }
 
     /** Asynchronously tears down this Vcn instance, including VcnGatewayConnection(s) */
@@ -136,6 +158,9 @@ public class Vcn extends Handler {
                 break;
             case MSG_EVENT_NETWORK_REQUESTED:
                 handleNetworkRequested((NetworkRequest) msg.obj, msg.arg1, msg.arg2);
+                break;
+            case MSG_EVENT_SUBSCRIPTIONS_CHANGED:
+                handleSubscriptionsChanged((TelephonySubscriptionSnapshot) msg.obj);
                 break;
             case MSG_CMD_TEARDOWN:
                 handleTeardown();
@@ -193,8 +218,21 @@ public class Vcn extends Handler {
 
                 final VcnGatewayConnection vcnGatewayConnection =
                         new VcnGatewayConnection(
-                                mVcnContext, mSubscriptionGroup, gatewayConnectionConfig);
+                                mVcnContext,
+                                mSubscriptionGroup,
+                                mLastSnapshot,
+                                gatewayConnectionConfig);
                 mVcnGatewayConnections.put(gatewayConnectionConfig, vcnGatewayConnection);
+            }
+        }
+    }
+
+    private void handleSubscriptionsChanged(@NonNull TelephonySubscriptionSnapshot snapshot) {
+        mLastSnapshot = snapshot;
+
+        if (mIsRunning) {
+            for (VcnGatewayConnection gatewayConnection : mVcnGatewayConnections.values()) {
+                gatewayConnection.updateSubscriptionSnapshot(mLastSnapshot);
             }
         }
     }
