@@ -139,6 +139,11 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         }
     }
 
+    private void waitForDeviceNotAvailable(long timeout, TimeUnit unit) {
+        assertWithMessage("waitForDeviceNotAvailable() timed out in %s %s", timeout, unit)
+                .that(getDevice().waitForDeviceNotAvailable(unit.toMillis(timeout))).isTrue();
+    }
+
     /**
      * Tests watchdog triggered staged rollbacks involving only apks.
      */
@@ -150,7 +155,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Trigger rollback and wait for reboot to happen
         runPhase("testBadApkOnly_Phase3_Crash");
-        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(2))).isTrue();
+        waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
 
         getDevice().waitForDeviceAvailable();
 
@@ -181,7 +186,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // 3. Staged rollback session becomes ready.
         // 4. Device actually reboots.
         // So we give a generous timeout here.
-        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5))).isTrue();
+        waitForDeviceNotAvailable(5, TimeUnit.MINUTES);
         getDevice().waitForDeviceAvailable();
 
         // verify rollback committed
@@ -219,7 +224,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // 3. Staged rollback session becomes ready.
         // 4. Device actually reboots.
         // So we give a generous timeout here.
-        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5))).isTrue();
+        waitForDeviceNotAvailable(5, TimeUnit.MINUTES);
         getDevice().waitForDeviceAvailable();
 
         // verify all available rollbacks have been committed
@@ -300,7 +305,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Verify apex was installed and then crash the apk
         runPhase("testRollbackApexWithApkCrashing_Phase2_Crash");
         // Wait for crash to trigger rollback
-        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5))).isTrue();
+        waitForDeviceNotAvailable(5, TimeUnit.MINUTES);
         getDevice().waitForDeviceAvailable();
         // Verify rollback occurred due to crash of apk-in-apex
         runPhase("testRollbackApexWithApkCrashing_Phase3_VerifyRollback");
@@ -323,8 +328,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath2 =
                 apexDataDirDeSys(APK_IN_APEX_TESTAPEX_NAME) + TEST_SUBDIR + TEST_FILENAME_2;
         runAsRoot(() -> {
-            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+            pushString(TEST_STRING_1, oldFilePath1);
+            pushString(TEST_STRING_2, oldFilePath2);
         });
 
         // Install new version of the APEX with rollback enabled
@@ -338,8 +343,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runAsRoot(() -> {
             getDevice().deleteFile(oldFilePath1);
             getDevice().deleteFile(oldFilePath2);
-            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+            pushString(TEST_STRING_3, newFilePath3);
+            pushString(TEST_STRING_4, newFilePath4);
         });
 
         // Roll back the APEX
@@ -348,10 +353,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
-            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
-            assertThat(getDevice().pullFile(newFilePath3)).isNull();
-            assertThat(getDevice().pullFile(newFilePath4)).isNull();
+            assertFileContents(TEST_STRING_1, oldFilePath1);
+            assertFileContents(TEST_STRING_2, oldFilePath2);
+            assertFileNotExists(newFilePath3);
+            assertFileNotExists(newFilePath4);
         });
 
         // Verify snapshots are deleted after restoration
@@ -377,8 +382,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath2 =
                 apexDataDirDeUser(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
         runAsRoot(() -> {
-            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+            pushString(TEST_STRING_1, oldFilePath1);
+            pushString(TEST_STRING_2, oldFilePath2);
         });
 
         // Install new version of the APEX with rollback enabled
@@ -393,8 +398,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runAsRoot(() -> {
             getDevice().deleteFile(oldFilePath1);
             getDevice().deleteFile(oldFilePath2);
-            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+            pushString(TEST_STRING_3, newFilePath3);
+            pushString(TEST_STRING_4, newFilePath4);
         });
 
         // Roll back the APEX
@@ -403,10 +408,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
-            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
-            assertThat(getDevice().pullFile(newFilePath3)).isNull();
-            assertThat(getDevice().pullFile(newFilePath4)).isNull();
+            assertFileContents(TEST_STRING_1, oldFilePath1);
+            assertFileContents(TEST_STRING_2, oldFilePath2);
+            assertFileNotExists(newFilePath3);
+            assertFileNotExists(newFilePath4);
         });
 
         // Verify snapshots are deleted after restoration
@@ -431,8 +436,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath2 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
         runAsRoot(() -> {
-            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+            pushString(TEST_STRING_1, oldFilePath1);
+            pushString(TEST_STRING_2, oldFilePath2);
         });
 
         // Install new version of the APEX with rollback enabled
@@ -446,8 +451,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runAsRoot(() -> {
             getDevice().deleteFile(oldFilePath1);
             getDevice().deleteFile(oldFilePath2);
-            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+            pushString(TEST_STRING_3, newFilePath3);
+            pushString(TEST_STRING_4, newFilePath4);
         });
 
         // Roll back the APEX
@@ -456,10 +461,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
-            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
-            assertThat(getDevice().pullFile(newFilePath3)).isNull();
-            assertThat(getDevice().pullFile(newFilePath4)).isNull();
+            assertFileContents(TEST_STRING_1, oldFilePath1);
+            assertFileContents(TEST_STRING_2, oldFilePath2);
+            assertFileNotExists(newFilePath3);
+            assertFileNotExists(newFilePath4);
         });
 
         // Verify snapshots are deleted after restoration
@@ -483,8 +488,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath1 = apkDataDirDe(TESTAPP_A, 0) + "/" + TEST_FILENAME_1;
         String oldFilePath2 = apkDataDirDe(TESTAPP_A, 0) + TEST_SUBDIR + TEST_FILENAME_2;
         runAsRoot(() -> {
-            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+            pushString(TEST_STRING_1, oldFilePath1);
+            pushString(TEST_STRING_2, oldFilePath2);
         });
 
         // Install version 2 of TESTAPP_A with rollback enabled
@@ -497,8 +502,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runAsRoot(() -> {
             getDevice().deleteFile(oldFilePath1);
             getDevice().deleteFile(oldFilePath2);
-            assertThat(getDevice().pushString(TEST_STRING_3, newFilePath3)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_4, newFilePath4)).isTrue();
+            pushString(TEST_STRING_3, newFilePath3);
+            pushString(TEST_STRING_4, newFilePath4);
         });
 
         // Roll back the APK
@@ -507,10 +512,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
-            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
-            assertThat(getDevice().pullFile(newFilePath3)).isNull();
-            assertThat(getDevice().pullFile(newFilePath4)).isNull();
+            assertFileContents(TEST_STRING_1, oldFilePath1);
+            assertFileContents(TEST_STRING_2, oldFilePath2);
+            assertFileNotExists(newFilePath3);
+            assertFileNotExists(newFilePath4);
         });
     }
 
@@ -524,8 +529,8 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         String oldFilePath2 =
                 apexDataDirCe(APK_IN_APEX_TESTAPEX_NAME, 0) + TEST_SUBDIR + TEST_FILENAME_2;
         runAsRoot(() -> {
-            assertThat(getDevice().pushString(TEST_STRING_1, oldFilePath1)).isTrue();
-            assertThat(getDevice().pushString(TEST_STRING_2, oldFilePath2)).isTrue();
+            pushString(TEST_STRING_1, oldFilePath1);
+            pushString(TEST_STRING_2, oldFilePath2);
         });
 
         // Install new version of the APEX with rollback enabled
@@ -541,7 +546,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("expireRollbacks");
         runAsRoot(() -> {
             for (String dir : after) {
-                assertThat(getDevice().getFileEntry(dir)).isNull();
+                assertFileNotExists(dir);
             }
         });
     }
@@ -558,6 +563,23 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
             getDevice().disableAdbRoot();
         }
         getDevice().reboot();
+    }
+
+    private void pushString(String contents, String path) throws Exception {
+        assertWithMessage("Failed to push file to device, content=%s path=%s", contents, path)
+                .that(getDevice().pushString(contents, path)).isTrue();
+    }
+
+    private void assertFileContents(String expectedContents, String path) throws Exception {
+        String actualContents = getDevice().pullFileContents(path);
+        assertWithMessage("Failed to retrieve file=%s", path).that(actualContents).isNotNull();
+        assertWithMessage("Mismatched file contents, path=%s", path)
+                .that(actualContents).isEqualTo(expectedContents);
+    }
+
+    private void assertFileNotExists(String path) throws Exception {
+        assertWithMessage("File shouldn't exist, path=%s", path)
+                .that(getDevice().getFileEntry(path)).isNull();
     }
 
     private static String apexDataDirDeSys(String apexName) {
