@@ -138,7 +138,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
                 info.expandedView = (BubbleExpandedView) inflater.inflate(
                         R.layout.bubble_expanded_view, stackView, false /* attachToRoot */);
-                info.expandedView.initialize(controller, stackView);
+                info.expandedView.initialize(controller, stackView, false /* isOverflow */);
             }
 
             if (b.getShortcutInfo() != null) {
