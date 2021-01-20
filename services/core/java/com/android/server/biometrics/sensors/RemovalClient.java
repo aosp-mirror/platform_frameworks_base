@@ -25,6 +25,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
+
 import java.util.Map;
 
 /**
@@ -89,5 +91,10 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
             }
             mCallback.onClientFinished(this, true /* success */);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_REMOVE;
     }
 }
