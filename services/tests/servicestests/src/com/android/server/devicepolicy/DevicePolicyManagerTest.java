@@ -107,6 +107,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto;
+import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -5130,6 +5131,54 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // unification.
         assertThat(dpm.isPasswordSufficientAfterProfileUnification(UserHandle.USER_SYSTEM,
         managedProfileUserId)).isFalse();
+    }
+
+    @Test
+    public void testGetAggregatedPasswordComplexity_IgnoreProfileRequirement()
+            throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+
+        dpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_HIGH);
+        parentDpm.setRequiredPasswordComplexity(PASSWORD_COMPLEXITY_LOW);
+
+        assertThat(dpms.getAggregatedPasswordComplexityForUser(UserHandle.USER_SYSTEM, true))
+                .isEqualTo(PASSWORD_COMPLEXITY_LOW);
+        assertThat(dpms.getAggregatedPasswordComplexityForUser(UserHandle.USER_SYSTEM, false))
+                .isEqualTo(PASSWORD_COMPLEXITY_HIGH);
+    }
+
+    @Test
+    public void testGetAggregatedPasswordMetrics_IgnoreProfileRequirement()
+            throws Exception {
+        final int managedProfileUserId = CALLER_USER_HANDLE;
+        final int managedProfileAdminUid =
+                UserHandle.getUid(managedProfileUserId, DpmMockContext.SYSTEM_UID);
+        mContext.binder.callingUid = managedProfileAdminUid;
+        addManagedProfile(admin1, managedProfileAdminUid, admin1, VERSION_CODES.R);
+
+        dpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_COMPLEX);
+        dpm.setPasswordMinimumLength(admin1, 8);
+        dpm.setPasswordMinimumLetters(admin1, 1);
+        dpm.setPasswordMinimumNumeric(admin1, 2);
+        dpm.setPasswordMinimumSymbols(admin1, 3);
+
+        parentDpm.setPasswordQuality(admin1, DevicePolicyManager.PASSWORD_QUALITY_SOMETHING);
+
+        PasswordMetrics deviceMetrics =
+                dpms.getPasswordMinimumMetrics(UserHandle.USER_SYSTEM, true);
+        assertThat(deviceMetrics.credType).isEqualTo(LockPatternUtils.CREDENTIAL_TYPE_PATTERN);
+
+        PasswordMetrics allMetrics =
+                dpms.getPasswordMinimumMetrics(UserHandle.USER_SYSTEM, false);
+        assertThat(allMetrics.credType).isEqualTo(LockPatternUtils.CREDENTIAL_TYPE_PASSWORD);
+        assertThat(allMetrics.length).isEqualTo(8);
+        assertThat(allMetrics.letters).isEqualTo(1);
+        assertThat(allMetrics.numeric).isEqualTo(2);
+        assertThat(allMetrics.symbols).isEqualTo(3);
     }
 
     @Test

@@ -1686,6 +1686,20 @@ public class DevicePolicyManager {
     public static final int PASSWORD_COMPLEXITY_HIGH = 0x50000;
 
     /**
+     * A boolean extra for {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} requesting that only
+     * device password requirement is enforced during the parent profile password enrolment flow.
+     * <p> Normally when enrolling password for the parent profile, both the device-wide password
+     * requirement (requirement set via {@link #getParentProfileInstance(ComponentName)} instance)
+     * and the profile password requirement are enforced, if the profile currently does not have a
+     * separate work challenge. By setting this to {@code true}, profile password requirement is
+     * explicitly disregarded.
+     *
+     * @see #isActivePasswordSufficientForDeviceRequirement()
+     */
+    public static final String EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY =
+            "android.app.extra.DEVICE_PASSWORD_REQUIREMENT_ONLY";
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -1700,8 +1714,10 @@ public class DevicePolicyManager {
     /**
      * Activity action: have the user enter a new password for the parent profile.
      * If the intent is launched from within a managed profile, this will trigger
-     * entering a new password for the parent of the profile. In all other cases
-     * the behaviour is identical to {@link #ACTION_SET_NEW_PASSWORD}.
+     * entering a new password for the parent of the profile. The caller can optionally
+     * set {@link #EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY} to only enforce device-wide
+     * password requirement. In all other cases the behaviour is identical to
+     * {@link #ACTION_SET_NEW_PASSWORD}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PARENT_PROFILE_PASSWORD
@@ -3844,9 +3860,21 @@ public class DevicePolicyManager {
      * @hide
      */
     public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
+        return getPasswordMinimumMetrics(userHandle, false);
+    }
+
+    /**
+     * Returns minimum PasswordMetrics that satisfies all admin policies.
+     * If requested, only consider device-wide admin policies and ignore policies set on the
+     * managed profile instance (as if the managed profile had separate work challenge).
+     *
+     * @hide
+     */
+    public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle,
+            boolean deviceWideOnly) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumMetrics(userHandle);
+                return mService.getPasswordMinimumMetrics(userHandle, deviceWideOnly);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4125,6 +4153,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if the calling application is not a profile owner of a managed
      *   profile, or if this API is not called on the parent DevicePolicyManager instance.
      * @throws IllegalStateException if the user isn't unlocked
+     * @see #EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY
      */
     public boolean isActivePasswordSufficientForDeviceRequirement() {
         if (!mParentInstance) {
@@ -4250,12 +4279,25 @@ public class DevicePolicyManager {
      */
     @PasswordComplexity
     public int getAggregatedPasswordComplexityForUser(int userId) {
+        return getAggregatedPasswordComplexityForUser(userId, false);
+    }
+
+    /**
+     * Returns the password complexity that applies to this user, aggregated from other users if
+     * necessary (for example, if the DPC has set password complexity requirements on the parent
+     * profile DPM instance of a managed profile user, they would apply to the primary user on the
+     * device). If {@code deviceWideOnly} is {@code true}, ignore policies set on the
+     * managed profile DPM instance (as if the managed profile had separate work challenge).
+     * @hide
+     */
+    @PasswordComplexity
+    public int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly) {
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
         }
 
         try {
-            return mService.getAggregatedPasswordComplexityForUser(userId);
+            return mService.getAggregatedPasswordComplexityForUser(userId, deviceWideOnly);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
