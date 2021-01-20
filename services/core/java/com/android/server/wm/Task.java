@@ -5443,9 +5443,13 @@ class Task extends WindowContainer<WindowContainer> {
                 final Task lastFocusedTask = displayArea.getFocusedRootTask();
                 displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/);
                 displayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
+                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                        getTaskInfo());
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
+                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                        task.getTaskInfo());
             }
             return;
         }
