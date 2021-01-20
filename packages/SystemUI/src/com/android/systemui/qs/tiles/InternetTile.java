@@ -249,7 +249,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 int qsType, boolean activityIn, boolean activityOut,
                 CharSequence typeContentDescription,
                 CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming) {
+                boolean isWide, int subId, boolean roaming, boolean showTriangle) {
             if (DEBUG) {
                 Log.d(TAG, "setMobileDataIndicators: "
                         + "statusIcon = " + (statusIcon == null ? "" :  statusIcon.toString()) + ","
@@ -263,7 +263,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
                         + "description = " + description + ","
                         + "isWide = " + isWide + ","
                         + "subId = " + subId + ","
-                        + "roaming = " + roaming);
+                        + "roaming = " + roaming + ","
+                        + "showTriangle = " + showTriangle);
             }
             if (qsIcon == null) {
                 // Not data sim, don't display.
