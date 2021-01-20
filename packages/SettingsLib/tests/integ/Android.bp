@@ -38,6 +38,7 @@ android_test {
         "androidx.test.espresso.core",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
+        "SettingsLibSettingsSpinner",
         "SettingsLibUsageProgressBarPreference",
     ],
 
