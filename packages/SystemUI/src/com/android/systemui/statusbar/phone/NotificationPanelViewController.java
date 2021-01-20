@@ -477,6 +477,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mShowingKeyguardHeadsUp;
     private boolean mAllowExpandForSmallExpansion;
     private Runnable mExpandAfterLayoutRunnable;
+    private float mSectionPadding;
 
     /**
      * Is this a collapse that started on the panel where we should allow the panel to intercept
@@ -2416,6 +2417,16 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
+    public void setSectionPadding(float padding) {
+        if (padding == mSectionPadding) {
+            return;
+        }
+        mSectionPadding = padding;
+        mQsFrame.setTranslationY(padding);
+        mNotificationStackScrollLayoutController.setSectionPadding(padding);
+    }
+
+    @Override
     protected void setOverExpansion(float overExpansion, boolean isPixels) {
         if (mConflictingQsExpansionGesture || mQsExpandImmediate) {
             return;
@@ -2502,19 +2513,6 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected boolean shouldExpandToTopOfClearAll(float targetHeight) {
-        boolean perform = super.shouldExpandToTopOfClearAll(targetHeight);
-        if (!perform) {
-            return false;
-        }
-        // Let's make sure we're not appearing but the animation will end below the appear.
-        // Otherwise quick settings would jump at the end of the animation.
-        float fraction = mNotificationStackScrollLayoutController
-                .calculateAppearFraction(targetHeight);
-        return fraction >= 1.0f;
-    }
-
-    @Override
     protected boolean shouldUseDismissingAnimation() {
         return mBarState != StatusBarState.SHADE && (mKeyguardStateController.canDismissLockScreen()
                 || !isTracking());
@@ -2530,11 +2528,6 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     protected boolean isClearAllVisible() {
         return mNotificationStackScrollLayoutController.isFooterViewContentVisible();
-    }
-
-    @Override
-    protected int getClearAllHeightWithPadding() {
-        return mNotificationStackScrollLayoutController.getFooterViewHeightWithPadding();
     }
 
     @Override
