@@ -3249,6 +3249,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     void removeImmediately() {
+        if (!finishing) {
+            // If Task#removeImmediately is called directly with alive activities, ensure that the
+            // activities are destroyed and detached from process.
+            destroyImmediately("removeImmediately");
+        }
         onRemovedFromDisplay();
         super.removeImmediately();
     }

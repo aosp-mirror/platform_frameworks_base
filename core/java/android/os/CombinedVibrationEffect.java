@@ -87,7 +87,13 @@ public abstract class CombinedVibrationEffect implements Parcelable {
     }
 
     /** @hide */
+    public abstract long getDuration();
+
+    /** @hide */
     public abstract void validate();
+
+    /** @hide */
+    public abstract boolean hasVibrator(int vibratorId);
 
     /**
      * A combination of haptic effects that should be played in multiple vibrators in sync.
@@ -265,10 +271,20 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             return mEffect;
         }
 
+        @Override
+        public long getDuration() {
+            return mEffect.getDuration();
+        }
+
         /** @hide */
         @Override
         public void validate() {
             mEffect.validate();
+        }
+
+        @Override
+        public boolean hasVibrator(int vibratorId) {
+            return true;
         }
 
         @Override
@@ -277,7 +293,7 @@ public abstract class CombinedVibrationEffect implements Parcelable {
                 return false;
             }
             Mono other = (Mono) o;
-            return other.mEffect.equals(other.mEffect);
+            return mEffect.equals(other.mEffect);
         }
 
         @Override
@@ -345,6 +361,15 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             return mEffects;
         }
 
+        @Override
+        public long getDuration() {
+            long maxDuration = Long.MIN_VALUE;
+            for (int i = 0; i < mEffects.size(); i++) {
+                maxDuration = Math.max(maxDuration, mEffects.valueAt(i).getDuration());
+            }
+            return maxDuration;
+        }
+
         /** @hide */
         @Override
         public void validate() {
@@ -353,6 +378,11 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             for (int i = 0; i < mEffects.size(); i++) {
                 mEffects.valueAt(i).validate();
             }
+        }
+
+        @Override
+        public boolean hasVibrator(int vibratorId) {
+            return mEffects.indexOfKey(vibratorId) >= 0;
         }
 
         @Override
@@ -445,6 +475,26 @@ public abstract class CombinedVibrationEffect implements Parcelable {
             return mDelays;
         }
 
+        @Override
+        public long getDuration() {
+            long durations = 0;
+            final int effectCount = mEffects.size();
+            for (int i = 0; i < effectCount; i++) {
+                CombinedVibrationEffect effect = mEffects.get(i);
+                long duration = effect.getDuration();
+                if (duration < 0) {
+                    // If any duration is unknown, this combination duration is also unknown.
+                    return duration;
+                }
+                durations += duration;
+            }
+            long delays = 0;
+            for (int i = 0; i < effectCount; i++) {
+                delays += mDelays.get(i);
+            }
+            return durations + delays;
+        }
+
         /** @hide */
         @Override
         public void validate() {
@@ -452,19 +502,32 @@ public abstract class CombinedVibrationEffect implements Parcelable {
                     "There should be at least one effect set for a combined effect");
             Preconditions.checkArgument(mEffects.size() == mDelays.size(),
                     "Effect and delays should have equal length");
-            for (long delay : mDelays) {
-                if (delay < 0) {
+            final int effectCount = mEffects.size();
+            for (int i = 0; i < effectCount; i++) {
+                if (mDelays.get(i) < 0) {
                     throw new IllegalArgumentException("Delays must all be >= 0"
                             + " (delays=" + mDelays + ")");
                 }
             }
-            for (CombinedVibrationEffect effect : mEffects) {
+            for (int i = 0; i < effectCount; i++) {
+                CombinedVibrationEffect effect = mEffects.get(i);
                 if (effect instanceof Sequential) {
                     throw new IllegalArgumentException(
                             "There should be no nested sequential effects in a combined effect");
                 }
                 effect.validate();
             }
+        }
+
+        @Override
+        public boolean hasVibrator(int vibratorId) {
+            final int effectCount = mEffects.size();
+            for (int i = 0; i < effectCount; i++) {
+                if (mEffects.get(i).hasVibrator(vibratorId)) {
+                    return true;
+                }
+            }
+            return false;
         }
 
         @Override

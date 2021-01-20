@@ -993,6 +993,11 @@
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
 
+    <!-- Time to wait before sending a HOME intent when waking up from power/home button.
+         (0 - do not send HOME intent on wakeup)
+    -->
+    <integer name="config_wakeUpToLastStateTimeoutMillis">0</integer>
+
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
 
@@ -4612,4 +4617,9 @@
          If omitted, image editing will not be offered via Chooser.
          This name is in the ComponentName flattened format (package/class) [DO NOT TRANSLATE]  -->
     <string name="config_systemImageEditor" translatable="false"></string>
+
+    <!-- Whether to force WindowOrientationListener to keep listening to its sensor, even when
+         dreaming. This allows the AoD to rotate on devices without a wake device_orientation
+         sensor. Note that this flag should only be enabled for development/testing use. -->
+    <bool name="config_forceOrientationListenerEnabledWhileDreaming">false</bool>
 </resources>

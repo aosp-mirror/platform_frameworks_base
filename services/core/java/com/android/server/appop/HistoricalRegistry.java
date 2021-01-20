@@ -1488,7 +1488,7 @@ final class HistoricalRegistry {
         private void writeHistoricalPackageOpsDLocked(@NonNull HistoricalPackageOps packageOps,
                 @NonNull TypedXmlSerializer serializer) throws IOException {
             serializer.startTag(null, TAG_PACKAGE);
-            serializer.attribute(null, ATTR_NAME, packageOps.getPackageName());
+            serializer.attributeInterned(null, ATTR_NAME, packageOps.getPackageName());
             final int numAttributions = packageOps.getAttributedOpsCount();
             for (int i = 0; i < numAttributions; i++) {
                 final AppOpsManager.AttributedHistoricalOps op = packageOps.getAttributedOpsAt(i);

@@ -49,9 +49,9 @@ public interface OneHanded {
     void stopOneHanded();
 
     /**
-     * Exits one handed mode with {@link OneHandedEvents}.
+     * Exits one handed mode with {@link OneHandedUiEventLogger}.
      */
-    void stopOneHanded(int event);
+    void stopOneHanded(int uiEvent);
 
     /**
      * Set navigation 3 button mode enabled or disabled by users.

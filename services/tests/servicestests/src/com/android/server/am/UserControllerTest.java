@@ -53,7 +53,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.IUserSwitchObserver;
@@ -71,6 +73,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.os.storage.IStorageManager;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
@@ -161,7 +164,7 @@ public class UserControllerTest {
             // All UserController params are set to default.
             mUserController = new UserController(mInjector);
             setUpUser(TEST_USER_ID, NO_USERINFO_FLAGS);
-            setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated=*/ true);
+            setUpUser(TEST_PRE_CREATED_USER_ID, NO_USERINFO_FLAGS, /* preCreated=*/ true, null);
         });
     }
 
@@ -549,19 +552,75 @@ public class UserControllerTest {
                 /* keyEvictedCallback= */ mKeyEvictedCallback, /* expectLocking= */ true);
     }
 
+    @Test
+    public void testStartProfile_fullUserFails() {
+        setUpUser(TEST_USER_ID1, 0);
+        assertThrows(IllegalArgumentException.class,
+                () -> mUserController.startProfile(TEST_USER_ID1));
+    }
+
+    @Test
+    public void testStopProfile_fullUserFails() throws Exception {
+        setUpAndStartUserInBackground(TEST_USER_ID1);
+        assertThrows(IllegalArgumentException.class,
+                () -> mUserController.stopProfile(TEST_USER_ID1));
+    }
+
+    @Test
+    public void testStartProfile_disabledProfileFails() {
+        setUpUser(TEST_USER_ID1, UserInfo.FLAG_PROFILE | UserInfo.FLAG_DISABLED, /* preCreated= */
+                false, UserManager.USER_TYPE_PROFILE_MANAGED);
+        assertThat(mUserController.startProfile(TEST_USER_ID1)).isFalse();
+    }
+
+    @Test
+    public void testStartProfile() throws Exception {
+        setUpAndStartProfileInBackground(TEST_USER_ID1);
+        startBackgroundUserAssertions();
+    }
+
+    @Test
+    public void testStopProfile() throws Exception {
+        setUpAndStartProfileInBackground(TEST_USER_ID1);
+        assertProfileLockedOrUnlockedAfterStopping(TEST_USER_ID1, /* expectLocking= */ true);
+    }
+
     private void setUpAndStartUserInBackground(int userId) throws Exception {
         setUpUser(userId, 0);
         mUserController.startUser(userId, /* foreground= */ false);
         verify(mInjector.mStorageManagerMock, times(1))
-                .unlockUserKey(TEST_USER_ID, 0, null, null);
+                .unlockUserKey(userId, /* serialNumber= */ 0, /* token= */ null, /* secret= */
+                        null);
+        mUserStates.put(userId, mUserController.getStartedUserState(userId));
+    }
+
+    private void setUpAndStartProfileInBackground(int userId) throws Exception {
+        setUpUser(userId, UserInfo.FLAG_PROFILE, false, UserManager.USER_TYPE_PROFILE_MANAGED);
+        assertThat(mUserController.startProfile(userId)).isTrue();
+
+        verify(mInjector.mStorageManagerMock, times(1))
+                .unlockUserKey(userId, /* serialNumber= */ 0, /* token= */ null, /* secret= */
+                        null);
         mUserStates.put(userId, mUserController.getStartedUserState(userId));
     }
 
     private void assertUserLockedOrUnlockedAfterStopping(int userId, boolean delayedLocking,
-            KeyEvictedCallback keyEvictedCallback, boolean expectLocking)  throws Exception {
+            KeyEvictedCallback keyEvictedCallback, boolean expectLocking) throws Exception {
         int r = mUserController.stopUser(userId, /* force= */ true, /* delayedLocking= */
                 delayedLocking, null, keyEvictedCallback);
         assertThat(r).isEqualTo(ActivityManager.USER_OP_SUCCESS);
+        assertUserLockedOrUnlockedState(userId, delayedLocking, expectLocking);
+    }
+
+    private void assertProfileLockedOrUnlockedAfterStopping(int userId, boolean expectLocking)
+            throws Exception {
+        boolean profileStopped = mUserController.stopProfile(userId);
+        assertThat(profileStopped).isTrue();
+        assertUserLockedOrUnlockedState(userId, /* delayedLocking= */ false, expectLocking);
+    }
+
+    private void assertUserLockedOrUnlockedState(int userId, boolean delayedLocking,
+            boolean expectLocking) throws InterruptedException, RemoteException {
         // fake all interim steps
         UserState ussUser = mUserStates.get(userId);
         ussUser.setState(UserState.STATE_SHUTDOWN);
@@ -594,11 +653,16 @@ public class UserControllerTest {
     }
 
     private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags) {
-        setUpUser(userId, flags, /* preCreated= */ false);
+        setUpUser(userId, flags, /* preCreated= */ false, /* userType */ null);
     }
 
-    private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags, boolean preCreated) {
-        UserInfo userInfo = new UserInfo(userId, "User" + userId, flags);
+    private void setUpUser(@UserIdInt int userId, @UserInfoFlag int flags, boolean preCreated,
+            @Nullable String userType) {
+        if (userType == null) {
+            userType = UserInfo.getDefaultUserType(flags);
+        }
+        UserInfo userInfo = new UserInfo(userId, "User" + userId, /* iconPath= */ null, flags,
+                userType);
         userInfo.preCreated = preCreated;
         when(mInjector.mUserManagerMock.getUserInfo(eq(userId))).thenReturn(userInfo);
         when(mInjector.mUserManagerMock.isPreCreated(userId)).thenReturn(preCreated);

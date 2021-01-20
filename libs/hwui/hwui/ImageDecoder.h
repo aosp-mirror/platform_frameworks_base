@@ -38,6 +38,7 @@ public:
                  sk_sp<SkPngChunkReader> peeker = nullptr);
     ~ImageDecoder();
 
+    SkISize getSampledDimensions(int sampleSize) const;
     bool setTargetSize(int width, int height);
     bool setCropRect(const SkIRect*);
 

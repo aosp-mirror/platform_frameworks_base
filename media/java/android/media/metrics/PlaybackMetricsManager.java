@@ -73,6 +73,18 @@ public class PlaybackMetricsManager {
     }
 
     /**
+     * Reports track change event.
+     * @hide
+     */
+    public void reportTrackChangeEvent(@NonNull String sessionId, TrackChangeEvent event) {
+        try {
+            mService.reportTrackChangeEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates a playback session.
      */
     public PlaybackSession createSession() {

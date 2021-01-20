@@ -264,11 +264,18 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             for (int i = 0, n = hops.size(); i < n; ++i) {
                 final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
                 switch (hop.getType()) {
-                    case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT:
-                        final Task task = WindowContainer.fromBinder(hop.getContainer()).asTask();
+                    case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
+                        final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
+                        final Task task = wc != null ? wc.asTask() : null;
+                        if (task != null) {
                             task.getDisplayArea().setLaunchRootTask(task,
                                     hop.getWindowingModes(), hop.getActivityTypes());
+                        } else {
+                            throw new IllegalArgumentException(
+                                    "Cannot set non-task as launch root: " + wc);
+                        }
                         break;
+                    }
                     case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
                         effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId);
                         break;

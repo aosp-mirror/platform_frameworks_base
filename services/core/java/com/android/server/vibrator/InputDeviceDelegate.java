@@ -18,6 +18,7 @@ package com.android.server.vibrator;
 
 import android.content.Context;
 import android.hardware.input.InputManager;
+import android.os.CombinedVibrationEffect;
 import android.os.Handler;
 import android.os.VibrationAttributes;
 import android.os.VibrationEffect;
@@ -84,11 +85,21 @@ public final class InputDeviceDelegate implements InputManager.InputDeviceListen
      *
      * @return {@link #isAvailable()}
      */
-    public boolean vibrateIfAvailable(int uid, String opPkg, VibrationEffect effect,
+    public boolean vibrateIfAvailable(int uid, String opPkg, CombinedVibrationEffect effect,
             String reason, VibrationAttributes attrs) {
         synchronized (mLock) {
-            for (int i = 0; i < mInputDeviceVibrators.size(); i++) {
-                mInputDeviceVibrators.valueAt(i).vibrate(uid, opPkg, effect, reason, attrs);
+            // TODO(b/159207608): Pass on the combined vibration once InputManager is merged
+            if (effect instanceof CombinedVibrationEffect.Mono) {
+                VibrationEffect e = ((CombinedVibrationEffect.Mono) effect).getEffect();
+                if (e instanceof VibrationEffect.Prebaked) {
+                    VibrationEffect fallback = ((VibrationEffect.Prebaked) e).getFallbackEffect();
+                    if (fallback != null) {
+                        e = fallback;
+                    }
+                }
+                for (int i = 0; i < mInputDeviceVibrators.size(); i++) {
+                    mInputDeviceVibrators.valueAt(i).vibrate(uid, opPkg, e, reason, attrs);
+                }
             }
             return mInputDeviceVibrators.size() > 0;
         }

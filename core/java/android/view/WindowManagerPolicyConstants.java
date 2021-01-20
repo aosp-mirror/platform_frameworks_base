@@ -89,6 +89,15 @@ public interface WindowManagerPolicyConstants {
      */
     String EXTRA_FROM_HOME_KEY = "android.intent.extra.FROM_HOME_KEY";
 
+    /**
+     * Extra for the start reason of the HOME intent.
+     * Will be {@link PowerManager#WAKE_REASON_WAKE_KEY} or
+     * {@link PowerManager#WAKE_REASON_POWER_BUTTON} when intent was sent through
+     * {@link PhoneWindowManager#shouldWakeUpWithHomeIntent}.
+     * @hide
+     */
+    String EXTRA_START_REASON = "android.intent.extra.EXTRA_START_REASON";
+
     // TODO: move this to a more appropriate place.
     interface PointerEventListener {
         /**

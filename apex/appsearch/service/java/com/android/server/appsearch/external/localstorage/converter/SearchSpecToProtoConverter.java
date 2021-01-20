@@ -25,6 +25,7 @@ import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.ScoringSpecProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.TermMatchType;
+import com.google.android.icing.proto.TypePropertyMask;
 
 import java.util.List;
 import java.util.Map;
@@ -71,7 +72,7 @@ public final class SearchSpecToProtoConverter {
         Map<String, List<String>> projectionTypePropertyPaths = spec.getProjections();
         for (Map.Entry<String, List<String>> e : projectionTypePropertyPaths.entrySet()) {
             builder.addTypePropertyMasks(
-                    ResultSpecProto.TypePropertyMask.newBuilder()
+                    TypePropertyMask.newBuilder()
                             .setSchemaType(e.getKey())
                             .addAllPaths(e.getValue()));
         }
@@ -107,8 +108,7 @@ public final class SearchSpecToProtoConverter {
             case SearchSpec.RANKING_STRATEGY_CREATION_TIMESTAMP:
                 return ScoringSpecProto.RankingStrategy.Code.CREATION_TIMESTAMP;
             case SearchSpec.RANKING_STRATEGY_RELEVANCE_SCORE:
-                return ScoringSpecProto.RankingStrategy.Code
-                        .RELEVANCE_SCORE_NONFUNCTIONAL_PLACEHOLDER;
+                return ScoringSpecProto.RankingStrategy.Code.RELEVANCE_SCORE;
             default:
                 throw new IllegalArgumentException(
                         "Invalid result ranking strategy: " + rankingStrategyCode);

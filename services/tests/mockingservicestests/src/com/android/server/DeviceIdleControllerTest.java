@@ -351,6 +351,7 @@ public class DeviceIdleControllerTest {
         // them after each test, otherwise, subsequent tests will fail.
         LocalServices.removeServiceForTest(AppStateTracker.class);
         LocalServices.removeServiceForTest(DeviceIdleInternal.class);
+        LocalServices.removeServiceForTest(PowerAllowlistInternal.class);
     }
 
     @Test

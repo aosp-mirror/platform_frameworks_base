@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Presubmit
 import android.graphics.Region
 import android.util.Rational
 import android.view.Surface
@@ -61,6 +62,7 @@ import org.junit.runners.Parameterized
  *
  * Currently it runs only in 0 degrees because of b/156100803
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

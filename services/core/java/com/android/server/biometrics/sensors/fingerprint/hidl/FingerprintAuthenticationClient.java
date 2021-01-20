@@ -101,6 +101,13 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         }
     }
 
+    @Override
+    public void onError(int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+    }
+
     private void resetFailedAttempts(int userId) {
         mLockoutFrameworkImpl.resetFailedAttemptsForUser(true /* clearAttemptCounter */, userId);
     }

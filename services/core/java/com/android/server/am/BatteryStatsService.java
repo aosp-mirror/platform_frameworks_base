@@ -16,14 +16,11 @@
 
 package com.android.server.am;
 
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.hardware.power.stats.EnergyConsumerId;
-import android.hardware.power.stats.EnergyConsumerResult;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
@@ -65,9 +62,6 @@ import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
-import com.android.internal.power.MeasuredEnergyArray;
-import com.android.internal.power.MeasuredEnergyArray.MeasuredEnergySubsystem;
-import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
@@ -75,7 +69,6 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.powerstats.PowerStatsHALWrapper;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -125,8 +118,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
     private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
     private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
-
-    private final PowerStatsHALWrapper.IPowerStatsHALWrapper mPowerStatsHALWrapper;
 
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
@@ -199,43 +190,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    @Override
-    public @Nullable MeasuredEnergyArray getEnergyConsumptionData() {
-        final EnergyConsumerResult[] results = mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
-        if (results == null) return null;
-        final int size = results.length;
-        final int[] subsystems = new int[size];
-        final long[] energyUJ = new long[size];
-
-        for (int i = 0; i < size; i++) {
-            final EnergyConsumerResult consumer = results[i];
-            final int subsystem;
-            switch (consumer.energyConsumerId) {
-                case EnergyConsumerId.DISPLAY:
-                    subsystem = MeasuredEnergyArray.SUBSYSTEM_DISPLAY;
-                    break;
-                default:
-                    continue;
-            }
-            subsystems[i] = subsystem;
-            energyUJ[i] = consumer.energyUWs;
-        }
-        return new MeasuredEnergyArray() {
-            @Override
-            public int getSubsystem(int index) {
-                return subsystems[index];
-            }
-            @Override
-            public long getEnergy(int index) {
-                return energyUJ[index];
-            }
-            @Override
-            public int size() {
-                return size;
-            }
-        };
-    }
-
     BatteryStatsService(Context context, File systemDir, Handler handler) {
         // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
         mContext = context;
@@ -253,43 +207,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
-        // TODO(b/173077356): Replace directly calling the HAL with PowerStatsService queries
-        mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
-
-        final MeasuredEnergyArray initialEnergies = getEnergyConsumptionData();
-        final boolean[] supportedBuckets = getSupportedEnergyBuckets(initialEnergies);
         mStats = new BatteryStatsImpl(systemDir, handler, this,
-                this, supportedBuckets, mUserManagerUserInfoProvider);
-        mWorker = new BatteryExternalStatsWorker(context, mStats, initialEnergies);
+                this, mUserManagerUserInfoProvider);
+        mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.setPowerProfileLocked(new PowerProfile(context));
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats);
-    }
-
-    /**
-     * Map the {@link MeasuredEnergySubsystem}s in the given energyArray to their corresponding
-     * {@link MeasuredEnergyStats.EnergyBucket}s.
-     *
-     * @return array with true for index i if energy bucket i is supported.
-     */
-    private static @Nullable boolean[] getSupportedEnergyBuckets(MeasuredEnergyArray energyArray) {
-        if (energyArray == null) {
-            return null;
-        }
-        final boolean[] buckets = new boolean[MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS];
-        final int size = energyArray.size();
-        for (int energyIdx = 0; energyIdx < size; energyIdx++) {
-            switch (energyArray.getSubsystem(energyIdx)) {
-                case MeasuredEnergyArray.SUBSYSTEM_DISPLAY:
-                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON] = true;
-                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE] = true;
-                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_OTHER] = true;
-                    break;
-            }
-        }
-        return buckets;
     }
 
     public void publish() {
@@ -299,6 +224,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void systemServicesReady() {
         mStats.systemServicesReady(mContext);
+        mWorker.systemServicesReady();
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -2270,7 +2196,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
                                         null, mStats.mHandler, null, null,
-                                        null /* energy buckets not currently in checkin anyway */,
                                         mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
@@ -2311,7 +2236,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
                                         null, mStats.mHandler, null, null,
-                                        null /* energy buckets not currently in checkin anyway */,
                                         mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();

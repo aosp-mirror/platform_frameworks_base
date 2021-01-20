@@ -22,6 +22,7 @@ import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
 import android.media.metrics.PlaybackStateEvent;
+import android.media.metrics.TrackChangeEvent;
 import android.os.Binder;
 import android.util.Base64;
 import android.util.StatsEvent;
@@ -116,6 +117,31 @@ public final class PlaybackMetricsManagerService extends SystemService {
                     .writeString(sessionId)
                     .writeInt(event.getType())
                     .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .usePooledBuffer()
+                    .build();
+            StatsLog.write(statsEvent);
+        }
+
+        @Override
+        public void reportTrackChangeEvent(
+                String sessionId, TrackChangeEvent event, int userId) {
+            StatsEvent statsEvent = StatsEvent.newBuilder()
+                    .setAtomId(321)
+                    .writeString(sessionId)
+                    .writeInt(event.getTrackState())
+                    .writeInt(event.getTrackChangeReason())
+                    .writeString(event.getContainerMimeType())
+                    .writeString(event.getSampleMimeType())
+                    .writeString(event.getCodecName())
+                    .writeInt(event.getBitrate())
+                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .writeInt(event.getTrackType())
+                    .writeString(event.getLanguage())
+                    .writeString(event.getLanguageRegion())
+                    .writeInt(event.getChannelCount())
+                    .writeInt(event.getSampleRate())
+                    .writeInt(event.getWidth())
+                    .writeInt(event.getHeight())
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);

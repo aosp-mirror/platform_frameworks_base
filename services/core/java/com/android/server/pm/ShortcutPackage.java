@@ -1049,6 +1049,7 @@ class ShortcutPackage extends ShortcutPackageItem {
                             }
                         }
 
+                        // TODO: update resource strings in AppSearch
                         // If this shortcut is not from a manifest, then update all resource IDs
                         // from resource names.  (We don't allow resource strings for
                         // non-manifest at the moment, but icons can still be resources.)
@@ -1340,6 +1341,7 @@ class ShortcutPackage extends ShortcutPackageItem {
      * For all the text fields, refresh the string values if they're from resources.
      */
     public void resolveResourceStrings() {
+        // TODO: update resource strings in AppSearch
         final ShortcutService s = mShortcutUser.mService;
 
         List<ShortcutInfo> changedShortcuts = null;

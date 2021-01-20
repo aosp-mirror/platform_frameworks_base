@@ -1565,6 +1565,7 @@ public class ShortcutService extends IShortcutService.Stub {
      * resource-based strings.
      */
     void fixUpShortcutResourceNamesAndValues(ShortcutInfo si) {
+        // TODO: update resource names in AppSearch
         final Resources publisherRes = injectGetResourcesForApplicationAsUser(
                 si.getPackage(), si.getUserId());
         if (publisherRes != null) {

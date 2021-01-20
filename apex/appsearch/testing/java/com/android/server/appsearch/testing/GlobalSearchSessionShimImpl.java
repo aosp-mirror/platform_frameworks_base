@@ -62,6 +62,7 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
             @NonNull GlobalSearchSession session, @NonNull ExecutorService executor) {
         mGlobalSearchSession = Preconditions.checkNotNull(session);
         mExecutor = Preconditions.checkNotNull(executor);
+
     }
 
     @NonNull
@@ -71,5 +72,10 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
         SearchResults searchResults =
                 mGlobalSearchSession.query(queryExpression, searchSpec, mExecutor);
         return new SearchResultsShimImpl(searchResults, mExecutor);
+    }
+
+    @Override
+    public void close() {
+        mGlobalSearchSession.close();
     }
 }

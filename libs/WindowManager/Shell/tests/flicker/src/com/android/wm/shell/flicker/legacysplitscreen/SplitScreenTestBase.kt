@@ -52,6 +52,7 @@ abstract class SplitScreenTestBase(
     protected val LIVE_WALLPAPER_PACKAGE_NAME =
             "com.breel.wallpapers18.soundviz.wallpaper.variations.SoundVizWallpaperV2"
     protected val LETTER_BOX_NAME = "Letterbox"
+    protected val TOAST_NAME = "Toast"
 
     protected val transitionSetup: FlickerBuilder
         get() = FlickerBuilder(instrumentation).apply {

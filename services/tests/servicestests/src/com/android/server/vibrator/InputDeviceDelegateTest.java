@@ -34,6 +34,7 @@ import android.content.ContextWrapper;
 import android.hardware.input.IInputDevicesChangedListener;
 import android.hardware.input.IInputManager;
 import android.hardware.input.InputManager;
+import android.os.CombinedVibrationEffect;
 import android.os.Handler;
 import android.os.Process;
 import android.os.VibrationAttributes;
@@ -66,6 +67,9 @@ public class InputDeviceDelegateTest {
     private static final String REASON = "some reason";
     private static final VibrationAttributes VIBRATION_ATTRIBUTES =
             new VibrationAttributes.Builder().setUsage(VibrationAttributes.USAGE_ALARM).build();
+    private static final VibrationEffect EFFECT = VibrationEffect.createOneShot(100, 255);
+    private static final CombinedVibrationEffect SYNCED_EFFECT =
+            CombinedVibrationEffect.createSynced(EFFECT);
 
     @Rule public MockitoRule rule = MockitoJUnit.rule();
 
@@ -227,10 +231,9 @@ public class InputDeviceDelegateTest {
 
     @Test
     public void vibrateIfAvailable_withNoInputDevice_returnsFalse() {
-        VibrationEffect effect = VibrationEffect.createOneShot(100, 255);
         assertFalse(mInputDeviceDelegate.isAvailable());
         assertFalse(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, effect, REASON, VIBRATION_ATTRIBUTES));
+                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
     }
 
     @Test
@@ -241,11 +244,10 @@ public class InputDeviceDelegateTest {
         when(mIInputManagerMock.getInputDevice(eq(2))).thenReturn(createInputDeviceWithVibrator(2));
         mInputDeviceDelegate.updateInputDeviceVibrators(/* vibrateInputDevices= */ true);
 
-        VibrationEffect effect = VibrationEffect.createOneShot(100, 255);
         assertTrue(mInputDeviceDelegate.vibrateIfAvailable(
-                UID, PACKAGE_NAME, effect, REASON, VIBRATION_ATTRIBUTES));
-        verify(mIInputManagerMock).vibrate(eq(1), same(effect), any());
-        verify(mIInputManagerMock).vibrate(eq(2), same(effect), any());
+                UID, PACKAGE_NAME, SYNCED_EFFECT, REASON, VIBRATION_ATTRIBUTES));
+        verify(mIInputManagerMock).vibrate(eq(1), same(EFFECT), any());
+        verify(mIInputManagerMock).vibrate(eq(2), same(EFFECT), any());
     }
 
     @Test

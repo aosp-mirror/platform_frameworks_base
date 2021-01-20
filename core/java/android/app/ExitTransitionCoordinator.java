@@ -470,9 +470,6 @@ public class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 || mSharedElementsHidden)) {
             finish();
         }
-        if (!mIsReturning && mExitNotified) {
-            mExitCallbacks = null; // don't need it anymore
-        }
     }
 
     private void finish() {

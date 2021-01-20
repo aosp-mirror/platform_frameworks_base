@@ -39,6 +39,7 @@ import android.platform.test.annotations.Presubmit;
 
 import com.android.internal.R;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -168,15 +169,30 @@ public class VibrationEffectTest {
     }
 
     @Test
-    public void testScalePrebaked_ignoresScaleAndReturnsSameEffect() {
-        VibrationEffect initial = VibrationEffect.get(VibrationEffect.RINGTONES[1]);
-        assertSame(initial, initial.scale(0.5f));
+    public void testScalePrebaked_scalesFallbackEffect() {
+        VibrationEffect.Prebaked prebaked =
+                (VibrationEffect.Prebaked) VibrationEffect.get(VibrationEffect.RINGTONES[1]);
+        assertSame(prebaked, prebaked.scale(0.5f));
+
+        prebaked = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_MEDIUM, TEST_ONE_SHOT);
+        VibrationEffect.OneShot scaledFallback =
+                (VibrationEffect.OneShot) prebaked.scale(0.5f).getFallbackEffect();
+        assertEquals(34, scaledFallback.getAmplitude(), AMPLITUDE_SCALE_TOLERANCE);
     }
 
     @Test
-    public void testResolvePrebaked_ignoresDefaultAmplitudeAndReturnsSameEffect() {
-        VibrationEffect initial = VibrationEffect.get(VibrationEffect.RINGTONES[1]);
-        assertSame(initial, initial.resolve(1000));
+    public void testResolvePrebaked_resolvesFallbackEffectIfSet() {
+        VibrationEffect.Prebaked prebaked =
+                (VibrationEffect.Prebaked) VibrationEffect.get(VibrationEffect.RINGTONES[1]);
+        assertSame(prebaked, prebaked.resolve(1000));
+
+        prebaked = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_MEDIUM,
+                VibrationEffect.createOneShot(1, VibrationEffect.DEFAULT_AMPLITUDE));
+        VibrationEffect.OneShot resolvedFallback =
+                (VibrationEffect.OneShot) prebaked.resolve(10).getFallbackEffect();
+        assertEquals(10, resolvedFallback.getAmplitude());
     }
 
     @Test
@@ -350,6 +366,36 @@ public class VibrationEffectTest {
         assertEquals(180, waveform.scale(0.8f).getAmplitudes()[0], AMPLITUDE_SCALE_TOLERANCE);
         assertEquals(0.57f, composed.scale(0.7f).getPrimitiveEffects().get(0).scale,
                 INTENSITY_SCALE_TOLERANCE);
+    }
+
+    @Test
+    public void getEffectStrength_returnsValueFromConstructor() {
+        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_LIGHT, null);
+        Assert.assertEquals(VibrationEffect.EFFECT_STRENGTH_LIGHT, effect.getEffectStrength());
+    }
+
+    @Test
+    public void getFallbackEffect_withFallbackDisabled_isNull() {
+        VibrationEffect fallback = VibrationEffect.createOneShot(100, 100);
+        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                false, VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        Assert.assertNull(effect.getFallbackEffect());
+    }
+
+    @Test
+    public void getFallbackEffect_withoutEffectSet_isNull() {
+        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                true, VibrationEffect.EFFECT_STRENGTH_LIGHT);
+        Assert.assertNull(effect.getFallbackEffect());
+    }
+
+    @Test
+    public void getFallbackEffect_withFallback_returnsValueFromConstructor() {
+        VibrationEffect fallback = VibrationEffect.createOneShot(100, 100);
+        VibrationEffect.Prebaked effect = new VibrationEffect.Prebaked(VibrationEffect.EFFECT_CLICK,
+                VibrationEffect.EFFECT_STRENGTH_LIGHT, fallback);
+        Assert.assertEquals(fallback, effect.getFallbackEffect());
     }
 
     private Resources mockRingtoneResources() {

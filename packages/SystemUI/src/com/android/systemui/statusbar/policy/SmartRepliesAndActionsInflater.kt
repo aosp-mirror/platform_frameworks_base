@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.policy
 
 import android.app.Notification
+import android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY
 import android.app.PendingIntent
 import android.app.RemoteInput
 import android.content.Context
@@ -310,11 +311,19 @@ interface SmartActionInflater {
         actionIndex: Int,
         action: Notification.Action
     ) =
+        if (smartActions.fromAssistant
+            && SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY == action.semanticAction) {
+            entry.row.doSmartActionClick(entry.row.x.toInt() / 2,
+                entry.row.y.toInt() / 2, SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY)
+            smartReplyController
+                .smartActionClicked(entry, actionIndex, action, smartActions.fromAssistant)
+        } else {
             activityStarter.startPendingIntentDismissingKeyguard(action.actionIntent, entry.row) {
                 smartReplyController
-                        .smartActionClicked(entry, actionIndex, action, smartActions.fromAssistant)
+                    .smartActionClicked(entry, actionIndex, action, smartActions.fromAssistant)
                 headsUpManager.removeNotification(entry.key, true /* releaseImmediately */)
             }
+        }
 }
 
 interface SmartReplyInflater {

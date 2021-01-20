@@ -39,6 +39,7 @@ import static android.view.Display.STATE_OFF;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.KeyEvent.KEYCODE_DPAD_CENTER;
 import static android.view.KeyEvent.KEYCODE_DPAD_DOWN;
+import static android.view.KeyEvent.KEYCODE_HOME;
 import static android.view.KeyEvent.KEYCODE_POWER;
 import static android.view.KeyEvent.KEYCODE_UNKNOWN;
 import static android.view.KeyEvent.KEYCODE_VOLUME_DOWN;
@@ -490,6 +491,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     boolean mWakeOnDpadKeyPress;
     boolean mWakeOnAssistKeyPress;
     boolean mWakeOnBackKeyPress;
+    long mWakeUpToLastStateTimeout;
 
     private boolean mHandleVolumeKeysInWM;
 
@@ -1846,6 +1848,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mPerDisplayFocusEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
+        mWakeUpToLastStateTimeout = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_wakeUpToLastStateTimeoutMillis);
+
         readConfigurationDependentBehaviors();
 
         mDisplayFoldController = DisplayFoldController.create(context, DEFAULT_DISPLAY);
@@ -2600,7 +2605,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // can never break it, although if keyguard is on, we do let
         // it handle it, because that gives us the correct 5 second
         // timeout.
-        if (keyCode == KeyEvent.KEYCODE_HOME) {
+        if (keyCode == KEYCODE_HOME) {
             DisplayHomeButtonHandler handler = mDisplayHomeButtonHandlers.get(displayId);
             if (handler == null) {
                 handler = new DisplayHomeButtonHandler(displayId);
@@ -3556,8 +3561,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (isValidGlobalKey(keyCode)
                 && mGlobalKeyManager.shouldHandleGlobalKey(keyCode, event)) {
             if (isWakeKey) {
-                wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
-                        PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
+                wakeUpFromWakeKey(event);
             }
             return result;
         }
@@ -3879,8 +3883,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         if (isWakeKey) {
-            wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
-                    PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY");
+            wakeUpFromWakeKey(event);
         }
 
         if ((result & ACTION_PASS_TO_USER) != 0) {
@@ -4319,9 +4322,39 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private boolean shouldWakeUpWithHomeIntent() {
+        if (mWakeUpToLastStateTimeout <= 0) {
+            return false;
+        }
+
+        final long sleepDuration = mPowerManagerInternal.getLastWakeup().sleepDuration;
+        if (DEBUG_WAKEUP) {
+            Log.i(TAG, "shouldWakeUpWithHomeIntent: sleepDuration= " + sleepDuration
+                    + " mWakeUpToLastStateTimeout= " + mWakeUpToLastStateTimeout);
+        }
+        return sleepDuration > mWakeUpToLastStateTimeout;
+    }
+
     private void wakeUpFromPowerKey(long eventTime) {
-        wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey,
-                PowerManager.WAKE_REASON_POWER_BUTTON, "android.policy:POWER");
+        if (wakeUp(eventTime, mAllowTheaterModeWakeFromPowerKey,
+                PowerManager.WAKE_REASON_POWER_BUTTON, "android.policy:POWER")) {
+            // Start HOME with "reason" extra if sleeping for more than mWakeUpToLastStateTimeout
+            if (shouldWakeUpWithHomeIntent()) {
+                startDockOrHome(DEFAULT_DISPLAY, /*fromHomeKey*/ false, /*wakenFromDreams*/ true,
+                        PowerManager.wakeReasonToString(PowerManager.WAKE_REASON_POWER_BUTTON));
+            }
+        }
+    }
+
+    private void wakeUpFromWakeKey(KeyEvent event) {
+        if (wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey,
+                PowerManager.WAKE_REASON_WAKE_KEY, "android.policy:KEY")) {
+            // Start HOME with "reason" extra if sleeping for more than mWakeUpToLastStateTimeout
+            if (shouldWakeUpWithHomeIntent() && event.getKeyCode() == KEYCODE_HOME) {
+                startDockOrHome(DEFAULT_DISPLAY, /*fromHomeKey*/ true, /*wakenFromDreams*/ true,
+                        PowerManager.wakeReasonToString(PowerManager.WAKE_REASON_WAKE_KEY));
+            }
+        }
     }
 
     private boolean wakeUp(long wakeTime, boolean wakeInTheaterMode, @WakeReason int reason,
@@ -5004,7 +5037,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return null;
     }
 
-    void startDockOrHome(int displayId, boolean fromHomeKey, boolean awakenFromDreams) {
+    void startDockOrHome(int displayId, boolean fromHomeKey, boolean awakenFromDreams,
+            String startReason) {
         try {
             ActivityManager.getService().stopAppSwitches();
         } catch (RemoteException e) {}
@@ -5032,9 +5066,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        if (DEBUG_WAKEUP) {
+            Log.d(TAG, "startDockOrHome: startReason= " + startReason);
+        }
+
         // Start home.
-        mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, "startDockOrHome",
+        mActivityTaskManagerInternal.startHomeOnDisplay(mCurrentUserId, startReason,
                 displayId, true /* allowInstrumenting */, fromHomeKey);
+    }
+
+    void startDockOrHome(int displayId, boolean fromHomeKey, boolean awakenFromDreams) {
+        startDockOrHome(displayId, fromHomeKey, awakenFromDreams, /*startReason*/
+                "startDockOrHome");
     }
 
     /**
