@@ -174,8 +174,10 @@ public final class RoleManager {
     @NonNull
     private final Object mListenersLock = new Object();
 
-    @NonNull
-    private final RoleControllerManager mRoleControllerManager;
+    @GuardedBy("mRoleControllerManagerLock")
+    @Nullable
+    private RoleControllerManager mRoleControllerManager;
+    private final Object mRoleControllerManagerLock = new Object();
 
     /**
      * @hide
@@ -184,7 +186,6 @@ public final class RoleManager {
         mContext = context;
         mService = IRoleManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
                 Context.ROLE_SERVICE));
-        mRoleControllerManager = new RoleControllerManager(context);
     }
 
     /**
@@ -693,7 +694,7 @@ public final class RoleManager {
     @TestApi
     public void isRoleVisible(@NonNull String roleName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        mRoleControllerManager.isRoleVisible(roleName, executor, callback);
+        getRoleControllerManager().isRoleVisible(roleName, executor, callback);
     }
 
     /**
@@ -714,8 +715,18 @@ public final class RoleManager {
     @TestApi
     public void isApplicationVisibleForRole(@NonNull String roleName, @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
-        mRoleControllerManager.isApplicationVisibleForRole(roleName, packageName, executor,
+        getRoleControllerManager().isApplicationVisibleForRole(roleName, packageName, executor,
                 callback);
+    }
+
+    @NonNull
+    private RoleControllerManager getRoleControllerManager() {
+        synchronized (mRoleControllerManagerLock) {
+            if (mRoleControllerManager == null) {
+                mRoleControllerManager = new RoleControllerManager(mContext);
+            }
+            return mRoleControllerManager;
+        }
     }
 
     private static class OnRoleHoldersChangedListenerDelegate
