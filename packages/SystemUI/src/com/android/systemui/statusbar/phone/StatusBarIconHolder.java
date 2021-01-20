@@ -22,8 +22,8 @@ import android.graphics.drawable.Icon;
 import android.os.UserHandle;
 
 import com.android.internal.statusbar.StatusBarIcon;
+import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.MobileIconState;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.NoCallingIconState;
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.WifiIconState;
 
 /**
@@ -72,14 +72,18 @@ public class StatusBarIconHolder {
     }
 
     /**
-     * Creates a new StatusBarIconHolder from a NoCallingIconState.
+     * Creates a new StatusBarIconHolder from a CallIndicatorIconState.
      */
-    public static StatusBarIconHolder fromNoCallingState(
-            Context context, NoCallingIconState state) {
+    public static StatusBarIconHolder fromCallIndicatorState(
+            Context context, CallIndicatorIconState state) {
         StatusBarIconHolder holder = new StatusBarIconHolder();
+        int resId = state.isNoCalling ? state.noCallingResId : state.callStrengthResId;
+        String contentDescription = state.isNoCalling
+                ? state.noCallingDescription : state.callStrengthDescription;
         holder.mIcon = new StatusBarIcon(UserHandle.SYSTEM, context.getPackageName(),
-                Icon.createWithResource(context, state.resId), 0, 0, null);
+                Icon.createWithResource(context, resId), 0, 0, contentDescription);
         holder.mTag = state.subId;
+        holder.setVisible(true);
         return holder;
     }
 
@@ -90,6 +94,10 @@ public class StatusBarIconHolder {
     @Nullable
     public StatusBarIcon getIcon() {
         return mIcon;
+    }
+
+    public void setIcon(StatusBarIcon icon) {
+        mIcon = icon;
     }
 
     @Nullable
