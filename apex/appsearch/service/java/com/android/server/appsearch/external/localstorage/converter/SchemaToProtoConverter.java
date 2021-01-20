@@ -22,6 +22,7 @@ import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import com.google.android.icing.proto.DocumentIndexingConfig;
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.SchemaTypeConfigProto;
 import com.google.android.icing.proto.SchemaTypeConfigProtoOrBuilder;
@@ -65,7 +66,6 @@ public final class SchemaToProtoConverter {
         Preconditions.checkNotNull(property);
         PropertyConfigProto.Builder builder =
                 PropertyConfigProto.newBuilder().setPropertyName(property.getName());
-        StringIndexingConfig.Builder indexingConfig = StringIndexingConfig.newBuilder();
 
         // Set dataType
         @AppSearchSchema.PropertyConfig.DataType int dataType = property.getDataType();
@@ -76,12 +76,6 @@ public final class SchemaToProtoConverter {
         }
         builder.setDataType(dataTypeProto);
 
-        // Set schemaType
-        String schemaType = property.getSchemaType();
-        if (schemaType != null) {
-            builder.setSchemaType(schemaType);
-        }
-
         // Set cardinality
         @AppSearchSchema.PropertyConfig.Cardinality int cardinality = property.getCardinality();
         PropertyConfigProto.Cardinality.Code cardinalityProto =
@@ -91,36 +85,27 @@ public final class SchemaToProtoConverter {
         }
         builder.setCardinality(cardinalityProto);
 
-        // Set indexingType
-        @AppSearchSchema.PropertyConfig.IndexingType int indexingType = property.getIndexingType();
-        TermMatchType.Code termMatchTypeProto;
-        switch (indexingType) {
-            case AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE:
-                termMatchTypeProto = TermMatchType.Code.UNKNOWN;
-                break;
-            case AppSearchSchema.PropertyConfig.INDEXING_TYPE_EXACT_TERMS:
-                termMatchTypeProto = TermMatchType.Code.EXACT_ONLY;
-                break;
-            case AppSearchSchema.PropertyConfig.INDEXING_TYPE_PREFIXES:
-                termMatchTypeProto = TermMatchType.Code.PREFIX;
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid indexingType: " + indexingType);
-        }
-        indexingConfig.setTermMatchType(termMatchTypeProto);
+        if (property instanceof AppSearchSchema.StringPropertyConfig) {
+            AppSearchSchema.StringPropertyConfig stringProperty =
+                    (AppSearchSchema.StringPropertyConfig) property;
+            StringIndexingConfig stringIndexingConfig =
+                    StringIndexingConfig.newBuilder()
+                            .setTermMatchType(
+                                    convertTermMatchTypeToProto(stringProperty.getIndexingType()))
+                            .setTokenizerType(
+                                    convertTokenizerTypeToProto(stringProperty.getTokenizerType()))
+                            .build();
+            builder.setStringIndexingConfig(stringIndexingConfig);
 
-        // Set tokenizerType
-        @AppSearchSchema.PropertyConfig.TokenizerType
-        int tokenizerType = property.getTokenizerType();
-        StringIndexingConfig.TokenizerType.Code tokenizerTypeProto =
-                StringIndexingConfig.TokenizerType.Code.forNumber(tokenizerType);
-        if (tokenizerTypeProto == null) {
-            throw new IllegalArgumentException("Invalid tokenizerType: " + tokenizerType);
+        } else if (property instanceof AppSearchSchema.DocumentPropertyConfig) {
+            AppSearchSchema.DocumentPropertyConfig documentProperty =
+                    (AppSearchSchema.DocumentPropertyConfig) property;
+            builder.setSchemaType(documentProperty.getSchemaType())
+                    .setDocumentIndexingConfig(
+                            DocumentIndexingConfig.newBuilder()
+                                    .setIndexNestedProperties(
+                                            documentProperty.isIndexNestedProperties()));
         }
-        indexingConfig.setTokenizerType(tokenizerTypeProto);
-
-        // Build!
-        builder.setStringIndexingConfig(indexingConfig);
         return builder.build();
     }
 
@@ -145,39 +130,99 @@ public final class SchemaToProtoConverter {
     private static AppSearchSchema.PropertyConfig toPropertyConfig(
             @NonNull PropertyConfigProto proto) {
         Preconditions.checkNotNull(proto);
-        AppSearchSchema.PropertyConfig.Builder builder =
-                new AppSearchSchema.PropertyConfig.Builder(proto.getPropertyName())
-                        .setDataType(proto.getDataType().getNumber())
+        switch (proto.getDataType()) {
+            case STRING:
+                return toStringPropertyConfig(proto);
+            case INT64:
+                return new AppSearchSchema.Int64PropertyConfig.Builder(proto.getPropertyName())
+                        .setCardinality(proto.getCardinality().getNumber())
+                        .build();
+            case DOUBLE:
+                return new AppSearchSchema.DoublePropertyConfig.Builder(proto.getPropertyName())
+                        .setCardinality(proto.getCardinality().getNumber())
+                        .build();
+            case BOOLEAN:
+                return new AppSearchSchema.BooleanPropertyConfig.Builder(proto.getPropertyName())
+                        .setCardinality(proto.getCardinality().getNumber())
+                        .build();
+            case BYTES:
+                return new AppSearchSchema.BytesPropertyConfig.Builder(proto.getPropertyName())
+                        .setCardinality(proto.getCardinality().getNumber())
+                        .build();
+            case DOCUMENT:
+                return toDocumentPropertyConfig(proto);
+            default:
+                throw new IllegalArgumentException("Invalid dataType: " + proto.getDataType());
+        }
+    }
+
+    @NonNull
+    private static AppSearchSchema.StringPropertyConfig toStringPropertyConfig(
+            @NonNull PropertyConfigProto proto) {
+        AppSearchSchema.StringPropertyConfig.Builder builder =
+                new AppSearchSchema.StringPropertyConfig.Builder(proto.getPropertyName())
                         .setCardinality(proto.getCardinality().getNumber())
                         .setTokenizerType(
                                 proto.getStringIndexingConfig().getTokenizerType().getNumber());
 
-        // Set schema
-        if (!proto.getSchemaType().isEmpty()) {
-            builder.setSchemaType(proto.getSchemaType());
-        }
-
         // Set indexingType
-        @AppSearchSchema.PropertyConfig.IndexingType int indexingType;
         TermMatchType.Code termMatchTypeProto = proto.getStringIndexingConfig().getTermMatchType();
-        switch (termMatchTypeProto) {
+        builder.setIndexingType(convertTermMatchTypeFromProto(termMatchTypeProto));
+
+        return builder.build();
+    }
+
+    @NonNull
+    private static AppSearchSchema.DocumentPropertyConfig toDocumentPropertyConfig(
+            @NonNull PropertyConfigProto proto) {
+        return new AppSearchSchema.DocumentPropertyConfig.Builder(proto.getPropertyName())
+                .setCardinality(proto.getCardinality().getNumber())
+                .setSchemaType(proto.getSchemaType())
+                .setIndexNestedProperties(
+                        proto.getDocumentIndexingConfig().getIndexNestedProperties())
+                .build();
+    }
+
+    @NonNull
+    private static TermMatchType.Code convertTermMatchTypeToProto(
+            @AppSearchSchema.StringPropertyConfig.IndexingType int indexingType) {
+        switch (indexingType) {
+            case AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE:
+                return TermMatchType.Code.UNKNOWN;
+            case AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS:
+                return TermMatchType.Code.EXACT_ONLY;
+            case AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES:
+                return TermMatchType.Code.PREFIX;
+            default:
+                throw new IllegalArgumentException("Invalid indexingType: " + indexingType);
+        }
+    }
+
+    @AppSearchSchema.StringPropertyConfig.IndexingType
+    private static int convertTermMatchTypeFromProto(@NonNull TermMatchType.Code termMatchType) {
+        switch (termMatchType) {
             case UNKNOWN:
-                indexingType = AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE;
-                break;
+                return AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE;
             case EXACT_ONLY:
-                indexingType = AppSearchSchema.PropertyConfig.INDEXING_TYPE_EXACT_TERMS;
-                break;
+                return AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_EXACT_TERMS;
             case PREFIX:
-                indexingType = AppSearchSchema.PropertyConfig.INDEXING_TYPE_PREFIXES;
-                break;
+                return AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_PREFIXES;
             default:
                 // Avoid crashing in the 'read' path; we should try to interpret the document to the
                 // extent possible.
-                Log.w(TAG, "Invalid indexingType: " + termMatchTypeProto.getNumber());
-                indexingType = AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE;
+                Log.w(TAG, "Invalid indexingType: " + termMatchType.getNumber());
+                return AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE;
         }
-        builder.setIndexingType(indexingType);
+    }
 
-        return builder.build();
+    @NonNull
+    private static StringIndexingConfig.TokenizerType.Code convertTokenizerTypeToProto(
+            @AppSearchSchema.StringPropertyConfig.TokenizerType int tokenizerType) {
+        StringIndexingConfig.TokenizerType.Code tokenizerTypeProto =
+                StringIndexingConfig.TokenizerType.Code.forNumber(tokenizerType);
+        if (tokenizerTypeProto == null) {
+            throw new IllegalArgumentException("Invalid tokenizerType: " + tokenizerType);
+        }
+        return tokenizerTypeProto;
     }
 }

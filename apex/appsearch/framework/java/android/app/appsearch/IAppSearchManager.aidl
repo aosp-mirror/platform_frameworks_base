@@ -97,6 +97,8 @@ interface IAppSearchManager {
      * @param databaseName  The databaseName this document resides in.
      * @param namespace    The namespace this document resides in.
      * @param uris The URIs of the documents to retrieve
+     * @param typePropertyPaths A map of schema type to a list of property paths to return in the
+     *     result.
      * @param userId Id of the calling user
      * @param callback
      *     If the call fails to start, {@link IAppSearchBatchResultCallback#onSystemError}
@@ -110,6 +112,7 @@ interface IAppSearchManager {
         in String databaseName,
         in String namespace,
         in List<String> uris,
+        in Map<String, List<String>> typePropertyPaths,
         in int userId,
         in IAppSearchBatchResultCallback callback);
 

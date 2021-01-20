@@ -190,6 +190,7 @@ public class AppSearchManagerService extends SystemService {
                 @NonNull String databaseName,
                 @NonNull String namespace,
                 @NonNull List<String> uris,
+                @NonNull Map<String, List<String>> typePropertyPaths,
                 @UserIdInt int userId,
                 @NonNull IAppSearchBatchResultCallback callback) {
             Preconditions.checkNotNull(packageName);
@@ -208,8 +209,8 @@ public class AppSearchManagerService extends SystemService {
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        GenericDocument document =
-                                impl.getDocument(packageName, databaseName, namespace, uri);
+                        GenericDocument document = impl.getDocument(packageName, databaseName,
+                                namespace, uri, typePropertyPaths);
                         resultBuilder.setSuccess(uri, document.getBundle());
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));

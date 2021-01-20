@@ -21,6 +21,7 @@ import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
@@ -38,6 +39,7 @@ import com.android.server.appsearch.external.localstorage.converter.GenericDocum
 import com.android.server.appsearch.external.localstorage.converter.SchemaToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SearchResultToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.TypePropertyPathToProtoConverter;
 
 import com.google.android.icing.IcingSearchEngine;
 import com.google.android.icing.proto.DeleteByQueryResultProto;
@@ -428,6 +430,8 @@ public final class AppSearchImpl {
      * @param databaseName The databaseName this document resides in.
      * @param namespace The namespace this document resides in.
      * @param uri The URI of the document to get.
+     * @param typePropertyPaths A map of schema type to a list of property paths to return in the
+     *     result.
      * @return The Document contents
      * @throws AppSearchException on IcingSearchEngine error.
      */
@@ -436,16 +440,35 @@ public final class AppSearchImpl {
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull String namespace,
-            @NonNull String uri)
+            @NonNull String uri,
+            @NonNull Map<String, List<String>> typePropertyPaths)
             throws AppSearchException {
         GetResultProto getResultProto;
+        List<TypePropertyMask> nonPrefixedPropertyMasks =
+                TypePropertyPathToProtoConverter.toTypePropertyMaskList(typePropertyPaths);
+        List<TypePropertyMask> prefixedPropertyMasks =
+                new ArrayList<>(nonPrefixedPropertyMasks.size());
+        for (int i = 0; i < nonPrefixedPropertyMasks.size(); ++i) {
+            TypePropertyMask typePropertyMask = nonPrefixedPropertyMasks.get(i);
+            String nonPrefixedType = typePropertyMask.getSchemaType();
+            String prefixedType =
+                    nonPrefixedType.equals(GetByUriRequest.PROJECTION_SCHEMA_TYPE_WILDCARD)
+                            ? nonPrefixedType
+                            : createPrefix(packageName, databaseName) + nonPrefixedType;
+            prefixedPropertyMasks.add(
+                    typePropertyMask.toBuilder().setSchemaType(prefixedType).build());
+        }
+        GetResultSpecProto getResultSpec =
+                GetResultSpecProto.newBuilder()
+                        .addAllTypePropertyMasks(prefixedPropertyMasks)
+                        .build();
         mReadWriteLock.readLock().lock();
         try {
             getResultProto =
                     mIcingSearchEngineLocked.get(
                             createPrefix(packageName, databaseName) + namespace,
                             uri,
-                            GetResultSpecProto.getDefaultInstance());
+                            getResultSpec);
         } finally {
             mReadWriteLock.readLock().unlock();
         }

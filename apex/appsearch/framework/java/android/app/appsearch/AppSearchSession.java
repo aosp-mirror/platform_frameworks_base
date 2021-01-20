@@ -311,8 +311,13 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
-            mService.getDocuments(mPackageName, mDatabaseName, request.getNamespace(),
-                    new ArrayList<>(request.getUris()), mUserId,
+            mService.getDocuments(
+                    mPackageName,
+                    mDatabaseName,
+                    request.getNamespace(),
+                    new ArrayList<>(request.getUris()),
+                    request.getProjectionsVisibleToPackagesInternal(),
+                    mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> {
