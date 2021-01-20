@@ -35,7 +35,11 @@ import com.android.internal.util.BitUtils;
 /**
  * Class for logging IpConnectvity events with IpConnectivityMetrics
  * {@hide}
+ * @deprecated The event may not be sent in Android S and above. The events
+ * are logged by a single caller in the system using signature permissions
+ * and that caller is migrating to statsd.
  */
+@Deprecated
 @SystemApi
 public class IpConnectivityLog {
     private static final String TAG = IpConnectivityLog.class.getSimpleName();
