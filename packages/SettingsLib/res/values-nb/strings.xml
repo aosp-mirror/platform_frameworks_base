@@ -34,7 +34,7 @@
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Sjekk passordet og prøv igjen"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Utenfor område"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Kobler ikke til automatisk"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen Internett-tilgang"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen internettilgang"</string>
     <string name="saved_network" msgid="7143698034077223645">"Lagret av <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisk tilkoblet via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisk tilkoblet via leverandør av nettverksvurdering"</string>
