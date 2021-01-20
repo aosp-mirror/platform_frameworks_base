@@ -8,7 +8,7 @@ per-file VibratorManagerService.java, VibratorService.java, DisplayThread.java =
 per-file ZramWriteback.java = minchan@google.com, rajekumar@google.com
 
 # Userspace reboot
-per-file UserspaceRebootLogger.java = ioffe@google.com, tomcherry@google.com
+per-file UserspaceRebootLogger.java = ioffe@google.com, dvander@google.com
 
 # Sensor Privacy
 per-file SensorPrivacyService.java = file:platform/frameworks/native:/libs/sensorprivacy/OWNERS
