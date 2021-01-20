@@ -23,6 +23,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
 import static android.app.StatusBarManager.windowStateToString;
+import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
@@ -547,6 +548,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         mIsCurrentUserSetup = mDeviceProvisionedController.isCurrentUserSetup();
         mDeviceProvisionedController.addCallback(mUserSetupListener);
+
+        setAccessibilityFloatingMenuModeIfNeeded();
 
         return barView;
     }
@@ -1392,6 +1395,13 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         updateSystemUiStateFlags(a11yFlags);
     }
 
+    private void setAccessibilityFloatingMenuModeIfNeeded() {
+        if (QuickStepContract.isGesturalMode(mNavBarMode)) {
+            Settings.Secure.putInt(mContentResolver, Settings.Secure.ACCESSIBILITY_BUTTON_MODE,
+                    ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU);
+        }
+    }
+
     public void updateSystemUiStateFlags(int a11yFlags) {
         if (a11yFlags < 0) {
             a11yFlags = getA11yButtonState(null);
@@ -1449,7 +1459,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
 
         // If accessibility button is floating menu mode, click and long click state should be
         // disabled.
-        if (mA11yBtnMode == Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
+        if (mA11yBtnMode == ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU) {
             return 0;
         }
 
@@ -1531,6 +1541,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     public void onNavigationModeChanged(int mode) {
         mNavBarMode = mode;
         updateScreenPinningGestures();
+        setAccessibilityFloatingMenuModeIfNeeded();
 
         if (!canShowSecondaryHandle()) {
             resetSecondaryHandle();
