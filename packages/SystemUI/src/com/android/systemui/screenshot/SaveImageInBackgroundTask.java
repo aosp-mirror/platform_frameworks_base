@@ -119,14 +119,13 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             return null;
         }
         // TODO: move to constructor / from ScreenshotRequest
-        final UUID uuid = UUID.randomUUID();
+        final UUID requestId = UUID.randomUUID();
         final UserHandle user = getUserHandleOfForegroundApplication(mContext);
 
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         Bitmap image = mParams.image;
-        String requestId = uuid.toString();
-        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, uuid);
+        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, requestId);
         try {
             // Call synchronously here since already on a background thread.
             ListenableFuture<ImageExporter.Result> future =

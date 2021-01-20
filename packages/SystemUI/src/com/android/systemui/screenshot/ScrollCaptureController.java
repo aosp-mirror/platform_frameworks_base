@@ -55,7 +55,7 @@ public class ScrollCaptureController {
     private final ImageTileSet mImageTileSet;
 
     private ZonedDateTime mCaptureTime;
-    private String mRequestId;
+    private UUID mRequestId;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter) {
@@ -74,7 +74,7 @@ public class ScrollCaptureController {
      */
     public void run(final Runnable after) {
         mCaptureTime = ZonedDateTime.now();
-        mRequestId = UUID.randomUUID().toString();
+        mRequestId = UUID.randomUUID();
         mConnection.start((session) -> startCapture(session, after));
     }
 
