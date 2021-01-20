@@ -73,6 +73,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -803,29 +804,35 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
     /**
      * Called when the device has started waking up.
+     *
+     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason we're
+     * waking up, such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
      */
-    void startedWakingUp(@OnReason int reason);
+    void startedWakingUp(@PowerManager.WakeReason int pmWakeReason);
 
     /**
      * Called when the device has finished waking up.
+     *
+     * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the specific reason we're
+     * waking up, such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
      */
-    void finishedWakingUp(@OnReason int reason);
+    void finishedWakingUp(@PowerManager.WakeReason int pmWakeReason);
 
     /**
      * Called when the device has started going to sleep.
      *
-     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
-     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
+     * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
      */
-    public void startedGoingToSleep(int why);
+    public void startedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
      * Called when the device has finished going to sleep.
      *
-     * @param why {@link #OFF_BECAUSE_OF_USER}, {@link #OFF_BECAUSE_OF_ADMIN},
-     * or {@link #OFF_BECAUSE_OF_TIMEOUT}.
+     * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
+     * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
      */
-    public void finishedGoingToSleep(int why);
+    public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason);
 
     /**
      * Called when the display is about to turn on to show content.

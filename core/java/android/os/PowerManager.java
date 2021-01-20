@@ -526,6 +526,25 @@ public final class PowerManager {
     public @interface WakeReason{}
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = { "GO_TO_SLEEP_REASON_" }, value = {
+            GO_TO_SLEEP_REASON_APPLICATION,
+            GO_TO_SLEEP_REASON_DEVICE_ADMIN,
+            GO_TO_SLEEP_REASON_TIMEOUT,
+            GO_TO_SLEEP_REASON_LID_SWITCH,
+            GO_TO_SLEEP_REASON_POWER_BUTTON,
+            GO_TO_SLEEP_REASON_HDMI,
+            GO_TO_SLEEP_REASON_SLEEP_BUTTON,
+            GO_TO_SLEEP_REASON_ACCESSIBILITY,
+            GO_TO_SLEEP_REASON_FORCE_SUSPEND,
+            GO_TO_SLEEP_REASON_INATTENTIVE,
+            GO_TO_SLEEP_REASON_QUIESCENT
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GoToSleepReason{}
+
+    /**
      * Wake up reason code: Waking for an unknown reason.
      * @hide
      */

@@ -17,6 +17,7 @@
 package android.view;
 
 import android.annotation.IntDef;
+import android.os.PowerManager;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -108,6 +109,27 @@ public interface WindowManagerPolicyConstants {
         void onPointerEvent(MotionEvent motionEvent);
     }
 
+    @IntDef(prefix = { "OFF_BECAUSE_OF_" }, value = {
+            OFF_BECAUSE_OF_ADMIN,
+            OFF_BECAUSE_OF_USER,
+            OFF_BECAUSE_OF_TIMEOUT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OffReason{}
+
+    static @OffReason int translateSleepReasonToOffReason(
+            @PowerManager.GoToSleepReason int reason) {
+        switch (reason) {
+            case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
+                return OFF_BECAUSE_OF_ADMIN;
+            case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
+            case PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE:
+                return OFF_BECAUSE_OF_TIMEOUT;
+            default:
+                return OFF_BECAUSE_OF_USER;
+        }
+    }
+
     /** Screen turned off because of a device admin */
     int OFF_BECAUSE_OF_ADMIN = 1;
     /** Screen turned off because of power button */
@@ -134,6 +156,23 @@ public interface WindowManagerPolicyConstants {
                 return "ON_BECAUSE_OF_UNKNOWN";
             default:
                 return Integer.toString(why);
+        }
+    }
+
+    static @OnReason int translateWakeReasonToOnReason(@PowerManager.WakeReason int reason) {
+        switch (reason) {
+            case PowerManager.WAKE_REASON_POWER_BUTTON:
+            case PowerManager.WAKE_REASON_PLUGGED_IN:
+            case PowerManager.WAKE_REASON_GESTURE:
+            case PowerManager.WAKE_REASON_CAMERA_LAUNCH:
+            case PowerManager.WAKE_REASON_WAKE_KEY:
+            case PowerManager.WAKE_REASON_WAKE_MOTION:
+            case PowerManager.WAKE_REASON_LID:
+                return ON_BECAUSE_OF_USER;
+            case PowerManager.WAKE_REASON_APPLICATION:
+                return ON_BECAUSE_OF_APPLICATION;
+            default:
+                return ON_BECAUSE_OF_UNKNOWN;
         }
     }
 

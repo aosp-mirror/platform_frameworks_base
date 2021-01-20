@@ -85,13 +85,11 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -863,11 +861,11 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
     /**
      * Called to let us know the screen was turned off.
-     * @param why either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
-     *   {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
+     * @param offReason either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
+     * {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
      */
-    public void onStartedGoingToSleep(int why) {
-        if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + why + ")");
+    public void onStartedGoingToSleep(@WindowManagerPolicyConstants.OffReason int offReason) {
+        if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + offReason + ")");
         synchronized (this) {
             mDeviceInteractive = false;
             mGoingToSleep = true;
@@ -900,8 +898,11 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                 }
             } else if (mShowing) {
                 mPendingReset = true;
-            } else if ((why == WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT && timeout > 0)
-                    || (why == WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER && !lockImmediately)) {
+            } else if (
+                    (offReason == WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT
+                            && timeout > 0)
+                            || (offReason == WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER
+                            && !lockImmediately)) {
                 doKeyguardLaterLocked(timeout);
                 mLockLater = true;
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
@@ -912,12 +913,18 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                 playSounds(true);
             }
         }
-        mUpdateMonitor.dispatchStartedGoingToSleep(why);
+        mUpdateMonitor.dispatchStartedGoingToSleep(offReason);
         notifyStartedGoingToSleep();
     }
 
-    public void onFinishedGoingToSleep(int why, boolean cameraGestureTriggered) {
-        if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + why + ")");
+    /**
+     * Called to let us know the screen finished turning off.
+     * @param offReason either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
+     * {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    public void onFinishedGoingToSleep(
+            @WindowManagerPolicyConstants.OffReason int offReason, boolean cameraGestureTriggered) {
+        if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + offReason + ")");
         synchronized (this) {
             mDeviceInteractive = false;
             mGoingToSleep = false;
@@ -957,7 +964,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             }
 
         }
-        mUpdateMonitor.dispatchFinishedGoingToSleep(why);
+        mUpdateMonitor.dispatchFinishedGoingToSleep(offReason);
     }
 
     private boolean isKeyguardServiceEnabled() {
