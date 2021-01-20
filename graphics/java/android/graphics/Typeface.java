@@ -45,7 +45,6 @@ import android.text.FontConfig;
 import android.util.Base64;
 import android.util.LongSparseArray;
 import android.util.LruCache;
-import android.util.Pair;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -197,7 +196,11 @@ public class Typeface {
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp
     /** @hide */
     public static final int RESOLVE_BY_FONT_TABLE = -1;
-    private static final String DEFAULT_FAMILY = "sans-serif";
+    /**
+     * The key of the default font family.
+     * @hide
+     */
+    public static final String DEFAULT_FAMILY = "sans-serif";
 
     // Style value for building typeface.
     private static final int STYLE_NORMAL = 0;
@@ -1139,18 +1142,19 @@ public class Typeface {
 
     /** @hide */
     @VisibleForTesting
-    public static void initSystemDefaultTypefaces(Map<String, Typeface> systemFontMap,
-            Map<String, FontFamily[]> fallbacks,
-            FontConfig.Alias[] aliases) {
+    public static void initSystemDefaultTypefaces(Map<String, FontFamily[]> fallbacks,
+            List<FontConfig.Alias> aliases,
+            Map<String, Typeface> outSystemFontMap) {
         for (Map.Entry<String, FontFamily[]> entry : fallbacks.entrySet()) {
-            systemFontMap.put(entry.getKey(), createFromFamilies(entry.getValue()));
+            outSystemFontMap.put(entry.getKey(), createFromFamilies(entry.getValue()));
         }
 
-        for (FontConfig.Alias alias : aliases) {
-            if (systemFontMap.containsKey(alias.getName())) {
+        for (int i = 0; i < aliases.size(); ++i) {
+            final FontConfig.Alias alias = aliases.get(i);
+            if (outSystemFontMap.containsKey(alias.getAliasName())) {
                 continue; // If alias and named family are conflict, use named family.
             }
-            final Typeface base = systemFontMap.get(alias.getToName());
+            final Typeface base = outSystemFontMap.get(alias.getReferName());
             if (base == null) {
                 // The missing target is a valid thing, some configuration don't have font files,
                 // e.g. wear devices. Just skip this alias.
@@ -1159,7 +1163,7 @@ public class Typeface {
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :
                     new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
-            systemFontMap.put(alias.getName(), newFace);
+            outSystemFontMap.put(alias.getAliasName(), newFace);
         }
     }
 
@@ -1339,11 +1343,11 @@ public class Typeface {
 
     /** @hide */
     public static void loadPreinstalledSystemFontMap() {
-        final HashMap<String, Typeface> systemFontMap = new HashMap<>();
-        Pair<FontConfig.Alias[], Map<String, FontFamily[]>> pair =
-                SystemFonts.initializePreinstalledFonts();
-        initSystemDefaultTypefaces(systemFontMap, pair.second, pair.first);
-        setSystemFontMap(systemFontMap);
+        final FontConfig fontConfig = SystemFonts.getSystemPreinstalledFontConfig();
+        final Map<String, FontFamily[]> fallback = SystemFonts.buildSystemFallback(fontConfig);
+        final Map<String, Typeface> typefaceMap =
+                SystemFonts.buildSystemTypefaces(fontConfig, fallback);
+        setSystemFontMap(typefaceMap);
     }
 
     static {
