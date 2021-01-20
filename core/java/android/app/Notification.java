@@ -9050,22 +9050,9 @@ public class Notification implements Parcelable
             return remoteViews;
         }
 
-        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
-        // a use case that is not supported by the Compat Framework library.  Workarounds to resolve
-        // the change's state in NotificationManagerService were very complex. While it's possible
-        // apps can detect the change, it's most likely that the changes will simply result in
-        // visual regressions.
-        @SuppressWarnings("AndroidFrameworkCompatChange")
         private int getDecorationType() {
             ContentResolver contentResolver = mBuilder.mContext.getContentResolver();
-            if (mBuilder.mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S
-                    || DevFlags.shouldBackportSNotifRules(contentResolver)) {
-                return DevFlags.getDecoratedCustomViewNotifDecoration(contentResolver);
-            } else {
-                // For apps that don't target S, this decoration provides the closest behavior to R,
-                // but doesn't fit with the design guidelines for S.
-                return DevFlags.DECORATION_FULL_COMPATIBLE;
-            }
+            return DevFlags.getDecoratedCustomViewNotifDecoration(contentResolver);
         }
 
         /**
