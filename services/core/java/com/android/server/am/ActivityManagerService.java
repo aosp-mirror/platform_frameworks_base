@@ -16802,6 +16802,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         public Intent getIntentForIntentSender(IIntentSender sender) {
             return ActivityManagerService.this.getIntentForIntentSender(sender);
         }
+
+        @Override
+        public long getBootTimeTempAllowListDuration() {
+            // Do not lock ActivityManagerService.this here, this API is called by
+            // PackageManagerService.
+            return mConstants.mBootTimeTempAllowlistDuration;
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
