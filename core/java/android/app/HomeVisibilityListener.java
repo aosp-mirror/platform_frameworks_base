@@ -19,6 +19,7 @@ package android.app;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Binder;
 
@@ -101,12 +102,11 @@ public abstract class HomeVisibilityListener {
         }
 
         // We can assume that the screen is idle if the home application is in the foreground.
-        String defaultHomePackage = mContext.getPackageManager()
-                .getHomeActivities(new ArrayList<>()).getPackageName();
-        if (Objects.equals(top, defaultHomePackage)) {
-            return true;
-        }
+        ComponentName defaultHomeComponent = mContext.getPackageManager()
+                .getHomeActivities(new ArrayList<>());
+        if (defaultHomeComponent == null) return false;
 
-        return false;
+        String defaultHomePackage = defaultHomeComponent.getPackageName();
+        return Objects.equals(top, defaultHomePackage);
     }
 }
