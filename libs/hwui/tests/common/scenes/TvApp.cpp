@@ -210,7 +210,7 @@ private:
                                                     overlay->stagingProperties().getHeight(),
                                                     overlay.get()));
             canvas->drawColor((curFrame % 150) << 24, SkBlendMode::kSrcOver);
-            overlay->setStagingDisplayList(canvas->finishRecording());
+            canvas->finishRecording(overlay.get());
             cardcanvas->drawRenderNode(overlay.get());
         } else {
             // re-recording image node's canvas, animating ColorFilter
@@ -223,11 +223,11 @@ private:
             paint.setColorFilter(filter);
             sk_sp<Bitmap> bitmap = mCachedBitmaps[ci];
             canvas->drawBitmap(*bitmap, 0, 0, &paint);
-            image->setStagingDisplayList(canvas->finishRecording());
+            canvas->finishRecording(image.get());
             cardcanvas->drawRenderNode(image.get());
         }
 
-        card->setStagingDisplayList(cardcanvas->finishRecording());
+        cardcanvas->finishRecording(card.get());
     }
 };
 

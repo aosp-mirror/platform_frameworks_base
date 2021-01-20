@@ -55,11 +55,15 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     SkiaCanvas::reset(&mRecorder);
 }
 
-uirenderer::DisplayList SkiaRecordingCanvas::finishRecording() {
+std::unique_ptr<SkiaDisplayList> SkiaRecordingCanvas::finishRecording() {
     // close any existing chunks if necessary
     enableZ(false);
     mRecorder.restoreToCount(1);
-    return uirenderer::DisplayList(std::move(mDisplayList));
+    return std::move(mDisplayList);
+}
+
+void SkiaRecordingCanvas::finishRecording(uirenderer::RenderNode* destination) {
+    destination->setStagingDisplayList(uirenderer::DisplayList(finishRecording()));
 }
 
 // ----------------------------------------------------------------------------
