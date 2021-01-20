@@ -29,6 +29,8 @@ import com.android.systemui.screenshot.ScrollCaptureClient.Session;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -52,6 +54,9 @@ public class ScrollCaptureController {
     private final ImageExporter mImageExporter;
     private final ImageTileSet mImageTileSet;
 
+    private ZonedDateTime mCaptureTime;
+    private String mRequestId;
+
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter) {
         mContext = context;
@@ -68,6 +73,8 @@ public class ScrollCaptureController {
      * @param after action to take after the flow is complete
      */
     public void run(final Runnable after) {
+        mCaptureTime = ZonedDateTime.now();
+        mRequestId = UUID.randomUUID().toString();
         mConnection.start((session) -> startCapture(session, after));
     }
 
@@ -109,11 +116,12 @@ public class ScrollCaptureController {
     void exportToFile(Bitmap bitmap, Session session, Runnable afterEnd) {
         mImageExporter.setFormat(Bitmap.CompressFormat.PNG);
         mImageExporter.setQuality(6);
-        ListenableFuture<Uri> future =
-                mImageExporter.export(mBgExecutor, bitmap);
+        ListenableFuture<ImageExporter.Result> future =
+                mImageExporter.export(mBgExecutor, mRequestId, bitmap, mCaptureTime);
         future.addListener(() -> {
             try {
-                launchViewer(future.get());
+                ImageExporter.Result result = future.get();
+                launchViewer(result.uri);
             } catch (InterruptedException | ExecutionException e) {
                 Toast.makeText(mContext, "Failed to write image", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, "Error storing screenshot to media store", e.getCause());
