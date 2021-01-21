@@ -6681,6 +6681,25 @@ public class Intent implements Parcelable, Cloneable {
             | FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             | FLAG_GRANT_PREFIX_URI_PERMISSION;
 
+    /**
+     * Local flag indicating this instance was created by copy constructor.
+     */
+    private static final int LOCAL_FLAG_FROM_COPY = 1 << 0;
+
+    /**
+     * Local flag indicating this instance was created from a {@link Parcel}.
+     */
+    private static final int LOCAL_FLAG_FROM_PARCEL = 1 << 1;
+
+    /**
+     * Local flag indicating this instance was delivered through a protected
+     * component, such as an activity that requires a signature permission, or a
+     * protected broadcast. Note that this flag <em>cannot</em> be recursively
+     * applied to any contained instances, since a malicious app may have
+     * controlled them via {@link #fillIn(Intent, int)}.
+     */
+    private static final int LOCAL_FLAG_FROM_PROTECTED_COMPONENT = 1 << 2;
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
@@ -6798,6 +6817,8 @@ public class Intent implements Parcelable, Cloneable {
     private String mPackage;
     private ComponentName mComponent;
     private int mFlags;
+    /** Set of in-process flags which are never parceled */
+    private int mLocalFlags;
     private ArraySet<String> mCategories;
     @UnsupportedAppUsage
     private Bundle mExtras;
@@ -6847,6 +6868,11 @@ public class Intent implements Parcelable, Cloneable {
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<>(o.mCategories);
         }
+
+        // Inherit flags from the original, plus mark that we were
+        // created by this copy constructor
+        this.mLocalFlags = o.mLocalFlags;
+        this.mLocalFlags |= LOCAL_FLAG_FROM_COPY;
 
         if (copyMode != COPY_MODE_FILTER) {
             this.mFlags = o.mFlags;
@@ -10931,6 +10957,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /** @hide */
     protected Intent(Parcel in) {
+        // Remember that we came from a remote process to help detect security
+        // issues caused by later unsafe launches
+        mLocalFlags = LOCAL_FLAG_FROM_PARCEL;
         readFromParcel(in);
     }
 
@@ -11242,18 +11271,27 @@ public class Intent implements Parcelable, Cloneable {
                 mData = Uri.fromFile(after);
             }
         }
+
+        // Detect cases where we're about to launch a potentially unsafe intent
+        if ((mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
+                && (mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0
+                && StrictMode.vmUnsafeIntentLaunchEnabled()) {
+            StrictMode.onUnsafeIntentLaunch(this);
+        }
     }
 
     /**
      * @hide
      */
-    public void prepareToEnterProcess() {
+    public void prepareToEnterProcess(boolean fromProtectedComponent) {
         // We just entered destination process, so we should be able to read all
         // parcelables inside.
         setDefusable(true);
 
         if (mSelector != null) {
-            mSelector.prepareToEnterProcess();
+            // We can't recursively claim that this data is from a protected
+            // component, since it may have been filled in by a malicious app
+            mSelector.prepareToEnterProcess(false);
         }
         if (mClipData != null) {
             mClipData.prepareToEnterProcess();
@@ -11264,6 +11302,10 @@ public class Intent implements Parcelable, Cloneable {
                 fixUris(mContentUserHint);
                 mContentUserHint = UserHandle.USER_CURRENT;
             }
+        }
+
+        if (fromProtectedComponent) {
+            mLocalFlags |= LOCAL_FLAG_FROM_PROTECTED_COMPONENT;
         }
     }
 
