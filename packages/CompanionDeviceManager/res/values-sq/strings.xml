@@ -19,11 +19,9 @@
     <string name="app_label" msgid="4470785958457506021">"Menaxheri i pajisjes shoqëruese"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Zgjidh një profil <xliff:g id="PROFILE_NAME">%1$s</xliff:g> që do të menaxhohet nga &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"pajisja"</string>
-    <!-- no translation found for profile_name_watch (576290739483672360) -->
-    <skip />
+    <string name="profile_name_watch" msgid="576290739483672360">"ora inteligjente"</string>
     <string name="confirmation_title" msgid="4751119145078041732">"Cakto &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; që të menaxhojë profilin tënd <xliff:g id="PROFILE_NAME">%2$s</xliff:g> - &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;"</string>
-    <!-- no translation found for profile_summary (2009764182871566255) -->
-    <skip />
+    <string name="profile_summary" msgid="2009764182871566255">"Nevojitet <xliff:g id="APP_NAME">%1$s</xliff:g> për të menaxhuar profilin tënd të <xliff:g id="PROFILE_NAME">%2$s</xliff:g>. <xliff:g id="PRIVILEGES_DISCPLAIMER">%3$s</xliff:g>"</string>
     <string name="consent_yes" msgid="4055438216605487056">"Po"</string>
     <string name="consent_no" msgid="1335543792857823917">"Jo, faleminderit"</string>
 </resources>
