@@ -28,12 +28,11 @@ public final class BLASTBufferQueue {
     public long mNativeObject; // BLASTBufferQueue*
 
     private static native long nativeCreate(String name, long surfaceControl, long width,
-            long height, int format, boolean tripleBufferingEnabled);
+                                            long height, boolean tripleBufferingEnabled);
     private static native void nativeDestroy(long ptr);
     private static native Surface nativeGetSurface(long ptr, boolean includeSurfaceControlHandle);
     private static native void nativeSetNextTransaction(long ptr, long transactionPtr);
-    private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height,
-            int format);
+    private static native void nativeUpdate(long ptr, long surfaceControl, long width, long height);
     private static native void nativeFlushShadowQueue(long ptr);
     private static native void nativeMergeWithNextTransaction(long ptr, long transactionPtr,
                                                               long frameNumber);
@@ -53,9 +52,8 @@ public final class BLASTBufferQueue {
 
     /** Create a new connection with the surface flinger. */
     public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
-            @PixelFormat.Format int format, boolean tripleBufferingEnabled) {
-        mNativeObject = nativeCreate(name, sc.mNativeObject, width, height, format,
-                tripleBufferingEnabled);
+            boolean tripleBufferingEnabled) {
+        mNativeObject = nativeCreate(name, sc.mNativeObject, width, height, tripleBufferingEnabled);
     }
 
     public void destroy() {
@@ -87,15 +85,8 @@ public final class BLASTBufferQueue {
         nativeSetNextTransaction(mNativeObject, t == null ? 0 : t.mNativeObject);
     }
 
-    /**
-     * Updates {@link SurfaceControl}, size, and format for a particular BLASTBufferQueue
-     * @param sc The new SurfaceControl that this BLASTBufferQueue will update
-     * @param width The new width for the buffer.
-     * @param height The new height for the buffer.
-     * @param format The new format for the buffer.
-     */
-    public void update(SurfaceControl sc, int width, int height, @PixelFormat.Format int format) {
-        nativeUpdate(mNativeObject, sc.mNativeObject, width, height, format);
+    public void update(SurfaceControl sc, int width, int height) {
+        nativeUpdate(mNativeObject, sc.mNativeObject, width, height);
     }
 
     /**
