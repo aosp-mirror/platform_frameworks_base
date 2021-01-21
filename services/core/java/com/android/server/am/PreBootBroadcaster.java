@@ -110,8 +110,12 @@ public abstract class PreBootBroadcaster extends IIntentReceiver.Stub {
         EventLogTags.writeAmPreBoot(mUserId, componentName.getPackageName());
 
         mIntent.setComponent(componentName);
-        final long duration = LocalServices.getService(ActivityManagerInternal.class)
-                .getBootTimeTempAllowListDuration();
+        long duration = 10_000;
+        final ActivityManagerInternal amInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (amInternal != null) {
+            duration = amInternal.getBootTimeTempAllowListDuration();
+        }
         final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
         bOptions.setTemporaryAppWhitelistDuration(
                 BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
