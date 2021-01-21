@@ -17,6 +17,7 @@
 package android.security.keystore;
 
 import android.annotation.Nullable;
+import android.content.Context;
 import android.os.Build;
 import android.security.Credentials;
 import android.security.KeyPairGeneratorSpec;
@@ -25,6 +26,8 @@ import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
 import android.security.keymaster.KeymasterCertificateChain;
 import android.security.keymaster.KeymasterDefs;
+import android.telephony.TelephonyManager;
+import android.util.ArraySet;
 
 import com.android.internal.org.bouncycastle.asn1.ASN1EncodableVector;
 import com.android.internal.org.bouncycastle.asn1.ASN1InputStream;
@@ -477,11 +480,11 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
 
             success = true;
             return keyPair;
-        } catch (ProviderException e) {
+        } catch (ProviderException | IllegalArgumentException | DeviceIdAttestationException e) {
           if ((mSpec.getPurposes() & KeyProperties.PURPOSE_WRAP_KEY) != 0) {
               throw new SecureKeyImportUnavailableException(e);
           } else {
-              throw e;
+                throw new ProviderException(e);
           }
         } finally {
             if (!success) {
@@ -491,7 +494,7 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
     }
 
     private Iterable<byte[]> createCertificateChain(final String privateKeyAlias, KeyPair keyPair)
-            throws ProviderException {
+            throws ProviderException, DeviceIdAttestationException {
         byte[] challenge = mSpec.getAttestationChallenge();
         if (challenge != null) {
             KeymasterArguments args = new KeymasterArguments();
@@ -508,6 +511,60 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                         Build.MANUFACTURER.getBytes(StandardCharsets.UTF_8));
                 args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MODEL,
                         Build.MODEL.getBytes(StandardCharsets.UTF_8));
+            }
+
+            int[] idTypes = mSpec.getAttestationIds();
+            if (idTypes != null) {
+                final Set<Integer> idTypesSet = new ArraySet<>(idTypes.length);
+                for (int idType : idTypes) {
+                    idTypesSet.add(idType);
+                }
+                TelephonyManager telephonyService = null;
+                if (idTypesSet.contains(AttestationUtils.ID_TYPE_IMEI)
+                        || idTypesSet.contains(AttestationUtils.ID_TYPE_MEID)) {
+                    telephonyService =
+                            (TelephonyManager) KeyStore.getApplicationContext().getSystemService(
+                                    Context.TELEPHONY_SERVICE);
+                    if (telephonyService == null) {
+                        throw new DeviceIdAttestationException(
+                                "Unable to access telephony service");
+                    }
+                }
+                for (final Integer idType : idTypesSet) {
+                    switch (idType) {
+                        case AttestationUtils.ID_TYPE_SERIAL:
+                            args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_SERIAL,
+                                    Build.getSerial().getBytes(StandardCharsets.UTF_8)
+                            );
+                            break;
+                        case AttestationUtils.ID_TYPE_IMEI: {
+                            final String imei = telephonyService.getImei(0);
+                            if (imei == null) {
+                                throw new DeviceIdAttestationException("Unable to retrieve IMEI");
+                            }
+                            args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_IMEI,
+                                    imei.getBytes(StandardCharsets.UTF_8)
+                            );
+                            break;
+                        }
+                        case AttestationUtils.ID_TYPE_MEID: {
+                            final String meid = telephonyService.getMeid(0);
+                            if (meid == null) {
+                                throw new DeviceIdAttestationException("Unable to retrieve MEID");
+                            }
+                            args.addBytes(KeymasterDefs.KM_TAG_ATTESTATION_ID_MEID,
+                                    meid.getBytes(StandardCharsets.UTF_8)
+                            );
+                            break;
+                        }
+                        case AttestationUtils.USE_INDIVIDUAL_ATTESTATION: {
+                            args.addBoolean(KeymasterDefs.KM_TAG_DEVICE_UNIQUE_ATTESTATION);
+                            break;
+                        }
+                        default:
+                            throw new IllegalArgumentException("Unknown device ID type " + idType);
+                    }
+                }
             }
 
             return getAttestationChain(privateKeyAlias, keyPair, args);
@@ -547,7 +604,8 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
         }
     }
 
-    private KeymasterArguments constructKeyGenerationArguments() {
+    private KeymasterArguments constructKeyGenerationArguments()
+            throws IllegalArgumentException, DeviceIdAttestationException {
         KeymasterArguments args = new KeymasterArguments();
         args.addUnsignedInt(KeymasterDefs.KM_TAG_KEY_SIZE, mKeySizeBits);
         args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM, mKeymasterAlgorithm);
@@ -565,9 +623,9 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                 mSpec.getKeyValidityForConsumptionEnd());
         addAlgorithmSpecificParameters(args);
 
-        if (mSpec.isUniqueIdIncluded())
+        if (mSpec.isUniqueIdIncluded()) {
             args.addBoolean(KeymasterDefs.KM_TAG_INCLUDE_UNIQUE_ID);
-
+        }
         return args;
     }
 
