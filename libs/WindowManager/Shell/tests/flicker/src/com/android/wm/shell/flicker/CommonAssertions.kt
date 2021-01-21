@@ -18,10 +18,11 @@ package com.android.wm.shell.flicker
 
 import android.graphics.Region
 import android.view.Surface
+import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
+import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.FlickerTestBase.Companion.DOCKED_STACK_DIVIDER
 
 @JvmOverloads
 fun LayersAssertionBuilder.appPairsDividerIsVisible(
@@ -29,7 +30,7 @@ fun LayersAssertionBuilder.appPairsDividerIsVisible(
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsVisible", bugId, enabled) {
-        this.isVisible(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+        this.isVisible(APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
@@ -39,7 +40,7 @@ fun LayersAssertionBuilder.appPairsDividerIsInvisible(
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsInVisible", bugId, enabled) {
-        this.notExists(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+        this.notExists(APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
@@ -107,7 +108,7 @@ fun LayersAssertionBuilder.appPairsPrimaryBoundsIsVisible(
     enabled: Boolean = bugId == 0
 ) {
     end("PrimaryAppBounds", bugId, enabled) {
-        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
     }
 }
@@ -120,7 +121,7 @@ fun LayersAssertionBuilder.appPairsSecondaryBoundsIsVisible(
     enabled: Boolean = bugId == 0
 ) {
     end("SecondaryAppBounds", bugId, enabled) {
-        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
     }
 }

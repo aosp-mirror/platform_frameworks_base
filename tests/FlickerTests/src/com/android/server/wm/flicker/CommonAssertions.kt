@@ -21,9 +21,12 @@ import com.android.server.wm.flicker.dsl.EventLogAssertionBuilder
 import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
 import com.android.server.wm.flicker.dsl.WmAssertionBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_LAYER_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_WINDOW_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_LAYER_NAME
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.STATUS_BAR_WINDOW_NAME
 
-const val NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar"
-const val STATUS_BAR_WINDOW_TITLE = "StatusBar"
+const val APP_PAIR_SPLIT_DIVIDER = "AppPairSplitDivider"
 const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
 const val WALLPAPER_TITLE = "Wallpaper"
 
@@ -33,7 +36,7 @@ fun WmAssertionBuilder.statusBarWindowIsAlwaysVisible(
     enabled: Boolean = bugId == 0
 ) {
     all("statusBarWindowIsAlwaysVisible", bugId, enabled) {
-        this.showsAboveAppWindow(STATUS_BAR_WINDOW_TITLE)
+        this.showsAboveAppWindow(STATUS_BAR_WINDOW_NAME)
     }
 }
 
@@ -43,7 +46,7 @@ fun WmAssertionBuilder.navBarWindowIsAlwaysVisible(
     enabled: Boolean = bugId == 0
 ) {
     all("navBarWindowIsAlwaysVisible", bugId, enabled) {
-        this.showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE)
+        this.showsAboveAppWindow(NAV_BAR_WINDOW_NAME)
     }
 }
 
@@ -113,6 +116,18 @@ fun WmAssertionBuilder.appWindowBecomesVisible(
     }
 }
 
+fun WmAssertionBuilder.appWindowBecomesInVisible(
+    appName: String,
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("appWindowBecomesInVisible", bugId, enabled) {
+        this.showsAppWindow(appName)
+                .then()
+                .hidesAppWindow(appName)
+    }
+}
+
 @JvmOverloads
 fun LayersAssertionBuilder.noUncoveredRegions(
     beginRotation: Int,
@@ -151,15 +166,15 @@ fun LayersAssertionBuilder.navBarLayerIsAlwaysVisible(
 ) {
     if (rotatesScreen) {
         all("navBarLayerIsAlwaysVisible", bugId, enabled) {
-            this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+            this.showsLayer(NAV_BAR_LAYER_NAME)
                     .then()
-                    .hidesLayer(NAVIGATION_BAR_WINDOW_TITLE)
+                    .hidesLayer(NAV_BAR_LAYER_NAME)
                     .then()
-                    .showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+                    .showsLayer(NAV_BAR_LAYER_NAME)
         }
     } else {
         all("navBarLayerIsAlwaysVisible", bugId, enabled) {
-            this.showsLayer(NAVIGATION_BAR_WINDOW_TITLE)
+            this.showsLayer(NAV_BAR_LAYER_NAME)
         }
     }
 }
@@ -172,15 +187,15 @@ fun LayersAssertionBuilder.statusBarLayerIsAlwaysVisible(
 ) {
     if (rotatesScreen) {
         all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
-            this.showsLayer(STATUS_BAR_WINDOW_TITLE)
+            this.showsLayer(STATUS_BAR_LAYER_NAME)
                     .then()
-                    hidesLayer(STATUS_BAR_WINDOW_TITLE)
+                    hidesLayer(STATUS_BAR_LAYER_NAME)
                     .then()
-                    .showsLayer(STATUS_BAR_WINDOW_TITLE)
+                    .showsLayer(STATUS_BAR_LAYER_NAME)
         }
     } else {
         all("statusBarLayerIsAlwaysVisible", bugId, enabled) {
-            this.showsLayer(STATUS_BAR_WINDOW_TITLE)
+            this.showsLayer(STATUS_BAR_LAYER_NAME)
         }
     }
 }
@@ -196,15 +211,15 @@ fun LayersAssertionBuilder.navBarLayerRotatesAndScales(
     val endingPos = WindowUtils.getNavigationBarPosition(endRotation)
 
     start("navBarLayerRotatesAndScales_StartingPos", bugId, enabled) {
-        this.hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, startingPos)
+        this.hasVisibleRegion(NAV_BAR_LAYER_NAME, startingPos)
     }
     end("navBarLayerRotatesAndScales_EndingPost", bugId, enabled) {
-        this.hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, endingPos)
+        this.hasVisibleRegion(NAV_BAR_LAYER_NAME, endingPos)
     }
 
     if (startingPos == endingPos) {
         all("navBarLayerRotatesAndScales", enabled = false, bugId = 167747321) {
-            this.hasVisibleRegion(NAVIGATION_BAR_WINDOW_TITLE, startingPos)
+            this.hasVisibleRegion(NAV_BAR_LAYER_NAME, startingPos)
         }
     }
 }
@@ -220,10 +235,10 @@ fun LayersAssertionBuilder.statusBarLayerRotatesScales(
     val endingPos = WindowUtils.getStatusBarPosition(endRotation)
 
     start("statusBarLayerRotatesScales_StartingPos", bugId, enabled) {
-        this.hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, startingPos)
+        this.hasVisibleRegion(STATUS_BAR_LAYER_NAME, startingPos)
     }
     end("statusBarLayerRotatesScales_EndingPos", bugId, enabled) {
-        this.hasVisibleRegion(STATUS_BAR_WINDOW_TITLE, endingPos)
+        this.hasVisibleRegion(STATUS_BAR_LAYER_NAME, endingPos)
     }
 }
 
