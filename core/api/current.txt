@@ -15006,6 +15006,7 @@ package android.graphics {
     field public static final int RGB_565 = 4; // 0x4
     field public static final int UNKNOWN = 0; // 0x0
     field public static final int Y8 = 538982489; // 0x20203859
+    field public static final int YCBCR_P010 = 54; // 0x36
     field public static final int YUV_420_888 = 35; // 0x23
     field public static final int YUV_422_888 = 39; // 0x27
     field public static final int YUV_444_888 = 40; // 0x28
