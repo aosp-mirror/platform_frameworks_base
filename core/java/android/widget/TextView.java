@@ -197,6 +197,7 @@ import android.view.textservice.TextServicesManager;
 import android.view.translation.TranslationRequest;
 import android.widget.RemoteViews.RemoteView;
 
+import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -6301,6 +6302,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             text = TextUtils.stringOrSpannedString(text);
         }
 
+        @AccessibilityUtils.A11yTextChangeType int a11yTextChangeType = AccessibilityUtils.NONE;
+        if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            a11yTextChangeType = AccessibilityUtils.textOrSpanChanged(text, mText);
+        }
+
         if (mAutoLinkMask != 0) {
             Spannable s2;
 
@@ -6320,6 +6326,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                  * setText() again to try to upgrade the buffer type.
                  */
                 setTextInternal(text);
+                if (a11yTextChangeType == AccessibilityUtils.NONE) {
+                    a11yTextChangeType = AccessibilityUtils.PARCELABLE_SPAN;
+                }
 
                 // Do not change the movement method for text that support text selection as it
                 // would prevent an arbitrary cursor displacement.
@@ -6384,7 +6393,13 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         sendOnTextChanged(text, 0, oldlen, textLength);
         onTextChanged(text, 0, oldlen, textLength);
 
-        notifyViewAccessibilityStateChangedIfNeeded(AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+        if (a11yTextChangeType == AccessibilityUtils.TEXT) {
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_TEXT);
+        } else if (a11yTextChangeType == AccessibilityUtils.PARCELABLE_SPAN) {
+            notifyViewAccessibilityStateChangedIfNeeded(
+                    AccessibilityEvent.CONTENT_CHANGE_TYPE_UNDEFINED);
+        }
 
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
