@@ -160,12 +160,12 @@ public class AuthBiometricFaceView extends AuthBiometricView {
 
     @Override
     protected void handleResetAfterError() {
-        resetErrorView(mContext, mIndicatorView);
+        resetErrorView();
     }
 
     @Override
     protected void handleResetAfterHelp() {
-        resetErrorView(mContext, mIndicatorView);
+        resetErrorView();
     }
 
     @Override
@@ -185,7 +185,7 @@ public class AuthBiometricFaceView extends AuthBiometricView {
 
         if (newState == STATE_AUTHENTICATING_ANIMATING_IN ||
                 (newState == STATE_AUTHENTICATING && mSize == AuthDialog.SIZE_MEDIUM)) {
-            resetErrorView(mContext, mIndicatorView);
+            resetErrorView();
         }
 
         // Do this last since the state variable gets updated.
@@ -204,9 +204,8 @@ public class AuthBiometricFaceView extends AuthBiometricView {
         super.onAuthenticationFailed(failureReason);
     }
 
-    static void resetErrorView(Context context, TextView textView) {
-        textView.setTextColor(context.getResources().getColor(
-                R.color.biometric_dialog_gray, context.getTheme()));
-        textView.setVisibility(View.INVISIBLE);
+    private void resetErrorView() {
+        mIndicatorView.setTextColor(mTextColorHint);
+        mIndicatorView.setVisibility(View.INVISIBLE);
     }
 }
