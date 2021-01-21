@@ -142,6 +142,15 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         mTaskOrganizer.applyTransaction(wct);
     }
 
+    private void onStageRootTaskAppeared(StageListenerImpl stageListener) {
+        if (mMainStageListener.mHasRootTask && mSideStageListener.mHasRootTask) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            // Make the stages adjacent to each other so they occlude what's behind them.
+            wct.setAdjacentRoots(mMainStage.mRootTaskInfo.token, mSideStage.mRootTaskInfo.token);
+            mTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
     private void onStageRootTaskVanished(StageListenerImpl stageListener) {
         if (stageListener == mMainStageListener || stageListener == mSideStageListener) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -357,6 +366,7 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         @Override
         public void onRootTaskAppeared() {
             mHasRootTask = true;
+            StageCoordinator.this.onStageRootTaskAppeared(this);
         }
 
         @Override

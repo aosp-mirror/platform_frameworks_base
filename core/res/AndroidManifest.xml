@@ -322,8 +322,10 @@
     <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.ALWAYS_ON_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="android.nfc.action.REQUIRE_UNLOCK_FOR_NFC" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_UP" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_DOWN" />
     <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
@@ -434,6 +436,8 @@
 
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
     <protected-broadcast android:name="android.location.MODE_CHANGED" />
+    <protected-broadcast android:name="android.location.action.GNSS_CAPABILITIES_CHANGED" />
+
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
@@ -3620,6 +3624,15 @@
     <permission android:name="android.permission.BIND_TRANSLATION_SERVICE"
                 android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows apps to use ui translation functions.
+         <p>Protection level: signature|privileged
+         <p> TODO(b/177703453): Restrict to a specific Role instead of allowing access to any
+         privileged app.
+         @hide Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.MANAGE_UI_TRANSLATION"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
          to ensure that only the system can bind to it.
          @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
@@ -4078,6 +4091,11 @@
     <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_MODE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to use background blur.
+         @hide -->
+    <permission android:name="android.permission.USE_BACKGROUND_BLUR"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to control the lights on the device.
          @hide
          @SystemApi
@@ -4318,7 +4336,7 @@
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-        android:protectionLevel="signature|privileged|recents" />
+        android:protectionLevel="signature|recents" />
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- Allows an application to broadcast a notification that an application

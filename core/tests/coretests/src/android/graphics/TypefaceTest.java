@@ -27,7 +27,6 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.SystemFonts;
 import android.os.SharedMemory;
 import android.text.FontConfig;
-import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
@@ -41,7 +40,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.nio.ByteOrder;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -197,10 +195,10 @@ public class TypefaceTest {
     @SmallTest
     @Test
     public void testSerialize() throws Exception {
-        HashMap<String, Typeface> systemFontMap = new HashMap<>();
-        Pair<FontConfig.Alias[], Map<String, FontFamily[]>> res =
-                SystemFonts.initializePreinstalledFonts();
-        Typeface.initSystemDefaultTypefaces(systemFontMap, res.second, res.first);
+        FontConfig fontConfig = SystemFonts.getSystemPreinstalledFontConfig();
+        Map<String, FontFamily[]> fallbackMap = SystemFonts.buildSystemFallback(fontConfig);
+        Map<String, Typeface> systemFontMap = SystemFonts.buildSystemTypefaces(fontConfig,
+                fallbackMap);
         SharedMemory sharedMemory = Typeface.serializeFontMap(systemFontMap);
         Map<String, Typeface> copiedFontMap =
                 Typeface.deserializeFontMap(sharedMemory.mapReadOnly().order(ByteOrder.BIG_ENDIAN));

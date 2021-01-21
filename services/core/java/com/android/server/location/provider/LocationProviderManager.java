@@ -1333,9 +1333,6 @@ public class LocationProviderManager extends
                 Binder.restoreCallingIdentity(identity);
             }
 
-            setRealProvider(null);
-            setMockProvider(null);
-
             mUserHelper.removeListener(mUserChangedListener);
             mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 

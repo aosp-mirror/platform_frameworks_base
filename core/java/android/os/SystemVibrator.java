@@ -17,6 +17,7 @@
 package android.os;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -27,6 +28,8 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
@@ -38,6 +41,14 @@ import java.util.concurrent.Executor;
 public class SystemVibrator extends Vibrator {
     private static final String TAG = "Vibrator";
 
+    private static final int VIBRATOR_PRESENT_UNKNOWN = 0;
+    private static final int VIBRATOR_PRESENT_YES = 1;
+    private static final int VIBRATOR_PRESENT_NO = 2;
+
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({VIBRATOR_PRESENT_UNKNOWN, VIBRATOR_PRESENT_YES, VIBRATOR_PRESENT_NO})
+    private @interface VibratorPresent {}
+
     private final IVibratorService mService;
     private final IVibratorManagerService mManagerService;
     private final Object mLock = new Object();
@@ -45,6 +56,9 @@ public class SystemVibrator extends Vibrator {
     private final Context mContext;
     @GuardedBy("mLock")
     private VibratorInfo mVibratorInfo;
+    @GuardedBy("mLock")
+    @VibratorPresent
+    private int mVibratorPresent;
 
     @GuardedBy("mDelegates")
     private final ArrayMap<OnVibratorStateChangedListener,
@@ -69,15 +83,18 @@ public class SystemVibrator extends Vibrator {
 
     @Override
     public boolean hasVibrator() {
-        if (mService == null) {
-            Log.w(TAG, "Failed to vibrate; no vibrator service.");
+        try {
+            synchronized (mLock) {
+                if (mVibratorPresent == VIBRATOR_PRESENT_UNKNOWN && mService != null) {
+                    mVibratorPresent =
+                            mService.hasVibrator() ? VIBRATOR_PRESENT_YES : VIBRATOR_PRESENT_NO;
+                }
+                return mVibratorPresent == VIBRATOR_PRESENT_YES;
+            }
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to query vibrator presence", e);
             return false;
         }
-        try {
-            return mService.hasVibrator();
-        } catch (RemoteException e) {
-        }
-        return false;
     }
 
     /**

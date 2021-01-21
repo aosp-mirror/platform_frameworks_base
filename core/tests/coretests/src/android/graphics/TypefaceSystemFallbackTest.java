@@ -21,6 +21,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.graphics.fonts.FontCustomizationParser;
@@ -44,7 +46,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -139,27 +140,55 @@ public class TypefaceSystemFallbackTest {
         }
     }
 
-    private static void buildSystemFallback(String xml,
-            FontCustomizationParser.Result oemCustomization, ArrayMap<String, Typeface> fontMap,
-            ArrayMap<String, FontFamily[]> fallbackMap) {
+    private static void buildSystemFallback(
+            @NonNull String xml,
+            @Nullable String oemXml,
+            @NonNull ArrayMap<String, Typeface> outFontMap,
+            @NonNull ArrayMap<String, FontFamily[]> outFallbackMap) {
         try (FileOutputStream fos = new FileOutputStream(TEST_FONTS_XML)) {
-            fos.write(xml.getBytes(Charset.forName("UTF-8")));
+            fos.write(xml.getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        String oemXmlPath;
+        if (oemXml != null) {
+            try (FileOutputStream fos = new FileOutputStream(TEST_OEM_XML)) {
+                fos.write(oemXml.getBytes(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            oemXmlPath = TEST_OEM_XML;
+        } else {
+            oemXmlPath = null;
+        }
+
         Map<String, File> updatableFontMap = new HashMap<>();
         for (File file : new File(TEST_UPDATABLE_FONT_DIR).listFiles()) {
             updatableFontMap.put(file.getName(), file);
         }
 
-        final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(TEST_FONTS_XML,
-                TEST_FONT_DIR, updatableFontMap, oemCustomization, fallbackMap);
-        Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
+        FontConfig fontConfig;
+        try {
+            fontConfig = FontListParser.parse(
+                    TEST_FONTS_XML, TEST_FONT_DIR, oemXmlPath, TEST_OEM_DIR, updatableFontMap);
+        } catch (IOException | XmlPullParserException e) {
+            throw new RuntimeException(e);
+        }
+
+        Map<String, FontFamily[]> fallbackMap = SystemFonts.buildSystemFallback(fontConfig);
+        Map<String, Typeface> typefaceMap = SystemFonts.buildSystemTypefaces(
+                fontConfig, fallbackMap);
+
+        outFontMap.clear();
+        outFontMap.putAll(typefaceMap);
+        outFallbackMap.clear();
+        outFallbackMap.putAll(fallbackMap);
     }
 
     private static FontCustomizationParser.Result readFontCustomization(String oemXml) {
         try (InputStream is = new ByteArrayInputStream(oemXml.getBytes(StandardCharsets.UTF_8))) {
-            return FontCustomizationParser.parse(is, TEST_OEM_DIR);
+            return FontCustomizationParser.parse(is, TEST_OEM_DIR, null);
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
         }
@@ -167,19 +196,22 @@ public class TypefaceSystemFallbackTest {
 
     @Test
     public void testBuildSystemFallback() {
-        final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
-        final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
+        FontConfig fontConfig;
+        try {
+            fontConfig = FontListParser.parse(
+                    SYSTEM_FONTS_XML, SYSTEM_FONT_DIR, null, TEST_OEM_DIR, null);
+        } catch (IOException | XmlPullParserException e) {
+            throw new RuntimeException(e);
+        }
+        assertFalse(fontConfig.getAliases().isEmpty());
+        assertFalse(fontConfig.getFontFamilies().isEmpty());
 
-        final FontConfig.Alias[] aliases = SystemFonts.buildSystemFallback(SYSTEM_FONTS_XML,
-                SYSTEM_FONT_DIR, oemCustomization, fallbackMap);
-
-        assertNotNull(aliases);
+        Map<String, FontFamily[]> fallbackMap = SystemFonts.buildSystemFallback(fontConfig);
         assertFalse(fallbackMap.isEmpty());
 
-        Typeface.initSystemDefaultTypefaces(fontMap, fallbackMap, aliases);
-        assertFalse(fontMap.isEmpty());
+        Map<String, Typeface> typefaceMap = SystemFonts.buildSystemTypefaces(
+                fontConfig, fallbackMap);
+        assertFalse(typefaceMap.isEmpty());
     }
 
     @Test
@@ -199,10 +231,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         assertEquals(1, fontMap.size());
         assertTrue(fontMap.containsKey("sans-serif"));
@@ -229,10 +259,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -277,10 +305,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -324,10 +350,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -376,10 +400,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -424,10 +446,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -465,10 +485,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -506,10 +524,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -556,10 +572,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
         paint.setTypeface(fontMap.get("sans-serif"));
@@ -600,10 +614,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -641,10 +653,8 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -679,10 +689,8 @@ public class TypefaceSystemFallbackTest {
                 + "</fonts-modification>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                readFontCustomization(oemXml);
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, oemXml, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -717,10 +725,8 @@ public class TypefaceSystemFallbackTest {
                 + "</fonts-modification>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                readFontCustomization(oemXml);
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, oemXml, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -751,10 +757,8 @@ public class TypefaceSystemFallbackTest {
                 + "</fonts-modification>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                readFontCustomization(oemXml);
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, oemXml, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -804,10 +808,8 @@ public class TypefaceSystemFallbackTest {
                 + "</fonts-modification>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                readFontCustomization(oemXml);
 
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, oemXml, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 
@@ -862,12 +864,10 @@ public class TypefaceSystemFallbackTest {
                 + "</familyset>";
         final ArrayMap<String, Typeface> fontMap = new ArrayMap<>();
         final ArrayMap<String, FontFamily[]> fallbackMap = new ArrayMap<>();
-        final FontCustomizationParser.Result oemCustomization =
-                new FontCustomizationParser.Result();
 
         // Install all2em.ttf as a3em.ttf
         copyAssetToFile("fonts/all2em.ttf", new File(TEST_UPDATABLE_FONT_DIR, "a3em.ttf"));
-        buildSystemFallback(xml, oemCustomization, fontMap, fallbackMap);
+        buildSystemFallback(xml, null, fontMap, fallbackMap);
 
         final Paint paint = new Paint();
 

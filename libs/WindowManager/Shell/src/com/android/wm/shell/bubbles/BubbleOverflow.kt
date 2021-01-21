@@ -65,8 +65,7 @@ class BubbleOverflow(
 
     /** Call before use and again if cleanUpExpandedState was called.  */
     fun initialize(controller: BubbleController) {
-        getExpandedView()?.initialize(controller, controller.stackView)
-        getExpandedView()?.setOverflow(true)
+        getExpandedView()?.initialize(controller, controller.stackView, true /* isOverflow */)
     }
 
     fun cleanUpExpandedState() {

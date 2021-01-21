@@ -121,7 +121,7 @@ public interface SysuiStatusBarStateController extends StatusBarStateController 
     /**
      * Set the fullscreen state
      */
-    void setFullscreenState(boolean isFullscreen, boolean isImmersive);
+    void setFullscreenState(boolean isFullscreen);
 
     /**
      * Set pulsing

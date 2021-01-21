@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
@@ -505,7 +506,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         compatTokens.clear();
         // Make the activity resizable again by restarting it
-        activity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+        activity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
         activity.mVisibleRequested = true;
         activity.restartProcessIfVisible();
         // The full lifecycle isn't hooked up so manually set state to resumed
@@ -522,7 +523,7 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(1000, 2500);
 
         // Make the task root resizable.
-        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
 
         // Create a size compat activity on the same task.
         final ActivityRecord activity = new ActivityBuilder(mAtm)
@@ -550,7 +551,7 @@ public class SizeCompatTests extends WindowTestsBase {
         setUpDisplaySizeWithApp(1000, 2500);
 
         // Make the task root resizable.
-        mActivity.info.resizeMode = ActivityInfo.RESIZE_MODE_RESIZEABLE;
+        mActivity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
 
         // Create a size compat activity on the same task.
         final ActivityRecord activity = new ActivityBuilder(mAtm)
@@ -946,13 +947,25 @@ public class SizeCompatTests extends WindowTestsBase {
         prepareUnresizable(activity, -1 /* maxAspect */, screenOrientation);
     }
 
-    /**
-     * Setups {@link #mActivity} as a size-compat-mode-able activity with fixed aspect and/or
-     * orientation.
-     */
     static void prepareUnresizable(ActivityRecord activity, float maxAspect,
             int screenOrientation) {
-        activity.info.resizeMode = RESIZE_MODE_UNRESIZEABLE;
+        prepareLimitedBounds(activity, maxAspect, screenOrientation, true /* isUnresizable */);
+    }
+
+    static void prepareLimitedBounds(ActivityRecord activity, int screenOrientation,
+            boolean isUnresizable) {
+        prepareLimitedBounds(activity, -1 /* maxAspect */, screenOrientation, isUnresizable);
+    }
+
+    /**
+     * Setups {@link #mActivity} with restriction on its bounds, such as maxAspect, fixed
+     * orientation, and/or whether it is resizable.
+     */
+    static void prepareLimitedBounds(ActivityRecord activity, float maxAspect,
+            int screenOrientation, boolean isUnresizable) {
+        activity.info.resizeMode = isUnresizable
+                ? RESIZE_MODE_UNRESIZEABLE
+                : RESIZE_MODE_RESIZEABLE;
         activity.mVisibleRequested = true;
         if (maxAspect >= 0) {
             activity.info.maxAspectRatio = maxAspect;

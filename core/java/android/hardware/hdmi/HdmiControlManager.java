@@ -454,6 +454,33 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface SystemAudioModeMuting {}
 
+    // -- Whether the HDMI CEC volume control is enabled or disabled.
+    /**
+     * HDMI CEC enabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
+     * @hide
+     */
+    public static final int VOLUME_CONTROL_ENABLED = 1;
+    /**
+     * HDMI CEC disabled.
+     *
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
+     * @hide
+     */
+    public static final int VOLUME_CONTROL_DISABLED = 0;
+    /**
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
+     * @hide
+     */
+    @IntDef({
+            VOLUME_CONTROL_ENABLED,
+            VOLUME_CONTROL_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface VolumeControl {}
+
+
     // -- Settings available in the CEC Configuration.
     /**
      * Name of a setting deciding whether the CEC is enabled.
@@ -492,6 +519,43 @@ public final class HdmiControlManager {
     @SystemApi
     public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING =
             "system_audio_mode_muting";
+
+    /**
+     * Controls whether volume control commands via HDMI CEC are enabled.
+     *
+     * <p>Effects on different device types:
+     * <table>
+     *     <tr><th>HDMI CEC device type</th><th>0: disabled</th><th>1: enabled</th></tr>
+     *     <tr>
+     *         <td>TV (type: 0)</td>
+     *         <td>Per CEC specification.</td>
+     *         <td>TV changes system volume. TV no longer reacts to incoming volume changes
+     *         via {@code <User Control Pressed>}. TV no longer handles {@code <Report Audio
+     *         Status>}.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Playback device (type: 4)</td>
+     *         <td>Device sends volume commands to TV/Audio system via {@code <User Control
+     *         Pressed>}</td>
+     *         <td>Device does not send volume commands via {@code <User Control Pressed>}.</td>
+     *     </tr>
+     *     <tr>
+     *         <td>Audio device (type: 5)</td>
+     *         <td>Full "System Audio Control" capabilities.</td>
+     *         <td>Audio device no longer reacts to incoming {@code <User Control Pressed>}
+     *         volume commands. Audio device no longer reports volume changes via {@code
+     *         <Report Audio Status>}.</td>
+     *     </tr>
+     * </table>
+     *
+     * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
+     *
+     * @hide
+     * @see android.hardware.hdmi.HdmiControlManager#setHdmiCecVolumeControlEnabled(int)
+     */
+    public static final String CEC_SETTING_NAME_VOLUME_CONTROL_MODE =
+            "volume_control_enabled";
+
     /**
      * @hide
      */
@@ -501,6 +565,7 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_POWER_CONTROL_MODE,
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
+        CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
     })
     public @interface CecSettingName {}
 
@@ -913,14 +978,16 @@ public final class HdmiControlManager {
      *
      * <p> Due to the resulting behavior, usage on TV and Audio devices is discouraged.
      *
-     * @param isHdmiCecVolumeControlEnabled target state of HDMI CEC volume control.
-     * @see Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED
+     * @param hdmiCecVolumeControlEnabled target state of HDMI CEC volume control.
+     * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
+    public void setHdmiCecVolumeControlEnabled(
+            @VolumeControl int hdmiCecVolumeControlEnabled) {
         try {
-            mService.setHdmiCecVolumeControlEnabled(isHdmiCecVolumeControlEnabled);
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                    hdmiCecVolumeControlEnabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -931,9 +998,10 @@ public final class HdmiControlManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
-    public boolean isHdmiCecVolumeControlEnabled() {
+    @VolumeControl
+    public int getHdmiCecVolumeControlEnabled() {
         try {
-            return mService.isHdmiCecVolumeControlEnabled();
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_VOLUME_CONTROL_MODE);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1042,7 +1110,8 @@ public final class HdmiControlManager {
          *
          * Note: Value of isCecAvailable is only valid when isCecEnabled is true.
          **/
-        void onStatusChange(boolean isCecEnabled, boolean isCecAvailable);
+        void onStatusChange(@HdmiControlManager.HdmiCecControl int isCecEnabled,
+                boolean isCecAvailable);
     }
 
     private final ArrayMap<HdmiControlStatusChangeListener, IHdmiControlStatusChangeListener>
@@ -1056,10 +1125,10 @@ public final class HdmiControlManager {
         /**
          * Called when the HDMI Control (CEC) volume control feature is enabled/disabled.
          *
-         * @param enabled status of HDMI CEC volume control feature
-         * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(boolean)} ()}
+         * @param hdmiCecVolumeControl status of HDMI CEC volume control feature
+         * @see {@link HdmiControlManager#setHdmiCecVolumeControlEnabled(int)} ()}
          **/
-        void onHdmiCecVolumeControlFeature(boolean enabled);
+        void onHdmiCecVolumeControlFeature(@VolumeControl int hdmiCecVolumeControl);
     }
 
     private final ArrayMap<HdmiCecVolumeControlFeatureListener,
@@ -1283,7 +1352,7 @@ public final class HdmiControlManager {
             Executor executor, final HdmiControlStatusChangeListener listener) {
         return new IHdmiControlStatusChangeListener.Stub() {
             @Override
-            public void onStatusChange(boolean isCecEnabled, boolean isCecAvailable) {
+            public void onStatusChange(@HdmiCecControl int isCecEnabled, boolean isCecAvailable) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> listener.onStatusChange(isCecEnabled, isCecAvailable));
@@ -1360,7 +1429,7 @@ public final class HdmiControlManager {
             Executor executor, final HdmiCecVolumeControlFeatureListener listener) {
         return new android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener.Stub() {
             @Override
-            public void onHdmiCecVolumeControlFeature(boolean enabled) {
+            public void onHdmiCecVolumeControlFeature(int enabled) {
                 final long token = Binder.clearCallingIdentity();
                 try {
                     executor.execute(() -> listener.onHdmiCecVolumeControlFeature(enabled));

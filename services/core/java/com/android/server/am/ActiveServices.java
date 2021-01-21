@@ -112,7 +112,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.messages.nano.SystemMessageProto;
 import com.android.internal.notification.SystemNotificationChannels;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastPrintWriter;
@@ -1047,9 +1046,11 @@ public final class ActiveServices {
 
     @GuardedBy("mAm")
     void schedulePendingServiceStartLocked(String packageName, int userId) {
-        for (int i = mPendingBringups.size() - 1; i >= 0; i--) {
+        int totalPendings = mPendingBringups.size();
+        for (int i = totalPendings - 1; i >= 0 && totalPendings > 0;) {
             final ServiceRecord r = mPendingBringups.keyAt(i);
             if (r.userId != userId || !TextUtils.equals(r.packageName, packageName)) {
+                i--;
                 continue;
             }
             final ArrayList<Runnable> curPendingBringups = mPendingBringups.valueAt(i);
@@ -1057,8 +1058,22 @@ public final class ActiveServices {
                 for (int j = curPendingBringups.size() - 1; j >= 0; j--) {
                     curPendingBringups.get(j).run();
                 }
+                curPendingBringups.clear();
             }
-            mPendingBringups.removeAt(i);
+            // Now, how many remaining ones we have after calling into above runnables
+            final int curTotalPendings = mPendingBringups.size();
+            // Don't call removeAt() here, as it could have been removed already by above runnables
+            mPendingBringups.remove(r);
+            if (totalPendings != curTotalPendings) {
+                // Okay, within the above Runnable.run(), the mPendingBringups is altered.
+                // Restart the loop, it won't call into those finished runnables
+                // since we've cleared the curPendingBringups above.
+                totalPendings = mPendingBringups.size();
+                i = totalPendings - 1;
+            } else {
+                totalPendings = mPendingBringups.size();
+                i--;
+            }
         }
     }
 
@@ -1069,10 +1084,13 @@ public final class ActiveServices {
             stracker.setStarted(true, mAm.mProcessStats.getMemFactorLocked(), r.lastActivity);
         }
         r.callStart = false;
-        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
-                r.name.getPackageName(), r.name.getClassName(),
-                FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
-        mAm.mBatteryStatsService.noteServiceStartRunning(r.stats);
+
+        final int uid = r.appInfo.uid;
+        final String packageName = r.name.getPackageName();
+        final String serviceName = r.name.getClassName();
+        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
+        mAm.mBatteryStatsService.noteServiceStartRunning(uid, packageName, serviceName);
         String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false, false);
         if (error != null) {
             return new ComponentName("!!", error);
@@ -1108,10 +1126,13 @@ public final class ActiveServices {
             service.delayedStop = true;
             return;
         }
-        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, service.appInfo.uid,
-                service.name.getPackageName(), service.name.getClassName(),
-                FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-        mAm.mBatteryStatsService.noteServiceStopRunning(service.stats);
+
+        final int uid = service.appInfo.uid;
+        final String packageName = service.name.getPackageName();
+        final String serviceName = service.name.getClassName();
+        FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+        mAm.mBatteryStatsService.noteServiceStopRunning(uid, packageName, serviceName);
         service.startRequested = false;
         if (service.tracker != null) {
             service.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -1267,10 +1288,12 @@ public final class ActiveServices {
                 }
             }
 
-            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, r.appInfo.uid,
-                    r.name.getPackageName(), r.name.getClassName(),
-                    FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
-            mAm.mBatteryStatsService.noteServiceStopRunning(r.stats);
+            final int uid = r.appInfo.uid;
+            final String packageName = r.name.getPackageName();
+            final String serviceName = r.name.getClassName();
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
+                    serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__STOP);
+            mAm.mBatteryStatsService.noteServiceStopRunning(uid, packageName, serviceName);
             r.startRequested = false;
             if (r.tracker != null) {
                 r.tracker.setStarted(false, mAm.mProcessStats.getMemFactorLocked(),
@@ -1692,7 +1715,7 @@ public final class ActiveServices {
             }
 
             try {
-                String ignoreForeground = null;
+                boolean ignoreForeground = false;
                 final int mode = mAm.getAppOpsManager().checkOpNoThrow(
                         AppOpsManager.OP_START_FOREGROUND, r.appInfo.uid, r.packageName);
                 switch (mode) {
@@ -1702,9 +1725,9 @@ public final class ActiveServices {
                         break;
                     case AppOpsManager.MODE_IGNORED:
                         // Whoops, silently ignore this.
-                        ignoreForeground = "Service.startForeground() not allowed due to app op: "
-                                + "service " + r.shortInstanceName;
-                        Slog.w(TAG, ignoreForeground);
+                        Slog.w(TAG, "Service.startForeground() not allowed due to app op: service "
+                                + r.shortInstanceName);
+                        ignoreForeground = true;
                         break;
                     default:
                         throw new SecurityException("Foreground not allowed as per app op");
@@ -1712,18 +1735,19 @@ public final class ActiveServices {
 
                 // Apps that are TOP or effectively similar may call startForeground() on
                 // their services even if they are restricted from doing that while in bg.
-                if (ignoreForeground == null
+                if (!ignoreForeground
                         && !appIsTopLocked(r.appInfo.uid)
                         && appRestrictedAnyInBackground(r.appInfo.uid, r.packageName)) {
-                    ignoreForeground = "Service.startForeground() not allowed due to bg restriction"
-                            + ":service " + r.shortInstanceName;
-                    Slog.w(TAG, ignoreForeground);
+                    Slog.w(TAG,
+                            "Service.startForeground() not allowed due to bg restriction: service "
+                                    + r.shortInstanceName);
                     // Back off of any foreground expectations around this service, since we've
                     // just turned down its fg request.
                     updateServiceForegroundLocked(r.app, false);
+                    ignoreForeground = true;
                 }
 
-                if (ignoreForeground == null) {
+                if (!ignoreForeground) {
                     if (isFgsBgStart(r.mAllowStartForeground)) {
                         if (!r.mLoggedInfoAllowStartForeground) {
                             Slog.wtf(TAG, "Background started FGS "
@@ -1732,12 +1756,17 @@ public final class ActiveServices {
                         }
                         if (r.mAllowStartForeground == FGS_FEATURE_DENIED
                                 && isBgFgsRestrictionEnabled(r)) {
-                            ignoreForeground = "Service.startForeground() not allowed due to "
+                            final String msg = "Service.startForeground() not allowed due to "
                                     + "mAllowStartForeground false: service "
                                     + r.shortInstanceName;
-                            Slog.w(TAG, ignoreForeground);
+                            Slog.w(TAG, msg);
                             showFgsBgRestrictedNotificationLocked(r);
                             updateServiceForegroundLocked(r.app, true);
+                            ignoreForeground = true;
+                            if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
+                                    r.appInfo.uid)) {
+                                throw new IllegalStateException(msg);
+                            }
                         }
                     }
                 }
@@ -1746,7 +1775,7 @@ public final class ActiveServices {
                 // services, so now that we've enforced the startForegroundService() contract
                 // we only do the machinery of making the service foreground when the app
                 // is not restricted.
-                if (ignoreForeground == null) {
+                if (!ignoreForeground) {
                     if (r.foregroundId != id) {
                         cancelForegroundNotificationLocked(r);
                         r.foregroundId = id;
@@ -1807,10 +1836,6 @@ public final class ActiveServices {
                 } else {
                     if (DEBUG_FOREGROUND_SERVICE) {
                         Slog.d(TAG, "Suppressing startForeground() for FAS " + r);
-                    }
-                    if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, r.appInfo.uid)
-                            && isBgFgsRestrictionEnabled(r)) {
-                        throw new IllegalStateException(ignoreForeground);
                     }
                 }
             } finally {
@@ -2874,15 +2899,7 @@ public final class ActiveServices {
                     final Intent.FilterComparison filter
                             = new Intent.FilterComparison(service.cloneFilter());
                     final ServiceRestarter res = new ServiceRestarter();
-                    final BatteryStatsImpl.Uid.Pkg.Serv ss;
-                    final BatteryStatsImpl stats = mAm.mBatteryStatsService.getActiveStatistics();
-                    synchronized (stats) {
-                        ss = stats.getServiceStatsLocked(
-                                sInfo.applicationInfo.uid, name.getPackageName(),
-                                name.getClassName(), SystemClock.elapsedRealtime(),
-                                SystemClock.uptimeMillis());
-                    }
-                    r = new ServiceRecord(mAm, ss, className, name, definingPackageName,
+                    r = new ServiceRecord(mAm, className, name, definingPackageName,
                             definingUid, filter, sInfo, callingFromFg, res);
                     r.mRecentCallingPackage = callingPackage;
                     res.setService(r);
@@ -3426,9 +3443,13 @@ public final class ActiveServices {
                 EventLogTags.writeAmCreateService(
                         r.userId, System.identityHashCode(r), nameTerm, r.app.uid, r.app.pid);
             }
-            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_LAUNCH_REPORTED, r.appInfo.uid,
-                    r.name.getPackageName(), r.name.getClassName());
-            mAm.mBatteryStatsService.noteServiceStartLaunch(r.stats);
+
+            final int uid = r.appInfo.uid;
+            final String packageName = r.name.getPackageName();
+            final String serviceName = r.name.getClassName();
+            FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_LAUNCH_REPORTED, uid, packageName,
+                    serviceName);
+            mAm.mBatteryStatsService.noteServiceStartLaunch(uid, packageName, serviceName);
             mAm.notifyPackageUse(r.serviceInfo.packageName,
                                  PackageManager.NOTIFY_PACKAGE_USE_SERVICE);
             app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_SERVICE);
@@ -3775,7 +3796,8 @@ public final class ActiveServices {
         smap.mDelayedStartList.remove(r);
 
         if (r.app != null) {
-            mAm.mBatteryStatsService.noteServiceStopLaunch(r.stats);
+            mAm.mBatteryStatsService.noteServiceStopLaunch(r.appInfo.uid, r.name.getPackageName(),
+                    r.name.getClassName());
             r.app.stopService(r);
             r.app.updateBoundClientUids();
             if (r.whitelistManager) {
@@ -4321,7 +4343,8 @@ public final class ActiveServices {
         // Clear app state from services.
         for (int i = app.numberOfRunningServices() - 1; i >= 0; i--) {
             ServiceRecord sr = app.getRunningServiceAt(i);
-            mAm.mBatteryStatsService.noteServiceStopLaunch(sr.stats);
+            mAm.mBatteryStatsService.noteServiceStopLaunch(sr.appInfo.uid, sr.name.getPackageName(),
+                    sr.name.getClassName());
             if (sr.app != app && sr.app != null && !sr.app.isPersistent()) {
                 sr.app.stopService(sr);
                 sr.app.updateBoundClientUids();

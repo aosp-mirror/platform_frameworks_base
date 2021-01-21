@@ -273,6 +273,7 @@ public class FusedLocationProvider extends LocationProviderBase {
                             .setLowPower(mRequest.isLowPower())
                             .setLocationSettingsIgnored(mRequest.isLocationSettingsIgnored())
                             .setWorkSource(mRequest.getWorkSource())
+                            .setHiddenFromAppOps(true)
                             .build();
                     mLocationManager.requestLocationUpdates(mProvider, request,
                             mContext.getMainExecutor(), this);

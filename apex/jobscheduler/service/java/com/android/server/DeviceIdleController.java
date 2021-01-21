@@ -2850,7 +2850,7 @@ public class DeviceIdleController extends SystemService
         }
         final int appId = UserHandle.getAppId(uid);
         updateTempWhitelistAppIdsLocked(uid, false, 0, 0);
-        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED, appId, 0)
+        mHandler.obtainMessage(MSG_REPORT_TEMP_APP_WHITELIST_CHANGED_TO_NPMS, appId, 0)
                 .sendToTarget();
         reportTempWhitelistChangedLocked(uid, false);
         try {

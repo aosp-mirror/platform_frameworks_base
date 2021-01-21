@@ -1620,7 +1620,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], attrs, viewVisibility, session.mUid, userId,
-                    session.mCanAddInternalSystemWindow);
+                    session.mCanAddInternalSystemWindow, session.mCanUseBackgroundBlur);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -2339,7 +2339,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
-                result = win.relayoutVisibleWindow(result, attrChanges);
+                result = win.relayoutVisibleWindow(result);
 
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);

@@ -949,7 +949,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean isProviderPackage(String provider, String packageName) {
+    public boolean isProviderPackage(@Nullable String provider, String packageName,
+            @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
 
         for (LocationProviderManager manager : mProviderManagers) {
@@ -960,7 +961,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (identity == null) {
                 continue;
             }
-            if (identity.getPackageName().equals(packageName)) {
+            if (identity.getPackageName().equals(packageName) && (attributionTag == null
+                    || Objects.equals(identity.getAttributionTag(), attributionTag))) {
                 return true;
             }
         }
@@ -1262,13 +1264,17 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
-        public boolean isProvider(String provider, CallerIdentity identity) {
-            LocationProviderManager manager = getLocationProviderManager(provider);
-            if (manager == null) {
-                return false;
-            } else {
-                return identity.equals(manager.getIdentity());
+        public boolean isProvider(@Nullable String provider, CallerIdentity identity) {
+            for (LocationProviderManager manager : mProviderManagers) {
+                if (provider != null && !provider.equals(manager.getName())) {
+                    continue;
+                }
+                if (identity.equalsIgnoringListenerId(manager.getIdentity())) {
+                    return true;
+                }
             }
+
+            return false;
         }
 
         @Override

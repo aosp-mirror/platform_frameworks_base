@@ -46,7 +46,6 @@ import android.util.proto.ProtoUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ServiceState;
-import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.uri.NeededUriGrants;
@@ -70,7 +69,6 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     static final int MAX_DONE_EXECUTING_COUNT = 6;
 
     final ActivityManagerService ams;
-    final BatteryStatsImpl.Uid.Pkg.Serv stats;
     final ComponentName name; // service component.
     final ComponentName instanceName; // service component's per-instance name.
     final String shortInstanceName; // instanceName.flattenToShortString().
@@ -518,13 +516,11 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         }
     }
 
-    ServiceRecord(ActivityManagerService ams,
-            BatteryStatsImpl.Uid.Pkg.Serv servStats, ComponentName name,
+    ServiceRecord(ActivityManagerService ams, ComponentName name,
             ComponentName instanceName, String definingPackageName, int definingUid,
             Intent.FilterComparison intent, ServiceInfo sInfo, boolean callerIsFg,
             Runnable restarter) {
         this.ams = ams;
-        this.stats = servStats;
         this.name = name;
         this.instanceName = instanceName;
         shortInstanceName = instanceName.flattenToShortString();

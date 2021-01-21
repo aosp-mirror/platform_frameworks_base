@@ -41,7 +41,6 @@ oneway interface IStatusBar
 
     void showWirelessChargingAnimation(int batteryLevel);
 
-    void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive);
     void setImeWindowStatus(int displayId, in IBinder token, int vis, int backDisposition,
             boolean showImeSwitcher, boolean isMultiClientImeEnabled);
     void setWindowState(int display, int window, int state);
@@ -167,7 +166,7 @@ oneway interface IStatusBar
     void onRecentsAnimationStateChanged(boolean running);
 
     /**
-     * Notifies System UI side of system bar appearance change on the specified display.
+     * Notifies System UI side of system bar attribute change on the specified display.
      *
      * @param displayId the ID of the display to notify
      * @param appearance the appearance of the focused window. The light top bar appearance is not
@@ -177,9 +176,12 @@ oneway interface IStatusBar
      *                         bar, that the bar can have partial appearances in corresponding
      *                         stacks.
      * @param navbarColorManagedByIme {@code true} if navigation bar color is managed by IME.
+     * @param behavior the behavior of the focused window.
+     * @param isFullscreen whether any of status or navigation bar is requested invisible.
      */
-    void onSystemBarAppearanceChanged(int displayId, int appearance,
-            in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme);
+    void onSystemBarAttributesChanged(int displayId, int appearance,
+            in AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            int behavior, boolean isFullscreen);
 
     /**
      * Notifies System UI to show transient bars. The transient bars are system bars, e.g., status

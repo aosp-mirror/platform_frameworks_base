@@ -17,6 +17,7 @@ package com.android.systemui.statusbar;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Matchers.eq;
@@ -30,6 +31,7 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.os.Bundle;
 import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 
 import androidx.test.filters.SmallTest;
 
@@ -116,24 +118,27 @@ public class CommandQueueTest extends SysuiTestCase {
     }
 
     @Test
-    public void testOnSystemBarAppearanceChanged() {
-        doTestOnSystemBarAppearanceChanged(DEFAULT_DISPLAY, 1,
-                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false);
+    public void testOnSystemBarAttributesChanged() {
+        doTestOnSystemBarAttributesChanged(DEFAULT_DISPLAY, 1,
+                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
+                BEHAVIOR_DEFAULT, false);
     }
 
     @Test
-    public void testOnSystemBarAppearanceChangedForSecondaryDisplay() {
-        doTestOnSystemBarAppearanceChanged(SECONDARY_DISPLAY, 1,
-                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false);
+    public void testOnSystemBarAttributesChangedForSecondaryDisplay() {
+        doTestOnSystemBarAttributesChanged(SECONDARY_DISPLAY, 1,
+                new AppearanceRegion[]{new AppearanceRegion(2, new Rect())}, false,
+                BEHAVIOR_DEFAULT, false);
     }
 
-    private void doTestOnSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
-        mCommandQueue.onSystemBarAppearanceChanged(displayId, appearance, appearanceRegions,
-                navbarColorManagedByIme);
+    private void doTestOnSystemBarAttributesChanged(int displayId, @Appearance int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            @Behavior int behavior, boolean isFullscreen) {
+        mCommandQueue.onSystemBarAttributesChanged(displayId, appearance, appearanceRegions,
+                navbarColorManagedByIme, behavior, isFullscreen);
         waitForIdleSync();
-        verify(mCallbacks).onSystemBarAppearanceChanged(eq(displayId), eq(appearance),
-                eq(appearanceRegions), eq(navbarColorManagedByIme));
+        verify(mCallbacks).onSystemBarAttributesChanged(eq(displayId), eq(appearance),
+                eq(appearanceRegions), eq(navbarColorManagedByIme), eq(behavior), eq(isFullscreen));
     }
 
     @Test

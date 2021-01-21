@@ -1902,7 +1902,6 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     /** Whether this task display area can request orientation. */
-    @VisibleForTesting
     boolean canSpecifyOrientation() {
         // Only allow to specify orientation if this TDA is not set to ignore orientation request,
         // and it is the last focused one on this logical display that can request orientation

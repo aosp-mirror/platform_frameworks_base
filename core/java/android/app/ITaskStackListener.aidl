@@ -214,4 +214,11 @@ oneway interface ITaskStackListener {
      * @param displayId id of the display where activity will rotate
      */
      void onActivityRotation(int displayId);
+
+    /**
+     * Called when a task is moved to the back behind the home stack.
+     *
+     * @param taskInfo info about the task which moved
+     */
+    void onTaskMovedToBack(in ActivityManager.RunningTaskInfo taskInfo);
 }

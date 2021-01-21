@@ -58,7 +58,7 @@ public class MultiRateLimiterTest {
 
     @Test
     public void testSingleRateLimit_belowLimit_isWithinQuota() {
-        MultiRateLimiter multiRateLimiter =  new MultiRateLimiter.Builder(mContext, mInjector)
+        MultiRateLimiter multiRateLimiter = new MultiRateLimiter.Builder(mContext, mInjector)
                 .addRateLimit(3, Duration.ofSeconds(20))
                 .build();
 
@@ -77,7 +77,7 @@ public class MultiRateLimiterTest {
 
     @Test
     public void testSingleRateLimit_aboveLimit_isNotWithinQuota() {
-        MultiRateLimiter multiRateLimiter =  new MultiRateLimiter.Builder(mContext, mInjector)
+        MultiRateLimiter multiRateLimiter = new MultiRateLimiter.Builder(mContext, mInjector)
                 .addRateLimit(3, Duration.ofSeconds(20))
                 .build();
 
@@ -97,7 +97,7 @@ public class MultiRateLimiterTest {
 
     @Test
     public void testSingleRateLimit_afterGoingAboveQuotaAndWaitingWindow_isBackWithinQuota() {
-        MultiRateLimiter multiRateLimiter =  new MultiRateLimiter.Builder(mContext, mInjector)
+        MultiRateLimiter multiRateLimiter = new MultiRateLimiter.Builder(mContext, mInjector)
                 .addRateLimit(3, Duration.ofSeconds(20))
                 .build();
 
@@ -166,7 +166,7 @@ public class MultiRateLimiterTest {
 
     @Test
     public void createSingleRateLimit_testItLimitsOnlyGivenUptc() {
-        MultiRateLimiter multiRateLimiter =  new MultiRateLimiter.Builder(mContext, mInjector)
+        MultiRateLimiter multiRateLimiter = new MultiRateLimiter.Builder(mContext, mInjector)
                 .addRateLimit(3, Duration.ofSeconds(20))
                 .build();
 
@@ -193,5 +193,49 @@ public class MultiRateLimiterTest {
         mInjector.mElapsedTime = Duration.ofSeconds(21);
         assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isTrue();
         assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isTrue();
+    }
+
+    @Test
+    public void clearRateLimiterForPackage_afterReachingQuota_quotaIsReset() {
+        MultiRateLimiter multiRateLimiter = new MultiRateLimiter.Builder(mContext, mInjector)
+                .addRateLimit(1, Duration.ofSeconds(100))
+                .build();
+
+        mInjector.mElapsedTime = Duration.ZERO;
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isTrue();
+        multiRateLimiter.noteEvent(USER_ID, PACKAGE_NAME_1, TAG);
+
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isFalse();
+
+        multiRateLimiter.clear(USER_ID, PACKAGE_NAME_1);
+
+        // Quota for that package is reset.
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isTrue();
+
+        // Quota is enforced again.
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        multiRateLimiter.noteEvent(USER_ID, PACKAGE_NAME_1, TAG);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_1, TAG)).isFalse();
+    }
+
+    @Test
+    public void clearRateLimiterForPackage_doesntAffectOtherPackages() {
+        MultiRateLimiter multiRateLimiter = new MultiRateLimiter.Builder(mContext, mInjector)
+                .addRateLimit(1, Duration.ofSeconds(100))
+                .build();
+
+        mInjector.mElapsedTime = Duration.ZERO;
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isTrue();
+        multiRateLimiter.noteEvent(USER_ID, PACKAGE_NAME_2, TAG);
+
+        mInjector.mElapsedTime = Duration.ofSeconds(1);
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isFalse();
+
+        multiRateLimiter.clear(USER_ID, PACKAGE_NAME_1);
+
+        // Doesn't affect the other package.
+        assertThat(multiRateLimiter.isWithinQuota(USER_ID, PACKAGE_NAME_2, TAG)).isFalse();
     }
 }

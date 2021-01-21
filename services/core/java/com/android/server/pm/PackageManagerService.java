@@ -15071,6 +15071,12 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         final IActivityManager am = ActivityManager.getService();
         try {
+            final long duration = LocalServices.getService(ActivityManagerInternal.class)
+                    .getBootTimeTempAllowListDuration();
+            final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+            bOptions.setTemporaryAppWhitelistDuration(
+                        BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                        duration);
             // Deliver LOCKED_BOOT_COMPLETED first
             Intent lockedBcIntent = new Intent(Intent.ACTION_LOCKED_BOOT_COMPLETED)
                     .setPackage(packageName);
@@ -15079,7 +15085,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             final String[] requiredPermissions = {Manifest.permission.RECEIVE_BOOT_COMPLETED};
             am.broadcastIntentWithFeature(null, null, lockedBcIntent, null, null, 0, null, null,
-                    requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
+                    requiredPermissions, android.app.AppOpsManager.OP_NONE, bOptions.toBundle(),
+                    false, false,
                     userId);
 
             // Deliver BOOT_COMPLETED only if user is unlocked
@@ -15089,7 +15096,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     bcIntent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
                 }
                 am.broadcastIntentWithFeature(null, null, bcIntent, null, null, 0, null, null,
-                        requiredPermissions, android.app.AppOpsManager.OP_NONE, null, false, false,
+                        requiredPermissions, android.app.AppOpsManager.OP_NONE, bOptions.toBundle(),
+                        false, false,
                         userId);
             }
         } catch (RemoteException e) {

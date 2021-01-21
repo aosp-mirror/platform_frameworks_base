@@ -59,7 +59,6 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowContainerTransactionCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.os.SomeArgs;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
@@ -505,8 +504,6 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
 
-        mPipMenuController.attach(leash);
-
         if (mInSwipePipToHomeTransition) {
             final Rect destinationBounds = mPipBoundsState.getBounds();
             // animation is finished in the Launcher and here we directly apply the final touch.
@@ -535,6 +532,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
+            mPipMenuController.attach(mLeash);
             final Rect sourceHintRect = getValidSourceHintRect(info.pictureInPictureParams,
                     currentBounds);
             scheduleAnimateResizePip(currentBounds, destinationBounds, sourceHintRect,
@@ -587,6 +585,9 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
     }
 
     private void applyEnterPipSyncTransaction(Rect destinationBounds, Runnable runnable) {
+        // PiP menu is attached late in the process here to avoid any artifacts on the leash
+        // caused by addShellRoot when in gesture navigation mode.
+        mPipMenuController.attach(mLeash);
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
         wct.setBounds(mToken, destinationBounds);

@@ -63,73 +63,49 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private final ChangeReporter mChangeReporter;
     private final CompatConfig mCompatConfig;
 
-    private static int sMinTargetSdk = Build.VERSION_CODES.Q;
-
     public PlatformCompat(Context context) {
         mContext = context;
-        mChangeReporter = new ChangeReporter(
-                ChangeReporter.SOURCE_SYSTEM_SERVER);
+        mChangeReporter = new ChangeReporter(ChangeReporter.SOURCE_SYSTEM_SERVER);
         mCompatConfig = CompatConfig.create(new AndroidBuildClassifier(), mContext);
     }
 
     @VisibleForTesting
     PlatformCompat(Context context, CompatConfig compatConfig) {
         mContext = context;
-        mChangeReporter = new ChangeReporter(
-                ChangeReporter.SOURCE_SYSTEM_SERVER);
+        mChangeReporter = new ChangeReporter(ChangeReporter.SOURCE_SYSTEM_SERVER);
         mCompatConfig = compatConfig;
+
         registerPackageReceiver(context);
     }
 
     @Override
     public void reportChange(long changeId, ApplicationInfo appInfo) {
-        checkCompatChangeLogPermission();
-        reportChange(changeId, appInfo.uid,
-                ChangeReporter.STATE_LOGGED);
+        reportChangeByUid(changeId, appInfo.uid);
     }
 
     @Override
-    public void reportChangeByPackageName(long changeId, String packageName, int userId) {
-        checkCompatChangeLogPermission();
+    public void reportChangeByPackageName(long changeId, String packageName,
+            @UserIdInt int userId) {
         ApplicationInfo appInfo = getApplicationInfo(packageName, userId);
-        if (appInfo == null) {
-            return;
+        if (appInfo != null) {
+            reportChangeByUid(changeId, appInfo.uid);
         }
-        reportChange(changeId, appInfo);
     }
 
     @Override
     public void reportChangeByUid(long changeId, int uid) {
         checkCompatChangeLogPermission();
-        reportChange(changeId, uid, ChangeReporter.STATE_LOGGED);
+        reportChangeInternal(changeId, uid, ChangeReporter.STATE_LOGGED);
+    }
+
+    private void reportChangeInternal(long changeId, int uid, int state) {
+        mChangeReporter.reportChange(uid, changeId, state);
     }
 
     @Override
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
         checkCompatChangeReadAndLogPermission();
         return isChangeEnabledInternal(changeId, appInfo);
-    }
-
-    /**
-     * Internal version of the above method, without logging. Does not perform costly permission
-     * check.
-     * TODO(b/167551701): Remove this method and add 'loggability' as a changeid property.
-     */
-    public boolean isChangeEnabledInternalNoLogging(long changeId, ApplicationInfo appInfo) {
-        return mCompatConfig.isChangeEnabled(changeId, appInfo);
-    }
-
-    /**
-     * Internal version of {@link #isChangeEnabled(long, ApplicationInfo)}. Does not perform costly
-     * permission check.
-     */
-    public boolean isChangeEnabledInternal(long changeId, ApplicationInfo appInfo) {
-        boolean enabled = isChangeEnabledInternalNoLogging(changeId, appInfo);
-        if (appInfo != null) {
-            reportChange(changeId, appInfo.uid,
-                    enabled ? ChangeReporter.STATE_ENABLED : ChangeReporter.STATE_DISABLED);
-        }
-        return enabled;
     }
 
     @Override
@@ -140,7 +116,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         if (appInfo == null) {
             return mCompatConfig.willChangeBeEnabled(changeId, packageName);
         }
-        return isChangeEnabled(changeId, appInfo);
+        return isChangeEnabledInternal(changeId, appInfo);
     }
 
     @Override
@@ -152,85 +128,92 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         }
         boolean enabled = true;
         for (String packageName : packages) {
-            enabled = enabled && isChangeEnabledByPackageName(changeId, packageName,
+            enabled &= isChangeEnabledByPackageName(changeId, packageName,
                     UserHandle.getUserId(uid));
         }
         return enabled;
     }
 
     /**
-     * Register a listener for change state overrides. Only one listener per change is allowed.
+     * Internal version of the above method, without logging.
      *
-     * <p>{@code listener.onCompatChange(String)} method is guaranteed to be called with
-     * packageName before the app is killed upon an override change. The state of a change is not
-     * guaranteed to change when {@code listener.onCompatChange(String)} is called.
-     *
-     * @param changeId to get updates for
-     * @param listener the listener that will be called upon a potential change for package.
-     * @throws IllegalStateException if a listener was already registered for changeId
-     * @returns {@code true} if a change with changeId was already known, or (@code false}
-     * otherwise.
+     * <p>Does not perform costly permission check.
+     * TODO(b/167551701): Remove this method and add 'loggability' as a changeid property.
      */
-    public boolean registerListener(long changeId, CompatChange.ChangeListener listener) {
-        return mCompatConfig.registerListener(changeId, listener);
+    public boolean isChangeEnabledInternalNoLogging(long changeId, ApplicationInfo appInfo) {
+        return mCompatConfig.isChangeEnabled(changeId, appInfo);
+    }
+
+    /**
+     * Internal version of {@link #isChangeEnabled(long, ApplicationInfo)}.
+     *
+     * <p>Does not perform costly permission check.
+     */
+    public boolean isChangeEnabledInternal(long changeId, ApplicationInfo appInfo) {
+        boolean enabled = isChangeEnabledInternalNoLogging(changeId, appInfo);
+        if (appInfo != null) {
+            reportChangeInternal(changeId, appInfo.uid,
+                    enabled ? ChangeReporter.STATE_ENABLED : ChangeReporter.STATE_DISABLED);
+        }
+        return enabled;
     }
 
     @Override
-    public void setOverrides(CompatibilityChangeConfig overrides, String packageName)
-            throws RemoteException, SecurityException {
+    public void setOverrides(CompatibilityChangeConfig overrides, String packageName) {
         checkCompatChangeOverridePermission();
         mCompatConfig.addOverrides(overrides, packageName);
         killPackage(packageName);
     }
 
     @Override
-    public void setOverridesForTest(CompatibilityChangeConfig overrides, String packageName)
-            throws RemoteException, SecurityException {
+    public void setOverridesForTest(CompatibilityChangeConfig overrides, String packageName) {
         checkCompatChangeOverridePermission();
         mCompatConfig.addOverrides(overrides, packageName);
     }
 
     @Override
-    public int enableTargetSdkChanges(String packageName, int targetSdkVersion)
-            throws RemoteException, SecurityException {
+    public int enableTargetSdkChanges(String packageName, int targetSdkVersion) {
         checkCompatChangeOverridePermission();
-        int numChanges = mCompatConfig.enableTargetSdkChangesForPackage(packageName,
-                                                                        targetSdkVersion);
+        int numChanges =
+                mCompatConfig.enableTargetSdkChangesForPackage(packageName, targetSdkVersion);
         killPackage(packageName);
         return numChanges;
     }
 
     @Override
-    public int disableTargetSdkChanges(String packageName, int targetSdkVersion)
-            throws RemoteException, SecurityException {
+    public int disableTargetSdkChanges(String packageName, int targetSdkVersion) {
         checkCompatChangeOverridePermission();
-        int numChanges = mCompatConfig.disableTargetSdkChangesForPackage(packageName,
-                                                                         targetSdkVersion);
+        int numChanges =
+                mCompatConfig.disableTargetSdkChangesForPackage(packageName, targetSdkVersion);
         killPackage(packageName);
         return numChanges;
     }
 
     @Override
-    public void clearOverrides(String packageName) throws RemoteException, SecurityException {
+    public void clearOverrides(String packageName) {
         checkCompatChangeOverridePermission();
         mCompatConfig.removePackageOverrides(packageName);
         killPackage(packageName);
     }
 
     @Override
-    public void clearOverridesForTest(String packageName)
-            throws RemoteException, SecurityException {
+    public void clearOverridesForTest(String packageName) {
         checkCompatChangeOverridePermission();
         mCompatConfig.removePackageOverrides(packageName);
     }
 
     @Override
-    public boolean clearOverride(long changeId, String packageName)
-            throws RemoteException, SecurityException {
+    public boolean clearOverride(long changeId, String packageName) {
         checkCompatChangeOverridePermission();
         boolean existed = mCompatConfig.removeOverride(changeId, packageName);
         killPackage(packageName);
         return existed;
+    }
+
+    @Override
+    public void clearOverrideForTest(long changeId, String packageName) {
+        checkCompatChangeOverridePermission();
+        mCompatConfig.removeOverride(changeId, packageName);
     }
 
     @Override
@@ -247,18 +230,13 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     public CompatibilityChangeInfo[] listUIChanges() {
-        return Arrays.stream(listAllChanges()).filter(
-                x -> isShownInUI(x)).toArray(CompatibilityChangeInfo[]::new);
+        return Arrays.stream(listAllChanges()).filter(this::isShownInUI).toArray(
+                CompatibilityChangeInfo[]::new);
     }
 
-    /**
-     * Check whether the change is known to the compat config.
-     *
-     * @return {@code true} if the change is known.
-     */
+    /** Checks whether the change is known to the compat config. */
     public boolean isKnownChangeId(long changeId) {
         return mCompatConfig.isKnownChangeId(changeId);
-
     }
 
     /**
@@ -286,7 +264,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, "platform_compat", pw)) return;
+        if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, "platform_compat", pw)) {
+            return;
+        }
         checkCompatChangeReadAndLogPermission();
         mCompatConfig.dumpConfig(pw);
     }
@@ -298,7 +278,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
 
     /**
      * Clears information stored about events reported on behalf of an app.
-     * To be called once upon app start or end. A second call would be a no-op.
+     *
+     * <p>To be called once upon app start or end. A second call would be a no-op.
      *
      * @param appInfo the app to reset
      */
@@ -311,13 +292,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
                 packageName, 0, userId, userId);
     }
 
-    private void reportChange(long changeId, int uid, int state) {
-        mChangeReporter.reportChange(uid, changeId, state);
-    }
-
     private void killPackage(String packageName) {
         int uid = LocalServices.getService(PackageManagerInternal.class).getPackageUid(packageName,
-                    0, UserHandle.myUserId());
+                0, UserHandle.myUserId());
 
         if (uid < 0) {
             Slog.w(TAG, "Didn't find package " + packageName + " on device.");
@@ -325,21 +302,18 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         }
 
         Slog.d(TAG, "Killing package " + packageName + " (UID " + uid + ").");
-        killUid(UserHandle.getAppId(uid),
-                UserHandle.USER_ALL, "PlatformCompat overrides");
+        killUid(UserHandle.getAppId(uid));
     }
 
-    private void killUid(int appId, int userId, String reason) {
+    private void killUid(int appId) {
         final long identity = Binder.clearCallingIdentity();
         try {
             IActivityManager am = ActivityManager.getService();
             if (am != null) {
-                try {
-                    am.killUid(appId, userId, reason);
-                } catch (RemoteException e) {
-                    /* ignore - same process */
-                }
+                am.killUid(appId, UserHandle.USER_ALL, "PlatformCompat overrides");
             }
+        } catch (RemoteException e) {
+            /* ignore - same process */
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -350,13 +324,12 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         if (Binder.getCallingUid() == SYSTEM_UID) {
             return;
         }
-        if (mContext.checkCallingOrSelfPermission(LOG_COMPAT_CHANGE)
-                != PERMISSION_GRANTED) {
+        if (mContext.checkCallingOrSelfPermission(LOG_COMPAT_CHANGE) != PERMISSION_GRANTED) {
             throw new SecurityException("Cannot log compat change usage");
         }
     }
 
-    private void checkCompatChangeReadPermission() throws SecurityException {
+    private void checkCompatChangeReadPermission() {
         // Don't check for permissions within the system process
         if (Binder.getCallingUid() == SYSTEM_UID) {
             return;
@@ -367,7 +340,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         }
     }
 
-    private void checkCompatChangeOverridePermission() throws SecurityException {
+    private void checkCompatChangeOverridePermission() {
         // Don't check for permissions within the system process
         if (Binder.getCallingUid() == SYSTEM_UID) {
             return;
@@ -378,7 +351,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         }
     }
 
-    private void checkCompatChangeReadAndLogPermission() throws SecurityException {
+    private void checkCompatChangeReadAndLogPermission() {
         checkCompatChangeReadPermission();
         checkCompatChangeLogPermission();
     }
@@ -391,16 +364,34 @@ public class PlatformCompat extends IPlatformCompat.Stub {
             return false;
         }
         if (change.getEnableSinceTargetSdk() > 0) {
-            if (change.getEnableSinceTargetSdk() < sMinTargetSdk) {
-                return false;
-            }
+            return change.getEnableSinceTargetSdk() >= Build.VERSION_CODES.Q;
         }
         return true;
     }
 
     /**
+     * Registers a listener for change state overrides.
+     *
+     * <p>Only one listener per change is allowed.
+     *
+     * <p>{@code listener.onCompatChange(String)} method is guaranteed to be called with
+     * packageName before the app is killed upon an override change. The state of a change is not
+     * guaranteed to change when {@code listener.onCompatChange(String)} is called.
+     *
+     * @param changeId to get updates for
+     * @param listener the listener that will be called upon a potential change for package
+     * @return {@code true} if a change with changeId was already known, or (@code false}
+     * otherwise
+     * @throws IllegalStateException if a listener was already registered for changeId
+     */
+    public boolean registerListener(long changeId, CompatChange.ChangeListener listener) {
+        return mCompatConfig.registerListener(changeId, listener);
+    }
+
+    /**
      * Registers a broadcast receiver that listens for package install, replace or remove.
-     * @param context the context where the receiver should be registered.
+     *
+     * @param context the context where the receiver should be registered
      */
     public void registerPackageReceiver(Context context) {
         final BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -429,8 +420,8 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     /**
-     * Register the observer for
-     * {@link android.provider.Settings.Global#FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT}
+     * Registers the observer for
+     * {@link android.provider.Settings.Global#FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT}.
      */
     public void registerContentObserver() {
         mCompatConfig.registerContentObserver();

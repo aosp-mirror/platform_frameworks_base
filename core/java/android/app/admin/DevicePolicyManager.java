@@ -1686,6 +1686,20 @@ public class DevicePolicyManager {
     public static final int PASSWORD_COMPLEXITY_HIGH = 0x50000;
 
     /**
+     * A boolean extra for {@link #ACTION_SET_NEW_PARENT_PROFILE_PASSWORD} requesting that only
+     * device password requirement is enforced during the parent profile password enrolment flow.
+     * <p> Normally when enrolling password for the parent profile, both the device-wide password
+     * requirement (requirement set via {@link #getParentProfileInstance(ComponentName)} instance)
+     * and the profile password requirement are enforced, if the profile currently does not have a
+     * separate work challenge. By setting this to {@code true}, profile password requirement is
+     * explicitly disregarded.
+     *
+     * @see #isActivePasswordSufficientForDeviceRequirement()
+     */
+    public static final String EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY =
+            "android.app.extra.DEVICE_PASSWORD_REQUIREMENT_ONLY";
+
+    /**
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
@@ -1700,8 +1714,10 @@ public class DevicePolicyManager {
     /**
      * Activity action: have the user enter a new password for the parent profile.
      * If the intent is launched from within a managed profile, this will trigger
-     * entering a new password for the parent of the profile. In all other cases
-     * the behaviour is identical to {@link #ACTION_SET_NEW_PASSWORD}.
+     * entering a new password for the parent of the profile. The caller can optionally
+     * set {@link #EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY} to only enforce device-wide
+     * password requirement. In all other cases the behaviour is identical to
+     * {@link #ACTION_SET_NEW_PASSWORD}.
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SET_NEW_PARENT_PROFILE_PASSWORD
@@ -3844,9 +3860,21 @@ public class DevicePolicyManager {
      * @hide
      */
     public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
+        return getPasswordMinimumMetrics(userHandle, false);
+    }
+
+    /**
+     * Returns minimum PasswordMetrics that satisfies all admin policies.
+     * If requested, only consider device-wide admin policies and ignore policies set on the
+     * managed profile instance (as if the managed profile had separate work challenge).
+     *
+     * @hide
+     */
+    public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle,
+            boolean deviceWideOnly) {
         if (mService != null) {
             try {
-                return mService.getPasswordMinimumMetrics(userHandle);
+                return mService.getPasswordMinimumMetrics(userHandle, deviceWideOnly);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -4125,6 +4153,7 @@ public class DevicePolicyManager {
      * @throws SecurityException if the calling application is not a profile owner of a managed
      *   profile, or if this API is not called on the parent DevicePolicyManager instance.
      * @throws IllegalStateException if the user isn't unlocked
+     * @see #EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY
      */
     public boolean isActivePasswordSufficientForDeviceRequirement() {
         if (!mParentInstance) {
@@ -4250,12 +4279,25 @@ public class DevicePolicyManager {
      */
     @PasswordComplexity
     public int getAggregatedPasswordComplexityForUser(int userId) {
+        return getAggregatedPasswordComplexityForUser(userId, false);
+    }
+
+    /**
+     * Returns the password complexity that applies to this user, aggregated from other users if
+     * necessary (for example, if the DPC has set password complexity requirements on the parent
+     * profile DPM instance of a managed profile user, they would apply to the primary user on the
+     * device). If {@code deviceWideOnly} is {@code true}, ignore policies set on the
+     * managed profile DPM instance (as if the managed profile had separate work challenge).
+     * @hide
+     */
+    @PasswordComplexity
+    public int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly) {
         if (mService == null) {
             return PASSWORD_COMPLEXITY_NONE;
         }
 
         try {
-            return mService.getAggregatedPasswordComplexityForUser(userId);
+            return mService.getAggregatedPasswordComplexityForUser(userId, deviceWideOnly);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -8633,6 +8675,19 @@ public class DevicePolicyManager {
      * Called by a profile or device owner to set the permitted input methods services for this
      * user. By default, the user can use any input method.
      * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance,
+     * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
+     * a profile owner of an organization-owned device.
+     * <p>
+     * If called on the parent instance:
+     * <ul>
+     *    <li>The permitted input methods will be applied on the personal profile</li>
+     *    <li>Can only permit all input methods (calling this method with a {@code null} package
+     *    list) or only permit system input methods (calling this method with an empty package
+     *    list). This is to prevent the caller from learning which packages are installed on
+     *    the personal side</li>
+     * </ul>
+     * <p>
      * When zero or more packages have been added, input method that are not in the list and not
      * part of the system can not be enabled by the user. This method will fail if it is called for
      * a admin that is not for the foreground user or a profile of the foreground user. Any
@@ -8647,14 +8702,18 @@ public class DevicePolicyManager {
      * @param packageNames List of input method package names.
      * @return {@code true} if the operation succeeded, or {@code false} if the list didn't
      *        contain every enabled non-system input method service.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device, profile owner or if called on
+     *                           the parent profile and the {@code admin} is not a profile owner
+     *                           of an organization-owned managed profile.
+     * @throws IllegalArgumentException if called on the parent profile, the {@code admin} is a
+     *                           profile owner of an organization-owned managed profile and the
+     *                           list of permitted input method package names is not null or empty.
      */
     public boolean setPermittedInputMethods(
             @NonNull ComponentName admin, List<String> packageNames) {
-        throwIfParentInstance("setPermittedInputMethods");
         if (mService != null) {
             try {
-                return mService.setPermittedInputMethods(admin, packageNames);
+                return mService.setPermittedInputMethods(admin, packageNames, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8666,18 +8725,25 @@ public class DevicePolicyManager {
     /**
      * Returns the list of permitted input methods set by this device or profile owner.
      * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance,
+     * returned by {@link #getParentProfileInstance(ComponentName)}, where the caller must be
+     * a profile owner of an organization-owned managed profile. If called on the parent instance,
+     * then the returned list of permitted input methods are those which are applied on the
+     * personal profile.
+     * <p>
      * An empty list means no input methods except system input methods are allowed. Null means all
      * input methods are allowed.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @return List of input method package names.
-     * @throws SecurityException if {@code admin} is not a device or profile owner.
+     * @throws SecurityException if {@code admin} is not a device, profile owner or if called on
+     *                           the parent profile and the {@code admin} is not a profile owner
+     *                           of an organization-owned managed profile.
      */
     public @Nullable List<String> getPermittedInputMethods(@NonNull ComponentName admin) {
-        throwIfParentInstance("getPermittedInputMethods");
         if (mService != null) {
             try {
-                return mService.getPermittedInputMethods(admin);
+                return mService.getPermittedInputMethods(admin, mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -8687,6 +8753,11 @@ public class DevicePolicyManager {
 
     /**
      * Called by the system to check if a specific input method is disabled by admin.
+     * <p>
+     * This method can be called on the {@link DevicePolicyManager} instance,
+     * returned by {@link #getParentProfileInstance(ComponentName)}. If called on the parent
+     * instance, this method will check whether the given input method is permitted on
+     * the personal profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param packageName Input method package name that needs to be checked.
@@ -8699,7 +8770,8 @@ public class DevicePolicyManager {
             @NonNull String packageName, int userHandle) {
         if (mService != null) {
             try {
-                return mService.isInputMethodPermittedByAdmin(admin, packageName, userHandle);
+                return mService.isInputMethodPermittedByAdmin(admin, packageName, userHandle,
+                        mParentInstance);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -10786,6 +10858,8 @@ public class DevicePolicyManager {
      * <li>{@link #setCameraDisabled}</li>
      * <li>{@link #getCameraDisabled}</li>
      * <li>{@link #setAccountManagementDisabled(ComponentName, String, boolean)}</li>
+     * <li>{@link #setPermittedInputMethods}</li>
+     * <li>{@link #getPermittedInputMethods}</li>
      * </ul>
      *
      * <p>The following methods can be called by the profile owner of a managed profile

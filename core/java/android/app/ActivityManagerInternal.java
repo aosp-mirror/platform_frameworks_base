@@ -532,4 +532,9 @@ public abstract class ActivityManagerInternal {
      */
     @Nullable
     public abstract Intent getIntentForIntentSender(IIntentSender sender);
+
+    /**
+     * @return mBootTimeTempAllowlistDuration of ActivityManagerConstants.
+     */
+    public abstract long getBootTimeTempAllowListDuration();
 }

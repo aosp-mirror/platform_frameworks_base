@@ -30,6 +30,7 @@ interface IAppSearchManager {
     /**
      * Updates the AppSearch schema for this database.
      *
+     * @param packageName The name of the package that owns this schema.
      * @param databaseName  The name of the database where this schema lives.
      * @param schemaBundles List of {@link AppSearchSchema} bundles.
      * @param schemasNotPlatformSurfaceable Schema types that should not be surfaced on platform
@@ -43,6 +44,7 @@ interface IAppSearchManager {
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
     void setSchema(
+        in String packageName,
         in String databaseName,
         in List<Bundle> schemaBundles,
         in List<String> schemasNotPlatformSurfaceable,
@@ -54,17 +56,23 @@ interface IAppSearchManager {
     /**
      * Retrieves the AppSearch schema for this database.
      *
+     * @param packageName The name of the package that owns the schema.
      * @param databaseName  The name of the database to retrieve.
      * @param userId Id of the calling user
      * @param callback {@link IAppSearchResultCallback#onResult} will be called with an
      *     {@link AppSearchResult}&lt;{@link List}&lt;{@link Bundle}&gt;&gt;, where the value are
      *     AppSearchSchema bundle.
      */
-    void getSchema(in String databaseName, in int userId, in IAppSearchResultCallback callback);
+    void getSchema(
+        in String packageName,
+        in String databaseName,
+        in int userId,
+        in IAppSearchResultCallback callback);
 
     /**
      * Inserts documents into the index.
      *
+     * @param packageName The name of the package that owns this document.
      * @param databaseName  The name of the database where this document lives.
      * @param documentBundes List of GenericDocument bundles.
      * @param userId Id of the calling user
@@ -76,6 +84,7 @@ interface IAppSearchManager {
      *     where the keys are document URIs, and the values are {@code null}.
      */
     void putDocuments(
+        in String packageName,
         in String databaseName,
         in List<Bundle> documentBundles,
         in int userId,
@@ -84,6 +93,7 @@ interface IAppSearchManager {
     /**
      * Retrieves documents from the index.
      *
+     * @param packageName The name of the package that owns this document.
      * @param databaseName  The databaseName this document resides in.
      * @param namespace    The namespace this document resides in.
      * @param uris The URIs of the documents to retrieve
@@ -96,6 +106,7 @@ interface IAppSearchManager {
      *     where the keys are document URIs, and the values are Document bundles.
      */
     void getDocuments(
+        in String packageName,
         in String databaseName,
         in String namespace,
         in List<String> uris,
@@ -105,6 +116,7 @@ interface IAppSearchManager {
     /**
      * Searches a document based on a given specifications.
      *
+     * @param packageName The name of the package to query over.
      * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
@@ -113,6 +125,7 @@ interface IAppSearchManager {
      *         operation.
      */
     void query(
+        in String packageName,
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,
@@ -123,6 +136,7 @@ interface IAppSearchManager {
      * Executes a global query, i.e. over all permitted databases, against the AppSearch index and
      * returns results.
      *
+     * @param packageName The name of the package making the query.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
      * @param userId Id of the calling user
@@ -130,6 +144,7 @@ interface IAppSearchManager {
      *         operation.
      */
     void globalQuery(
+        in String packageName,
         in String queryExpression,
         in Bundle searchSpecBundle,
         in int userId,
@@ -158,6 +173,7 @@ interface IAppSearchManager {
     /**
      * Removes documents by URI.
      *
+     * @param packageName The name of the package the document is in.
      * @param databaseName The databaseName the document is in.
      * @param namespace    Namespace of the document to remove.
      * @param uris The URIs of the documents to delete
@@ -171,6 +187,7 @@ interface IAppSearchManager {
      *     failure where the {@code throwable} is {@code null}.
      */
     void removeByUri(
+        in String packageName,
         in String databaseName,
         in String namespace,
         in List<String> uris,
@@ -180,6 +197,7 @@ interface IAppSearchManager {
     /**
      * Removes documents by given query.
      *
+     * @param packageName The name of the package to query over.
      * @param databaseName The databaseName this query for.
      * @param queryExpression String to search for
      * @param searchSpecBundle SearchSpec bundle
@@ -188,6 +206,7 @@ interface IAppSearchManager {
      *     {@link AppSearchResult}&lt;{@link Void}&gt;.
      */
     void removeByQuery(
+        in String packageName,
         in String databaseName,
         in String queryExpression,
         in Bundle searchSpecBundle,

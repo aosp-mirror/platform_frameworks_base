@@ -159,14 +159,6 @@ public:
             renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
             const SkMatrix& transform);
 
-    template <class CanvasType>
-    static std::unique_ptr<DisplayList> createDisplayList(
-            int width, int height, std::function<void(CanvasType& canvas)> canvasCallback) {
-        CanvasType canvas(width, height);
-        canvasCallback(canvas);
-        return std::unique_ptr<DisplayList>(canvas.finishRecording());
-    }
-
     static sp<RenderNode> createNode(
             int left, int top, int right, int bottom,
             std::function<void(RenderProperties& props, Canvas& canvas)> setup) {
@@ -177,7 +169,7 @@ public:
             std::unique_ptr<Canvas> canvas(
                     Canvas::create_recording_canvas(props.getWidth(), props.getHeight()));
             setup(props, *canvas.get());
-            node->setStagingDisplayList(canvas->finishRecording());
+            canvas->finishRecording(node.get());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
@@ -203,7 +195,7 @@ public:
         std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
                 node.stagingProperties().getWidth(), node.stagingProperties().getHeight(), &node));
         contentCallback(*canvas.get());
-        node.setStagingDisplayList(canvas->finishRecording());
+        canvas->finishRecording(&node);
     }
 
     static sp<RenderNode> createSkiaNode(
@@ -226,7 +218,7 @@ public:
                     new skiapipeline::SkiaRecordingCanvas(nullptr, props.getWidth(),
                                                           props.getHeight()));
             setup(props, *canvas.get());
-            node->setStagingDisplayList(canvas->finishRecording());
+            canvas->finishRecording(node.get());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
