@@ -39,6 +39,7 @@ import android.app.NotificationManager;
 import android.app.Person;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
+import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -55,9 +56,8 @@ import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.service.notification.ConversationChannelWrapper;
 import android.service.notification.StatusBarNotification;
+import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
-
-import androidx.test.filters.SmallTest;
 
 import com.android.internal.appwidget.IAppWidgetService;
 import com.android.systemui.R;
@@ -419,7 +419,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         // Existing tile has a birthday status.
         Map<Integer, PeopleSpaceTile> widgetIdToTile = Map.of(WIDGET_ID_WITH_SHORTCUT,
                 new PeopleSpaceTile.Builder(mShortcutInfoWithoutPerson,
-                        mContext.getSystemService(LauncherApps.class)).setStatusText(
+                        mContext.getSystemService(LauncherApps.class)).setBirthdayText(
                         mContext.getString(R.string.birthday_status)).build());
         PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
                 widgetIdToTile, widgetIdsArray);
@@ -454,7 +454,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         // Existing tile has a birthday status.
         Map<Integer, PeopleSpaceTile> widgetIdToTile = Map.of(WIDGET_ID_WITH_SHORTCUT,
                 new PeopleSpaceTile.Builder(mShortcutInfo,
-                        mContext.getSystemService(LauncherApps.class)).setStatusText(
+                        mContext.getSystemService(LauncherApps.class)).setBirthdayText(
                         mContext.getString(R.string.birthday_status)).build());
         PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
                 widgetIdToTile, widgetIdsArray);
@@ -474,7 +474,7 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
         // Existing tile has a birthday status.
         Map<Integer, PeopleSpaceTile> widgetIdToTile = Map.of(WIDGET_ID_WITH_SHORTCUT,
                 new PeopleSpaceTile.Builder(mShortcutInfo,
-                        mContext.getSystemService(LauncherApps.class)).setStatusText(
+                        mContext.getSystemService(LauncherApps.class)).setBirthdayText(
                         mContext.getString(R.string.birthday_status)).build());
         PeopleSpaceUtils.getBirthdays(mMockContext, mAppWidgetManager,
                 widgetIdToTile, widgetIdsArray);
