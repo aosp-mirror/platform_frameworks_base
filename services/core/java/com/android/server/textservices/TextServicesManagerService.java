@@ -45,6 +45,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 import android.view.textservice.SpellCheckerInfo;
 import android.view.textservice.SpellCheckerSubtype;
+import android.view.textservice.SuggestionsInfo;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
@@ -58,7 +59,6 @@ import com.android.internal.textservice.ITextServicesSessionListener;
 import com.android.internal.util.DumpUtils;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
-import com.android.server.SystemService.TargetUser;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -567,7 +567,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
     @Override
     public void getSpellCheckerService(@UserIdInt int userId, String sciId, String locale,
             ITextServicesSessionListener tsListener, ISpellCheckerSessionListener scListener,
-            Bundle bundle) {
+            Bundle bundle, @SuggestionsInfo.ResultAttrs int supportedAttributes) {
         verifyUser(userId);
         if (TextUtils.isEmpty(sciId) || tsListener == null || scListener == null) {
             Slog.e(TAG, "getSpellCheckerService: Invalid input.");
@@ -603,7 +603,8 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             // Start getISpellCheckerSession async IPC, or just queue the request until the spell
             // checker service is bound.
             bindGroup.getISpellCheckerSessionOrQueueLocked(
-                    new SessionRequest(uid, locale, tsListener, scListener, bundle));
+                    new SessionRequest(uid, locale, tsListener, scListener, bundle,
+                            supportedAttributes));
         }
     }
 
@@ -774,15 +775,18 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
         public final ISpellCheckerSessionListener mScListener;
         @Nullable
         public final Bundle mBundle;
+        public final int mSupportedAttributes;
 
         SessionRequest(int uid, @Nullable String locale,
                 @NonNull ITextServicesSessionListener tsListener,
-                @NonNull ISpellCheckerSessionListener scListener, @Nullable Bundle bundle) {
+                @NonNull ISpellCheckerSessionListener scListener, @Nullable Bundle bundle,
+                @SuggestionsInfo.ResultAttrs int supportedAttributes) {
             mUid = uid;
             mLocale = locale;
             mTsListener = tsListener;
             mScListener = scListener;
             mBundle = bundle;
+            mSupportedAttributes = supportedAttributes;
         }
     }
 
@@ -825,6 +829,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
                     final SessionRequest request = mPendingSessionRequests.get(i);
                     mSpellChecker.getISpellCheckerSession(
                             request.mLocale, request.mScListener, request.mBundle,
+                            request.mSupportedAttributes,
                             new ISpellCheckerServiceCallbackBinder(this, request));
                     mOnGoingSessionRequests.add(request);
                 }
@@ -913,6 +918,7 @@ public class TextServicesManagerService extends ITextServicesManager.Stub {
             try {
                 mSpellChecker.getISpellCheckerSession(
                         request.mLocale, request.mScListener, request.mBundle,
+                        request.mSupportedAttributes,
                         new ISpellCheckerServiceCallbackBinder(this, request));
                 mOnGoingSessionRequests.add(request);
             } catch(RemoteException e) {

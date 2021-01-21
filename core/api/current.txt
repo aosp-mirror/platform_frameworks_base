@@ -38202,6 +38202,7 @@ package android.service.textservice {
     ctor public SpellCheckerService.Session();
     method public android.os.Bundle getBundle();
     method public String getLocale();
+    method public int getSupportedAttributes();
     method public void onCancel();
     method public void onClose();
     method public abstract void onCreate();
@@ -51796,7 +51797,8 @@ package android.view.textservice {
     method @Nullable public android.view.textservice.SpellCheckerSubtype getCurrentSpellCheckerSubtype(boolean);
     method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckersList();
     method public boolean isSpellCheckerEnabled();
-    method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean, int);
   }
 
 }
