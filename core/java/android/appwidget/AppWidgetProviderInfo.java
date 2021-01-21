@@ -16,8 +16,11 @@
 
 package android.appwidget;
 
+import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -273,6 +276,15 @@ public class AppWidgetProviderInfo implements Parcelable {
     public int widgetCategory;
 
     /**
+     * Resource id for the description of the AppWidget.
+     * <p>This field corresponds to the <code>android:description</code> attribute in the AppWidget
+     * meta-data file.
+     */
+    @SuppressLint("MutableBareField")
+    @IdRes
+    public int descriptionResource;
+
+    /**
      * Flags indicating various features supported by the widget. These are hints to the widget
      * host, and do not actually change the behavior of the widget.
      *
@@ -313,6 +325,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         this.widgetCategory = in.readInt();
         this.providerInfo = in.readTypedObject(ActivityInfo.CREATOR);
         this.widgetFeatures = in.readInt();
+        this.descriptionResource = in.readInt();
     }
 
     /**
@@ -369,6 +382,21 @@ public class AppWidgetProviderInfo implements Parcelable {
         return loadDrawable(context, density, previewImage, false);
     }
 
+    /** Loads localized description for the app widget. */
+    @Nullable
+    public final String loadDescription(@NonNull Context context) {
+        if (ResourceId.isValid(descriptionResource)) {
+            return context.getPackageManager()
+                    .getText(
+                            providerInfo.packageName,
+                            descriptionResource,
+                            providerInfo.applicationInfo)
+                    .toString()
+                    .trim();
+        }
+        return null;
+    }
+
     /**
      * Gets the user profile in which the provider resides.
      *
@@ -398,6 +426,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         out.writeInt(this.widgetCategory);
         out.writeTypedObject(this.providerInfo, flags);
         out.writeInt(this.widgetFeatures);
+        out.writeInt(this.descriptionResource);
     }
 
     @Override
@@ -421,6 +450,7 @@ public class AppWidgetProviderInfo implements Parcelable {
         that.widgetCategory = this.widgetCategory;
         that.providerInfo = this.providerInfo;
         that.widgetFeatures = this.widgetFeatures;
+        that.descriptionResource = this.descriptionResource;
         return that;
     }
 

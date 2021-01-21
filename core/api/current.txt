@@ -8349,6 +8349,7 @@ package android.appwidget {
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
     method public final android.os.UserHandle getProfile();
+    method @Nullable public final String loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
     method public final android.graphics.drawable.Drawable loadPreviewImage(@NonNull android.content.Context, int);
@@ -8366,6 +8367,7 @@ package android.appwidget {
     field public static final int WIDGET_FEATURE_RECONFIGURABLE = 1; // 0x1
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
+    field @IdRes public int descriptionResource;
     field public int icon;
     field public int initialKeyguardLayout;
     field public int initialLayout;
