@@ -1253,9 +1253,17 @@ public class PackageInstaller {
          *                  {@link #openWrite}
          * @param checksums installer intends to make available via
          *                  {@link PackageManager#requestChecksums}.
-         * @param signature PKCS#7 detached signature bytes over serialized checksums to enable
-         *                  fs-verity for the checksums or null if fs-verity should not be enabled.
-         *                  @see <a href="https://www.kernel.org/doc/html/latest/filesystems/fsverity.html#built-in-signature-verification">fs-verity</a>
+         * @param signature DER PKCS#7 detached signature bytes over binary serialized checksums
+         *                  to enable integrity checking for the checksums or null for no integrity
+         *                  checking. {@link PackageManager#requestChecksums} will return
+         *                  the certificate used to create signature.
+         *                  Binary format for checksums:
+         *                  <pre>{@code DataOutputStream dos;
+         *                  dos.writeInt(checksum.getType());
+         *                  dos.writeInt(checksum.getValue().length);
+         *                  dos.write(checksum.getValue());}</pre>
+         *                  If using <b>openssl cms</b>, make sure to specify -binary -nosmimecap.
+         *                  @see <a href="https://www.openssl.org/docs/man1.0.2/man1/cms.html">openssl cms</a>
          * @throws SecurityException if called after the session has been
          *                           committed or abandoned.
          * @throws IllegalStateException if checksums for this file have already been added.
