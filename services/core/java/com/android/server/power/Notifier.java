@@ -36,7 +36,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteException;
@@ -49,7 +48,7 @@ import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.EventLog;
 import android.util.Slog;
-import android.view.WindowManagerPolicyConstants.OnReason;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -455,13 +454,7 @@ public class Notifier {
         synchronized (mLock) {
             if (mInteractive) {
                 // Waking up...
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        final int why = translateOnReason(mInteractiveChangeReason);
-                        mPolicy.startedWakingUp(why);
-                    }
-                });
+                mHandler.post(() -> mPolicy.startedWakingUp(mInteractiveChangeReason));
 
                 // Send interactive broadcast.
                 mPendingInteractiveState = INTERACTIVE_STATE_AWAKE;
@@ -470,13 +463,7 @@ public class Notifier {
             } else {
                 // Going to sleep...
                 // Tell the policy that we started going to sleep.
-                final int why = translateOffReason(mInteractiveChangeReason);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mPolicy.startedGoingToSleep(why);
-                    }
-                });
+                mHandler.post(() -> mPolicy.startedGoingToSleep(mInteractiveChangeReason));
             }
         }
     }
@@ -492,20 +479,17 @@ public class Notifier {
                     (int) (SystemClock.uptimeMillis() - mInteractiveChangeStartTime);
             if (mInteractive) {
                 // Finished waking up...
-                final int why = translateOnReason(mInteractiveChangeReason);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
-                        log.setType(MetricsEvent.TYPE_OPEN);
-                        log.setSubtype(why);
-                        log.setLatency(interactiveChangeLatency);
-                        log.addTaggedData(
-                                MetricsEvent.FIELD_SCREEN_WAKE_REASON, mInteractiveChangeReason);
-                        MetricsLogger.action(log);
-                        EventLogTags.writePowerScreenState(1, 0, 0, 0, interactiveChangeLatency);
-                        mPolicy.finishedWakingUp(why);
-                    }
+                mHandler.post(() -> {
+                    LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+                    log.setType(MetricsEvent.TYPE_OPEN);
+                    log.setSubtype(WindowManagerPolicyConstants.translateWakeReasonToOnReason(
+                            mInteractiveChangeReason));
+                    log.setLatency(interactiveChangeLatency);
+                    log.addTaggedData(
+                            MetricsEvent.FIELD_SCREEN_WAKE_REASON, mInteractiveChangeReason);
+                    MetricsLogger.action(log);
+                    EventLogTags.writePowerScreenState(1, 0, 0, 0, interactiveChangeLatency);
+                    mPolicy.finishedWakingUp(mInteractiveChangeReason);
                 });
             } else {
                 // Finished going to sleep...
@@ -521,20 +505,19 @@ public class Notifier {
                 }
 
                 // Tell the policy we finished going to sleep.
-                final int why = translateOffReason(mInteractiveChangeReason);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        LogMaker log = new LogMaker(MetricsEvent.SCREEN);
-                        log.setType(MetricsEvent.TYPE_CLOSE);
-                        log.setSubtype(why);
-                        log.setLatency(interactiveChangeLatency);
-                        log.addTaggedData(
-                                MetricsEvent.FIELD_SCREEN_SLEEP_REASON, mInteractiveChangeReason);
-                        MetricsLogger.action(log);
-                        EventLogTags.writePowerScreenState(0, why, 0, 0, interactiveChangeLatency);
-                        mPolicy.finishedGoingToSleep(why);
-                    }
+                final int offReason = WindowManagerPolicyConstants.translateSleepReasonToOffReason(
+                        mInteractiveChangeReason);
+                mHandler.post(() -> {
+                    LogMaker log = new LogMaker(MetricsEvent.SCREEN);
+                    log.setType(MetricsEvent.TYPE_CLOSE);
+                    log.setSubtype(offReason);
+                    log.setLatency(interactiveChangeLatency);
+                    log.addTaggedData(
+                            MetricsEvent.FIELD_SCREEN_SLEEP_REASON, mInteractiveChangeReason);
+                    MetricsLogger.action(log);
+                    EventLogTags.writePowerScreenState(
+                            0, offReason, 0, 0, interactiveChangeLatency);
+                    mPolicy.finishedGoingToSleep(mInteractiveChangeReason);
                 });
 
                 // Send non-interactive broadcast.
@@ -542,35 +525,6 @@ public class Notifier {
                 mPendingGoToSleepBroadcast = true;
                 updatePendingBroadcastLocked();
             }
-        }
-    }
-
-    private static int translateOffReason(int reason) {
-        switch (reason) {
-            case PowerManager.GO_TO_SLEEP_REASON_DEVICE_ADMIN:
-                return WindowManagerPolicy.OFF_BECAUSE_OF_ADMIN;
-            case PowerManager.GO_TO_SLEEP_REASON_TIMEOUT:
-            case PowerManager.GO_TO_SLEEP_REASON_INATTENTIVE:
-                return WindowManagerPolicy.OFF_BECAUSE_OF_TIMEOUT;
-            default:
-                return WindowManagerPolicy.OFF_BECAUSE_OF_USER;
-        }
-    }
-
-    private static @OnReason int translateOnReason(@WakeReason int reason) {
-        switch (reason) {
-            case PowerManager.WAKE_REASON_POWER_BUTTON:
-            case PowerManager.WAKE_REASON_PLUGGED_IN:
-            case PowerManager.WAKE_REASON_GESTURE:
-            case PowerManager.WAKE_REASON_CAMERA_LAUNCH:
-            case PowerManager.WAKE_REASON_WAKE_KEY:
-            case PowerManager.WAKE_REASON_WAKE_MOTION:
-            case PowerManager.WAKE_REASON_LID:
-                return WindowManagerPolicy.ON_BECAUSE_OF_USER;
-            case PowerManager.WAKE_REASON_APPLICATION:
-                return WindowManagerPolicy.ON_BECAUSE_OF_APPLICATION;
-            default:
-                return WindowManagerPolicy.ON_BECAUSE_OF_UNKNOWN;
         }
     }
 

@@ -24,9 +24,11 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.Process;
 import android.os.Trace;
 import android.util.Log;
+import android.view.WindowManagerPolicyConstants;
 
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IKeyguardDrawnCallback;
@@ -117,27 +119,32 @@ public class KeyguardService extends Service {
         }
 
         @Override // Binder interface
-        public void onStartedGoingToSleep(int reason) {
+        public void onStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
             checkPermission();
-            mKeyguardViewMediator.onStartedGoingToSleep(reason);
+            mKeyguardViewMediator.onStartedGoingToSleep(
+                    WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason));
             mKeyguardLifecyclesDispatcher.dispatch(
-                    KeyguardLifecyclesDispatcher.STARTED_GOING_TO_SLEEP);
+                    KeyguardLifecyclesDispatcher.STARTED_GOING_TO_SLEEP, pmSleepReason);
         }
 
         @Override // Binder interface
-        public void onFinishedGoingToSleep(int reason, boolean cameraGestureTriggered) {
+        public void onFinishedGoingToSleep(
+                @PowerManager.GoToSleepReason int pmSleepReason, boolean cameraGestureTriggered) {
             checkPermission();
-            mKeyguardViewMediator.onFinishedGoingToSleep(reason, cameraGestureTriggered);
+            mKeyguardViewMediator.onFinishedGoingToSleep(
+                    WindowManagerPolicyConstants.translateSleepReasonToOffReason(pmSleepReason),
+                    cameraGestureTriggered);
             mKeyguardLifecyclesDispatcher.dispatch(
                     KeyguardLifecyclesDispatcher.FINISHED_GOING_TO_SLEEP);
         }
 
         @Override // Binder interface
-        public void onStartedWakingUp() {
+        public void onStartedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
             Trace.beginSection("KeyguardService.mBinder#onStartedWakingUp");
             checkPermission();
             mKeyguardViewMediator.onStartedWakingUp();
-            mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.STARTED_WAKING_UP);
+            mKeyguardLifecyclesDispatcher.dispatch(
+                    KeyguardLifecyclesDispatcher.STARTED_WAKING_UP, pmWakeReason);
             Trace.endSection();
         }
 

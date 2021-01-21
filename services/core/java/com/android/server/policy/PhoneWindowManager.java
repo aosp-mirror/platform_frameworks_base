@@ -1897,8 +1897,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Match current screen state.
         if (!mPowerManager.isInteractive()) {
-            startedGoingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
-            finishedGoingToSleep(WindowManagerPolicy.OFF_BECAUSE_OF_USER);
+            startedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
+            finishedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_TIMEOUT);
         }
 
         mWindowManagerInternal.registerAppTransitionListener(new AppTransitionListener() {
@@ -4234,27 +4234,31 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void startedGoingToSleep(int why) {
+    public void startedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Started going to sleep... (why="
-                    + WindowManagerPolicyConstants.offReasonToString(why) + ")");
+                    + WindowManagerPolicyConstants.offReasonToString(
+                            WindowManagerPolicyConstants.translateSleepReasonToOffReason(
+                                    pmSleepReason)) + ")");
         }
 
         mGoingToSleep = true;
         mRequestedOrGoingToSleep = true;
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedGoingToSleep(why);
+            mKeyguardDelegate.onStartedGoingToSleep(pmSleepReason);
         }
     }
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void finishedGoingToSleep(int why) {
+    public void finishedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
         EventLogTags.writeScreenToggled(0);
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Finished going to sleep... (why="
-                    + WindowManagerPolicyConstants.offReasonToString(why) + ")");
+                    + WindowManagerPolicyConstants.offReasonToString(
+                            WindowManagerPolicyConstants.translateSleepReasonToOffReason(
+                                    pmSleepReason)) + ")");
         }
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
@@ -4271,7 +4275,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onFinishedGoingToSleep(why,
+            mKeyguardDelegate.onFinishedGoingToSleep(pmSleepReason,
                     mCameraGestureTriggeredDuringGoingToSleep);
         }
         if (mDisplayFoldController != null) {
@@ -4282,11 +4286,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void startedWakingUp(@OnReason int why) {
+    public void startedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
         EventLogTags.writeScreenToggled(1);
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Started waking up... (why="
-                    + WindowManagerPolicyConstants.onReasonToString(why) + ")");
+                    + WindowManagerPolicyConstants.onReasonToString(
+                            WindowManagerPolicyConstants.translateWakeReasonToOnReason(
+                                    pmWakeReason)) + ")");
         }
 
         mDefaultDisplayPolicy.setAwake(true);
@@ -4302,16 +4308,18 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mDefaultDisplayRotation.updateOrientationListener();
 
         if (mKeyguardDelegate != null) {
-            mKeyguardDelegate.onStartedWakingUp();
+            mKeyguardDelegate.onStartedWakingUp(pmWakeReason);
         }
     }
 
     // Called on the PowerManager's Notifier thread.
     @Override
-    public void finishedWakingUp(@OnReason int why) {
+    public void finishedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
         if (DEBUG_WAKEUP) {
             Slog.i(TAG, "Finished waking up... (why="
-                    + WindowManagerPolicyConstants.onReasonToString(why) + ")");
+                    + WindowManagerPolicyConstants.onReasonToString(
+                            WindowManagerPolicyConstants.translateWakeReasonToOnReason(
+                                    pmWakeReason)) + ")");
         }
 
         if (mKeyguardDelegate != null) {
@@ -4730,8 +4738,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mKeyguardDelegate.onBootCompleted();
             }
         }
-        startedWakingUp(ON_BECAUSE_OF_UNKNOWN);
-        finishedWakingUp(ON_BECAUSE_OF_UNKNOWN);
+        startedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        finishedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         screenTurningOn(DEFAULT_DISPLAY, null);
         screenTurnedOn(DEFAULT_DISPLAY);
     }
