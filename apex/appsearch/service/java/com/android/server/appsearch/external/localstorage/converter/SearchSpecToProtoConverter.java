@@ -25,10 +25,6 @@ import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.ScoringSpecProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.TermMatchType;
-import com.google.android.icing.proto.TypePropertyMask;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Translates a {@link SearchSpec} into icing search protos.
@@ -61,22 +57,17 @@ public final class SearchSpecToProtoConverter {
     @NonNull
     public static ResultSpecProto toResultSpecProto(@NonNull SearchSpec spec) {
         Preconditions.checkNotNull(spec);
-        ResultSpecProto.Builder builder =
-                ResultSpecProto.newBuilder()
-                        .setNumPerPage(spec.getResultCountPerPage())
-                        .setSnippetSpec(
-                                ResultSpecProto.SnippetSpecProto.newBuilder()
-                                        .setNumToSnippet(spec.getSnippetCount())
-                                        .setNumMatchesPerProperty(spec.getSnippetCountPerProperty())
-                                        .setMaxWindowBytes(spec.getMaxSnippetSize()));
-        Map<String, List<String>> projectionTypePropertyPaths = spec.getProjections();
-        for (Map.Entry<String, List<String>> e : projectionTypePropertyPaths.entrySet()) {
-            builder.addTypePropertyMasks(
-                    TypePropertyMask.newBuilder()
-                            .setSchemaType(e.getKey())
-                            .addAllPaths(e.getValue()));
-        }
-        return builder.build();
+        return ResultSpecProto.newBuilder()
+                .setNumPerPage(spec.getResultCountPerPage())
+                .setSnippetSpec(
+                        ResultSpecProto.SnippetSpecProto.newBuilder()
+                                .setNumToSnippet(spec.getSnippetCount())
+                                .setNumMatchesPerProperty(spec.getSnippetCountPerProperty())
+                                .setMaxWindowBytes(spec.getMaxSnippetSize()))
+                .addAllTypePropertyMasks(
+                        TypePropertyPathToProtoConverter.toTypePropertyMaskList(
+                                spec.getProjections()))
+                .build();
     }
 
     /** Extracts {@link ScoringSpecProto} information from a {@link SearchSpec}. */
@@ -109,6 +100,10 @@ public final class SearchSpecToProtoConverter {
                 return ScoringSpecProto.RankingStrategy.Code.CREATION_TIMESTAMP;
             case SearchSpec.RANKING_STRATEGY_RELEVANCE_SCORE:
                 return ScoringSpecProto.RankingStrategy.Code.RELEVANCE_SCORE;
+            case SearchSpec.RANKING_STRATEGY_USAGE_COUNT:
+                return ScoringSpecProto.RankingStrategy.Code.USAGE_TYPE1_COUNT;
+            case SearchSpec.RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP:
+                return ScoringSpecProto.RankingStrategy.Code.USAGE_TYPE1_LAST_USED_TIMESTAMP;
             default:
                 throw new IllegalArgumentException(
                         "Invalid result ranking strategy: " + rankingStrategyCode);

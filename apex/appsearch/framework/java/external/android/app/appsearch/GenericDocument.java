@@ -80,9 +80,9 @@ public class GenericDocument {
     /**
      * The maximum number of indexed properties a document can have.
      *
-     * <p>Indexed properties are properties where the {@link
-     * AppSearchSchema.PropertyConfig#getIndexingType()} constant is anything other than {@link
-     * AppSearchSchema.PropertyConfig.IndexingType#INDEXING_TYPE_NONE}.
+     * <p>Indexed properties are properties which are strings where the {@link
+     * AppSearchSchema.StringPropertyConfig#getIndexingType} value is anything other than {@link
+     * AppSearchSchema.StringPropertyConfig.IndexingType#INDEXING_TYPE_NONE}.
      */
     public static int getMaxIndexedProperties() {
         return MAX_INDEXED_PROPERTIES;
