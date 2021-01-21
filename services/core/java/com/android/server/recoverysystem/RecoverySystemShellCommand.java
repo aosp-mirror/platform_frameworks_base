@@ -76,7 +76,7 @@ public class RecoverySystemShellCommand extends ShellCommand {
     private int rebootAndApply() throws RemoteException {
         String packageName = getNextArgRequired();
         String rebootReason = getNextArgRequired();
-        boolean success = mService.rebootWithLskf(packageName, rebootReason, true);
+        boolean success = mService.rebootWithLskf(packageName, rebootReason, false);
         PrintWriter pw = getOutPrintWriter();
         // Keep the old message for cts test.
         pw.printf("%s Reboot and apply status: %s\n", packageName,
