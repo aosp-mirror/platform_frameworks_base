@@ -58,7 +58,7 @@ import java.util.PriorityQueue;
  * of quota until it is below that limit again. Limits are applied according to the category
  * the UPTC is placed in. Categories are basic constructs to apply different limits to
  * different groups of UPTCs. For example, standby buckets can be a set of categories, or
- * foreground & background could be two categories. If every UPTC should have the limits
+ * foreground & background could be two categories. If every UPTC should have the same limits
  * applied, then only one category is needed.
  *
  * Note: all limits are enforced per category unless explicitly stated otherwise.
@@ -132,7 +132,7 @@ abstract class QuotaTracker {
                 case Intent.ACTION_PACKAGE_FULLY_REMOVED:
                     final int uid = intent.getIntExtra(Intent.EXTRA_UID, -1);
                     synchronized (mLock) {
-                        onAppRemovedLocked(getPackageName(intent), uid);
+                        onAppRemovedLocked(UserHandle.getUserId(uid), getPackageName(intent));
                     }
                     break;
                 case Intent.ACTION_USER_REMOVED:
@@ -358,21 +358,20 @@ abstract class QuotaTracker {
     }
 
     @GuardedBy("mLock")
-    abstract void handleRemovedAppLocked(String packageName, int uid);
+    abstract void handleRemovedAppLocked(int userId, @NonNull String packageName);
 
     @GuardedBy("mLock")
-    private void onAppRemovedLocked(String packageName, int uid) {
+    void onAppRemovedLocked(final int userId, @NonNull String packageName) {
         if (packageName == null) {
             Slog.wtf(TAG, "Told app removed but given null package name.");
             return;
         }
-        final int userId = UserHandle.getUserId(uid);
 
         mInQuotaAlarmListener.removeAlarmsLocked(userId, packageName);
 
         mFreeQuota.delete(userId, packageName);
 
-        handleRemovedAppLocked(packageName, uid);
+        handleRemovedAppLocked(userId, packageName);
     }
 
     @GuardedBy("mLock")

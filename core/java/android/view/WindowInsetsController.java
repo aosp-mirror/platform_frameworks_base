@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Insets;
 import android.inputmethodservice.InputMethodService;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsets.Type;
@@ -77,12 +78,29 @@ public interface WindowInsetsController {
     }
 
     /**
-     * The default option for {@link #setSystemBarsBehavior(int)}. System bars will be forcibly
-     * shown on any user interaction on the corresponding display if navigation bars are hidden by
+     * Option for {@link #setSystemBarsBehavior(int)}. System bars will be forcibly shown on any
+     * user interaction on the corresponding display if navigation bars are hidden by
      * {@link #hide(int)} or
      * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
+     * @deprecated This is not supported on Android {@link Build.VERSION_CODES#S} and later. Use
+     *             {@link #BEHAVIOR_DEFAULT} or {@link #BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE}
+     *             instead.
      */
+    @Deprecated
     int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0;
+
+    /**
+     * The default option for {@link #setSystemBarsBehavior(int)}: Window would like to remain
+     * interactive when hiding navigation bars by calling {@link #hide(int)} or
+     * {@link WindowInsetsAnimationController#setInsetsAndAlpha(Insets, float, float)}.
+     *
+     * <p>When system bars are hidden in this mode, they can be revealed with system gestures, such
+     * as swiping from the edge of the screen where the bar is hidden from.</p>
+     *
+     * <p>When the gesture navigation is enabled, the system gestures can be triggered regardless
+     * the visibility of system bars.</p>
+     */
+    int BEHAVIOR_DEFAULT = 1;
 
     /**
      * Option for {@link #setSystemBarsBehavior(int)}: Window would like to remain interactive when
@@ -91,8 +109,10 @@ public interface WindowInsetsController {
      *
      * <p>When system bars are hidden in this mode, they can be revealed with system gestures, such
      * as swiping from the edge of the screen where the bar is hidden from.</p>
+     * @deprecated Use {@link #BEHAVIOR_DEFAULT} instead.
      */
-    int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1;
+    @Deprecated
+    int BEHAVIOR_SHOW_BARS_BY_SWIPE = BEHAVIOR_DEFAULT;
 
     /**
      * Option for {@link #setSystemBarsBehavior(int)}: Window would like to remain interactive when
@@ -111,8 +131,7 @@ public interface WindowInsetsController {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(value = {BEHAVIOR_SHOW_BARS_BY_TOUCH, BEHAVIOR_SHOW_BARS_BY_SWIPE,
-            BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE})
+    @IntDef(value = {BEHAVIOR_DEFAULT, BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE})
     @interface Behavior {
     }
 

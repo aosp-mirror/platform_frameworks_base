@@ -862,7 +862,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_up_volumeEnabled() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
         mTestLooper.dispatchAll();
@@ -879,7 +880,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_down_volumeEnabled() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, false);
         mTestLooper.dispatchAll();
@@ -896,7 +898,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_mute_volumeEnabled() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, false);
         mTestLooper.dispatchAll();
@@ -913,7 +916,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_up_volumeDisabled() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, false);
         mTestLooper.dispatchAll();
@@ -930,7 +934,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_down_volumeDisabled() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_DOWN, false);
         mTestLooper.dispatchAll();
@@ -947,7 +952,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_mute_volumeDisabled() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_MUTE, false);
         mTestLooper.dispatchAll();
@@ -964,7 +970,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_toTv_activeSource() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiControlService.setSystemAudioActivated(false);
         mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress,
                 "HdmiCecLocalDevicePlaybackTest");
@@ -984,7 +991,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_toAudio_activeSource() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiControlService.setSystemAudioActivated(true);
         mHdmiControlService.setActiveSource(mPlaybackLogicalAddress, mPlaybackPhysicalAddress,
                 "HdmiCecLocalDevicePlaybackTest");
@@ -1004,7 +1012,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_toTv_inactiveSource() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiControlService.setSystemAudioActivated(false);
         mHdmiControlService.setActiveSource(ADDR_TV, 0x0000, "HdmiCecLocalDevicePlaybackTest");
 
@@ -1023,7 +1032,8 @@ public class HdmiCecLocalDevicePlaybackTest {
 
     @Test
     public void sendVolumeKeyEvent_toAudio_inactiveSource() {
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiControlService.setSystemAudioActivated(true);
         mHdmiControlService.setActiveSource(ADDR_TV, 0x0000, "HdmiCecLocalDevicePlaybackTest");
 

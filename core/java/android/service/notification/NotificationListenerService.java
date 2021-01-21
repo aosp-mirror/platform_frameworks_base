@@ -1487,6 +1487,11 @@ public abstract class NotificationListenerService extends Service {
         }
 
         @Override
+        public void onNotificationClicked(String key) {
+            // no-op in the listener
+        }
+
+        @Override
         public void onAllowedAdjustmentsChanged() {
             // no-op in the listener
         }

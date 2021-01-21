@@ -605,19 +605,23 @@ public class UserSwitcherController implements Dumpable {
             controller.addAdapter(new WeakReference<>(this));
         }
 
+        protected ArrayList<UserRecord> getUsers() {
+            return mController.getUsers();
+        }
+
         public int getUserCount() {
             boolean secureKeyguardShowing = mKeyguardStateController.isShowing()
                     && mKeyguardStateController.isMethodSecure()
                     && !mKeyguardStateController.canDismissLockScreen();
             if (!secureKeyguardShowing) {
-                return mController.getUsers().size();
+                return getUsers().size();
             }
             // The lock screen is secure and showing. Filter out restricted records.
-            final int N = mController.getUsers().size();
+            final int userSize = getUsers().size();
             int count = 0;
-            for (int i = 0; i < N; i++) {
-                if (mController.getUsers().get(i).isGuest) continue;
-                if (mController.getUsers().get(i).isRestricted) {
+            for (int i = 0; i < userSize; i++) {
+                if (getUsers().get(i).isGuest) continue;
+                if (getUsers().get(i).isRestricted) {
                     break;
                 } else {
                     count++;
@@ -632,13 +636,13 @@ public class UserSwitcherController implements Dumpable {
                     && mKeyguardStateController.isMethodSecure()
                     && !mKeyguardStateController.canDismissLockScreen();
             if (!secureKeyguardShowing) {
-                return mController.getUsers().size();
+                return getUsers().size();
             }
             // The lock screen is secure and showing. Filter out restricted records.
-            final int N = mController.getUsers().size();
+            final int userSize = getUsers().size();
             int count = 0;
-            for (int i = 0; i < N; i++) {
-                if (mController.getUsers().get(i).isRestricted) {
+            for (int i = 0; i < userSize; i++) {
+                if (getUsers().get(i).isRestricted) {
                     break;
                 } else {
                     count++;
@@ -649,7 +653,7 @@ public class UserSwitcherController implements Dumpable {
 
         @Override
         public UserRecord getItem(int position) {
-            return mController.getUsers().get(position);
+            return getUsers().get(position);
         }
 
         @Override

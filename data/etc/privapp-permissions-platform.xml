@@ -69,7 +69,6 @@ applications that come with the platform
 
     <privapp-permissions package="com.android.launcher3">
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
-        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.location.fused">
@@ -463,6 +462,8 @@ applications that come with the platform
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
         <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
+        <!-- Permission required for CTS test - CallLogTest -->
+        <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">

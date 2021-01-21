@@ -2498,44 +2498,56 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    void noteServiceStartRunning(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStartRunning(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.startRunningLocked(uptime);
                 }
             });
         }
     }
 
-    void noteServiceStopRunning(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStopRunning(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.stopRunningLocked(uptime);
                 }
             });
         }
     }
 
-    void noteServiceStartLaunch(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStartLaunch(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.startLaunchedLocked(uptime);
                 }
             });
         }
     }
 
-    void noteServiceStopLaunch(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStopLaunch(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.stopLaunchedLocked(uptime);
                 }
             });

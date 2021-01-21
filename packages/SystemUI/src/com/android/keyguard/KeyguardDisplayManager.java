@@ -255,6 +255,7 @@ public class KeyguardDisplayManager {
         private static final int VIDEO_SAFE_REGION = 80; // Percentage of display width & height
         private static final int MOVE_CLOCK_TIMEOUT = 10000; // 10s
         private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
+        private final Context mContext;
         private KeyguardClockSwitchController mKeyguardClockSwitchController;
         private View mClock;
         private int mUsableWidth;
@@ -278,6 +279,7 @@ public class KeyguardDisplayManager {
                     WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
             mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
             setCancelable(false);
+            mContext = context;
         }
 
         @Override
@@ -301,7 +303,7 @@ public class KeyguardDisplayManager {
             mMarginLeft = (100 - VIDEO_SAFE_REGION) * bounds.width() / 200;
             mMarginTop = (100 - VIDEO_SAFE_REGION) * bounds.height() / 200;
 
-            setContentView(LayoutInflater.from(getContext())
+            setContentView(LayoutInflater.from(mContext)
                     .inflate(R.layout.keyguard_presentation, null));
 
             // Logic to make the lock screen fullscreen

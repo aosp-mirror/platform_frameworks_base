@@ -78,6 +78,7 @@ public class AmbientState {
     private ExpandableNotificationRow mTrackedHeadsUpRow;
     private float mAppearFraction;
     private boolean mIsShadeOpening;
+    private float mSectionPadding;
 
     /** Tracks the state from AlertingNotificationManager#hasNotifications() */
     private boolean mHasAlertEntries;
@@ -103,6 +104,14 @@ public class AmbientState {
 
     public boolean isShadeOpening() {
         return mIsShadeOpening;
+    }
+
+    void setSectionPadding(float padding) {
+        mSectionPadding = padding;
+    }
+
+    float getSectionPadding() {
+        return mSectionPadding;
     }
 
     private static int getZDistanceBetweenElements(Context context) {

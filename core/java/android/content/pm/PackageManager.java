@@ -3532,6 +3532,17 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
 
+    /**
+     * Feature for {@link android.view.WindowManager.LayoutParams.backgroundBlurRedius} and
+     * {@link android.graphics.drawable.BackgroundBlurDrawable}: the device supports cross-layer
+     * blurring.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 

@@ -1508,9 +1508,13 @@ public interface WindowManager extends ViewManager {
          *  Use {@link #dimAmount} to control the amount of dim. */
         public static final int FLAG_DIM_BEHIND        = 0x00000002;
 
-        /** Window flag: blur everything behind this window.
-         * @deprecated Blurring is no longer supported. */
-        @Deprecated
+        /** Window flag: enable blurring behind this window.
+         * To set the amount of blur, use {@link #backgroundBlurRadius}
+         *
+         * @hide
+         */
+        @RequiresPermission(permission.USE_BACKGROUND_BLUR)
+        @SystemApi
         public static final int FLAG_BLUR_BEHIND        = 0x00000004;
 
         /** Window flag: this window won't ever get key input focus, so the
@@ -3225,10 +3229,14 @@ public interface WindowManager extends ViewManager {
         public boolean preferMinimalPostProcessing = false;
 
         /**
-         * Indicates that this window wants to have blurred content behind it.
+         * When {@link FLAG_BLUR_BEHIND} is set, this is the amount of blur in pixels that this
+         * window will use to blur behind itself.
+         * The range is from 0, which means no blur, to 150.
          *
          * @hide
          */
+        @SystemApi
+        @RequiresPermission(permission.USE_BACKGROUND_BLUR)
         public int backgroundBlurRadius = 0;
 
         /**

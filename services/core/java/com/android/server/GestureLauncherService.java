@@ -394,7 +394,7 @@ public class GestureLauncherService extends SystemService {
     static boolean isEmergencyGestureSettingEnabled(Context context, int userId) {
         return isEmergencyGestureEnabled(context.getResources())
                 && Settings.Secure.getIntForUser(context.getContentResolver(),
-                Settings.Secure.EMERGENCY_GESTURE_ENABLED, 0, userId) != 0;
+                Settings.Secure.EMERGENCY_GESTURE_ENABLED, 1, userId) != 0;
     }
 
     /**

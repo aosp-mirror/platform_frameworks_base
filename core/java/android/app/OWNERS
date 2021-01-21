@@ -42,8 +42,10 @@ per-file *AppOp* = file:/core/java/android/permission/OWNERS
 # Multiuser
 per-file *User* = file:/MULTIUSER_OWNERS
 
-# Notification
+# Notification, DND, Status bar
 per-file *Notification* = file:/packages/SystemUI/OWNERS
+per-file *Zen* = file:/packages/SystemUI/OWNERS
+per-file *StatusBar* = file:/packages/SystemUI/OWNERS
 
 # ResourcesManager
 per-file ResourcesManager = rtmitchell@google.com, toddke@google.com

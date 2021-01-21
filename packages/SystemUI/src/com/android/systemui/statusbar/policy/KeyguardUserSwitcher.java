@@ -43,6 +43,8 @@ import com.android.systemui.qs.tiles.UserDetailItemView;
 import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 
+import java.util.ArrayList;
+
 /**
  * Manages the user switcher on the Keyguard.
  */
@@ -53,7 +55,7 @@ public class KeyguardUserSwitcher {
 
     private final Container mUserSwitcherContainer;
     private final KeyguardStatusBarView mStatusBarView;
-    private final Adapter mAdapter;
+    private final KeyguardUserAdapter mAdapter;
     private final AppearAnimationUtils mAppearAnimationUtils;
     private final KeyguardUserSwitcherScrim mBackground;
 
@@ -76,7 +78,7 @@ public class KeyguardUserSwitcher {
             mStatusBarView = statusBarView;
             mStatusBarView.setKeyguardUserSwitcher(this);
             panelViewController.setKeyguardUserSwitcher(this);
-            mAdapter = new Adapter(context, userSwitcherController, this);
+            mAdapter = new KeyguardUserAdapter(context, userSwitcherController, this);
             mAdapter.registerDataSetObserver(mDataSetObserver);
             mUserSwitcherController = userSwitcherController;
             mAppearAnimationUtils = new AppearAnimationUtils(context, 400, -0.5f, 0.5f,
@@ -259,14 +261,16 @@ public class KeyguardUserSwitcher {
         }
     }
 
-    public static class Adapter extends UserSwitcherController.BaseUserAdapter implements
-            View.OnClickListener {
+    static class KeyguardUserAdapter extends
+            UserSwitcherController.BaseUserAdapter implements View.OnClickListener {
 
         private Context mContext;
         private KeyguardUserSwitcher mKeyguardUserSwitcher;
         private View mCurrentUserView;
+        // List of users where the first entry is always the current user
+        private ArrayList<UserSwitcherController.UserRecord> mUsersOrdered = new ArrayList<>();
 
-        public Adapter(Context context, UserSwitcherController controller,
+        KeyguardUserAdapter(Context context, UserSwitcherController controller,
                 KeyguardUserSwitcher kgu) {
             super(controller);
             mContext = context;
@@ -274,15 +278,53 @@ public class KeyguardUserSwitcher {
         }
 
         @Override
+        public void notifyDataSetChanged() {
+            refreshUserOrder();
+            super.notifyDataSetChanged();
+        }
+
+        void refreshUserOrder() {
+            ArrayList<UserSwitcherController.UserRecord> users = super.getUsers();
+            mUsersOrdered = new ArrayList<>(users.size());
+            for (int i = 0; i < users.size(); i++) {
+                UserSwitcherController.UserRecord record = users.get(i);
+                if (record.isCurrent) {
+                    mUsersOrdered.add(0, record);
+                } else {
+                    mUsersOrdered.add(record);
+                }
+            }
+        }
+
+        @Override
+        protected ArrayList<UserSwitcherController.UserRecord> getUsers() {
+            return mUsersOrdered;
+        }
+
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             UserSwitcherController.UserRecord item = getItem(position);
-            if (!(convertView instanceof UserDetailItemView)
+            return createUserDetailItemView(convertView, parent, item);
+        }
+
+        KeyguardUserDetailItemView convertOrInflate(View convertView, ViewGroup parent) {
+            if (!(convertView instanceof KeyguardUserDetailItemView)
                     || !(convertView.getTag() instanceof UserSwitcherController.UserRecord)) {
                 convertView = LayoutInflater.from(mContext).inflate(
                         R.layout.keyguard_user_switcher_item, parent, false);
-                convertView.setOnClickListener(this);
             }
-            UserDetailItemView v = (UserDetailItemView) convertView;
+            return (KeyguardUserDetailItemView) convertView;
+        }
+
+        UserDetailItemView createUserDetailItemView(View convertView, ViewGroup parent,
+                UserSwitcherController.UserRecord item) {
+            KeyguardUserDetailItemView v = convertOrInflate(convertView, parent);
+            if (!item.isCurrent || item.isGuest) {
+                v.setOnClickListener(this);
+            } else {
+                v.setOnClickListener(null);
+                v.setClickable(false);
+            }
 
             String name = getName(mContext, item);
             if (item.picture == null) {

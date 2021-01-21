@@ -998,6 +998,7 @@ public class NotificationManagerService extends SystemService {
                         REASON_CLICK, nv.rank, nv.count, null);
                 nv.recycle();
                 reportUserInteraction(r);
+                mAssistants.notifyAssistantNotificationClicked(r);
             }
         }
 
@@ -3085,8 +3086,23 @@ public class NotificationManagerService extends SystemService {
 
             synchronized (mToastQueue) {
                 int uid = Binder.getCallingUid();
+                int userId = UserHandle.getUserId(uid);
                 if (enable) {
                     mToastRateLimitingDisabledUids.remove(uid);
+                    try {
+                        String[] packages = mPackageManager.getPackagesForUid(uid);
+                        if (packages == null) {
+                            Slog.e(TAG, "setToastRateLimitingEnabled method haven't found any "
+                                    + "packages for the  given uid: " + uid + ", toast rate "
+                                    + "limiter not reset for that uid.");
+                            return;
+                        }
+                        for (String pkg : packages) {
+                            mToastRateLimiter.clear(userId, pkg);
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Failed to reset toast rate limiter for given uid", e);
+                    }
                 } else {
                     mToastRateLimitingDisabledUids.add(uid);
                 }
@@ -9455,6 +9471,22 @@ public class NotificationManagerService extends SystemService {
                                     sbnHolder, snoozeCriterionId);
                         } catch (RemoteException ex) {
                             Slog.e(TAG, "unable to notify assistant (snoozed): " + assistant, ex);
+                        }
+                    });
+        }
+
+        @GuardedBy("mNotificationLock")
+        void notifyAssistantNotificationClicked(final NotificationRecord r) {
+            final String key = r.getSbn().getKey();
+            notifyAssistantLocked(
+                    r.getSbn(),
+                    r.getNotificationType(),
+                    true /* sameUserOnly */,
+                    (assistant, sbnHolder) -> {
+                        try {
+                            assistant.onNotificationClicked(key);
+                        } catch (RemoteException ex) {
+                            Slog.e(TAG, "unable to notify assistant (clicked): " + assistant, ex);
                         }
                     });
         }

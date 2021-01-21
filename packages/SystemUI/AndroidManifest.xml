@@ -116,6 +116,7 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.MONITOR_INPUT" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
+    <uses-permission android:name="android.permission.USE_BACKGROUND_BLUR" />
 
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
@@ -352,14 +353,6 @@
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
-
-        <activity
-            android:name="com.android.wm.shell.bubbles.BubbleOverflowActivity"
-            android:theme="@style/BubbleOverflow"
-            android:excludeFromRecents="true"
-            android:documentLaunchMode="always"
-            android:resizeableActivity="true">
-        </activity>
 
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"

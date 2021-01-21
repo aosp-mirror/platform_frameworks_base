@@ -57,6 +57,10 @@ public abstract class PanelBar extends FrameLayout {
         }
     }
 
+    protected boolean isShadeOpening() {
+        return mState == STATE_OPENING;
+    }
+
     @Override
     protected Parcelable onSaveInstanceState() {
         Bundle bundle = new Bundle();

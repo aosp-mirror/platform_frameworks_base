@@ -20,6 +20,7 @@ import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
+import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_WINDOW_ORGANIZER;
@@ -278,6 +279,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                     }
                     case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
                         effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId);
+                        break;
+                    case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
+                        effects |= setAdjacentRootsHierarchyOp(hop);
                         break;
                     case HIERARCHY_OP_TYPE_REORDER:
                     case HIERARCHY_OP_TYPE_REPARENT:
@@ -594,6 +598,17 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         if (transition != null) transition.collect(newParent);
 
+        return TRANSACT_EFFECTS_LIFECYCLE;
+    }
+
+    private int setAdjacentRootsHierarchyOp(WindowContainerTransaction.HierarchyOp hop) {
+        final Task root1 = WindowContainer.fromBinder(hop.getContainer()).asTask();
+        final Task root2 = WindowContainer.fromBinder(hop.getAdjacentRoot()).asTask();
+        if (!root1.mCreatedByOrganizer || !root2.mCreatedByOrganizer) {
+            throw new IllegalArgumentException("setAdjacentRootsHierarchyOp: Not created by"
+                    + " organizer root1=" + root1 + " root2=" + root2);
+        }
+        root1.setAdjacentTask(root2);
         return TRANSACT_EFFECTS_LIFECYCLE;
     }
 

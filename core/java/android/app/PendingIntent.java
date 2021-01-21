@@ -40,7 +40,6 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.AndroidException;
 import android.util.ArraySet;
-import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.os.IResultReceiver;
@@ -108,7 +107,6 @@ import java.lang.annotation.RetentionPolicy;
  * FLAG_ONE_SHOT, <b>both</b> FLAG_ONE_SHOT and FLAG_NO_CREATE need to be supplied.
  */
 public final class PendingIntent implements Parcelable {
-    private static final String TAG = "PendingIntent";
     private final IIntentSender mTarget;
     private IResultReceiver mCancelReceiver;
     private IBinder mWhitelistToken;
@@ -354,7 +352,7 @@ public final class PendingIntent implements Parcelable {
 
         if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
                 && !flagImmutableSet && !flagMutableSet) {
-            Log.e(TAG, msg);
+            throw new IllegalArgumentException(msg);
         }
     }
 

@@ -52,7 +52,6 @@ import android.telephony.CallAttributes;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
-import android.telephony.CellLocation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
 import android.telephony.CellSignalStrengthGsm;
@@ -585,8 +584,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public TelephonyRegistry(Context context, ConfigurationProvider configurationProvider) {
-        CellLocation  location = CellLocation.getEmpty();
-
         mContext = context;
         mConfigurationProvider = configurationProvider;
         mBatteryStats = BatteryStatsService.getService();

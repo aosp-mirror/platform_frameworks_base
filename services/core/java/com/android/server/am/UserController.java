@@ -45,8 +45,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.Dialog;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
@@ -518,7 +520,9 @@ class UserController implements Handler.Callback {
                         | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
                         new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                        AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                        AppOpsManager.OP_NONE,
+                        getTemporaryAppWhitelistBroadcastOptions().toBundle(), true,
+                        false, MY_PID, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), userId);
             }
         }
@@ -764,7 +768,9 @@ class UserController implements Handler.Callback {
                         }
                     }, 0, null, null,
                     new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                    AppOpsManager.OP_NONE,
+                    getTemporaryAppWhitelistBroadcastOptions().toBundle(), true,
+                    false, MY_PID, SYSTEM_UID,
                     callingUid, callingPid, userId);
         });
     }
@@ -2802,6 +2808,16 @@ class UserController implements Handler.Callback {
             }
             clearSessionId(userId);
         }
+    }
+
+    private BroadcastOptions getTemporaryAppWhitelistBroadcastOptions() {
+        final long duration = LocalServices.getService(ActivityManagerInternal.class)
+                .getBootTimeTempAllowListDuration();
+        final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+        bOptions.setTemporaryAppWhitelistDuration(
+                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                duration);
+        return bOptions;
     }
 
     /**
