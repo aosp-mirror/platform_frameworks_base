@@ -31,6 +31,7 @@ import static android.app.admin.DevicePolicyManager.PASSWORD_COMPLEXITY_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.PasswordMetrics.computeForPassword;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
+import static android.net.InetAddresses.parseNumericAddress;
 
 import static com.android.internal.widget.LockPatternUtils.CREDENTIAL_TYPE_NONE;
 import static com.android.internal.widget.LockPatternUtils.EscrowTokenStateChangeCallback;
@@ -65,6 +66,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.hamcrest.MockitoHamcrest.argThat;
 import static org.testng.Assert.assertThrows;
+
+import static java.util.Collections.emptyList;
 
 import android.Manifest.permission;
 import android.app.Activity;
@@ -126,6 +129,8 @@ import org.mockito.internal.util.collections.Sets;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -2357,6 +2362,49 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                         + "input methods must allow all input methods or only system input methods "
                         + "when called on the parent instance of an organization-owned device",
                 () -> parentDpm.setPermittedInputMethods(admin1, inputMethods));
+    }
+
+    @Test
+    public void testGetProxyParameters() throws Exception {
+        assertThat(dpm.getProxyParameters(inetAddrProxy("192.0.2.1", 1234), emptyList()))
+                .isEqualTo(new Pair<>("192.0.2.1:1234", ""));
+        assertThat(dpm.getProxyParameters(inetAddrProxy("192.0.2.1", 1234),
+                listOf("one.example.com  ", "  two.example.com ")))
+                .isEqualTo(new Pair<>("192.0.2.1:1234", "one.example.com,two.example.com"));
+        assertThat(dpm.getProxyParameters(hostnameProxy("proxy.example.com", 1234), emptyList()))
+                .isEqualTo(new Pair<>("proxy.example.com:1234", ""));
+        assertThat(dpm.getProxyParameters(hostnameProxy("proxy.example.com", 1234),
+                listOf("excluded.example.com")))
+                .isEqualTo(new Pair<>("proxy.example.com:1234", "excluded.example.com"));
+
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                inetAddrProxy("192.0.2.1", 0), emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                hostnameProxy("", 1234), emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                hostnameProxy("", 0), emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                hostnameProxy("invalid! hostname", 1234), emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                hostnameProxy("proxy.example.com", 1234), listOf("invalid exclusion")));
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                hostnameProxy("proxy.example.com", -1), emptyList()));
+        assertThrows(IllegalArgumentException.class, () -> dpm.getProxyParameters(
+                hostnameProxy("proxy.example.com", 0xFFFF + 1), emptyList()));
+    }
+
+    private static Proxy inetAddrProxy(String inetAddr, int port) {
+        return new Proxy(
+                Proxy.Type.HTTP, new InetSocketAddress(parseNumericAddress(inetAddr), port));
+    }
+
+    private static Proxy hostnameProxy(String hostname, int port) {
+        return new Proxy(
+                Proxy.Type.HTTP, InetSocketAddress.createUnresolved(hostname, port));
+    }
+
+    private static List<String> listOf(String... args) {
+        return Arrays.asList(args);
     }
 
     @Test
@@ -5494,7 +5542,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Attempt to set to empty list (which means no listener is allowlisted)
         mContext.binder.callingUid = adminUid;
         assertThat(dpms.setPermittedCrossProfileNotificationListeners(
-                admin1, Collections.emptyList())).isFalse();
+                admin1, emptyList())).isFalse();
         assertThat(dpms.getPermittedCrossProfileNotificationListeners(admin1)).isNull();
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
@@ -5588,7 +5636,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Setting an empty allowlist - only system listeners allowed
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertThat(dpms.setPermittedCrossProfileNotificationListeners(
-                admin1, Collections.emptyList())).isTrue();
+                admin1, emptyList())).isTrue();
         assertThat(dpms.getPermittedCrossProfileNotificationListeners(admin1).size()).isEqualTo(0);
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
@@ -5653,7 +5701,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // all allowed in primary profile
         mContext.binder.callingUid = MANAGED_PROFILE_ADMIN_UID;
         assertThat(dpms.setPermittedCrossProfileNotificationListeners(
-                admin1, Collections.emptyList())).isTrue();
+                admin1, emptyList())).isTrue();
         assertThat(dpms.getPermittedCrossProfileNotificationListeners(admin1).size()).isEqualTo(0);
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;

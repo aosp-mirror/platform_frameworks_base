@@ -88,6 +88,7 @@ import android.telephony.data.ApnSetting;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.NetworkUtilsInternal;
@@ -5276,30 +5277,10 @@ public class DevicePolicyManager {
                     if (!proxySpec.type().equals(Proxy.Type.HTTP)) {
                         throw new IllegalArgumentException();
                     }
-                    InetSocketAddress sa = (InetSocketAddress)proxySpec.address();
-                    String hostName = sa.getHostName();
-                    int port = sa.getPort();
-                    StringBuilder hostBuilder = new StringBuilder();
-                    hostSpec = hostBuilder.append(hostName)
-                        .append(":").append(Integer.toString(port)).toString();
-                    if (exclusionList == null) {
-                        exclSpec = "";
-                    } else {
-                        StringBuilder listBuilder = new StringBuilder();
-                        boolean firstDomain = true;
-                        for (String exclDomain : exclusionList) {
-                            if (!firstDomain) {
-                                listBuilder = listBuilder.append(",");
-                            } else {
-                                firstDomain = false;
-                            }
-                            listBuilder = listBuilder.append(exclDomain.trim());
-                        }
-                        exclSpec = listBuilder.toString();
-                    }
-                    if (android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec)
-                            != android.net.Proxy.PROXY_VALID)
-                        throw new IllegalArgumentException();
+                    final Pair<String, String> proxyParams =
+                            getProxyParameters(proxySpec, exclusionList);
+                    hostSpec = proxyParams.first;
+                    exclSpec = proxyParams.second;
                 }
                 return mService.setGlobalProxy(admin, hostSpec, exclSpec);
             } catch (RemoteException e) {
@@ -5307,6 +5288,41 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Build HTTP proxy parameters for {@link IDevicePolicyManager#setGlobalProxy}.
+     * @throws IllegalArgumentException Invalid proxySpec
+     * @hide
+     */
+    @VisibleForTesting
+    public Pair<String, String> getProxyParameters(Proxy proxySpec, List<String> exclusionList) {
+        InetSocketAddress sa = (InetSocketAddress) proxySpec.address();
+        String hostName = sa.getHostName();
+        int port = sa.getPort();
+        StringBuilder hostBuilder = new StringBuilder();
+        final String hostSpec = hostBuilder.append(hostName)
+                .append(":").append(Integer.toString(port)).toString();
+        final String exclSpec;
+        if (exclusionList == null) {
+            exclSpec = "";
+        } else {
+            StringBuilder listBuilder = new StringBuilder();
+            boolean firstDomain = true;
+            for (String exclDomain : exclusionList) {
+                if (!firstDomain) {
+                    listBuilder = listBuilder.append(",");
+                } else {
+                    firstDomain = false;
+                }
+                listBuilder = listBuilder.append(exclDomain.trim());
+            }
+            exclSpec = listBuilder.toString();
+        }
+        if (android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec)
+                != android.net.Proxy.PROXY_VALID) throw new IllegalArgumentException();
+
+        return new Pair<>(hostSpec, exclSpec);
     }
 
     /**
