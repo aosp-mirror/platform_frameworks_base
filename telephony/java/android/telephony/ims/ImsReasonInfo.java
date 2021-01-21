@@ -890,6 +890,13 @@ public final class ImsReasonInfo implements Parcelable {
     public static final int CODE_WFC_SERVICE_NOT_AVAILABLE_IN_THIS_LOCATION = 1623;
 
     /**
+     * Call failed because of network congestion, resource is not available,
+     * or no circuit or channel available, etc.
+     * @hide
+     */
+    public static final int CODE_NETWORK_CONGESTION = 1624;
+
+    /**
      * The dialed RTT call should be retried without RTT
      * @hide
      */
@@ -1075,6 +1082,7 @@ public final class ImsReasonInfo implements Parcelable {
             CODE_REJECT_VT_AVPF_NOT_ALLOWED,
             CODE_REJECT_ONGOING_ENCRYPTED_CALL,
             CODE_REJECT_ONGOING_CS_CALL,
+            CODE_NETWORK_CONGESTION,
             CODE_RETRY_ON_IMS_WITHOUT_RTT,
             CODE_OEM_CAUSE_1,
             CODE_OEM_CAUSE_2,
