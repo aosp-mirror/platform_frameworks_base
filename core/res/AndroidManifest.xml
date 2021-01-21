@@ -4336,7 +4336,7 @@
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-        android:protectionLevel="signature|recents" />
+        android:protectionLevel="signature|privileged|recents" />
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- Allows an application to broadcast a notification that an application
