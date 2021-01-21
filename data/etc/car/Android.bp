@@ -122,13 +122,6 @@ prebuilt_etc {
 }
 
 prebuilt_etc {
-    name: "allowed_privapp_com.android.car.companiondevicesupport",
-    sub_dir: "permissions",
-    src: "com.android.car.companiondevicesupport.xml",
-    filename_from_src: true,
-}
-
-prebuilt_etc {
     name: "allowed_privapp_com.google.android.car.kitchensink",
     sub_dir: "permissions",
     src: "com.google.android.car.kitchensink.xml",
