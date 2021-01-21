@@ -13384,15 +13384,16 @@ package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
+    method public boolean isSystemApplicationOverlay();
+    method @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public void setSystemApplicationOverlay(boolean);
     method public final void setUserActivityTimeout(long);
     field @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public static final int FLAG_BLUR_BEHIND = 4; // 0x4
     field @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS) public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
     field @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW) public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 16; // 0x10
-    field @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public static final int SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public int backgroundBlurRadius;
   }
 
-  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
+  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
   }
 
 }
