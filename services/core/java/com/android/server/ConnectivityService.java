@@ -7912,10 +7912,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public void startNattKeepaliveWithFd(Network network, FileDescriptor fd, int resourceId,
+    public void startNattKeepaliveWithFd(Network network, ParcelFileDescriptor pfd, int resourceId,
             int intervalSeconds, ISocketKeepaliveCallback cb, String srcAddr,
             String dstAddr) {
         try {
+            final FileDescriptor fd = pfd.getFileDescriptor();
             mKeepaliveTracker.startNattKeepalive(
                     getNetworkAgentInfoForNetwork(network), fd, resourceId,
                     intervalSeconds, cb,
@@ -7923,24 +7924,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } finally {
             // FileDescriptors coming from AIDL calls must be manually closed to prevent leaks.
             // startNattKeepalive calls Os.dup(fd) before returning, so we can close immediately.
-            if (fd != null && Binder.getCallingPid() != Process.myPid()) {
-                IoUtils.closeQuietly(fd);
+            if (pfd != null && Binder.getCallingPid() != Process.myPid()) {
+                IoUtils.closeQuietly(pfd);
             }
         }
     }
 
     @Override
-    public void startTcpKeepalive(Network network, FileDescriptor fd, int intervalSeconds,
+    public void startTcpKeepalive(Network network, ParcelFileDescriptor pfd, int intervalSeconds,
             ISocketKeepaliveCallback cb) {
         try {
             enforceKeepalivePermission();
+            final FileDescriptor fd = pfd.getFileDescriptor();
             mKeepaliveTracker.startTcpKeepalive(
                     getNetworkAgentInfoForNetwork(network), fd, intervalSeconds, cb);
         } finally {
             // FileDescriptors coming from AIDL calls must be manually closed to prevent leaks.
             // startTcpKeepalive calls Os.dup(fd) before returning, so we can close immediately.
-            if (fd != null && Binder.getCallingPid() != Process.myPid()) {
-                IoUtils.closeQuietly(fd);
+            if (pfd != null && Binder.getCallingPid() != Process.myPid()) {
+                IoUtils.closeQuietly(pfd);
             }
         }
     }
