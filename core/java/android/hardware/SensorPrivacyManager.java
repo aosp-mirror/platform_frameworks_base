@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -44,6 +45,18 @@ import java.lang.annotation.RetentionPolicy;
 @TestApi
 @SystemService(Context.SENSOR_PRIVACY_SERVICE)
 public final class SensorPrivacyManager {
+    /**
+     * Unique Id of this manager to identify to the service
+     * @hide
+     */
+    private IBinder token = new Binder();
+
+    /**
+     * An extra containing a sensor
+     * @hide
+     */
+    public static final String EXTRA_SENSOR = SensorPrivacyManager.class.getName()
+            + ".extra.sensor";
 
     /** Microphone
      * @hide */
@@ -295,6 +308,24 @@ public final class SensorPrivacyManager {
         try {
             mService.setIndividualSensorPrivacyForProfileGroup(mContext.getUserId(), sensor,
                     enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Don't show dialogs to turn off sensor privacy for this package.
+     *
+     * @param packageName Package name not to show dialogs for
+     * @param suppress Whether to suppress or re-enable.
+     *
+     * @hide
+     */
+    public void suppressIndividualSensorPrivacyReminders(@NonNull String packageName,
+            boolean suppress) {
+        try {
+            mService.suppressIndividualSensorPrivacyReminders(mContext.getUserId(), packageName,
+                    token, suppress);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
