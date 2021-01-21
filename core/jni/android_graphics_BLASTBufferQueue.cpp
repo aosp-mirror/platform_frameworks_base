@@ -68,7 +68,7 @@ private:
 };
 
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfaceControl,
-                          jlong width, jlong height, jint format, jboolean enableTripleBuffering) {
+                          jlong width, jlong height, jboolean enableTripleBuffering) {
     String8 str8;
     if (jName) {
         const jchar* str16 = env->GetStringCritical(jName, nullptr);
@@ -81,7 +81,7 @@ static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName, jlong surfac
     std::string name = str8.string();
     sp<BLASTBufferQueue> queue =
             new BLASTBufferQueue(name, reinterpret_cast<SurfaceControl*>(surfaceControl), width,
-                                 height, format, enableTripleBuffering);
+                                 height, enableTripleBuffering);
     queue->incStrong((void*)nativeCreate);
     return reinterpret_cast<jlong>(queue.get());
 }
@@ -104,10 +104,9 @@ static void nativeSetNextTransaction(JNIEnv* env, jclass clazz, jlong ptr, jlong
     queue->setNextTransaction(transaction);
 }
 
-static void nativeUpdate(JNIEnv* env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width,
-                         jlong height, jint format) {
+static void nativeUpdate(JNIEnv*env, jclass clazz, jlong ptr, jlong surfaceControl, jlong width, jlong height) {
     sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
-    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height, format);
+    queue->update(reinterpret_cast<SurfaceControl*>(surfaceControl), width, height);
 }
 
 static void nativeFlushShadowQueue(JNIEnv* env, jclass clazz, jlong ptr) {
@@ -140,11 +139,11 @@ static void nativeSetTransactionCompleteCallback(JNIEnv* env, jclass clazz, jlon
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
-        {"nativeCreate", "(Ljava/lang/String;JJJIZ)J", (void*)nativeCreate},
+        {"nativeCreate", "(Ljava/lang/String;JJJZ)J", (void*)nativeCreate},
         {"nativeGetSurface", "(JZ)Landroid/view/Surface;", (void*)nativeGetSurface},
         {"nativeDestroy", "(J)V", (void*)nativeDestroy},
         {"nativeSetNextTransaction", "(JJ)V", (void*)nativeSetNextTransaction},
-        {"nativeUpdate", "(JJJJI)V", (void*)nativeUpdate},
+        {"nativeUpdate", "(JJJJ)V", (void*)nativeUpdate},
         {"nativeFlushShadowQueue", "(J)V", (void*)nativeFlushShadowQueue},
         {"nativeMergeWithNextTransaction", "(JJJ)V", (void*)nativeMergeWithNextTransaction},
         {"nativeSetTransactionCompleteCallback",
