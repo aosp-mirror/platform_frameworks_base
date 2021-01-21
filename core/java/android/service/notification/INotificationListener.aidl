@@ -46,7 +46,7 @@ oneway interface INotificationListener
     void onNotificationChannelGroupModification(String pkgName, in UserHandle user, in NotificationChannelGroup group, int modificationType);
 
     // assistants only
-    void onNotificationEnqueuedWithChannel(in IStatusBarNotificationHolder notificationHolder, in NotificationChannel channel);
+    void onNotificationEnqueuedWithChannel(in IStatusBarNotificationHolder notificationHolder, in NotificationChannel channel, in NotificationRankingUpdate update);
     void onNotificationSnoozedUntilContext(in IStatusBarNotificationHolder notificationHolder, String snoozeCriterionId);
     void onNotificationsSeen(in List<String> keys);
     void onPanelRevealed(int items);
