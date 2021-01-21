@@ -3109,6 +3109,12 @@
     <permission android:name="android.permission.RECOVERY"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to do certain operations needed for
+         resume on reboot feature.
+         @hide -->
+    <permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to read system update info.
          @hide -->
     <permission android:name="android.permission.READ_SYSTEM_UPDATE_INFO"

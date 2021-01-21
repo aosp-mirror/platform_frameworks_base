@@ -45,6 +45,7 @@ package android {
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
+    field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
     field public static final String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
@@ -9907,6 +9908,18 @@ package android.service.resolver {
     method public void setTimeSpentScore(float);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.resolver.ResolverTarget> CREATOR;
+  }
+
+}
+
+package android.service.resumeonreboot {
+
+  public abstract class ResumeOnRebootService extends android.app.Service {
+    ctor public ResumeOnRebootService();
+    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @NonNull public abstract byte[] onUnwrap(@NonNull byte[]) throws java.io.IOException;
+    method @NonNull public abstract byte[] onWrap(@NonNull byte[], long) throws java.io.IOException;
+    field public static final String SERVICE_INTERFACE = "android.service.resumeonreboot.ResumeOnRebootService";
   }
 
 }
