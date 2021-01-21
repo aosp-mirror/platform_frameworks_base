@@ -160,18 +160,25 @@ public final class AppSearchImpl {
      */
     @NonNull
     public static AppSearchImpl create(
-            @NonNull File icingDir, @NonNull Context context, @NonNull String globalQuerierPackage)
+            @NonNull File icingDir,
+            @NonNull Context context,
+            int userId,
+            @NonNull String globalQuerierPackage)
             throws AppSearchException {
         Preconditions.checkNotNull(icingDir);
         Preconditions.checkNotNull(context);
         Preconditions.checkNotNull(globalQuerierPackage);
-        AppSearchImpl appSearchImpl = new AppSearchImpl(icingDir, context, globalQuerierPackage);
+        AppSearchImpl appSearchImpl =
+                new AppSearchImpl(icingDir, context, userId, globalQuerierPackage);
         appSearchImpl.initializeVisibilityStore();
         return appSearchImpl;
     }
 
     private AppSearchImpl(
-            @NonNull File icingDir, @NonNull Context context, @NonNull String globalQuerierPackage)
+            @NonNull File icingDir,
+            @NonNull Context context,
+            int userId,
+            @NonNull String globalQuerierPackage)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
 
@@ -184,7 +191,8 @@ public final class AppSearchImpl {
                             .build();
             mIcingSearchEngineLocked = new IcingSearchEngine(options);
 
-            mVisibilityStoreLocked = new VisibilityStore(this, context, globalQuerierPackage);
+            mVisibilityStoreLocked =
+                    new VisibilityStore(this, context, globalQuerierPackage);
 
             InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
             SchemaProto schemaProto;
@@ -1350,6 +1358,7 @@ public final class AppSearchImpl {
     }
 
     @GuardedBy("mReadWriteLock")
+    @NonNull
     @VisibleForTesting
     VisibilityStore getVisibilityStoreLocked() {
         return mVisibilityStoreLocked;
