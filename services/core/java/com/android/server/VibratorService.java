@@ -129,8 +129,10 @@ public class VibratorService extends IVibratorService.Stub {
                 Slog.d(TAG, "Vibration thread finished with status " + status);
             }
             synchronized (mLock) {
-                mThread = null;
-                reportFinishVibrationLocked(status);
+                if (mCurrentVibration != null && mCurrentVibration.id == vibrationId) {
+                    mThread = null;
+                    reportFinishVibrationLocked(status);
+                }
             }
         }
     }
