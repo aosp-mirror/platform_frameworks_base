@@ -75,6 +75,7 @@ import com.android.wm.shell.sizecompatui.SizeCompatUI;
 import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
+import com.android.wm.shell.transition.RemoteTransitions;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -384,6 +385,12 @@ public abstract class WMShellBaseModule {
     @Provides
     static FullscreenTaskListener provideFullscreenTaskListener(SyncTransactionQueue syncQueue) {
         return new FullscreenTaskListener(syncQueue);
+    }
+
+    @WMSingleton
+    @Provides
+    static RemoteTransitions provideRemoteTransitions(Transitions transitions) {
+        return Transitions.asRemoteTransitions(transitions);
     }
 
     @WMSingleton

@@ -67,6 +67,7 @@ public class Transitions {
     private final ShellExecutor mAnimExecutor;
     private final TransitionPlayerImpl mPlayerImpl;
     private final RemoteTransitionHandler mRemoteTransitionHandler;
+    private final RemoteTransitionImpl mImpl = new RemoteTransitionImpl();
 
     /** List of possible handlers. Ordered by specificity (eg. tapped back to front). */
     private final ArrayList<TransitionHandler> mHandlers = new ArrayList<>();
@@ -77,6 +78,10 @@ public class Transitions {
 
     /** Keeps track of currently tracked transitions and all the animations associated with each */
     private final ArrayMap<IBinder, ActiveTransition> mActiveTransitions = new ArrayMap<>();
+
+    public static RemoteTransitions asRemoteTransitions(Transitions transitions) {
+        return transitions.mImpl;
+    }
 
     public Transitions(@NonNull WindowOrganizer organizer, @NonNull TransactionPool pool,
             @NonNull ShellExecutor mainExecutor, @NonNull ShellExecutor animExecutor) {
@@ -101,8 +106,20 @@ public class Transitions {
 
     /** Create an empty/non-registering transitions object for system-ui tests. */
     @VisibleForTesting
-    public static Transitions createEmptyForTesting() {
-        return new Transitions();
+    public static RemoteTransitions createEmptyForTesting() {
+        return new RemoteTransitions() {
+            @Override
+            public void registerRemote(@androidx.annotation.NonNull TransitionFilter filter,
+                    @androidx.annotation.NonNull IRemoteTransition remoteTransition) {
+                // Do nothing
+            }
+
+            @Override
+            public void unregisterRemote(
+                    @androidx.annotation.NonNull IRemoteTransition remoteTransition) {
+                // Do nothing
+            }
+        };
     }
 
     /** Register this transition handler with Core */
@@ -134,16 +151,14 @@ public class Transitions {
     }
 
     /** Register a remote transition to be used when `filter` matches an incoming transition */
-    @ExternalThread
     public void registerRemote(@NonNull TransitionFilter filter,
             @NonNull IRemoteTransition remoteTransition) {
-        mMainExecutor.execute(() -> mRemoteTransitionHandler.addFiltered(filter, remoteTransition));
+        mRemoteTransitionHandler.addFiltered(filter, remoteTransition);
     }
 
     /** Unregisters a remote transition and all associated filters */
-    @ExternalThread
     public void unregisterRemote(@NonNull IRemoteTransition remoteTransition) {
-        mMainExecutor.execute(() -> mRemoteTransitionHandler.removeFiltered(remoteTransition));
+        mRemoteTransitionHandler.removeFiltered(remoteTransition);
     }
 
     /** @return true if the transition was triggered by opening something vs closing something */
@@ -359,6 +374,24 @@ public class Transitions {
         public void requestStartTransition(IBinder iBinder,
                 TransitionRequestInfo request) throws RemoteException {
             mMainExecutor.execute(() -> Transitions.this.requestStartTransition(iBinder, request));
+        }
+    }
+
+    @ExternalThread
+    private class RemoteTransitionImpl implements RemoteTransitions {
+        @Override
+        public void registerRemote(@NonNull TransitionFilter filter,
+                @NonNull IRemoteTransition remoteTransition) {
+            mMainExecutor.execute(() -> {
+                Transitions.this.registerRemote(filter, remoteTransition);
+            });
+        }
+
+        @Override
+        public void unregisterRemote(@NonNull IRemoteTransition remoteTransition) {
+            mMainExecutor.execute(() -> {
+                Transitions.this.unregisterRemote(remoteTransition);
+            });
         }
     }
 }

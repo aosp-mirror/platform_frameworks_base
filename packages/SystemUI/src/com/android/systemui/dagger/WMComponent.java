@@ -27,7 +27,7 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.transition.RemoteTransitions;
 
 import java.util.Optional;
 
@@ -55,16 +55,12 @@ public interface WMComponent {
         getShellInit().init();
     }
 
-    // Gets the Shell init instance
     @WMSingleton
     ShellInit getShellInit();
 
-    // Gets the Shell dump instance
     @WMSingleton
     Optional<ShellCommandHandler> getShellCommandHandler();
 
-    // TODO(b/162923491): We currently pass the instances through to SysUI, but that may change
-    //                    depending on the threading mechanism we go with
     @WMSingleton
     Optional<OneHanded> getOneHanded();
 
@@ -89,7 +85,6 @@ public interface WMComponent {
     @WMSingleton
     Optional<TaskViewFactory> getTaskViewFactory();
 
-    /** Gets transitions */
     @WMSingleton
-    Transitions getTransitions();
+    RemoteTransitions getTransitions();
 }

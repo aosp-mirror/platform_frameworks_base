@@ -47,6 +47,7 @@ import android.window.TaskSnapshot;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.startingsurface.TaskSnapshotWindow;
 
 import org.junit.Test;
@@ -83,7 +84,7 @@ public class TaskSnapshotWindowTest {
                 createTaskDescription(Color.WHITE, Color.RED, Color.BLUE),
                 0 /* appearance */, windowFlags /* windowFlags */, 0 /* privateWindowFlags */,
                 taskBounds, ORIENTATION_PORTRAIT, ACTIVITY_TYPE_STANDARD, new InsetsState(),
-                null /* clearWindow */);
+                null /* clearWindow */, new TestShellExecutor());
     }
 
     private TaskSnapshot createTaskSnapshot(int width, int height, Point taskSize,
