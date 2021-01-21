@@ -41475,6 +41475,7 @@ package android.telephony {
 
   public final class SignalStrengthUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.os.IBinder getLiveToken();
     method @NonNull public java.util.Collection<android.telephony.SignalThresholdInfo> getSignalThresholdInfos();
     method public boolean isReportingRequestedWhileIdle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -41855,6 +41856,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method public boolean canChangeDtmfToneLength();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void clearSignalStrengthUpdateRequest(@NonNull android.telephony.SignalStrengthUpdateRequest);
     method @Nullable public android.telephony.TelephonyManager createForPhoneAccountHandle(android.telecom.PhoneAccountHandle);
     method public android.telephony.TelephonyManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean doesSwitchMultiSimConfigTriggerReboot();
@@ -41968,6 +41970,7 @@ package android.telephony {
     method public boolean setOperatorBrandOverride(String);
     method public boolean setPreferredNetworkTypeToGlobal();
     method public void setPreferredOpportunisticDataSubscription(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSignalStrengthUpdateRequest(@NonNull android.telephony.SignalStrengthUpdateRequest);
     method public void setVisualVoicemailSmsFilterSettings(android.telephony.VisualVoicemailSmsFilterSettings);
     method public boolean setVoiceMailNumber(String, String);
     method @Deprecated public void setVoicemailRingtoneUri(android.telecom.PhoneAccountHandle, android.net.Uri);
