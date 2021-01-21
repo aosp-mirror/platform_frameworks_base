@@ -647,11 +647,6 @@ class WindowToken extends WindowContainer<WindowState> {
         state.mIsTransforming = false;
         if (applyDisplayRotation != null) {
             applyDisplayRotation.run();
-        } else {
-            // The display will not rotate to the rotation of this container, let's cancel them.
-            for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
-                state.mAssociatedTokens.get(i).cancelFixedRotationTransform();
-            }
         }
         // The state is cleared at the end, because it is used to indicate that other windows can
         // use seamless rotation when applying rotation to display.
@@ -659,6 +654,10 @@ class WindowToken extends WindowContainer<WindowState> {
             final WindowToken token = state.mAssociatedTokens.get(i);
             token.mFixedRotationTransformState = null;
             token.notifyFixedRotationTransform(false /* enabled */);
+            if (applyDisplayRotation == null) {
+                // Notify cancellation because the display does not change rotation.
+                token.cancelFixedRotationTransform();
+            }
         }
     }
 
@@ -707,7 +706,6 @@ class WindowToken extends WindowContainer<WindowState> {
             // The window may be detached or detaching.
             return;
         }
-        notifyFixedRotationTransform(false /* enabled */);
         final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());
         onCancelFixedRotationTransform(originalRotation);
