@@ -35,11 +35,12 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.MathUtils;
-import android.util.TypedValue;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import com.android.internal.graphics.ColorUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -157,16 +158,16 @@ public class UdfpsView extends View implements DozeReceiver,
 
     @Override
     public void dozeTimeTick() {
-        updateAodPosition();
+        updateAodPositionAndColor();
     }
 
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
         mInterpolatedDarkAmount = eased;
-        updateAodPosition();
+        updateAodPositionAndColor();
     }
 
-    private void updateAodPosition() {
+    private void updateAodPositionAndColor() {
         mBurnInOffsetX = MathUtils.lerp(0f,
                 getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
                         - mMaxBurnInOffsetX,
@@ -175,6 +176,7 @@ public class UdfpsView extends View implements DozeReceiver,
                 getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
                         - 0.5f * mMaxBurnInOffsetY,
                 mInterpolatedDarkAmount);
+        updateColor();
         postInvalidate();
     }
 
@@ -231,19 +233,21 @@ public class UdfpsView extends View implements DozeReceiver,
         Log.v(TAG, "onAttachedToWindow");
 
         // Retrieve the colors each time, since it depends on day/night mode
-        final TypedValue tv = new TypedValue();
-        mContext.getTheme().resolveAttribute(R.attr.wallpaperTextColor, tv, true);
-        final int authIconColor = mContext.getResources()
-                .getColor(tv.resourceId, mContext.getTheme());
-        final int enrollIconColor = mContext.getColor(R.color.udfps_enroll_icon);
-
-        if (mShowReason == IUdfpsOverlayController.REASON_AUTH) {
-            mFingerprintDrawable.setTint(authIconColor);
-        } else if (mShowReason == IUdfpsOverlayController.REASON_ENROLL) {
-            mFingerprintDrawable.setTint(enrollIconColor);
-        }
+        updateColor();
 
         getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
+    }
+
+    private void updateColor() {
+        if (mShowReason == IUdfpsOverlayController.REASON_AUTH) {
+            final int lockScreenIconColor = Utils.getColorAttrDefaultColor(mContext,
+                    com.android.systemui.R.attr.wallpaperTextColor);
+            final int ambientDisplayIconColor = Color.WHITE;
+            mFingerprintDrawable.setTint(ColorUtils.blendARGB(lockScreenIconColor,
+                    ambientDisplayIconColor, mInterpolatedDarkAmount));
+        } else if (mShowReason == IUdfpsOverlayController.REASON_ENROLL) {
+            mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
+        }
     }
 
     @Override
