@@ -3193,16 +3193,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Invoke ConnectivityReport generation for this Network test event.
             final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(mNetId);
             if (nai == null) return;
-            final Message m = mConnectivityDiagnosticsHandler.obtainMessage(
-                    ConnectivityDiagnosticsHandler.EVENT_NETWORK_TESTED,
-                    new ConnectivityReportEvent(p.timestampMillis, nai));
 
             final PersistableBundle extras = new PersistableBundle();
             extras.putInt(KEY_NETWORK_VALIDATION_RESULT, p.result);
             extras.putInt(KEY_NETWORK_PROBES_SUCCEEDED_BITMASK, p.probesSucceeded);
             extras.putInt(KEY_NETWORK_PROBES_ATTEMPTED_BITMASK, p.probesAttempted);
 
-            m.setData(new Bundle(extras));
+            ConnectivityReportEvent reportEvent =
+                    new ConnectivityReportEvent(p.timestampMillis, nai, extras);
+            final Message m = mConnectivityDiagnosticsHandler.obtainMessage(
+                    ConnectivityDiagnosticsHandler.EVENT_NETWORK_TESTED, reportEvent);
             mConnectivityDiagnosticsHandler.sendMessage(m);
         }
 
@@ -3289,8 +3289,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         final Message msg = mConnectivityDiagnosticsHandler.obtainMessage(
                 ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED, detectionMethod, netId,
-                p.timestampMillis);
-        msg.setData(new Bundle(extras));
+                new Pair<>(p.timestampMillis, extras));
 
         // NetworkStateTrackerHandler currently doesn't take any actions based on data
         // stalls so send the message directly to ConnectivityDiagnosticsHandler and avoid
@@ -8272,24 +8271,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     final ConnectivityReportEvent reportEvent =
                             (ConnectivityReportEvent) msg.obj;
 
-                    // This is safe because {@link
-                    // NetworkMonitorCallbacks#notifyNetworkTestedWithExtras} receives a
-                    // PersistableBundle and converts it to the Bundle in the incoming Message. If
-                    // {@link NetworkMonitorCallbacks#notifyNetworkTested} is called, msg.data will
-                    // not be set. This is also safe, as msg.getData() will return an empty Bundle.
-                    final PersistableBundle extras = new PersistableBundle(msg.getData());
-                    handleNetworkTestedWithExtras(reportEvent, extras);
+                    handleNetworkTestedWithExtras(reportEvent, reportEvent.mExtras);
                     break;
                 }
                 case EVENT_DATA_STALL_SUSPECTED: {
                     final NetworkAgentInfo nai = getNetworkAgentInfoForNetId(msg.arg2);
+                    final Pair<Long, PersistableBundle> arg =
+                            (Pair<Long, PersistableBundle>) msg.obj;
                     if (nai == null) break;
 
-                    // This is safe because NetworkMonitorCallbacks#notifyDataStallSuspected
-                    // receives a PersistableBundle and converts it to the Bundle in the incoming
-                    // Message.
-                    final PersistableBundle extras = new PersistableBundle(msg.getData());
-                    handleDataStallSuspected(nai, (long) msg.obj, msg.arg1, extras);
+                    handleDataStallSuspected(nai, arg.first, msg.arg1, arg.second);
                     break;
                 }
                 case EVENT_NETWORK_CONNECTIVITY_REPORTED: {
@@ -8353,10 +8344,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static class ConnectivityReportEvent {
         private final long mTimestampMillis;
         @NonNull private final NetworkAgentInfo mNai;
+        private final PersistableBundle mExtras;
 
-        private ConnectivityReportEvent(long timestampMillis, @NonNull NetworkAgentInfo nai) {
+        private ConnectivityReportEvent(long timestampMillis, @NonNull NetworkAgentInfo nai,
+                PersistableBundle p) {
             mTimestampMillis = timestampMillis;
             mNai = nai;
+            mExtras = p;
         }
     }
 
