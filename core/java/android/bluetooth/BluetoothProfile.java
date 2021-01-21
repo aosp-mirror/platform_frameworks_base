@@ -186,6 +186,7 @@ public interface BluetoothProfile {
      *
      * @hide
      */
+    @SystemApi
     int MAP_CLIENT = 18;
 
     /**
