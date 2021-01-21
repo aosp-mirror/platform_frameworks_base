@@ -277,6 +277,28 @@ static jstring FontFileUtil_getFontPostScriptName(JNIEnv* env, jobject, jobject 
     }
     return env->NewStringUTF(psName->c_str());
 }
+
+static jint FontFileUtil_isPostScriptType1Font(JNIEnv* env, jobject, jobject buffer, jint index) {
+    NPE_CHECK_RETURN_ZERO(env, buffer);
+    const void* fontPtr = env->GetDirectBufferAddress(buffer);
+    if (fontPtr == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", "Not a direct buffer");
+        return -1;
+    }
+    jlong fontSize = env->GetDirectBufferCapacity(buffer);
+    if (fontSize <= 0) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                          "buffer size must not be zero or negative");
+        return -1;
+    }
+    minikin::FontFileParser parser(fontPtr, fontSize, index);
+    std::optional<bool> isType1 = parser.isPostScriptType1Font();
+    if (!isType1.has_value()) {
+        return -1;  // not an OpenType font. HarfBuzz failed to parse it.
+    }
+    return isType1.value();
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontBuilderMethods[] = {
@@ -304,6 +326,8 @@ static const JNINativeMethod gFontFileUtilMethods[] = {
     { "nGetFontRevision", "(Ljava/nio/ByteBuffer;I)J", (void*) FontFileUtil_getFontRevision },
     { "nGetFontPostScriptName", "(Ljava/nio/ByteBuffer;I)Ljava/lang/String;",
         (void*) FontFileUtil_getFontPostScriptName },
+    { "nIsPostScriptType1Font", "(Ljava/nio/ByteBuffer;I)I",
+        (void*) FontFileUtil_isPostScriptType1Font },
 };
 
 int register_android_graphics_fonts_Font(JNIEnv* env) {
