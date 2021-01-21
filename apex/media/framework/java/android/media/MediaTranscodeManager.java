@@ -1023,10 +1023,13 @@ public final class MediaTranscodeManager {
                             "Source Width and height must be larger than 0");
                 }
 
-                float frameRate = mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE);
-                if (frameRate <= 0) {
-                    throw new IllegalArgumentException(
-                            "frameRate must be larger than 0");
+                float frameRate = 30.0f; // default to 30fps.
+                if (mSrcVideoFormatHint.containsKey(MediaFormat.KEY_FRAME_RATE)) {
+                    frameRate = mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE);
+                    if (frameRate <= 0) {
+                        throw new IllegalArgumentException(
+                                "frameRate must be larger than 0");
+                    }
                 }
 
                 int bitrate = getAVCBitrate(width, height, frameRate);
