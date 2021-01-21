@@ -44,8 +44,12 @@ import java.util.concurrent.Executor;
  * requirements and granting or revoking relevant privileges of roles. This class can only be
  * implemented by the permission controller app which is registered in {@code PackageManager}.
  *
+ * @deprecated The role controller service is an internal implementation detail inside role, and it
+ *             may be replaced by other mechanisms in the future and no longer be called.
+ *
  * @hide
  */
+@Deprecated
 @SystemApi
 public abstract class RoleControllerService extends Service {
 

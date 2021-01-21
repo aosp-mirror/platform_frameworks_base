@@ -521,8 +521,12 @@ public final class RoleManager {
      *
      * @param roleNames the names of all the available roles
      *
+     * @deprecated This is only usable by the role controller service, which is an internal
+     *             implementation detail inside role.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
     @SystemApi
     public void setRoleNamesFromController(@NonNull List<String> roleNames) {
@@ -551,8 +555,12 @@ public final class RoleManager {
      * @see #getRoleHolders(String)
      * @see #removeRoleHolderFromController(String, String)
      *
+     * @deprecated This is only usable by the role controller service, which is an internal
+     *             implementation detail inside role.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
     @SystemApi
     public boolean addRoleHolderFromController(@NonNull String roleName,
@@ -583,8 +591,12 @@ public final class RoleManager {
      * @see #getRoleHolders(String)
      * @see #addRoleHolderFromController(String, String)
      *
+     * @deprecated This is only usable by the role controller service, which is an internal
+     *             implementation detail inside role.
+     *
      * @hide
      */
+    @Deprecated
     @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
     @SystemApi
     public boolean removeRoleHolderFromController(@NonNull String roleName,
@@ -604,8 +616,12 @@ public final class RoleManager {
      * @param packageName the package name
      * @return the list of role names
      *
+     * @deprecated This is only usable by the role controller service, which is an internal
+     *             implementation detail inside role.
+     *
      * @hide
      */
+    @Deprecated
     @NonNull
     @RequiresPermission(PERMISSION_MANAGE_ROLES_FROM_CONTROLLER)
     @SystemApi
