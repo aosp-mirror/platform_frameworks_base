@@ -56,16 +56,10 @@ import java.util.Set;
  * <h4>Capability of handling HDR(high dynamic range) video</h4>
  * There are four types of HDR video(Dolby-Vision, HDR10, HDR10+, HLG) supported by the platform,
  * application will only need to specify individual types they supported.
- *
- * <h4>Capability of handling Slow Motion video</h4>
- * There is no standard format for slow motion yet. If an application indicates support for slow
- * motion, it is application's responsibility to parse the slow motion videos using their own parser
- * or using support library.
  */
 // TODO(huang): Correct openTypedAssetFileDescriptor with the new API after it is added.
 // TODO(hkuang): Add a link to seamless transcoding detail when it is published
 // TODO(hkuang): Add code sample on how to build a capability object with MediaCodecList
-// TODO(hkuang): Add the support library page on parsing slow motion video.
 public final class ApplicationMediaCapabilities implements Parcelable {
     private static final String TAG = "ApplicationMediaCapabilities";
 
@@ -260,6 +254,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
 
     /*
      * Whether handling of slow-motion video is supported
+     * @hide
      */
     public boolean isSlowMotionSupported() {
         return mIsSlowMotionSupported;
@@ -578,6 +573,7 @@ public final class ApplicationMediaCapabilities implements Parcelable {
          * If an application indicates support for slow-motion, it is application's responsibility
          * to parse the slow-motion videos using their own parser or using support library.
          * @see android.media.MediaFormat#KEY_SLOW_MOTION_MARKERS
+         * @hide
          */
         @NonNull
         public Builder setSlowMotionSupported(boolean slowMotionSupported) {
