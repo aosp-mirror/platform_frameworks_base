@@ -188,11 +188,11 @@ public class SplitLayout {
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
         switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
-                mLayoutChangeListener.onSnappedToDismiss(false /* snappedToEnd */);
+                mLayoutChangeListener.onSnappedToDismiss(false /* bottomOrRight */);
                 mSplitWindowManager.setResizingSplits(false);
                 break;
             case FLAG_DISMISS_END:
-                mLayoutChangeListener.onSnappedToDismiss(true /* snappedToEnd */);
+                mLayoutChangeListener.onSnappedToDismiss(true /* bottomOrRight */);
                 mSplitWindowManager.setResizingSplits(false);
                 break;
             default:
@@ -207,9 +207,11 @@ public class SplitLayout {
 
     /**
      * Returns {@link DividerSnapAlgorithm.SnapTarget} which matches passing position and velocity.
+     * If hardDismiss is set to {@code true}, it will be harder to reach dismiss target.
      */
-    public DividerSnapAlgorithm.SnapTarget findSnapTarget(int position, float velocity) {
-        return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity);
+    public DividerSnapAlgorithm.SnapTarget findSnapTarget(int position, float velocity,
+            boolean hardDismiss) {
+        return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
     private DividerSnapAlgorithm getSnapAlgorithm(Resources resources, Rect rootBounds) {

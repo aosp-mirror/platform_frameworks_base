@@ -135,7 +135,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
 
                 final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
                 final DividerSnapAlgorithm.SnapTarget snapTarget =
-                        mSplitLayout.findSnapTarget(position, velocity);
+                        mSplitLayout.findSnapTarget(position, velocity, false /* hardDismiss */);
                 mSplitLayout.snapToTarget(position, snapTarget);
                 break;
         }
