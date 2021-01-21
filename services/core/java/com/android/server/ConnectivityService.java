@@ -8662,6 +8662,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 long timestampNs, int uid) {
             mNetworkActivityTracker.setAndReportNetworkActive(isActive, timerLabel, timestampNs);
         }
+
+        @Override
+        public void onInterfaceLinkStateChanged(String iface, boolean up) {
+            for (NetworkAgentInfo nai: mNetworkAgentInfos) {
+                nai.clatd.interfaceLinkStateChanged(iface, up);
+            }
+        }
+
+        @Override
+        public void onInterfaceRemoved(String iface) {
+            for (NetworkAgentInfo nai: mNetworkAgentInfos) {
+                nai.clatd.interfaceRemoved(iface);
+            }
+        }
     }
 
     private final LegacyNetworkActivityTracker mNetworkActivityTracker;

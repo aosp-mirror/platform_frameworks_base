@@ -206,7 +206,6 @@ public class Nat464XlatTest {
         // Start clat.
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // Stacked interface up notification arrives.
@@ -225,7 +224,6 @@ public class Nat464XlatTest {
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
-        verify(mNms).unregisterObserver(eq(nat));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
@@ -346,7 +344,6 @@ public class Nat464XlatTest {
 
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // Stacked interface up notification arrives.
@@ -365,7 +362,6 @@ public class Nat464XlatTest {
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
         verify(mConnectivity, times(2)).handleUpdateLinkProperties(eq(mNai), c.capture());
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertTrue(c.getValue().getStackedLinks().isEmpty());
         assertFalse(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
@@ -386,7 +382,6 @@ public class Nat464XlatTest {
 
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // ConnectivityService immediately stops clat (Network disconnects, IPv4 addr appears, ...)
@@ -394,7 +389,6 @@ public class Nat464XlatTest {
         nat.stop();
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
@@ -430,7 +424,6 @@ public class Nat464XlatTest {
 
         nat.start();
 
-        verify(mNms).registerObserver(eq(nat));
         verify(mNetd).clatdStart(eq(BASE_IFACE), eq(NAT64_PREFIX));
 
         // ConnectivityService immediately stops clat (Network disconnects, IPv4 addr appears, ...)
@@ -438,7 +431,6 @@ public class Nat464XlatTest {
         nat.stop();
 
         verify(mNetd).clatdStop(eq(BASE_IFACE));
-        verify(mNms).unregisterObserver(eq(nat));
         verify(mDnsResolver).stopPrefix64Discovery(eq(NETID));
         assertIdle(nat);
 
