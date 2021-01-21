@@ -1095,12 +1095,21 @@ package android.media {
     method public void forceResourceLost();
   }
 
+  public final class MediaCodec implements android.media.metrics.PlaybackComponent {
+    method public String getPlaybackId();
+    method public void setPlaybackId(@NonNull String);
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
     method public int getMaxFrameRate();
     method public long getMaxMacroBlockRate();
     method public int getMaxMacroBlocks();
+  }
+
+  public final class MediaDrm implements java.lang.AutoCloseable {
+    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
   }
 
   public final class MediaRoute2Info implements android.os.Parcelable {
@@ -1161,6 +1170,15 @@ package android.media.audiopolicy {
 
   public static class AudioPolicy.Builder {
     method @NonNull public android.media.audiopolicy.AudioPolicy.Builder setIsTestFocusPolicy(boolean);
+  }
+
+}
+
+package android.media.metrics {
+
+  public interface PlaybackComponent {
+    method @NonNull public String getPlaybackId();
+    method public void setPlaybackId(@NonNull String);
   }
 
 }
