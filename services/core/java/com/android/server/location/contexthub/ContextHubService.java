@@ -320,6 +320,10 @@ public class ContextHubService extends IContextHubService.Stub {
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
             }
+
+            @Override
+            public void onClientAuthorizationChanged(long nanoAppId, int authorization) {
+            }
         };
     }
 
