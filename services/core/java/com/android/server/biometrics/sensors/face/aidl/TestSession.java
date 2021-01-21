@@ -50,7 +50,7 @@ public class TestSession extends ISession.Stub {
     }
 
     @Override
-    public ICancellationSignal enroll(int cookie, HardwareAuthToken hat,
+    public ICancellationSignal enroll(int cookie, byte enrollmentType, HardwareAuthToken hat,
             NativeHandle previewSurface) {
         return null;
     }

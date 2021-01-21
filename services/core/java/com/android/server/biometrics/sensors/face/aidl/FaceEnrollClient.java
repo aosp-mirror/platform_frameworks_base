@@ -22,6 +22,7 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
+import android.hardware.biometrics.face.EnrollmentType;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
@@ -114,7 +115,8 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
 
         try {
             // TODO(b/172593978): Pass features.
-            mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
+            // TODO(b/174619156): Handle accessibility enrollment.
+            mCancellationSignal = getFreshDaemon().enroll(mSequentialId, EnrollmentType.DEFAULT,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
                     mPreviewSurface);
         } catch (RemoteException e) {
