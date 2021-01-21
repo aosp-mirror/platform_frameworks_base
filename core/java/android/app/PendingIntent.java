@@ -352,7 +352,13 @@ public final class PendingIntent implements Parcelable {
 
         if (Compatibility.isChangeEnabled(PENDING_INTENT_EXPLICIT_MUTABILITY_REQUIRED)
                 && !flagImmutableSet && !flagMutableSet) {
-            throw new IllegalArgumentException(msg);
+
+            //TODO(b/178065720) Remove check for chrome and enforce this requirement
+            if (packageName.equals("com.android.chrome")) {
+                Log.e(msg);
+            } else {
+                throw new IllegalArgumentException(msg);
+            }
         }
     }
 
