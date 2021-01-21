@@ -359,7 +359,7 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Novi korisnik"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WiFi"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Sigurno za rad u zrakoplovu"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Sigurno za korištenje u avionu"</string>
     <string name="quick_settings_networks_available" msgid="1875138606855420438">"Mreže su dostupne"</string>
     <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Mreže nisu dostupne"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nije povezano"</string>
