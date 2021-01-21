@@ -855,5 +855,13 @@ public class KeyguardIndicationController implements StateListener,
                 updateIndication(false);
             }
         }
+
+        @Override
+        public void onRequireUnlockForNfc() {
+            showTransientIndication(mContext.getString(R.string.require_unlock_for_nfc),
+                    false /* isError */, false /* hideOnScreenOff */);
+            hideTransientIndicationDelayed(HIDE_DELAY_MS);
+        }
+
     }
 }

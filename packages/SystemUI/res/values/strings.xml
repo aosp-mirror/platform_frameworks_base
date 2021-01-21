@@ -1044,6 +1044,9 @@
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
 
+    <!-- Message shown when notifying user to unlock in order to use NFC. [CHAR LIMIT=60] -->
+    <string name="require_unlock_for_nfc">Unlock to use NFC</string>
+
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the user's device belongs to their organization. [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device belongs to your organization</string>
 
