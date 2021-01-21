@@ -447,8 +447,25 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     volatile int mPowerKeyPressCounter;
     volatile boolean mEndCallKeyHandled;
     volatile boolean mCameraGestureTriggeredDuringGoingToSleep;
-    volatile boolean mGoingToSleep;
-    volatile boolean mRequestedOrGoingToSleep;
+
+    /**
+     * {@code true} if the device is entering a low-power state; {@code false otherwise}.
+     *
+     * <p>This differs from {@link #mRequestedOrSleepingDefaultDisplay} which tracks the power state
+     * of the {@link #mDefaultDisplay default display} versus the power state of the entire device.
+     */
+    volatile boolean mDeviceGoingToSleep;
+
+    /**
+     * {@code true} if the {@link #mDefaultDisplay default display} is entering or was requested to
+     * enter a low-power state; {@code false otherwise}.
+     *
+     * <p>This differs from {@link #mDeviceGoingToSleep} which tracks the power state of the entire
+     * device versus the power state of the {@link #mDefaultDisplay default display}.
+     */
+    // TODO(b/178103325): Track sleep/requested sleep for every display.
+    volatile boolean mRequestedOrSleepingDefaultDisplay;
+
     volatile boolean mRecentsVisible;
     volatile boolean mNavBarVirtualKeyHapticFeedbackEnabled = true;
     volatile boolean mPictureInPictureVisible;
@@ -916,7 +933,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         if (gestureService != null) {
             gesturedServiceIntercepted = gestureService.interceptPowerKeyDown(event, interactive,
                     mTmpBoolean);
-            if (mTmpBoolean.value && mRequestedOrGoingToSleep) {
+            if (mTmpBoolean.value && mRequestedOrSleepingDefaultDisplay) {
                 mCameraGestureTriggeredDuringGoingToSleep = true;
             }
         }
@@ -1063,13 +1080,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 case SHORT_PRESS_POWER_NOTHING:
                     break;
                 case SHORT_PRESS_POWER_GO_TO_SLEEP:
-                    goToSleepFromPowerButton(eventTime, 0);
+                    sleepDefaultDisplayFromPowerButton(eventTime, 0);
                     break;
                 case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP:
-                    goToSleepFromPowerButton(eventTime, PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
+                    sleepDefaultDisplayFromPowerButton(eventTime,
+                            PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                     break;
                 case SHORT_PRESS_POWER_REALLY_GO_TO_SLEEP_AND_GO_HOME:
-                    if (goToSleepFromPowerButton(eventTime,
+                    if (sleepDefaultDisplayFromPowerButton(eventTime,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE)) {
                         launchHomeFromHotKey(DEFAULT_DISPLAY);
                     }
@@ -1097,11 +1115,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     /**
-     * Sends the device to sleep as a result of a power button press.
+     * Sends the default display to sleep as a result of a power button press.
      *
-     * @return True if the was device was sent to sleep, false if sleep was suppressed.
+     * @return True if the device was sent to sleep, false if the device did not sleep.
      */
-    private boolean goToSleepFromPowerButton(long eventTime, int flags) {
+    private boolean sleepDefaultDisplayFromPowerButton(long eventTime, int flags) {
         // Before we actually go to sleep, we check the last wakeup reason.
         // If the device very recently woke up from a gesture (like user lifting their device)
         // then ignore the sleep instruction. This is because users have developed
@@ -1121,12 +1139,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
-        goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, flags);
+        sleepDefaultDisplay(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, flags);
         return true;
     }
 
-    private void goToSleep(long eventTime, int reason, int flags) {
-        mRequestedOrGoingToSleep = true;
+    private void sleepDefaultDisplay(long eventTime, int reason, int flags) {
+        mRequestedOrSleepingDefaultDisplay = true;
         mPowerManager.goToSleep(eventTime, reason, flags);
     }
 
@@ -1163,7 +1181,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             Settings.Global.THEATER_MODE_ON, 1);
 
                     if (mGoToSleepOnButtonPressTheaterMode && interactive) {
-                        goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
+                        sleepDefaultDisplay(eventTime, PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON,
+                                0);
                     }
                 }
                 break;
@@ -1271,7 +1290,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP:
             case SHORT_PRESS_SLEEP_GO_TO_SLEEP_AND_GO_HOME:
                 Slog.i(TAG, "sleepRelease() calling goToSleep(GO_TO_SLEEP_REASON_SLEEP_BUTTON)");
-                goToSleep(eventTime, PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
+                sleepDefaultDisplay(eventTime, PowerManager.GO_TO_SLEEP_REASON_SLEEP_BUTTON, 0);
                 break;
         }
     }
@@ -3686,7 +3705,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             }
                             if ((mEndcallBehavior
                                     & Settings.System.END_BUTTON_BEHAVIOR_SLEEP) != 0) {
-                                goToSleep(event.getEventTime(),
+                                sleepDefaultDisplay(event.getEventTime(),
                                         PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON, 0);
                                 isWakeKey = false;
                             }
@@ -3729,10 +3748,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Any activity on the power button stops the accessibility shortcut
                 result &= ~ACTION_PASS_TO_USER;
                 isWakeKey = false; // wake-up will be handled separately
+                final boolean isDefaultDisplayOn = Display.isOnState(mDefaultDisplay.getState());
+                final boolean interactiveAndOn = interactive && isDefaultDisplayOn;
                 if (down) {
-                    interceptPowerKeyDown(event, interactive);
+                    interceptPowerKeyDown(event, interactiveAndOn);
                 } else {
-                    interceptPowerKeyUp(event, interactive, canceled);
+                    interceptPowerKeyUp(event, interactiveAndOn, canceled);
                 }
                 break;
             }
@@ -4242,8 +4263,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                     pmSleepReason)) + ")");
         }
 
-        mGoingToSleep = true;
-        mRequestedOrGoingToSleep = true;
+        mDeviceGoingToSleep = true;
 
         if (mKeyguardDelegate != null) {
             mKeyguardDelegate.onStartedGoingToSleep(pmSleepReason);
@@ -4262,8 +4282,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         MetricsLogger.histogram(mContext, "screen_timeout", mLockScreenTimeout / 1000);
 
-        mGoingToSleep = false;
-        mRequestedOrGoingToSleep = false;
+        mDeviceGoingToSleep = false;
         mDefaultDisplayPolicy.setAwake(false);
 
         // We must get this work done here because the power manager will drop
@@ -4413,6 +4432,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         if (DEBUG_WAKEUP) Slog.i(TAG, "Screen turned off...");
 
+        mRequestedOrSleepingDefaultDisplay = false;
         updateScreenOffSleepToken(true);
         mDefaultDisplayPolicy.screenTurnedOff();
         synchronized (mLock) {
@@ -4479,6 +4499,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return;
         }
 
+        mRequestedOrSleepingDefaultDisplay = true;
         mWindowManagerFuncs.screenTurningOff(screenOffListener);
         synchronized (mLock) {
             if (mKeyguardDelegate != null) {
@@ -4564,7 +4585,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     @Override
     public boolean okToAnimate() {
-        return mDefaultDisplayPolicy.isAwake() && !mGoingToSleep;
+        return mDefaultDisplayPolicy.isAwake() && !mDeviceGoingToSleep;
     }
 
     /** {@inheritDoc} */
@@ -4940,7 +4961,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     mWindowManagerFuncs.lockDeviceNow();
                     break;
                 case LID_BEHAVIOR_SLEEP:
-                    goToSleep(SystemClock.uptimeMillis(),
+                    sleepDefaultDisplay(SystemClock.uptimeMillis(),
                             PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
                     break;
