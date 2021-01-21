@@ -39246,6 +39246,7 @@ package android.telephony {
     field public static final int BAND_25 = 25; // 0x19
     field public static final int BAND_257 = 257; // 0x101
     field public static final int BAND_258 = 258; // 0x102
+    field public static final int BAND_26 = 26; // 0x1a
     field public static final int BAND_260 = 260; // 0x104
     field public static final int BAND_261 = 261; // 0x105
     field public static final int BAND_28 = 28; // 0x1c
@@ -39257,10 +39258,12 @@ package android.telephony {
     field public static final int BAND_39 = 39; // 0x27
     field public static final int BAND_40 = 40; // 0x28
     field public static final int BAND_41 = 41; // 0x29
+    field public static final int BAND_46 = 46; // 0x2e
     field public static final int BAND_48 = 48; // 0x30
     field public static final int BAND_5 = 5; // 0x5
     field public static final int BAND_50 = 50; // 0x32
     field public static final int BAND_51 = 51; // 0x33
+    field public static final int BAND_53 = 53; // 0x35
     field public static final int BAND_65 = 65; // 0x41
     field public static final int BAND_66 = 66; // 0x42
     field public static final int BAND_7 = 7; // 0x7
@@ -39286,6 +39289,7 @@ package android.telephony {
     field public static final int BAND_93 = 93; // 0x5d
     field public static final int BAND_94 = 94; // 0x5e
     field public static final int BAND_95 = 95; // 0x5f
+    field public static final int BAND_96 = 96; // 0x60
   }
 
   public static final class AccessNetworkConstants.UtranBand {
@@ -40723,17 +40727,27 @@ package android.telephony {
 
   public final class PhysicalChannelConfig implements android.os.Parcelable {
     method public int describeContents();
-    method public int getCellBandwidthDownlink();
-    method public int getChannelNumber();
+    method @IntRange(from=1, to=261) public int getBand();
+    method @IntRange(from=1) public int getCellBandwidthDownlinkKhz();
+    method @IntRange(from=1) public int getCellBandwidthUplinkKhz();
+    method @Deprecated public int getChannelNumber();
     method public int getConnectionStatus();
+    method @IntRange(from=0) public int getDownlinkChannelNumber();
+    method @IntRange(from=0) public int getDownlinkFrequencyKhz();
     method public int getNetworkType();
     method @IntRange(from=0, to=1007) public int getPhysicalCellId();
+    method @IntRange(from=0) public int getUplinkChannelNumber();
+    method @IntRange(from=0) public int getUplinkFrequencyKhz();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BAND_UNKNOWN = 0; // 0x0
+    field public static final int CELL_BANDWIDTH_UNKNOWN = 0; // 0x0
     field public static final int CHANNEL_NUMBER_UNKNOWN = -1; // 0xffffffff
     field public static final int CONNECTION_PRIMARY_SERVING = 1; // 0x1
     field public static final int CONNECTION_SECONDARY_SERVING = 2; // 0x2
     field public static final int CONNECTION_UNKNOWN = -1; // 0xffffffff
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhysicalChannelConfig> CREATOR;
+    field public static final int FREQUENCY_UNKNOWN = -1; // 0xffffffff
+    field public static final int PHYSICAL_CELL_ID_MAXIMUM_VALUE = 1007; // 0x3ef
     field public static final int PHYSICAL_CELL_ID_UNKNOWN = -1; // 0xffffffff
   }
 
