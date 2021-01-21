@@ -19,6 +19,7 @@ package com.android.server.locksettings;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,13 +38,13 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
     private static final String TAG = "RebootEscrowProvider";
 
     // Timeout for service binding
-    private static final long SERVICE_TIME_OUT_IN_SECONDS = 10;
+    private static final long DEFAULT_SERVICE_TIMEOUT_IN_SECONDS = 10;
 
     /**
      * Use the default lifetime of 10 minutes. The lifetime covers the following activities:
      * Server wrap secret -> device reboot -> server unwrap blob.
      */
-    private static final long SERVER_BLOB_LIFETIME_IN_MILLIS = 600_1000;
+    private static final long DEFAULT_SERVER_BLOB_LIFETIME_IN_MILLIS = 600_1000;
 
     private final LockSettingsStorage mStorage;
 
@@ -66,6 +67,18 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
         @Nullable
         private ResumeOnRebootServiceConnection getServiceConnection() {
             return mServiceConnection;
+        }
+
+        long getServiceTimeoutInSeconds() {
+            return DeviceConfig.getLong(DeviceConfig.NAMESPACE_OTA,
+                    "server_based_service_timeout_in_seconds",
+                    DEFAULT_SERVICE_TIMEOUT_IN_SECONDS);
+        }
+
+        long getServerBlobLifetimeInMillis() {
+            return DeviceConfig.getLong(DeviceConfig.NAMESPACE_OTA,
+                    "server_based_server_blob_lifetime_in_millis",
+                    DEFAULT_SERVER_BLOB_LIFETIME_IN_MILLIS);
         }
     }
 
@@ -102,9 +115,9 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
 
         // Ask the server connection service to decrypt the inner layer, to get the reboot
         // escrow key (k_s).
-        serviceConnection.bindToService(SERVICE_TIME_OUT_IN_SECONDS);
+        serviceConnection.bindToService(mInjector.getServiceTimeoutInSeconds());
         byte[] escrowKeyBytes = serviceConnection.unwrap(decryptedBlob,
-                SERVICE_TIME_OUT_IN_SECONDS);
+                mInjector.getServiceTimeoutInSeconds());
         serviceConnection.unbindService();
 
         return escrowKeyBytes;
@@ -152,10 +165,10 @@ class RebootEscrowProviderServerBasedImpl implements RebootEscrowProviderInterfa
             return null;
         }
 
-        serviceConnection.bindToService(SERVICE_TIME_OUT_IN_SECONDS);
+        serviceConnection.bindToService(mInjector.getServiceTimeoutInSeconds());
         // Ask the server connection service to encrypt the reboot escrow key.
         byte[] serverEncryptedBlob = serviceConnection.wrapBlob(escrowKeyBytes,
-                SERVER_BLOB_LIFETIME_IN_MILLIS, SERVICE_TIME_OUT_IN_SECONDS);
+                mInjector.getServerBlobLifetimeInMillis(), mInjector.getServiceTimeoutInSeconds());
         serviceConnection.unbindService();
 
         if (serverEncryptedBlob == null) {
