@@ -52,10 +52,7 @@ genrule {
             dest: "current.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk", "win_sdk"],
             dir: "apistubs/android/public/api",
             dest: "android.txt",
         },
@@ -112,6 +109,11 @@ genrule {
             dir: "api",
             dest: "removed.txt",
         },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "removed.txt",
+        },
     ],
 }
 
@@ -139,10 +141,7 @@ genrule {
             dest: "system-current.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk", "win_sdk"],
             dir: "apistubs/android/system/api",
             dest: "android.txt",
         },
@@ -173,6 +172,11 @@ genrule {
             dir: "api",
             dest: "system-removed.txt",
         },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "removed.txt",
+        },
     ],
     visibility: ["//visibility:public"],
 }
@@ -201,10 +205,7 @@ genrule {
             dest: "module-lib-current.txt",
         },
         {
-            targets: [
-                "sdk",
-                "win_sdk",
-            ],
+            targets: ["sdk", "win_sdk"],
             dir: "apistubs/android/module-lib/api",
             dest: "android.txt",
         },
@@ -233,6 +234,11 @@ genrule {
             targets: ["droidcore"],
             dir: "api",
             dest: "module-lib-removed.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "removed.txt",
         },
     ],
 }

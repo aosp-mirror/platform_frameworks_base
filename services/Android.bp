@@ -147,11 +147,20 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/system-server/api",
-        dest: "android.txt",
-    },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "android.txt",
+            tag: ".api.txt"
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ]
 }
 
 java_library {
