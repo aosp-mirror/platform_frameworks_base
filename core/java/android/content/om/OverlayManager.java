@@ -254,6 +254,29 @@ public class OverlayManager {
     }
 
     /**
+     * Perform a series of requests related to overlay packages. This is an
+     * atomic operation: either all requests were performed successfully and
+     * the changes were propagated to the rest of the system, or at least one
+     * request could not be performed successfully and nothing is changed and
+     * nothing is propagated to the rest of the system.
+     *
+     * @see OverlayManagerTransaction
+     *
+     * @param transaction the series of overlay related requests to perform
+     * @throws Exception if not all the requests could be successfully and
+     *         atomically executed
+     *
+     * @hide
+     */
+    public void commit(@NonNull final OverlayManagerTransaction transaction) {
+        try {
+            mService.commit(transaction);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Starting on R, actor enforcement and app visibility changes introduce additional failure
      * cases, but the SecurityException thrown with these checks is unexpected for existing
      * consumers of the API.

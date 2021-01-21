@@ -24,10 +24,14 @@ import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_REASON;
+import static android.content.om.OverlayManagerTransaction.Request.TYPE_SET_DISABLED;
+import static android.content.om.OverlayManagerTransaction.Request.TYPE_SET_ENABLED;
 import static android.content.pm.PackageManager.SIGNATURE_MATCH;
 import static android.os.Trace.TRACE_TAG_RRO;
 import static android.os.Trace.traceBegin;
 import static android.os.Trace.traceEnd;
+
+import static com.android.server.om.OverlayManagerServiceImpl.OperationFailedException;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -40,6 +44,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
+import android.content.om.OverlayManagerTransaction;
 import android.content.om.OverlayableInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
@@ -49,6 +54,7 @@ import android.content.res.ApkAssets;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -65,7 +71,6 @@ import android.util.SparseArray;
 
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.FgThread;
-import com.android.server.IoThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
@@ -84,12 +89,15 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * Service to manage asset overlays.
@@ -238,7 +246,14 @@ public final class OverlayManagerService extends SystemService {
 
     private final OverlayActorEnforcer mActorEnforcer;
 
-    private final AtomicBoolean mPersistSettingsScheduled = new AtomicBoolean(false);
+    private final Consumer<PackageAndUser> mPropagateOverlayChange = (pair) -> {
+        persistSettings();
+        FgThread.getHandler().post(() -> {
+            List<String> affectedTargets = updatePackageManager(pair.packageName, pair.userId);
+            updateActivityManager(affectedTargets, pair.userId);
+            broadcastActionOverlayChanged(pair.packageName, pair.userId);
+        });
+    };
 
     public OverlayManagerService(@NonNull final Context context) {
         super(context);
@@ -251,9 +266,11 @@ public final class OverlayManagerService extends SystemService {
             IdmapManager im = new IdmapManager(IdmapDaemon.getInstance(), mPackageManager);
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
-                    OverlayConfig.getSystemInstance(), getDefaultOverlayPackages(),
-                    new OverlayChangeListener());
+                    OverlayConfig.getSystemInstance(), getDefaultOverlayPackages());
             mActorEnforcer = new OverlayActorEnforcer(mPackageManager);
+
+            HandlerThread packageReceiverThread = new HandlerThread(TAG);
+            packageReceiverThread.start();
 
             final IntentFilter packageFilter = new IntentFilter();
             packageFilter.addAction(ACTION_PACKAGE_ADDED);
@@ -261,7 +278,7 @@ public final class OverlayManagerService extends SystemService {
             packageFilter.addAction(ACTION_PACKAGE_REMOVED);
             packageFilter.addDataScheme("package");
             getContext().registerReceiverAsUser(new PackageReceiver(), UserHandle.ALL,
-                    packageFilter, null, null);
+                    packageFilter, null, packageReceiverThread.getThreadHandler());
 
             final IntentFilter userFilter = new IntentFilter();
             userFilter.addAction(ACTION_USER_ADDED);
@@ -294,11 +311,11 @@ public final class OverlayManagerService extends SystemService {
             for (int i = 0; i < userCount; i++) {
                 final UserInfo userInfo = users.get(i);
                 if (!userInfo.supportsSwitchTo() && userInfo.id != UserHandle.USER_SYSTEM) {
-                    // Initialize any users that can't be switched to, as there state would
+                    // Initialize any users that can't be switched to, as their state would
                     // never be setup in onSwitchUser(). We will switch to the system user right
                     // after this, and its state will be setup there.
                     final List<String> targets = mImpl.updateOverlaysForUser(users.get(i).id);
-                    updateOverlayPaths(users.get(i).id, targets);
+                    updatePackageManager(targets, users.get(i).id);
                 }
             }
         }
@@ -316,9 +333,10 @@ public final class OverlayManagerService extends SystemService {
             // any asset changes to the rest of the system
             synchronized (mLock) {
                 final List<String> targets = mImpl.updateOverlaysForUser(newUserId);
-                updateAssets(newUserId, targets);
+                final List<String> affectedTargets = updatePackageManager(targets, newUserId);
+                updateActivityManager(affectedTargets, newUserId);
             }
-            schedulePersistSettings();
+            persistSettings();
         } finally {
             traceEnd(TRACE_TAG_RRO);
         }
@@ -402,10 +420,17 @@ public final class OverlayManagerService extends SystemService {
                                 false);
                         if (pi != null && !pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
-                            if (pi.isOverlayPackage()) {
-                                mImpl.onOverlayPackageAdded(packageName, userId);
-                            } else {
-                                mImpl.onTargetPackageAdded(packageName, userId);
+
+                            try {
+                                if (pi.isOverlayPackage()) {
+                                    mImpl.onOverlayPackageAdded(packageName, userId)
+                                        .ifPresent(mPropagateOverlayChange);
+                                } else {
+                                    mImpl.onTargetPackageAdded(packageName, userId)
+                                        .ifPresent(mPropagateOverlayChange);
+                                }
+                            } catch (OperationFailedException e) {
+                                Slog.e(TAG, "onPackageAdded internal error", e);
                             }
                         }
                     }
@@ -425,10 +450,17 @@ public final class OverlayManagerService extends SystemService {
                                 false);
                         if (pi != null && pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
-                            if (pi.isOverlayPackage()) {
-                                mImpl.onOverlayPackageChanged(packageName, userId);
-                            }  else {
-                                mImpl.onTargetPackageChanged(packageName, userId);
+
+                            try {
+                                if (pi.isOverlayPackage()) {
+                                    mImpl.onOverlayPackageChanged(packageName, userId)
+                                        .ifPresent(mPropagateOverlayChange);
+                                }  else {
+                                    mImpl.onTargetPackageChanged(packageName, userId)
+                                        .ifPresent(mPropagateOverlayChange);
+                                }
+                            } catch (OperationFailedException e) {
+                                Slog.e(TAG, "onPackageChanged internal error", e);
                             }
                         }
                     }
@@ -447,7 +479,12 @@ public final class OverlayManagerService extends SystemService {
                         mPackageManager.forgetPackageInfo(packageName, userId);
                         final OverlayInfo oi = mImpl.getOverlayInfo(packageName, userId);
                         if (oi != null) {
-                            mImpl.onOverlayPackageReplacing(packageName, userId);
+                            try {
+                                mImpl.onOverlayPackageReplacing(packageName, userId)
+                                    .ifPresent(mPropagateOverlayChange);
+                            } catch (OperationFailedException e) {
+                                Slog.e(TAG, "onPackageReplacing internal error", e);
+                            }
                         }
                     }
                 }
@@ -466,10 +503,16 @@ public final class OverlayManagerService extends SystemService {
                                 false);
                         if (pi != null && !pi.applicationInfo.isInstantApp()) {
                             mPackageManager.cachePackageInfo(packageName, userId, pi);
-                            if (pi.isOverlayPackage()) {
-                                mImpl.onOverlayPackageReplaced(packageName, userId);
-                            } else {
-                                mImpl.onTargetPackageReplaced(packageName, userId);
+                            try {
+                                if (pi.isOverlayPackage()) {
+                                    mImpl.onOverlayPackageReplaced(packageName, userId)
+                                        .ifPresent(mPropagateOverlayChange);
+                                } else {
+                                    mImpl.onTargetPackageReplaced(packageName, userId)
+                                        .ifPresent(mPropagateOverlayChange);
+                                }
+                            } catch (OperationFailedException e) {
+                                Slog.e(TAG, "onPackageReplaced internal error", e);
                             }
                         }
                     }
@@ -487,10 +530,17 @@ public final class OverlayManagerService extends SystemService {
                     synchronized (mLock) {
                         mPackageManager.forgetPackageInfo(packageName, userId);
                         final OverlayInfo oi = mImpl.getOverlayInfo(packageName, userId);
-                        if (oi != null) {
-                            mImpl.onOverlayPackageRemoved(packageName, userId);
-                        } else {
-                            mImpl.onTargetPackageRemoved(packageName, userId);
+
+                        try {
+                            if (oi != null) {
+                                mImpl.onOverlayPackageRemoved(packageName, userId)
+                                    .ifPresent(mPropagateOverlayChange);
+                            } else {
+                                mImpl.onTargetPackageRemoved(packageName, userId)
+                                    .ifPresent(mPropagateOverlayChange);
+                            }
+                        } catch (OperationFailedException e) {
+                            Slog.e(TAG, "onPackageRemoved internal error", e);
                         }
                     }
                 }
@@ -513,7 +563,7 @@ public final class OverlayManagerService extends SystemService {
                             synchronized (mLock) {
                                 targets = mImpl.updateOverlaysForUser(userId);
                             }
-                            updateOverlayPaths(userId, targets);
+                            updatePackageManager(targets, userId);
                         } finally {
                             traceEnd(TRACE_TAG_RRO);
                         }
@@ -608,7 +658,13 @@ public final class OverlayManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
-                        return mImpl.setEnabled(packageName, enable, realUserId);
+                        try {
+                            mImpl.setEnabled(packageName, enable, realUserId)
+                                .ifPresent(mPropagateOverlayChange);
+                            return true;
+                        } catch (OperationFailedException e) {
+                            return false;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -633,8 +689,14 @@ public final class OverlayManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
-                        return mImpl.setEnabledExclusive(packageName, false /* withinCategory */,
-                                realUserId);
+                        try {
+                            mImpl.setEnabledExclusive(packageName,
+                                    false /* withinCategory */, realUserId)
+                                .ifPresent(mPropagateOverlayChange);
+                            return true;
+                        } catch (OperationFailedException e) {
+                            return false;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -660,8 +722,14 @@ public final class OverlayManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
-                        return mImpl.setEnabledExclusive(packageName, true /* withinCategory */,
-                                realUserId);
+                        try {
+                            mImpl.setEnabledExclusive(packageName,
+                                    true /* withinCategory */, realUserId)
+                                .ifPresent(mPropagateOverlayChange);
+                            return true;
+                        } catch (OperationFailedException e) {
+                            return false;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -687,7 +755,13 @@ public final class OverlayManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
-                        return mImpl.setPriority(packageName, parentPackageName, realUserId);
+                        try {
+                            mImpl.setPriority(packageName, parentPackageName, realUserId)
+                                .ifPresent(mPropagateOverlayChange);
+                            return true;
+                        } catch (OperationFailedException e) {
+                            return false;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -711,7 +785,13 @@ public final class OverlayManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
-                        return mImpl.setHighestPriority(packageName, realUserId);
+                        try {
+                            mImpl.setHighestPriority(packageName, realUserId)
+                                .ifPresent(mPropagateOverlayChange);
+                            return true;
+                        } catch (OperationFailedException e) {
+                            return false;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -735,7 +815,13 @@ public final class OverlayManagerService extends SystemService {
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     synchronized (mLock) {
-                        return mImpl.setLowestPriority(packageName, realUserId);
+                        try {
+                            mImpl.setLowestPriority(packageName, realUserId)
+                                .ifPresent(mPropagateOverlayChange);
+                            return true;
+                        } catch (OperationFailedException e) {
+                            return false;
+                        }
                     }
                 } finally {
                     Binder.restoreCallingIdentity(ident);
@@ -781,6 +867,129 @@ public final class OverlayManagerService extends SystemService {
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
+        }
+
+        @Override
+        public void commit(@NonNull final OverlayManagerTransaction transaction)
+                throws RemoteException {
+            try {
+                traceBegin(TRACE_TAG_RRO, "OMS#commit " + transaction);
+                try {
+                    executeAllRequests(transaction);
+                } catch (Exception e) {
+                    final long ident = Binder.clearCallingIdentity();
+                    try {
+                        restoreSettings();
+                    } finally {
+                        Binder.restoreCallingIdentity(ident);
+                    }
+                    Slog.d(TAG, "commit failed: " + e.getMessage(), e);
+                    throw new SecurityException("commit failed"
+                            + (DEBUG ? ": " + e.getMessage() : ""));
+                }
+            } finally {
+                traceEnd(TRACE_TAG_RRO);
+            }
+        }
+
+        private Optional<PackageAndUser> executeRequest(
+                @NonNull final OverlayManagerTransaction.Request request) throws Exception {
+            final int realUserId = handleIncomingUser(request.userId, request.typeToString());
+            enforceActor(request.packageName, request.typeToString(), realUserId);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                switch (request.type) {
+                    case TYPE_SET_ENABLED:
+                        Optional<PackageAndUser> opt1 =
+                                mImpl.setEnabled(request.packageName, true, request.userId);
+                        Optional<PackageAndUser> opt2 =
+                                mImpl.setHighestPriority(request.packageName, request.userId);
+                        // Both setEnabled and setHighestPriority affected the same
+                        // target package and user: if both return non-empty
+                        // Optionals, they are identical
+                        return opt1.isPresent() ? opt1 : opt2;
+                    case TYPE_SET_DISABLED:
+                        return mImpl.setEnabled(request.packageName, false, request.userId);
+                    default:
+                        throw new IllegalArgumentException("unsupported request: " + request);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        private void executeAllRequests(@NonNull final OverlayManagerTransaction transaction)
+                throws Exception {
+            if (DEBUG) {
+                Slog.d(TAG, "commit " + transaction);
+            }
+            if (transaction == null) {
+                throw new IllegalArgumentException("null transaction");
+            }
+
+            // map: userId -> set<package-name>: target packages of overlays in
+            // this transaction
+            SparseArray<Set<String>> transactionTargets = new SparseArray<>();
+
+            // map: userId -> set<package-name>: packages that need to reload
+            // their resources due to changes to the overlays in this
+            // transaction
+            SparseArray<List<String>> affectedPackagesToUpdate = new SparseArray<>();
+
+            synchronized (mLock) {
+
+                // execute the requests (as calling user)
+                for (final OverlayManagerTransaction.Request request : transaction) {
+                    executeRequest(request).ifPresent(target -> {
+                        Set<String> userTargets = transactionTargets.get(target.userId);
+                        if (userTargets == null) {
+                            userTargets = new ArraySet<String>();
+                            transactionTargets.put(target.userId, userTargets);
+                        }
+                        userTargets.add(target.packageName);
+                    });
+                }
+
+                // past the point of no return: the entire transaction has been
+                // processed successfully, we can no longer fail: continue as
+                // system_server
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    persistSettings();
+
+                    // inform the package manager about the new paths
+                    for (int index = 0; index < transactionTargets.size(); index++) {
+                        final int userId = transactionTargets.keyAt(index);
+                        final List<String> affectedTargets =
+                                updatePackageManager(transactionTargets.valueAt(index), userId);
+                        affectedPackagesToUpdate.put(userId, affectedTargets);
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            } // synchronized (mLock)
+
+            FgThread.getHandler().post(() -> {
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    // schedule apps to refresh
+                    for (int index = 0; index < affectedPackagesToUpdate.size(); index++) {
+                        final int userId = affectedPackagesToUpdate.keyAt(index);
+                        updateActivityManager(affectedPackagesToUpdate.valueAt(index), userId);
+                    }
+
+                    // broadcast the ACTION_OVERLAY_CHANGED intents
+                    for (int index = 0; index < transactionTargets.size(); index++) {
+                        final int userId = transactionTargets.keyAt(index);
+                        for (String pkg: transactionTargets.valueAt(index)) {
+                            broadcastActionOverlayChanged(pkg, userId);
+                        }
+                    }
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
+            });
         }
 
         @Override
@@ -904,162 +1113,7 @@ public final class OverlayManagerService extends SystemService {
         }
     };
 
-    private final class OverlayChangeListener
-            implements OverlayManagerServiceImpl.OverlayChangeListener {
-        @Override
-        public void onOverlaysChanged(@NonNull final String targetPackageName, final int userId) {
-            schedulePersistSettings();
-            FgThread.getHandler().post(() -> {
-                updateAssets(userId, targetPackageName);
-
-                final Intent intent = new Intent(ACTION_OVERLAY_CHANGED,
-                        Uri.fromParts("package", targetPackageName, null));
-                intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
-
-                if (DEBUG) {
-                    Slog.d(TAG, "send broadcast " + intent);
-                }
-
-                try {
-                    ActivityManager.getService().broadcastIntentWithFeature(null, null, intent,
-                            null, null, 0, null, null, null, android.app.AppOpsManager.OP_NONE,
-                            null, false, false, userId);
-                } catch (RemoteException e) {
-                    // Intentionally left empty.
-                }
-            });
-        }
-    }
-
-    /**
-     * Updates the target packages' set of enabled overlays in PackageManager.
-     */
-    private ArrayList<String> updateOverlayPaths(int userId, List<String> targetPackageNames) {
-        try {
-            traceBegin(TRACE_TAG_RRO, "OMS#updateOverlayPaths " + targetPackageNames);
-            if (DEBUG) {
-                Slog.d(TAG, "Updating overlay assets");
-            }
-            final PackageManagerInternal pm =
-                    LocalServices.getService(PackageManagerInternal.class);
-            final boolean updateFrameworkRes = targetPackageNames.contains("android");
-            if (updateFrameworkRes) {
-                targetPackageNames = pm.getTargetPackageNames(userId);
-            }
-
-            final Map<String, List<String>> pendingChanges =
-                    new ArrayMap<>(targetPackageNames.size());
-            synchronized (mLock) {
-                final List<String> frameworkOverlays =
-                        mImpl.getEnabledOverlayPackageNames("android", userId);
-                final int n = targetPackageNames.size();
-                for (int i = 0; i < n; i++) {
-                    final String targetPackageName = targetPackageNames.get(i);
-                    List<String> list = new ArrayList<>();
-                    if (!"android".equals(targetPackageName)) {
-                        list.addAll(frameworkOverlays);
-                    }
-                    list.addAll(mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
-                    pendingChanges.put(targetPackageName, list);
-                }
-            }
-
-            final HashSet<String> updatedPackages = new HashSet<>();
-            final int n = targetPackageNames.size();
-            for (int i = 0; i < n; i++) {
-                final String targetPackageName = targetPackageNames.get(i);
-                if (DEBUG) {
-                    Slog.d(TAG, "-> Updating overlay: target=" + targetPackageName + " overlays=["
-                            + TextUtils.join(",", pendingChanges.get(targetPackageName))
-                            + "] userId=" + userId);
-                }
-
-                if (!pm.setEnabledOverlayPackages(
-                        userId, targetPackageName, pendingChanges.get(targetPackageName),
-                        updatedPackages)) {
-                    Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
-                            targetPackageName, userId));
-                }
-            }
-            return new ArrayList<>(updatedPackages);
-        } finally {
-            traceEnd(TRACE_TAG_RRO);
-        }
-    }
-
-    private void updateAssets(final int userId, final String targetPackageName) {
-        updateAssets(userId, Collections.singletonList(targetPackageName));
-    }
-
-    private void updateAssets(final int userId, List<String> targetPackageNames) {
-        final IActivityManager am = ActivityManager.getService();
-        try {
-            final ArrayList<String> updatedPaths = updateOverlayPaths(userId, targetPackageNames);
-            am.scheduleApplicationInfoChanged(updatedPaths, userId);
-        } catch (RemoteException e) {
-            // Intentionally left empty.
-        }
-    }
-
-    private void schedulePersistSettings() {
-        if (mPersistSettingsScheduled.getAndSet(true)) {
-            return;
-        }
-        IoThread.getHandler().post(() -> {
-            mPersistSettingsScheduled.set(false);
-            if (DEBUG) {
-                Slog.d(TAG, "Writing overlay settings");
-            }
-            synchronized (mLock) {
-                FileOutputStream stream = null;
-                try {
-                    stream = mSettingsFile.startWrite();
-                    mSettings.persist(stream);
-                    mSettingsFile.finishWrite(stream);
-                } catch (IOException | XmlPullParserException e) {
-                    mSettingsFile.failWrite(stream);
-                    Slog.e(TAG, "failed to persist overlay state", e);
-                }
-            }
-        });
-    }
-
-    private void restoreSettings() {
-        try {
-            traceBegin(TRACE_TAG_RRO, "OMS#restoreSettings");
-            synchronized (mLock) {
-                if (!mSettingsFile.getBaseFile().exists()) {
-                    return;
-                }
-                try (FileInputStream stream = mSettingsFile.openRead()) {
-                    mSettings.restore(stream);
-
-                    // We might have data for dying users if the device was
-                    // restarted before we received USER_REMOVED. Remove data for
-                    // users that will not exist after the system is ready.
-
-                    final List<UserInfo> liveUsers = mUserManager.getUsers(true /*excludeDying*/);
-                    final int[] liveUserIds = new int[liveUsers.size()];
-                    for (int i = 0; i < liveUsers.size(); i++) {
-                        liveUserIds[i] = liveUsers.get(i).getUserHandle().getIdentifier();
-                    }
-                    Arrays.sort(liveUserIds);
-
-                    for (int userId : mSettings.getUsers()) {
-                        if (Arrays.binarySearch(liveUserIds, userId) < 0) {
-                            mSettings.removeUser(userId);
-                        }
-                    }
-                } catch (IOException | XmlPullParserException e) {
-                    Slog.e(TAG, "failed to restore overlay state", e);
-                }
-            }
-        } finally {
-            traceEnd(TRACE_TAG_RRO);
-        }
-    }
-
-    private static final class PackageManagerHelperImpl implements PackageManagerHelper  {
+    private static final class PackageManagerHelperImpl implements PackageManagerHelper {
 
         private final Context mContext;
         private final IPackageManager mPackageManager;
@@ -1267,6 +1321,146 @@ public final class OverlayManagerService extends SystemService {
                     pw.println(TAB2 + entry.getKey() + ": " + entry.getValue());
                 }
             }
+        }
+    }
+
+    // Helper methods to update other parts of the system or read/write
+    // settings: these methods should never call into each other!
+
+    private void broadcastActionOverlayChanged(@NonNull final String targetPackageName,
+            final int userId) {
+        final Intent intent = new Intent(ACTION_OVERLAY_CHANGED,
+                Uri.fromParts("package", targetPackageName, null));
+        intent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY_BEFORE_BOOT);
+        try {
+            ActivityManager.getService().broadcastIntent(null, intent, null, null, 0, null, null,
+                    null, android.app.AppOpsManager.OP_NONE, null, false, false, userId);
+        } catch (RemoteException e) {
+            // Intentionally left empty.
+        }
+    }
+
+    /**
+     * Tell the activity manager to tell a set of packages to reload their
+     * resources.
+     */
+    private void updateActivityManager(List<String> targetPackageNames, final int userId) {
+        final IActivityManager am = ActivityManager.getService();
+        try {
+            am.scheduleApplicationInfoChanged(targetPackageNames, userId);
+        } catch (RemoteException e) {
+            // Intentionally left empty.
+        }
+    }
+
+    private ArrayList<String> updatePackageManager(String targetPackageNames, final int userId) {
+        return updatePackageManager(Collections.singletonList(targetPackageNames), userId);
+    }
+
+    /**
+     * Updates the target packages' set of enabled overlays in PackageManager.
+     * @return the package names of affected targets (a superset of
+     *         targetPackageNames: the target themserlves and shared libraries)
+     */
+    private ArrayList<String> updatePackageManager(@NonNull Collection<String> targetPackageNames,
+            final int userId) {
+        try {
+            traceBegin(TRACE_TAG_RRO, "OMS#updatePackageManager " + targetPackageNames);
+            if (DEBUG) {
+                Slog.d(TAG, "Update package manager about changed overlays");
+            }
+            final PackageManagerInternal pm =
+                    LocalServices.getService(PackageManagerInternal.class);
+            final boolean updateFrameworkRes = targetPackageNames.contains("android");
+            if (updateFrameworkRes) {
+                targetPackageNames = pm.getTargetPackageNames(userId);
+            }
+
+            final Map<String, List<String>> pendingChanges =
+                    new ArrayMap<>(targetPackageNames.size());
+            synchronized (mLock) {
+                final List<String> frameworkOverlays =
+                        mImpl.getEnabledOverlayPackageNames("android", userId);
+                for (final String targetPackageName : targetPackageNames) {
+                    List<String> list = new ArrayList<>();
+                    if (!"android".equals(targetPackageName)) {
+                        list.addAll(frameworkOverlays);
+                    }
+                    list.addAll(mImpl.getEnabledOverlayPackageNames(targetPackageName, userId));
+                    pendingChanges.put(targetPackageName, list);
+                }
+            }
+
+            final HashSet<String> updatedPackages = new HashSet<>();
+            for (final String targetPackageName : targetPackageNames) {
+                if (DEBUG) {
+                    Slog.d(TAG, "-> Updating overlay: target=" + targetPackageName + " overlays=["
+                            + TextUtils.join(",", pendingChanges.get(targetPackageName))
+                            + "] userId=" + userId);
+                }
+
+                if (!pm.setEnabledOverlayPackages(
+                        userId, targetPackageName, pendingChanges.get(targetPackageName),
+                        updatedPackages)) {
+                    Slog.e(TAG, String.format("Failed to change enabled overlays for %s user %d",
+                            targetPackageName, userId));
+                }
+            }
+            return new ArrayList<>(updatedPackages);
+        } finally {
+            traceEnd(TRACE_TAG_RRO);
+        }
+    }
+
+    private void persistSettings() {
+        if (DEBUG) {
+            Slog.d(TAG, "Writing overlay settings");
+        }
+        synchronized (mLock) {
+            FileOutputStream stream = null;
+            try {
+                stream = mSettingsFile.startWrite();
+                mSettings.persist(stream);
+                mSettingsFile.finishWrite(stream);
+            } catch (IOException | XmlPullParserException e) {
+                mSettingsFile.failWrite(stream);
+                Slog.e(TAG, "failed to persist overlay state", e);
+            }
+        }
+    }
+
+    private void restoreSettings() {
+        try {
+            traceBegin(TRACE_TAG_RRO, "OMS#restoreSettings");
+            synchronized (mLock) {
+                if (!mSettingsFile.getBaseFile().exists()) {
+                    return;
+                }
+                try (FileInputStream stream = mSettingsFile.openRead()) {
+                    mSettings.restore(stream);
+
+                    // We might have data for dying users if the device was
+                    // restarted before we received USER_REMOVED. Remove data for
+                    // users that will not exist after the system is ready.
+
+                    final List<UserInfo> liveUsers = mUserManager.getUsers(true /*excludeDying*/);
+                    final int[] liveUserIds = new int[liveUsers.size()];
+                    for (int i = 0; i < liveUsers.size(); i++) {
+                        liveUserIds[i] = liveUsers.get(i).getUserHandle().getIdentifier();
+                    }
+                    Arrays.sort(liveUserIds);
+
+                    for (int userId : mSettings.getUsers()) {
+                        if (Arrays.binarySearch(liveUserIds, userId) < 0) {
+                            mSettings.removeUser(userId);
+                        }
+                    }
+                } catch (IOException | XmlPullParserException e) {
+                    Slog.e(TAG, "failed to restore overlay state", e);
+                }
+            }
+        } finally {
+            traceEnd(TRACE_TAG_RRO);
         }
     }
 }
