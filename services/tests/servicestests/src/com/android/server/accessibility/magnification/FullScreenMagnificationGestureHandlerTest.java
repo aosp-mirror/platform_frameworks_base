@@ -124,7 +124,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private Context mContext;
     FullScreenMagnificationController mFullScreenMagnificationController;
     @Mock
-    MagnificationGestureHandler.ScaleChangedListener mMockScaleChangedListener;
+    MagnificationGestureHandler.Callback mMockCallback;
     @Mock
     MagnificationRequestObserver mMagnificationRequestObserver;
     @Mock
@@ -179,7 +179,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
-                mContext, mFullScreenMagnificationController, mMockScaleChangedListener,
+                mContext, mFullScreenMagnificationController, mMockCallback,
                 detectTripleTap, detectShortcutTrigger,
                 mWindowMagnificationPromptController, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
@@ -451,6 +451,14 @@ public class FullScreenMagnificationGestureHandlerTest {
         verify(mWindowMagnificationPromptController).showNotificationIfNeeded();
     }
 
+    @Test
+    public void testZoomedWithTripleTap_callsOnTripleTapped() {
+        goFromStateIdleTo(STATE_ZOOMED_2TAPS);
+
+        verify(mMockCallback).onTripleTapped(DISPLAY_0,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
     private void assertActionsInOrder(List<MotionEvent> actualEvents,
             List<Integer> expectedActions) {
         assertTrue(actualEvents.size() == expectedActions.size());
@@ -554,8 +562,6 @@ public class FullScreenMagnificationGestureHandlerTest {
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(mMgh.mPanningScalingState.mScaling, state);
-                verify(mMockScaleChangedListener).onMagnificationScaleChanged(DISPLAY_0,
-                        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
             } break;
             default: throw new IllegalArgumentException("Illegal state: " + state);
         }
