@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-import android.hardware.power.stats.EnergyConsumerId;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.net.wifi.WifiManager;
 import android.os.BatteryStats;
@@ -750,7 +749,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
         for (int i = 0; i < size; i++) {
             final EnergyConsumerResult consumer = results[i];
-            final int subsystem;
+            final int subsystem = 0;
+            /*
             switch (consumer.energyConsumerId) {
                 case EnergyConsumerId.DISPLAY:
                     subsystem = MeasuredEnergyArray.SUBSYSTEM_DISPLAY;
@@ -758,6 +758,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                 default:
                     continue;
             }
+            */
             subsystems[i] = subsystem;
             energyUJ[i] = consumer.energyUWs;
         }

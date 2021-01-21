@@ -16,7 +16,7 @@
 
 package android.power;
 
-import android.hardware.power.stats.EnergyConsumerId;
+//import android.hardware.power.stats.EnergyConsumerId;
 import android.hardware.power.stats.EnergyConsumerResult;
 
 import java.util.concurrent.CompletableFuture;
@@ -38,5 +38,5 @@ public abstract class PowerStatsInternal {
      *         consumer results for all listed {@link EnergyConsumerId}.
      */
     public abstract CompletableFuture<EnergyConsumerResult[]> getEnergyConsumedAsync(
-            @EnergyConsumerId int[] energyConsumerIds);
+            /*@EnergyConsumerId*/ int[] energyConsumerIds);
 }

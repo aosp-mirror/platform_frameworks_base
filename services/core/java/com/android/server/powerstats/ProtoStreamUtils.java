@@ -16,11 +16,12 @@
 
 package com.android.server.powerstats;
 
-import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.Channel;
+import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
-import android.hardware.power.stats.PowerEntityInfo;
-import android.hardware.power.stats.StateInfo;
+import android.hardware.power.stats.PowerEntity;
+import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
 import android.hardware.power.stats.StateResidencyResult;
 import android.util.Slog;
@@ -46,55 +47,54 @@ import java.util.List;
 public class ProtoStreamUtils {
     private static final String TAG = ProtoStreamUtils.class.getSimpleName();
 
-    static class PowerEntityInfoUtils {
-        public static void packProtoMessage(PowerEntityInfo[] powerEntityInfo,
+    static class PowerEntityUtils {
+        public static void packProtoMessage(PowerEntity[] powerEntity,
                 ProtoOutputStream pos) {
-            if (powerEntityInfo == null) return;
+            if (powerEntity == null) return;
 
-            for (int i = 0; i < powerEntityInfo.length; i++) {
-                long peiToken = pos.start(PowerStatsServiceResidencyProto.POWER_ENTITY_INFO);
-                pos.write(PowerEntityInfoProto.POWER_ENTITY_ID, powerEntityInfo[i].powerEntityId);
-                pos.write(PowerEntityInfoProto.POWER_ENTITY_NAME,
-                        powerEntityInfo[i].powerEntityName);
-                if (powerEntityInfo[i].states != null) {
-                    final int statesLength = powerEntityInfo[i].states.length;
+            for (int i = 0; i < powerEntity.length; i++) {
+                long peToken = pos.start(PowerStatsServiceResidencyProto.POWER_ENTITY);
+                pos.write(PowerEntityProto.ID, powerEntity[i].id);
+                pos.write(PowerEntityProto.NAME, powerEntity[i].name);
+                if (powerEntity[i].states != null) {
+                    final int statesLength = powerEntity[i].states.length;
                     for (int j = 0; j < statesLength; j++) {
-                        final StateInfo state = powerEntityInfo[i].states[j];
-                        long siToken = pos.start(PowerEntityInfoProto.STATES);
-                        pos.write(StateInfoProto.STATE_ID, state.stateId);
-                        pos.write(StateInfoProto.STATE_NAME, state.stateName);
-                        pos.end(siToken);
+                        final State state = powerEntity[i].states[j];
+                        long stateToken = pos.start(PowerEntityProto.STATES);
+                        pos.write(StateProto.ID, state.id);
+                        pos.write(StateProto.NAME, state.name);
+                        pos.end(stateToken);
                     }
                 }
-                pos.end(peiToken);
+                pos.end(peToken);
             }
         }
 
-        public static void print(PowerEntityInfo[] powerEntityInfo) {
-            if (powerEntityInfo == null) return;
+        public static void print(PowerEntity[] powerEntity) {
+            if (powerEntity == null) return;
 
-            for (int i = 0; i < powerEntityInfo.length; i++) {
-                Slog.d(TAG, "PowerEntityId: " + powerEntityInfo[i].powerEntityId
-                        + ", PowerEntityName: " + powerEntityInfo[i].powerEntityName);
-                if (powerEntityInfo[i].states != null) {
-                    for (int j = 0; j < powerEntityInfo[i].states.length; j++) {
-                        Slog.d(TAG, "  StateId: " + powerEntityInfo[i].states[j].stateId
-                                + ", StateName: " + powerEntityInfo[i].states[j].stateName);
+            for (int i = 0; i < powerEntity.length; i++) {
+                Slog.d(TAG, "powerEntityId: " + powerEntity[i].id
+                        + ", powerEntityName: " + powerEntity[i].name);
+                if (powerEntity[i].states != null) {
+                    for (int j = 0; j < powerEntity[i].states.length; j++) {
+                        Slog.d(TAG, "  StateId: " + powerEntity[i].states[j].id
+                                + ", StateName: " + powerEntity[i].states[j].name);
                     }
                 }
             }
         }
 
-        public static void dumpsys(PowerEntityInfo[] powerEntityInfo, PrintWriter pw) {
-            if (powerEntityInfo == null) return;
+        public static void dumpsys(PowerEntity[] powerEntity, PrintWriter pw) {
+            if (powerEntity == null) return;
 
-            for (int i = 0; i < powerEntityInfo.length; i++) {
-                pw.println("PowerEntityId: " + powerEntityInfo[i].powerEntityId
-                        + ", PowerEntityName: " + powerEntityInfo[i].powerEntityName);
-                if (powerEntityInfo[i].states != null) {
-                    for (int j = 0; j < powerEntityInfo[i].states.length; j++) {
-                        pw.println("  StateId: " + powerEntityInfo[i].states[j].stateId
-                                + ", StateName: " + powerEntityInfo[i].states[j].stateName);
+            for (int i = 0; i < powerEntity.length; i++) {
+                pw.println("PowerEntityId: " + powerEntity[i].id
+                        + ", PowerEntityName: " + powerEntity[i].name);
+                if (powerEntity[i].states != null) {
+                    for (int j = 0; j < powerEntity[i].states.length; j++) {
+                        pw.println("  StateId: " + powerEntity[i].states[j].id
+                                + ", StateName: " + powerEntity[i].states[j].name);
                     }
                 }
             }
@@ -115,13 +115,13 @@ public class ProtoStreamUtils {
             for (int i = 0; i < stateResidencyResult.length; i++) {
                 final int stateLength = stateResidencyResult[i].stateResidencyData.length;
                 long srrToken = pos.start(PowerStatsServiceResidencyProto.STATE_RESIDENCY_RESULT);
-                pos.write(StateResidencyResultProto.POWER_ENTITY_ID,
-                        stateResidencyResult[i].powerEntityId);
+                pos.write(StateResidencyResultProto.ID,
+                        stateResidencyResult[i].id);
                 for (int j = 0; j < stateLength; j++) {
                     final StateResidency stateResidencyData =
                             stateResidencyResult[i].stateResidencyData[j];
                     long srdToken = pos.start(StateResidencyResultProto.STATE_RESIDENCY_DATA);
-                    pos.write(StateResidencyProto.STATE_ID, stateResidencyData.stateId);
+                    pos.write(StateResidencyProto.ID, stateResidencyData.id);
                     pos.write(StateResidencyProto.TOTAL_TIME_IN_STATE_MS,
                             stateResidencyData.totalTimeInStateMs);
                     pos.write(StateResidencyProto.TOTAL_STATE_ENTRY_COUNT,
@@ -170,9 +170,8 @@ public class ProtoStreamUtils {
             while (true) {
                 try {
                     switch (pis.nextField()) {
-                        case (int) StateResidencyResultProto.POWER_ENTITY_ID:
-                            stateResidencyResult.powerEntityId =
-                                pis.readInt(StateResidencyResultProto.POWER_ENTITY_ID);
+                        case (int) StateResidencyResultProto.ID:
+                            stateResidencyResult.id = pis.readInt(StateResidencyResultProto.ID);
                             break;
 
                         case (int) StateResidencyResultProto.STATE_RESIDENCY_DATA:
@@ -205,8 +204,8 @@ public class ProtoStreamUtils {
             while (true) {
                 try {
                     switch (pis.nextField()) {
-                        case (int) StateResidencyProto.STATE_ID:
-                            stateResidency.stateId = pis.readInt(StateResidencyProto.STATE_ID);
+                        case (int) StateResidencyProto.ID:
+                            stateResidency.id = pis.readInt(StateResidencyProto.ID);
                             break;
 
                         case (int) StateResidencyProto.TOTAL_TIME_IN_STATE_MS:
@@ -244,10 +243,10 @@ public class ProtoStreamUtils {
             if (stateResidencyResult == null) return;
 
             for (int i = 0; i < stateResidencyResult.length; i++) {
-                Slog.d(TAG, "PowerEntityId: " + stateResidencyResult[i].powerEntityId);
+                Slog.d(TAG, "PowerEntityId: " + stateResidencyResult[i].id);
                 for (int j = 0; j < stateResidencyResult[i].stateResidencyData.length; j++) {
                     Slog.d(TAG, "  StateId: "
-                            + stateResidencyResult[i].stateResidencyData[j].stateId
+                            + stateResidencyResult[i].stateResidencyData[j].id
                             + ", TotalTimeInStateMs: "
                             + stateResidencyResult[i].stateResidencyData[j].totalTimeInStateMs
                             + ", TotalStateEntryCount: "
@@ -259,33 +258,33 @@ public class ProtoStreamUtils {
         }
     }
 
-    static class ChannelInfoUtils {
-        public static void packProtoMessage(ChannelInfo[] channelInfo, ProtoOutputStream pos) {
-            if (channelInfo == null) return;
+    static class ChannelUtils {
+        public static void packProtoMessage(Channel[] channel, ProtoOutputStream pos) {
+            if (channel == null) return;
 
-            for (int i = 0; i < channelInfo.length; i++) {
-                long token = pos.start(PowerStatsServiceMeterProto.CHANNEL_INFO);
-                pos.write(ChannelInfoProto.CHANNEL_ID, channelInfo[i].channelId);
-                pos.write(ChannelInfoProto.CHANNEL_NAME, channelInfo[i].channelName);
+            for (int i = 0; i < channel.length; i++) {
+                long token = pos.start(PowerStatsServiceMeterProto.CHANNEL);
+                pos.write(ChannelProto.ID, channel[i].id);
+                pos.write(ChannelProto.NAME, channel[i].name);
                 pos.end(token);
             }
         }
 
-        public static void print(ChannelInfo[] channelInfo) {
-            if (channelInfo == null) return;
+        public static void print(Channel[] channel) {
+            if (channel == null) return;
 
-            for (int i = 0; i < channelInfo.length; i++) {
-                Slog.d(TAG, "ChannelId: " + channelInfo[i].channelId
-                        + ", ChannelName: " + channelInfo[i].channelName);
+            for (int i = 0; i < channel.length; i++) {
+                Slog.d(TAG, "ChannelId: " + channel[i].id
+                        + ", ChannelName: " + channel[i].name);
             }
         }
 
-        public static void dumpsys(ChannelInfo[] channelInfo, PrintWriter pw) {
-            if (channelInfo == null) return;
+        public static void dumpsys(Channel[] channel, PrintWriter pw) {
+            if (channel == null) return;
 
-            for (int i = 0; i < channelInfo.length; i++) {
-                pw.println("ChannelId: " + channelInfo[i].channelId
-                        + ", ChannelName: " + channelInfo[i].channelName);
+            for (int i = 0; i < channel.length; i++) {
+                pw.println("ChannelId: " + channel[i].id
+                        + ", ChannelName: " + channel[i].name);
             }
         }
     }
@@ -303,8 +302,9 @@ public class ProtoStreamUtils {
 
             for (int i = 0; i < energyMeasurement.length; i++) {
                 long token = pos.start(PowerStatsServiceMeterProto.ENERGY_MEASUREMENT);
-                pos.write(EnergyMeasurementProto.CHANNEL_ID, energyMeasurement[i].channelId);
+                pos.write(EnergyMeasurementProto.ID, energyMeasurement[i].id);
                 pos.write(EnergyMeasurementProto.TIMESTAMP_MS, energyMeasurement[i].timestampMs);
+                pos.write(EnergyMeasurementProto.DURATION_MS, energyMeasurement[i].durationMs);
                 pos.write(EnergyMeasurementProto.ENERGY_UWS, energyMeasurement[i].energyUWs);
                 pos.end(token);
             }
@@ -344,14 +344,19 @@ public class ProtoStreamUtils {
             while (true) {
                 try {
                     switch (pis.nextField()) {
-                        case (int) EnergyMeasurementProto.CHANNEL_ID:
-                            energyMeasurement.channelId =
-                                pis.readInt(EnergyMeasurementProto.CHANNEL_ID);
+                        case (int) EnergyMeasurementProto.ID:
+                            energyMeasurement.id =
+                                pis.readInt(EnergyMeasurementProto.ID);
                             break;
 
                         case (int) EnergyMeasurementProto.TIMESTAMP_MS:
                             energyMeasurement.timestampMs =
                                 pis.readLong(EnergyMeasurementProto.TIMESTAMP_MS);
+                            break;
+
+                        case (int) EnergyMeasurementProto.DURATION_MS:
+                            energyMeasurement.durationMs =
+                                pis.readLong(EnergyMeasurementProto.DURATION_MS);
                             break;
 
                         case (int) EnergyMeasurementProto.ENERGY_UWS:
@@ -378,37 +383,48 @@ public class ProtoStreamUtils {
             if (energyMeasurement == null) return;
 
             for (int i = 0; i < energyMeasurement.length; i++) {
-                Slog.d(TAG, "ChannelId: " + energyMeasurement[i].channelId
+                Slog.d(TAG, "ChannelId: " + energyMeasurement[i].id
                         + ", Timestamp (ms): " + energyMeasurement[i].timestampMs
+                        + ", Duration (ms): " + energyMeasurement[i].durationMs
                         + ", Energy (uWs): " + energyMeasurement[i].energyUWs);
             }
         }
     }
 
-    static class EnergyConsumerIdUtils {
-        public static void packProtoMessage(int[] energyConsumerId, ProtoOutputStream pos) {
-            if (energyConsumerId == null) return;
+    static class EnergyConsumerUtils {
+        public static void packProtoMessage(EnergyConsumer[] energyConsumer,
+                ProtoOutputStream pos) {
+            if (energyConsumer == null) return;
 
-            for (int i = 0; i < energyConsumerId.length; i++) {
-                long token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_ID);
-                pos.write(EnergyConsumerIdProto.ENERGY_CONSUMER_ID, energyConsumerId[i]);
+            for (int i = 0; i < energyConsumer.length; i++) {
+                long token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER);
+                pos.write(EnergyConsumerProto.ID, energyConsumer[i].id);
+                pos.write(EnergyConsumerProto.ORDINAL, energyConsumer[i].ordinal);
+                pos.write(EnergyConsumerProto.TYPE, energyConsumer[i].type);
+                pos.write(EnergyConsumerProto.NAME, energyConsumer[i].name);
                 pos.end(token);
             }
         }
 
-        public static void print(int[] energyConsumerId) {
-            if (energyConsumerId == null) return;
+        public static void print(EnergyConsumer[] energyConsumer) {
+            if (energyConsumer == null) return;
 
-            for (int i = 0; i < energyConsumerId.length; i++) {
-                Slog.d(TAG, "EnergyConsumerId: " + energyConsumerId[i]);
+            for (int i = 0; i < energyConsumer.length; i++) {
+                Slog.d(TAG, "EnergyConsumerId: " + energyConsumer[i].id
+                        + ", Ordinal: " + energyConsumer[i].ordinal
+                        + ", Type: " + energyConsumer[i].type
+                        + ", Name: " + energyConsumer[i].name);
             }
         }
 
-        public static void dumpsys(int[] energyConsumerId, PrintWriter pw) {
-            if (energyConsumerId == null) return;
+        public static void dumpsys(EnergyConsumer[] energyConsumer, PrintWriter pw) {
+            if (energyConsumer == null) return;
 
-            for (int i = 0; i < energyConsumerId.length; i++) {
-                pw.println("EnergyConsumerId: " + energyConsumerId[i]);
+            for (int i = 0; i < energyConsumer.length; i++) {
+                pw.println("EnergyConsumerId: " + energyConsumer[i].id
+                        + ", Ordinal: " + energyConsumer[i].ordinal
+                        + ", Type: " + energyConsumer[i].type
+                        + ", Name: " + energyConsumer[i].name);
             }
         }
     }
@@ -426,8 +442,7 @@ public class ProtoStreamUtils {
 
             for (int i = 0; i < energyConsumerResult.length; i++) {
                 long token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
-                pos.write(EnergyConsumerResultProto.ENERGY_CONSUMER_ID,
-                        energyConsumerResult[i].energyConsumerId);
+                pos.write(EnergyConsumerResultProto.ID, energyConsumerResult[i].id);
                 pos.write(EnergyConsumerResultProto.TIMESTAMP_MS,
                         energyConsumerResult[i].timestampMs);
                 pos.write(EnergyConsumerResultProto.ENERGY_UWS, energyConsumerResult[i].energyUWs);
@@ -469,9 +484,8 @@ public class ProtoStreamUtils {
             while (true) {
                 try {
                     switch (pis.nextField()) {
-                        case (int) EnergyConsumerResultProto.ENERGY_CONSUMER_ID:
-                            energyConsumerResult.energyConsumerId =
-                                pis.readInt(EnergyConsumerResultProto.ENERGY_CONSUMER_ID);
+                        case (int) EnergyConsumerResultProto.ID:
+                            energyConsumerResult.id = pis.readInt(EnergyConsumerResultProto.ID);
                             break;
 
                         case (int) EnergyConsumerResultProto.TIMESTAMP_MS:
@@ -503,7 +517,7 @@ public class ProtoStreamUtils {
             if (energyConsumerResult == null) return;
 
             for (int i = 0; i < energyConsumerResult.length; i++) {
-                Slog.d(TAG, "EnergyConsumerId: " + energyConsumerResult[i].energyConsumerId
+                Slog.d(TAG, "EnergyConsumerId: " + energyConsumerResult[i].id
                         + ", Timestamp (ms): " + energyConsumerResult[i].timestampMs
                         + ", Energy (uWs): " + energyConsumerResult[i].energyUWs);
             }
