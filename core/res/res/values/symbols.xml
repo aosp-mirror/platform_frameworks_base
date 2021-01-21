@@ -2177,6 +2177,7 @@
   <java-symbol type="string" name="config_persistentDataPackageName" />
   <java-symbol type="string" name="config_deviceConfiguratorPackageName" />
   <java-symbol type="array" name="config_autoTimeSourcesPriority" />
+  <java-symbol type="bool" name="config_enableGnssTimeUpdateService" />
   <java-symbol type="bool" name="config_enableGeolocationTimeZoneDetection" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneProvider" />
   <java-symbol type="bool" name="config_enablePrimaryLocationTimeZoneOverlay" />

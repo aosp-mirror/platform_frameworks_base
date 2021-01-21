@@ -5387,6 +5387,9 @@
          on-device data -->
     <attribution android:tag="OfflineLocationTimeZoneProviderService"
                  android:label="@string/offline_location_time_zone_detection_service_attribution"/>
+    <!-- Attribution for Gnss Time Update service. -->
+    <attribution android:tag="GnssTimeUpdateService"
+                 android:label="@string/gnss_time_update_service"/>
 
     <application android:process="system"
                  android:persistent="true"
