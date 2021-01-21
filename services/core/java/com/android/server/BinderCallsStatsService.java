@@ -40,6 +40,7 @@ import com.android.internal.os.AppIdToPackageMap;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.BinderInternal;
+import com.android.internal.os.BinderLatencyObserver;
 import com.android.internal.os.CachedDeviceState;
 import com.android.internal.util.DumpUtils;
 
@@ -120,6 +121,7 @@ public class BinderCallsStatsService extends Binder {
 
     /** Listens for flag changes. */
     private static class SettingsObserver extends ContentObserver {
+        // Settings for BinderCallsStats.
         private static final String SETTINGS_ENABLED_KEY = "enabled";
         private static final String SETTINGS_DETAILED_TRACKING_KEY = "detailed_tracking";
         private static final String SETTINGS_UPLOAD_DATA_KEY = "upload_data";
@@ -127,6 +129,10 @@ public class BinderCallsStatsService extends Binder {
         private static final String SETTINGS_TRACK_SCREEN_INTERACTIVE_KEY = "track_screen_state";
         private static final String SETTINGS_TRACK_DIRECT_CALLING_UID_KEY = "track_calling_uid";
         private static final String SETTINGS_MAX_CALL_STATS_KEY = "max_call_stats_count";
+        // Settings for BinderLatencyObserver.
+        private static final String SETTINGS_COLLECT_LATENCY_DATA_KEY = "collect_Latency_data";
+        private static final String SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY =
+                "latency_observer_sampling_interval";
 
         private boolean mEnabled;
         private final Uri mUri = Settings.Global.getUriFor(Settings.Global.BINDER_CALLS_STATS);
@@ -180,6 +186,13 @@ public class BinderCallsStatsService extends Binder {
             mBinderCallsStats.setTrackDirectCallerUid(
                     mParser.getBoolean(SETTINGS_TRACK_DIRECT_CALLING_UID_KEY,
                     BinderCallsStats.DEFAULT_TRACK_DIRECT_CALLING_UID));
+            mBinderCallsStats.setCollectLatencyData(
+                    mParser.getBoolean(SETTINGS_COLLECT_LATENCY_DATA_KEY,
+                    BinderCallsStats.DEFAULT_COLLECT_LATENCY_DATA));
+            // Binder latency observer settings.
+            mBinderCallsStats.getLatencyObserver().setSamplingInterval(mParser.getInt(
+                    SETTINGS_LATENCY_OBSERVER_SAMPLING_INTERVAL_KEY,
+                    BinderLatencyObserver.PERIODIC_SAMPLING_INTERVAL_DEFAULT));
 
 
             final boolean enabled =
@@ -198,6 +211,7 @@ public class BinderCallsStatsService extends Binder {
                 mEnabled = enabled;
                 mBinderCallsStats.reset();
                 mBinderCallsStats.setAddDebugEntries(enabled);
+                mBinderCallsStats.getLatencyObserver().reset();
             }
         }
     }
