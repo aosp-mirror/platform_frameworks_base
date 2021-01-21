@@ -999,6 +999,20 @@ public final class Settings {
             "android.settings.MANAGE_ALL_APPLICATIONS_SETTINGS";
 
     /**
+     * Activity Action: Show settings to manage all SIM profiles.
+     * <p>
+     * In some cases, a matching Activity may not exist, so ensure you
+     * safeguard against this.
+     * <p>
+     * Input: Nothing.
+     * <p>
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_ALL_SUBSCRIPTIONS_SETTINGS =
+            "android.settings.MANAGE_ALL_SUBSCRIPTIONS_SETTINGS";
+
+    /**
      * Activity Action: Show screen for controlling which apps can draw on top of other apps.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you safeguard against this.
