@@ -2486,7 +2486,8 @@
         <attr name="singleUser" />
         <attr name="directBootAware" />
         <attr name="visibleToInstantApps" />
-        <!-- The code for this component is located in the given split. -->
+        <!-- The code for this component is located in the given split.
+             @deprecated Do not use it. This is not supported. -->
         <attr name="splitName" />
     </declare-styleable>
 
@@ -2602,7 +2603,8 @@
              must also be {@link android.R.attr#exported} if this flag is set. -->
         <attr name="externalService" format="boolean" />
         <attr name="visibleToInstantApps" />
-        <!-- The code for this component is located in the given split. -->
+        <!-- The code for this component is located in the given split.
+             @deprecated Do not use it. This is not supported. -->
         <attr name="splitName" />
         <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
              will be spawned from an Application Zygote, instead of the regular Zygote.

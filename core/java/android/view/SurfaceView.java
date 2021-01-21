@@ -232,7 +232,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     private final Matrix mTmpMatrix = new Matrix();
 
     SurfaceControlViewHost.SurfacePackage mSurfacePackage;
-    private final boolean mUseBlastSync = false;
+    private final boolean mUseBlastSync = true;
 
     /**
      * Returns {@code true} if buffers should be submitted via blast
@@ -1193,11 +1193,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
     private void setBufferSize(Transaction transaction) {
         if (mUseBlastAdapter) {
-            mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth,
-                    mSurfaceHeight);
+            mBlastBufferQueue.update(mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, mFormat);
         } else {
-            transaction.setBufferSize(mSurfaceControl, mSurfaceWidth,
-                    mSurfaceHeight);
+            transaction.setBufferSize(mSurfaceControl, mSurfaceWidth, mSurfaceHeight);
         }
     }
 
@@ -1241,15 +1239,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                     .setName(name + "(BLAST)")
                     .setLocalOwnerView(this)
                     .setBufferSize(mSurfaceWidth, mSurfaceHeight)
-                    .setFormat(mFormat)
                     .setParent(mSurfaceControl)
                     .setFlags(mSurfaceFlags)
                     .setHidden(false)
                     .setBLASTLayer()
                     .setCallsite("SurfaceView.updateSurface")
                     .build();
-            mBlastBufferQueue = new BLASTBufferQueue(name,
-                    mBlastSurfaceControl, mSurfaceWidth, mSurfaceHeight, true /* TODO */);
+            mBlastBufferQueue = new BLASTBufferQueue(name, mBlastSurfaceControl, mSurfaceWidth,
+                    mSurfaceHeight, mFormat, true /* TODO */);
         } else {
             previousSurfaceControl = mSurfaceControl;
             mSurfaceControl = builder

@@ -79,6 +79,7 @@ import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -1063,6 +1064,21 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     /**
+     * Verify that finish bottom activity from a task won't boost it to top.
+     */
+    @Test
+    public void testFinishBottomActivityIfPossible_noZBoost() {
+        final ActivityRecord bottomActivity = createActivityWithTask();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm)
+                .setTask(bottomActivity.getTask()).build();
+        topActivity.mVisibleRequested = true;
+        // simulating bottomActivity as a trampoline activity.
+        bottomActivity.setState(RESUMED, "test");
+        bottomActivity.finishIfPossible("test", false);
+        assertFalse(bottomActivity.mNeedsZBoost);
+    }
+
+    /**
      * Verify that complete finish request for visible activity must be delayed before the next one
      * becomes visible.
      */
@@ -1446,6 +1462,19 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity.safelyDestroy("test");
 
         verify(activity).destroyImmediately(anyString());
+    }
+
+    @Test
+    public void testRemoveImmediately() throws RemoteException {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowProcessController wpc = activity.app;
+        activity.getTask().removeImmediately("test");
+
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
+                isA(DestroyActivityItem.class));
+        assertNull(activity.app);
+        assertEquals(DESTROYED, activity.getState());
+        assertFalse(wpc.hasActivities());
     }
 
     @Test

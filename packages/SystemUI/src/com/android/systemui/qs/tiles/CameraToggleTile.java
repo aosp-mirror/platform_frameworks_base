@@ -20,7 +20,6 @@ import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
 
 import static com.android.systemui.DejankUtils.whitelistIpcs;
 
-import android.annotation.StringRes;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
@@ -65,7 +64,7 @@ public class CameraToggleTile extends SensorPrivacyToggleTile {
 
     @Override
     public @DrawableRes int getIconRes() {
-        return R.drawable.ic_camera_blocked;
+        return com.android.internal.R.drawable.ic_camera_blocked;
     }
 
     @Override

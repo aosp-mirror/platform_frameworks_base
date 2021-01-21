@@ -460,9 +460,9 @@ abstract class MagnetizedObject<T : Any>(
 
     /** Plays the given vibration effect if haptics are enabled. */
     @SuppressLint("MissingPermission")
-    private fun vibrateIfEnabled(effect: Int) {
+    private fun vibrateIfEnabled(effectId: Int) {
         if (hapticsEnabled && systemHapticsEnabled) {
-            vibrator.vibrate(effect.toLong())
+            vibrator.vibrate(VibrationEffect.createPredefined(effectId))
         }
     }
 

@@ -294,7 +294,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         };
 
-        mWifiManager.registerScanResultsCallback(mReceiverHandler::post, scanResultsCallback);
+        if (mWifiManager != null) {
+            mWifiManager.registerScanResultsCallback(mReceiverHandler::post, scanResultsCallback);
+        }
 
         ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback(){
             private Network mLastNetwork;

@@ -254,6 +254,7 @@ package android.app {
     method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
+    method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
@@ -291,6 +292,7 @@ package android.app {
   }
 
   public class StatusBarManager {
+    method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
@@ -724,6 +726,11 @@ package android.graphics {
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
     method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
+  }
+
+  public final class Rect implements android.os.Parcelable {
+    method public void splitHorizontally(@NonNull android.graphics.Rect...);
+    method public void splitVertically(@NonNull android.graphics.Rect...);
   }
 
 }
@@ -1181,7 +1188,7 @@ package android.media.tv.tuner {
 package android.net {
 
   public class ConnectivityManager {
-    method @RequiresPermission(anyOf={"android.permission.MANAGE_TEST_NETWORKS", android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
   }
 
   public class EthernetManager {
@@ -1199,22 +1206,6 @@ package android.net {
 
   public class NetworkStack {
     method public static void setServiceForTest(@Nullable android.os.IBinder);
-  }
-
-  public final class TestNetworkInterface implements android.os.Parcelable {
-    ctor public TestNetworkInterface(android.os.ParcelFileDescriptor, String);
-    method public int describeContents();
-    method public android.os.ParcelFileDescriptor getFileDescriptor();
-    method public String getInterfaceName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
-  }
-
-  public class TestNetworkManager {
-    method public android.net.TestNetworkInterface createTapInterface();
-    method public android.net.TestNetworkInterface createTunInterface(@NonNull android.net.LinkAddress[]);
-    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
-    method public void teardownTestNetwork(@NonNull android.net.Network);
   }
 
   public class TrafficStats {
@@ -1366,11 +1357,10 @@ package android.os {
 
   public static class VibrationEffect.Prebaked extends android.os.VibrationEffect implements android.os.Parcelable {
     ctor public VibrationEffect.Prebaked(android.os.Parcel);
-    ctor public VibrationEffect.Prebaked(int, boolean);
+    ctor public VibrationEffect.Prebaked(int, boolean, int);
     method public long getDuration();
     method public int getEffectStrength();
     method public int getId();
-    method public void setEffectStrength(int);
     method public boolean shouldFallback();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;
@@ -1623,6 +1613,11 @@ package android.provider {
 }
 
 package android.security {
+
+  public final class KeyChain {
+    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean removeCredentialManagementApp(@NonNull android.content.Context);
+    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean setCredentialManagementApp(@NonNull android.content.Context, @NonNull String, @NonNull android.security.AppUriAuthenticationPolicy);
+  }
 
   public class KeyStoreException extends java.lang.Exception {
     ctor public KeyStoreException(int, String);
@@ -2391,10 +2386,6 @@ package android.view.textservice {
     field public static final int SUBTYPE_ID_NONE = 0; // 0x0
   }
 
-  public final class TextServicesManager {
-    method public boolean isSpellCheckerEnabled();
-  }
-
 }
 
 package android.widget {
@@ -2559,6 +2550,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
+    method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setAppBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBoundsChangeTransaction(@NonNull android.window.WindowContainerToken, @NonNull android.view.SurfaceControl.Transaction);

@@ -1620,7 +1620,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], attrs, viewVisibility, session.mUid, userId,
-                    session.mCanAddInternalSystemWindow);
+                    session.mCanAddInternalSystemWindow, session.mCanUseBackgroundBlur);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -2339,7 +2339,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (shouldRelayout) {
                 Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
 
-                result = win.relayoutVisibleWindow(result, attrChanges);
+                result = win.relayoutVisibleWindow(result);
 
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
@@ -8411,10 +8411,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void grantEmbeddedWindowFocus(Session session, IBinder targetInputToken, boolean grantFocus) {
+    void grantEmbeddedWindowFocus(Session session, IBinder inputToken, boolean grantFocus) {
         synchronized (mGlobalLock) {
             final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                    mEmbeddedWindowController.get(targetInputToken);
+                    mEmbeddedWindowController.get(inputToken);
             if (embeddedWindow == null) {
                 Slog.e(TAG, "Embedded window not found");
                 return;
@@ -8426,7 +8426,7 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl.Transaction t = mTransactionFactory.get();
             final int displayId = embeddedWindow.mDisplayId;
             if (grantFocus) {
-                t.setFocusedWindow(targetInputToken, displayId).apply();
+                t.setFocusedWindow(inputToken, embeddedWindow.getName(), displayId).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Focus request " + embeddedWindow.getName(),
                         "reason=grantEmbeddedWindowFocus(true)");
@@ -8441,7 +8441,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             embeddedWindow.getName());
                     return;
                 }
-                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, targetInputToken,
+                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
+                        inputToken, embeddedWindow.getName(),
                         displayId).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + newFocusTarget,
@@ -8477,13 +8478,17 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             SurfaceControl.Transaction t = mTransactionFactory.get();
             if (grantFocus) {
-                t.requestFocusTransfer(targetInputToken, hostWindow.mInputChannel.getToken(),
+                t.requestFocusTransfer(targetInputToken, embeddedWindow.getName(),
+                        hostWindow.mInputChannel.getToken(),
+                        hostWindow.getName(),
                         hostWindow.getDisplayId()).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + embeddedWindow.getName(),
                         "reason=grantEmbeddedWindowFocus(true)");
             } else {
-                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), targetInputToken,
+                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), hostWindow.getName(),
+                        targetInputToken,
+                        embeddedWindow.getName(),
                         hostWindow.getDisplayId()).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + hostWindow,

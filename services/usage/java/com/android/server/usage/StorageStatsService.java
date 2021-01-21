@@ -514,6 +514,7 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
         res.codeBytes = stats.codeSize + stats.externalCodeSize;
         res.dataBytes = stats.dataSize + stats.externalDataSize;
         res.cacheBytes = stats.cacheSize + stats.externalCacheSize;
+        res.externalCacheBytes = stats.externalCacheSize;
         return res;
     }
 

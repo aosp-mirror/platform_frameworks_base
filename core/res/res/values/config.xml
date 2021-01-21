@@ -993,6 +993,11 @@
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
 
+    <!-- Time to wait before sending a HOME intent when waking up from power/home button.
+         (0 - do not send HOME intent on wakeup)
+    -->
+    <integer name="config_wakeUpToLastStateTimeoutMillis">0</integer>
+
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
 
@@ -1571,6 +1576,10 @@
         <item>telephony</item>
         <item>network</item>
     </string-array>
+
+    <!-- Enables the GnssTimeUpdate service. This is the global switch for enabling Gnss time based
+         suggestions to TimeDetector service. See also config_autoTimeSourcesPriority. -->
+    <bool name="config_enableGnssTimeUpdateService">false</bool>
 
     <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
          zone update mechanism. -->
@@ -2643,6 +2652,11 @@
          in. -->
     <string name="config_usbResolverActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
+
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of privacy settings. -->
+    <string name="config_sensorUseStartedActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
@@ -3996,13 +4010,13 @@
     <string name="config_misprovisionedBrandValue" translatable="false"></string>
 
     <!-- Pre-scale volume at volume step 1 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index1">50%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index1">60%</fraction>
 
     <!-- Pre-scale volume at volume step 2 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index2">70%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index2">80%</fraction>
 
     <!-- Pre-scale volume at volume step 3 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index3">85%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index3">90%</fraction>
 
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
@@ -4612,4 +4626,9 @@
          If omitted, image editing will not be offered via Chooser.
          This name is in the ComponentName flattened format (package/class) [DO NOT TRANSLATE]  -->
     <string name="config_systemImageEditor" translatable="false"></string>
+
+    <!-- Whether to force WindowOrientationListener to keep listening to its sensor, even when
+         dreaming. This allows the AoD to rotate on devices without a wake device_orientation
+         sensor. Note that this flag should only be enabled for development/testing use. -->
+    <bool name="config_forceOrientationListenerEnabledWhileDreaming">false</bool>
 </resources>

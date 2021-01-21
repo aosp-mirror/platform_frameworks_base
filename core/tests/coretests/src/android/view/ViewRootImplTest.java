@@ -23,7 +23,7 @@ import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
+import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -35,6 +35,7 @@ import static androidx.test.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.os.Binder;
@@ -49,6 +50,9 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link ViewRootImpl}
@@ -180,7 +184,7 @@ public class ViewRootImplTest {
     public void adjustLayoutParamsForCompatibility_noAdjustBehavior() {
         final WindowInsetsController controller = mViewRootImpl.getInsetsController();
         final WindowManager.LayoutParams attrs = mViewRootImpl.mWindowAttributes;
-        final int behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
+        final int behavior = BEHAVIOR_DEFAULT;
         controller.setSystemBarsBehavior(behavior);
         attrs.systemUiVisibility = SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
@@ -193,6 +197,26 @@ public class ViewRootImplTest {
 
         // Behavior must not be adjusted due to setting new LayoutParams.
         assertEquals(behavior, controller.getSystemBarsBehavior());
+    }
+
+    /**
+     * Ensure scroll capture request handles a ViewRootImpl with no view tree.
+     */
+    @Test
+    public void requestScrollCapture_withoutContentRoot() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        mViewRootImpl.handleScrollCaptureRequest(new IScrollCaptureCallbacks.Default() {
+            @Override
+            public void onUnavailable() {
+                latch.countDown();
+            }
+        });
+        try {
+            if (latch.await(100, TimeUnit.MILLISECONDS)) {
+                return; // pass
+            }
+        } catch (InterruptedException e) { /* ignore */ }
+        fail("requestScrollCapture did not respond");
     }
 
     /**

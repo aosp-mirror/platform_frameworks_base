@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
+import java.io.Closeable;
 import java.util.Set;
 
 /**
@@ -29,7 +30,7 @@ import java.util.Set;
  *
  * <p>All implementations of this interface must be thread safe.
  */
-public interface AppSearchSessionShim {
+public interface AppSearchSessionShim extends Closeable {
 
     /**
      * Sets the schema that will be used by documents provided to the {@link #putDocuments} method.
@@ -174,6 +175,25 @@ public interface AppSearchSessionShim {
     SearchResultsShim query(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /**
+     * Reports usage of a particular document by URI and namespace.
+     *
+     * <p>A usage report represents an event in which a user interacted with or viewed a document.
+     *
+     * <p>For each call to {@link #reportUsage}, AppSearch updates usage count and usage recency
+     * metrics for that particular document. These metrics are used for ordering {@link #query}
+     * results by the {@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} and {@link
+     * SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} ranking strategies.
+     *
+     * <p>Reporting usage of a document is optional.
+     *
+     * @param request The usage reporting request.
+     * @return The pending result of performing this operation which resolves to {@code null} on
+     *     success.
+     */
+    @NonNull
+    ListenableFuture<Void> reportUsage(@NonNull ReportUsageRequest request);
+
+    /**
      * Removes {@link GenericDocument}s from the index by URI.
      *
      * @param request Request containing URIs to be removed.
@@ -207,11 +227,9 @@ public interface AppSearchSessionShim {
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /**
-     * Closes the SearchSessionImpl to persists all update/delete requests to the disk.
-     *
-     * @hide
+     * Closes the {@link AppSearchSessionShim} to persist all schema and document updates,
+     * additions, and deletes to disk.
      */
-
-    // TODO(b/175637134) when unhide it, extends Closeable and remove this method.
+    @Override
     void close();
 }

@@ -7805,18 +7805,23 @@ public class TelephonyManager {
     }
 
     /**
-     * Set IMS registration state
+     * Set IMS registration state on all active subscriptions.
+     * <p/>
+     * Use {@link android.telephony.ims.stub.ImsRegistrationImplBase#onRegistered} and
+     * {@link android.telephony.ims.stub.ImsRegistrationImplBase#onDeregistered} to set Ims
+     * registration state instead.
      *
-     * @param Registration state
+     * @param registered whether ims is registered
+     *
      * @hide
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void setImsRegistrationState(boolean registered) {
+    public void setImsRegistrationState(final boolean registered) {
         try {
-            ITelephony telephony = getITelephony();
+            final ITelephony telephony = getITelephony();
             if (telephony != null)
                 telephony.setImsRegistrationState(registered);
-        } catch (RemoteException e) {
+        } catch (final RemoteException e) {
         }
     }
 

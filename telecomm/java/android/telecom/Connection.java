@@ -18,6 +18,7 @@ package android.telecom;
 
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
+import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -3013,6 +3014,26 @@ public abstract class Connection extends Conferenceable {
     public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
+     * Inform this Connection when it will or will not be tracked by an {@link InCallService} which
+     * can provide an InCall UI.
+     * This is primarily intended for use by Connections reported by self-managed
+     * {@link ConnectionService} which typically maintain their own UI.
+     *
+     * @param isUsingAlternativeUi Indicates whether an InCallService that can provide InCall UI is
+     *                             currently tracking the self-managed call.
+     */
+    public void onUsingAlternativeUi(boolean isUsingAlternativeUi) {}
+
+    /**
+     * Inform this Conenection when it will or will not be tracked by an non-UI
+     * {@link InCallService}.
+     *
+     * @param isTracked Indicates whether an non-UI InCallService is currently tracking the
+     *                 self-managed call.
+     */
+    public void onTrackedByNonUiService(boolean isTracked) {}
+
+    /**
      * Notifies this Connection of an internal state change. This method is called after the
      * state is changed.
      *
@@ -3356,6 +3377,24 @@ public abstract class Connection extends Conferenceable {
      *                      the in-call app.
      */
     public void handleRttUpgradeResponse(@Nullable RttTextStream rttTextStream) {}
+
+    /**
+     * Indicates that call filtering in Telecom is complete
+     *
+     * This method is called for a connection created via
+     * {@link ConnectionService#onCreateIncomingConnection} when call filtering completes in
+     * Telecom, including checking the blocked number db, per-contact settings, and custom call
+     * filtering apps.
+     *
+     * @param isBlocked {@code true} if the call was blocked, {@code false} otherwise. If this is
+     *                  {@code true}, {@link #onDisconnect()} will be called soon after
+     *                  this is called.
+     * @param isInContacts Indicates whether the caller is in the user's contacts list.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_CONTACTS)
+    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts) { }
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

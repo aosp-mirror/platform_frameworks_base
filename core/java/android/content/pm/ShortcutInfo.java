@@ -2191,7 +2191,7 @@ public final class ShortcutInfo implements Parcelable {
         dest.writeString8(mIconUri);
     }
 
-    public static final @android.annotation.NonNull Creator<ShortcutInfo> CREATOR =
+    public static final @NonNull Creator<ShortcutInfo> CREATOR =
             new Creator<ShortcutInfo>() {
                 public ShortcutInfo createFromParcel(Parcel source) {
                     return new ShortcutInfo(source);

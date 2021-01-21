@@ -16,8 +16,10 @@
 
 package android.telecom;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.hardware.camera2.CameraManager;
 import android.net.Uri;
@@ -1190,6 +1192,28 @@ public final class RemoteConnection {
         try {
             if (mConnected) {
                 mConnectionService.stopRtt(mConnectionId, null /*Session.Info*/);
+            }
+        } catch (RemoteException ignored) {
+        } finally {
+            Log.endSession();
+        }
+    }
+
+    /**
+     * Notifies this {@link RemoteConnection} that call filtering has completed, as well as
+     * the results of a contacts lookup for the remote party.
+     * @param isBlocked Whether call filtering indicates that the call should be blocked
+     * @param isInContacts Whether the remote party is in the user's contacts
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_CONTACTS)
+    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts) {
+        Log.startSession("RC.oCFC", getActiveOwnerInfo());
+        try {
+            if (mConnected) {
+                mConnectionService.onCallFilteringCompleted(mConnectionId, isBlocked, isInContacts,
+                        null /*Session.Info*/);
             }
         } catch (RemoteException ignored) {
         } finally {

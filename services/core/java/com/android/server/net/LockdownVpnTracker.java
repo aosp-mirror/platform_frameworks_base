@@ -34,7 +34,6 @@ import android.net.NetworkInfo;
 import android.net.NetworkInfo.DetailedState;
 import android.net.NetworkInfo.State;
 import android.os.Handler;
-import android.security.Credentials;
 import android.security.KeyStore;
 import android.text.TextUtils;
 import android.util.Log;
@@ -70,6 +69,7 @@ public class LockdownVpnTracker {
     @NonNull private final Handler mHandler;
     @NonNull private final Vpn mVpn;
     @NonNull private final VpnProfile mProfile;
+    @NonNull private final KeyStore mKeyStore;
 
     @NonNull private final Object mStateLock = new Object();
 
@@ -81,13 +81,10 @@ public class LockdownVpnTracker {
 
     private int mErrorCount;
 
-    public static boolean isEnabled() {
-        return KeyStore.getInstance().contains(Credentials.LOCKDOWN_VPN);
-    }
-
     public LockdownVpnTracker(@NonNull Context context,
             @NonNull ConnectivityService connService,
             @NonNull Handler handler,
+            @NonNull KeyStore keyStore,
             @NonNull Vpn vpn,
             @NonNull VpnProfile profile) {
         mContext = Objects.requireNonNull(context);
@@ -95,6 +92,7 @@ public class LockdownVpnTracker {
         mHandler = Objects.requireNonNull(handler);
         mVpn = Objects.requireNonNull(vpn);
         mProfile = Objects.requireNonNull(profile);
+        mKeyStore = Objects.requireNonNull(keyStore);
         mNotificationManager = mContext.getSystemService(NotificationManager.class);
 
         final Intent configIntent = new Intent(ACTION_VPN_SETTINGS);
@@ -157,7 +155,7 @@ public class LockdownVpnTracker {
                 try {
                     // Use the privileged method because Lockdown VPN is initiated by the system, so
                     // no additional permission checks are necessary.
-                    mVpn.startLegacyVpnPrivileged(mProfile, KeyStore.getInstance(), egressProp);
+                    mVpn.startLegacyVpnPrivileged(mProfile, mKeyStore, egressProp);
                 } catch (IllegalStateException e) {
                     mAcceptedEgressIface = null;
                     Log.e(TAG, "Failed to start VPN", e);

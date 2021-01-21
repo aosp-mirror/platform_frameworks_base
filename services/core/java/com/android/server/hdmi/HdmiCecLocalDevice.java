@@ -619,7 +619,9 @@ abstract class HdmiCecLocalDevice {
         } else if (mService.isPowerStandbyOrTransient() && isPowerOnOrToggleCommand(message)) {
             mService.wakeUp();
             return true;
-        } else if (!mService.isHdmiCecVolumeControlEnabled() && isVolumeOrMuteCommand(message)) {
+        } else if (mService.getHdmiCecVolumeControl()
+                == HdmiControlManager.VOLUME_CONTROL_DISABLED && isVolumeOrMuteCommand(
+                message)) {
             return false;
         }
 
@@ -1142,7 +1144,8 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
-        if (!mService.isHdmiCecVolumeControlEnabled()) {
+        if (mService.getHdmiCecVolumeControl()
+                == HdmiControlManager.VOLUME_CONTROL_DISABLED) {
             return;
         }
         if (!HdmiCecKeycode.isVolumeKeycode(keyCode)) {

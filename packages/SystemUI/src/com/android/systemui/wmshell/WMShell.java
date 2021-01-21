@@ -55,14 +55,14 @@ import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.nano.WmShellTraceProto;
 import com.android.wm.shell.onehanded.OneHanded;
-import com.android.wm.shell.onehanded.OneHandedEvents;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
+import com.android.wm.shell.onehanded.OneHandedUiEventLogger;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogImpl;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -253,7 +253,7 @@ public final class WMShell extends SystemUI
                 mSysUiMainExecutor.execute(() -> {
                     if (oneHanded.isOneHandedEnabled()) {
                         oneHanded.stopOneHanded(
-                                OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
+                                OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
                     } else if (oneHanded.isSwipeToNotificationEnabled()) {
                         mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_UP);
                     }
@@ -280,7 +280,7 @@ public final class WMShell extends SystemUI
             @Override
             public void onScreenTurningOff() {
                 oneHanded.stopOneHanded(
-                        OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
+                        OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_SCREEN_OFF_OUT);
             }
         });
 
@@ -294,7 +294,8 @@ public final class WMShell extends SystemUI
             public void setImeWindowStatus(int displayId, IBinder token, int vis,
                     int backDisposition, boolean showImeSwitcher) {
                 if (displayId == DEFAULT_DISPLAY && (vis & InputMethodService.IME_VISIBLE) != 0) {
-                    oneHanded.stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
+                    oneHanded.stopOneHanded(
+                            OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_POP_IME_OUT);
                 }
             }
         });

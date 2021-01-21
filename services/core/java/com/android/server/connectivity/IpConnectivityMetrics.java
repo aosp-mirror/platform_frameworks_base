@@ -368,6 +368,7 @@ final public class IpConnectivityMetrics extends SystemService {
 
         @Override
         public void logDefaultNetworkValidity(boolean valid) {
+            NetworkStack.checkNetworkStackPermission(getContext());
             mDefaultNetworkMetrics.logDefaultNetworkValidity(SystemClock.elapsedRealtime(), valid);
         }
 
@@ -375,6 +376,7 @@ final public class IpConnectivityMetrics extends SystemService {
         public void logDefaultNetworkEvent(Network defaultNetwork, int score, boolean validated,
                 LinkProperties lp, NetworkCapabilities nc, Network previousDefaultNetwork,
                 int previousScore, LinkProperties previousLp, NetworkCapabilities previousNc) {
+            NetworkStack.checkNetworkStackPermission(getContext());
             final long timeMs = SystemClock.elapsedRealtime();
             mDefaultNetworkMetrics.logDefaultNetworkEvent(timeMs, defaultNetwork, score, validated,
                     lp, nc,  previousDefaultNetwork, previousScore, previousLp, previousNc);

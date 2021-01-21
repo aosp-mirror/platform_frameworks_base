@@ -2926,7 +2926,10 @@ public final class InputMethodManager {
                 ? SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES
                 : SHOW_IM_PICKER_MODE_EXCLUDE_AUXILIARY_SUBTYPES;
         try {
-            mService.showInputMethodPickerFromSystem(mClient, mode, displayId);
+            final Completable.Void value = Completable.createVoid();
+            mService.showInputMethodPickerFromSystem(
+                    mClient, mode, displayId, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2934,7 +2937,10 @@ public final class InputMethodManager {
 
     private void showInputMethodPickerLocked() {
         try {
-            mService.showInputMethodPickerFromClient(mClient, SHOW_IM_PICKER_MODE_AUTO);
+            final Completable.Void value = Completable.createVoid();
+            mService.showInputMethodPickerFromClient(
+                    mClient, SHOW_IM_PICKER_MODE_AUTO, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2970,7 +2976,10 @@ public final class InputMethodManager {
      */
     public void showInputMethodAndSubtypeEnabler(String imiId) {
         try {
-            mService.showInputMethodAndSubtypeEnablerFromClient(mClient, imiId);
+            final Completable.Void value = Completable.createVoid();
+            mService.showInputMethodAndSubtypeEnablerFromClient(
+                    mClient, imiId, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -3132,7 +3141,10 @@ public final class InputMethodManager {
                 matrixValues = new float[9];
                 matrix.getValues(matrixValues);
             }
-            mService.reportActivityView(mClient, childDisplayId, matrixValues);
+            final Completable.Void value = Completable.createVoid();
+            mService.reportActivityView(
+                    mClient, childDisplayId, matrixValues, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

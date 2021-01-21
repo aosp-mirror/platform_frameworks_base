@@ -71,6 +71,7 @@ import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
+import android.content.pm.IPackageLoadingProgressCallback;
 import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
@@ -186,6 +187,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     static final String TAG_CHILD_SESSION = "childSession";
     static final String TAG_SESSION_FILE = "sessionFile";
     static final String TAG_SESSION_CHECKSUM = "sessionChecksum";
+    static final String TAG_SESSION_CHECKSUM_SIGNATURE = "sessionChecksumSignature";
     private static final String TAG_GRANTED_RUNTIME_PERMISSION = "granted-runtime-permission";
     private static final String TAG_WHITELISTED_RESTRICTED_PERMISSION =
             "whitelisted-restricted-permission";
@@ -319,6 +321,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private float mProgress = 0;
     @GuardedBy("mLock")
     private float mReportedProgress = -1;
+    @GuardedBy("mLock")
+    private float mIncrementalProgress = 0;
 
     /** State of the session. */
     @GuardedBy("mLock")
@@ -397,8 +401,26 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     @GuardedBy("mLock")
     private ArraySet<FileEntry> mFiles = new ArraySet<>();
 
+    static class PerFileChecksum {
+        private final Checksum[] mChecksums;
+        private final byte[] mSignature;
+
+        PerFileChecksum(Checksum[] checksums, byte[] signature) {
+            mChecksums = checksums;
+            mSignature = signature;
+        }
+
+        Checksum[] getChecksums() {
+            return this.mChecksums;
+        }
+
+        byte[] getSignature() {
+            return this.mSignature;
+        }
+    }
+
     @GuardedBy("mLock")
-    private ArrayMap<String, Checksum[]> mChecksums = new ArrayMap<>();
+    private ArrayMap<String, PerFileChecksum> mChecksums = new ArrayMap<>();
 
     @Nullable
     final StagedSession mStagedSession;
@@ -921,7 +943,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             int sessionId, int userId, int installerUid, @NonNull InstallSource installSource,
             SessionParams params, long createdMillis, long committedMillis,
             File stageDir, String stageCid, InstallationFile[] files,
-            ArrayMap<String, List<Checksum>> checksums,
+            ArrayMap<String, PerFileChecksum> checksums,
             boolean prepared, boolean committed, boolean destroyed, boolean sealed,
             @Nullable int[] childSessionIds, int parentSessionId, boolean isReady,
             boolean isFailed, boolean isApplied, int stagedSessionErrorCode,
@@ -967,11 +989,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (checksums != null) {
-            for (int i = 0, isize = checksums.size(); i < isize; ++i) {
-                final String fileName = checksums.keyAt(i);
-                final List<Checksum> fileChecksums = checksums.valueAt(i);
-                mChecksums.put(fileName, fileChecksums.toArray(new Checksum[fileChecksums.size()]));
-            }
+            mChecksums.putAll(checksums);
         }
 
         if (!params.isMultiPackage && (stageDir == null) == (stageCid == null)) {
@@ -1182,7 +1200,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private void computeProgressLocked(boolean forcePublish) {
-        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
+        // This method is triggered when the client progress is updated or the incremental progress
+        // is updated. For incremental installs, ignore the progress values reported from client.
+        // Instead, only use the progress reported by IncFs as the percentage of loading completion.
+        final float loadingProgress =
+                isIncrementalInstallation() ? mIncrementalProgress : mClientProgress;
+        mProgress = MathUtils.constrain(loadingProgress * 0.8f, 0f, 0.8f)
                 + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
 
         // Only publish when meaningful change
@@ -1253,7 +1276,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     @Override
-    public void addChecksums(String name, @NonNull Checksum[] checksums) {
+    public void setChecksums(String name, @NonNull Checksum[] checksums,
+            @Nullable byte[] signature) {
         if (checksums.length == 0) {
             return;
         }
@@ -1269,6 +1293,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new IllegalStateException("Can't obtain calling installer's package.");
         }
 
+        if (signature != null && signature.length != 0) {
+            final boolean standardMode = PackageManagerServiceUtils.isApkVerityEnabled();
+            final boolean legacyMode = PackageManagerServiceUtils.isLegacyApkVerityEnabled();
+            if (!standardMode || legacyMode) {
+                Slog.e(TAG,
+                        "Can't enforce checksum's signature: Apk-Verity is disabled or in legacy "
+                                + "mode.");
+                signature = null;
+            }
+        }
+
         synchronized (mLock) {
             assertCallerIsOwnerOrRootLocked();
             assertPreparedAndNotCommittedOrDestroyedLocked("addChecksums");
@@ -1277,7 +1312,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalStateException("Duplicate checksums.");
             }
 
-            mChecksums.put(name, checksums);
+            mChecksums.put(name, new PerFileChecksum(checksums, signature));
         }
     }
 
@@ -3032,15 +3067,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         maybeStageFsveritySignatureLocked(dexMetadataFile, targetDexMetadataFile);
     }
 
+    private void storeBytesToInstallationFile(final String localPath, final String absolutePath,
+            final byte[] bytes) throws IOException {
+        if (!isIncrementalInstallation() || mIncrementalFileStorages == null) {
+            FileUtils.bytesToFile(absolutePath, bytes);
+        } else {
+            mIncrementalFileStorages.makeFile(localPath, bytes);
+        }
+    }
+
     @GuardedBy("mLock")
     private void maybeStageDigestsLocked(File origFile, File targetFile, String splitName)
             throws PackageManagerException {
-        final Checksum[] checksums = mChecksums.get(origFile.getName());
-        if (checksums == null) {
+        final PerFileChecksum perFileChecksum = mChecksums.get(origFile.getName());
+        if (perFileChecksum == null) {
             return;
         }
         mChecksums.remove(origFile.getName());
 
+        final Checksum[] checksums = perFileChecksum.getChecksums();
         if (checksums.length == 0) {
             return;
         }
@@ -3048,14 +3093,24 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final String targetDigestsPath = ApkChecksums.buildDigestsPathForApk(targetFile.getName());
         final File targetDigestsFile = new File(stageDir, targetDigestsPath);
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            // Storing and staging checksums.
             ApkChecksums.writeChecksums(os, checksums);
-            final byte[] checksumsBytes = os.toByteArray();
+            storeBytesToInstallationFile(targetDigestsPath, targetDigestsFile.getAbsolutePath(),
+                    os.toByteArray());
+            stageFileLocked(targetDigestsFile, targetDigestsFile);
 
-            if (!isIncrementalInstallation() || mIncrementalFileStorages == null) {
-                FileUtils.bytesToFile(targetDigestsFile.getAbsolutePath(), checksumsBytes);
-            } else {
-                mIncrementalFileStorages.makeFile(targetDigestsPath, checksumsBytes);
+            final byte[] signature = perFileChecksum.getSignature();
+            if (signature == null || signature.length == 0) {
+                return;
             }
+
+            // Storing and staging signature.
+            final String targetDigestsSignaturePath = VerityUtils.getFsveritySignatureFilePath(
+                    targetDigestsPath);
+            final File targetDigestsSignatureFile = new File(stageDir, targetDigestsSignaturePath);
+            storeBytesToInstallationFile(targetDigestsSignaturePath,
+                    targetDigestsSignatureFile.getAbsolutePath(), signature);
+            stageFileLocked(targetDigestsSignatureFile, targetDigestsSignatureFile);
         } catch (CertificateException e) {
             throw new PackageManagerException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
                     "Failed to encode certificate for " + mPackageName, e);
@@ -3063,8 +3118,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
                     "Failed to store digests for " + mPackageName, e);
         }
-
-        stageFileLocked(targetDigestsFile, targetDigestsFile);
     }
 
     @GuardedBy("mLock")
@@ -3704,7 +3757,16 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
                         params, statusListener, healthCheckParams, healthListener, addedFiles,
-                        perUidReadTimeouts);
+                        perUidReadTimeouts,
+                        new IPackageLoadingProgressCallback.Stub() {
+                            @Override
+                            public void onPackageLoadingProgressChanged(float progress) {
+                                synchronized (mLock) {
+                                    mIncrementalProgress = progress;
+                                    computeProgressLocked(true);
+                                }
+                            }
+                        });
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
@@ -4277,7 +4339,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             for (int i = 0, isize = mChecksums.size(); i < isize; ++i) {
                 final String fileName = mChecksums.keyAt(i);
-                final Checksum[] checksums = mChecksums.valueAt(i);
+                final PerFileChecksum perFileChecksum = mChecksums.valueAt(i);
+                final Checksum[] checksums = perFileChecksum.getChecksums();
                 for (Checksum checksum : checksums) {
                     out.startTag(null, TAG_SESSION_CHECKSUM);
                     writeStringAttribute(out, ATTR_NAME, fileName);
@@ -4286,6 +4349,19 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     out.endTag(null, TAG_SESSION_CHECKSUM);
                 }
             }
+            for (int i = 0, isize = mChecksums.size(); i < isize; ++i) {
+                final String fileName = mChecksums.keyAt(i);
+                final PerFileChecksum perFileChecksum = mChecksums.valueAt(i);
+                final byte[] signature = perFileChecksum.getSignature();
+                if (signature == null || signature.length == 0) {
+                    continue;
+                }
+                out.startTag(null, TAG_SESSION_CHECKSUM_SIGNATURE);
+                writeStringAttribute(out, ATTR_NAME, fileName);
+                writeByteArrayAttribute(out, ATTR_SIGNATURE, signature);
+                out.endTag(null, TAG_SESSION_CHECKSUM_SIGNATURE);
+            }
+
         }
 
         out.endTag(null, TAG_SESSION);
@@ -4401,6 +4477,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         List<Integer> childSessionIds = new ArrayList<>();
         List<InstallationFile> files = new ArrayList<>();
         ArrayMap<String, List<Checksum>> checksums = new ArrayMap<>();
+        ArrayMap<String, byte[]> signatures = new ArrayMap<>();
         int outerDepth = in.getDepth();
         int type;
         while ((type = in.next()) != XmlPullParser.END_DOCUMENT
@@ -4443,6 +4520,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 fileChecksums.add(checksum);
             }
+            if (TAG_SESSION_CHECKSUM_SIGNATURE.equals(in.getName())) {
+                final String fileName = readStringAttribute(in, ATTR_NAME);
+                final byte[] signature = readByteArrayAttribute(in, ATTR_SIGNATURE);
+                signatures.put(fileName, signature);
+            }
         }
 
         if (grantedRuntimePermissions.size() > 0) {
@@ -4471,13 +4553,25 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             fileArray = files.toArray(EMPTY_INSTALLATION_FILE_ARRAY);
         }
 
+        ArrayMap<String, PerFileChecksum> checksumsMap = null;
+        if (!checksums.isEmpty()) {
+            checksumsMap = new ArrayMap<>(checksums.size());
+            for (int i = 0, isize = checksums.size(); i < isize; ++i) {
+                final String fileName = checksums.keyAt(i);
+                final List<Checksum> perFileChecksum = checksums.valueAt(i);
+                final byte[] perFileSignature = signatures.get(fileName);
+                checksumsMap.put(fileName, new PerFileChecksum(
+                        perFileChecksum.toArray(new Checksum[perFileChecksum.size()]),
+                        perFileSignature));
+            }
+        }
+
         InstallSource installSource = InstallSource.create(installInitiatingPackageName,
                 installOriginatingPackageName, installerPackageName, installerAttributionTag);
-        return new PackageInstallerSession(callback, context, pm, sessionProvider,
-                installerThread, stagingManager, sessionId, userId, installerUid,
-                installSource, params, createdMillis, committedMillis, stageDir, stageCid,
-                fileArray, checksums, prepared, committed, destroyed, sealed, childSessionIdsArray,
-                parentSessionId, isReady, isFailed, isApplied, stagedSessionErrorCode,
-                stagedSessionErrorMessage);
+        return new PackageInstallerSession(callback, context, pm, sessionProvider, installerThread,
+                stagingManager, sessionId, userId, installerUid, installSource, params,
+                createdMillis, committedMillis, stageDir, stageCid, fileArray, checksumsMap,
+                prepared, committed, destroyed, sealed, childSessionIdsArray, parentSessionId,
+                isReady, isFailed, isApplied, stagedSessionErrorCode, stagedSessionErrorMessage);
     }
 }

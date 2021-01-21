@@ -47,6 +47,26 @@ class PrivacyLogger @Inject constructor(
         })
     }
 
+    fun startIndicatorsHold(time: Long) {
+        log(LogLevel.DEBUG, {
+            int1 = time.toInt() / 1000
+        }, {
+            "Starting privacy indicators hold for $int1 seconds"
+        })
+    }
+
+    fun cancelIndicatorsHold() {
+        log(LogLevel.VERBOSE, {}, {
+            "Cancel privacy indicators hold"
+        })
+    }
+
+    fun finishIndicatorsHold() {
+        log(LogLevel.DEBUG, {}, {
+            "Finish privacy indicators hold"
+        })
+    }
+
     fun logCurrentProfilesChanged(profiles: List<Int>) {
         log(LogLevel.INFO, {
             str1 = profiles.toString()

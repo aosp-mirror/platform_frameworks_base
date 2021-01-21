@@ -37,6 +37,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
@@ -47,7 +48,6 @@ import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
 
 /**
  * Manages and manipulates the one handed states, transitions, and gesture for phones.
@@ -73,6 +73,8 @@ public class OneHandedController {
     private final OneHandedTimeoutHandler mTimeoutHandler;
     private final OneHandedTouchHandler mTouchHandler;
     private final OneHandedTutorialHandler mTutorialHandler;
+    private final OneHandedUiEventLogger mOneHandedUiEventLogger;
+    private final TaskStackListenerImpl mTaskStackListener;
     private final IOverlayManager mOverlayManager;
     private final ShellExecutor mMainExecutor;
     private final Handler mMainHandler;
@@ -117,15 +119,28 @@ public class OneHandedController {
                 }
             };
 
+    private final TaskStackListenerCallback mTaskStackListenerCallback =
+            new TaskStackListenerCallback() {
+                @Override
+                public void onTaskCreated(int taskId, ComponentName componentName) {
+                    stopOneHanded(OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
+                }
+
+                @Override
+                public void onTaskMovedToFront(int taskId) {
+                    stopOneHanded(OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
+                }
+            };
+
+
     /**
      * Creates {@link OneHanded}, returns {@code null} if the feature is not supported.
      */
     @Nullable
     public static OneHanded create(
             Context context, DisplayController displayController,
-            TaskStackListenerImpl taskStackListener,
-            ShellExecutor mainExecutor,
-            Handler mainHandler) {
+            TaskStackListenerImpl taskStackListener, UiEventLogger uiEventLogger,
+            ShellExecutor mainExecutor, Handler mainHandler) {
         if (!SystemProperties.getBoolean(SUPPORT_ONE_HANDED_MODE, false)) {
             Slog.w(TAG, "Device doesn't support OneHanded feature");
             return null;
@@ -145,12 +160,13 @@ public class OneHandedController {
         OneHandedDisplayAreaOrganizer organizer = new OneHandedDisplayAreaOrganizer(
                 context, displayController, animationController, tutorialHandler,
                 oneHandedBackgroundPanelOrganizer, mainExecutor);
+        OneHandedUiEventLogger oneHandedUiEventsLogger = new OneHandedUiEventLogger(uiEventLogger);
         IOverlayManager overlayManager = IOverlayManager.Stub.asInterface(
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         return new OneHandedController(context, displayController,
                 oneHandedBackgroundPanelOrganizer, organizer, touchHandler, tutorialHandler,
-                gestureHandler, timeoutHandler, overlayManager, taskStackListener, mainExecutor,
-                mainHandler).mImpl;
+                gestureHandler, timeoutHandler, oneHandedUiEventsLogger, overlayManager,
+                taskStackListener, mainExecutor, mainHandler).mImpl;
     }
 
     @VisibleForTesting
@@ -162,6 +178,7 @@ public class OneHandedController {
             OneHandedTutorialHandler tutorialHandler,
             OneHandedGestureHandler gestureHandler,
             OneHandedTimeoutHandler timeoutHandler,
+            OneHandedUiEventLogger uiEventsLogger,
             IOverlayManager overlayManager,
             TaskStackListenerImpl taskStackListener,
             ShellExecutor mainExecutor,
@@ -176,6 +193,8 @@ public class OneHandedController {
         mOverlayManager = overlayManager;
         mMainExecutor = mainExecutor;
         mMainHandler = mainHandler;
+        mOneHandedUiEventLogger = uiEventsLogger;
+        mTaskStackListener = taskStackListener;
 
         final float offsetPercentageConfig = context.getResources().getFraction(
                 R.fraction.config_one_handed_offset, 1, 1);
@@ -203,19 +222,6 @@ public class OneHandedController {
         setupGesturalOverlay();
         updateSettings();
 
-        taskStackListener.addListener(
-                new TaskStackListenerCallback() {
-                    @Override
-                    public void onTaskCreated(int taskId, ComponentName componentName) {
-                        stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
-                    }
-
-                    @Override
-                    public void onTaskMovedToFront(int taskId) {
-                        stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT);
-                    }
-                });
-
         mAccessibilityManager = (AccessibilityManager)
                 context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         mAccessibilityManager.addAccessibilityStateChangeListener(
@@ -234,6 +240,11 @@ public class OneHandedController {
      * Set one handed enabled or disabled by when user update settings
      */
     void setTaskChangeToExit(boolean enabled) {
+        if (enabled) {
+            mTaskStackListener.addListener(mTaskStackListenerCallback);
+        } else {
+            mTaskStackListener.removeListener(mTaskStackListenerCallback);
+        }
         mTaskChangeToExit = enabled;
     }
 
@@ -252,7 +263,8 @@ public class OneHandedController {
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
 
-            OneHandedEvents.writeEvent(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN);
+            mOneHandedUiEventLogger.writeEvent(
+                    OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN);
         }
     }
 
@@ -264,17 +276,12 @@ public class OneHandedController {
         }
     }
 
-    private void stopOneHanded(int event) {
-        if (!mTaskChangeToExit && event == OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_APP_TAPS_OUT) {
-            //Task change exit not enable, do nothing and return here.
-            return;
-        }
-
+    private void stopOneHanded(int uiEvent) {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
-            OneHandedEvents.writeEvent(event);
+            mDisplayAreaOrganizer.scheduleOffset(0, 0);
+            mTimeoutHandler.removeTimer();
+            mOneHandedUiEventLogger.writeEvent(uiEvent);
         }
-
-        stopOneHanded();
     }
 
     private void setThreeButtonModeEnabled(boolean enabled) {
@@ -292,11 +299,14 @@ public class OneHandedController {
 
     private void setupCallback() {
         mTouchHandler.registerTouchEventListener(() ->
-                stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_OVERSPACE_OUT));
+                stopOneHanded(OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_OVERSPACE_OUT));
         mDisplayAreaOrganizer.registerTransitionCallback(mTouchHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mGestureHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mTutorialHandler);
         mDisplayAreaOrganizer.registerTransitionCallback(mBackgroundPanelOrganizer);
+        if (mTaskChangeToExit) {
+            mTaskStackListener.addListener(mTaskStackListenerCallback);
+        }
     }
 
     private void setupSettingObservers() {
@@ -334,9 +344,9 @@ public class OneHandedController {
     private void onEnabledSettingChanged() {
         final boolean enabled = OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(
                 mContext.getContentResolver());
-        OneHandedEvents.writeEvent(enabled
-                ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON
-                : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF);
+        mOneHandedUiEventLogger.writeEvent(enabled
+                ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_ENABLED_ON
+                : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_ENABLED_OFF);
 
         setOneHandedEnabled(enabled);
 
@@ -349,25 +359,25 @@ public class OneHandedController {
     private void onTimeoutSettingChanged() {
         final int newTimeout = OneHandedSettingsUtil.getSettingsOneHandedModeTimeout(
                 mContext.getContentResolver());
-        int metricsId = OneHandedEvents.OneHandedSettingsTogglesEvent.INVALID.getId();
+        int metricsId = OneHandedUiEventLogger.OneHandedSettingsTogglesEvent.INVALID.getId();
         switch (newTimeout) {
             case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_NEVER:
-                metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER;
+                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_NEVER;
                 break;
             case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_SHORT_IN_SECONDS:
-                metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4;
+                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_4;
                 break;
             case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_MEDIUM_IN_SECONDS:
-                metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8;
+                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_8;
                 break;
             case OneHandedSettingsUtil.ONE_HANDED_TIMEOUT_LONG_IN_SECONDS:
-                metricsId = OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12;
+                metricsId = OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_TIMEOUT_SECONDS_12;
                 break;
             default:
                 // do nothing
                 break;
         }
-        OneHandedEvents.writeEvent(metricsId);
+        mOneHandedUiEventLogger.writeEvent(metricsId);
 
         if (mTimeoutHandler != null) {
             mTimeoutHandler.setTimeout(newTimeout);
@@ -377,9 +387,9 @@ public class OneHandedController {
     private void onTaskChangeExitSettingChanged() {
         final boolean enabled = OneHandedSettingsUtil.getSettingsTapsAppToExit(
                 mContext.getContentResolver());
-        OneHandedEvents.writeEvent(enabled
-                ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON
-                : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF);
+        mOneHandedUiEventLogger.writeEvent(enabled
+                ? OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON
+                : OneHandedUiEventLogger.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF);
 
         setTaskChangeToExit(enabled);
     }
@@ -397,9 +407,8 @@ public class OneHandedController {
     }
 
     private void setupTimeoutListener() {
-        mTimeoutHandler.registerTimeoutListener(timeoutTime -> {
-            stopOneHanded(OneHandedEvents.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT);
-        });
+        mTimeoutHandler.registerTimeoutListener(timeoutTime -> stopOneHanded(
+                OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_TIMEOUT_OUT));
     }
 
     /**

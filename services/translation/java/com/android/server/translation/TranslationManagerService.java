@@ -22,12 +22,16 @@ import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_FAIL;
 import android.content.Context;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.view.autofill.AutofillId;
 import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationManager.UiTranslationState;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
+
+import java.util.List;
 
 /**
  * Entry point service for translation management.
@@ -79,6 +83,19 @@ public final class TranslationManagerService
                 } else {
                     Slog.v(TAG, "onSessionCreated(): no service for " + userId);
                     receiver.send(STATUS_SYNC_CALL_FAIL, null);
+                }
+            }
+        }
+
+        @Override
+        public void updateUiTranslationState(@UiTranslationState int state,
+                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
+                int taskId, int userId) {
+            synchronized (mLock) {
+                final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
+                if (service != null) {
+                    service.updateUiTranslationState(state, sourceSpec, destSpec, viewIds,
+                            taskId);
                 }
             }
         }

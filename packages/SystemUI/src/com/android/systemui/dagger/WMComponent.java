@@ -27,6 +27,7 @@ import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -87,4 +88,8 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<TaskViewFactory> getTaskViewFactory();
+
+    /** Gets transitions */
+    @WMSingleton
+    Transitions getTransitions();
 }

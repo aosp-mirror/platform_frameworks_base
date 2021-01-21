@@ -323,6 +323,21 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Sets to containers adjacent to each other. Containers below two visible adjacent roots will
+     * be made invisible. This currently only applies to Task containers created by organizer.
+     * @param root1 the first root.
+     * @param root2 the second root.
+     */
+    @NonNull
+    public WindowContainerTransaction setAdjacentRoots(
+            @NonNull WindowContainerToken root1, @NonNull WindowContainerToken root2) {
+        mHierarchyOps.add(HierarchyOp.createForAdjacentRoots(
+                root1.asBinder(),
+                root2.asBinder()));
+        return this;
+    }
+
+    /**
      * Merges another WCT into this one.
      * @param transfer When true, this will transfer everything from other potentially leaving
      *                 other in an unusable state. When false, other is left alone, but
@@ -642,6 +657,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_REORDER = 1;
         public static final int HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT = 2;
         public static final int HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT = 3;
+        public static final int HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS = 4;
 
         private final int mType;
 
@@ -678,6 +694,11 @@ public final class WindowContainerTransaction implements Parcelable {
                 int[] windowingModes, int[] activityTypes) {
             return new HierarchyOp(HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT,
                     container, null, windowingModes, activityTypes, false);
+        }
+
+        public static HierarchyOp createForAdjacentRoots(IBinder root1, IBinder root2) {
+            return new HierarchyOp(HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS,
+                    root1, root2, null, null, false);
         }
 
         private HierarchyOp(int type, @NonNull IBinder container, @Nullable IBinder reparent,
@@ -728,6 +749,11 @@ public final class WindowContainerTransaction implements Parcelable {
             return mContainer;
         }
 
+        @NonNull
+        public IBinder getAdjacentRoot() {
+            return mReparent;
+        }
+
         public boolean getToTop() {
             return mToTop;
         }
@@ -756,6 +782,9 @@ public final class WindowContainerTransaction implements Parcelable {
                             + mReparent + "}";
                 case HIERARCHY_OP_TYPE_REORDER:
                     return "{reorder: " + mContainer + " to " + (mToTop ? "top" : "bottom") + "}";
+                case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
+                    return "{SetAdjacentRoot: container=" + mContainer
+                            + " adjacentRoot=" + mReparent + "}";
                 default:
                     return "{mType=" + mType + " container=" + mContainer + " reparent=" + mReparent
                             + " mToTop=" + mToTop + " mWindowingMode=" + mWindowingModes

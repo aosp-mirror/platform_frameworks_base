@@ -89,6 +89,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import android.annotation.SuppressLint;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
+import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -538,6 +539,25 @@ public class DisplayContentTests extends WindowTestsBase {
         // Verify not waiting for drawn windows on display with system decorations.
         setDrawnState(WindowStateAnimator.HAS_DRAWN, windows);
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+    }
+
+    @Test
+    public void testImeIsAttachedToDisplayForLetterboxedApp() {
+        final DisplayContent dc = mDisplayContent;
+        final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");
+        dc.setImeLayeringTarget(ws);
+
+        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false and
+        // hence isLetterboxedAppWindow() returns true.
+        ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
+        assertFalse("matchesRootDisplayAreaBounds() should return false",
+                ws.matchesRootDisplayAreaBounds());
+        assertTrue("isLetterboxedAppWindow() should return true", ws.isLetterboxedAppWindow());
+        assertTrue("IME shouldn't be attached to app",
+                dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
+                        .mActivityRecord.getSurfaceControl());
+        assertEquals("IME should be attached to display",
+                dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
     }
 
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
@@ -1446,6 +1466,33 @@ public class DisplayContentTests extends WindowTestsBase {
                 eq(recentsActivity));
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
         assertFalse(recentsActivity.hasFixedRotationTransform());
+    }
+
+    @Test
+    public void testClearIntermediateFixedRotation() throws RemoteException {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        mDisplayContent.setFixedRotationLaunchingApp(activity,
+                (mDisplayContent.getRotation() + 1) % 4);
+        // Create a window so FixedRotationAdjustmentsItem can be sent.
+        createWindow(null, TYPE_APPLICATION_STARTING, activity, "AppWin");
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setVisible(false);
+        clearInvocations(mAtm.getLifecycleManager());
+        // The first activity has applied fixed rotation but the second activity becomes the top
+        // before the transition is done and it has the same rotation as display, so the dispatched
+        // rotation adjustment of first activity must be cleared.
+        mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(activity2,
+                false /* checkOpening */);
+
+        final ArgumentCaptor<FixedRotationAdjustmentsItem> adjustmentsCaptor =
+                ArgumentCaptor.forClass(FixedRotationAdjustmentsItem.class);
+        verify(mAtm.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
+                eq(activity.app.getThread()), adjustmentsCaptor.capture());
+        assertFalse(activity.hasFixedRotationTransform());
+        final FixedRotationAdjustmentsItem clearAdjustments = FixedRotationAdjustmentsItem.obtain(
+                activity.token, null /* fixedRotationAdjustments */);
+        // The captor may match other items. The first one must be the item to clear adjustments.
+        assertEquals(clearAdjustments, adjustmentsCaptor.getAllValues().get(0));
     }
 
     @Test

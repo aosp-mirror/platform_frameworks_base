@@ -21,12 +21,12 @@ import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_EMPTY;
 import static android.app.ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_BACKGROUND;
-import static android.app.ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManager.PROCESS_STATE_RECEIVER;
 import static android.app.ActivityManager.PROCESS_STATE_SERVICE;
 import static android.app.ActivityManager.PROCESS_STATE_TOP;
+import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.util.DebugUtils.valueToString;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
@@ -69,7 +69,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
-import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
@@ -105,7 +104,6 @@ import java.util.function.Function;
  *  atest FrameworksServicesTests:ActivityManagerServiceTest
  */
 @SmallTest
-@FlakyTest(bugId = 113616538)
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
 
@@ -199,8 +197,8 @@ public class ActivityManagerServiceTest {
 
         // Uid state is not moving from background to foreground or vice versa.
         verifySeqCounterAndInteractions(uidRec,
-                PROCESS_STATE_IMPORTANT_BACKGROUND, // prevState
-                PROCESS_STATE_IMPORTANT_FOREGROUND, // curState
+                PROCESS_STATE_TRANSIENT_BACKGROUND, // prevState
+                PROCESS_STATE_IMPORTANT_BACKGROUND, // curState
                 42, // expectedGlobalCounter
                 1, // exptectedCurProcStateSeq
                 NETWORK_STATE_NO_CHANGE, // expectedBlockState

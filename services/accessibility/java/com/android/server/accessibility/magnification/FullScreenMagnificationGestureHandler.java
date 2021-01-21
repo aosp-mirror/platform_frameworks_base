@@ -141,12 +141,12 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     public FullScreenMagnificationGestureHandler(Context context,
             FullScreenMagnificationController fullScreenMagnificationController,
-            ScaleChangedListener listener,
+            Callback callback,
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
             @NonNull WindowMagnificationPromptController promptController,
             int displayId) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, listener);
+        super(displayId, detectTripleTap, detectShortcutTrigger, callback);
         if (DEBUG_ALL) {
             Log.i(mLogTag,
                     "FullScreenMagnificationGestureHandler(detectTripleTap = " + detectTripleTap
@@ -211,16 +211,14 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
     }
 
     @Override
-    public void notifyShortcutTriggered() {
-        if (mDetectShortcutTrigger) {
-            boolean wasMagnifying = mFullScreenMagnificationController.resetIfNeeded(mDisplayId,
-                    /* animate */ true);
-            if (wasMagnifying) {
-                clearAndTransitionToStateDetecting();
-            } else {
-                mPromptController.showNotificationIfNeeded();
-                mDetectingState.toggleShortcutTriggered();
-            }
+    public void handleShortcutTriggered() {
+        boolean wasMagnifying = mFullScreenMagnificationController.resetIfNeeded(mDisplayId,
+                /* animate */ true);
+        if (wasMagnifying) {
+            clearAndTransitionToStateDetecting();
+        } else {
+            mPromptController.showNotificationIfNeeded();
+            mDetectingState.toggleShortcutTriggered();
         }
     }
 
@@ -395,7 +393,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
             if (DEBUG_PANNING_SCALING) Slog.i(mLogTag, "Scaled content to: " + scale + "x");
             mFullScreenMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
-            mListener.onMagnificationScaleChanged(mDisplayId, getMode());
             return /* handled: */ true;
         }
 
@@ -869,6 +866,8 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
                 mPromptController.showNotificationIfNeeded();
                 zoomOn(up.getX(), up.getY());
             }
+
+            mCallback.onTripleTapped(mDisplayId, getMode());
         }
 
         private boolean isMagnifying() {

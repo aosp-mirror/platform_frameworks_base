@@ -35,7 +35,7 @@ interface IPackageInstallerSession {
     void write(String name, long offsetBytes, long lengthBytes, in ParcelFileDescriptor fd);
     void stageViaHardLink(String target);
 
-    void addChecksums(String name, in Checksum[] checksums);
+    void setChecksums(String name, in Checksum[] checksums, in byte[] signature);
 
     void removeSplit(String splitName);
 

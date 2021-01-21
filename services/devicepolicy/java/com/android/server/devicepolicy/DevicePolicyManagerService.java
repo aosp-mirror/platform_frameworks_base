@@ -378,6 +378,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String CREDENTIAL_MANAGEMENT_APP = "credentialManagementApp";
     private static final String NOT_CREDENTIAL_MANAGEMENT_APP = "notCredentialManagementApp";
 
+    private static final String NULL_STRING_ARRAY = "nullStringArray";
+
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
         DELEGATION_CERT_INSTALL,
@@ -4187,21 +4189,36 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * Calculates strictest (maximum) value for a given password property enforced by admin[s].
      */
     @Override
-    public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle) {
+    public PasswordMetrics getPasswordMinimumMetrics(@UserIdInt int userHandle,
+            boolean deviceWideOnly) {
         final CallerIdentity caller = getCallerIdentity();
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
-        return getPasswordMinimumMetricsUnchecked(userHandle);
+        return getPasswordMinimumMetricsUnchecked(userHandle, deviceWideOnly);
     }
 
     private PasswordMetrics getPasswordMinimumMetricsUnchecked(@UserIdInt int userId) {
+        return getPasswordMinimumMetricsUnchecked(userId, false);
+    }
+
+    private PasswordMetrics getPasswordMinimumMetricsUnchecked(@UserIdInt int userId,
+            boolean deviceWideOnly) {
         if (!mHasFeature) {
             new PasswordMetrics(CREDENTIAL_TYPE_NONE);
         }
         Preconditions.checkArgumentNonnegative(userId, "Invalid userId");
+        if (deviceWideOnly) {
+            Preconditions.checkArgument(!isManagedProfile(userId));
+        }
 
         ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>();
         synchronized (getLockObject()) {
-            List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userId);
+            final List<ActiveAdmin> admins;
+            if (deviceWideOnly) {
+                admins = getActiveAdminsForUserAndItsManagedProfilesLocked(userId,
+                        /* shouldIncludeProfileAdmins */ (user) -> false);
+            } else {
+                admins = getActiveAdminsForLockscreenPoliciesLocked(userId);
+            }
             for (ActiveAdmin admin : admins) {
                 final boolean isAdminOfUser = userId == admin.getUserHandle().getIdentifier();
                 // Use the password metrics from the admin in one of three cases:
@@ -4260,24 +4277,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int parentUser = getProfileParentId(profileUserId);
         enforceUserUnlocked(parentUser);
 
+        final boolean isSufficient;
         synchronized (getLockObject()) {
 
-            // Combine password policies across the user and its profiles. Profile admins are
-            // excluded since we only want explicit password requirements, while profile admin
-            // requirement are applicable only when the profile has unified challenge.
-            List<ActiveAdmin> admins = getActiveAdminsForUserAndItsManagedProfilesLocked(parentUser,
-                    /* shouldIncludeProfileAdmins */ (user) -> false);
-            ArrayList<PasswordMetrics> adminMetrics = new ArrayList<>(admins.size());
-            int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
-            for (ActiveAdmin admin : admins) {
-                adminMetrics.add(admin.mPasswordPolicy.getMinMetrics());
-                maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
-            }
+            int complexity = getAggregatedPasswordComplexityLocked(parentUser, true);
+            PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(parentUser, true);
 
             PasswordMetrics metrics = mLockSettingsInternal.getUserPasswordMetrics(parentUser);
-            return PasswordMetrics.validatePasswordMetrics(PasswordMetrics.merge(adminMetrics),
-                    maxRequiredComplexity, false, metrics).isEmpty();
+            final List<PasswordValidationError> passwordValidationErrors =
+                    PasswordMetrics.validatePasswordMetrics(
+                            minMetrics, complexity, false, metrics);
+            isSufficient = passwordValidationErrors.isEmpty();
         }
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.IS_ACTIVE_PASSWORD_SUFFICIENT_FOR_DEVICE)
+                .setStrings(mOwners.getProfileOwnerComponent(caller.getUserId()).getPackageName())
+                .write();
+        return isSufficient;
     }
 
     @Override
@@ -4380,7 +4396,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      */
     private boolean isPasswordSufficientForUserWithoutCheckpointLocked(
             @NonNull PasswordMetrics metrics, @UserIdInt int userId) {
-        final int complexity = getEffectivePasswordComplexityRequirementLocked(userId);
+        final int complexity = getAggregatedPasswordComplexityLocked(userId);
         PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userId);
         final List<PasswordValidationError> passwordValidationErrors =
                 PasswordMetrics.validatePasswordMetrics(
@@ -4482,9 +4498,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private int getEffectivePasswordComplexityRequirementLocked(@UserIdInt int userHandle) {
+    private int getAggregatedPasswordComplexityLocked(@UserIdInt int userHandle) {
+        return getAggregatedPasswordComplexityLocked(userHandle, false);
+    }
+
+    private int getAggregatedPasswordComplexityLocked(@UserIdInt int userHandle,
+            boolean deviceWideOnly) {
         ensureLocked();
-        List<ActiveAdmin> admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
+        final List<ActiveAdmin> admins;
+        if (deviceWideOnly) {
+            admins = getActiveAdminsForUserAndItsManagedProfilesLocked(userHandle,
+                    /* shouldIncludeProfileAdmins */ (user) -> false);
+        } else {
+            admins = getActiveAdminsForLockscreenPoliciesLocked(userHandle);
+        }
         int maxRequiredComplexity = PASSWORD_COMPLEXITY_NONE;
         for (ActiveAdmin admin : admins) {
             maxRequiredComplexity = Math.max(maxRequiredComplexity, admin.mPasswordComplexity);
@@ -4512,7 +4539,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public int getAggregatedPasswordComplexityForUser(int userId) {
+    public int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly) {
         if (!mHasFeature) {
             return PASSWORD_COMPLEXITY_NONE;
         }
@@ -4521,7 +4548,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userId));
 
         synchronized (getLockObject()) {
-            return getEffectivePasswordComplexityRequirementLocked(userId);
+            return getAggregatedPasswordComplexityLocked(userId, deviceWideOnly);
         }
     }
 
@@ -4716,7 +4743,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             final PasswordMetrics minMetrics = getPasswordMinimumMetricsUnchecked(userHandle);
             final List<PasswordValidationError> validationErrors;
-            final int complexity = getEffectivePasswordComplexityRequirementLocked(userHandle);
+            final int complexity = getAggregatedPasswordComplexityLocked(userHandle);
             // TODO: Consider changing validation API to take LockscreenCredential.
             if (password.isEmpty()) {
                 validationErrors = PasswordMetrics.validatePasswordMetrics(
@@ -8650,11 +8677,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         if (isCallerProfileOwnerOrDelegate && isProfileOwnerOfOrganizationOwnedDevice(userId)) {
             return true;
         }
-        //TODO(b/130844684): Temporarily allow profile owner on non-organization-owned devices
-        //to read device identifiers.
-        if (isCallerProfileOwnerOrDelegate) {
-            return true;
-        }
 
         return false;
     }
@@ -9564,59 +9586,86 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean setPermittedInputMethods(ComponentName who, List packageList) {
+    public boolean setPermittedInputMethods(ComponentName who, List packageList,
+            boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return false;
         }
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        final int userId = getProfileParentUserIfRequested(
+                caller.getUserId(), calledOnParentInstance);
+        if (calledOnParentInstance) {
+            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+            Preconditions.checkArgument(packageList == null || packageList.isEmpty(),
+                    "Permitted input methods must allow all input methods or only "
+                            + "system input methods when called on the parent instance of an "
+                            + "organization-owned device");
+        } else {
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        }
 
         if (packageList != null) {
-            List<InputMethodInfo> enabledImes = InputMethodManagerInternal.get()
-                    .getEnabledInputMethodListAsUser(caller.getUserId());
+            List<InputMethodInfo> enabledImes = mInjector.binderWithCleanCallingIdentity(() ->
+                    InputMethodManagerInternal.get().getEnabledInputMethodListAsUser(userId));
             if (enabledImes != null) {
                 List<String> enabledPackages = new ArrayList<String>();
                 for (InputMethodInfo ime : enabledImes) {
                     enabledPackages.add(ime.getPackageName());
                 }
                 if (!checkPackagesInPermittedListOrSystem(enabledPackages, packageList,
-                        caller.getUserId())) {
-                    Slog.e(LOG_TAG, "Cannot set permitted input methods, "
-                            + "because it contains already enabled input method.");
+                        userId)) {
+                    Slog.e(LOG_TAG, "Cannot set permitted input methods, because the list of "
+                            + "permitted input methods excludes an already-enabled input method.");
                     return false;
                 }
             }
         }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            final ActiveAdmin admin = getParentOfAdminIfRequired(
+                    getProfileOwnerOrDeviceOwnerLocked(caller), calledOnParentInstance);
             admin.permittedInputMethods = packageList;
             saveSettingsLocked(caller.getUserId());
         }
-        final String[] packageArray =
-                packageList != null ? ((List<String>) packageList).toArray(new String[0]) : null;
+
         DevicePolicyEventLogger
                 .createEvent(DevicePolicyEnums.SET_PERMITTED_INPUT_METHODS)
                 .setAdmin(who)
-                .setStrings(packageArray)
+                .setStrings(getStringArrayForLogging(packageList, calledOnParentInstance))
                 .write();
         return true;
     }
 
+    private String[] getStringArrayForLogging(List list, boolean calledOnParentInstance) {
+        List<String> stringList = new ArrayList<String>();
+        stringList.add(calledOnParentInstance ? CALLED_FROM_PARENT : NOT_CALLED_FROM_PARENT);
+        if (list == null) {
+            stringList.add(NULL_STRING_ARRAY);
+        } else {
+            stringList.addAll((List<String>) list);
+        }
+        return stringList.toArray(new String[0]);
+    }
+
     @Override
-    public List getPermittedInputMethods(ComponentName who) {
+    public List getPermittedInputMethods(ComponentName who, boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return null;
         }
         Objects.requireNonNull(who, "ComponentName is null");
 
         final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        if (calledOnParentInstance) {
+            Preconditions.checkCallAuthorization(isProfileOwnerOfOrganizationOwnedDevice(caller));
+        } else {
+            Preconditions.checkCallAuthorization(isDeviceOwner(caller) || isProfileOwner(caller));
+        }
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getProfileOwnerOrDeviceOwnerLocked(caller);
+            final ActiveAdmin admin = getParentOfAdminIfRequired(
+                    getProfileOwnerOrDeviceOwnerLocked(caller), calledOnParentInstance);
             return admin.permittedInputMethods;
         }
     }
@@ -9629,9 +9678,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         synchronized (getLockObject()) {
             List<String> result = null;
             // Only device or profile owners can have permitted lists set.
-            DevicePolicyData policy = getUserDataUnchecked(caller.getUserId());
-            for (int i = 0; i < policy.mAdminList.size(); i++) {
-                ActiveAdmin admin = policy.mAdminList.get(i);
+            List<ActiveAdmin> admins = getActiveAdminsForAffectedUserLocked(caller.getUserId());
+            for (ActiveAdmin admin: admins) {
                 List<String> fromAdmin = admin.permittedInputMethods;
                 if (fromAdmin != null) {
                     if (result == null) {
@@ -9662,7 +9710,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean isInputMethodPermittedByAdmin(ComponentName who, String packageName,
-            int userHandle) {
+            int userHandle, boolean calledOnParentInstance) {
         if (!mHasFeature) {
             return true;
         }
@@ -9671,7 +9719,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         enforceSystemCaller("query if an input method is disabled by admin");
 
         synchronized (getLockObject()) {
-            ActiveAdmin admin = getActiveAdminUncheckedLocked(who, userHandle);
+            ActiveAdmin admin = getParentOfAdminIfRequired(
+                    getActiveAdminUncheckedLocked(who, userHandle), calledOnParentInstance);
             if (admin == null) {
                 return false;
             }
@@ -15873,8 +15922,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Log.i(LOG_TAG,
                 String.format("Setting Enterprise ID to %s for user %d", organizationId, userId));
 
+        final String ownerPackage;
         synchronized (getLockObject()) {
-            ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
+            final ActiveAdmin owner = getDeviceOrProfileOwnerAdminLocked(userId);
             // As the caller is the system, it must specify the component name of the profile owner
             // as a safety check.
             Preconditions.checkCallAuthorization(
@@ -15882,6 +15932,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     String.format("The Profile Owner or Device Owner may only set the Enterprise ID"
                             + " on its own user, called on user %d but owner user is %d", userId,
                             owner.getUserHandle().getIdentifier()));
+            ownerPackage = owner.info.getPackageName();
             Preconditions.checkState(
                     TextUtils.isEmpty(owner.mOrganizationId) || owner.mOrganizationId.equals(
                             organizationId),
@@ -15899,5 +15950,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 saveSettingsLocked(userId);
             });
         }
+
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.SET_ORGANIZATION_ID)
+                .setAdmin(ownerPackage)
+                .setBoolean(isManagedProfile(userId))
+                .write();
     }
 }

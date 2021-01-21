@@ -28,6 +28,7 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByUriRequest;
+import android.app.appsearch.ReportUsageRequest;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchResultsShim;
 import android.app.appsearch.SearchSpec;
@@ -125,6 +126,14 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
         SearchResults searchResults =
                 mAppSearchSession.query(queryExpression, searchSpec, mExecutor);
         return new SearchResultsShimImpl(searchResults, mExecutor);
+    }
+
+    @Override
+    @NonNull
+    public ListenableFuture<Void> reportUsage(@NonNull ReportUsageRequest request) {
+        SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
+        mAppSearchSession.reportUsage(request, mExecutor, future::set);
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 
     @Override

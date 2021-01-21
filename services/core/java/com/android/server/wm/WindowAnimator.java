@@ -222,6 +222,7 @@ public class WindowAnimator {
 
         mService.destroyPreservedSurfaceLocked();
 
+        mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         executeAfterPrepareSurfacesRunnables();
 
         if (DEBUG_WINDOW_TRACE) {

@@ -136,7 +136,9 @@ package android {
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
+    field public static final String MANAGE_TEST_NETWORKS = "android.permission.MANAGE_TEST_NETWORKS";
     field public static final String MANAGE_TIME_AND_ZONE_DETECTION = "android.permission.MANAGE_TIME_AND_ZONE_DETECTION";
+    field public static final String MANAGE_UI_TRANSLATION = "android.permission.MANAGE_UI_TRANSLATION";
     field public static final String MANAGE_USB = "android.permission.MANAGE_USB";
     field public static final String MANAGE_USERS = "android.permission.MANAGE_USERS";
     field public static final String MANAGE_USER_OEM_UNLOCK_STATE = "android.permission.MANAGE_USER_OEM_UNLOCK_STATE";
@@ -253,6 +255,7 @@ package android {
     field public static final String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
     field public static final String USER_ACTIVITY = "android.permission.USER_ACTIVITY";
+    field public static final String USE_BACKGROUND_BLUR = "android.permission.USE_BACKGROUND_BLUR";
     field public static final String USE_RESERVED_DISK = "android.permission.USE_RESERVED_DISK";
     field public static final String WHITELIST_AUTO_REVOKE_PERMISSIONS = "android.permission.WHITELIST_AUTO_REVOKE_PERMISSIONS";
     field public static final String WHITELIST_RESTRICTED_PERMISSIONS = "android.permission.WHITELIST_RESTRICTED_PERMISSIONS";
@@ -284,6 +287,8 @@ package android {
     field public static final int sdkVersion = 16844304; // 0x1010610
     field public static final int supportsAmbientMode = 16844173; // 0x101058d
     field public static final int userRestriction = 16844164; // 0x1010584
+    field public static final int windowBackgroundBlurEnabled = 16844316; // 0x101061c
+    field public static final int windowBackgroundBlurRadius = 16844315; // 0x101061b
   }
 
   public static final class R.bool {
@@ -369,6 +374,8 @@ package android.app {
     method @RequiresPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) public void removeOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener);
     method public void setDeviceLocales(@NonNull android.os.LocaleList);
     method @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS) public static void setPersistentVrThread(int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean startProfile(@NonNull android.os.UserHandle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public boolean stopProfile(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_USERS) public boolean switchUser(@NonNull android.os.UserHandle);
   }
 
@@ -1945,6 +1952,7 @@ package android.content {
     field public static final String SYSTEM_UPDATE_SERVICE = "system_update";
     field public static final String TETHERING_SERVICE = "tethering";
     field public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
+    field public static final String UI_TRANSLATION_SERVICE = "ui_translation";
     field public static final String VR_SERVICE = "vrmanager";
     field public static final String WIFI_NL80211_SERVICE = "wifinl80211";
     field @Deprecated public static final String WIFI_RTT_SERVICE = "rttmanager";
@@ -2337,6 +2345,7 @@ package android.content.pm {
     field public static final String EXTRA_REQUEST_PERMISSIONS_RESULTS = "android.content.pm.extra.REQUEST_PERMISSIONS_RESULTS";
     field public static final String FEATURE_BROADCAST_RADIO = "android.hardware.broadcastradio";
     field public static final String FEATURE_CONTEXT_HUB = "android.hardware.context_hub";
+    field public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
     field public static final String FEATURE_INCREMENTAL_DELIVERY = "android.software.incremental_delivery";
     field public static final String FEATURE_REBOOT_ESCROW = "android.hardware.reboot_escrow";
     field public static final String FEATURE_TELEPHONY_CARRIERLOCK = "android.hardware.telephony.carrierlock";
@@ -2571,6 +2580,18 @@ package android.debug {
   public class AdbManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING) public boolean isAdbWifiQrSupported();
     method @RequiresPermission(android.Manifest.permission.MANAGE_DEBUGGING) public boolean isAdbWifiSupported();
+  }
+
+}
+
+package android.graphics.drawable {
+
+  public final class BackgroundBlurDrawable extends android.graphics.drawable.Drawable {
+    ctor @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public BackgroundBlurDrawable();
+    method public void setBlurRadius(int);
+    method public void setColor(@ColorInt int);
+    method public void setCornerRadius(float);
+    method public void setCornerRadius(float, float, float, float);
   }
 
 }
@@ -4396,7 +4417,8 @@ package android.location {
     method public boolean isLocationEnabledForUser(@NonNull android.os.UserHandle);
     method public boolean isProviderEnabledForUser(@NonNull String, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@NonNull String);
-    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String);
+    method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String, @Nullable String);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.UPDATE_APP_OPS_STATS}) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
@@ -7310,157 +7332,157 @@ package android.net.apf {
 
 package android.net.metrics {
 
-  public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class ApfProgramEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class ApfProgramEvent.Builder {
-    ctor public ApfProgramEvent.Builder();
-    method @NonNull public android.net.metrics.ApfProgramEvent build();
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
-    method @NonNull public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
+  @Deprecated public static final class ApfProgramEvent.Builder {
+    ctor @Deprecated public ApfProgramEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent build();
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setActualLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setCurrentRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setFilteredRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setFlags(boolean, boolean);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.ApfProgramEvent.Builder setProgramLength(int);
   }
 
-  public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class ApfStats implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class ApfStats.Builder {
-    ctor public ApfStats.Builder();
-    method @NonNull public android.net.metrics.ApfStats build();
-    method @NonNull public android.net.metrics.ApfStats.Builder setDroppedRas(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setDurationMs(long);
-    method @NonNull public android.net.metrics.ApfStats.Builder setMatchingRas(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setParseErrors(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setReceivedRas(int);
-    method @NonNull public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
+  @Deprecated public static final class ApfStats.Builder {
+    ctor @Deprecated public ApfStats.Builder();
+    method @Deprecated @NonNull public android.net.metrics.ApfStats build();
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setDroppedRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setDurationMs(long);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setMatchingRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setMaxProgramSize(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setParseErrors(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdates(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAll(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setProgramUpdatesAllowingMulticast(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setReceivedRas(int);
+    method @Deprecated @NonNull public android.net.metrics.ApfStats.Builder setZeroLifetimeRas(int);
   }
 
-  public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class DhcpClientEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class DhcpClientEvent.Builder {
-    ctor public DhcpClientEvent.Builder();
-    method @NonNull public android.net.metrics.DhcpClientEvent build();
-    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
-    method @NonNull public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
+  @Deprecated public static final class DhcpClientEvent.Builder {
+    ctor @Deprecated public DhcpClientEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.DhcpClientEvent build();
+    method @Deprecated @NonNull public android.net.metrics.DhcpClientEvent.Builder setDurationMs(int);
+    method @Deprecated @NonNull public android.net.metrics.DhcpClientEvent.Builder setMsg(String);
   }
 
-  public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public DhcpErrorEvent(int);
-    method public static int errorCodeWithOption(int, int);
-    field public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
-    field public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
-    field public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
-    field public static final int DHCP_ERROR = 4; // 0x4
-    field public static final int DHCP_INVALID_OPTION_LENGTH = 67305472; // 0x4030000
-    field public static final int DHCP_NO_COOKIE = 67502080; // 0x4060000
-    field public static final int DHCP_NO_MSG_TYPE = 67371008; // 0x4040000
-    field public static final int DHCP_UNKNOWN_MSG_TYPE = 67436544; // 0x4050000
-    field public static final int L2_ERROR = 1; // 0x1
-    field public static final int L2_TOO_SHORT = 16842752; // 0x1010000
-    field public static final int L2_WRONG_ETH_TYPE = 16908288; // 0x1020000
-    field public static final int L3_ERROR = 2; // 0x2
-    field public static final int L3_INVALID_IP = 33751040; // 0x2030000
-    field public static final int L3_NOT_IPV4 = 33685504; // 0x2020000
-    field public static final int L3_TOO_SHORT = 33619968; // 0x2010000
-    field public static final int L4_ERROR = 3; // 0x3
-    field public static final int L4_NOT_UDP = 50397184; // 0x3010000
-    field public static final int L4_WRONG_PORT = 50462720; // 0x3020000
-    field public static final int MISC_ERROR = 5; // 0x5
-    field public static final int PARSING_ERROR = 84082688; // 0x5030000
-    field public static final int RECEIVE_ERROR = 84017152; // 0x5020000
+  @Deprecated public final class DhcpErrorEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public DhcpErrorEvent(int);
+    method @Deprecated public static int errorCodeWithOption(int, int);
+    field @Deprecated public static final int BOOTP_TOO_SHORT = 67174400; // 0x4010000
+    field @Deprecated public static final int BUFFER_UNDERFLOW = 83951616; // 0x5010000
+    field @Deprecated public static final int DHCP_BAD_MAGIC_COOKIE = 67239936; // 0x4020000
+    field @Deprecated public static final int DHCP_ERROR = 4; // 0x4
+    field @Deprecated public static final int DHCP_INVALID_OPTION_LENGTH = 67305472; // 0x4030000
+    field @Deprecated public static final int DHCP_NO_COOKIE = 67502080; // 0x4060000
+    field @Deprecated public static final int DHCP_NO_MSG_TYPE = 67371008; // 0x4040000
+    field @Deprecated public static final int DHCP_UNKNOWN_MSG_TYPE = 67436544; // 0x4050000
+    field @Deprecated public static final int L2_ERROR = 1; // 0x1
+    field @Deprecated public static final int L2_TOO_SHORT = 16842752; // 0x1010000
+    field @Deprecated public static final int L2_WRONG_ETH_TYPE = 16908288; // 0x1020000
+    field @Deprecated public static final int L3_ERROR = 2; // 0x2
+    field @Deprecated public static final int L3_INVALID_IP = 33751040; // 0x2030000
+    field @Deprecated public static final int L3_NOT_IPV4 = 33685504; // 0x2020000
+    field @Deprecated public static final int L3_TOO_SHORT = 33619968; // 0x2010000
+    field @Deprecated public static final int L4_ERROR = 3; // 0x3
+    field @Deprecated public static final int L4_NOT_UDP = 50397184; // 0x3010000
+    field @Deprecated public static final int L4_WRONG_PORT = 50462720; // 0x3020000
+    field @Deprecated public static final int MISC_ERROR = 5; // 0x5
+    field @Deprecated public static final int PARSING_ERROR = 84082688; // 0x5030000
+    field @Deprecated public static final int RECEIVE_ERROR = 84017152; // 0x5020000
   }
 
-  public class IpConnectivityLog {
-    ctor public IpConnectivityLog();
-    method public boolean log(long, @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(@NonNull String, @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(@NonNull android.net.Network, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(int, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
-    method public boolean log(@NonNull android.net.metrics.IpConnectivityLog.Event);
+  @Deprecated public class IpConnectivityLog {
+    ctor @Deprecated public IpConnectivityLog();
+    method @Deprecated public boolean log(long, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(@NonNull String, @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(@NonNull android.net.Network, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(int, @NonNull int[], @NonNull android.net.metrics.IpConnectivityLog.Event);
+    method @Deprecated public boolean log(@NonNull android.net.metrics.IpConnectivityLog.Event);
   }
 
-  public static interface IpConnectivityLog.Event extends android.os.Parcelable {
+  @Deprecated public static interface IpConnectivityLog.Event extends android.os.Parcelable {
   }
 
-  public final class IpManagerEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public IpManagerEvent(int, long);
-    field public static final int COMPLETE_LIFECYCLE = 3; // 0x3
-    field public static final int ERROR_INTERFACE_NOT_FOUND = 8; // 0x8
-    field public static final int ERROR_INVALID_PROVISIONING = 7; // 0x7
-    field public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6; // 0x6
-    field public static final int ERROR_STARTING_IPV4 = 4; // 0x4
-    field public static final int ERROR_STARTING_IPV6 = 5; // 0x5
-    field public static final int PROVISIONING_FAIL = 2; // 0x2
-    field public static final int PROVISIONING_OK = 1; // 0x1
+  @Deprecated public final class IpManagerEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public IpManagerEvent(int, long);
+    field @Deprecated public static final int COMPLETE_LIFECYCLE = 3; // 0x3
+    field @Deprecated public static final int ERROR_INTERFACE_NOT_FOUND = 8; // 0x8
+    field @Deprecated public static final int ERROR_INVALID_PROVISIONING = 7; // 0x7
+    field @Deprecated public static final int ERROR_STARTING_IPREACHABILITYMONITOR = 6; // 0x6
+    field @Deprecated public static final int ERROR_STARTING_IPV4 = 4; // 0x4
+    field @Deprecated public static final int ERROR_STARTING_IPV6 = 5; // 0x5
+    field @Deprecated public static final int PROVISIONING_FAIL = 2; // 0x2
+    field @Deprecated public static final int PROVISIONING_OK = 1; // 0x1
   }
 
-  public final class IpReachabilityEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public IpReachabilityEvent(int);
-    field public static final int NUD_FAILED = 512; // 0x200
-    field public static final int NUD_FAILED_ORGANIC = 1024; // 0x400
-    field public static final int PROBE = 256; // 0x100
-    field public static final int PROVISIONING_LOST = 768; // 0x300
-    field public static final int PROVISIONING_LOST_ORGANIC = 1280; // 0x500
+  @Deprecated public final class IpReachabilityEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public IpReachabilityEvent(int);
+    field @Deprecated public static final int NUD_FAILED = 512; // 0x200
+    field @Deprecated public static final int NUD_FAILED_ORGANIC = 1024; // 0x400
+    field @Deprecated public static final int PROBE = 256; // 0x100
+    field @Deprecated public static final int PROVISIONING_LOST = 768; // 0x300
+    field @Deprecated public static final int PROVISIONING_LOST_ORGANIC = 1280; // 0x500
   }
 
-  public final class NetworkEvent implements android.net.metrics.IpConnectivityLog.Event {
-    ctor public NetworkEvent(int, long);
-    ctor public NetworkEvent(int);
-    field public static final int NETWORK_CAPTIVE_PORTAL_FOUND = 4; // 0x4
-    field public static final int NETWORK_CONNECTED = 1; // 0x1
-    field public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12; // 0xc
-    field public static final int NETWORK_DISCONNECTED = 7; // 0x7
-    field public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
-    field public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
-    field public static final int NETWORK_LINGER = 5; // 0x5
-    field public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
-    field public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
-    field public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
-    field public static final int NETWORK_UNLINGER = 6; // 0x6
-    field public static final int NETWORK_VALIDATED = 2; // 0x2
-    field public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
+  @Deprecated public final class NetworkEvent implements android.net.metrics.IpConnectivityLog.Event {
+    ctor @Deprecated public NetworkEvent(int, long);
+    ctor @Deprecated public NetworkEvent(int);
+    field @Deprecated public static final int NETWORK_CAPTIVE_PORTAL_FOUND = 4; // 0x4
+    field @Deprecated public static final int NETWORK_CONNECTED = 1; // 0x1
+    field @Deprecated public static final int NETWORK_CONSECUTIVE_DNS_TIMEOUT_FOUND = 12; // 0xc
+    field @Deprecated public static final int NETWORK_DISCONNECTED = 7; // 0x7
+    field @Deprecated public static final int NETWORK_FIRST_VALIDATION_PORTAL_FOUND = 10; // 0xa
+    field @Deprecated public static final int NETWORK_FIRST_VALIDATION_SUCCESS = 8; // 0x8
+    field @Deprecated public static final int NETWORK_LINGER = 5; // 0x5
+    field @Deprecated public static final int NETWORK_PARTIAL_CONNECTIVITY = 13; // 0xd
+    field @Deprecated public static final int NETWORK_REVALIDATION_PORTAL_FOUND = 11; // 0xb
+    field @Deprecated public static final int NETWORK_REVALIDATION_SUCCESS = 9; // 0x9
+    field @Deprecated public static final int NETWORK_UNLINGER = 6; // 0x6
+    field @Deprecated public static final int NETWORK_VALIDATED = 2; // 0x2
+    field @Deprecated public static final int NETWORK_VALIDATION_FAILED = 3; // 0x3
   }
 
-  public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
+  @Deprecated public final class RaEvent implements android.net.metrics.IpConnectivityLog.Event {
   }
 
-  public static final class RaEvent.Builder {
-    ctor public RaEvent.Builder();
-    method @NonNull public android.net.metrics.RaEvent build();
-    method @NonNull public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
-    method @NonNull public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
+  @Deprecated public static final class RaEvent.Builder {
+    ctor @Deprecated public RaEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.RaEvent build();
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateDnsslLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updatePrefixPreferredLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updatePrefixValidLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateRdnssLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateRouteInfoLifetime(long);
+    method @Deprecated @NonNull public android.net.metrics.RaEvent.Builder updateRouterLifetime(long);
   }
 
-  public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
-    method @NonNull public static String getProbeName(int);
-    field public static final int DNS_FAILURE = 0; // 0x0
-    field public static final int DNS_SUCCESS = 1; // 0x1
-    field public static final int PROBE_DNS = 0; // 0x0
-    field public static final int PROBE_FALLBACK = 4; // 0x4
-    field public static final int PROBE_HTTP = 1; // 0x1
-    field public static final int PROBE_HTTPS = 2; // 0x2
-    field public static final int PROBE_PAC = 3; // 0x3
-    field public static final int PROBE_PRIVDNS = 5; // 0x5
+  @Deprecated public final class ValidationProbeEvent implements android.net.metrics.IpConnectivityLog.Event {
+    method @Deprecated @NonNull public static String getProbeName(int);
+    field @Deprecated public static final int DNS_FAILURE = 0; // 0x0
+    field @Deprecated public static final int DNS_SUCCESS = 1; // 0x1
+    field @Deprecated public static final int PROBE_DNS = 0; // 0x0
+    field @Deprecated public static final int PROBE_FALLBACK = 4; // 0x4
+    field @Deprecated public static final int PROBE_HTTP = 1; // 0x1
+    field @Deprecated public static final int PROBE_HTTPS = 2; // 0x2
+    field @Deprecated public static final int PROBE_PAC = 3; // 0x3
+    field @Deprecated public static final int PROBE_PRIVDNS = 5; // 0x5
   }
 
-  public static final class ValidationProbeEvent.Builder {
-    ctor public ValidationProbeEvent.Builder();
-    method @NonNull public android.net.metrics.ValidationProbeEvent build();
-    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
-    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
-    method @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
+  @Deprecated public static final class ValidationProbeEvent.Builder {
+    ctor @Deprecated public ValidationProbeEvent.Builder();
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent build();
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setDurationMs(long);
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setProbeType(int, boolean);
+    method @Deprecated @NonNull public android.net.metrics.ValidationProbeEvent.Builder setReturnCode(int);
   }
 
 }
@@ -7733,7 +7755,10 @@ package android.nfc {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enable();
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableNdefPush();
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean enableSecureNfc(boolean);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isAlwaysOnEnabled();
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean isAlwaysOnSupported();
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean removeNfcUnlockHandler(android.nfc.NfcAdapter.NfcUnlockHandler);
+    method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setAlwaysOn(boolean);
     method public void setNdefPushMessage(android.nfc.NdefMessage, android.app.Activity, int);
     field public static final int FLAG_NDEF_PUSH_NO_CONFIRM = 1; // 0x1
   }
@@ -9723,6 +9748,7 @@ package android.service.notification {
     method public void onActionInvoked(@NonNull String, @NonNull android.app.Notification.Action, int);
     method public void onAllowedAdjustmentsChanged();
     method @NonNull public final android.os.IBinder onBind(@Nullable android.content.Intent);
+    method public void onNotificationClicked(@NonNull String);
     method public void onNotificationDirectReplied(@NonNull String);
     method @Nullable public abstract android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification);
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
@@ -10229,6 +10255,7 @@ package android.telecom {
     method @Nullable public android.telecom.PhoneAccountHandle getPhoneAccountHandle();
     method @Nullable public final String getTelecomCallId();
     method @Deprecated public void onAudioStateChanged(android.telecom.AudioState);
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean);
     method public final void resetConnectionTime();
     method public void setCallDirection(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public final void setConnectTimeMillis(@IntRange(from=0) long);
@@ -10405,6 +10432,7 @@ package android.telecom {
   }
 
   public final class RemoteConnection {
+    method @RequiresPermission(android.Manifest.permission.READ_CONTACTS) public void onCallFilteringCompleted(boolean, boolean);
     method @Deprecated public void setAudioState(android.telecom.AudioState);
   }
 
@@ -10588,6 +10616,7 @@ package android.telephony {
   public static final class CarrierConfigManager.Wifi {
     field public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT = "wifi.hotspot_maximum_client_count";
     field public static final String KEY_PREFIX = "wifi.";
+    field public static final String KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED = "wifi.suggestion_ssid_list_with_mac_randomization_disabled";
   }
 
   public final class CarrierRestrictionRules implements android.os.Parcelable {
@@ -13355,13 +13384,16 @@ package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
+    method public boolean isSystemApplicationOverlay();
+    method @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public void setSystemApplicationOverlay(boolean);
     method public final void setUserActivityTimeout(long);
+    field @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public static final int FLAG_BLUR_BEHIND = 4; // 0x4
     field @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS) public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
     field @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW) public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 16; // 0x10
-    field @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public static final int SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY = 8; // 0x8
+    field @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public int backgroundBlurRadius;
   }
 
-  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
+  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
   }
 
 }
@@ -13428,6 +13460,17 @@ package android.view.contentcapture {
 
   public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
     method @Nullable public android.view.autofill.AutofillId getParentAutofillId();
+  }
+
+}
+
+package android.view.translation {
+
+  public final class UiTranslationManager {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, int);
   }
 
 }

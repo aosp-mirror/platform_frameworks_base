@@ -686,11 +686,12 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     protected void updateMediaHostContentMargins(ViewGroup mediaHostView) {
         if (mUsingMediaPlayer) {
-            int marginStart = mContentMarginStart;
+            int marginStart = 0;
+            int marginEnd = 0;
             if (mUsingHorizontalLayout) {
-                marginStart = 0;
+                marginEnd = mContentMarginEnd;
             }
-            updateMargins(mediaHostView, marginStart, mContentMarginEnd);
+            updateMargins(mediaHostView, marginStart, marginEnd);
         }
     }
 

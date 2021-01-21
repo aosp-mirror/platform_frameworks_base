@@ -113,6 +113,13 @@ public class FingerprintEnrollClient extends EnrollClient<IBiometricsFingerprint
     }
 
     @Override
+    public void onError(int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+    }
+
+    @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
     }

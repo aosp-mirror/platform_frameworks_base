@@ -275,6 +275,10 @@ public class NotificationStackScrollLayoutController {
         mView.setIsShadeOpening(isOpening);
     }
 
+    public void setSectionPadding(float padding) {
+        mView.setSectionPadding(padding);
+    }
+
     private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
         @Override
         public void onMenuClicked(

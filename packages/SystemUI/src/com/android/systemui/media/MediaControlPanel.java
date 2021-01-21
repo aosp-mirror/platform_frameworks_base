@@ -29,6 +29,7 @@ import android.graphics.drawable.Icon;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
+import android.os.SystemProperties;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewOutlineProvider;
@@ -63,6 +64,11 @@ import dagger.Lazy;
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
     private static final float DISABLED_ALPHA = 0.38f;
+
+    private final boolean mShowAppName = SystemProperties.getBoolean(
+            "persist.sysui.qs_media_show_app_name", false);
+    private final boolean mShowDeviceName = SystemProperties.getBoolean(
+            "persist.sysui.qs_media_show_device_name", false);
 
     private static final Intent SETTINGS_INTENT = new Intent(ACTION_MEDIA_CONTROLS_SETTINGS);
 
@@ -265,6 +271,9 @@ public class MediaControlPanel {
         // App title
         TextView appName = mViewHolder.getAppName();
         appName.setText(data.getApp());
+        appName.setVisibility(mShowAppName ? View.VISIBLE : View.GONE);
+        setVisibleAndAlpha(collapsedSet, R.id.app_name, mShowAppName);
+        setVisibleAndAlpha(expandedSet, R.id.app_name, mShowAppName);
 
         // Artist name
         TextView artistText = mViewHolder.getArtistText();
@@ -277,6 +286,10 @@ public class MediaControlPanel {
         mViewHolder.getSeamless().setOnClickListener(v -> {
             mMediaOutputDialogFactory.create(data.getPackageName(), true);
         });
+        TextView mDeviceName = mViewHolder.getSeamlessText();
+        mDeviceName.setVisibility(mShowDeviceName ? View.VISIBLE : View.GONE);
+        setVisibleAndAlpha(collapsedSet, R.id.media_seamless_text, mShowDeviceName);
+        setVisibleAndAlpha(expandedSet, R.id.media_seamless_text, mShowDeviceName);
 
         ImageView iconView = mViewHolder.getSeamlessIcon();
         TextView deviceName = mViewHolder.getSeamlessText();

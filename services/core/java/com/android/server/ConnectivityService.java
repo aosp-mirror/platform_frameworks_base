@@ -888,6 +888,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         /**
+         * Get a reference to the system keystore.
+         */
+        public KeyStore getKeyStore() {
+            return KeyStore.getInstance();
+        }
+
+        /**
          * @see ProxyTracker
          */
         public ProxyTracker makeProxyTracker(@NonNull Context context,
@@ -981,7 +988,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mProxyTracker = mDeps.makeProxyTracker(mContext, mHandler);
 
         mNetd = netd;
-        mKeyStore = KeyStore.getInstance();
+        mKeyStore = mDeps.getKeyStore();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
         mAppOpsManager = (AppOpsManager) mContext.getSystemService(Context.APP_OPS_SERVICE);
         mLocationPermissionChecker = new LocationPermissionChecker(mContext);
@@ -1108,11 +1115,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         userAllContext.registerReceiver(
                 mIntentReceiver, intentFilter, NETWORK_STACK, mHandler);
 
-        try {
-            mNMS.registerObserver(mDataActivityObserver);
-        } catch (RemoteException e) {
-            loge("Error registering observer :" + e);
-        }
+        mNetworkActivityTracker = new LegacyNetworkActivityTracker(mContext, mNMS);
 
         mSettingsObserver = new SettingsObserver(mContext, mHandler);
         registerSettingsCallbacks();
@@ -1644,7 +1647,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private NetworkCapabilities getNetworkCapabilitiesInternal(NetworkAgentInfo nai) {
         if (nai == null) return null;
         synchronized (nai) {
-            if (nai.networkCapabilities == null) return null;
             return networkCapabilitiesRestrictedForCallerPermissions(
                     nai.networkCapabilities, Binder.getCallingPid(), mDeps.getCallingUid());
         }
@@ -1796,30 +1798,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private INetworkManagementEventObserver mDataActivityObserver = new BaseNetworkObserver() {
-        @Override
-        public void interfaceClassDataActivityChanged(int transportType, boolean active,
-                long tsNanos, int uid) {
-            sendDataActivityBroadcast(transportTypeToLegacyType(transportType), active, tsNanos);
-        }
-    };
-
-    // This is deprecated and only to support legacy use cases.
-    private int transportTypeToLegacyType(int type) {
-        switch (type) {
-            case NetworkCapabilities.TRANSPORT_CELLULAR:
-                return ConnectivityManager.TYPE_MOBILE;
-            case NetworkCapabilities.TRANSPORT_WIFI:
-                return ConnectivityManager.TYPE_WIFI;
-            case NetworkCapabilities.TRANSPORT_BLUETOOTH:
-                return ConnectivityManager.TYPE_BLUETOOTH;
-            case NetworkCapabilities.TRANSPORT_ETHERNET:
-                return ConnectivityManager.TYPE_ETHERNET;
-            default:
-                loge("Unexpected transport in transportTypeToLegacyType: " + type);
-        }
-        return ConnectivityManager.TYPE_NONE;
-    }
     /**
      * Ensures that the system cannot call a particular method.
      */
@@ -2268,20 +2246,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         sendStickyBroadcast(makeGeneralIntent(info, bcastType));
     }
 
-    private void sendDataActivityBroadcast(int deviceType, boolean active, long tsNanos) {
-        Intent intent = new Intent(ConnectivityManager.ACTION_DATA_ACTIVITY_CHANGE);
-        intent.putExtra(ConnectivityManager.EXTRA_DEVICE_TYPE, deviceType);
-        intent.putExtra(ConnectivityManager.EXTRA_IS_ACTIVE, active);
-        intent.putExtra(ConnectivityManager.EXTRA_REALTIME_NS, tsNanos);
-        final long ident = Binder.clearCallingIdentity();
-        try {
-            mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL,
-                    RECEIVE_DATA_ACTIVITY_CHANGE, null, null, 0, null, null);
-        } finally {
-            Binder.restoreCallingIdentity(ident);
-        }
-    }
-
     private void sendStickyBroadcast(Intent intent) {
         synchronized (this) {
             if (!mSystemReady
@@ -2386,74 +2350,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return false;
     }
 
-    /**
-     * Setup data activity tracking for the given network.
-     *
-     * Every {@code setupDataActivityTracking} should be paired with a
-     * {@link #removeDataActivityTracking} for cleanup.
-     */
-    private void setupDataActivityTracking(NetworkAgentInfo networkAgent) {
-        final String iface = networkAgent.linkProperties.getInterfaceName();
-
-        final int timeout;
-        final int type;
-
-        if (networkAgent.networkCapabilities.hasTransport(
-                NetworkCapabilities.TRANSPORT_CELLULAR)) {
-            timeout = Settings.Global.getInt(mContext.getContentResolver(),
-                                             Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
-                                             10);
-            type = NetworkCapabilities.TRANSPORT_CELLULAR;
-        } else if (networkAgent.networkCapabilities.hasTransport(
-                NetworkCapabilities.TRANSPORT_WIFI)) {
-            timeout = Settings.Global.getInt(mContext.getContentResolver(),
-                                             Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
-                                             15);
-            type = NetworkCapabilities.TRANSPORT_WIFI;
-        } else {
-            return; // do not track any other networks
-        }
-
-        if (timeout > 0 && iface != null) {
-            try {
-                mNMS.addIdleTimer(iface, timeout, type);
-            } catch (Exception e) {
-                // You shall not crash!
-                loge("Exception in setupDataActivityTracking " + e);
-            }
-        }
-    }
-
-    /**
-     * Remove data activity tracking when network disconnects.
-     */
-    private void removeDataActivityTracking(NetworkAgentInfo networkAgent) {
-        final String iface = networkAgent.linkProperties.getInterfaceName();
-        final NetworkCapabilities caps = networkAgent.networkCapabilities;
-
-        if (iface != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
-                              caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))) {
-            try {
-                // the call fails silently if no idle timer setup for this interface
-                mNMS.removeIdleTimer(iface);
-            } catch (Exception e) {
-                loge("Exception in removeDataActivityTracking " + e);
-            }
-        }
-    }
-
-    /**
-     * Update data activity tracking when network state is updated.
-     */
-    private void updateDataActivityTracking(NetworkAgentInfo newNetwork,
-            NetworkAgentInfo oldNetwork) {
-        if (newNetwork != null) {
-            setupDataActivityTracking(newNetwork);
-        }
-        if (oldNetwork != null) {
-            removeDataActivityTracking(oldNetwork);
-        }
-    }
     /**
      * Reads the network specific MTU size from resources.
      * and set it on it's iface.
@@ -2768,7 +2664,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private boolean isLiveNetworkAgent(NetworkAgentInfo nai, int what) {
-        if (nai.network == null) return false;
         final NetworkAgentInfo officialNai = getNetworkAgentInfoForNetwork(nai.network);
         if (officialNai != null && officialNai.equals(nai)) return true;
         if (officialNai != null || VDBG) {
@@ -3461,6 +3356,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // available until we've told netd to delete it below.
             mNetworkForNetId.remove(nai.network.getNetId());
         }
+        propagateUnderlyingNetworkCapabilities(nai.network);
         // Remove all previously satisfied requests.
         for (int i = 0; i < nai.numNetworkRequests(); i++) {
             NetworkRequest request = nai.requestAt(i);
@@ -3473,10 +3369,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
         nai.clearLingerState();
-        propagateUnderlyingNetworkCapabilities(nai.network);
+        // TODO: this loop, and the mLegacyTypeTracker.remove just below it, seem redundant given
+        // there's a full rematch right after. Currently, deleting it breaks tests that check for
+        // the default network disconnecting. Find out why, fix the rematch code, and delete this.
         if (nai.isSatisfyingRequest(mDefaultRequest.requestId)) {
             mDefaultNetworkNai = null;
-            updateDataActivityTracking(null /* newNetwork */, nai);
+            mNetworkActivityTracker.updateDataActivityTracking(null /* newNetwork */, nai);
             notifyLockdownVpn(nai);
             ensureNetworkTransitionWakelock(nai.toShortString());
         }
@@ -4984,16 +4882,23 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mVpnBlockedUidRanges = newVpnBlockedUidRanges;
     }
 
+    private boolean isLockdownVpnEnabled() {
+        return mKeyStore.contains(Credentials.LOCKDOWN_VPN);
+    }
+
     @Override
     public boolean updateLockdownVpn() {
-        if (mDeps.getCallingUid() != Process.SYSTEM_UID) {
-            logw("Lockdown VPN only available to AID_SYSTEM");
+        // Allow the system UID for the system server and for Settings.
+        // Also, for unit tests, allow the process that ConnectivityService is running in.
+        if (mDeps.getCallingUid() != Process.SYSTEM_UID
+                && Binder.getCallingPid() != Process.myPid()) {
+            logw("Lockdown VPN only available to system process or AID_SYSTEM");
             return false;
         }
 
         synchronized (mVpns) {
             // Tear down existing lockdown if profile was removed
-            mLockdownEnabled = LockdownVpnTracker.isEnabled();
+            mLockdownEnabled = isLockdownVpnEnabled();
             if (mLockdownEnabled) {
                 byte[] profileTag = mKeyStore.get(Credentials.LOCKDOWN_VPN);
                 if (profileTag == null) {
@@ -5014,7 +4919,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     logw("VPN for user " + user + " not ready yet. Skipping lockdown");
                     return false;
                 }
-                setLockdownTracker(new LockdownVpnTracker(mContext, this, mHandler, vpn, profile));
+                setLockdownTracker(
+                        new LockdownVpnTracker(mContext, this, mHandler, mKeyStore, vpn,  profile));
             } else {
                 setLockdownTracker(null);
             }
@@ -5102,7 +5008,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         synchronized (mVpns) {
             // Can't set always-on VPN if legacy VPN is already in lockdown mode.
-            if (LockdownVpnTracker.isEnabled()) {
+            if (isLockdownVpnEnabled()) {
                 return false;
             }
 
@@ -5208,7 +5114,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             userVpn = new Vpn(mHandler.getLooper(), mContext, mNMS, mNetd, userId, mKeyStore);
             mVpns.put(userId, userVpn);
-            if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
+            if (mUserManager.getUserInfo(userId).isPrimary() && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
             }
         }
@@ -5292,7 +5198,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void onUserUnlocked(int userId) {
         synchronized (mVpns) {
             // User present may be sent because of an unlock, which might mean an unlocked keystore.
-            if (mUserManager.getUserInfo(userId).isPrimary() && LockdownVpnTracker.isEnabled()) {
+            if (mUserManager.getUserInfo(userId).isPrimary() && isLockdownVpnEnabled()) {
                 updateLockdownVpn();
             } else {
                 startAlwaysOnVpn(userId);
@@ -6059,6 +5965,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public Network registerNetworkAgent(INetworkAgent na, NetworkInfo networkInfo,
             LinkProperties linkProperties, NetworkCapabilities networkCapabilities,
             int currentScore, NetworkAgentConfig networkAgentConfig, int providerId) {
+        Objects.requireNonNull(networkInfo, "networkInfo must not be null");
+        Objects.requireNonNull(linkProperties, "linkProperties must not be null");
+        Objects.requireNonNull(networkCapabilities, "networkCapabilities must not be null");
+        Objects.requireNonNull(networkAgentConfig, "networkAgentConfig must not be null");
         if (networkCapabilities.hasTransport(TRANSPORT_TEST)) {
             enforceAnyPermissionOf(Manifest.permission.MANAGE_TEST_NETWORKS);
         } else {
@@ -7294,7 +7204,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (oldDefaultNetwork != null) {
                 mLingerMonitor.noteLingerDefaultNetwork(oldDefaultNetwork, newDefaultNetwork);
             }
-            updateDataActivityTracking(newDefaultNetwork, oldDefaultNetwork);
+            mNetworkActivityTracker.updateDataActivityTracking(
+                    newDefaultNetwork, oldDefaultNetwork);
             // Notify system services of the new default.
             makeDefault(newDefaultNetwork);
 
@@ -7573,10 +7484,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (!networkAgent.everConnected && state == NetworkInfo.State.CONNECTED) {
             networkAgent.everConnected = true;
-
-            if (networkAgent.linkProperties == null) {
-                Log.wtf(TAG, networkAgent.toShortString() + " connected with null LinkProperties");
-            }
 
             // NetworkCapabilities need to be set before sending the private DNS config to
             // NetworkMonitor, otherwise NetworkMonitor cannot determine if validation is required.
@@ -7896,10 +7803,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     @Override
-    public void startNattKeepaliveWithFd(Network network, FileDescriptor fd, int resourceId,
+    public void startNattKeepaliveWithFd(Network network, ParcelFileDescriptor pfd, int resourceId,
             int intervalSeconds, ISocketKeepaliveCallback cb, String srcAddr,
             String dstAddr) {
         try {
+            final FileDescriptor fd = pfd.getFileDescriptor();
             mKeepaliveTracker.startNattKeepalive(
                     getNetworkAgentInfoForNetwork(network), fd, resourceId,
                     intervalSeconds, cb,
@@ -7907,24 +7815,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } finally {
             // FileDescriptors coming from AIDL calls must be manually closed to prevent leaks.
             // startNattKeepalive calls Os.dup(fd) before returning, so we can close immediately.
-            if (fd != null && Binder.getCallingPid() != Process.myPid()) {
-                IoUtils.closeQuietly(fd);
+            if (pfd != null && Binder.getCallingPid() != Process.myPid()) {
+                IoUtils.closeQuietly(pfd);
             }
         }
     }
 
     @Override
-    public void startTcpKeepalive(Network network, FileDescriptor fd, int intervalSeconds,
+    public void startTcpKeepalive(Network network, ParcelFileDescriptor pfd, int intervalSeconds,
             ISocketKeepaliveCallback cb) {
         try {
             enforceKeepalivePermission();
+            final FileDescriptor fd = pfd.getFileDescriptor();
             mKeepaliveTracker.startTcpKeepalive(
                     getNetworkAgentInfoForNetwork(network), fd, intervalSeconds, cb);
         } finally {
             // FileDescriptors coming from AIDL calls must be manually closed to prevent leaks.
             // startTcpKeepalive calls Os.dup(fd) before returning, so we can close immediately.
-            if (fd != null && Binder.getCallingPid() != Process.myPid()) {
-                IoUtils.closeQuietly(fd);
+            if (pfd != null && Binder.getCallingPid() != Process.myPid()) {
+                IoUtils.closeQuietly(pfd);
             }
         }
     }
@@ -8649,5 +8558,146 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         notifyDataStallSuspected(p, network.getNetId());
+    }
+
+    private final LegacyNetworkActivityTracker mNetworkActivityTracker;
+
+    /**
+     * Class used for updating network activity tracking with netd and notify network activity
+     * changes.
+     */
+    private static final class LegacyNetworkActivityTracker {
+        private final Context mContext;
+        private final INetworkManagementService mNMS;
+
+        LegacyNetworkActivityTracker(@NonNull Context context,
+                        @NonNull INetworkManagementService nms) {
+            mContext = context;
+            mNMS = nms;
+            try {
+                mNMS.registerObserver(mDataActivityObserver);
+            } catch (RemoteException e) {
+                loge("Error registering observer :" + e);
+            }
+        }
+
+        // TODO: Migrate away the dependency with INetworkManagementEventObserver.
+        private final INetworkManagementEventObserver mDataActivityObserver =
+                new BaseNetworkObserver() {
+                    @Override
+                    public void interfaceClassDataActivityChanged(int transportType, boolean active,
+                            long tsNanos, int uid) {
+                        sendDataActivityBroadcast(transportTypeToLegacyType(transportType), active,
+                                tsNanos);
+                    }
+        };
+
+        // This is deprecated and only to support legacy use cases.
+        private int transportTypeToLegacyType(int type) {
+            switch (type) {
+                case NetworkCapabilities.TRANSPORT_CELLULAR:
+                    return ConnectivityManager.TYPE_MOBILE;
+                case NetworkCapabilities.TRANSPORT_WIFI:
+                    return ConnectivityManager.TYPE_WIFI;
+                case NetworkCapabilities.TRANSPORT_BLUETOOTH:
+                    return ConnectivityManager.TYPE_BLUETOOTH;
+                case NetworkCapabilities.TRANSPORT_ETHERNET:
+                    return ConnectivityManager.TYPE_ETHERNET;
+                default:
+                    loge("Unexpected transport in transportTypeToLegacyType: " + type);
+            }
+            return ConnectivityManager.TYPE_NONE;
+        }
+
+        public void sendDataActivityBroadcast(int deviceType, boolean active, long tsNanos) {
+            final Intent intent = new Intent(ConnectivityManager.ACTION_DATA_ACTIVITY_CHANGE);
+            intent.putExtra(ConnectivityManager.EXTRA_DEVICE_TYPE, deviceType);
+            intent.putExtra(ConnectivityManager.EXTRA_IS_ACTIVE, active);
+            intent.putExtra(ConnectivityManager.EXTRA_REALTIME_NS, tsNanos);
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                mContext.sendOrderedBroadcastAsUser(intent, UserHandle.ALL,
+                        RECEIVE_DATA_ACTIVITY_CHANGE,
+                        null /* resultReceiver */,
+                        null /* scheduler */,
+                        0 /* initialCode */,
+                        null /* initialData */,
+                        null /* initialExtra */);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        /**
+         * Setup data activity tracking for the given network.
+         *
+         * Every {@code setupDataActivityTracking} should be paired with a
+         * {@link #removeDataActivityTracking} for cleanup.
+         */
+        private void setupDataActivityTracking(NetworkAgentInfo networkAgent) {
+            final String iface = networkAgent.linkProperties.getInterfaceName();
+
+            final int timeout;
+            final int type;
+
+            if (networkAgent.networkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_CELLULAR)) {
+                timeout = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.DATA_ACTIVITY_TIMEOUT_MOBILE,
+                        10);
+                type = NetworkCapabilities.TRANSPORT_CELLULAR;
+            } else if (networkAgent.networkCapabilities.hasTransport(
+                    NetworkCapabilities.TRANSPORT_WIFI)) {
+                timeout = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.DATA_ACTIVITY_TIMEOUT_WIFI,
+                        15);
+                type = NetworkCapabilities.TRANSPORT_WIFI;
+            } else {
+                return; // do not track any other networks
+            }
+
+            if (timeout > 0 && iface != null) {
+                try {
+                    // TODO: Access INetd directly instead of NMS
+                    mNMS.addIdleTimer(iface, timeout, type);
+                } catch (Exception e) {
+                    // You shall not crash!
+                    loge("Exception in setupDataActivityTracking " + e);
+                }
+            }
+        }
+
+        /**
+         * Remove data activity tracking when network disconnects.
+         */
+        private void removeDataActivityTracking(NetworkAgentInfo networkAgent) {
+            final String iface = networkAgent.linkProperties.getInterfaceName();
+            final NetworkCapabilities caps = networkAgent.networkCapabilities;
+
+            if (iface != null && (caps.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                    || caps.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))) {
+                try {
+                    // the call fails silently if no idle timer setup for this interface
+                    // TODO: Access INetd directly instead of NMS
+                    mNMS.removeIdleTimer(iface);
+                } catch (Exception e) {
+                    // You shall not crash!
+                    loge("Exception in removeDataActivityTracking " + e);
+                }
+            }
+        }
+
+        /**
+         * Update data activity tracking when network state is updated.
+         */
+        public void updateDataActivityTracking(NetworkAgentInfo newNetwork,
+                NetworkAgentInfo oldNetwork) {
+            if (newNetwork != null) {
+                setupDataActivityTracking(newNetwork);
+            }
+            if (oldNetwork != null) {
+                removeDataActivityTracking(oldNetwork);
+            }
+        }
     }
 }

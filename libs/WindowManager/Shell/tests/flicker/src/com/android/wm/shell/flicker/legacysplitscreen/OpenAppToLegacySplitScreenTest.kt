@@ -29,6 +29,7 @@ import com.android.server.wm.flicker.dsl.runWithFlicker
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.appPairsDividerBecomesVisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
 import org.junit.FixMethodOrder
@@ -41,8 +42,7 @@ import org.junit.runners.Parameterized
  * Test open app to split screen.
  * To run this test: `atest WMShellFlickerTests:OpenAppToLegacySplitScreenTest`
  */
-// TODO: Add back to pre-submit when stable.
-//@Presubmit
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -53,28 +53,37 @@ class OpenAppToLegacySplitScreenTest(
     @Test
     fun OpenAppToLegacySplitScreenTest() {
         val testTag = "OpenAppToLegacySplitScreenTest"
-
+        val helper = WindowManagerStateHelper()
         runWithFlicker(transitionSetup) {
             withTestName { testTag }
             repeat { SplitScreenHelper.TEST_REPETITIONS }
+            setup {
+                eachRun {
+                    splitScreenApp.launchViaIntent()
+                    device.pressHome()
+                    this.setRotation(rotation)
+                }
+            }
             transitions {
-                splitScreenApp.launchViaIntent()
-                device.pressHome()
-                this.setRotation(rotation)
                 device.launchSplitScreen()
+                helper.waitForAppTransitionIdle()
             }
             assertions {
                 windowManagerTrace {
-                    visibleWindowsShownMoreThanOneConsecutiveEntry()
+                    visibleWindowsShownMoreThanOneConsecutiveEntry(
+                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                                    LETTER_BOX_NAME)
+                    )
                     appWindowBecomesVisible(splitScreenApp.getPackage())
                 }
 
                 layersTrace {
-                    navBarLayerIsAlwaysVisible(bugId = 140855415)
+                    navBarLayerIsAlwaysVisible()
                     noUncoveredRegions(rotation, enabled = false)
-                    statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                    statusBarLayerIsAlwaysVisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME))
+                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                                    LETTER_BOX_NAME))
                     appPairsDividerBecomesVisible()
                     layerBecomesVisible(splitScreenApp.getPackage())
                 }
@@ -92,7 +101,8 @@ class OpenAppToLegacySplitScreenTest(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
-            val supportedRotations = intArrayOf(Surface.ROTATION_0, Surface.ROTATION_90)
+            // TODO(b/161435597) causes the test not to work on 90 degrees
+            val supportedRotations = intArrayOf(Surface.ROTATION_0)
             return supportedRotations.map { arrayOf(Surface.rotationToString(it), it) }
         }
     }

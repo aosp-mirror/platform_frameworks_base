@@ -174,10 +174,6 @@ public class Am extends BaseCommand {
                 instrument.noWindowAnimation = true;
             } else if (opt.equals("--no-hidden-api-checks")) {
                 instrument.disableHiddenApiChecks = true;
-            } else if (opt.equals("--no-test-api-checks")) {
-                // TODO(satayev): remove this option, only kept for backwards compatibility with
-                // cached tradefed instance
-                instrument.disableTestApiChecks = false;
             } else if (opt.equals("--no-test-api-access")) {
                 instrument.disableTestApiChecks = false;
             } else if (opt.equals("--no-isolated-storage")) {
@@ -200,7 +196,6 @@ public class Am extends BaseCommand {
         }
 
         instrument.componentNameArg = nextArgRequired();
-
         instrument.run();
     }
 }

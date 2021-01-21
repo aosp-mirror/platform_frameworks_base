@@ -34,6 +34,8 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+
 /**
  * Test class for {@link MeasuredEnergyStats}.
  *
@@ -114,7 +116,7 @@ public class MeasuredEnergyStatsTest {
     }
 
     @Test
-    public void testReadWriteSummaryParcel() {
+    public void testCreateAndReadSummaryFromParcel() {
         final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
         supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
         supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
@@ -126,35 +128,21 @@ public class MeasuredEnergyStatsTest {
         stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 40, true);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
-
-
-        final boolean[] newSupportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
-        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
-        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = true; // switched from false to true
-        newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_OTHER] = false; // switched true to false
-        MeasuredEnergyStats newStats = new MeasuredEnergyStats(newSupportedEnergyBuckets);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
         parcel.setDataPosition(0);
-        MeasuredEnergyStats.readSummaryFromParcel(newStats, parcel);
+        MeasuredEnergyStats newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(parcel);
 
         for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            if (!newSupportedEnergyBuckets[i]) {
-                assertFalse(newStats.isEnergyBucketSupported(i));
-                assertEquals(ENERGY_DATA_UNAVAILABLE, newStats.getAccumulatedBucketEnergy(i));
-            } else if (!supportedEnergyBuckets[i]) {
-                assertTrue(newStats.isEnergyBucketSupported(i));
-                assertEquals(0L, newStats.getAccumulatedBucketEnergy(i));
-            } else {
-                assertTrue(newStats.isEnergyBucketSupported(i));
-                assertEquals(stats.getAccumulatedBucketEnergy(i),
-                        newStats.getAccumulatedBucketEnergy(i));
-            }
+            assertEquals(stats.isEnergyBucketSupported(i),
+                    newStats.isEnergyBucketSupported(i));
+            assertEquals(stats.getAccumulatedBucketEnergy(i),
+                    newStats.getAccumulatedBucketEnergy(i));
         }
         parcel.recycle();
     }
 
     @Test
-    public void testCreateAndReadSummaryFromParcel() {
+    public void testCreateAndReadSummaryFromParcel_existingTemplate() {
         final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
         supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
         supportedEnergyBuckets[ENERGY_BUCKET_SCREEN_DOZE] = false;
@@ -171,7 +159,7 @@ public class MeasuredEnergyStatsTest {
         stats.updateBucket(ENERGY_BUCKET_SCREEN_OTHER, 63, true);
 
         final Parcel parcel = Parcel.obtain();
-        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel);
+        MeasuredEnergyStats.writeSummaryToParcel(stats, parcel, false);
 
         final boolean[] newSupportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
         newSupportedEnergyBuckets[ENERGY_BUCKET_SCREEN_ON] = true;
@@ -197,6 +185,55 @@ public class MeasuredEnergyStatsTest {
             }
         }
         parcel.recycle();
+    }
+
+    @Test
+    public void testCreateAndReadSummaryFromParcel_skipZero() {
+        final boolean[] supportedEnergyBuckets = new boolean[NUMBER_ENERGY_BUCKETS];
+        Arrays.fill(supportedEnergyBuckets, true);
+
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(supportedEnergyBuckets);
+        // Accumulate energy in one bucket, the rest should be zero
+        stats.updateBucket(ENERGY_BUCKET_SCREEN_ON, 200, true);
+
+        final Parcel includeZerosParcel = Parcel.obtain();
+        MeasuredEnergyStats.writeSummaryToParcel(stats, includeZerosParcel, false);
+        includeZerosParcel.setDataPosition(0);
+
+        MeasuredEnergyStats newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(
+                includeZerosParcel);
+
+        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
+            if (i == ENERGY_BUCKET_SCREEN_ON) {
+                assertEquals(stats.isEnergyBucketSupported(i),
+                        newStats.isEnergyBucketSupported(i));
+                assertEquals(stats.getAccumulatedBucketEnergy(i),
+                        newStats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertTrue(newStats.isEnergyBucketSupported(i));
+                assertEquals(0L, newStats.getAccumulatedBucketEnergy(i));
+            }
+        }
+        includeZerosParcel.recycle();
+
+        final Parcel skipZerosParcel = Parcel.obtain();
+        MeasuredEnergyStats.writeSummaryToParcel(stats, skipZerosParcel, true);
+        skipZerosParcel.setDataPosition(0);
+
+        newStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(skipZerosParcel);
+
+        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
+            if (i == ENERGY_BUCKET_SCREEN_ON) {
+                assertEquals(stats.isEnergyBucketSupported(i),
+                        newStats.isEnergyBucketSupported(i));
+                assertEquals(stats.getAccumulatedBucketEnergy(i),
+                        newStats.getAccumulatedBucketEnergy(i));
+            } else {
+                assertFalse(newStats.isEnergyBucketSupported(i));
+                assertEquals(ENERGY_DATA_UNAVAILABLE, newStats.getAccumulatedBucketEnergy(i));
+            }
+        }
+        skipZerosParcel.recycle();
     }
 
     @Test

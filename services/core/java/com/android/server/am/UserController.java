@@ -45,8 +45,10 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.BroadcastOptions;
 import android.app.Dialog;
 import android.app.IStopUserCallback;
 import android.app.IUserSwitchObserver;
@@ -518,7 +520,9 @@ class UserController implements Handler.Callback {
                         | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
                 mInjector.broadcastIntent(intent, null, resultTo, 0, null, null,
                         new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                        AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                        AppOpsManager.OP_NONE,
+                        getTemporaryAppWhitelistBroadcastOptions().toBundle(), true,
+                        false, MY_PID, SYSTEM_UID,
                         Binder.getCallingUid(), Binder.getCallingPid(), userId);
             }
         }
@@ -628,19 +632,30 @@ class UserController implements Handler.Callback {
                     Binder.getCallingUid(), Binder.getCallingPid(), userId);
         }
 
-        if (getUserInfo(userId).isManagedProfile()) {
+        final UserInfo userInfo = getUserInfo(userId);
+        if (userInfo.isProfile()) {
             UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
             if (parent != null) {
-                final Intent profileUnlockedIntent = new Intent(
-                        Intent.ACTION_MANAGED_PROFILE_UNLOCKED);
-                profileUnlockedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
-                profileUnlockedIntent.addFlags(
-                        Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                                | Intent.FLAG_RECEIVER_FOREGROUND);
-                mInjector.broadcastIntent(profileUnlockedIntent,
-                        null, null, 0, null, null, null, AppOpsManager.OP_NONE,
-                        null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
-                        Binder.getCallingPid(), parent.id);
+                // Send PROFILE_ACCESSIBLE broadcast to the parent user if a profile was unlocked
+                broadcastProfileAccessibleStateChanged(userId, parent.id,
+                        Intent.ACTION_PROFILE_ACCESSIBLE);
+
+                //TODO(b/175704931): send ACTION_MANAGED_PROFILE_AVAILABLE
+
+                // Also send MANAGED_PROFILE_UNLOCKED broadcast to the parent user
+                // if a managed profile was unlocked
+                if (userInfo.isManagedProfile()) {
+                    final Intent profileUnlockedIntent = new Intent(
+                            Intent.ACTION_MANAGED_PROFILE_UNLOCKED);
+                    profileUnlockedIntent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
+                    profileUnlockedIntent.addFlags(
+                            Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                                    | Intent.FLAG_RECEIVER_FOREGROUND);
+                    mInjector.broadcastIntent(profileUnlockedIntent,
+                            null, null, 0, null, null, null, AppOpsManager.OP_NONE,
+                            null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
+                            Binder.getCallingPid(), parent.id);
+                }
             }
         }
 
@@ -753,7 +768,9 @@ class UserController implements Handler.Callback {
                         }
                     }, 0, null, null,
                     new String[]{android.Manifest.permission.RECEIVE_BOOT_COMPLETED},
-                    AppOpsManager.OP_NONE, null, true, false, MY_PID, SYSTEM_UID,
+                    AppOpsManager.OP_NONE,
+                    getTemporaryAppWhitelistBroadcastOptions().toBundle(), true,
+                    false, MY_PID, SYSTEM_UID,
                     callingUid, callingPid, userId);
         });
     }
@@ -761,13 +778,44 @@ class UserController implements Handler.Callback {
     int restartUser(final int userId, final boolean foreground) {
         return stopUser(userId, /* force= */ true, /* allowDelayedLocking= */ false,
                 /* stopUserCallback= */ null, new KeyEvictedCallback() {
-            @Override
-            public void keyEvicted(@UserIdInt int userId) {
-                // Post to the same handler that this callback is called from to ensure the user
-                // cleanup is complete before restarting.
-                mHandler.post(() -> UserController.this.startUser(userId, foreground));
-            }
-        });
+                    @Override
+                    public void keyEvicted(@UserIdInt int userId) {
+                        // Post to the same handler that this callback is called from to ensure
+                        // the user cleanup is complete before restarting.
+                        mHandler.post(() -> UserController.this.startUser(userId, foreground));
+                    }
+                });
+    }
+
+    /**
+     * Stops a user only if it's a profile, with a more relaxed permission requirement:
+     * {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     * To be called from ActivityManagerService.
+     * @param userId the id of the user to stop.
+     * @return true if the operation was successful.
+     */
+    boolean stopProfile(final @UserIdInt int userId) {
+        if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
+                == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(
+                    "You either need MANAGE_USERS or INTERACT_ACROSS_USERS_FULL permission to "
+                            + "stop a profile");
+        }
+
+        final UserInfo userInfo = getUserInfo(userId);
+        if (userInfo == null || !userInfo.isProfile()) {
+            throw new IllegalArgumentException("User " + userId + " is not a profile");
+        }
+
+        enforceShellRestriction(UserManager.DISALLOW_DEBUGGING_FEATURES, userId);
+        synchronized (mLock) {
+            return stopUsersLU(userId, /* force= */ true, /* allowDelayedLocking= */
+                    false, /* stopUserCallback= */ null, /* keyEvictedCallback= */ null)
+                    == ActivityManager.USER_OP_SUCCESS;
+        }
     }
 
     int stopUser(final int userId, final boolean force, boolean allowDelayedLocking,
@@ -1144,6 +1192,17 @@ class UserController implements Handler.Callback {
                 null, null, 0, null, null, null, AppOpsManager.OP_NONE,
                 null, false, false, MY_PID, SYSTEM_UID, Binder.getCallingUid(),
                 Binder.getCallingPid(), UserHandle.USER_ALL);
+
+        // Send PROFILE_INACCESSIBLE broadcast if a profile was stopped
+        final UserInfo userInfo = getUserInfo(userId);
+        if (userInfo.isProfile()) {
+            UserInfo parent = mInjector.getUserManager().getProfileParent(userId);
+            if (parent != null) {
+                broadcastProfileAccessibleStateChanged(userId, parent.id,
+                        Intent.ACTION_PROFILE_INACCESSIBLE);
+                //TODO(b/175704931): send ACTION_MANAGED_PROFILE_UNAVAILABLE
+            }
+        }
     }
 
     /**
@@ -1208,6 +1267,37 @@ class UserController implements Handler.Callback {
         }
     }
 
+    /**
+     * Starts a user only if it's a profile, with a more relaxed permission requirement:
+     * {@link android.Manifest.permission#MANAGE_USERS} or
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL}.
+     * To be called from ActivityManagerService.
+     * @param userId the id of the user to start.
+     * @return true if the operation was successful.
+     */
+    boolean startProfile(final @UserIdInt int userId) {
+        if (mInjector.checkCallingPermission(android.Manifest.permission.MANAGE_USERS)
+                == PackageManager.PERMISSION_DENIED && mInjector.checkCallingPermission(
+                android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(
+                    "You either need MANAGE_USERS or INTERACT_ACROSS_USERS_FULL permission to "
+                            + "start a profile");
+        }
+
+        final UserInfo userInfo = getUserInfo(userId);
+        if (userInfo == null || !userInfo.isProfile()) {
+            throw new IllegalArgumentException("User " + userId + " is not a profile");
+        }
+
+        if (!userInfo.isEnabled()) {
+            Slog.w(TAG, "Cannot start disabled profile #" + userId);
+            return false;
+        }
+
+        return startUserNoChecks(userId, /* foreground= */ false, /* unlockListener= */ null);
+    }
+
     boolean startUser(final @UserIdInt int userId, final boolean foreground) {
         return startUser(userId, foreground, null);
     }
@@ -1248,9 +1338,13 @@ class UserController implements Handler.Callback {
             final @UserIdInt int userId,
             final boolean foreground,
             @Nullable IProgressListener unlockListener) {
-
         checkCallingPermission(INTERACT_ACROSS_USERS_FULL, "startUser");
 
+        return startUserNoChecks(userId, foreground, unlockListener);
+    }
+
+    private boolean startUserNoChecks(final @UserIdInt int userId, final boolean foreground,
+            @Nullable IProgressListener unlockListener) {
         TimingsTraceAndSlog t = new TimingsTraceAndSlog();
 
         t.traceBegin("startUser-" + userId + "-" + (foreground ? "fg" : "bg"));
@@ -1872,6 +1966,25 @@ class UserController implements Handler.Callback {
         }
     }
 
+    /**
+     * Broadcasts to the parent user when a profile is started+unlocked/stopped.
+     * @param userId the id of the profile
+     * @param parentId the id of the parent user
+     * @param intentAction either ACTION_PROFILE_ACCESSIBLE or ACTION_PROFILE_INACCESSIBLE
+     */
+    private void broadcastProfileAccessibleStateChanged(@UserIdInt int userId,
+            @UserIdInt int parentId,
+            String intentAction) {
+        final Intent intent = new Intent(intentAction);
+        intent.putExtra(Intent.EXTRA_USER, UserHandle.of(userId));
+        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                | Intent.FLAG_RECEIVER_FOREGROUND);
+        mInjector.broadcastIntent(intent, /* resolvedType= */ null, /* resultTo= */
+                null, /* resultCode= */ 0, /* resultData= */ null, /* resultExtras= */
+                null, /* requiredPermissions= */ null, AppOpsManager.OP_NONE, /* bOptions= */
+                null, /* ordered= */ false, /* sticky= */ false, MY_PID, SYSTEM_UID,
+                Binder.getCallingUid(), Binder.getCallingPid(), parentId);
+    }
 
     int handleIncomingUser(int callingPid, int callingUid, @UserIdInt int userId, boolean allowAll,
             int allowMode, String name, String callerPackage) {
@@ -2695,6 +2808,20 @@ class UserController implements Handler.Callback {
             }
             clearSessionId(userId);
         }
+    }
+
+    private BroadcastOptions getTemporaryAppWhitelistBroadcastOptions() {
+        long duration = 10_000;
+        final ActivityManagerInternal amInternal =
+                LocalServices.getService(ActivityManagerInternal.class);
+        if (amInternal != null) {
+            duration = amInternal.getBootTimeTempAllowListDuration();
+        }
+        final BroadcastOptions bOptions = BroadcastOptions.makeBasic();
+        bOptions.setTemporaryAppWhitelistDuration(
+                BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+                duration);
+        return bOptions;
     }
 
     /**

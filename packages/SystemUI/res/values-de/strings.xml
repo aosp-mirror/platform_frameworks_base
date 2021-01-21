@@ -358,12 +358,9 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Neuer Nutzer"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WLAN"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
-    <!-- no translation found for quick_settings_airplane_safe_label (2665758539772645899) -->
-    <skip />
-    <!-- no translation found for quick_settings_networks_available (1875138606855420438) -->
-    <skip />
-    <!-- no translation found for quick_settings_networks_unavailable (1167847013337940082) -->
-    <skip />
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Flugsicher"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Netzwerke verfügbar"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Netzwerke nicht verfügbar"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nicht verbunden"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Kein Netz"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"WLAN aus"</string>
@@ -938,7 +935,7 @@
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"WLAN ist deaktiviert"</string>
     <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth ist deaktiviert"</string>
-    <string name="dnd_is_off" msgid="3185706903793094463">"\"Bitte nicht stören\" ist deaktiviert"</string>
+    <string name="dnd_is_off" msgid="3185706903793094463">"„Bitte nicht stören“ ist deaktiviert"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"\"Bitte nicht stören\" wurde von einer automatischen Regel aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_app" msgid="4027984447935396820">"\"Bitte nicht stören\" wurde von einer App aktiviert (<xliff:g id="ID_1">%s</xliff:g>)."</string>
     <string name="qs_dnd_prompt_auto_rule_app" msgid="1841469944118486580">"\"Bitte nicht stören\" wurde von einer automatischen Regel oder einer App aktiviert."</string>

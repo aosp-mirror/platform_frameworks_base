@@ -142,6 +142,11 @@ public final class VibratorController {
         }
     }
 
+    @VisibleForTesting
+    public NativeWrapper getNativeWrapper() {
+        return mNativeWrapper;
+    }
+
     /** Return the {@link VibratorInfo} representing the vibrator controlled by this instance. */
     public VibratorInfo getVibratorInfo() {
         return mVibratorInfo;
@@ -240,6 +245,8 @@ public final class VibratorController {
      * {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The duration of the effect playing, or 0 if unsupported.
      */
     public long on(VibrationEffect.Prebaked effect, long vibrationId) {
         synchronized (mLock) {
@@ -257,15 +264,26 @@ public final class VibratorController {
      * {@link OnVibrationCompleteListener}.
      *
      * <p>This will affect the state of {@link #isVibrating()}.
+     *
+     * @return The duration of the effect playing, or 0 if unsupported.
      */
-    public void on(VibrationEffect.Composed effect, long vibrationId) {
+    public long on(VibrationEffect.Composed effect, long vibrationId) {
         if (!mVibratorInfo.hasCapability(IVibrator.CAP_COMPOSE_EFFECTS)) {
-            return;
+            return 0;
         }
         synchronized (mLock) {
-            mNativeWrapper.compose(effect.getPrimitiveEffects().toArray(
-                    new VibrationEffect.Composition.PrimitiveEffect[0]), vibrationId);
+            VibrationEffect.Composition.PrimitiveEffect[] primitives =
+                    effect.getPrimitiveEffects().toArray(
+                            new VibrationEffect.Composition.PrimitiveEffect[0]);
+            mNativeWrapper.compose(primitives, vibrationId);
             notifyVibratorOnLocked();
+            // Compose don't actually give us an estimated duration, so we just guess here.
+            long duration = 0;
+            for (VibrationEffect.Composition.PrimitiveEffect primitive : primitives) {
+                // TODO(b/177807015): use exposed durations from IVibrator here instead
+                duration += 20 + primitive.delay;
+            }
+            return duration;
         }
     }
 

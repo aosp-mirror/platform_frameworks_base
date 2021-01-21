@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -208,6 +209,7 @@ import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
+import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -424,12 +426,16 @@ class Task extends WindowContainer<WindowContainer> {
     /** If original intent did not allow relinquishing task identity, save that information */
     private boolean mNeverRelinquishIdentity = true;
 
+    /** Avoid reentrant of {@link #removeImmediately(String)}. */
+    private boolean mRemoving;
+
     // Used in the unique case where we are clearing the task in order to reuse it. In that case we
     // do not want to delete the stack when the task goes empty.
     private boolean mReuseTask = false;
 
     CharSequence lastDescription; // Last description captured for this item.
 
+    Task mAdjacentTask; // Task adjacent to this one.
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
     Task mPrevAffiliate; // previous task in affiliated chain.
     int mPrevAffiliateTaskId = INVALID_TASK_ID; // previous id for persistence.
@@ -873,6 +879,11 @@ class Task extends WindowContainer<WindowContainer> {
         mLaunchCookie = _launchCookie;
         mDeferTaskAppear = _deferTaskAppear;
         EventLogTags.writeWmTaskCreated(mTaskId, isRootTask() ? INVALID_TASK_ID : getRootTaskId());
+    }
+
+    static Task fromWindowContainerToken(WindowContainerToken token) {
+        if (token == null) return null;
+        return fromBinder(token.asBinder()).asTask();
     }
 
     Task reuseAsLeafTask(IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
@@ -1559,6 +1570,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         mAtmService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
                 mTaskId, mUserId);
+    }
+
+    void setAdjacentTask(Task adjacent) {
+        mAdjacentTask = adjacent;
+        adjacent.mAdjacentTask = this;
     }
 
     void setTaskToAffiliateWith(Task taskToAffiliateWith) {
@@ -3239,12 +3255,18 @@ class Task extends WindowContainer<WindowContainer> {
 
     void removeImmediately(String reason) {
         if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask:" + reason + " removing taskId=" + mTaskId);
+        if (mRemoving) {
+            return;
+        }
+        mRemoving = true;
+
         EventLogTags.writeWmTaskRemoved(mTaskId, reason);
 
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
 
         super.removeImmediately();
+        mRemoving = false;
     }
 
     // TODO: Consolidate this with Task.reparent()
@@ -3318,6 +3340,14 @@ class Task extends WindowContainer<WindowContainer> {
             return true;
         }
         return false;
+    }
+
+    @Override
+    boolean handlesOrientationChangeFromDescendant() {
+        return super.handlesOrientationChangeFromDescendant()
+                // Display won't rotate for the orientation request if the TaskDisplayArea can't
+                // specify orientation.
+                && getDisplayArea().canSpecifyOrientation();
     }
 
     void resize(boolean relayout, boolean forced) {
@@ -4227,6 +4257,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
         }
 
+        final List<Task> adjacentTasks = new ArrayList<>();
         final int windowingMode = getWindowingMode();
         final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
@@ -4255,6 +4286,15 @@ class Task extends WindowContainer<WindowContainer> {
                     gotTranslucentFullscreen = true;
                     continue;
                 }
+                return TASK_VISIBILITY_INVISIBLE;
+            } else if (otherWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                    && other.matchParentBounds()) {
+                if (other.isTranslucent(starting)) {
+                    // Can be visible behind a translucent task.
+                    gotTranslucentFullscreen = true;
+                    continue;
+                }
+                // Multi-window task that matches parent bounds would occlude other children.
                 return TASK_VISIBILITY_INVISIBLE;
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
@@ -4287,6 +4327,20 @@ class Task extends WindowContainer<WindowContainer> {
                 // making sense, it also works around an issue here we boost the z-order of the
                 // assistant window surfaces in window manager whenever it is visible.
                 return TASK_VISIBILITY_INVISIBLE;
+            }
+            if (other.mAdjacentTask != null) {
+                if (adjacentTasks.contains(other.mAdjacentTask)) {
+                    if (other.isTranslucent(starting)
+                            || other.mAdjacentTask.isTranslucent(starting)) {
+                        // Can be visible behind a translucent adjacent tasks.
+                        gotTranslucentFullscreen = true;
+                        continue;
+                    }
+                    // Can not be visible behind adjacent tasks.
+                    return TASK_VISIBILITY_INVISIBLE;
+                } else {
+                    adjacentTasks.add(other);
+                }
             }
         }
 
@@ -5009,7 +5063,6 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } else {
             // No longer managed by any organizer.
-            mTaskAppearedSent = false;
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
                 removeImmediately("setTaskOrganizer");
@@ -5035,7 +5088,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
         if (getSurfaceControl() == null) {
-            // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
+            // Can't call onTaskAppeared without a surfacecontrol, so defer this until next one
             // is created.
             return false;
         }
@@ -5427,9 +5480,13 @@ class Task extends WindowContainer<WindowContainer> {
                 final Task lastFocusedTask = displayArea.getFocusedRootTask();
                 displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/);
                 displayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
+                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                        getTaskInfo());
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
+                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                        task.getTaskInfo());
             }
             return;
         }
@@ -7181,6 +7238,7 @@ class Task extends WindowContainer<WindowContainer> {
                     + " mode=" + windowingModeToString(getWindowingMode()));
             pw.println("  isSleeping=" + shouldSleepActivities());
             pw.println("  mBounds=" + getRequestedOverrideBounds());
+            pw.println("  mCreatedByOrganizer=" + mCreatedByOrganizer);
         };
 
         boolean printed = false;
@@ -7328,6 +7386,7 @@ class Task extends WindowContainer<WindowContainer> {
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
                     .setActivityInfo(info)
+                    .setActivityOptions(options)
                     .setIntent(intent)
                     .setVoiceSession(voiceSession)
                     .setVoiceInteractor(voiceInteractor)
@@ -7686,7 +7745,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void dispatchTaskInfoChangedIfNeeded(boolean force) {
         if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, force);
+            mAtmService.mTaskOrganizerController.onTaskInfoChanged(this, force);
         }
     }
 
@@ -7767,6 +7826,7 @@ class Task extends WindowContainer<WindowContainer> {
         private int mMinWidth = INVALID_MIN_SIZE;
         private int mMinHeight = INVALID_MIN_SIZE;
         private ActivityInfo mActivityInfo;
+        private ActivityOptions mActivityOptions;
         private IVoiceInteractionSession mVoiceSession;
         private IVoiceInteractor mVoiceInteractor;
         private int mActivityType;
@@ -7817,6 +7877,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         Builder setActivityInfo(ActivityInfo info) {
             mActivityInfo = info;
+            return this;
+        }
+
+        Builder setActivityOptions(ActivityOptions opts) {
+            mActivityOptions = opts;
             return this;
         }
 
@@ -8026,7 +8091,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             // Task created by organizer are added as root.
             final Task launchRootTask = mCreatedByOrganizer
-                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType);
+                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions);
             if (launchRootTask != null) {
                 // Since this task will be put into a root task, its windowingMode will be
                 // inherited.

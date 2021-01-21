@@ -20,6 +20,7 @@
 #include <aidl/android/media/tv/tunerresourcemanager/ITunerResourceManager.h>
 #include <aidl/android/media/tv/tuner/ITunerService.h>
 #include <aidl/android/media/tv/tuner/TunerFrontendInfo.h>
+#include <android/binder_parcel_utils.h>
 #include <android/hardware/tv/tuner/1.1/ITuner.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
@@ -27,6 +28,8 @@
 #include "DemuxClient.h"
 #include "DescramblerClient.h"
 #include "LnbClient.h"
+
+using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::media::tv::tuner::ITunerService;
 using ::aidl::android::media::tv::tuner::TunerFrontendInfo;
@@ -131,6 +134,15 @@ public:
      * while the low 16 bits are the minor version. Default value is unknown version 0.
      */
     int getHalTunerVersion() { return mTunerVersion; }
+
+    static Result getServiceSpecificErrorCode(Status& s) {
+        if (s.getExceptionCode() == EX_SERVICE_SPECIFIC) {
+            return static_cast<Result>(s.getServiceSpecificError());
+        } else if (s.isOk()) {
+            return Result::SUCCESS;
+        }
+        return Result::UNKNOWN_ERROR;
+    }
 
 private:
     sp<ITuner> getHidlTuner();

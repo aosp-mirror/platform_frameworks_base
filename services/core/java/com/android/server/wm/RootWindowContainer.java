@@ -862,6 +862,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
             }
         }
+
+        // Send any pending task-info changes that were queued-up during a layout deferment
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         checkAppTransitionReady(surfacePlacer);
@@ -1013,9 +1016,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.enableScreenIfNeededLocked();
 
         mWmService.scheduleAnimationLocked();
-
-        // Send any pending task-info changes that were queued-up during a layout deferment
-        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG, "performSurfacePlacementInner exit");
     }
@@ -1545,6 +1545,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
             mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "startHomeActivity");
         }
+        homeIntent.putExtra(WindowManagerPolicy.EXTRA_START_REASON, reason);
+
         // Update the reason for ANR debugging to verify if the user activity is the one that
         // actually launched.
         final String myReason = reason + ":" + userId + ":" + UserHandle.getUserId(
@@ -2856,6 +2858,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
             taskDisplayArea = daToken != null
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+
+            final Task rootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
+            if (rootTask != null) {
+                return rootTask;
+            }
         }
 
         // First preference for stack goes to the task Id set in the activity options. Use the stack
@@ -3030,7 +3037,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int activityType =
                     options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
                             ? options.getLaunchActivityType() : r.getActivityType();
-            return taskDisplayArea.createRootTask(windowingMode, activityType, true /*onTop*/);
+            return taskDisplayArea.createRootTask(
+                    windowingMode, activityType, true /*onTop*/, options);
         }
 
         return null;

@@ -1198,6 +1198,14 @@ public class Notification implements Parcelable
             "android.pictureContentDescription";
 
     /**
+     * {@link #extras} key: this is a boolean to indicate that the
+     * {@link BigPictureStyle#bigPicture(Bitmap) big picture} is to be shown in the collapsed state
+     * of a {@link BigPictureStyle} notification.  This will replace a
+     * {@link Builder#setLargeIcon(Icon) large icon} in that state if one was provided.
+     */
+    public static final String EXTRA_PROMOTE_PICTURE = "android.promotePicture";
+
+    /**
      * {@link #extras} key: An array of CharSequences to show in {@link InboxStyle} expanded
      * notifications, each of which was supplied to {@link InboxStyle#addLine(CharSequence)}.
      */
@@ -5149,6 +5157,7 @@ public class Notification implements Parcelable
         // changes are entirely visual, and should otherwise be undetectable by apps.
         @SuppressWarnings("AndroidFrameworkCompatChange")
         private void calculateLargeIconDimens(boolean largeIconShown,
+                @NonNull StandardTemplateParams p,
                 @NonNull TemplateBindResult result) {
             final Resources resources = mContext.getResources();
             final float density = resources.getDisplayMetrics().density;
@@ -5159,9 +5168,9 @@ public class Notification implements Parcelable
             final float viewHeightDp = resources.getDimension(
                     R.dimen.notification_right_icon_size) / density;
             float viewWidthDp = viewHeightDp;  // icons are 1:1 by default
-            if (largeIconShown && (
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S
-                            || DevFlags.shouldBackportSNotifRules(mContext.getContentResolver()))) {
+            if (largeIconShown && (p.mPromotePicture
+                    || mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S
+                    || DevFlags.shouldBackportSNotifRules(mContext.getContentResolver()))) {
                 Drawable drawable = mN.mLargeIcon.loadDrawable(mContext);
                 if (drawable != null) {
                     int iconWidth = drawable.getIntrinsicWidth();
@@ -5187,7 +5196,7 @@ public class Notification implements Parcelable
                 mN.mLargeIcon = Icon.createWithBitmap(mN.largeIcon);
             }
             boolean showLargeIcon = mN.mLargeIcon != null && !p.hideLargeIcon;
-            calculateLargeIconDimens(showLargeIcon, result);
+            calculateLargeIconDimens(showLargeIcon, p, result);
             if (showLargeIcon) {
                 contentView.setViewLayoutWidth(R.id.right_icon,
                         result.mRightIconWidthDp, TypedValue.COMPLEX_UNIT_DIP);
@@ -6995,6 +7004,7 @@ public class Notification implements Parcelable
         private Icon mBigLargeIcon;
         private boolean mBigLargeIconSet = false;
         private CharSequence mPictureContentDescription;
+        private boolean mPromotePicture;
 
         public BigPictureStyle() {
         }
@@ -7011,7 +7021,8 @@ public class Notification implements Parcelable
          * Overrides ContentTitle in the big form of the template.
          * This defaults to the value passed to setContentTitle().
          */
-        public BigPictureStyle setBigContentTitle(CharSequence title) {
+        @NonNull
+        public BigPictureStyle setBigContentTitle(@Nullable CharSequence title) {
             internalSetBigContentTitle(safeCharSequence(title));
             return this;
         }
@@ -7019,7 +7030,8 @@ public class Notification implements Parcelable
         /**
          * Set the first line of text after the detail section in the big form of the template.
          */
-        public BigPictureStyle setSummaryText(CharSequence cs) {
+        @NonNull
+        public BigPictureStyle setSummaryText(@Nullable CharSequence cs) {
             internalSetSummaryText(safeCharSequence(cs));
             return this;
         }
@@ -7044,22 +7056,36 @@ public class Notification implements Parcelable
         /**
          * Provide the bitmap to be used as the payload for the BigPicture notification.
          */
-        public BigPictureStyle bigPicture(Bitmap b) {
+        @NonNull
+        public BigPictureStyle bigPicture(@Nullable Bitmap b) {
             mPicture = b;
+            return this;
+        }
+
+        /**
+         * When set, the {@link #bigPicture(Bitmap) big picture} of this style will be promoted and
+         * shown in place of the {@link Builder#setLargeIcon(Icon) large icon} in the collapsed
+         * state of this notification.
+         */
+        @NonNull
+        public BigPictureStyle showBigPictureWhenCollapsed(boolean show) {
+            mPromotePicture = show;
             return this;
         }
 
         /**
          * Override the large icon when the big notification is shown.
          */
-        public BigPictureStyle bigLargeIcon(Bitmap b) {
+        @NonNull
+        public BigPictureStyle bigLargeIcon(@Nullable Bitmap b) {
             return bigLargeIcon(b != null ? Icon.createWithBitmap(b) : null);
         }
 
         /**
          * Override the large icon when the big notification is shown.
          */
-        public BigPictureStyle bigLargeIcon(Icon icon) {
+        @NonNull
+        public BigPictureStyle bigLargeIcon(@Nullable Icon icon) {
             mBigLargeIconSet = true;
             mBigLargeIcon = icon;
             return this;
@@ -7107,6 +7133,66 @@ public class Notification implements Parcelable
                         : R.dimen.notification_right_icon_size);
                 mBigLargeIcon.scaleDownIfNecessary(rightIconSize, rightIconSize);
             }
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeContentView(boolean increasedHeight) {
+            if (mPicture == null || !mPromotePicture) {
+                return super.makeContentView(increasedHeight);
+            }
+
+            Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
+            mBuilder.mN.mLargeIcon = Icon.createWithBitmap(mPicture);
+            // The legacy largeIcon might not allow us to clear the image, as it's taken in
+            // replacement if the other one is null. Because we're restoring these legacy icons
+            // for old listeners, this is in general non-null.
+            Bitmap largeIconLegacy = mBuilder.mN.largeIcon;
+            mBuilder.mN.largeIcon = null;
+
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .fillTextsFrom(mBuilder)
+                    .promotePicture(true);
+            RemoteViews contentView = getStandardView(mBuilder.getBaseLayoutResource(),
+                    p, null /* result */);
+
+            mBuilder.mN.mLargeIcon = oldLargeIcon;
+            mBuilder.mN.largeIcon = largeIconLegacy;
+
+            return contentView;
+        }
+
+        /**
+         * @hide
+         */
+        @Override
+        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+            if (mPicture == null || !mPromotePicture) {
+                return super.makeHeadsUpContentView(increasedHeight);
+            }
+
+            Icon oldLargeIcon = mBuilder.mN.mLargeIcon;
+            mBuilder.mN.mLargeIcon = Icon.createWithBitmap(mPicture);
+            // The legacy largeIcon might not allow us to clear the image, as it's taken in
+            // replacement if the other one is null. Because we're restoring these legacy icons
+            // for old listeners, this is in general non-null.
+            Bitmap largeIconLegacy = mBuilder.mN.largeIcon;
+            mBuilder.mN.largeIcon = null;
+
+            StandardTemplateParams p = mBuilder.mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .fillTextsFrom(mBuilder)
+                    .promotePicture(true);
+            RemoteViews contentView = getStandardView(mBuilder.getHeadsUpBaseLayoutResource(),
+                    p, null /* result */);
+
+            mBuilder.mN.mLargeIcon = oldLargeIcon;
+            mBuilder.mN.largeIcon = largeIconLegacy;
+
+            return contentView;
         }
 
         /**
@@ -7168,6 +7254,7 @@ public class Notification implements Parcelable
                 extras.putCharSequence(EXTRA_PICTURE_CONTENT_DESCRIPTION,
                         mPictureContentDescription);
             }
+            extras.putBoolean(EXTRA_PROMOTE_PICTURE, mPromotePicture);
             extras.putParcelable(EXTRA_PICTURE, mPicture);
         }
 
@@ -7188,6 +7275,7 @@ public class Notification implements Parcelable
                         extras.getCharSequence(EXTRA_PICTURE_CONTENT_DESCRIPTION);
             }
 
+            mPromotePicture = extras.getBoolean(EXTRA_PROMOTE_PICTURE);
             mPicture = extras.getParcelable(EXTRA_PICTURE);
         }
 
@@ -8962,22 +9050,9 @@ public class Notification implements Parcelable
             return remoteViews;
         }
 
-        // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
-        // a use case that is not supported by the Compat Framework library.  Workarounds to resolve
-        // the change's state in NotificationManagerService were very complex. While it's possible
-        // apps can detect the change, it's most likely that the changes will simply result in
-        // visual regressions.
-        @SuppressWarnings("AndroidFrameworkCompatChange")
         private int getDecorationType() {
             ContentResolver contentResolver = mBuilder.mContext.getContentResolver();
-            if (mBuilder.mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.S
-                    || DevFlags.shouldBackportSNotifRules(contentResolver)) {
-                return DevFlags.getDecoratedCustomViewNotifDecoration(contentResolver);
-            } else {
-                // For apps that don't target S, this decoration provides the closest behavior to R,
-                // but doesn't fit with the design guidelines for S.
-                return DevFlags.DECORATION_FULL_COMPATIBLE;
-            }
+            return DevFlags.getDecoratedCustomViewNotifDecoration(contentResolver);
         }
 
         /**
@@ -11306,6 +11381,7 @@ public class Notification implements Parcelable
         boolean mHideTitle;
         boolean mHideActions;
         boolean mHideProgress;
+        boolean mPromotePicture;
         CharSequence title;
         CharSequence text;
         CharSequence headerTextSecondary;
@@ -11321,6 +11397,7 @@ public class Notification implements Parcelable
             mHideTitle = false;
             mHideActions = false;
             mHideProgress = false;
+            mPromotePicture = false;
             title = null;
             text = null;
             summaryText = null;
@@ -11357,6 +11434,11 @@ public class Notification implements Parcelable
 
         final StandardTemplateParams hideTitle(boolean hideTitle) {
             this.mHideTitle = hideTitle;
+            return this;
+        }
+
+        final StandardTemplateParams promotePicture(boolean promotePicture) {
+            this.mPromotePicture = promotePicture;
             return this;
         }
 

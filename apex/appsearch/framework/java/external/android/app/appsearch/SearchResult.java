@@ -52,6 +52,9 @@ public final class SearchResult {
     /** @hide */
     public static final String PACKAGE_NAME_FIELD = "packageName";
 
+    /** @hide */
+    public static final String DATABASE_NAME_FIELD = "databaseName";
+
     @NonNull private final Bundle mBundle;
 
     /** Cache of the inflated document. Comes from inflating mDocumentBundle at first use. */
@@ -116,6 +119,16 @@ public final class SearchResult {
     @NonNull
     public String getPackageName() {
         return Preconditions.checkNotNull(mBundle.getString(PACKAGE_NAME_FIELD));
+    }
+
+    /**
+     * Contains the database name that stored the {@link GenericDocument}.
+     *
+     * @return Database name that stored the document
+     */
+    @NonNull
+    public String getDatabaseName() {
+        return Preconditions.checkNotNull(mBundle.getString(DATABASE_NAME_FIELD));
     }
 
     /**

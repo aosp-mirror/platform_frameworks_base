@@ -76,6 +76,11 @@ static bool requires_matrix_scaling(bool swapWidthHeight, const SkISize& decodeS
           || (!swapWidthHeight && decodeSize != targetSize);
 }
 
+SkISize ImageDecoder::getSampledDimensions(int sampleSize) const {
+    auto size = mCodec->getSampledDimensions(sampleSize);
+    return swapWidthHeight() ? swapped(size) : size;
+}
+
 bool ImageDecoder::setTargetSize(int width, int height) {
     if (width <= 0 || height <= 0) {
         return false;

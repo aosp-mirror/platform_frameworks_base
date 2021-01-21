@@ -123,6 +123,20 @@ droidstubs {
             new_since: ":android-non-updatable.api.public.latest",
         },
     },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 priv_apps =
@@ -162,6 +176,20 @@ droidstubs {
             baseline_file: "core/api/system-lint-baseline.txt",
         },
     },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 droidstubs {
@@ -178,11 +206,32 @@ droidstubs {
             baseline_file: "core/api/test-lint-baseline.txt",
         },
     },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/test/api",
-        dest: "android.txt",
-    },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "removed.txt",
+            tag: ".removed-api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 droidstubs {
@@ -203,6 +252,20 @@ droidstubs {
             new_since: ":android-non-updatable.api.module-lib.latest",
         },
     },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 /////////////////////////////////////////////////////////////////////

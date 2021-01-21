@@ -210,6 +210,7 @@ import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 import android.view.translation.ITranslationManager;
 import android.view.translation.TranslationManager;
+import android.view.translation.UiTranslationManager;
 
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
@@ -1183,6 +1184,19 @@ public final class SystemServiceRegistry {
                         // Service is null when not provided by OEM.
                         if (service != null) {
                             return new TranslationManager(ctx.getOuterContext(), service);
+                        }
+                        return null;
+                    }});
+
+        registerService(Context.UI_TRANSLATION_SERVICE, UiTranslationManager.class,
+                new CachedServiceFetcher<UiTranslationManager>() {
+                    @Override
+                    public UiTranslationManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getService(Context.TRANSLATION_MANAGER_SERVICE);
+                        ITranslationManager service = ITranslationManager.Stub.asInterface(b);
+                        if (service != null) {
+                            return new UiTranslationManager(ctx.getOuterContext(), service);
                         }
                         return null;
                     }});

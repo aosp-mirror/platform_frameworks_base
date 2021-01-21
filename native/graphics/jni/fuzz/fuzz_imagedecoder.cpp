@@ -22,6 +22,10 @@
 #include <cstdlib>
 #include <memory>
 
+#ifdef PNG_MUTATOR_DEFINE_LIBFUZZER_CUSTOM_MUTATOR
+#include <fuzz/png_mutator.h>
+#endif
+
 struct DecoderDeleter {
     void operator()(AImageDecoder* decoder) const { AImageDecoder_delete(decoder); }
 };

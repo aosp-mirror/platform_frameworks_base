@@ -405,6 +405,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             if (mLastPowerStateFromRadio != powerState) {
                 mLastPowerStateFromRadio = powerState;
                 try {
+                    // TODO: The interface changes that comes from netd are handled by BSS itself.
+                    // There are still events caused by setting or removing idle timer, so keep
+                    // reporting from here until setting idler timer moved to CS.
                     getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
@@ -415,6 +418,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             if (mLastPowerStateFromWifi != powerState) {
                 mLastPowerStateFromWifi = powerState;
                 try {
+                    // TODO: The interface changes that comes from netd are handled by BSS itself.
+                    // There are still events caused by setting or removing idle timer, so keep
+                    // reporting from here until setting idler timer moved to CS.
                     getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }

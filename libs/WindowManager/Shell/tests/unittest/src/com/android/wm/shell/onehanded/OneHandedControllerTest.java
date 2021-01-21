@@ -28,7 +28,6 @@ import android.content.om.IOverlayManager;
 import android.os.Handler;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
@@ -67,6 +66,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     OneHandedTimeoutHandler mMockTimeoutHandler;
     @Mock
+    OneHandedUiEventLogger mMockUiEventLogger;
+    @Mock
     IOverlayManager mMockOverlayManager;
     @Mock
     TaskStackListenerImpl mMockTaskStackListener;
@@ -89,6 +90,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mMockTutorialHandler,
                 mMockGestureHandler,
                 mTimeoutHandler,
+                mMockUiEventLogger,
                 mMockOverlayManager,
                 mMockTaskStackListener,
                 mMockShellMainExecutor,

@@ -341,7 +341,8 @@ public class StackScrollAlgorithm {
         boolean isEmptyShadeView = child instanceof EmptyShadeView;
 
         childViewState.location = ExpandableViewState.LOCATION_MAIN_AREA;
-        float inset = ambientState.getTopPadding() + ambientState.getStackTranslation();
+        float inset = ambientState.getTopPadding() + ambientState.getStackTranslation()
+                + ambientState.getSectionPadding();
         if (i <= algorithmState.getIndexOfExpandingNotification()) {
             inset += ambientState.getExpandAnimationTopChange();
         }
@@ -563,11 +564,18 @@ public class StackScrollAlgorithm {
             childViewState.yTranslation = Math.max(childViewState.yTranslation, shelfStart);
         }
         childViewState.yTranslation = Math.min(childViewState.yTranslation, shelfStart);
-        if (childViewState.yTranslation >= shelfStart) {
-            childViewState.hidden = !child.isExpandAnimationRunning() && !child.hasExpandingChild();
-            childViewState.inShelf = true;
-            childViewState.headsUpIsVisible = false;
+        if (child instanceof SectionHeaderView) {
+            // Add padding before sections for overscroll effect.
+            childViewState.yTranslation += ambientState.getSectionPadding();
         }
+        boolean show = childViewState.yTranslation < shelfStart
+                && !ambientState.isAppearing();
+        childViewState.hidden = !show
+                && !child.isExpandAnimationRunning()
+                && !child.hasExpandingChild();
+        childViewState.inShelf = !show;
+        childViewState.headsUpIsVisible = show;
+        childViewState.alpha = show ? 1f : 0f;
     }
 
     protected int getMaxAllowedChildHeight(View child) {

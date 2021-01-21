@@ -167,6 +167,7 @@ import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
 import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
+import com.android.internal.inputmethod.IVoidResultCallback;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
@@ -3720,38 +3721,43 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void showInputMethodPickerFromClient(
-            IInputMethodClient client, int auxiliarySubtypeMode) {
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
-                return;
-            }
-            if(!canShowInputMethodPickerLocked(client)) {
-                Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
-                        + Binder.getCallingUid() + ": " + client);
-                return;
-            }
+    public void showInputMethodPickerFromClient(IInputMethodClient client, int auxiliarySubtypeMode,
+            IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            synchronized (mMethodMap) {
+                if (!calledFromValidUserLocked()) {
+                    return;
+                }
+                if (!canShowInputMethodPickerLocked(client)) {
+                    Slog.w(TAG, "Ignoring showInputMethodPickerFromClient of uid "
+                            + Binder.getCallingUid() + ": " + client);
+                    return;
+                }
 
-            // Always call subtype picker, because subtype picker is a superset of input method
-            // picker.
-            mHandler.sendMessage(mCaller.obtainMessageII(
-                    MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode,
-                    (mCurClient != null) ? mCurClient.selfReportedDisplayId : DEFAULT_DISPLAY));
-        }
+                // Always call subtype picker, because subtype picker is a superset of input method
+                // picker.
+                mHandler.sendMessage(mCaller.obtainMessageII(
+                        MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode,
+                        (mCurClient != null) ? mCurClient.selfReportedDisplayId : DEFAULT_DISPLAY));
+            }
+        });
     }
 
     @Override
     public void showInputMethodPickerFromSystem(IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId) {
-        if (mContext.checkCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException(
-                    "showInputMethodPickerFromSystem requires WRITE_SECURE_SETTINGS permission");
-        }
-        // Always call subtype picker, because subtype picker is a superset of input method
-        // picker.
-        mHandler.sendMessage(mCaller.obtainMessageII(
-                MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId));
+            int displayId, IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            if (mContext.checkCallingPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                throw new SecurityException(
+                        "showInputMethodPickerFromSystem requires WRITE_SECURE_SETTINGS "
+                                + "permission");
+            }
+            // Always call subtype picker, because subtype picker is a superset of input method
+            // picker.
+            mHandler.sendMessage(mCaller.obtainMessageII(
+                    MSG_SHOW_IM_SUBTYPE_PICKER, auxiliarySubtypeMode, displayId));
+        });
     }
 
     /**
@@ -3795,15 +3801,17 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void showInputMethodAndSubtypeEnablerFromClient(
-            IInputMethodClient client, String inputMethodId) {
-        synchronized (mMethodMap) {
-            // TODO(yukawa): Should we verify the display ID?
-            if (!calledFromValidUserLocked()) {
-                return;
+            IInputMethodClient client, String inputMethodId, IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            synchronized (mMethodMap) {
+                // TODO(yukawa): Should we verify the display ID?
+                if (!calledFromValidUserLocked()) {
+                    return;
+                }
+                executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
+                        MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId));
             }
-            executeOrSendMessage(mCurMethod, mCaller.obtainMessageO(
-                    MSG_SHOW_IM_SUBTYPE_ENABLER, inputMethodId));
-        }
+        });
     }
 
     @BinderThread
@@ -4011,84 +4019,87 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @Override
     public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
-            float[] matrixValues) {
-        final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(childDisplayId);
-        if (displayInfo == null) {
-            throw new IllegalArgumentException(
-                    "Cannot find display for non-existent displayId: " + childDisplayId);
-        }
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != displayInfo.ownerUid) {
-            throw new SecurityException("The caller doesn't own the display.");
-        }
-
-        synchronized (mMethodMap) {
-            final ClientState cs = mClients.get(parentClient.asBinder());
-            if (cs == null) {
-                return;
+            float[] matrixValues, IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            final DisplayInfo displayInfo = mDisplayManagerInternal.getDisplayInfo(childDisplayId);
+            if (displayInfo == null) {
+                throw new IllegalArgumentException(
+                        "Cannot find display for non-existent displayId: " + childDisplayId);
+            }
+            final int callingUid = Binder.getCallingUid();
+            if (callingUid != displayInfo.ownerUid) {
+                throw new SecurityException("The caller doesn't own the display.");
             }
 
-            // null matrixValues means that the entry needs to be removed.
-            if (matrixValues == null) {
-                final ActivityViewInfo info = mActivityViewDisplayIdToParentMap.get(childDisplayId);
-                if (info == null) {
+            synchronized (mMethodMap) {
+                final ClientState cs = mClients.get(parentClient.asBinder());
+                if (cs == null) {
                     return;
                 }
-                if (info.mParentClient != cs) {
-                    throw new SecurityException("Only the owner client can clear"
-                            + " ActivityViewGeometry for display #" + childDisplayId);
-                }
-                mActivityViewDisplayIdToParentMap.remove(childDisplayId);
-                return;
-            }
 
-            ActivityViewInfo info = mActivityViewDisplayIdToParentMap.get(childDisplayId);
-            if (info != null && info.mParentClient != cs) {
-                throw new InvalidParameterException("Display #" + childDisplayId
-                        + " is already registered by " + info.mParentClient);
-            }
-            if (info == null) {
-                if (!mWindowManagerInternal.isUidAllowedOnDisplay(childDisplayId, cs.uid)) {
-                    throw new SecurityException(cs + " cannot access to display #"
-                            + childDisplayId);
-                }
-                info = new ActivityViewInfo(cs, new Matrix());
-                mActivityViewDisplayIdToParentMap.put(childDisplayId, info);
-            }
-            info.mMatrix.setValues(matrixValues);
-
-            if (mCurClient == null || mCurClient.curSession == null) {
-                return;
-            }
-
-            Matrix matrix = null;
-            int displayId = mCurClient.selfReportedDisplayId;
-            boolean needToNotify = false;
-            while (true) {
-                needToNotify |= (displayId == childDisplayId);
-                final ActivityViewInfo next = mActivityViewDisplayIdToParentMap.get(displayId);
-                if (next == null) {
-                    break;
-                }
-                if (matrix == null) {
-                    matrix = new Matrix(next.mMatrix);
-                } else {
-                    matrix.postConcat(next.mMatrix);
-                }
-                if (next.mParentClient.selfReportedDisplayId == mCurTokenDisplayId) {
-                    if (needToNotify) {
-                        final float[] values = new float[9];
-                        matrix.getValues(values);
-                        try {
-                            mCurClient.client.updateActivityViewToScreenMatrix(mCurSeq, values);
-                        } catch (RemoteException e) {
-                        }
+                // null matrixValues means that the entry needs to be removed.
+                if (matrixValues == null) {
+                    final ActivityViewInfo info =
+                            mActivityViewDisplayIdToParentMap.get(childDisplayId);
+                    if (info == null) {
+                        return;
                     }
-                    break;
+                    if (info.mParentClient != cs) {
+                        throw new SecurityException("Only the owner client can clear"
+                                + " ActivityViewGeometry for display #" + childDisplayId);
+                    }
+                    mActivityViewDisplayIdToParentMap.remove(childDisplayId);
+                    return;
                 }
-                displayId = info.mParentClient.selfReportedDisplayId;
+
+                ActivityViewInfo info = mActivityViewDisplayIdToParentMap.get(childDisplayId);
+                if (info != null && info.mParentClient != cs) {
+                    throw new InvalidParameterException("Display #" + childDisplayId
+                            + " is already registered by " + info.mParentClient);
+                }
+                if (info == null) {
+                    if (!mWindowManagerInternal.isUidAllowedOnDisplay(childDisplayId, cs.uid)) {
+                        throw new SecurityException(cs + " cannot access to display #"
+                                + childDisplayId);
+                    }
+                    info = new ActivityViewInfo(cs, new Matrix());
+                    mActivityViewDisplayIdToParentMap.put(childDisplayId, info);
+                }
+                info.mMatrix.setValues(matrixValues);
+
+                if (mCurClient == null || mCurClient.curSession == null) {
+                    return;
+                }
+
+                Matrix matrix = null;
+                int displayId = mCurClient.selfReportedDisplayId;
+                boolean needToNotify = false;
+                while (true) {
+                    needToNotify |= (displayId == childDisplayId);
+                    final ActivityViewInfo next = mActivityViewDisplayIdToParentMap.get(displayId);
+                    if (next == null) {
+                        break;
+                    }
+                    if (matrix == null) {
+                        matrix = new Matrix(next.mMatrix);
+                    } else {
+                        matrix.postConcat(next.mMatrix);
+                    }
+                    if (next.mParentClient.selfReportedDisplayId == mCurTokenDisplayId) {
+                        if (needToNotify) {
+                            final float[] values = new float[9];
+                            matrix.getValues(values);
+                            try {
+                                mCurClient.client.updateActivityViewToScreenMatrix(mCurSeq, values);
+                            } catch (RemoteException e) {
+                            }
+                        }
+                        break;
+                    }
+                    displayId = info.mParentClient.selfReportedDisplayId;
+                }
             }
-        }
+        });
     }
 
     @Override

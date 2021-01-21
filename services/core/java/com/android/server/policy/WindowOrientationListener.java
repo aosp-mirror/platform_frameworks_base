@@ -62,6 +62,7 @@ public abstract class WindowOrientationListener {
     private Sensor mSensor;
     private OrientationJudge mOrientationJudge;
     private int mCurrentRotation = -1;
+    private final Context mContext;
 
     private final Object mLock = new Object();
 
@@ -88,6 +89,7 @@ public abstract class WindowOrientationListener {
      * This constructor is private since no one uses it.
      */
     private WindowOrientationListener(Context context, Handler handler, int rate) {
+        mContext = context;
         mHandler = handler;
         mSensorManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         mRate = rate;
@@ -282,6 +284,19 @@ public abstract class WindowOrientationListener {
                 mOrientationJudge.dumpLocked(pw, prefix);
             }
         }
+    }
+
+    /**
+     * Returns whether this WindowOrientationListener can remain enabled while the device is dozing.
+     * If this returns true, it implies that the underlying sensor can still run while the AP is
+     * asleep, and that the underlying sensor will wake the AP on an event.
+     */
+    public boolean shouldStayEnabledWhileDreaming() {
+        if (mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_forceOrientationListenerEnabledWhileDreaming)) {
+            return true;
+        }
+        return mSensor.getType() == Sensor.TYPE_DEVICE_ORIENTATION && mSensor.isWakeUpSensor();
     }
 
     abstract class OrientationJudge implements SensorEventListener {

@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
-import android.window.TaskSnapshot;
 import android.app.ITaskStackListener;
 import android.app.TaskInfo;
 import android.content.ComponentName;
@@ -29,6 +28,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.window.TaskSnapshot;
 
 import com.android.internal.os.SomeArgs;
 
@@ -60,6 +60,7 @@ class TaskChangeNotificationController {
     private static final int NOTIFY_TASK_FOCUS_CHANGED_MSG = 25;
     private static final int NOTIFY_TASK_REQUESTED_ORIENTATION_CHANGED_MSG = 26;
     private static final int NOTIFY_ACTIVITY_ROTATED_MSG = 27;
+    private static final int NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG = 28;
 
     // Delay in notifying task stack change listeners (in millis)
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_DELAY = 100;
@@ -178,6 +179,10 @@ class TaskChangeNotificationController {
         l.onActivityRotation(m.arg1);
     };
 
+    private final TaskStackConsumer mNotifyTaskMovedToBack = (l, m) -> {
+        l.onTaskMovedToBack((RunningTaskInfo) m.obj);
+    };
+
     @FunctionalInterface
     public interface TaskStackConsumer {
         void accept(ITaskStackListener t, Message m) throws RemoteException;
@@ -268,6 +273,9 @@ class TaskChangeNotificationController {
                     break;
                 case NOTIFY_ACTIVITY_ROTATED_MSG:
                     forAllRemoteListeners(mNotifyOnActivityRotation, msg);
+                    break;
+                case NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG:
+                    forAllRemoteListeners(mNotifyTaskMovedToBack, msg);
                     break;
             }
             if (msg.obj instanceof SomeArgs) {
@@ -551,6 +559,15 @@ class TaskChangeNotificationController {
         final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_ROTATED_MSG,
                 displayId, 0 /* unused */);
         forAllLocalListeners(mNotifyOnActivityRotation, msg);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Notify that a task is being moved behind home.
+     */
+    void notifyTaskMovedToBack(TaskInfo ti) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_TASK_MOVED_TO_BACK_LISTENERS_MSG, ti);
+        forAllLocalListeners(mNotifyTaskMovedToBack, msg);
         msg.sendToTarget();
     }
 }

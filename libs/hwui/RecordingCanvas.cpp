@@ -16,12 +16,14 @@
 
 #include "RecordingCanvas.h"
 
-#include "pipeline/skia/FunctorDrawable.h"
-#include "VectorDrawable.h"
+#include <GrRecordingContext.h>
+
+#include <experimental/type_traits>
 
 #include "SkAndroidFrameworkUtils.h"
 #include "SkCanvas.h"
 #include "SkCanvasPriv.h"
+#include "SkColor.h"
 #include "SkData.h"
 #include "SkDrawShadowInfo.h"
 #include "SkImage.h"
@@ -33,8 +35,8 @@
 #include "SkRegion.h"
 #include "SkTextBlob.h"
 #include "SkVertices.h"
-
-#include <experimental/type_traits>
+#include "VectorDrawable.h"
+#include "pipeline/skia/FunctorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -500,7 +502,68 @@ struct DrawWebView final : Op {
     // SkDrawable::onSnapGpuDrawHandler callback instead of SkDrawable::onDraw.
     // SkCanvas::drawDrawable/SkGpuDevice::drawDrawable has the logic to invoke
     // onSnapGpuDrawHandler.
-    void draw(SkCanvas* c, const SkMatrix&) const { c->drawDrawable(drawable.get()); }
+private:
+    // Unfortunately WebView does not have complex clip information serialized, and we only perform
+    // best-effort stencil fill for GLES. So for Vulkan we create an intermediate layer if the
+    // canvas clip is complex.
+    static bool needsCompositedLayer(SkCanvas* c) {
+        if (Properties::getRenderPipelineType() != RenderPipelineType::SkiaVulkan) {
+            return false;
+        }
+        SkRegion clipRegion;
+        // WebView's rasterizer has access to simple clips, so for Vulkan we only need to check if
+        // the clip is more complex than a rectangle.
+        c->temporary_internal_getRgnClip(&clipRegion);
+        return clipRegion.isComplex();
+    }
+
+    mutable SkImageInfo mLayerImageInfo;
+    mutable sk_sp<SkSurface> mLayerSurface = nullptr;
+
+public:
+    void draw(SkCanvas* c, const SkMatrix&) const {
+        if (needsCompositedLayer(c)) {
+            // What we do now is create an offscreen surface, sized by the clip bounds.
+            // We won't apply a clip while drawing - clipping will be performed when compositing the
+            // surface back onto the original canvas. Note also that we're not using saveLayer
+            // because the webview functor still doesn't respect the canvas clip stack.
+            const SkIRect deviceBounds = c->getDeviceClipBounds();
+            if (mLayerSurface == nullptr || c->imageInfo() != mLayerImageInfo) {
+                GrRecordingContext* directContext = c->recordingContext();
+                mLayerImageInfo =
+                        c->imageInfo().makeWH(deviceBounds.width(), deviceBounds.height());
+                mLayerSurface = SkSurface::MakeRenderTarget(directContext, SkBudgeted::kYes,
+                                                            mLayerImageInfo, 0,
+                                                            kTopLeft_GrSurfaceOrigin, nullptr);
+            }
+
+            SkCanvas* layerCanvas = mLayerSurface->getCanvas();
+
+            SkAutoCanvasRestore(layerCanvas, true);
+            layerCanvas->clear(SK_ColorTRANSPARENT);
+
+            // Preserve the transform from the original canvas, but now the clip rectangle is
+            // anchored at the origin so we need to transform the clipped content to the origin.
+            SkM44 mat4(c->getLocalToDevice());
+            mat4.postTranslate(-deviceBounds.fLeft, -deviceBounds.fTop);
+            layerCanvas->concat(mat4);
+            layerCanvas->drawDrawable(drawable.get());
+
+            SkAutoCanvasRestore acr(c, true);
+
+            // Temporarily use an identity transform, because this is just blitting to the parent
+            // canvas with an offset.
+            SkMatrix invertedMatrix;
+            if (!c->getTotalMatrix().invert(&invertedMatrix)) {
+                ALOGW("Unable to extract invert canvas matrix; aborting VkFunctor draw");
+                return;
+            }
+            c->concat(invertedMatrix);
+            mLayerSurface->draw(c, deviceBounds.fLeft, deviceBounds.fTop, nullptr);
+        } else {
+            c->drawDrawable(drawable.get());
+        }
+    }
 };
 }
 

@@ -4638,6 +4638,18 @@ public class CarrierConfigManager {
             "use_lower_mtu_value_if_both_received";
 
     /**
+     * Determines the default RTT mode.
+     *
+     * Upon first boot, when the user has not yet set a value for their preferred RTT mode,
+     * the value of this config will be sent to the IMS stack. Valid values are the same as for
+     * {@link Settings.Secure#RTT_CALLING_MODE}.
+     *
+     * @hide
+     */
+    public static final String KEY_DEFAULT_RTT_MODE_INT =
+            "default_rtt_mode_int";
+
+    /**
      * Indicates if auto-configuration server is used for the RCS config
      * Reference: GSMA RCC.14
      */
@@ -5201,6 +5213,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
         sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, false);
+        sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
     }
 
     /**
@@ -5219,9 +5232,25 @@ public class CarrierConfigManager {
         public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT =
                 KEY_PREFIX + "hotspot_maximum_client_count";
 
+        /**
+         * This configuration is intended to be a narrow exception for provisioning
+         * {@link android.net.wifi.WifiNetworkSuggestion} of widely-known carrier networks that do
+         * not support using randomized MAC address.
+         * Carrier provisioned {@link android.net.wifi.WifiNetworkSuggestion} with SSIDs included
+         * in this list will have MAC randomization disabled.
+         *
+         * Note: the SSIDs in the list are expected to be interpreted as is - do not add double
+         * quotes to the SSIDs.
+         */
+        public static final String KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED =
+                KEY_PREFIX + "suggestion_ssid_list_with_mac_randomization_disabled";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_HOTSPOT_MAX_CLIENT_COUNT, 0);
+            defaults.putStringArray(KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED,
+                    new String[0]);
+
             return defaults;
         }
 

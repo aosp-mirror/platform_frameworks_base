@@ -195,8 +195,9 @@ public class HdmiCecLocalDeviceAudioSystemTest {
                 }
             };
 
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
-
+        mHdmiControlService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mMyLooper = mTestLooper.getLooper();
         mHdmiCecLocalDeviceAudioSystem = new HdmiCecLocalDeviceAudioSystem(mHdmiControlService);
         mHdmiCecLocalDevicePlayback = new HdmiCecLocalDevicePlayback(mHdmiControlService) {
@@ -710,7 +711,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     public void giveAudioStatus_volumeEnabled() {
         mMusicVolume = 50;
         mMusicMaxVolume = 100;
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
 
         int volume = mHdmiControlService.getAudioManager()
@@ -740,7 +742,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     public void giveAudioStatus_volumeDisabled() {
         mMusicVolume = 50;
         mMusicMaxVolume = 100;
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
 
         int volume = mHdmiControlService.getAudioManager()
@@ -770,7 +773,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     public void reportAudioStatus_volumeEnabled() {
         mMusicVolume = 50;
         mMusicMaxVolume = 100;
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_ENABLED);
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
 
         int volume = mHdmiControlService.getAudioManager()
@@ -794,7 +798,8 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     public void reportAudioStatus_volumeDisabled() {
         mMusicVolume = 50;
         mMusicMaxVolume = 100;
-        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(
+                HdmiControlManager.VOLUME_CONTROL_DISABLED);
         mHdmiCecLocalDeviceAudioSystem.setSystemAudioControlFeatureEnabled(true);
 
         int volume = mHdmiControlService.getAudioManager()

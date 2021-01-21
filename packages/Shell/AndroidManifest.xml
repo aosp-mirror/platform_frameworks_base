@@ -119,6 +119,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
+    <uses-permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
     <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE"/>
@@ -386,6 +387,9 @@
 
     <!-- Permission required for CTS to test sensor privacy behavior -->
     <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
+
+    <!-- Permission needed for CTS test - CallLogTest -->
+    <uses-permission android:name="com.android.voicemail.permission.READ_VOICEMAIL" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
