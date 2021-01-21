@@ -33,6 +33,7 @@ import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.SizeCompatTests.prepareLimitedBounds;
 import static com.android.server.wm.SizeCompatTests.prepareUnresizable;
 import static com.android.server.wm.SizeCompatTests.rotateDisplay;
 
@@ -307,6 +308,43 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mDisplay.findAreaForToken(imeToken)).isNull();
         assertThat(mFirstRoot.findAreaForToken(imeToken)).isNull();
         assertThat(mSecondRoot.findAreaForToken(imeToken)).isEqualTo(imeContainer);
+    }
+
+    @Test
+    public void testResizableFixedOrientationApp_taskLevelLetterboxing() {
+        mFirstRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
+        mSecondRoot.setIgnoreOrientationRequest(false /* ignoreOrientationRequest */);
+
+        // Launch portrait on first DAG
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
+        prepareLimitedBounds(mFirstActivity, SCREEN_ORIENTATION_PORTRAIT,
+                false /* isUnresizable */);
+
+        // Display in landscape (as opposite to DAG), first DAG and activity in portrait
+        assertThat(mDisplay.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
+        assertThat(mFirstRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
+        assertThat(mFirstActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
+        assertThat(mFirstTask.isTaskLetterboxed()).isFalse();
+        assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
+
+        // Launch portrait on second DAG
+        mDisplay.onLastFocusedTaskDisplayAreaChanged(mSecondTda);
+        prepareLimitedBounds(mSecondActivity, SCREEN_ORIENTATION_LANDSCAPE,
+                false /* isUnresizable */);
+
+        // Display in portrait (as opposite to DAG), first DAG and activity in landscape
+        assertThat(mDisplay.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
+        assertThat(mSecondRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
+        assertThat(mSecondActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
+        assertThat(mSecondTask.isTaskLetterboxed()).isFalse();
+        assertThat(mSecondActivity.inSizeCompatMode()).isFalse();
+
+        // First activity is letterboxed in portrait as requested.
+        assertThat(mFirstRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
+        assertThat(mFirstActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
+        assertThat(mFirstTask.isTaskLetterboxed()).isTrue();
+        assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
+
     }
 
     private void setupImeWindow() {

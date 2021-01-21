@@ -56,5 +56,6 @@ oneway interface INotificationListener
     void onNotificationDirectReply(String key);
     void onSuggestedReplySent(String key, in CharSequence reply, int source);
     void onActionClicked(String key, in Notification.Action action, int source);
+    void onNotificationClicked(String key);
     void onAllowedAdjustmentsChanged();
 }

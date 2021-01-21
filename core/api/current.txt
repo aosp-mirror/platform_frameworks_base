@@ -1055,11 +1055,11 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
-    field public static final int pathAdvancedPattern = 16844319; // 0x101061f
+    field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
-    field public static final int pathSuffix = 16844317; // 0x101061d
+    field public static final int pathSuffix = 16844318; // 0x101061e
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1152,7 +1152,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
-    field public static final int requireDeviceScreenOn = 16844316; // 0x101061c
+    field public static final int requireDeviceScreenOn = 16844317; // 0x101061d
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
@@ -1293,10 +1293,10 @@ package android {
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
-    field public static final int sspAdvancedPattern = 16844320; // 0x1010620
+    field public static final int sspAdvancedPattern = 16844321; // 0x1010621
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
-    field public static final int sspSuffix = 16844318; // 0x101061e
+    field public static final int sspSuffix = 16844319; // 0x101061f
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -5573,6 +5573,7 @@ package android.app {
     field public static final String EXTRA_PROGRESS = "android.progress";
     field public static final String EXTRA_PROGRESS_INDETERMINATE = "android.progressIndeterminate";
     field public static final String EXTRA_PROGRESS_MAX = "android.progressMax";
+    field public static final String EXTRA_PROMOTE_PICTURE = "android.promotePicture";
     field public static final String EXTRA_REMOTE_INPUT_DRAFT = "android.remoteInputDraft";
     field public static final String EXTRA_REMOTE_INPUT_HISTORY = "android.remoteInputHistory";
     field @Deprecated public static final String EXTRA_SELF_DISPLAY_NAME = "android.selfDisplayName";
@@ -5712,12 +5713,13 @@ package android.app {
   public static class Notification.BigPictureStyle extends android.app.Notification.Style {
     ctor public Notification.BigPictureStyle();
     ctor @Deprecated public Notification.BigPictureStyle(android.app.Notification.Builder);
-    method public android.app.Notification.BigPictureStyle bigLargeIcon(android.graphics.Bitmap);
-    method public android.app.Notification.BigPictureStyle bigLargeIcon(android.graphics.drawable.Icon);
-    method public android.app.Notification.BigPictureStyle bigPicture(android.graphics.Bitmap);
+    method @NonNull public android.app.Notification.BigPictureStyle bigLargeIcon(@Nullable android.graphics.Bitmap);
+    method @NonNull public android.app.Notification.BigPictureStyle bigLargeIcon(@Nullable android.graphics.drawable.Icon);
+    method @NonNull public android.app.Notification.BigPictureStyle bigPicture(@Nullable android.graphics.Bitmap);
     method @NonNull public android.app.Notification.BigPictureStyle bigPictureContentDescription(@Nullable CharSequence);
-    method public android.app.Notification.BigPictureStyle setBigContentTitle(CharSequence);
-    method public android.app.Notification.BigPictureStyle setSummaryText(CharSequence);
+    method @NonNull public android.app.Notification.BigPictureStyle setBigContentTitle(@Nullable CharSequence);
+    method @NonNull public android.app.Notification.BigPictureStyle setSummaryText(@Nullable CharSequence);
+    method @NonNull public android.app.Notification.BigPictureStyle showBigPictureWhenCollapsed(boolean);
   }
 
   public static class Notification.BigTextStyle extends android.app.Notification.Style {
@@ -7191,6 +7193,7 @@ package android.app.admin {
     field public static final String EXTRA_ADD_EXPLANATION = "android.app.extra.ADD_EXPLANATION";
     field public static final String EXTRA_DELEGATION_SCOPES = "android.app.extra.DELEGATION_SCOPES";
     field public static final String EXTRA_DEVICE_ADMIN = "android.app.extra.DEVICE_ADMIN";
+    field public static final String EXTRA_DEVICE_PASSWORD_REQUIREMENT_ONLY = "android.app.extra.DEVICE_PASSWORD_REQUIREMENT_ONLY";
     field @RequiresPermission(android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY) public static final String EXTRA_PASSWORD_COMPLEXITY = "android.app.extra.PASSWORD_COMPLEXITY";
     field public static final String EXTRA_PROVISIONING_ACCOUNT_TO_MIGRATE = "android.app.extra.PROVISIONING_ACCOUNT_TO_MIGRATE";
     field public static final String EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE = "android.app.extra.PROVISIONING_ADMIN_EXTRAS_BUNDLE";
@@ -12053,7 +12056,6 @@ package android.content.pm {
 
   public static class PackageInstaller.Session implements java.io.Closeable {
     method public void abandon();
-    method @Deprecated public void addChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>) throws java.io.IOException;
     method public void addChildSessionId(int);
     method public void close();
     method public void commit(@NonNull android.content.IntentSender);
@@ -12067,6 +12069,7 @@ package android.content.pm {
     method @NonNull public java.io.OutputStream openWrite(@NonNull String, long, long) throws java.io.IOException;
     method public void removeChildSessionId(int);
     method public void removeSplit(@NonNull String) throws java.io.IOException;
+    method @Deprecated public void setChecksums(@NonNull String, @NonNull java.util.List<android.content.pm.Checksum>, @Nullable byte[]) throws java.io.IOException;
     method public void setStagingProgress(float);
     method public void transfer(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
   }
@@ -21520,6 +21523,8 @@ package android.media {
     method public void removeKeys(@NonNull byte[]);
     method public void removeOfflineLicense(@NonNull byte[]);
     method public void removeSecureStop(@NonNull byte[]);
+    method public boolean requiresSecureDecoder(@NonNull String);
+    method public boolean requiresSecureDecoder(@NonNull String, @android.media.MediaDrm.SecurityLevel int);
     method public void restoreKeys(@NonNull byte[], @NonNull byte[]);
     method public void setOnEventListener(@Nullable android.media.MediaDrm.OnEventListener);
     method public void setOnEventListener(@Nullable android.media.MediaDrm.OnEventListener, @Nullable android.os.Handler);
@@ -33012,6 +33017,7 @@ package android.provider {
     field public static final String CACHED_PHOTO_URI = "photo_uri";
     field public static final String CALL_SCREENING_APP_NAME = "call_screening_app_name";
     field public static final String CALL_SCREENING_COMPONENT_NAME = "call_screening_component_name";
+    field public static final String COMPOSER_PHOTO_URI = "composer_photo_uri";
     field public static final android.net.Uri CONTENT_FILTER_URI;
     field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/calls";
     field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/calls";
@@ -33036,6 +33042,7 @@ package android.provider {
     field public static final String IS_READ = "is_read";
     field public static final String LAST_MODIFIED = "last_modified";
     field public static final String LIMIT_PARAM_KEY = "limit";
+    field public static final String LOCATION = "location";
     field public static final String MISSED_REASON = "missed_reason";
     field public static final long MISSED_REASON_NOT_MISSED = 0L; // 0x0L
     field public static final int MISSED_TYPE = 3; // 0x3
@@ -33051,7 +33058,11 @@ package android.provider {
     field public static final int PRESENTATION_PAYPHONE = 4; // 0x4
     field public static final int PRESENTATION_RESTRICTED = 2; // 0x2
     field public static final int PRESENTATION_UNKNOWN = 3; // 0x3
+    field public static final String PRIORITY = "priority";
+    field public static final int PRIORITY_NORMAL = 0; // 0x0
+    field public static final int PRIORITY_URGENT = 1; // 0x1
     field public static final int REJECTED_TYPE = 5; // 0x5
+    field public static final String SUBJECT = "subject";
     field public static final String TRANSCRIPTION = "transcription";
     field public static final String TYPE = "type";
     field public static final long USER_MISSED_CALL_FILTERS_TIMEOUT = 4194304L; // 0x400000L
@@ -33064,6 +33075,15 @@ package android.provider {
     field public static final String VIA_NUMBER = "via_number";
     field public static final int VOICEMAIL_TYPE = 4; // 0x4
     field public static final String VOICEMAIL_URI = "voicemail_uri";
+  }
+
+  public static class CallLog.Locations implements android.provider.BaseColumns {
+    field public static final String AUTHORITY = "call_composer_locations";
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/call_composer_location";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/call_composer_location";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final String LATITUDE = "latitude";
+    field public static final String LONGITUDE = "longitude";
   }
 
   @Deprecated public class Contacts {
@@ -39022,7 +39042,9 @@ package android.telecom {
     method public void onStateChanged(int);
     method public void onStopDtmfTone();
     method public void onStopRtt();
+    method public void onTrackedByNonUiService(boolean);
     method public void onUnhold();
+    method public void onUsingAlternativeUi(boolean);
     method public static String propertiesToString(int);
     method public final void putExtras(@NonNull android.os.Bundle);
     method public final void removeExtras(java.util.List<java.lang.String>);
@@ -39361,6 +39383,7 @@ package android.telecom {
     field public static final int CAPABILITY_VIDEO_CALLING = 8; // 0x8
     field public static final int CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE = 256; // 0x100
     field @NonNull public static final android.os.Parcelable.Creator<android.telecom.PhoneAccount> CREATOR;
+    field public static final String EXTRA_ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE = "android.telecom.extra.ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE";
     field public static final String EXTRA_ALWAYS_USE_VOIP_AUDIO_MODE = "android.telecom.extra.ALWAYS_USE_VOIP_AUDIO_MODE";
     field public static final String EXTRA_CALL_SUBJECT_CHARACTER_ENCODING = "android.telecom.extra.CALL_SUBJECT_CHARACTER_ENCODING";
     field public static final String EXTRA_CALL_SUBJECT_MAX_LENGTH = "android.telecom.extra.CALL_SUBJECT_MAX_LENGTH";
@@ -49398,8 +49421,9 @@ package android.view {
     method public void show(int);
     field public static final int APPEARANCE_LIGHT_NAVIGATION_BARS = 16; // 0x10
     field public static final int APPEARANCE_LIGHT_STATUS_BARS = 8; // 0x8
-    field public static final int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1; // 0x1
-    field public static final int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0; // 0x0
+    field public static final int BEHAVIOR_DEFAULT = 1; // 0x1
+    field @Deprecated public static final int BEHAVIOR_SHOW_BARS_BY_SWIPE = 1; // 0x1
+    field @Deprecated public static final int BEHAVIOR_SHOW_BARS_BY_TOUCH = 0; // 0x0
     field public static final int BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE = 2; // 0x2
   }
 
@@ -49460,7 +49484,6 @@ package android.view {
     field public static final int FLAGS_CHANGED = 4; // 0x4
     field public static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON = 1; // 0x1
     field public static final int FLAG_ALT_FOCUSABLE_IM = 131072; // 0x20000
-    field @Deprecated public static final int FLAG_BLUR_BEHIND = 4; // 0x4
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field @Deprecated public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
     field @Deprecated public static final int FLAG_DITHER = 4096; // 0x1000

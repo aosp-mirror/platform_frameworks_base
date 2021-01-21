@@ -45,6 +45,7 @@ import java.util.function.Consumer;
  */
 public final class AppSearchSession implements Closeable {
     private static final String TAG = "AppSearchSession";
+    private final String mPackageName;
     private final String mDatabaseName;
     @UserIdInt
     private final int mUserId;
@@ -52,14 +53,20 @@ public final class AppSearchSession implements Closeable {
     private boolean mIsMutated = false;
     private boolean mIsClosed = false;
 
+
+    /**
+     * Creates a search session for the client, defined by the {@code userId} and
+     * {@code packageName}.
+     */
     static void createSearchSession(
             @NonNull AppSearchManager.SearchContext searchContext,
             @NonNull IAppSearchManager service,
             @UserIdInt int userId,
+            @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<AppSearchSession>> callback) {
         AppSearchSession searchSession =
-                new AppSearchSession(service, userId, searchContext.mDatabaseName);
+                new AppSearchSession(service, userId, packageName, searchContext.mDatabaseName);
         searchSession.initialize(executor, callback);
     }
 
@@ -87,10 +94,11 @@ public final class AppSearchSession implements Closeable {
     }
 
     private AppSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId,
-            @NonNull String databaseName) {
-        mDatabaseName = databaseName;
+            @NonNull String packageName, @NonNull String databaseName) {
         mService = service;
         mUserId = userId;
+        mPackageName = packageName;
+        mDatabaseName = databaseName;
     }
 
     /**
@@ -144,7 +152,7 @@ public final class AppSearchSession implements Closeable {
      * Visibility settings for a schema type do not apply or persist across
      * {@link SetSchemaRequest}s.
      *
-     * @param request The schema update request.
+     * @param request  The schema update request.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive errors resulting from setting the schema. If the
      *                 operation succeeds, the callback will be invoked with {@code null}.
@@ -175,6 +183,7 @@ public final class AppSearchSession implements Closeable {
         }
         try {
             mService.setSchema(
+                    mPackageName,
                     mDatabaseName,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
@@ -206,6 +215,7 @@ public final class AppSearchSession implements Closeable {
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
             mService.getSchema(
+                    mPackageName,
                     mDatabaseName,
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
@@ -261,7 +271,7 @@ public final class AppSearchSession implements Closeable {
             documentBundles.add(documents.get(i).getBundle());
         }
         try {
-            mService.putDocuments(mDatabaseName, documentBundles, mUserId,
+            mService.putDocuments(mPackageName, mDatabaseName, documentBundles, mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             executor.execute(() -> callback.onResult(result));
@@ -280,7 +290,7 @@ public final class AppSearchSession implements Closeable {
     /**
      * Retrieves {@link GenericDocument}s by URI.
      *
-     * @param request {@link GetByUriRequest} containing URIs to be retrieved.
+     * @param request  {@link GetByUriRequest} containing URIs to be retrieved.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive the pending result of performing this operation. The keys
      *                 of the returned {@link AppSearchBatchResult} are the input URIs. The values
@@ -301,7 +311,7 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
-            mService.getDocuments(mDatabaseName, request.getNamespace(),
+            mService.getDocuments(mPackageName, mDatabaseName, request.getNamespace(),
                     new ArrayList<>(request.getUris()), mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
@@ -405,14 +415,14 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
-        return new SearchResults(mService, mDatabaseName, queryExpression, searchSpec, mUserId,
-                executor);
+        return new SearchResults(mService, mPackageName, mDatabaseName, queryExpression,
+                searchSpec, mUserId, executor);
     }
 
     /**
      * Removes {@link GenericDocument}s from the index by URI.
      *
-     * @param request Request containing URIs to be removed.
+     * @param request  Request containing URIs to be removed.
      * @param executor Executor on which to invoke the callback.
      * @param callback Callback to receive the pending result of performing this operation. The keys
      *                 of the returned {@link AppSearchBatchResult} are the input URIs. The values
@@ -432,7 +442,7 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
-            mService.removeByUri(mDatabaseName, request.getNamespace(),
+            mService.removeByUri(mPackageName, mDatabaseName, request.getNamespace(),
                     new ArrayList<>(request.getUris()), mUserId,
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
@@ -478,7 +488,8 @@ public final class AppSearchSession implements Closeable {
         Objects.requireNonNull(callback);
         Preconditions.checkState(!mIsClosed, "AppSearchSession has already been closed");
         try {
-            mService.removeByQuery(mDatabaseName, queryExpression, searchSpec.getBundle(), mUserId,
+            mService.removeByQuery(mPackageName, mDatabaseName, queryExpression,
+                    searchSpec.getBundle(), mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
                             executor.execute(() -> callback.accept(result));

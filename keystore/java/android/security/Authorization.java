@@ -17,11 +17,13 @@
 package android.security;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.security.keymint.HardwareAuthToken;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
 import android.security.authorization.IKeystoreAuthorization;
+import android.security.authorization.LockScreenEvent;
 import android.system.keystore2.ResponseCode;
 import android.util.Log;
 
@@ -73,6 +75,33 @@ public class Authorization {
      */
     public int addAuthToken(@NonNull byte[] authToken) {
         return addAuthToken(AuthTokenUtils.toHardwareAuthToken(authToken));
+    }
+
+    /**
+     * Informs keystore2 about lock screen event.
+     *
+     * @param locked            - whether it is a lock (true) or unlock (false) event
+     * @param syntheticPassword - if it is an unlock event with the password, pass the synthetic
+     *                          password provided by the LockSettingService
+     *
+     * @return 0 if successful or a {@code ResponseCode}.
+     */
+    public int onLockScreenEvent(@NonNull boolean locked, @NonNull int userId,
+            @Nullable byte[] syntheticPassword) {
+        if (!android.security.keystore2.AndroidKeyStoreProvider.isInstalled()) return 0;
+        try {
+            if (locked) {
+                getService().onLockScreenEvent(LockScreenEvent.LOCK, userId, null);
+            } else {
+                getService().onLockScreenEvent(LockScreenEvent.UNLOCK, userId, syntheticPassword);
+            }
+            return 0;
+        } catch (RemoteException e) {
+            Log.w(TAG, "Can not connect to keystore", e);
+            return SYSTEM_ERROR;
+        } catch (ServiceSpecificException e) {
+            return e.errorCode;
+        }
     }
 
 }

@@ -32,7 +32,6 @@ import com.android.systemui.R;
  * Utility class to calculate the clock position and top padding of notifications on Keyguard.
  */
 public class KeyguardClockPositionAlgorithm {
-
     /**
      * How much the clock height influences the shade position.
      * 0 means nothing, 1 means move the shade up by the height of the clock
@@ -79,6 +78,11 @@ public class KeyguardClockPositionAlgorithm {
      * Minimum top margin to avoid overlap with status bar.
      */
     private int mMinTopMargin;
+
+    /**
+     * Minimum top inset (in pixels) to avoid overlap with any display cutouts.
+     */
+    private int mCutoutTopInset = 0;
 
     /**
      * Maximum bottom padding to avoid overlap with {@link KeyguardBottomAreaView} or
@@ -172,7 +176,7 @@ public class KeyguardClockPositionAlgorithm {
             float panelExpansion, int parentHeight, int keyguardStatusHeight, int clockPreferredY,
             boolean hasCustomClock, boolean hasVisibleNotifs, float dark, float emptyDragAmount,
             boolean bypassEnabled, int unlockedStackScrollerPadding, boolean showLockIcon,
-            float qsExpansion) {
+            float qsExpansion, int cutoutTopInset) {
         mMinTopMargin = statusBarMinHeight + (showLockIcon
                 ? mContainerTopPaddingWithLockIcon : mContainerTopPaddingWithoutLockIcon);
         mMaxShadeBottom = maxShadeBottom;
@@ -188,6 +192,7 @@ public class KeyguardClockPositionAlgorithm {
         mBypassEnabled = bypassEnabled;
         mUnlockedStackScrollerPadding = unlockedStackScrollerPadding;
         mQsExpansion = qsExpansion;
+        mCutoutTopInset = cutoutTopInset;
     }
 
     public void run(Result result) {
@@ -270,10 +275,13 @@ public class KeyguardClockPositionAlgorithm {
 
         float darkAmount = mBypassEnabled && !mHasCustomClock ? 1.0f : mDarkAmount;
 
-        // TODO(b/12836565) - prototyping only adjustment
         if (mLockScreenMode != KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL) {
-            // This will keep the clock at the top
-            clockYDark = (int) (clockY + burnInPreventionOffsetY());
+            // This will keep the clock at the top but out of the cutout area
+            float shift = 0;
+            if (clockY - mBurnInPreventionOffsetYLargeClock < mCutoutTopInset) {
+                shift = mCutoutTopInset - (clockY - mBurnInPreventionOffsetYLargeClock);
+            }
+            clockYDark = clockY + burnInPreventionOffsetY() + shift;
         }
         return (int) (MathUtils.lerp(clockY, clockYDark, darkAmount) + mEmptyDragAmount);
     }

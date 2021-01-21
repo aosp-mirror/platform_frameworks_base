@@ -106,6 +106,10 @@ public class ArcTerminationActionFromAvrTest {
                     }
 
                     @Override
+                    protected void writeStringSystemProperty(String key, String value) {
+                    }
+
+                    @Override
                     Looper getServiceLooper() {
                         return mTestLooper.getLooper();
                     }

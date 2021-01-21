@@ -29,16 +29,21 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,10 +55,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Activity for showing aged out bubbles.
- * Must be public to be accessible to androidx...AppComponentFactory
+ * Container view for showing aged out bubbles.
  */
-public class BubbleOverflowActivity extends Activity {
+public class BubbleOverflowContainerView extends LinearLayout {
     static final String EXTRA_BUBBLE_CONTROLLER = "bubble_controller";
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
@@ -95,37 +99,55 @@ public class BubbleOverflowActivity extends Activity {
         }
     }
 
+    public BubbleOverflowContainerView(Context context) {
+        super(context);
+    }
+
+    public BubbleOverflowContainerView(Context context, @Nullable AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public BubbleOverflowContainerView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    public BubbleOverflowContainerView(Context context, AttributeSet attrs, int defStyleAttr,
+            int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public void setBubbleController(BubbleController controller) {
+        mController = controller;
+    }
+
+    public void show() {
+        setVisibility(View.VISIBLE);
+        updateOverflow();
+    }
+
+    public void hide() {
+        setVisibility(View.INVISIBLE);
+    }
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.bubble_overflow_activity);
+    protected void onFinishInflate() {
+        super.onFinishInflate();
 
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
         mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mEmptyStateTitle = findViewById(R.id.bubble_overflow_empty_title);
         mEmptyStateSubtitle = findViewById(R.id.bubble_overflow_empty_subtitle);
         mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
-
-        Intent intent = getIntent();
-        if (intent != null && intent.getExtras() != null) {
-            IBinder binder = intent.getExtras().getBinder(EXTRA_BUBBLE_CONTROLLER);
-            if (binder instanceof ObjectWrapper) {
-                mController = ((ObjectWrapper<BubbleController>) binder).get();
-                updateOverflow();
-            }
-        } else {
-            Log.w(TAG, "Bubble overflow activity created without bubble controller!");
-        }
     }
 
     void updateOverflow() {
         Resources res = getResources();
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
         mRecyclerView.setLayoutManager(
-                new NoScrollGridLayoutManager(getApplicationContext(), columns));
+                new NoScrollGridLayoutManager(getContext(), columns));
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        getContext().getDisplay().getMetrics(displayMetrics);
 
         final int overflowPadding = res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
         final int recyclerViewWidth = displayMetrics.widthPixels - (overflowPadding * 2);
@@ -137,7 +159,7 @@ public class BubbleOverflowActivity extends Activity {
                 - res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
         final int viewHeight = recyclerViewHeight / rows;
 
-        mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
+        mAdapter = new BubbleOverflowAdapter(getContext(), mOverflowBubbles,
                 mController::promoteBubbleFromOverflow,
                 mController.getPositioner(),
                 viewWidth, viewHeight);
@@ -146,6 +168,11 @@ public class BubbleOverflowActivity extends Activity {
         mOverflowBubbles.clear();
         mOverflowBubbles.addAll(mController.getOverflowBubbles());
         mAdapter.notifyDataSetChanged();
+
+        // Currently BubbleExpandedView.mExpandedViewContainer is WRAP_CONTENT so use the same
+        // width we would use for the recycler view
+        LayoutParams lp = (LayoutParams) mEmptyState.getLayoutParams();
+        lp.width = recyclerViewWidth;
         updateEmptyStateVisibility();
 
         mController.setOverflowListener(mDataListener);
@@ -172,12 +199,12 @@ public class BubbleOverflowActivity extends Activity {
                 ? res.getDrawable(R.drawable.bubble_ic_empty_overflow_dark)
                 : res.getDrawable(R.drawable.bubble_ic_empty_overflow_light));
 
-        findViewById(android.R.id.content)
+        findViewById(R.id.bubble_overflow_container)
                 .setBackgroundColor(isNightMode
                         ? res.getColor(R.color.bubbles_dark)
                         : res.getColor(R.color.bubbles_light));
 
-        final TypedArray typedArray = getApplicationContext().obtainStyledAttributes(
+        final TypedArray typedArray = getContext().obtainStyledAttributes(
                 new int[]{android.R.attr.colorBackgroundFloating,
                         android.R.attr.textColorSecondary});
         int bgColor = typedArray.getColor(0, isNightMode ? Color.BLACK : Color.WHITE);
@@ -222,36 +249,6 @@ public class BubbleOverflowActivity extends Activity {
             }
         }
     };
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onRestart() {
-        super.onRestart();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateOverflow();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }
 
 class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.ViewHolder> {

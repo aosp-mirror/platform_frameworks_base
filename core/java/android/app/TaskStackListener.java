@@ -17,13 +17,13 @@
 package android.app;
 
 import android.app.ActivityManager.RunningTaskInfo;
-import android.window.TaskSnapshot;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.window.TaskSnapshot;
 
 /**
  * Classes interested in observing only a subset of changes using ITaskStackListener can extend
@@ -195,5 +195,9 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
 
     @Override
     public void onActivityRotation(int displayId) {
+    }
+
+    @Override
+    public void onTaskMovedToBack(RunningTaskInfo taskInfo) {
     }
 }

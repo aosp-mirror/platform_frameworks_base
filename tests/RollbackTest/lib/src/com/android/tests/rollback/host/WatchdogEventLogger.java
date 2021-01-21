@@ -17,6 +17,8 @@
 package com.android.tests.rollback.host;
 
 import com.android.tradefed.device.ITestDevice;
+import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.Truth;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -75,5 +77,31 @@ public class WatchdogEventLogger {
                 && matchProperty(type, "logPackage", logPackage)
                 && matchProperty(type, "rollbackReason", rollbackReason)
                 && matchProperty(type, "failedPackageName", failedPackageName);
+    }
+
+    static class Subject extends com.google.common.truth.Subject {
+        private final WatchdogEventLogger mActual;
+
+        private Subject(FailureMetadata failureMetadata, WatchdogEventLogger subject) {
+            super(failureMetadata, subject);
+            mActual = subject;
+        }
+
+        private static com.google.common.truth.Subject.Factory<Subject,
+                WatchdogEventLogger> loggers() {
+            return Subject::new;
+        }
+
+        static Subject assertThat(WatchdogEventLogger actual) {
+            return Truth.assertAbout(loggers()).that(actual);
+        }
+
+        void eventOccurred(String type, String logPackage, String rollbackReason,
+                String failedPackageName) throws Exception {
+            check("watchdogEventOccurred(type=%s, logPackage=%s, rollbackReason=%s, "
+                    + "failedPackageName=%s)", type, logPackage, rollbackReason, failedPackageName)
+                    .that(mActual.watchdogEventOccurred(type, logPackage, rollbackReason,
+                            failedPackageName)).isTrue();
+        }
     }
 }

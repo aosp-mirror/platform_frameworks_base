@@ -48,6 +48,7 @@ import java.util.List;
  * @hide
  */
 public class MultiRateLimiter {
+    private static final String TAG = "MultiRateLimiter";
 
     private static final CountQuotaTracker[] EMPTY_TRACKER_ARRAY = {};
 
@@ -73,6 +74,13 @@ public class MultiRateLimiter {
         }
     }
 
+    /** Remove all saved events from the rate limiter for the given app (reset it). */
+    public void clear(int userId, @NonNull String packageName) {
+        synchronized (mLock) {
+            clearLocked(userId, packageName);
+        }
+    }
+
     @GuardedBy("mLock")
     private void noteEventLocked(int userId, @NonNull String packageName, @Nullable String tag) {
         for (CountQuotaTracker quotaTracker : mQuotaTrackers) {
@@ -91,6 +99,16 @@ public class MultiRateLimiter {
         return true;
     }
 
+    @GuardedBy("mLock")
+    private void clearLocked(int userId, @NonNull String packageName) {
+        for (CountQuotaTracker quotaTracker : mQuotaTrackers) {
+            // This method behaves as if the package has been removed from the device, which
+            // isn't the case here, but it does similar clean-up to what we are aiming for here,
+            // so it works for this use case.
+            quotaTracker.onAppRemovedLocked(userId, packageName);
+        }
+    }
+
     /** Can create a new {@link MultiRateLimiter}. */
     public static class Builder {
 
@@ -98,7 +116,8 @@ public class MultiRateLimiter {
         private final Context mContext;
         private final Categorizer mCategorizer;
         private final Category mCategory;
-        @Nullable private final QuotaTracker.Injector mInjector;
+        @Nullable
+        private final QuotaTracker.Injector mInjector;
 
         /**
          * Creates a new builder and allows to inject an object that can be used
@@ -121,7 +140,7 @@ public class MultiRateLimiter {
         /**
          * Adds another rate limit to be used in {@link MultiRateLimiter}.
          *
-         * @param limit The maximum event count an app can have in the rolling time window.
+         * @param limit      The maximum event count an app can have in the rolling time window.
          * @param windowSize The rolling time window to use when checking quota usage.
          */
         public Builder addRateLimit(int limit, Duration windowSize) {
@@ -164,7 +183,7 @@ public class MultiRateLimiter {
         public final Duration mWindowSize;
 
         /**
-         * @param limit The maximum count of some occurrence in the rolling time window.
+         * @param limit      The maximum count of some occurrence in the rolling time window.
          * @param windowSize The rolling time window to use when checking quota usage.
          */
         private RateLimit(int limit, Duration windowSize) {
@@ -173,7 +192,7 @@ public class MultiRateLimiter {
         }
 
         /**
-         * @param limit The maximum count of some occurrence in the rolling time window.
+         * @param limit      The maximum count of some occurrence in the rolling time window.
          * @param windowSize The rolling time window to use when checking quota usage.
          */
         public static RateLimit create(int limit, Duration windowSize) {

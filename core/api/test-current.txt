@@ -292,6 +292,7 @@ package android.app {
   }
 
   public class StatusBarManager {
+    method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
@@ -725,6 +726,11 @@ package android.graphics {
 
   public final class ImageDecoder implements java.lang.AutoCloseable {
     method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
+  }
+
+  public final class Rect implements android.os.Parcelable {
+    method public void splitHorizontally(@NonNull android.graphics.Rect...);
+    method public void splitVertically(@NonNull android.graphics.Rect...);
   }
 
 }
@@ -2560,6 +2566,7 @@ package android.window {
     method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
+    method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setAppBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBoundsChangeTransaction(@NonNull android.window.WindowContainerToken, @NonNull android.view.SurfaceControl.Transaction);

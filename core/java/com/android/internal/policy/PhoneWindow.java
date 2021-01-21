@@ -2540,8 +2540,14 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
             }
         }
 
-        params.backgroundBlurRadius = a.getDimensionPixelSize(
-                R.styleable.Window_windowBackgroundBlurRadius, 0);
+        if (a.getBoolean(R.styleable.Window_windowBackgroundBlurEnabled, false)) {
+            if ((getForcedWindowFlags() & WindowManager.LayoutParams.FLAG_BLUR_BEHIND) == 0) {
+                params.flags |= WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
+            }
+
+            params.backgroundBlurRadius = a.getDimensionPixelSize(
+                        android.R.styleable.Window_windowBackgroundBlurRadius, 0);
+        }
 
         if (params.windowAnimations == 0) {
             params.windowAnimations = a.getResourceId(
