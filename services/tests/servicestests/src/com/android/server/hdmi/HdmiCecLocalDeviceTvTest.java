@@ -58,6 +58,8 @@ public class HdmiCecLocalDeviceTvTest {
     private TestLooper mTestLooper = new TestLooper();
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mTvPhysicalAddress;
+    private int mTvLogicalAddress;
+    private boolean mWokenUp;
 
     @Mock
     private IPowerManager mIPowerManagerMock;
@@ -77,6 +79,11 @@ public class HdmiCecLocalDeviceTvTest {
 
         mHdmiControlService =
                 new HdmiControlService(InstrumentationRegistry.getTargetContext()) {
+                    @Override
+                    void wakeUp() {
+                        mWokenUp = true;
+                    }
+
                     @Override
                     boolean isControlEnabled() {
                         return true;
@@ -122,6 +129,7 @@ public class HdmiCecLocalDeviceTvTest {
         mTvPhysicalAddress = 0x0000;
         mNativeWrapper.setPhysicalAddress(mTvPhysicalAddress);
         mTestLooper.dispatchAll();
+        mTvLogicalAddress = mHdmiCecLocalDeviceTv.getDeviceInfo().getLogicalAddress();
         mNativeWrapper.clearResultMessages();
     }
 
@@ -202,5 +210,61 @@ public class HdmiCecLocalDeviceTvTest {
                 HdmiControlManager.CEC_SETTING_NAME_POWER_CONTROL_MODE,
                 HdmiControlManager.POWER_CONTROL_MODE_TV);
         assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isFalse();
+    }
+
+    @Test
+    public void tvWakeOnOneTouchPlay_TextViewOn_Enabled() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
+        mTestLooper.dispatchAll();
+        mWokenUp = false;
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(ADDR_PLAYBACK_1,
+                mTvLogicalAddress);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(textViewOn)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
+    }
+
+    @Test
+    public void tvWakeOnOneTouchPlay_ImageViewOn_Enabled() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED);
+        mTestLooper.dispatchAll();
+        mWokenUp = false;
+        HdmiCecMessage imageViewOn = new HdmiCecMessage(ADDR_PLAYBACK_1, mTvLogicalAddress,
+                Constants.MESSAGE_IMAGE_VIEW_ON, HdmiCecMessage.EMPTY_PARAM);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isTrue();
+    }
+
+    @Test
+    public void tvWakeOnOneTouchPlay_TextViewOn_Disabled() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED);
+        mTestLooper.dispatchAll();
+        mWokenUp = false;
+        HdmiCecMessage textViewOn = HdmiCecMessageBuilder.buildTextViewOn(ADDR_PLAYBACK_1,
+                mTvLogicalAddress);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(textViewOn)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void tvWakeOnOneTouchPlay_ImageViewOn_Disabled() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED);
+        mTestLooper.dispatchAll();
+        mWokenUp = false;
+        HdmiCecMessage imageViewOn = new HdmiCecMessage(ADDR_PLAYBACK_1, mTvLogicalAddress,
+                Constants.MESSAGE_IMAGE_VIEW_ON, HdmiCecMessage.EMPTY_PARAM);
+        assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mWokenUp).isFalse();
     }
 }

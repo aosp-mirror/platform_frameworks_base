@@ -480,6 +480,28 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface VolumeControl {}
 
+    // -- Whether TV Wake on One Touch Play is enabled or disabled.
+    /**
+     * TV Wake on One Touch Play enabled.
+     *
+     * @hide
+     */
+    public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED = 1;
+    /**
+     * TV Wake on One Touch Play disabled.
+     *
+     * @hide
+     */
+    public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TV_WAKE_ON_ONE_TOUCH_PLAY_" }, value = {
+            TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED,
+            TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TvWakeOnOneTouchPlay {}
 
     // -- Settings available in the CEC Configuration.
     /**
@@ -519,7 +541,6 @@ public final class HdmiControlManager {
     @SystemApi
     public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING =
             "system_audio_mode_muting";
-
     /**
      * Controls whether volume control commands via HDMI CEC are enabled.
      *
@@ -555,7 +576,14 @@ public final class HdmiControlManager {
      */
     public static final String CEC_SETTING_NAME_VOLUME_CONTROL_MODE =
             "volume_control_enabled";
-
+    /**
+     * Name of a setting deciding whether the TV will automatically turn on upon reception
+     * of the CEC command &lt;Text View On&gt; or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY =
+            "tv_wake_on_one_touch_play";
     /**
      * @hide
      */
@@ -566,6 +594,7 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
         CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+        CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
     })
     public @interface CecSettingName {}
 
@@ -1865,6 +1894,50 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of TV Wake on One Touch Play.
+     *
+     * <p>Sets whether the TV should wake up upon reception of &lt;Text View On&gt;
+     * or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setTvWakeOnOneTouchPlay(@NonNull @TvWakeOnOneTouchPlay int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of TV Wake on One Touch Play.
+     *
+     * <p>Reflects whether the TV should wake up upon reception of &lt;Text View On&gt;
+     * or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @NonNull
+    @TvWakeOnOneTouchPlay
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getTvWakeOnOneTouchPlay() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

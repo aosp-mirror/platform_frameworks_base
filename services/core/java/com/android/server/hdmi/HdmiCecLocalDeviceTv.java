@@ -94,9 +94,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     // If true, TV going to standby mode puts other devices also to standby.
     private boolean mAutoDeviceOff;
 
-    // If true, TV wakes itself up when receiving <Text/Image View On>.
-    private boolean mAutoWakeup;
-
     private final HdmiCecStandbyModeHandler mStandbyHandler;
 
     // If true, do not do routing control/send active source for internal source.
@@ -163,7 +160,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mPrevPortId = Constants.INVALID_PORT_ID;
         mAutoDeviceOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 true);
-        mAutoWakeup = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, true);
         mSystemAudioControlFeatureEnabled =
                 mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
@@ -641,7 +637,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         // implemented in such a way that Android system is not really put to standby mode
         // but only the display is set to blank. Then the command leads to the effect of
         // turning on the display by the invocation of PowerManager.wakeUp().
-        if (mService.isPowerStandbyOrTransient() && mAutoWakeup) {
+        if (mService.isPowerStandbyOrTransient() && getAutoWakeup()) {
             mService.wakeUp();
         }
         return true;
@@ -1216,15 +1212,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     }
 
     @ServiceThreadOnly
-    void setAutoWakeup(boolean enabled) {
-        assertRunOnServiceThread();
-        mAutoWakeup = enabled;
-    }
-
-    @ServiceThreadOnly
     boolean getAutoWakeup() {
         assertRunOnServiceThread();
-        return mAutoWakeup;
+        return mService.getHdmiCecConfig().getIntValue(
+                  HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY)
+                    == HdmiControlManager.TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED;
     }
 
     @Override
@@ -1552,7 +1544,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         pw.println("mSystemAudioMute: " + mSystemAudioMute);
         pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
         pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
-        pw.println("mAutoWakeup: " + mAutoWakeup);
         pw.println("mSkipRoutingControl: " + mSkipRoutingControl);
         pw.println("mPrevPortId: " + mPrevPortId);
     }
