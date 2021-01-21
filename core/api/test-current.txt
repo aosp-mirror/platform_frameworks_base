@@ -981,7 +981,7 @@ package android.media.tv {
 package android.net {
 
   public class ConnectivityManager {
-    method @RequiresPermission(anyOf={"android.permission.MANAGE_TEST_NETWORKS", android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
   }
 
   public class EthernetManager {
