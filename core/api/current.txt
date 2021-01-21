@@ -7907,24 +7907,6 @@ package android.app.people {
 
 }
 
-package android.app.role {
-
-  public final class RoleManager {
-    method @NonNull public android.content.Intent createRequestRoleIntent(@NonNull String);
-    method public boolean isRoleAvailable(@NonNull String);
-    method public boolean isRoleHeld(@NonNull String);
-    field public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
-    field public static final String ROLE_BROWSER = "android.app.role.BROWSER";
-    field public static final String ROLE_CALL_REDIRECTION = "android.app.role.CALL_REDIRECTION";
-    field public static final String ROLE_CALL_SCREENING = "android.app.role.CALL_SCREENING";
-    field public static final String ROLE_DIALER = "android.app.role.DIALER";
-    field public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
-    field public static final String ROLE_HOME = "android.app.role.HOME";
-    field public static final String ROLE_SMS = "android.app.role.SMS";
-  }
-
-}
-
 package android.app.slice {
 
   public final class Slice implements android.os.Parcelable {

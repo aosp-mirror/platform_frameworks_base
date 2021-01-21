@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.infra;
+package com.android.permission.util;
 
 import android.annotation.NonNull;
 import android.os.Handler;

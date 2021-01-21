@@ -24,7 +24,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.Intent;
@@ -630,7 +629,7 @@ public final class RoleManager {
      * @hide
      */
     @Nullable
-    //@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public String getBrowserRoleHolder(@UserIdInt int userId) {
         try {
             return mService.getBrowserRoleHolder(userId);
@@ -653,7 +652,7 @@ public final class RoleManager {
      */
     @Nullable
     @RequiresPermission(Manifest.permission.SET_PREFERRED_APPLICATIONS)
-    //@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public boolean setBrowserRoleHolder(@Nullable String packageName, @UserIdInt int userId) {
         try {
             return mService.setBrowserRoleHolder(packageName, userId);
@@ -674,7 +673,6 @@ public final class RoleManager {
      */
     @Nullable
     @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
-    @TestApi
     public String getSmsRoleHolder(@UserIdInt int userId) {
         try {
             return mService.getSmsRoleHolder(userId);
@@ -693,7 +691,7 @@ public final class RoleManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    @TestApi
+    @SystemApi
     public void isRoleVisible(@NonNull String roleName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         getRoleControllerManager().isRoleVisible(roleName, executor, callback);
@@ -714,7 +712,7 @@ public final class RoleManager {
      * @hide
      */
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
-    @TestApi
+    @SystemApi
     public void isApplicationVisibleForRole(@NonNull String roleName, @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor, @NonNull Consumer<Boolean> callback) {
         getRoleControllerManager().isApplicationVisibleForRole(roleName, packageName, executor,

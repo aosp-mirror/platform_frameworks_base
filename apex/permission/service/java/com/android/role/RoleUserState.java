@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.role;
+package com.android.role;
 
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
@@ -29,10 +29,11 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.permission.util.BackgroundThread;
+import com.android.permission.util.CollectionUtils;
 import com.android.role.persistence.RolesPersistence;
 import com.android.role.persistence.RolesState;
-import com.android.server.role.util.BackgroundThread;
-import com.android.server.role.util.CollectionUtils;
+import com.android.server.role.RoleServicePlatformHelper;
 
 import java.util.ArrayList;
 import java.util.List;

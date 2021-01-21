@@ -21,6 +21,56 @@ filegroup {
     visibility: ["//frameworks/base/services"],
 }
 
+filegroup {
+    name: "service-permission-protos",
+    srcs: [
+        "proto/**/*.proto",
+    ],
+    visibility: ["//frameworks/base"],
+}
+
+gensrcs {
+    name: "service-permission-javastream-protos",
+    depfile: true,
+
+    tools: [
+        "aprotoc",
+        "protoc-gen-javastream",
+        "soong_zip",
+    ],
+
+    cmd: "mkdir -p $(genDir)/$(in) " +
+        "&& $(location aprotoc) " +
+        "  --plugin=$(location protoc-gen-javastream) " +
+        "  --dependency_out=$(depfile) " +
+        "  --javastream_out=$(genDir)/$(in) " +
+        "  -Iexternal/protobuf/src " +
+        "  -I . " +
+        "  $(in) " +
+        "&& $(location soong_zip) -jar -o $(out) -C $(genDir)/$(in) -D $(genDir)/$(in)",
+
+    srcs: [
+        ":service-permission-protos",
+    ],
+    output_extension: "srcjar",
+}
+
+java_library {
+    name: "service-permission-shared",
+    srcs: [":service-permission-shared-srcs"],
+    libs: [
+        "framework-annotations-lib",
+        "framework-permission-s-shared",
+    ],
+    apex_available: [
+        "com.android.permission",
+        "test_com.android.permission",
+    ],
+    installable: false,
+    min_sdk_version: "30",
+    sdk_version: "system_server_current",
+}
+
 java_sdk_library {
     name: "service-permission",
     defaults: ["framework-system-server-module-defaults"],
@@ -31,10 +81,20 @@ java_sdk_library {
     ],
     srcs: [
         ":service-permission-sources",
+        ":service-permission-javastream-protos",
     ],
     libs: [
         "framework-permission",
+        "framework-permission-s.impl",
+        "framework-permission-s-shared",
     ],
+    static_libs: [
+        "modules-utils-os",
+        "service-permission-shared",
+    ],
+    jarjar_rules: ":permission-jarjar-rules",
+    min_sdk_version: "30",
+    sdk_version: "system_server_current",
     apex_available: [
         "com.android.permission",
         "test_com.android.permission",

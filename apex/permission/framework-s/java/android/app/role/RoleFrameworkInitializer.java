@@ -16,6 +16,7 @@
 
 package android.app.role;
 
+import android.annotation.SystemApi;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
 
@@ -24,7 +25,7 @@ import android.content.Context;
  *
  * @hide
  */
-//@SystemApi
+@SystemApi
 public class RoleFrameworkInitializer {
     private RoleFrameworkInitializer() {}
 

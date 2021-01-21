@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.role.util;
+package com.android.permission.util;
 
 import android.annotation.Nullable;
 

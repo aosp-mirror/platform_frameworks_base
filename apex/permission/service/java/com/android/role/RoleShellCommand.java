@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.role;
+package com.android.role;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -23,7 +23,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 
 import com.android.modules.utils.BasicShellCommandHandler;
-import com.android.server.role.compat.UserHandleCompat;
+import com.android.permission.compat.UserHandleCompat;
 
 import java.io.PrintWriter;
 import java.util.concurrent.CompletableFuture;

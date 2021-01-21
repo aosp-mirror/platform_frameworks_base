@@ -544,16 +544,6 @@ package android.app.prediction {
 
 }
 
-package android.app.role {
-
-  public final class RoleManager {
-    method @Nullable public String getSmsRoleHolder(int);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void isApplicationVisibleForRole(@NonNull String, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ROLE_HOLDERS) public void isRoleVisible(@NonNull String, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<java.lang.Boolean>);
-  }
-
-}
-
 package android.app.usage {
 
   public class NetworkStatsManager {

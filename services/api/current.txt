@@ -26,6 +26,14 @@ package com.android.permission.persistence {
 
 }
 
+package com.android.role {
+
+  public interface RoleManagerLocal {
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getRolesAndHolders(int);
+  }
+
+}
+
 package com.android.role.persistence {
 
   public interface RolesPersistence {
@@ -76,6 +84,15 @@ package com.android.server {
 
   public static final class SystemService.TargetUser {
     method @NonNull public android.os.UserHandle getUserHandle();
+  }
+
+}
+
+package com.android.server.role {
+
+  public interface RoleServicePlatformHelper {
+    method @NonNull public String computePackageStateHash(int);
+    method @NonNull public java.util.Map<java.lang.String,java.util.Set<java.lang.String>> getLegacyRoleState(int);
   }
 
 }

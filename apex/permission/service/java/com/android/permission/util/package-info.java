@@ -14,13 +14,9 @@
  * limitations under the License.
  */
 
-package android.app.role;
-
 /**
- * Temporary placeholder class inside framework-permission-s for compilation to pass.
- *
  * @hide
+ * TODO(b/146466118) remove this javadoc tag
  */
-public class RoleFrameworkPlaceholder {
-    private RoleFrameworkPlaceholder() {}
-}
+@android.annotation.Hide
+package com.android.permission.util;

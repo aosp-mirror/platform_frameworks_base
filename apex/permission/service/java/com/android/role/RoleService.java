@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.role;
+package com.android.role;
 
 import android.Manifest;
 import android.annotation.AnyThread;
@@ -51,15 +51,16 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.infra.AndroidFuture;
-import com.android.internal.infra.ThrottledRunnable;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.dump.DualDumpOutputStream;
+import com.android.permission.compat.UserHandleCompat;
+import com.android.permission.util.ArrayUtils;
+import com.android.permission.util.CollectionUtils;
+import com.android.permission.util.ForegroundThread;
+import com.android.permission.util.ThrottledRunnable;
 import com.android.server.LocalManagerRegistry;
 import com.android.server.SystemService;
-import com.android.server.role.compat.UserHandleCompat;
-import com.android.server.role.util.ArrayUtils;
-import com.android.server.role.util.CollectionUtils;
-import com.android.server.role.util.ForegroundThread;
+import com.android.server.role.RoleServicePlatformHelper;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -701,7 +702,7 @@ public class RoleService extends SystemService implements RoleUserState.Callback
                     final RoleUserState userState = mUserStates.valueAt(i);
 
                     userState.dump(dumpOutputStream, "user_states",
-                            RoleManagerServiceDumpProto.USER_STATES);
+                            RoleServiceDumpProto.USER_STATES);
                 }
             }
 
