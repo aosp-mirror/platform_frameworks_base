@@ -324,10 +324,10 @@ public class TelecomManager {
      */
     public static final String EXTRA_INCOMING_PICTURE = "android.telecom.extra.INCOMING_PICTURE";
 
-    // TODO(hallliu), This UUID is obtained from TelephonyManager#uploadCallComposerPicture.
     /**
      * A ParcelUuid used as a token to represent a picture that was uploaded prior to the call
-     * being placed.
+     * being placed. The value of this extra should be set using the {@link android.os.ParcelUuid}
+     * obtained from the callback in {@link TelephonyManager#uploadCallComposerPicture}.
      */
     public static final String EXTRA_OUTGOING_PICTURE = "android.telecom.extra.OUTGOING_PICTURE";
 
