@@ -63,6 +63,7 @@ public class PipTouchHandler {
     private static final String TAG = "PipTouchHandler";
 
     private static final float STASH_MINIMUM_VELOCITY_X = 3000.f;
+    private static final float MINIMUM_SIZE_PERCENT = 0.4f;
 
     // Allow PIP to resize to a slightly bigger state upon touch
     private final boolean mEnableResize;
@@ -438,17 +439,17 @@ public class PipTouchHandler {
             float aspectRatio) {
         final int shorterLength = Math.min(mPipBoundsState.getDisplayBounds().width(),
                 mPipBoundsState.getDisplayBounds().height());
-        final int padding = insetBounds.left;
+        final int totalPadding = insetBounds.left * 2;
         final int minWidth, minHeight, maxWidth, maxHeight;
         if (aspectRatio > 1f) {
-            minWidth = (int) Math.min(normalBounds.width(), shorterLength * 0.4);
+            minWidth = (int) Math.min(normalBounds.width(), shorterLength * MINIMUM_SIZE_PERCENT);
             minHeight = (int) (minWidth / aspectRatio);
-            maxWidth = (int) Math.max(normalBounds.width(), shorterLength - 2 * padding);
+            maxWidth = (int) Math.max(normalBounds.width(), shorterLength - totalPadding);
             maxHeight = (int) (maxWidth / aspectRatio);
         } else {
-            minHeight = (int) Math.min(normalBounds.height(), shorterLength * 0.4);
+            minHeight = (int) Math.min(normalBounds.height(), shorterLength * MINIMUM_SIZE_PERCENT);
             minWidth = (int) (minHeight * aspectRatio);
-            maxHeight = (int) Math.max(normalBounds.height(), shorterLength - 2 * padding);
+            maxHeight = (int) Math.max(normalBounds.height(), shorterLength - totalPadding);
             maxWidth = (int) (maxHeight * aspectRatio);
         }
 

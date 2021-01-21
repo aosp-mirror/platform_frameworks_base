@@ -62,6 +62,7 @@ public class PipResizeGestureHandler {
 
     private static final String TAG = "PipResizeGestureHandler";
     private static final int PINCH_RESIZE_SNAP_DURATION = 250;
+    private static final int PINCH_RESIZE_MAX_ANGLE_ROTATION = 45;
 
     private final Context mContext;
     private final PipBoundsAlgorithm mPipBoundsAlgorithm;
@@ -359,12 +360,12 @@ public class PipResizeGestureHandler {
             if (mFirstIndex == -1 && mSecondIndex == -1) {
                 mFirstIndex = 0;
                 mSecondIndex = 1;
-                mLastResizeBounds.setEmpty();
                 mDownPoint.set(ev.getRawX(mFirstIndex), ev.getRawY(mFirstIndex));
                 mDownSecondaryPoint.set(ev.getRawX(mSecondIndex), ev.getRawY(mSecondIndex));
 
-                mLastResizeBounds.setEmpty();
+
                 mLastDownBounds.set(mPipBoundsState.getBounds());
+                mLastResizeBounds.set(mLastDownBounds);
             }
         }
 
@@ -403,16 +404,61 @@ public class PipResizeGestureHandler {
                 x1 = mThresholdCrossed1 ? x1 : mDownSecondaryPoint.x;
                 y1 = mThresholdCrossed1 ? y1 : mDownSecondaryPoint.y;
 
-                final Rect currentPipBounds = mPipBoundsState.getBounds();
+                final Rect originalPipBounds = mPipBoundsState.getBounds();
+                int focusX = (int) originalPipBounds.centerX();
+                int focusY = (int) originalPipBounds.centerY();
+
+                float down0X = mDownPoint.x;
+                float down0Y = mDownPoint.y;
+                float down1X = mDownSecondaryPoint.x;
+                float down1Y = mDownSecondaryPoint.y;
+
+                // Top right + Bottom left pinch to zoom.
+                if ((down0X > focusX && down0Y < focusY && down1X < focusX && down1Y > focusY)
+                        || (down1X > focusX && down1Y < focusY
+                        && down0X < focusX && down0Y > focusY)) {
+                    mAngle = calculateRotationAngle(mLastResizeBounds.centerX(),
+                            mLastResizeBounds.centerY(), x0, y0, x1, y1, true);
+                } else if ((down0X < focusX && down0Y < focusY
+                        && down1X > focusX && down1Y > focusY)
+                        || (down1X < focusX && down1Y < focusY
+                        && down0X > focusX && down0Y > focusY)) {
+                    mAngle = calculateRotationAngle(mLastResizeBounds.centerX(),
+                            mLastResizeBounds.centerY(), x0, y0, x1, y1, false);
+                }
+
                 mLastResizeBounds.set(PipPinchResizingAlgorithm.pinchResize(x0, y0, x1, y1,
                         mDownPoint.x, mDownPoint.y, mDownSecondaryPoint.x, mDownSecondaryPoint.y,
-                        currentPipBounds, mMinSize.x, mMinSize.y, mMaxSize));
+                        originalPipBounds, mMinSize.x, mMinSize.y, mMaxSize));
 
                 mPipTaskOrganizer.scheduleUserResizePip(mLastDownBounds, mLastResizeBounds,
-                        null);
+                        (float) -mAngle, null);
                 mPipBoundsState.setHasUserResizedPip(true);
             }
         }
+    }
+
+    private float mAngle = 0;
+
+    private float calculateRotationAngle(int focusX, int focusY, float x0, float y0,
+            float x1, float y1, boolean positive) {
+
+        // The base angle is the angle formed by taking the angle between the center horizontal
+        // and one of the corners.
+        double baseAngle = Math.toDegrees(Math.atan2(Math.abs(mLastResizeBounds.top - focusY),
+                Math.abs(mLastResizeBounds.right - focusX)));
+        double angle0 = mThresholdCrossed0
+                ? Math.toDegrees(Math.atan2(Math.abs(y0 - focusY), Math.abs(x0 - focusX)))
+                : baseAngle;
+        double angle1 = mThresholdCrossed1
+                ? Math.toDegrees(Math.atan2(Math.abs(y1 - focusY), Math.abs(x1 - focusX)))
+                : baseAngle;
+
+        // Calculate the percentage difference of [0, 90] compare to the base angle.
+        double diff0 = (Math.max(0, Math.min(angle0, 90)) - baseAngle) / 90;
+        double diff1 = (Math.max(0, Math.min(angle1, 90)) - baseAngle) / 90;
+
+        return (float) (diff0 + diff1) / 2 * PINCH_RESIZE_MAX_ANGLE_ROTATION * (positive ? 1 : -1);
     }
 
     private void onDragCornerResize(MotionEvent ev) {
@@ -490,7 +536,7 @@ public class PipResizeGestureHandler {
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds,
                         mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds()));
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
-                        PINCH_RESIZE_SNAP_DURATION,
+                        PINCH_RESIZE_SNAP_DURATION, mAngle,
                         (Rect rect) -> {
                             mHandler.post(callback);
                         });
@@ -509,6 +555,7 @@ public class PipResizeGestureHandler {
 
     private void resetState() {
         mCtrlType = CTRL_NONE;
+        mAngle = 0;
         mUsingPinchToZoom = false;
         mAllowGesture = false;
         mThresholdCrossed = false;

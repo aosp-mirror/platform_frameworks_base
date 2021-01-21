@@ -80,7 +80,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
     public void getAnimator_withBounds_returnBoundsAnimator() {
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mLeash, new Rect(), new Rect(), new Rect(), null,
-                        TRANSITION_DIRECTION_TO_PIP);
+                        TRANSITION_DIRECTION_TO_PIP, 0);
 
         assertEquals("Expect ANIM_TYPE_BOUNDS animation",
                 animator.getAnimationType(), PipAnimationController.ANIM_TYPE_BOUNDS);
@@ -94,13 +94,13 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator oldAnimator = mPipAnimationController
                 .getAnimator(mLeash, baseValue, startValue, endValue1, null,
-                        TRANSITION_DIRECTION_TO_PIP);
+                        TRANSITION_DIRECTION_TO_PIP, 0);
         oldAnimator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
         oldAnimator.start();
 
         final PipAnimationController.PipTransitionAnimator newAnimator = mPipAnimationController
                 .getAnimator(mLeash, baseValue, startValue, endValue2, null,
-                        TRANSITION_DIRECTION_TO_PIP);
+                        TRANSITION_DIRECTION_TO_PIP, 0);
 
         assertEquals("getAnimator with same type returns same animator",
                 oldAnimator, newAnimator);
@@ -132,7 +132,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final Rect endValue2 = new Rect(200, 200, 300, 300);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mLeash, baseValue, startValue, endValue1, null,
-                        TRANSITION_DIRECTION_TO_PIP);
+                        TRANSITION_DIRECTION_TO_PIP, 0);
 
         animator.updateEndValue(endValue2);
 
@@ -146,7 +146,7 @@ public class PipAnimationControllerTest extends ShellTestCase {
         final Rect endValue = new Rect(100, 100, 200, 200);
         final PipAnimationController.PipTransitionAnimator animator = mPipAnimationController
                 .getAnimator(mLeash, baseValue, startValue, endValue, null,
-                        TRANSITION_DIRECTION_TO_PIP);
+                        TRANSITION_DIRECTION_TO_PIP, 0);
         animator.setSurfaceControlTransactionFactory(DummySurfaceControlTx::new);
 
         animator.setPipAnimationCallback(mPipAnimationCallback);

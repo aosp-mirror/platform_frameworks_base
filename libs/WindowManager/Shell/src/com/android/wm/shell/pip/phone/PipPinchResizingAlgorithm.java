@@ -53,6 +53,8 @@ public class PipPinchResizingAlgorithm {
         final float aspect = (float) width / (float) height;
         final int widthDelta = Math.round(Math.abs(x0 - x1) - Math.abs(downx0 - downx1));
         final int heightDelta = Math.round(Math.abs(y0 - y1) - Math.abs(downy0 - downy1));
+        final int dx = (int) ((x0 - downx0 + x1 - downx1) / 2);
+        final int dy = (int) ((y0 - downy0 + y1 - downy1) / 2);
 
         width = Math.max(minVisibleWidth, Math.min(width + widthDelta, maxSize.x));
         height = Math.max(minVisibleHeight, Math.min(height + heightDelta, maxSize.y));
@@ -118,6 +120,7 @@ public class PipPinchResizingAlgorithm {
                 currentPipBounds.centerY() - height / 2,
                 currentPipBounds.centerX() + width / 2,
                 currentPipBounds.centerY() + height / 2);
+        TMP_RECT.offset(dx, dy);
         return TMP_RECT;
     }
 }
