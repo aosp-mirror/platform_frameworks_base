@@ -344,10 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‎‏‎‎‎‎‎‎‏‏‏‎‎‎‎‏‏‏‏‎‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‎‎‏‏‎‏‏‎‎‏‎‎‎‏‎‎‏‏‎Input Method‎‏‎‎‏‎"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‎‎‎‏‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‏‏‎‎‎‏‏‎‏‎‎‏‏‏‎‎‏‏‏‏‏‎‏‏‎‏‎‏‏‎Location‎‏‎‎‏‎"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‎‏‏‏‏‏‎‏‏‏‎‏‏‏‎‎‏‏‏‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‎‏‎‏‏‎‎‎‏‏‎‎‏‎‎‎‏‏‏‏‎Location Off‎‏‎‎‏‎"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‏‏‏‏‏‎‎‏‎‎‎‏‎‏‏‏‎‏‎‏‎‎‎‎‎‏‏‏‎‏‏‎‏‏‎‏‏‎‎‎‏‏‎‏‏‎‏‎‏‎‎‎‏‏‏‎‎Block Camera‎‏‎‎‏‎"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‎‎‏‎‎‏‏‎‏‏‏‏‎‎‎‏‎‎‏‏‏‎‏‎‏‏‎‎‎‏‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‎‎‎‏‎‎‏‏‏‎‏‏‎‎‏‎Mute Microphone‎‏‎‎‏‎"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‏‏‏‎‏‎‎‏‎‎‎‏‏‏‏‎‏‏‏‏‎‏‎‏‎‎‏‏‏‎‏‏‏‏‏‏‎‎‏‎‎‎‏‎‎‏‏‏‎‏‎‏‎Media device‎‏‎‎‏‎"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‏‏‏‎‎‏‎‎‏‏‎‏‏‎‎‎‎‎‏‎‎‏‏‎‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‏‎‏‎‎‎‏‎‎‏‎‎‏‎‏‏‏‎‏‎RSSI‎‏‎‎‏‎"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‎‎‎‎‏‎‎‏‎‏‎‎‎‏‎‎‏‎‎‏‏‏‎‏‎‏‏‎‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‏‏‏‎‏‎‏‎‎‎‏‏‎‎Emergency Calls Only‎‏‎‎‏‎"</string>
