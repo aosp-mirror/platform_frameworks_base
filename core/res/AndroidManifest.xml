@@ -1624,7 +1624,7 @@
     <permission android:name="android.permission.MANAGE_IPSEC_TUNNELS"
         android:protectionLevel="signature|appop" />
 
-    <!-- @hide Allows apps to create and manage Test Networks.
+    <!-- @SystemApi @hide Allows apps to create and manage Test Networks.
          <p>Granted only to shell. CTS tests will use
          UiAutomation.AdoptShellPermissionIdentity() to gain access.
     -->
