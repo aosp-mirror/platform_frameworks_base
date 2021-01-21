@@ -75,6 +75,7 @@ import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -297,9 +298,9 @@ public class VcnGatewayConnection extends StateMachine {
     private static final int EVENT_SETUP_COMPLETED = 6;
 
     private static class EventSetupCompletedInfo implements EventInfo {
-        @NonNull public final ChildSessionConfiguration childSessionConfig;
+        @NonNull public final VcnChildSessionConfiguration childSessionConfig;
 
-        EventSetupCompletedInfo(@NonNull ChildSessionConfiguration childSessionConfig) {
+        EventSetupCompletedInfo(@NonNull VcnChildSessionConfiguration childSessionConfig) {
             this.childSessionConfig = Objects.requireNonNull(childSessionConfig);
         }
 
@@ -471,7 +472,7 @@ public class VcnGatewayConnection extends StateMachine {
      * <p>Set in Connected and Migrating states, always @NonNull in Connected, Migrating
      * states, @Nullable otherwise.
      */
-    private ChildSessionConfiguration mChildConfig;
+    private VcnChildSessionConfiguration mChildConfig;
 
     /**
      * The active network agent.
@@ -659,7 +660,7 @@ public class VcnGatewayConnection extends StateMachine {
                 new EventTransformCreatedInfo(direction, transform));
     }
 
-    private void childOpened(int token, @NonNull ChildSessionConfiguration childConfig) {
+    private void childOpened(int token, @NonNull VcnChildSessionConfiguration childConfig) {
         sendMessage(EVENT_SETUP_COMPLETED, token, new EventSetupCompletedInfo(childConfig));
     }
 
@@ -1008,7 +1009,7 @@ public class VcnGatewayConnection extends StateMachine {
         protected void updateNetworkAgent(
                 @NonNull IpSecTunnelInterface tunnelIface,
                 @NonNull NetworkAgent agent,
-                @NonNull ChildSessionConfiguration childConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying);
             final LinkProperties lp =
@@ -1020,7 +1021,7 @@ public class VcnGatewayConnection extends StateMachine {
 
         protected NetworkAgent buildNetworkAgent(
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull ChildSessionConfiguration childConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig) {
             final NetworkCapabilities caps =
                     buildNetworkCapabilities(mConnectionConfig, mUnderlying);
             final LinkProperties lp =
@@ -1068,15 +1069,15 @@ public class VcnGatewayConnection extends StateMachine {
         protected void setupInterface(
                 int token,
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull ChildSessionConfiguration childConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig) {
             setupInterface(token, tunnelIface, childConfig, null);
         }
 
         protected void setupInterface(
                 int token,
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull ChildSessionConfiguration childConfig,
-                @Nullable ChildSessionConfiguration oldChildConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig,
+                @Nullable VcnChildSessionConfiguration oldChildConfig) {
             try {
                 final Set<LinkAddress> newAddrs =
                         new ArraySet<>(childConfig.getInternalAddresses());
@@ -1189,7 +1190,7 @@ public class VcnGatewayConnection extends StateMachine {
         protected void setupInterfaceAndNetworkAgent(
                 int token,
                 @NonNull IpSecTunnelInterface tunnelIface,
-                @NonNull ChildSessionConfiguration childConfig) {
+                @NonNull VcnChildSessionConfiguration childConfig) {
             setupInterface(token, tunnelIface, childConfig);
 
             if (mNetworkAgent == null) {
@@ -1277,7 +1278,7 @@ public class VcnGatewayConnection extends StateMachine {
     private static LinkProperties buildConnectedLinkProperties(
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
             @NonNull IpSecTunnelInterface tunnelIface,
-            @NonNull ChildSessionConfiguration childConfig) {
+            @NonNull VcnChildSessionConfiguration childConfig) {
         final LinkProperties lp = new LinkProperties();
 
         lp.setInterfaceName(tunnelIface.getInterfaceName());
@@ -1328,17 +1329,25 @@ public class VcnGatewayConnection extends StateMachine {
         }
     }
 
-    private class ChildSessionCallbackImpl implements ChildSessionCallback {
+    /** Implementation of ChildSessionCallback, exposed for testing. */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public class VcnChildSessionCallback implements ChildSessionCallback {
         private final int mToken;
 
-        ChildSessionCallbackImpl(int token) {
+        VcnChildSessionCallback(int token) {
             mToken = token;
+        }
+
+        /** Internal proxy method for injecting of mocked ChildSessionConfiguration */
+        @VisibleForTesting(visibility = Visibility.PRIVATE)
+        void onOpened(@NonNull VcnChildSessionConfiguration childConfig) {
+            Slog.v(TAG, "ChildOpened for token " + mToken);
+            childOpened(mToken, childConfig);
         }
 
         @Override
         public void onOpened(@NonNull ChildSessionConfiguration childConfig) {
-            Slog.v(TAG, "ChildOpened for token " + mToken);
-            childOpened(mToken, childConfig);
+            onOpened(new VcnChildSessionConfiguration(childConfig));
         }
 
         @Override
@@ -1421,7 +1430,7 @@ public class VcnGatewayConnection extends StateMachine {
                 buildIkeParams(),
                 buildChildParams(),
                 new IkeSessionCallbackImpl(token),
-                new ChildSessionCallbackImpl(token));
+                new VcnChildSessionCallback(token));
     }
 
     /** External dependencies used by VcnGatewayConnection, for injection in tests */
@@ -1455,6 +1464,35 @@ public class VcnGatewayConnection extends StateMachine {
                     childSessionParams,
                     ikeSessionCallback,
                     childSessionCallback);
+        }
+    }
+
+    /**
+     * Proxy implementation of Child Session Configuration, used for testing.
+     *
+     * <p>This wrapper allows mocking of the final, parcelable ChildSessionConfiguration object for
+     * testing purposes. This is the unfortunate result of mockito-inline (for mocking final
+     * classes) not working properly with system services & associated classes.
+     *
+     * <p>This class MUST EXCLUSIVELY be a passthrough, proxying calls directly to the actual
+     * ChildSessionConfiguration.
+     */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class VcnChildSessionConfiguration {
+        private final ChildSessionConfiguration mChildConfig;
+
+        public VcnChildSessionConfiguration(ChildSessionConfiguration childConfig) {
+            mChildConfig = childConfig;
+        }
+
+        /** Retrieves the addresses to be used inside the tunnel. */
+        public List<LinkAddress> getInternalAddresses() {
+            return mChildConfig.getInternalAddresses();
+        }
+
+        /** Retrieves the DNS servers to be used inside the tunnel. */
+        public List<InetAddress> getInternalDnsServers() {
+            return mChildConfig.getInternalDnsServers();
         }
     }
 

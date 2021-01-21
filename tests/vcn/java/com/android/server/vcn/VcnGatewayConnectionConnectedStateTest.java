@@ -18,15 +18,25 @@ package com.android.server.vcn;
 
 import static android.net.IpSecManager.DIRECTION_IN;
 import static android.net.IpSecManager.DIRECTION_OUT;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
+import static com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+
+import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -34,6 +44,9 @@ import androidx.test.runner.AndroidJUnit4;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+
+import java.util.Collections;
 
 /** Tests for VcnGatewayConnection.ConnectedState */
 @RunWith(AndroidJUnit4.class)
@@ -107,6 +120,51 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
     }
 
     @Test
+    public void testChildOpenedRegistersNetwork() throws Exception {
+        final VcnChildSessionConfiguration mMockChildSessionConfig =
+                mock(VcnChildSessionConfiguration.class);
+        doReturn(Collections.singletonList(TEST_INTERNAL_ADDR))
+                .when(mMockChildSessionConfig)
+                .getInternalAddresses();
+        doReturn(Collections.singletonList(TEST_DNS_ADDR))
+                .when(mMockChildSessionConfig)
+                .getInternalDnsServers();
+
+        getChildSessionCallback().onOpened(mMockChildSessionConfig);
+        mTestLooper.dispatchAll();
+
+        assertEquals(mGatewayConnection.mConnectedState, mGatewayConnection.getCurrentState());
+
+        final ArgumentCaptor<LinkProperties> lpCaptor =
+                ArgumentCaptor.forClass(LinkProperties.class);
+        final ArgumentCaptor<NetworkCapabilities> ncCaptor =
+                ArgumentCaptor.forClass(NetworkCapabilities.class);
+        verify(mConnMgr)
+                .registerNetworkAgent(
+                        any(),
+                        any(),
+                        lpCaptor.capture(),
+                        ncCaptor.capture(),
+                        anyInt(),
+                        any(),
+                        anyInt());
+        verify(mIpSecSvc)
+                .addAddressToTunnelInterface(
+                        eq(TEST_IPSEC_TUNNEL_RESOURCE_ID), eq(TEST_INTERNAL_ADDR), any());
+
+        final LinkProperties lp = lpCaptor.getValue();
+        assertEquals(Collections.singletonList(TEST_INTERNAL_ADDR), lp.getLinkAddresses());
+        assertEquals(Collections.singletonList(TEST_DNS_ADDR), lp.getDnsServers());
+
+        final NetworkCapabilities nc = ncCaptor.getValue();
+        assertTrue(nc.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(nc.hasTransport(TRANSPORT_WIFI));
+        for (int cap : mConfig.getAllExposedCapabilities()) {
+            assertTrue(nc.hasCapability(cap));
+        }
+    }
+
+    @Test
     public void testChildSessionClosedTriggersDisconnect() throws Exception {
         getChildSessionCallback().onClosed();
         mTestLooper.dispatchAll();
@@ -122,6 +180,4 @@ public class VcnGatewayConnectionConnectedStateTest extends VcnGatewayConnection
         assertEquals(mGatewayConnection.mRetryTimeoutState, mGatewayConnection.getCurrentState());
         verify(mIkeSession).close();
     }
-
-    // TODO: Add tests for childOpened() when ChildSessionConfiguration can be mocked or created
 }
