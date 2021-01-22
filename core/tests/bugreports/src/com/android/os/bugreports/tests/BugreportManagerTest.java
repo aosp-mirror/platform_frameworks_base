@@ -76,6 +76,12 @@ public class BugreportManagerTest {
     private static final long DUMPSTATE_STARTUP_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
     private static final long UIAUTOMATOR_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
 
+
+    // A small timeout used when waiting for the result of a BugreportCallback to be received.
+    // This value must be at least 1000ms since there is an intentional delay in
+    // BugreportManagerServiceImpl in the error case.
+    private static final long CALLBACK_RESULT_TIMEOUT_MS = 1500;
+
     // Sent by Shell when its bugreport finishes (contains final bugreport/screenshot file name
     // associated with the bugreport).
     private static final String INTENT_BUGREPORT_FINISHED =
@@ -185,7 +191,7 @@ public class BugreportManagerTest {
         ParcelFileDescriptor bugreportFd2 = parcelFd(bugreportFile2);
         ParcelFileDescriptor screenshotFd2 = parcelFd(screenshotFile2);
         mBrm.startBugreport(bugreportFd2, screenshotFd2, wifi(), mExecutor, callback2);
-        Thread.sleep(500 /* .5s */);
+        Thread.sleep(CALLBACK_RESULT_TIMEOUT_MS);
 
         // Verify #2 encounters an error.
         assertThat(callback2.getErrorCode()).isEqualTo(
@@ -194,7 +200,7 @@ public class BugreportManagerTest {
 
         // Cancel #1 so we can move on to the next test.
         mBrm.cancelBugreport();
-        Thread.sleep(500 /* .5s */);
+        waitTillDoneOrTimeout(callback);
         assertThat(callback.isDone()).isTrue();
         assertFdsAreClosed(mBugreportFd, mScreenshotFd);
     }
@@ -220,7 +226,7 @@ public class BugreportManagerTest {
         // Try again, with DUMP permission.
         getPermissions();
         mBrm.cancelBugreport();
-        Thread.sleep(500 /* .5s */);
+        waitTillDoneOrTimeout(callback);
         assertThat(callback.isDone()).isTrue();
         assertFdsAreClosed(mBugreportFd, mScreenshotFd);
     }
