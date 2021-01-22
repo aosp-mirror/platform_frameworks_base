@@ -3109,12 +3109,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             freezeBounds();
         }
 
-        // In the process of tearing down before relaunching, the app will
-        // try and clean up it's child surfaces. We need to prevent this from
-        // happening, so we sever the children, transfering their ownership
-        // from the client it-self to the parent surface (owned by us).
-        detachChildren();
-
         clearAllDrawn();
 
         mPendingRelaunchCount++;
@@ -3137,15 +3131,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         // Calling unset() to make it equal to Configuration.EMPTY.
         task.mPreparedFrozenMergedConfig.unset();
-    }
-
-    void detachChildren() {
-        SurfaceControl.openTransaction();
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState w = mChildren.get(i);
-            w.mWinAnimator.detachChildren(getGlobalTransaction());
-        }
-        SurfaceControl.closeTransaction();
     }
 
     void finishRelaunching() {
@@ -4577,7 +4562,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         + appToken);
                 return;
             }
-            detachChildren();
         }
         if (app != null) {
             mTaskSupervisor.onProcessActivityStateChanged(app, false /* forceBatch */);

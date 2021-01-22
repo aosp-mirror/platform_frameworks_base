@@ -163,11 +163,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction detachChildren(SurfaceControl sc) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setColor(SurfaceControl sc, float[] color) {
         return this;
     }
