@@ -102,6 +102,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     public static ForInternedStringValueMap sForInternedStringValueMap =
             Parcelling.Cache.getOrCreate(ForInternedStringValueMap.class);
     public static ForStringSet sForStringSet = Parcelling.Cache.getOrCreate(ForStringSet.class);
+    public static ForInternedStringSet sForInternedStringSet =
+            Parcelling.Cache.getOrCreate(ForInternedStringSet.class);
     protected static ParsedIntentInfo.StringPairListParceler sForIntentInfoPairs =
             Parcelling.Cache.getOrCreate(ParsedIntentInfo.StringPairListParceler.class);
 
@@ -1143,6 +1145,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeString(this.mPath);
         dest.writeParcelableList(this.queriesIntents, flags);
         sForInternedStringList.parcel(this.queriesPackages, dest, flags);
+        sForInternedStringSet.parcel(this.queriesProviders, dest, flags);
         dest.writeString(this.appComponentFactory);
         dest.writeString(this.backupAgentName);
         dest.writeInt(this.banner);
@@ -1261,6 +1264,7 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.mPath = in.readString();
         this.queriesIntents = in.createTypedArrayList(Intent.CREATOR);
         this.queriesPackages = sForInternedStringList.unparcel(in);
+        this.queriesProviders = sForInternedStringSet.unparcel(in);
         this.appComponentFactory = in.readString();
         this.backupAgentName = in.readString();
         this.banner = in.readInt();
