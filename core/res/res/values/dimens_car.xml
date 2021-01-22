@@ -17,6 +17,7 @@
 -->
 <resources>
     <dimen name="car_large_avatar_size">96dp</dimen>
+    <dimen name="car_large_avatar_badge_size">32dp</dimen>
     <!-- Application Bar -->
     <dimen name="car_app_bar_height">80dp</dimen>
     <!-- Margin -->
