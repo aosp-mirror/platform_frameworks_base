@@ -15,15 +15,16 @@
  */
 
 package android.app.admin;
-
 import android.annotation.NonNull;
 import android.annotation.TestApi;
 import android.util.AndroidException;
 
 /**
- * Thrown to indicate a failure during {@link DevicePolicyManager#createAndProvisionManagedProfile}.
+ * Thrown to indicate a failure during {@link DevicePolicyManager#provisionFullyManagedDevice} and
+ * {@link DevicePolicyManager#createAndProvisionManagedProfile}.
  *
  * @hide
+ *
  */
 @TestApi
 public class ProvisioningException extends AndroidException {

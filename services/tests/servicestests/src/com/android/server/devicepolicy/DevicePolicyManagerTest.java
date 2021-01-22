@@ -3337,7 +3337,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(false);
         initializeDpms();
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(false);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(true);
         setUserSetupCompleteForUser(false, UserHandle.USER_SYSTEM);
 
@@ -3379,7 +3379,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(false);
         initializeDpms();
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(false);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(true);
         setUserSetupCompleteForUser(false, UserHandle.USER_SYSTEM);
 
@@ -3443,7 +3443,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().ipackageManager
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(false);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(true);
         setUserSetupCompleteForUser(false, UserHandle.USER_SYSTEM);
         when(getServices().userManager.getProfileParent(UserHandle.USER_SYSTEM)).thenReturn(null);
@@ -3487,7 +3487,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().ipackageManager
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(false);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(true);
         setUserSetupCompleteForUser(true, UserHandle.USER_SYSTEM);
         when(getServices().userManager.getProfileParent(UserHandle.USER_SYSTEM)).thenReturn(null);
@@ -3507,8 +3507,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         final int MANAGED_PROFILE_ADMIN_UID = UserHandle.getUid(MANAGED_PROFILE_USER_ID, 1308);
         when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
                 false /* we can't remove a managed profile */)).thenReturn(false);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM,
-                true)).thenReturn(true);
     }
 
     @Test
@@ -3668,7 +3666,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().ipackageManager
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(false);
         setUserSetupCompleteForUser(false, UserHandle.USER_SYSTEM);
 
@@ -3712,7 +3710,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().ipackageManager
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(false);
         setUserSetupCompleteForUser(true, UserHandle.USER_SYSTEM);
 
@@ -3759,7 +3757,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
         when(getServices().userManager.canAddMoreManagedProfiles(CALLER_USER_HANDLE,
-                true)).thenReturn(true);
+                false)).thenReturn(true);
         setUserSetupCompleteForUser(false, CALLER_USER_HANDLE);
 
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -3801,7 +3799,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
         when(getServices().userManager.canAddMoreManagedProfiles(CALLER_USER_HANDLE,
-                true)).thenReturn(true);
+                false)).thenReturn(true);
         setUserSetupCompleteForUser(true, CALLER_USER_HANDLE);
 
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
@@ -3848,7 +3846,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().ipackageManager
                 .hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS, 0)).thenReturn(true);
         when(getServices().userManagerForMock.isSplitSystemUser()).thenReturn(true);
-        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, true))
+        when(getServices().userManager.canAddMoreManagedProfiles(UserHandle.USER_SYSTEM, false))
                 .thenReturn(false);
         setUserSetupCompleteForUser(true, UserHandle.USER_SYSTEM);
 
@@ -3883,7 +3881,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         when(getServices().userManager.getProfileParent(CALLER_USER_HANDLE))
             .thenReturn(new UserInfo(UserHandle.USER_SYSTEM, "user system", 0));
         when(getServices().userManager.canAddMoreManagedProfiles(CALLER_USER_HANDLE,
-                true)).thenReturn(true);
+                false)).thenReturn(true);
         setUserSetupCompleteForUser(false, CALLER_USER_HANDLE);
 
         mContext.binder.callingUid = DpmMockContext.ANOTHER_UID;
@@ -3909,7 +3907,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
     }
 
-    private void setup_provisionManagedProfileCantRemoveUser_primaryUser() throws Exception {
+    private void setup_provisionManagedProfileOneAlreadyExist_primaryUser() throws Exception {
         setDeviceOwner();
 
         when(getServices().ipackageManager
@@ -3921,26 +3919,24 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .thenReturn(true);
         when(getServices().userManager.canAddMoreManagedProfiles(CALLER_USER_HANDLE,
                 false /* we can't remove a managed profile */)).thenReturn(false);
-        when(getServices().userManager.canAddMoreManagedProfiles(CALLER_USER_HANDLE,
-                true)).thenReturn(true);
         setUserSetupCompleteForUser(false, CALLER_USER_HANDLE);
 
         mContext.binder.callingUid = DpmMockContext.CALLER_UID;
     }
 
     @Test
-    public void testIsProvisioningAllowed_provisionManagedProfileCantRemoveUser_primaryUser()
+    public void testIsProvisioningAllowed_provisionManagedProfile_oneAlreadyExists_primaryUser()
             throws Exception {
-        setup_provisionManagedProfileCantRemoveUser_primaryUser();
+        setup_provisionManagedProfileOneAlreadyExist_primaryUser();
         mContext.packageName = admin1.getPackageName();
         setUpPackageManagerForAdmin(admin1, mContext.binder.callingUid);
         assertProvisioningAllowed(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE, false);
     }
 
     @Test
-    public void testCheckProvisioningPreCondition_provisionManagedProfileCantRemoveUser_primaryUser()
+    public void testCheckProvisioningPreCondition_provisionManagedProfile_oneAlreadyExists_primaryUser()
             throws Exception {
-        setup_provisionManagedProfileCantRemoveUser_primaryUser();
+        setup_provisionManagedProfileOneAlreadyExist_primaryUser();
         mContext.callerPermissions.add(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS);
         assertCheckProvisioningPreCondition(DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE,
                 DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE);
