@@ -60,8 +60,7 @@ public class FileIntegrityService extends SystemService {
     private final IBinder mService = new IFileIntegrityService.Stub() {
         @Override
         public boolean isApkVeritySupported() {
-            return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
-                    || SystemProperties.getInt("ro.apk_verity.mode", 0) == 2;
+            return FileIntegrityService.isApkVeritySupported();
         }
 
         @Override
@@ -110,6 +109,11 @@ public class FileIntegrityService extends SystemService {
             }
         }
     };
+
+    public static boolean isApkVeritySupported() {
+        return Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.R
+                || SystemProperties.getInt("ro.apk_verity.mode", 0) == 2;
+    }
 
     public FileIntegrityService(final Context context) {
         super(context);
