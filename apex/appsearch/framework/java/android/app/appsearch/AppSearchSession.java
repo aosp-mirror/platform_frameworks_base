@@ -162,7 +162,7 @@ public final class AppSearchSession implements Closeable {
     public void setSchema(
             @NonNull SetSchemaRequest request,
             @NonNull @CallbackExecutor Executor executor,
-            @NonNull Consumer<AppSearchResult<Void>> callback) {
+            @NonNull Consumer<AppSearchResult<SetSchemaResponse>> callback) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
@@ -192,7 +192,18 @@ public final class AppSearchSession implements Closeable {
                     mUserId,
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
-                            executor.execute(() -> callback.accept(result));
+                            executor.execute(() -> {
+                                if (result.isSuccess()) {
+                                    callback.accept(
+                                            // TODO(b/151178558) implement Migration in platform.
+                                            AppSearchResult.newSuccessfulResult(
+                                                    new SetSchemaResponse.Builder().setResultCode(
+                                                            result.getResultCode())
+                                                            .build()));
+                                } else {
+                                    callback.accept(result);
+                                }
+                            });
                         }
                     });
             mIsMutated = true;
