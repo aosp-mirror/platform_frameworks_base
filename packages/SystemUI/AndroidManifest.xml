@@ -433,6 +433,15 @@
             android:excludeFromRecents="true">
         </activity>
 
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.SensorUseStartedActivity"
+                  android:exported="true"
+                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:finishOnCloseSystemDialogs="true">
+        </activity>
+
+
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"
             android:exported="true"

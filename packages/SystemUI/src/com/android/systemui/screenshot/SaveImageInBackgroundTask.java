@@ -29,6 +29,7 @@ import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
@@ -49,8 +50,9 @@ import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,7 +67,6 @@ import java.util.function.Supplier;
 class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = logTag(SaveImageInBackgroundTask.class);
 
-    private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_ID_TEMPLATE = "Screenshot_%s";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
@@ -73,14 +74,14 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final ScreenshotController.SaveImageInBackgroundData mParams;
     private final ScreenshotController.SavedImageData mImageData;
-    private final String mImageFileName;
-    private final long mImageTime;
+
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
-    private final String mScreenshotId;
+    private String mScreenshotId;
     private final boolean mSmartActionsEnabled;
     private final Random mRandom = new Random();
     private final Supplier<ActionTransition> mSharedElementTransition;
     private final ImageExporter mImageExporter;
+    private long mImageTime;
 
     SaveImageInBackgroundTask(Context context, ImageExporter exporter,
             ScreenshotSmartActions screenshotSmartActions,
@@ -94,10 +95,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         // Prepare all the output metadata
         mParams = data;
-        mImageTime = System.currentTimeMillis();
-        String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
-        mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, UUID.randomUUID());
 
         // Initialize screenshot notification smart actions provider.
         mSmartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -121,18 +118,27 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             }
             return null;
         }
+        // TODO: move to constructor / from ScreenshotRequest
+        final UUID uuid = UUID.randomUUID();
+        final UserHandle user = getUserHandleOfForegroundApplication(mContext);
+
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         Bitmap image = mParams.image;
-
+        String requestId = uuid.toString();
+        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, uuid);
         try {
             // Call synchronously here since already on a background thread.
-            Uri uri = mImageExporter.export(Runnable::run, image).get();
+            ListenableFuture<ImageExporter.Result> future =
+                    mImageExporter.export(Runnable::run, requestId, image);
+            ImageExporter.Result result = future.get();
+            final Uri uri = result.uri;
+            mImageTime = result.timestamp;
 
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
                     mScreenshotSmartActions.getSmartActionsFuture(
                             mScreenshotId, uri, image, mSmartActionsProvider,
-                            mSmartActionsEnabled, getUserHandle(mContext));
+                            mSmartActionsEnabled, user);
 
             List<Notification.Action> smartActions = new ArrayList<>();
             if (mSmartActionsEnabled) {
@@ -336,22 +342,21 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         return deleteActionBuilder.build();
     }
 
-    private int getUserHandleOfForegroundApplication(Context context) {
+    private UserHandle getUserHandleOfForegroundApplication(Context context) {
+        UserManager manager = UserManager.get(context);
+        int result;
         // This logic matches
         // com.android.systemui.statusbar.phone.PhoneStatusBarPolicy#updateManagedProfile
         try {
-            return ActivityTaskManager.getService().getLastResumedActivityUserId();
+            result = ActivityTaskManager.getService().getLastResumedActivityUserId();
         } catch (RemoteException e) {
             if (DEBUG_ACTIONS) {
                 Log.d(TAG, "Failed to get UserHandle of foreground app: ", e);
             }
-            return context.getUserId();
+            result = context.getUserId();
         }
-    }
-
-    private UserHandle getUserHandle(Context context) {
-        UserManager manager = UserManager.get(context);
-        return manager.getUserInfo(getUserHandleOfForegroundApplication(context)).getUserHandle();
+        UserInfo userInfo = manager.getUserInfo(result);
+        return userInfo.getUserHandle();
     }
 
     private List<Notification.Action> buildSmartActions(

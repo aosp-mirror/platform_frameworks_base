@@ -60,6 +60,7 @@ import android.hardware.face.FaceSensorPropertiesInternal;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
+import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -183,6 +184,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final int MSG_KEYGUARD_GOING_AWAY = 342;
     private static final int MSG_LOCK_SCREEN_MODE = 343;
     private static final int MSG_TIME_FORMAT_UPDATE = 344;
+    private static final int MSG_REQUIRE_NFC_UNLOCK = 345;
 
     public static final int LOCK_SCREEN_MODE_NORMAL = 0;
     public static final int LOCK_SCREEN_MODE_LAYOUT_1 = 1;
@@ -1259,6 +1261,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             } else if (ACTION_USER_REMOVED.equals(action)) {
                 mHandler.sendMessage(mHandler.obtainMessage(MSG_USER_REMOVED,
                         intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1), 0));
+            } else if (NfcAdapter.ACTION_REQUIRE_UNLOCK_FOR_NFC.equals(action)) {
+                mHandler.sendEmptyMessage(MSG_REQUIRE_NFC_UNLOCK);
             }
         }
     };
@@ -1313,6 +1317,16 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         @Override
         public void onAuthenticationAcquired(int acquireInfo) {
             handleFingerprintAcquired(acquireInfo);
+        }
+
+        @Override
+        public void onUdfpsPointerDown(int sensorId) {
+            Log.d(TAG, "onUdfpsPointerDown, sensorId: " + sensorId);
+        }
+
+        @Override
+        public void onUdfpsPointerUp(int sensorId) {
+            Log.d(TAG, "onUdfpsPointerUp, sensorId: " + sensorId);
         }
     };
 
@@ -1725,6 +1739,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                         break;
                     case MSG_TIME_FORMAT_UPDATE:
                         handleTimeFormatUpdate((String) msg.obj);
+                    case MSG_REQUIRE_NFC_UNLOCK:
+                        handleRequireUnlockForNfc();
                         break;
                     default:
                         super.handleMessage(msg);
@@ -1787,6 +1803,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         allUserFilter.addAction(ACTION_USER_UNLOCKED);
         allUserFilter.addAction(ACTION_USER_STOPPED);
         allUserFilter.addAction(ACTION_USER_REMOVED);
+        allUserFilter.addAction(NfcAdapter.ACTION_REQUIRE_UNLOCK_FOR_NFC);
         mBroadcastDispatcher.registerReceiverWithHandler(mBroadcastAllReceiver, allUserFilter,
                 mHandler, UserHandle.ALL);
 
@@ -2687,6 +2704,19 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
         updateBiometricListeningState();
+    }
+
+    /**
+     * Handle {@link #MSG_REQUIRE_NFC_UNLOCK}
+     */
+    private void handleRequireUnlockForNfc() {
+        Assert.isMainThread();
+        for (int i = 0; i < mCallbacks.size(); i++) {
+            KeyguardUpdateMonitorCallback cb = mCallbacks.get(i).get();
+            if (cb != null) {
+                cb.onRequireUnlockForNfc();
+            }
+        }
     }
 
     /**

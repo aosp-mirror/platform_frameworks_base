@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,26 @@
  * limitations under the License.
  */
 
+// TODO(b/169883602): This is purposely a different package from the path so that it can access
+// AppSearchImpl's methods without having to make them public. This should be moved into a proper
+// package once AppSearchImpl-VisibilityStore's dependencies are refactored.
 package com.android.server.appsearch.external.localstorage;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
 import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.exceptions.AppSearchException;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Process;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Log;
 
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -52,10 +60,18 @@ import java.util.Set;
  *
  * <p>NOTE: This class holds an instance of AppSearchImpl and AppSearchImpl holds an instance of
  * this class. Take care to not cause any circular dependencies.
+ *
+ * @hide
  */
-class VisibilityStore {
+public class VisibilityStore {
+
+    private static final String TAG = "AppSearchVisibilityStore";
+
+    /** No-op user id that won't have any visibility settings. */
+    public static final int NO_OP_USER_ID = -1;
+
     /** Schema type for documents that hold AppSearch's metadata, e.g. visibility settings */
-    @VisibleForTesting static final String VISIBILITY_TYPE = "VisibilityType";
+    private static final String VISIBILITY_TYPE = "VisibilityType";
 
     /**
      * Property that holds the list of platform-hidden schemas, as part of the visibility settings.
@@ -81,15 +97,14 @@ class VisibilityStore {
     private static final AppSearchSchema VISIBILITY_SCHEMA =
             new AppSearchSchema.Builder(VISIBILITY_TYPE)
                     .addProperty(
-                            new AppSearchSchema.PropertyConfig.Builder(
+                            new AppSearchSchema.StringPropertyConfig.Builder(
                                             NOT_PLATFORM_SURFACEABLE_PROPERTY)
-                                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_STRING)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
                                     .build())
                     .addProperty(
-                            new AppSearchSchema.PropertyConfig.Builder(PACKAGE_ACCESSIBLE_PROPERTY)
-                                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_DOCUMENT)
+                            new AppSearchSchema.DocumentPropertyConfig.Builder(
+                                            PACKAGE_ACCESSIBLE_PROPERTY)
                                     .setSchemaType(PACKAGE_ACCESSIBLE_TYPE)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_REPEATED)
@@ -103,28 +118,26 @@ class VisibilityStore {
     private static final AppSearchSchema PACKAGE_ACCESSIBLE_SCHEMA =
             new AppSearchSchema.Builder(PACKAGE_ACCESSIBLE_TYPE)
                     .addProperty(
-                            new AppSearchSchema.PropertyConfig.Builder(PACKAGE_NAME_PROPERTY)
+                            new AppSearchSchema.StringPropertyConfig.Builder(PACKAGE_NAME_PROPERTY)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
-                                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_STRING)
                                     .build())
                     .addProperty(
-                            new AppSearchSchema.PropertyConfig.Builder(SHA_256_CERT_PROPERTY)
+                            new AppSearchSchema.BytesPropertyConfig.Builder(SHA_256_CERT_PROPERTY)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
-                                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_BYTES)
                                     .build())
                     .addProperty(
-                            new AppSearchSchema.PropertyConfig.Builder(ACCESSIBLE_SCHEMA_PROPERTY)
+                            new AppSearchSchema.StringPropertyConfig.Builder(
+                                            ACCESSIBLE_SCHEMA_PROPERTY)
                                     .setCardinality(
                                             AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
-                                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_STRING)
                                     .build())
                     .build();
 
     /**
-     * These cannot have any of the special characters used by AppSearchImpl (e.g. {@link
-     * AppSearchImpl#PACKAGE_DELIMITER} or {@link AppSearchImpl#DATABASE_DELIMITER}.
+     * These cannot have any of the special characters used by AppSearchImpl (e.g. {@code
+     * AppSearchImpl#PACKAGE_DELIMITER} or {@code AppSearchImpl#DATABASE_DELIMITER}.
      */
     static final String PACKAGE_NAME = "VS#Pkg";
 
@@ -147,6 +160,16 @@ class VisibilityStore {
     private static final String URI_PREFIX = "uri:";
 
     private final AppSearchImpl mAppSearchImpl;
+
+    // Context of the system service.
+    private final Context mContext;
+
+    // User ID of the caller who we're checking visibility settings for.
+    private final int mUserId;
+
+    // UID of the package that has platform-query privileges, i.e. can query for all
+    // platform-surfaceable content.
+    private int mGlobalQuerierUid;
 
     /**
      * Maps prefixes to the set of schemas that are platform-hidden within that prefix. All schemas
@@ -173,8 +196,15 @@ class VisibilityStore {
      *
      * @param appSearchImpl AppSearchImpl instance
      */
-    VisibilityStore(@NonNull AppSearchImpl appSearchImpl) {
+    public VisibilityStore(
+            @NonNull AppSearchImpl appSearchImpl,
+            @NonNull Context context,
+            @UserIdInt int userId,
+            @NonNull String globalQuerierPackage) {
         mAppSearchImpl = appSearchImpl;
+        mContext = context;
+        mUserId = userId;
+        mGlobalQuerierUid = getGlobalQuerierUid(globalQuerierPackage);
     }
 
     /**
@@ -216,7 +246,8 @@ class VisibilityStore {
                                 PACKAGE_NAME,
                                 DATABASE_NAME,
                                 NAMESPACE,
-                                /*uri=*/ addUriPrefix(prefix));
+                                /*uri=*/ addUriPrefix(prefix),
+                                /*typePropertyPaths=*/ Collections.emptyMap());
 
                 // Update platform visibility settings
                 String[] schemas =
@@ -302,8 +333,7 @@ class VisibilityStore {
                 schemasPackageAccessible.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 // TODO(b/169883602): remove the "placeholder" uri once upstream changes to relax
-                // nested
-                // document uri rules gets synced down.
+                // nested document uri rules gets synced down.
                 GenericDocument packageAccessibleDocument =
                         new GenericDocument.Builder(/*uri=*/ "placeholder", PACKAGE_ACCESSIBLE_TYPE)
                                 .setNamespace(NAMESPACE)
@@ -332,42 +362,93 @@ class VisibilityStore {
         mPackageAccessibleMap.put(prefix, schemaToPackageIdentifierMap);
     }
 
-    /** Returns if the schema is surfaceable by the platform. */
-    // TODO(b/169883602): check permissions against the allowlisted global querier package name.
-    public boolean isSchemaPlatformSurfaceable(
-            @NonNull String prefix, @NonNull String prefixedSchema) {
+    /** Checks whether {@code prefixedSchema} can be searched over by the {@code callerUid}. */
+    public boolean isSchemaSearchableByCaller(
+            @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
         Preconditions.checkNotNull(prefix);
         Preconditions.checkNotNull(prefixedSchema);
-        Set<String> notPlatformSurfaceableSchemas = mNotPlatformSurfaceableMap.get(prefix);
-        if (notPlatformSurfaceableSchemas == null) {
+
+        // We compare appIds here rather than direct uids because the package's uid may change based
+        // on the user that's running.
+        if (UserHandle.isSameApp(mGlobalQuerierUid, callerUid)
+                && isSchemaPlatformSurfaceable(prefix, prefixedSchema)) {
             return true;
         }
+
+        // May not be platform surfaceable, but might still be accessible through 3p access.
+        return isSchemaPackageAccessible(prefix, prefixedSchema, callerUid);
+    }
+
+    /**
+     * Returns whether the caller has platform query privileges, and if so, that the schema is
+     * surfaceable on the platform.
+     */
+    private boolean isSchemaPlatformSurfaceable(
+            @NonNull String prefix, @NonNull String prefixedSchema) {
+        if (prefix.equals(VISIBILITY_STORE_PREFIX)) {
+            // VisibilityStore schemas are for internal bookkeeping.
+            return false;
+        }
+
+        Set<String> notPlatformSurfaceableSchemas = mNotPlatformSurfaceableMap.get(prefix);
+        if (notPlatformSurfaceableSchemas == null) {
+            // No schemas were opted out of being platform-surfaced. So by default, it can be
+            // surfaced.
+            return true;
+        }
+
+        // Some schemas were opted out of being platform-surfaced. As long as this schema
+        // isn't one of those opt-outs, it's surfaceable.
         return !notPlatformSurfaceableSchemas.contains(prefixedSchema);
     }
 
-    /** Returns whether the schema is accessible by {@code accessingPackage}. */
-    // TODO(b/169883602): check certificate and package against the incoming querier's uid/package.
-    public boolean isSchemaPackageAccessible(
-            @NonNull String prefix,
-            @NonNull String prefixedSchema,
-            @NonNull PackageIdentifier accessingPackage) {
-        Preconditions.checkNotNull(prefix);
-        Preconditions.checkNotNull(prefixedSchema);
-        Preconditions.checkNotNull(accessingPackage);
-
+    /**
+     * Returns whether the schema is accessible by the {@code callerUid}. Checks that the callerUid
+     * has one of the allowed PackageIdentifier's package. And if so, that the package also has the
+     * matching certificate.
+     *
+     * <p>This supports packages that have certificate rotation. As long as the specified
+     * certificate was once used to sign the package, the package will still be granted access. This
+     * does not handle packages that have been signed by multiple certificates.
+     */
+    private boolean isSchemaPackageAccessible(
+            @NonNull String prefix, @NonNull String prefixedSchema, int callerUid) {
         Map<String, Set<PackageIdentifier>> schemaToPackageIdentifierMap =
                 mPackageAccessibleMap.get(prefix);
         if (schemaToPackageIdentifierMap == null) {
+            // No schemas under this prefix have granted package access, return early.
             return false;
         }
 
         Set<PackageIdentifier> packageIdentifiers =
                 schemaToPackageIdentifierMap.get(prefixedSchema);
         if (packageIdentifiers == null) {
+            // No package identifiers were granted access for this schema, return early.
             return false;
         }
 
-        return packageIdentifiers.contains(accessingPackage);
+        for (PackageIdentifier packageIdentifier : packageIdentifiers) {
+            // Check that the caller uid matches this allowlisted PackageIdentifier.
+            // TODO(b/169883602): Consider caching the UIDs of packages. Looking this up in the
+            // package manager could be costly. We would also need to update the cache on
+            // package-removals.
+            if (getPackageUidAsUser(packageIdentifier.getPackageName()) != callerUid) {
+                continue;
+            }
+
+            // Check that the package also has the matching certificate
+            if (mContext.getPackageManager()
+                    .hasSigningCertificate(
+                            packageIdentifier.getPackageName(),
+                            packageIdentifier.getSha256Certificate(),
+                            PackageManager.CERT_INPUT_SHA256)) {
+                // The caller has the right package name and right certificate!
+                return true;
+            }
+        }
+
+        // If we can't verify the schema is package accessible, default to no access.
+        return false;
     }
 
     /**
@@ -375,7 +456,7 @@ class VisibilityStore {
      *
      * <p>{@link #initialize()} must be called after this.
      */
-    void handleReset() {
+    public void handleReset() {
         mNotPlatformSurfaceableMap.clear();
         mPackageAccessibleMap.clear();
     }
@@ -388,5 +469,43 @@ class VisibilityStore {
      */
     private static String addUriPrefix(String uri) {
         return URI_PREFIX + uri;
+    }
+
+    /**
+     * Finds the uid of the {@code globalQuerierPackage}. {@code globalQuerierPackage} must be a
+     * pre-installed, system app. Returns {@link Process#INVALID_UID} if unable to find the UID.
+     */
+    private int getGlobalQuerierUid(@NonNull String globalQuerierPackage) {
+        try {
+            int flags =
+                    PackageManager.MATCH_DISABLED_COMPONENTS
+                            | PackageManager.MATCH_DISABLED_UNTIL_USED_COMPONENTS
+                            | PackageManager.MATCH_SYSTEM_ONLY;
+            // It doesn't matter that we're using the caller's userId here. We'll eventually check
+            // that the two uids in question belong to the same appId.
+            return mContext.getPackageManager()
+                    .getPackageUidAsUser(globalQuerierPackage, flags, mUserId);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Global querier doesn't exist.
+            Log.i(
+                    TAG,
+                    "AppSearch global querier package not found on device:  '"
+                            + globalQuerierPackage
+                            + "'");
+        }
+        return Process.INVALID_UID;
+    }
+
+    /**
+     * Finds the UID of the {@code packageName}. Returns {@link Process#INVALID_UID} if unable to
+     * find the UID.
+     */
+    private int getPackageUidAsUser(@NonNull String packageName) {
+        try {
+            return mContext.getPackageManager().getPackageUidAsUser(packageName, mUserId);
+        } catch (PackageManager.NameNotFoundException e) {
+            // Package doesn't exist, continue
+        }
+        return Process.INVALID_UID;
     }
 }

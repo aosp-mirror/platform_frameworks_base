@@ -47,32 +47,24 @@ public class AppSearchPerson extends GenericDocument {
     }
 
     public static final AppSearchSchema SCHEMA = new AppSearchSchema.Builder(SCHEMA_TYPE)
-            .addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_NAME)
-                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_STRING)
+            .addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_NAME)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
-                    .setTokenizerType(AppSearchSchema.PropertyConfig.TOKENIZER_TYPE_NONE)
-                    .setIndexingType(AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_KEY)
-                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_STRING)
+            ).addProperty(new AppSearchSchema.StringPropertyConfig.Builder(KEY_KEY)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_OPTIONAL)
-                    .setTokenizerType(AppSearchSchema.PropertyConfig.TOKENIZER_TYPE_NONE)
-                    .setIndexingType(AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE)
+                    .setTokenizerType(AppSearchSchema.StringPropertyConfig.TOKENIZER_TYPE_NONE)
+                    .setIndexingType(AppSearchSchema.StringPropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_IS_BOT)
-                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_BOOLEAN)
+            ).addProperty(new AppSearchSchema.BooleanPropertyConfig.Builder(KEY_IS_BOT)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED)
-                    .setTokenizerType(AppSearchSchema.PropertyConfig.TOKENIZER_TYPE_NONE)
-                    .setIndexingType(AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
-            ).addProperty(new AppSearchSchema.PropertyConfig.Builder(KEY_IS_IMPORTANT)
-                    .setDataType(AppSearchSchema.PropertyConfig.DATA_TYPE_BOOLEAN)
+            ).addProperty(new AppSearchSchema.BooleanPropertyConfig.Builder(KEY_IS_IMPORTANT)
                     .setCardinality(AppSearchSchema.PropertyConfig.CARDINALITY_REQUIRED)
-                    .setTokenizerType(AppSearchSchema.PropertyConfig.TOKENIZER_TYPE_NONE)
-                    .setIndexingType(AppSearchSchema.PropertyConfig.INDEXING_TYPE_NONE)
                     .build()
 
             ).build();

@@ -47,28 +47,40 @@ public abstract class DisplayManagerInternal {
      * begins adjusting the power state to match what was requested.
      * </p>
      *
+     * @param groupId The identifier for the display group being requested to change power state
      * @param request The requested power state.
-     * @param waitForNegativeProximity If true, issues a request to wait for
+     * @param waitForNegativeProximity If {@code true}, issues a request to wait for
      * negative proximity before turning the screen back on, assuming the screen
      * was turned off by the proximity sensor.
-     * @return True if display is ready, false if there are important changes that must
-     * be made asynchronously (such as turning the screen on), in which case the caller
-     * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
-     * then try the request again later until the state converges.
+     * @return {@code true} if display group is ready, {@code false} if there are important
+     * changes that must be made asynchronously (such as turning the screen on), in which case
+     * the caller should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged}
+     * then try the request again later until the state converges. If the provided {@code groupId}
+     * cannot be found then {@code true} will be returned.
      */
-    public abstract boolean requestPowerState(DisplayPowerRequest request,
+    public abstract boolean requestPowerState(int groupId, DisplayPowerRequest request,
             boolean waitForNegativeProximity);
 
     /**
-     * Returns true if the proximity sensor screen-off function is available.
+     * Returns {@code true} if the proximity sensor screen-off function is available.
      */
     public abstract boolean isProximitySensorAvailable();
 
     /**
-     * Returns the id of the {@link com.android.server.display.DisplayGroup} to which the provided
-     * display belongs.
+     * Registers a display group listener which will be informed of the addition, removal, or change
+     * of display groups.
+     *
+     * @param listener The listener to register.
      */
-    public abstract int getDisplayGroupId(int displayId);
+    public abstract void registerDisplayGroupListener(DisplayGroupListener listener);
+
+    /**
+     * Unregisters a display group listener which will be informed of the addition, removal, or
+     * change of display groups.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterDisplayGroupListener(DisplayGroupListener listener);
 
     /**
      * Screenshot for internal system-only use such as rotation, etc.  This method includes
@@ -451,7 +463,7 @@ public abstract class DisplayManagerInternal {
         void onStateChanged();
         void onProximityPositive();
         void onProximityNegative();
-        void onDisplayStateChange(int state); // one of the Display state constants
+        void onDisplayStateChange(boolean allInactive, boolean allOff);
 
         void acquireSuspendBlocker();
         void releaseSuspendBlocker();
@@ -464,5 +476,34 @@ public abstract class DisplayManagerInternal {
      */
     public interface DisplayTransactionListener {
         void onDisplayTransaction(Transaction t);
+    }
+
+    /**
+     * Called when there are changes to {@link com.android.server.display.DisplayGroup
+     * DisplayGroups}.
+     */
+    public interface DisplayGroupListener {
+        /**
+         * A new display group with the provided {@code groupId} was added.
+         * This is guaranteed to be called <i>before</i> any corresponding calls to
+         * {@link android.hardware.display.DisplayManager.DisplayListener} are made.
+         */
+        void onDisplayGroupAdded(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} was removed.
+         *
+         * This is guaranteed to be called <i>after</i> any corresponding calls to
+         * {@link android.hardware.display.DisplayManager.DisplayListener} are made.
+         */
+        void onDisplayGroupRemoved(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} has changed.
+         *
+         * This is guaranteed to be called <i>after</i> any corresponding calls to
+         * {@link android.hardware.display.DisplayManager.DisplayListener} are made.
+         */
+        void onDisplayGroupChanged(int groupId);
     }
 }

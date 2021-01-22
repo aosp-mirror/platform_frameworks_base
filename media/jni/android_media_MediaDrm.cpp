@@ -1978,6 +1978,24 @@ static jboolean android_media_MediaDrm_requiresSecureDecoder(
     return drm->requiresSecureDecoder(mimeType.c_str(), securityLevel);
 }
 
+static void android_media_MediaDrm_setPlaybackId(
+        JNIEnv *env, jobject thiz, jbyteArray jsessionId,
+        jstring jplaybackId) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+    if (!CheckSession(env, drm, jsessionId)) {
+        return;
+    }
+
+    Vector<uint8_t> sessionId(JByteArrayToVector(env, jsessionId));
+
+    String8 playbackId;
+    if (jplaybackId != NULL) {
+        playbackId = JStringToString8(env, jplaybackId);
+    }
+    status_t err = drm->setPlaybackId(sessionId, playbackId.c_str());
+    throwExceptionAsNecessary(env, err, "Failed to set playbackId");
+}
+
 static const JNINativeMethod gMethods[] = {
     { "native_release", "()V", (void *)android_media_MediaDrm_native_release },
 
@@ -1992,10 +2010,10 @@ static const JNINativeMethod gMethods[] = {
     { "isCryptoSchemeSupportedNative", "([BLjava/lang/String;I)Z",
       (void *)android_media_MediaDrm_isCryptoSchemeSupportedNative },
 
-    { "openSession", "(I)[B",
+    { "openSessionNative", "(I)[B",
       (void *)android_media_MediaDrm_openSession },
 
-    { "closeSession", "([B)V",
+    { "closeSessionNative", "([B)V",
       (void *)android_media_MediaDrm_closeSession },
 
     { "getKeyRequest", "([B[BLjava/lang/String;ILjava/util/HashMap;)"
@@ -2102,6 +2120,9 @@ static const JNINativeMethod gMethods[] = {
 
     { "requiresSecureDecoder", "(Ljava/lang/String;I)Z",
       (void *)android_media_MediaDrm_requiresSecureDecoder },
+
+    { "setPlaybackId", "([BLjava/lang/String;)V",
+      (void *)android_media_MediaDrm_setPlaybackId },
 };
 
 int register_android_media_Drm(JNIEnv *env) {

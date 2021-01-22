@@ -52,7 +52,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
 
     private final Context mContext;
     private final DisplayController mDisplayController;
-    private LegacySplitScreen mLegacySplitScreen;
+    private SplitScreen mSplitScreen;
 
     private final SparseArray<PerDisplay> mDisplayDropTargets = new SparseArray<>();
     private final SurfaceControl.Transaction mTransaction = new SurfaceControl.Transaction();
@@ -76,8 +76,8 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
         mDisplayController = displayController;
     }
 
-    public void initialize(Optional<LegacySplitScreen> splitscreen) {
-        mLegacySplitScreen = splitscreen.orElse(null);
+    public void initialize(Optional<SplitScreen> splitscreen) {
+        mSplitScreen = splitscreen.orElse(null);
         mDisplayController.addDisplayWindowListener(this);
     }
 
@@ -104,7 +104,7 @@ public class DragAndDropController implements DisplayController.OnDisplaysChange
                 R.layout.global_drop_target, null);
         rootView.setOnDragListener(this);
         rootView.setVisibility(View.INVISIBLE);
-        DragLayout dragLayout = new DragLayout(context, mLegacySplitScreen);
+        DragLayout dragLayout = new DragLayout(context, mSplitScreen);
         rootView.addView(dragLayout,
                 new FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT));
         try {

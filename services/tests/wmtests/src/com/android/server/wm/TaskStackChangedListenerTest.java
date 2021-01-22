@@ -198,6 +198,10 @@ public class TaskStackChangedListenerTest {
 
             @Override
             public void onTaskRemoved(int taskId) throws RemoteException {
+                if (taskCreatedLaunchLatch.getCount() == 1) {
+                    // The test activity hasn't started. Ignore the noise from previous test.
+                    return;
+                }
                 params[0] = taskId;
                 taskRemovedLatch.countDown();
             }

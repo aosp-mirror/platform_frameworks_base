@@ -317,7 +317,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
-        wakefulnessLifecycle.dispatchStartedWakingUp();
+        wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         wakefulnessLifecycle.dispatchFinishedWakingUp();
 
         when(mGradientColors.supportsDarkText()).thenReturn(true);

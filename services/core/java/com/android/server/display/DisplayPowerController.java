@@ -683,6 +683,17 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         // TODO: b/175821789 - Support high brightness on multiple (folding) displays
     }
 
+    /**
+     * Unregisters all listeners and interrupts all running threads; halting future work.
+     *
+     * This method should be called when the DisplayPowerController is no longer in use; i.e. when
+     * the {@link #mDisplayId display} has been removed.
+     */
+    public void stop() {
+        mContext.getContentResolver().unregisterContentObserver(mSettingsObserver);
+        mPowerState.stop();
+    }
+
     private void sendUpdatePowerState() {
         synchronized (mLock) {
             sendUpdatePowerStateLocked();

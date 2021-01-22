@@ -88,9 +88,9 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
 
     public WindowMagnificationGestureHandler(Context context,
             WindowMagnificationManager windowMagnificationMgr,
-            ScaleChangedListener listener,
+            Callback callback,
             boolean detectTripleTap, boolean detectShortcutTrigger, int displayId) {
-        super(displayId, detectTripleTap, detectShortcutTrigger, listener);
+        super(displayId, detectTripleTap, detectShortcutTrigger, callback);
         if (DEBUG_ALL) {
             Slog.i(mLogTag,
                     "WindowMagnificationGestureHandler() , displayId = " + displayId + ")");
@@ -115,7 +115,6 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
                             @Override
                             public void setScale(int displayId, float scale) {
                                 mWindowMagnificationMgr.setScale(displayId, scale);
-                                mListener.onMagnificationScaleChanged(displayId, getMode());
                             }
 
                             @Override
@@ -153,13 +152,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
     }
 
     @Override
-    public void notifyShortcutTriggered() {
-        if (DEBUG_ALL) {
-            Slog.i(mLogTag, "notifyShortcutTriggered():");
-        }
-        if (!mDetectShortcutTrigger) {
-            return;
-        }
+    public void handleShortcutTriggered() {
         final Point screenSize = mTempPoint;
         getScreenSize(mTempPoint);
         toggleMagnification(screenSize.x / 2.0f, screenSize.y / 2.0f);
@@ -206,6 +199,7 @@ public class WindowMagnificationGestureHandler extends MagnificationGestureHandl
             Slog.i(mLogTag, "onTripleTap()");
         }
         toggleMagnification(up.getX(), up.getY());
+        mCallback.onTripleTapped(mDisplayId, getMode());
     }
 
     void resetToDetectState() {

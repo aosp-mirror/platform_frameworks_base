@@ -30,4 +30,6 @@ oneway interface IFingerprintServiceReceiver {
     void onError(int error, int vendorCode);
     void onRemoved(in Fingerprint fp, int remaining);
     void onChallengeGenerated(int sensorId, long challenge);
+    void onUdfpsPointerDown(int sensorId);
+    void onUdfpsPointerUp(int sensorId);
 }

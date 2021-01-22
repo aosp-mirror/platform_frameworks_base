@@ -146,6 +146,22 @@ package android.net {
     field public final int sndWnd;
   }
 
+  public final class TestNetworkInterface implements android.os.Parcelable {
+    ctor public TestNetworkInterface(@NonNull android.os.ParcelFileDescriptor, @NonNull String);
+    method public int describeContents();
+    method @NonNull public android.os.ParcelFileDescriptor getFileDescriptor();
+    method @NonNull public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
+  }
+
+  public class TestNetworkManager {
+    method @NonNull public android.net.TestNetworkInterface createTapInterface();
+    method @NonNull public android.net.TestNetworkInterface createTunInterface(@NonNull java.util.Collection<android.net.LinkAddress>);
+    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
+    method public void teardownTestNetwork(@NonNull android.net.Network);
+  }
+
 }
 
 package android.os {

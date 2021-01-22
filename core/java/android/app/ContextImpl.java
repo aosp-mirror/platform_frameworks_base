@@ -1670,7 +1670,9 @@ class ContextImpl extends Context {
                     flags);
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
-                intent.prepareToEnterProcess();
+                // TODO: determine at registration time if caller is
+                // protecting themselves with signature permission
+                intent.prepareToEnterProcess(ActivityThread.isProtectedBroadcast(intent));
             }
             return intent;
         } catch (RemoteException e) {

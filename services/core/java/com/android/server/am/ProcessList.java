@@ -340,12 +340,23 @@ public final class ProcessList {
     private static final long NATIVE_HEAP_POINTER_TAGGING = 135754954; // This is a bug id.
 
     /**
-     * Enable memory tag checks in non-system apps. This flag will only have an effect on
-     * hardware supporting the ARM Memory Tagging Extension (MTE).
+     * Enable asynchronous (ASYNC) memory tag checking in this process. This
+     * flag will only have an effect on hardware supporting the ARM Memory
+     * Tagging Extension (MTE).
      */
     @ChangeId
     @Disabled
-    private static final long NATIVE_MEMORY_TAGGING = 135772972; // This is a bug id.
+    private static final long NATIVE_MEMTAG_ASYNC = 135772972; // This is a bug id.
+
+    /**
+     * Enable synchronous (SYNC) memory tag checking in this process. This flag
+     * will only have an effect on hardware supporting the ARM Memory Tagging
+     * Extension (MTE). If both NATIVE_MEMTAG_ASYNC and this option is selected,
+     * this option takes preference and MTE is enabled in SYNC mode.
+     */
+    @ChangeId
+    @Disabled
+    private static final long NATIVE_MEMTAG_SYNC = 177438394; // This is a bug id.
 
     /**
      * Enable sampled memory bug detection in the app.
@@ -1655,23 +1666,23 @@ public final class ProcessList {
         return gidArray;
     }
 
-    private boolean shouldEnableMemoryTagging(ProcessRecord app) {
+    // Returns the memory tagging level to be enabled. If memory tagging isn't
+    // requested, returns zero.
+    private int getMemtagLevel(ProcessRecord app) {
         // Ensure the hardware + kernel actually supports MTE.
         if (!Zygote.nativeSupportsMemoryTagging()) {
-            return false;
+            return 0;
         }
 
-        // Enable MTE for system apps if supported.
-        if ((app.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
-            return true;
+        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_SYNC, app.info)) {
+            return Zygote.MEMORY_TAG_LEVEL_SYNC;
         }
 
-        // Enable MTE if the compat feature is enabled.
-        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMORY_TAGGING, app.info)) {
-            return true;
+        if (mPlatformCompat.isChangeEnabled(NATIVE_MEMTAG_ASYNC, app.info)) {
+            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
         }
 
-        return false;
+        return 0;
     }
 
     private boolean shouldEnableTaggedPointers(ProcessRecord app) {
@@ -1695,8 +1706,9 @@ public final class ProcessList {
 
     private int decideTaggingLevel(ProcessRecord app) {
         // Check MTE support first, as it should take precedence over TBI.
-        if (shouldEnableMemoryTagging(app)) {
-            return Zygote.MEMORY_TAG_LEVEL_ASYNC;
+        int memtagLevel = getMemtagLevel(app);
+        if (memtagLevel != 0) {
+            return memtagLevel;
         }
 
         if (shouldEnableTaggedPointers(app)) {

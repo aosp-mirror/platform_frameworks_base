@@ -209,6 +209,7 @@ import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
+import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -878,6 +879,11 @@ class Task extends WindowContainer<WindowContainer> {
         mLaunchCookie = _launchCookie;
         mDeferTaskAppear = _deferTaskAppear;
         EventLogTags.writeWmTaskCreated(mTaskId, isRootTask() ? INVALID_TASK_ID : getRootTaskId());
+    }
+
+    static Task fromWindowContainerToken(WindowContainerToken token) {
+        if (token == null) return null;
+        return fromBinder(token.asBinder()).asTask();
     }
 
     Task reuseAsLeafTask(IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
@@ -7380,6 +7386,7 @@ class Task extends WindowContainer<WindowContainer> {
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
                     .setActivityInfo(info)
+                    .setActivityOptions(options)
                     .setIntent(intent)
                     .setVoiceSession(voiceSession)
                     .setVoiceInteractor(voiceInteractor)
@@ -7819,6 +7826,7 @@ class Task extends WindowContainer<WindowContainer> {
         private int mMinWidth = INVALID_MIN_SIZE;
         private int mMinHeight = INVALID_MIN_SIZE;
         private ActivityInfo mActivityInfo;
+        private ActivityOptions mActivityOptions;
         private IVoiceInteractionSession mVoiceSession;
         private IVoiceInteractor mVoiceInteractor;
         private int mActivityType;
@@ -7869,6 +7877,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         Builder setActivityInfo(ActivityInfo info) {
             mActivityInfo = info;
+            return this;
+        }
+
+        Builder setActivityOptions(ActivityOptions opts) {
+            mActivityOptions = opts;
             return this;
         }
 
@@ -8078,7 +8091,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             // Task created by organizer are added as root.
             final Task launchRootTask = mCreatedByOrganizer
-                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType);
+                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions);
             if (launchRootTask != null) {
                 // Since this task will be put into a root task, its windowingMode will be
                 // inherited.

@@ -166,11 +166,32 @@ public class FontFileUtil {
         return nGetFontPostScriptName(buffer, index);
     }
 
+    /**
+     * Analyze name OpenType table and return true if the font has PostScript Type 1 glyphs.
+     *
+     * IllegalArgumentException will be thrown for invalid font data.
+     * -1 will be returned if the byte buffer is not a OpenType font data.
+     * 0 will be returned if the font file doesn't have PostScript Type 1 glyphs, i.e. ttf file.
+     * 1 will be returned if the font file has PostScript Type 1 glyphs, i.e. otf file.
+     *
+     * @param buffer a buffer of OpenType font
+     * @param index a font index
+     * @return a post script name or null if it is invalid or not found.
+     */
+    public static int isPostScriptType1Font(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index) {
+        return nIsPostScriptType1Font(buffer, index);
+    }
+
     @FastNative
     private static native long nGetFontRevision(@NonNull ByteBuffer buffer,
             @IntRange(from = 0) int index);
 
     @FastNative
     private static native String nGetFontPostScriptName(@NonNull ByteBuffer buffer,
+            @IntRange(from = 0) int index);
+
+    @FastNative
+    private static native int nIsPostScriptType1Font(@NonNull ByteBuffer buffer,
             @IntRange(from = 0) int index);
 }

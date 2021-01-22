@@ -330,6 +330,7 @@ public class AppSearchManager {
                     DEFAULT_DATABASE_NAME,
                     request.getNamespace(),
                     uris,
+                    request.getProjectionsVisibleToPackagesInternal(),
                     mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {

@@ -82,6 +82,7 @@ import com.android.internal.inputmethod.IIntResultCallback;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
+import com.android.internal.inputmethod.IVoidResultCallback;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
@@ -1776,23 +1777,26 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void showInputMethodPickerFromClient(
-                IInputMethodClient client, int auxiliarySubtypeMode) {
+        public void showInputMethodPickerFromClient(IInputMethodClient client,
+                int auxiliarySubtypeMode, IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
-        public void showInputMethodPickerFromSystem(
-                IInputMethodClient client, int auxiliarySubtypeMode, int displayId) {
+        public void showInputMethodPickerFromSystem(IInputMethodClient client,
+                int auxiliarySubtypeMode, int displayId, IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
-        public void showInputMethodAndSubtypeEnablerFromClient(
-                IInputMethodClient client, String inputMethodId) {
+        public void showInputMethodAndSubtypeEnablerFromClient(IInputMethodClient client,
+                String inputMethodId, IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
@@ -1825,8 +1829,9 @@ public final class MultiClientInputMethodManagerService {
         @BinderThread
         @Override
         public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
-                float[] matrixValues) {
+                float[] matrixValues, IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
