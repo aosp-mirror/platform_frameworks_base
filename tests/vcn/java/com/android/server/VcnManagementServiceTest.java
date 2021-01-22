@@ -23,10 +23,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,8 +40,10 @@ import static org.mockito.Mockito.verify;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnConfigTest;
+import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -126,6 +133,10 @@ public class VcnManagementServiceTest {
 
     private final VcnManagementService mVcnMgmtSvc;
 
+    private final IVcnUnderlyingNetworkPolicyListener mMockPolicyListener =
+            mock(IVcnUnderlyingNetworkPolicyListener.class);
+    private final IBinder mMockIBinder = mock(IBinder.class);
+
     public VcnManagementServiceTest() throws Exception {
         setupSystemService(mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
         setupSystemService(mTelMgr, Context.TELEPHONY_SERVICE, TelephonyManager.class);
@@ -168,6 +179,8 @@ public class VcnManagementServiceTest {
 
         setupMockedCarrierPrivilege(true);
         mVcnMgmtSvc = new VcnManagementService(mMockContext, mMockDeps);
+
+        doReturn(mMockIBinder).when(mMockPolicyListener).asBinder();
 
         // Make sure the profiles are loaded.
         mTestLooper.dispatchAll();
@@ -437,5 +450,41 @@ public class VcnManagementServiceTest {
         // Verify Vcn is stopped if it was already started
         mVcnMgmtSvc.clearVcnConfig(TEST_UUID_2);
         verify(vcnInstance).teardownAsynchronously();
+    }
+
+    @Test
+    public void testAddVcnUnderlyingNetworkPolicyListener() throws Exception {
+        doNothing()
+                .when(mMockContext)
+                .enforceCallingPermission(eq(android.Manifest.permission.NETWORK_FACTORY), any());
+
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        verify(mMockIBinder).linkToDeath(any(), anyInt());
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testAddVcnUnderlyingNetworkPolicyListenerInvalidPermission() {
+        doThrow(new SecurityException())
+                .when(mMockContext)
+                .enforceCallingPermission(eq(android.Manifest.permission.NETWORK_FACTORY), any());
+
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+    }
+
+    @Test
+    public void testRemoveVcnUnderlyingNetworkPolicyListener() {
+        // verify listener added
+        doNothing()
+                .when(mMockContext)
+                .enforceCallingPermission(eq(android.Manifest.permission.NETWORK_FACTORY), any());
+        mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+
+        mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+    }
+
+    @Test
+    public void testRemoveVcnUnderlyingNetworkPolicyListenerNeverRegistered() {
+        mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
     }
 }
