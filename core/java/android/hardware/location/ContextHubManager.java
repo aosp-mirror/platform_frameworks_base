@@ -816,9 +816,10 @@ public final class ContextHubManager {
      * registration succeeds, the client can send messages to nanoapps through the returned
      * {@link ContextHubClient} object, and receive notifications through the provided callback.
      *
+     * @param context  the context of the application
      * @param hubInfo  the hub to attach this client to
-     * @param callback the notification callback to register
      * @param executor the executor to invoke the callback
+     * @param callback the notification callback to register
      * @return the registered client object
      *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub
@@ -832,8 +833,9 @@ public final class ContextHubManager {
             android.Manifest.permission.ACCESS_CONTEXT_HUB
     })
     @NonNull public ContextHubClient createClient(
-            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
-            @NonNull @CallbackExecutor Executor executor) {
+            @Nullable Context context, @NonNull ContextHubInfo hubInfo,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull ContextHubClientCallback callback) {
         Objects.requireNonNull(callback, "Callback cannot be null");
         Objects.requireNonNull(hubInfo, "ContextHubInfo cannot be null");
         Objects.requireNonNull(executor, "Executor cannot be null");
@@ -842,9 +844,14 @@ public final class ContextHubManager {
         IContextHubClientCallback clientInterface = createClientCallback(
                 client, callback, executor);
 
+        String attributionTag = null;
+        if (context != null) {
+            attributionTag = context.getAttributionTag();
+        }
+
         IContextHubClient clientProxy;
         try {
-            clientProxy = mService.createClient(hubInfo.getId(), clientInterface);
+            clientProxy = mService.createClient(hubInfo.getId(), clientInterface, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -853,19 +860,25 @@ public final class ContextHubManager {
         return client;
     }
 
+
+    /**
+     * Equivalent to
+     * {@link #createClient(ContextHubInfo, Executor, String, ContextHubClientCallback)}
+     * with the {@link Context} being set to null.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.LOCATION_HARDWARE,
+            android.Manifest.permission.ACCESS_CONTEXT_HUB
+    })
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        return createClient(null /* context */, hubInfo, executor, callback);
+    }
+
     /**
      * Equivalent to {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)}
      * with the executor using the main thread's Looper.
-     *
-     * @param hubInfo  the hub to attach this client to
-     * @param callback the notification callback to register
-     * @return the registered client object
-     *
-     * @throws IllegalArgumentException if hubInfo does not represent a valid hub
-     * @throws IllegalStateException    if there were too many registered clients at the service
-     * @throws NullPointerException     if callback or hubInfo is null
-     *
-     * @see ContextHubClientCallback
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.LOCATION_HARDWARE,
@@ -873,7 +886,8 @@ public final class ContextHubManager {
     })
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
-        return createClient(hubInfo, callback, new HandlerExecutor(Handler.getMain()));
+        return createClient(null /* context */, hubInfo, new HandlerExecutor(Handler.getMain()),
+                            callback);
     }
 
     /**
@@ -907,6 +921,8 @@ public final class ContextHubManager {
      * on the provided PendingIntent, then the client will be automatically unregistered by the
      * service.
      *
+     * @param context       the context of the application. If a PendingIntent client is recreated,
+     * the latest state in the context will be used and old state will be discarded
      * @param hubInfo       the hub to attach this client to
      * @param pendingIntent the PendingIntent to register to the client
      * @param nanoAppId     the ID of the nanoapp that Intent events will be generated for
@@ -921,22 +937,41 @@ public final class ContextHubManager {
             android.Manifest.permission.ACCESS_CONTEXT_HUB
     })
     @NonNull public ContextHubClient createClient(
-            @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
+            @Nullable Context context, @NonNull ContextHubInfo hubInfo,
+            @NonNull PendingIntent pendingIntent, long nanoAppId) {
         Objects.requireNonNull(pendingIntent);
         Objects.requireNonNull(hubInfo);
 
         ContextHubClient client = new ContextHubClient(hubInfo, true /* persistent */);
 
+        String attributionTag = null;
+        if (context != null) {
+            attributionTag = context.getAttributionTag();
+        }
+
         IContextHubClient clientProxy;
         try {
             clientProxy = mService.createPendingIntentClient(
-                    hubInfo.getId(), pendingIntent, nanoAppId);
+                    hubInfo.getId(), pendingIntent, nanoAppId, attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
 
         client.setClientProxy(clientProxy);
         return client;
+    }
+
+    /**
+     * Equivalent to {@link #createClient(ContextHubInfo, PendingIntent, long, String)}
+     * with {@link Context} being set to null.
+     */
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.LOCATION_HARDWARE,
+            android.Manifest.permission.ACCESS_CONTEXT_HUB
+    })
+    @NonNull public ContextHubClient createClient(
+            @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
+        return createClient(null /* context */, hubInfo, pendingIntent, nanoAppId);
     }
 
     /**
