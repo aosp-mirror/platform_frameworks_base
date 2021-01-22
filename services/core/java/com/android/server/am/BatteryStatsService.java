@@ -1853,7 +1853,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
-                mStats.updateMobileRadioState(info, elapsedRealtime, uptime);
+                mStats.noteModemControllerActivity(info, elapsedRealtime, uptime);
             });
         }
     }
