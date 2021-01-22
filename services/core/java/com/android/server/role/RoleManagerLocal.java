@@ -18,14 +18,17 @@ package com.android.server.role;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
-import android.util.ArrayMap;
-import android.util.ArraySet;
+
+import java.util.Map;
+import java.util.Set;
 
 /**
- * Internal calls into {@link RoleManagerService}.
+ * Internal calls into {@link RoleService}.
+ *
+ * @hide
  */
-public abstract class RoleManagerInternal {
-
+//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+public interface RoleManagerLocal {
     /**
      * Get all roles and their holders.
      *
@@ -34,6 +37,5 @@ public abstract class RoleManagerInternal {
      * @return The roles and their holders
      */
     @NonNull
-    public abstract ArrayMap<String, ArraySet<String>> getRolesAndHolders(
-            @UserIdInt int userId);
+    Map<String, Set<String>> getRolesAndHolders(@UserIdInt int userId);
 }
