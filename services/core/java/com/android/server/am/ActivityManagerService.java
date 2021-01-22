@@ -2533,11 +2533,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_SWITCH, "updateActivityUsageStats: comp="
                     + activity + " hash=" + appToken.hashCode() + " event=" + event);
         }
-        synchronized (this) {
-            if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode(),
-                        taskRoot);
-            }
+        if (mUsageStatsService != null) {
+            mUsageStatsService.reportEvent(activity, userId, event, appToken.hashCode(), taskRoot);
         }
         if (mContentCaptureService != null && (event == Event.ACTIVITY_PAUSED
                 || event == Event.ACTIVITY_RESUMED || event == Event.ACTIVITY_STOPPED
@@ -2557,10 +2554,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_SWITCH, "updateActivityUsageStats: package="
                     + packageName + " event=" + event);
         }
-        synchronized (this) {
-            if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(packageName, userId, event);
-            }
+        if (mUsageStatsService != null) {
+            mUsageStatsService.reportEvent(packageName, userId, event);
         }
     }
 
@@ -2575,12 +2570,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             Slog.d(TAG_SWITCH, "updateForegroundServiceUsageStats: comp="
                     + service + " started=" + started);
         }
-        synchronized (this) {
-            if (mUsageStatsService != null) {
-                mUsageStatsService.reportEvent(service, userId,
-                        started ? UsageEvents.Event.FOREGROUND_SERVICE_START
-                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0, null);
-            }
+        if (mUsageStatsService != null) {
+            mUsageStatsService.reportEvent(service, userId,
+                    started ? UsageEvents.Event.FOREGROUND_SERVICE_START
+                            : UsageEvents.Event.FOREGROUND_SERVICE_STOP, 0, null);
         }
     }
 
@@ -6098,7 +6091,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return pfd;
     }
 
-    void reportGlobalUsageEventLocked(int event) {
+    void reportGlobalUsageEvent(int event) {
         final int currentUserId = mUserController.getCurrentUserId();
         mUsageStatsService.reportEvent(Event.DEVICE_EVENT_PACKAGE_NAME, currentUserId, event);
         int[] profiles = mUserController.getCurrentProfileIds();
@@ -6112,8 +6105,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    void reportCurWakefulnessUsageEventLocked() {
-        reportGlobalUsageEventLocked(mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE
+    void reportCurWakefulnessUsageEvent() {
+        reportGlobalUsageEvent(mWakefulness == PowerManagerInternal.WAKEFULNESS_AWAKE
                 ? UsageEvents.Event.SCREEN_INTERACTIVE
                 : UsageEvents.Event.SCREEN_NON_INTERACTIVE);
     }
@@ -6127,7 +6120,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (wasAwake != isAwake) {
                 // Also update state in a special way for running foreground services UI.
                 mServices.updateScreenStateLocked(isAwake);
-                reportCurWakefulnessUsageEventLocked();
+                reportCurWakefulnessUsageEvent();
                 mActivityTaskManager.onScreenAwakeChanged(isAwake);
                 mOomAdjProfiler.onWakefulnessChanged(wakefulness);
             }
@@ -16506,11 +16499,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         public void reportCurKeyguardUsageEvent(boolean keyguardShowing) {
-            synchronized(ActivityManagerService.this) {
-                ActivityManagerService.this.reportGlobalUsageEventLocked(keyguardShowing
-                        ? UsageEvents.Event.KEYGUARD_SHOWN
-                        : UsageEvents.Event.KEYGUARD_HIDDEN);
-            }
+            ActivityManagerService.this.reportGlobalUsageEvent(keyguardShowing
+                    ? UsageEvents.Event.KEYGUARD_SHOWN
+                    : UsageEvents.Event.KEYGUARD_HIDDEN);
         }
 
         @Override
