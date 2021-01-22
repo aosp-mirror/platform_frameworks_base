@@ -19,7 +19,6 @@
 #include <android-base/logging.h>
 #include <utils/Log.h>
 
-#include "TunerClient.h"
 #include "LnbClient.h"
 
 using ::android::hardware::tv::tuner::V1_0::Result;
@@ -48,7 +47,7 @@ Result LnbClient::setCallback(sp<LnbClientCallback> cb) {
     if (mTunerLnb != NULL) {
         mAidlCallback = ::ndk::SharedRefBase::make<TunerLnbCallback>(cb);
         Status s = mTunerLnb->setCallback(mAidlCallback);
-        return TunerClient::getServiceSpecificErrorCode(s);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
@@ -62,7 +61,7 @@ Result LnbClient::setCallback(sp<LnbClientCallback> cb) {
 Result LnbClient::setVoltage(LnbVoltage voltage) {
     if (mTunerLnb != NULL) {
         Status s = mTunerLnb->setVoltage((int)voltage);
-        return TunerClient::getServiceSpecificErrorCode(s);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
@@ -75,7 +74,7 @@ Result LnbClient::setVoltage(LnbVoltage voltage) {
 Result LnbClient::setTone(LnbTone tone) {
     if (mTunerLnb != NULL) {
         Status s = mTunerLnb->setTone((int)tone);
-        return TunerClient::getServiceSpecificErrorCode(s);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
@@ -88,7 +87,7 @@ Result LnbClient::setTone(LnbTone tone) {
 Result LnbClient::setSatellitePosition(LnbPosition position) {
     if (mTunerLnb != NULL) {
         Status s = mTunerLnb->setSatellitePosition((int)position);
-        return TunerClient::getServiceSpecificErrorCode(s);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
@@ -101,7 +100,7 @@ Result LnbClient::setSatellitePosition(LnbPosition position) {
 Result LnbClient::sendDiseqcMessage(vector<uint8_t> diseqcMessage) {
     if (mTunerLnb != NULL) {
         Status s = mTunerLnb->sendDiseqcMessage(diseqcMessage);
-        return TunerClient::getServiceSpecificErrorCode(s);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {
@@ -114,7 +113,7 @@ Result LnbClient::sendDiseqcMessage(vector<uint8_t> diseqcMessage) {
 Result LnbClient::close() {
     if (mTunerLnb != NULL) {
         Status s = mTunerLnb->close();
-        return TunerClient::getServiceSpecificErrorCode(s);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mLnb != NULL) {

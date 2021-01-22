@@ -66,7 +66,7 @@ vector<FrontendId> TunerClient::getFrontendIds() {
     if (mTunerService != NULL) {
         vector<int32_t> v;
         Status s = mTunerService->getFrontendIds(&v);
-        if (getServiceSpecificErrorCode(s) != Result::SUCCESS || v.size() == 0) {
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS || v.size() == 0) {
             ids.clear();
             return ids;
         }
@@ -96,18 +96,22 @@ vector<FrontendId> TunerClient::getFrontendIds() {
 
 sp<FrontendClient> TunerClient::openFrontend(int frontendHandle) {
     if (mTunerService != NULL) {
-        // TODO: handle error code
         shared_ptr<ITunerFrontend> tunerFrontend;
-        mTunerService->openFrontend(frontendHandle, &tunerFrontend);
-        if (tunerFrontend == NULL) {
+        Status s = mTunerService->openFrontend(frontendHandle, &tunerFrontend);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS
+                || tunerFrontend == NULL) {
             return NULL;
         }
         int id;
-        // TODO: handle error code
-        tunerFrontend->getFrontendId(&id);
+        s = tunerFrontend->getFrontendId(&id);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
         TunerFrontendInfo aidlFrontendInfo;
-        // TODO: handle error code
-        mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
+        s = mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
         return new FrontendClient(tunerFrontend, frontendHandle, aidlFrontendInfo.type);
     }
 
@@ -133,7 +137,10 @@ shared_ptr<FrontendInfo> TunerClient::getFrontendInfo(int id) {
     if (mTunerService != NULL) {
         TunerFrontendInfo aidlFrontendInfo;
         // TODO: handle error code
-        mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
+        Status s = mTunerService->getFrontendInfo(id, &aidlFrontendInfo);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
         return make_shared<FrontendInfo>(FrontendInfoAidlToHidl(aidlFrontendInfo));
     }
 
@@ -168,17 +175,18 @@ shared_ptr<FrontendDtmbCapabilities> TunerClient::getFrontendDtmbCapabilities(in
     return NULL;
 }
 
-sp<DemuxClient> TunerClient::openDemux(int /*demuxHandle*/) {
+sp<DemuxClient> TunerClient::openDemux(int demuxHandle) {
     if (mTunerService != NULL) {
-        // TODO: handle error code
-        /*shared_ptr<ITunerDemux> tunerDemux;
-        mTunerService->openDemux(demuxHandle, &tunerDemux);
-        return new DemuxClient(tunerDemux);*/
+        shared_ptr<ITunerDemux> tunerDemux;
+        Status s = mTunerService->openDemux(demuxHandle, &tunerDemux);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        return new DemuxClient(tunerDemux);
     }
 
     if (mTuner != NULL) {
-        // TODO: pending aidl interface
-        sp<DemuxClient> demuxClient = new DemuxClient();
+        sp<DemuxClient> demuxClient = new DemuxClient(NULL);
         int demuxId;
         sp<IDemux> hidlDemux = openHidlDemux(demuxId);
         if (hidlDemux != NULL) {
@@ -231,15 +239,16 @@ sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
 
 sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
     if (mTunerService != NULL) {
-        // TODO: handle error code
         shared_ptr<ITunerLnb> tunerLnb;
-        mTunerService->openLnb(lnbHandle, &tunerLnb);
+        Status s = mTunerService->openLnb(lnbHandle, &tunerLnb);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
         return new LnbClient(tunerLnb);
     }
 
     if (mTuner != NULL) {
         int id = getResourceIdFromHandle(lnbHandle, LNB);
-        // TODO: pending aidl interface
         sp<LnbClient> lnbClient = new LnbClient(NULL);
         sp<ILnb> hidlLnb = openHidlLnbById(id);
         if (hidlLnb != NULL) {
@@ -254,14 +263,15 @@ sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
 
 sp<LnbClient> TunerClient::openLnbByName(string lnbName) {
     if (mTunerService != NULL) {
-        // TODO: handle error code
         shared_ptr<ITunerLnb> tunerLnb;
-        mTunerService->openLnbByName(lnbName, &tunerLnb);
+        Status s = mTunerService->openLnbByName(lnbName, &tunerLnb);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
         return new LnbClient(tunerLnb);
     }
 
     if (mTuner != NULL) {
-        // TODO: pending aidl interface
         sp<LnbClient> lnbClient = new LnbClient(NULL);
         LnbId id;
         sp<ILnb> hidlLnb = openHidlLnbByName(lnbName, id);
@@ -411,29 +421,8 @@ sp<ILnb> TunerClient::openHidlLnbByName(string name, LnbId& lnbId) {
     return lnb;
 }
 
-sp<IDescrambler> TunerClient::openHidlDescrambler() {
-    sp<IDescrambler> descrambler;
-    Result res;
-
-    mTuner->openDescrambler([&](Result r, const sp<IDescrambler>& descramblerSp) {
-        res = r;
-        descrambler = descramblerSp;
-    });
-
-    if (res != Result::SUCCESS || descrambler == NULL) {
-        return NULL;
-    }
-
-    return descrambler;
-}
-
 vector<int> TunerClient::getLnbHandles() {
     vector<int> lnbHandles;
-
-    if (mTunerService != NULL) {
-        // TODO: pending hidl interface
-    }
-
     if (mTuner != NULL) {
         Result res;
         vector<LnbId> lnbIds;
@@ -451,6 +440,22 @@ vector<int> TunerClient::getLnbHandles() {
     }
 
     return lnbHandles;
+}
+
+sp<IDescrambler> TunerClient::openHidlDescrambler() {
+    sp<IDescrambler> descrambler;
+    Result res;
+
+    mTuner->openDescrambler([&](Result r, const sp<IDescrambler>& descramblerSp) {
+        res = r;
+        descrambler = descramblerSp;
+    });
+
+    if (res != Result::SUCCESS || descrambler == NULL) {
+        return NULL;
+    }
+
+    return descrambler;
 }
 
 FrontendInfo TunerClient::FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo) {
