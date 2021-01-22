@@ -33,8 +33,7 @@ import static android.net.NetworkStats.TAG_NONE;
 import static org.junit.Assert.assertEquals;
 
 import android.net.NetworkStats;
-
-import com.android.internal.net.VpnInfo;
+import android.net.VpnInfo;
 
 /** Superclass with utilities for NetworkStats(Service|Factory)Test */
 abstract class NetworkStatsBaseTest {
@@ -113,10 +112,6 @@ abstract class NetworkStatsBaseTest {
     }
 
     static VpnInfo createVpnInfo(String vpnIface, String[] underlyingIfaces) {
-        VpnInfo info = new VpnInfo();
-        info.ownerUid = UID_VPN;
-        info.vpnIface = vpnIface;
-        info.underlyingIfaces = underlyingIfaces;
-        return info;
+        return new VpnInfo(UID_VPN, vpnIface, underlyingIfaces);
     }
 }
