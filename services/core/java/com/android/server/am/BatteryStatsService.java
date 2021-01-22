@@ -265,10 +265,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     public void systemServicesReady() {
         mStats.systemServicesReady(mContext);
         mWorker.systemServicesReady();
-        final INetworkManagementService mNMService = INetworkManagementService.Stub.asInterface(
+        final INetworkManagementService nms = INetworkManagementService.Stub.asInterface(
                 ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
         try {
-            mNMService.registerObserver(mActivityChangeObserver);
+            nms.registerObserver(mActivityChangeObserver);
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
         }
