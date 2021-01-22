@@ -87,16 +87,6 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
-        <!-- When windowBackgroundBlurEnabled is set, this is the amount of blur to apply
-             behind the window. The range is from 0, which means no blur, to 150.
-             @hide @SystemApi -->
-        <attr name="windowBackgroundBlurRadius" format="dimension"/>
-        <!-- If set, the area behind the window will be blurred with radius
-             windowBackgroundBlurRadius.
-             @hide @SystemApi -->
-        <attr name="windowBackgroundBlurEnabled" format="boolean" />
-
-
         <!-- Color of background imagery used for popup windows. -->
         <attr name="colorPopupBackground" format="color" />
         <!-- Color used for list divider. -->
@@ -1974,8 +1964,6 @@
         <attr name="textColor" />
         <attr name="backgroundDimEnabled" />
         <attr name="backgroundDimAmount" />
-        <attr name="windowBackgroundBlurEnabled" />
-        <attr name="windowBackgroundBlurRadius" />
         <attr name="windowActionBar" />
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
@@ -2192,6 +2180,10 @@
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
              the decor view. -->
         <attr name="windowLightNavigationBar" format="boolean" />
+
+        <!-- @hide -->
+        <attr name="windowBackgroundBlurRadius" format="dimension"/>
+
 
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
         <p>
