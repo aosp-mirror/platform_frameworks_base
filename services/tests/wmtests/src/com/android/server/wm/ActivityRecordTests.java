@@ -2180,6 +2180,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         activity.setOccludesParent(true);
         activity.setVisible(false);
+        activity.mVisibleRequested = false;
         // Can not specify orientation if app isn't visible even though it occludes parent.
         assertEquals(SCREEN_ORIENTATION_UNSET, activity.getOrientation());
         // Can specify orientation if the current orientation candidate is orientation behind.

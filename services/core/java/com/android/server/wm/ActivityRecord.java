@@ -6533,7 +6533,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Allowing closing {@link ActivityRecord} to participate can lead to an Activity in another
         // task being started in the wrong orientation during the transition.
         if (!getDisplayContent().mClosingApps.contains(this)
-                && (isVisible() || getDisplayContent().mOpeningApps.contains(this))) {
+                && (isVisibleRequested() || getDisplayContent().mOpeningApps.contains(this))) {
             return mOrientation;
         }
 
