@@ -274,7 +274,8 @@ public class CastTile extends QSTileImpl<BooleanState> {
                         NetworkController.IconState qsIcon, boolean activityIn, boolean activityOut,
                         String description, boolean isTransient, String statusLabel) {
                     // statusIcon.visible has the connected status information
-                    boolean enabledAndConnected = enabled && qsIcon.visible;
+                    boolean enabledAndConnected =
+                            enabled && (qsIcon == null ? false : qsIcon.visible);
                     if (enabledAndConnected != mWifiConnected) {
                         mWifiConnected = enabledAndConnected;
                         // Hotspot is not connected, so changes here should update
