@@ -226,6 +226,8 @@ filegroup {
         "java/com/android/server/connectivity/NetworkRanker.java",
         "java/com/android/server/connectivity/PermissionMonitor.java",
         "java/com/android/server/connectivity/ProxyTracker.java",
+        "java/com/android/server/connectivity/QosCallbackAgentConnection.java",
+        "java/com/android/server/connectivity/QosCallbackTracker.java",
         "java/com/android/server/connectivity/TcpKeepaliveController.java",
         "java/com/android/server/connectivity/Vpn.java",
         "java/com/android/server/connectivity/VpnIkev2Utils.java",
