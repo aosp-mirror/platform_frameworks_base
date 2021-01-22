@@ -1240,21 +1240,12 @@ package android.media.tv.tuner {
 
 package android.net {
 
-  public class ConnectivityManager {
-    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
-  }
-
   public class EthernetManager {
     method public void setIncludeTestInterfaces(boolean);
   }
 
   public final class IpSecManager {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
-  }
-
-  public final class NetworkCapabilities implements android.os.Parcelable {
-    method public int[] getCapabilities();
-    field public static final int TRANSPORT_TEST = 7; // 0x7
   }
 
   public class NetworkStack {
