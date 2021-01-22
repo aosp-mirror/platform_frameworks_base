@@ -374,7 +374,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
         state.label = r.getString(R.string.quick_settings_internet_label);
         if (cb.mAirplaneModeEnabled) {
             if (!state.value) {
-                state.state = Tile.STATE_UNAVAILABLE;
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
                 state.secondaryLabel = r.getString(R.string.status_bar_airplane);
             } else if (!wifiConnected) {
@@ -445,7 +444,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
         state.expandedAccessibilityClassName = Switch.class.getName();
 
         if (cb.mAirplaneModeEnabled && cb.mNoDefaultNetwork) {
-            state.state = Tile.STATE_UNAVAILABLE;
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
