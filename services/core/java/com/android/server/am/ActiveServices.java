@@ -5373,7 +5373,7 @@ public final class ActiveServices {
             for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
                 final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
                 if (pr.uid == callingUid) {
-                    if (pr.getWindowProcessController().areBackgroundActivityStartsAllowed()) {
+                    if (pr.getWindowProcessController().areBackgroundFgsStartsAllowed()) {
                         ret = FGS_FEATURE_ALLOWED_BY_ACTIVITY_STARTER;
                         break;
                     }

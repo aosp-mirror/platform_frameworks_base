@@ -519,13 +519,21 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
-    public boolean areBackgroundActivityStartsAllowed() {
+    /**
+     * Is this WindowProcessController in the state of allowing background FGS start?
+     */
+    public boolean areBackgroundFgsStartsAllowed() {
         synchronized (mAtm.mGlobalLock) {
-            return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed());
+            return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed(), true);
         }
     }
 
     boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed) {
+        return areBackgroundActivityStartsAllowed(appSwitchAllowed, false);
+    }
+
+    boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed,
+            boolean isCheckingForFgsStart) {
         // If app switching is not allowed, we ignore all the start activity grace period
         // exception so apps cannot start itself in onPause() after pressing home button.
         if (appSwitchAllowed) {
@@ -579,7 +587,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             return true;
         }
         // allow if the flag was explicitly set
-        if (isBackgroundStartAllowedByToken()) {
+        if (isBackgroundStartAllowedByToken(isCheckingForFgsStart)) {
             if (DEBUG_ACTIVITY_STARTS) {
                 Slog.d(TAG, "[WindowProcessController(" + mPid
                         + ")] Activity start allowed: process allowed by token");
@@ -590,13 +598,20 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     /**
-     * If there are no tokens, we don't allow *by token*. If there are tokens, we ask the callback
-     * if the start is allowed for these tokens, otherwise if there is no callback we allow.
+     * If there are no tokens, we don't allow *by token*. If there are tokens and
+     * isCheckingForFgsStart is false, we ask the callback if the start is allowed for these tokens,
+     * otherwise if there is no callback we allow.
      */
-    private boolean isBackgroundStartAllowedByToken() {
+    private boolean isBackgroundStartAllowedByToken(boolean isCheckingForFgsStart) {
         if (mBackgroundActivityStartTokens.isEmpty()) {
             return false;
         }
+
+        if (isCheckingForFgsStart) {
+            /// The checking is for BG-FGS-start.
+            return true;
+        }
+
         if (mBackgroundActivityStartCallback == null) {
             // We have tokens but no callback to decide => allow
             return true;
