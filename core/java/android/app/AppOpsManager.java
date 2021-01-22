@@ -7689,8 +7689,8 @@ public class AppOpsManager {
         if (code != OP_RECORD_AUDIO) {
             return false;
         }
-        final String voiceRecognitionComponent = Settings.Secure.getString(
-                context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE);
+        final String voiceRecognitionComponent = Settings.Secure.getStringForUser(
+                context.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE, userId);
 
         final String voiceRecognitionServicePackageName =
                 getComponentPackageNameFromString(voiceRecognitionComponent);
