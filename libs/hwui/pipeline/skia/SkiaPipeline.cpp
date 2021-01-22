@@ -276,7 +276,10 @@ bool SkiaPipeline::setupMultiFrameCapture() {
         // we need to keep it until after mMultiPic.close()
         // procs is passed as a pointer, but just as a method of having an optional default.
         // procs doesn't need to outlive this Make call.
-        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs);
+        mMultiPic = SkMakeMultiPictureDocument(mOpenMultiPicStream.get(), &procs,
+            [sharingCtx = mSerialContext.get()](const SkPicture* pic) {
+                    SkSharingSerialContext::collectNonTextureImagesFromPicture(pic, sharingCtx);
+            });
         return true;
     } else {
         ALOGE("Could not open \"%s\" for writing.", mCapturedFile.c_str());
