@@ -896,9 +896,8 @@ public class NotificationPanelViewController extends PanelViewController {
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
-            final boolean hasVisibleNotifications = !bypassEnabled
-                    && (mNotificationStackScrollLayoutController.getVisibleNotificationCount() != 0
-                    || mMediaDataManager.hasActiveMedia());
+            final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                    .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
             mKeyguardStatusViewController.setHasVisibleNotifications(hasVisibleNotifications);
             mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
