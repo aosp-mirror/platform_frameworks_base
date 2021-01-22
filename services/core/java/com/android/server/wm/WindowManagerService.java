@@ -4142,12 +4142,19 @@ public class WindowManagerService extends IWindowManager.Stub
                                 .notifyOnActivityRotation(displayContent.mDisplayId);
                     }
 
-                    if (!rotationChanged || forceRelayout) {
-                        displayContent.setLayoutNeeded();
-                        layoutNeeded = true;
-                    }
-                    if (rotationChanged || alwaysSendConfiguration) {
-                        displayContent.sendNewConfiguration();
+                    final boolean pendingRemoteRotation = rotationChanged
+                            && (displayContent.getDisplayRotation().isWaitingForRemoteRotation()
+                            || mAtmService.getTransitionController().isCollecting());
+                    // Even if alwaysSend, we are waiting for a transition or remote to provide
+                    // rotated configuration, so we can't update configuration yet.
+                    if (!pendingRemoteRotation) {
+                        if (!rotationChanged || forceRelayout) {
+                            displayContent.setLayoutNeeded();
+                            layoutNeeded = true;
+                        }
+                        if (rotationChanged || alwaysSendConfiguration) {
+                            displayContent.sendNewConfiguration();
+                        }
                     }
                 }
 
