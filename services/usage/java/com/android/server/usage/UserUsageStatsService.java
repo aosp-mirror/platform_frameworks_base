@@ -1170,6 +1170,12 @@ class UserUsageStatsService {
                 return "DEVICE_SHUTDOWN";
             case Event.DEVICE_STARTUP:
                 return "DEVICE_STARTUP";
+            case Event.USER_UNLOCKED:
+                return "USER_UNLOCKED";
+            case Event.USER_STOPPED:
+                return "USER_STOPPED";
+            case Event.LOCUS_ID_SET:
+                return "LOCUS_ID_SET";
             default:
                 return "UNKNOWN_TYPE_" + eventType;
         }
