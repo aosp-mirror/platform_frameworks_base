@@ -598,4 +598,16 @@ public class VcnManagementServiceTest {
 
         mVcnMgmtSvc.getUnderlyingNetworkPolicy(new NetworkCapabilities(), new LinkProperties());
     }
+
+    @Test
+    public void testSubscriptionSnapshotUpdateNotifiesVcn() {
+        mVcnMgmtSvc.setVcnConfig(TEST_UUID_2, TEST_VCN_CONFIG, TEST_PACKAGE_NAME);
+        final Map<ParcelUuid, Vcn> vcnInstances = mVcnMgmtSvc.getAllVcns();
+        final Vcn vcnInstance = vcnInstances.get(TEST_UUID_2);
+
+        TelephonySubscriptionSnapshot snapshot =
+                triggerSubscriptionTrackerCbAndGetSnapshot(Collections.singleton(TEST_UUID_2));
+
+        verify(vcnInstance).updateSubscriptionSnapshot(eq(snapshot));
+    }
 }

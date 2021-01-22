@@ -27,11 +27,16 @@ import android.os.Message;
 import android.os.ParcelUuid;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Represents an single instance of a VCN.
@@ -99,7 +104,8 @@ public class Vcn extends Handler {
         this(vcnContext, subscriptionGroup, config, snapshot, new Dependencies());
     }
 
-    private Vcn(
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public Vcn(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull VcnConfig config,
@@ -135,6 +141,12 @@ public class Vcn extends Handler {
     /** Asynchronously tears down this Vcn instance, including VcnGatewayConnection(s) */
     public void teardownAsynchronously() {
         sendMessageAtFrontOfQueue(obtainMessage(MSG_CMD_TEARDOWN));
+    }
+
+    /** Get current Gateways for testing purposes */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public Set<VcnGatewayConnection> getVcnGatewayConnections() {
+        return Collections.unmodifiableSet(new HashSet<>(mVcnGatewayConnections.values()));
     }
 
     private class VcnNetworkRequestListener implements VcnNetworkProvider.NetworkRequestListener {
@@ -217,7 +229,7 @@ public class Vcn extends Handler {
                         "Bringing up new VcnGatewayConnection for request " + request.requestId);
 
                 final VcnGatewayConnection vcnGatewayConnection =
-                        new VcnGatewayConnection(
+                        mDeps.newVcnGatewayConnection(
                                 mVcnContext,
                                 mSubscriptionGroup,
                                 mLastSnapshot,
@@ -259,5 +271,17 @@ public class Vcn extends Handler {
         return 52;
     }
 
-    private static class Dependencies {}
+    /** External dependencies used by Vcn, for injection in tests */
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    public static class Dependencies {
+        /** Builds a new VcnGatewayConnection */
+        public VcnGatewayConnection newVcnGatewayConnection(
+                VcnContext vcnContext,
+                ParcelUuid subscriptionGroup,
+                TelephonySubscriptionSnapshot snapshot,
+                VcnGatewayConnectionConfig connectionConfig) {
+            return new VcnGatewayConnection(
+                    vcnContext, subscriptionGroup, snapshot, connectionConfig);
+        }
+    }
 }
