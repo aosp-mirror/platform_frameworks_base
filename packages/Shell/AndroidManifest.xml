@@ -296,9 +296,6 @@
     <uses-permission android:name="android.permission.RESTART_WIFI_SUBSYSTEM" />
 
     <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
-    <uses-permission android:name="android.permission.NETWORK_AIRPLANE_MODE" />
-
-    <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
     <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL" />
 
     <!-- Permission needed to use wifi usability API's for CtsNetTestCases -->
