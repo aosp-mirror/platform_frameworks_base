@@ -5580,7 +5580,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (ns == null) {
             return;
         }
-        MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(ns);
+        if (ns instanceof MatchAllNetworkSpecifier) {
+            throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
+        }
     }
 
     private void ensureValid(NetworkCapabilities nc) {
