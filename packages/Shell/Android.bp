@@ -1,14 +1,32 @@
+// used both for the android_app and android_library
+shell_srcs = ["src/**/*.java",":dumpstate_aidl"]
+shell_static_libs = ["androidx.legacy_legacy-support-v4"]
+
 android_app {
     name: "Shell",
-    srcs: ["src/**/*.java",":dumpstate_aidl"],
+    srcs: shell_srcs,
     aidl: {
         include_dirs: ["frameworks/native/cmds/dumpstate/binder"],
     },
-    static_libs: ["androidx.legacy_legacy-support-v4"],
+    static_libs: shell_static_libs,
     platform_apis: true,
     certificate: "platform",
     privileged: true,
     jacoco: {
         include_filter: ["com.android.shell.*"],
     },
+}
+
+// A library for product type like auto to create a new shell package
+// with product specific permissions.
+android_library {
+    name: "Shell-package-library",
+    srcs: shell_srcs,
+    aidl: {
+        include_dirs: ["frameworks/native/cmds/dumpstate/binder"],
+    },
+    resource_dirs: ["res"],
+    static_libs: shell_static_libs,
+    platform_apis: true,
+    manifest: "AndroidManifest.xml",
 }
