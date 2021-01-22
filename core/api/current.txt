@@ -36460,6 +36460,9 @@ package android.se.omapi {
     method @NonNull public String getVersion();
     method public boolean isConnected();
     method public void shutdown();
+    field public static final String ACTION_SECURE_ELEMENT_STATE_CHANGED = "android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED";
+    field public static final String EXTRA_READER_NAME = "android.se.omapi.extra.READER_NAME";
+    field public static final String EXTRA_READER_STATE = "android.se.omapi.extra.READER_STATE";
   }
 
   public static interface SEService.OnConnectedListener {
