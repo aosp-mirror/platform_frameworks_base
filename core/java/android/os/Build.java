@@ -317,6 +317,7 @@ public class Build {
          * @see #SDK_INT
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @TestApi
         public static final int FIRST_SDK_INT = SystemProperties
                 .getInt("ro.product.first_api_level", 0);
