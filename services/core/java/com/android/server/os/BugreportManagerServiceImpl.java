@@ -336,6 +336,13 @@ class BugreportManagerServiceImpl extends IDumpstate.Stub {
 
         @Override
         public void binderDied() {
+            try {
+                // Allow a small amount of time for any error or finished callbacks to be made.
+                // This ensures that the listener does not receive an erroneous runtime error
+                // callback.
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
             synchronized (mLock) {
                 if (!mDone) {
                     // If we have not gotten a "done" callback this must be a crash.
