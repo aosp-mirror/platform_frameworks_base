@@ -38,9 +38,11 @@ import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.FeatureFlagUtils;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.CollectionUtils;
@@ -62,11 +64,14 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.tuner.TunerService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -117,9 +122,16 @@ public class QSTileHostTest extends SysuiTestCase {
     private Handler mHandler;
     private TestableLooper mLooper;
     private QSTileHost mQSTileHost;
+    MockitoSession mMockingSession = null;
 
     @Before
     public void setUp() {
+        // TODO(b/174753536): Remove the mMockingSession when
+        // FeatureFlagUtils.SETTINGS_PROVIDER_MODEL is removed.
+        mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
+                .mockStatic(FeatureFlagUtils.class).startMocking();
+        ExtendedMockito.doReturn(false).when(() -> FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_PROVIDER_MODEL));
         MockitoAnnotations.initMocks(this);
         mLooper = TestableLooper.get(this);
         mHandler = new Handler(mLooper.getLooper());
@@ -130,6 +142,13 @@ public class QSTileHostTest extends SysuiTestCase {
 
         Settings.Secure.putStringForUser(mContext.getContentResolver(), QSTileHost.TILES_SETTING,
                 "", ActivityManager.getCurrentUser());
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (mMockingSession != null) {
+            mMockingSession.finishMocking();
+        }
     }
 
     private void setUpTileFactory() {
