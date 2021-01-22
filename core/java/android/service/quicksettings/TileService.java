@@ -46,7 +46,7 @@ import com.android.internal.R;
  *
  * <p>The lifecycle of a TileService is different from some other services in
  * that it may be unbound during parts of its lifecycle.  Any of the following
- * lifecycle events can happen indepently in a separate binding/creation of the
+ * lifecycle events can happen independently in a separate binding/creation of the
  * service.</p>
  *
  * <ul>
@@ -58,6 +58,9 @@ import com.android.internal.R;
  *
  * <li>When the user removes a tile from Quick Settings {@link #onTileRemoved()}
  * will be called.</li>
+ *
+ * <li>{@link #onTileAdded()} and {@link #onTileRemoved()} may be called outside of the
+ * {@link #onCreate()} - {@link #onDestroy()} window</li>
  * </ul>
  * <p>TileService will be detected by tiles that match the {@value #ACTION_QS_TILE}
  * and require the permission "android.permission.BIND_QUICK_SETTINGS_TILE".
@@ -176,9 +179,6 @@ public class TileService extends Service {
 
     @Override
     public void onDestroy() {
-        // As this call will come asynchronously in the main thread, prevent calls from the binder
-        // being processed after this.
-        mHandler.removeCallbacksAndMessages(null);
         if (mListening) {
             onStopListening();
             mListening = false;
