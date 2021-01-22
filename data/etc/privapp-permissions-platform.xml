@@ -74,6 +74,7 @@ applications that come with the platform
     <privapp-permissions package="com.android.location.fused">
         <permission name="android.permission.INSTALL_LOCATION_PROVIDER"/>
         <permission name="android.permission.UPDATE_DEVICE_STATS"/>
+        <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.managedprovisioning">
@@ -95,6 +96,7 @@ applications that come with the platform
         <permission name="android.permission.SHUTDOWN"/>
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
         <permission name="android.permission.START_ACTIVITIES_FROM_BACKGROUND"/>
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.mms.service">
@@ -464,6 +466,7 @@ applications that come with the platform
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
         <!-- Permission required for CTS test - CallLogTest -->
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
+        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
