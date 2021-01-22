@@ -9464,10 +9464,10 @@ package android.service.carrier {
     method @NonNull @WorkerThread public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
-  public final class CarrierMessagingServiceWrapper {
+  public final class CarrierMessagingServiceWrapper implements java.lang.AutoCloseable {
     ctor public CarrierMessagingServiceWrapper();
     method public boolean bindToCarrierMessagingService(@NonNull android.content.Context, @NonNull String, @NonNull java.util.concurrent.Executor, @NonNull Runnable);
-    method public void disposeConnection(@NonNull android.content.Context);
+    method public void disconnect();
     method public void downloadMms(@NonNull android.net.Uri, int, @NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
     method public void receiveSms(@NonNull android.service.carrier.MessagePdu, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);
     method public void sendDataSms(@NonNull byte[], int, @NonNull String, int, int, @NonNull java.util.concurrent.Executor, @NonNull android.service.carrier.CarrierMessagingServiceWrapper.CarrierMessagingCallback);

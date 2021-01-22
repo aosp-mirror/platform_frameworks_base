@@ -48,12 +48,12 @@ import java.util.concurrent.Executor;
  *   // Unable to bind: handle error.
  * }
  * </code>
- * <p> Upon completion {@link #disposeConnection} should be called to unbind the
+ * <p> Upon completion {@link #disconnect} should be called to unbind the
  * CarrierMessagingService.
  * @hide
  */
 @SystemApi
-public final class CarrierMessagingServiceWrapper {
+public final class CarrierMessagingServiceWrapper implements AutoCloseable {
     // Populated by bindToCarrierMessagingService. bindToCarrierMessagingService must complete
     // prior to calling disposeConnection so that mCarrierMessagingServiceConnection is initialized.
     private volatile CarrierMessagingServiceConnection mCarrierMessagingServiceConnection;
@@ -61,6 +61,7 @@ public final class CarrierMessagingServiceWrapper {
     private volatile ICarrierMessagingService mICarrierMessagingService;
     private Runnable mOnServiceReadyCallback;
     private Executor mServiceReadyCallbackExecutor;
+    private Context mContext;
 
     /**
      * Binds to the carrier messaging service under package {@code carrierPackageName}. This method
@@ -89,6 +90,7 @@ public final class CarrierMessagingServiceWrapper {
         mCarrierMessagingServiceConnection = new CarrierMessagingServiceConnection();
         mOnServiceReadyCallback = onServiceReadyCallback;
         mServiceReadyCallbackExecutor = executor;
+        mContext = context;
         return context.bindService(intent, mCarrierMessagingServiceConnection,
                 Context.BIND_AUTO_CREATE);
     }
@@ -96,13 +98,12 @@ public final class CarrierMessagingServiceWrapper {
     /**
      * Unbinds the carrier messaging service. This method should be called exactly once.
      *
-     * @param context the context
      * @hide
      */
     @SystemApi
-    public void disposeConnection(@NonNull Context context) {
+    public void disconnect() {
         Preconditions.checkNotNull(mCarrierMessagingServiceConnection);
-        context.unbindService(mCarrierMessagingServiceConnection);
+        mContext.unbindService(mCarrierMessagingServiceConnection);
         mCarrierMessagingServiceConnection = null;
         mOnServiceReadyCallback = null;
         mServiceReadyCallbackExecutor = null;
@@ -289,6 +290,12 @@ public final class CarrierMessagingServiceWrapper {
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /** @hide */
+    @Override
+    public void close() {
+        disconnect();
     }
 
     /**
