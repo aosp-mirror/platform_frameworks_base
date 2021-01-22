@@ -2764,13 +2764,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         Log.wtf(TAG, "Non-virtual networks cannot have underlying networks");
                         break;
                     }
-                    final ArrayList<Network> underlying;
-                    try {
-                        underlying = ((Bundle) arg.second).getParcelableArrayList(
-                                NetworkAgent.UNDERLYING_NETWORKS_KEY);
-                    } catch (NullPointerException | ClassCastException e) {
-                        break;
-                    }
+                    final List<Network> underlying = (List<Network>) arg.second;
                     final Network[] oldUnderlying = nai.declaredUnderlyingNetworks;
                     nai.declaredUnderlyingNetworks = (underlying != null)
                             ? underlying.toArray(new Network[0]) : null;

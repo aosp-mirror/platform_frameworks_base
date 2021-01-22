@@ -37,7 +37,6 @@ import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.TcpKeepalivePacketData;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.INetworkManagementService;
@@ -53,7 +52,6 @@ import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -583,16 +581,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
 
         @Override
         public void sendUnderlyingNetworks(@Nullable List<Network> networks) {
-            final Bundle args = new Bundle();
-            if (networks instanceof ArrayList<?>) {
-                args.putParcelableArrayList(NetworkAgent.UNDERLYING_NETWORKS_KEY,
-                        (ArrayList<Network>) networks);
-            } else {
-                args.putParcelableArrayList(NetworkAgent.UNDERLYING_NETWORKS_KEY,
-                        networks == null ? null : new ArrayList<>(networks));
-            }
             mHandler.obtainMessage(NetworkAgent.EVENT_UNDERLYING_NETWORKS_CHANGED,
-                    new Pair<>(NetworkAgentInfo.this, args)).sendToTarget();
+                    new Pair<>(NetworkAgentInfo.this, networks)).sendToTarget();
         }
     }
 
