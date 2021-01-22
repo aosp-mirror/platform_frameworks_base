@@ -3061,7 +3061,9 @@ public final class Settings {
      */
     public static boolean canDrawOverlays(Context context) {
         return Settings.isCallingPackageAllowedToDrawOverlays(context, Process.myUid(),
-                context.getOpPackageName(), false);
+                context.getOpPackageName(), false) || context.checkSelfPermission(
+                Manifest.permission.SYSTEM_APPLICATION_OVERLAY)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
