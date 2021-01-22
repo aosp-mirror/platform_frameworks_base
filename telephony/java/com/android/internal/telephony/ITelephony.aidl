@@ -2280,6 +2280,14 @@ interface ITelephony {
     CarrierBandwidth getCarrierBandwidth(int subId);
 
     /**
+     * Checks whether the device supports the given capability on the radio interface.
+     *
+     * @param capability the name of the capability
+     * @return the availability of the capability
+     */
+    boolean isRadioInterfaceCapabilitySupported(String capability);
+
+    /**
      * Thermal mitigation request to control functionalities at modem.
      *
      * @param subId the id of the subscription
