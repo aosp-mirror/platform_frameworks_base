@@ -1084,6 +1084,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         .setPosition(taskSurface, mFinishBounds.left, mFinishBounds.top)
                         .setWindowCrop(taskSurface, mFinishBounds.width(), mFinishBounds.height())
                         .apply();
+                mTask.mLastRecentsAnimationBounds.set(mFinishBounds);
                 mFinishBounds.setEmpty();
             } else if (!mTask.isAttached()) {
                 // Apply the task's pending transaction in case it is detached and its transaction

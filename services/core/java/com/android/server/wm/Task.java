@@ -463,6 +463,15 @@ class Task extends WindowContainer<WindowContainer> {
     int mMinWidth;
     int mMinHeight;
 
+    // The bounds of the target when recents animation is finished.
+    // This is originally introduced to carry out the current surface control position and window
+    // crop when a multi-activity task enters pip with autoEnterPip enabled. In such case,
+    // the surface control of the task will be animated in Launcher and then the top activity is
+    // reparented to pinned root task.
+    // Do not forget to reset this to null after reparenting.
+    // TODO: remove this once the recents animation is moved to the Shell
+    final Rect mLastRecentsAnimationBounds = new Rect();
+
     static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
     // This number will be assigned when we evaluate OOM scores for all visible tasks.
@@ -4158,9 +4167,9 @@ class Task extends WindowContainer<WindowContainer> {
 
     private @Nullable PictureInPictureParams getPictureInPictureParams(Task top) {
         if (top == null) return null;
-        final ActivityRecord rootActivity = top.getRootActivity();
-        return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
-                ? null : new PictureInPictureParams(rootActivity.pictureInPictureArgs);
+        final ActivityRecord topVisibleActivity = top.getTopVisibleActivity();
+        return (topVisibleActivity == null || topVisibleActivity.pictureInPictureArgs.empty())
+                ? null : new PictureInPictureParams(topVisibleActivity.pictureInPictureArgs);
     }
 
     /**
@@ -4984,7 +4993,7 @@ class Task extends WindowContainer<WindowContainer> {
                 commitPendingTransaction();
             }
 
-            sendTaskAppeared();
+            if (!mDeferTaskAppear) sendTaskAppeared();
             if (!isRootTask()) {
                 getRootTask().setHasBeenVisible(true);
             }
@@ -7589,6 +7598,17 @@ class Task extends WindowContainer<WindowContainer> {
         reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
+    void maybeApplyLastRecentsAnimationBounds() {
+        if (!mLastRecentsAnimationBounds.isEmpty()) {
+            getPendingTransaction()
+                    .setPosition(mSurfaceControl, mLastRecentsAnimationBounds.left,
+                            mLastRecentsAnimationBounds.top)
+                    .setWindowCrop(mSurfaceControl, mLastRecentsAnimationBounds.width(),
+                            mLastRecentsAnimationBounds.height());
+            mLastRecentsAnimationBounds.setEmpty();
+        }
+    }
+
     private void updateSurfaceBounds() {
         updateSurfaceSize(getSyncTransaction());
         updateSurfacePositionNonOrganized();
@@ -7824,6 +7844,7 @@ class Task extends WindowContainer<WindowContainer> {
         private boolean mDeferTaskAppear;
         private IBinder mLaunchCookie;
         private boolean mOnTop;
+        private boolean mHasBeenVisible;
 
         Builder(ActivityTaskManagerService atm) {
             mAtmService = atm;
@@ -7918,6 +7939,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         Builder setOnTop(boolean onTop) {
             mOnTop = onTop;
+            return this;
+        }
+
+        Builder setHasBeenVisible(boolean hasBeenVisible) {
+            mHasBeenVisible = hasBeenVisible;
             return this;
         }
 
@@ -8114,6 +8140,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
 
             final Task task = buildInner();
+            task.mHasBeenVisible = mHasBeenVisible;
 
             // Set activity type before adding the root task to TaskDisplayArea, so home task can
             // be cached, see TaskDisplayArea#addRootTaskReferenceIfNeeded().

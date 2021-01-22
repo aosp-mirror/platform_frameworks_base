@@ -74,7 +74,13 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) return;
         final SurfaceControl leash = mLeashByTaskId.get(taskInfo.taskId);
         final Point positionInParent = taskInfo.positionInParent;
-        mSyncQueue.runInSync(t -> t.setPosition(leash, positionInParent.x, positionInParent.y));
+        mSyncQueue.runInSync(t -> {
+            // Reset several properties back. For instance, when an Activity enters PiP with
+            // multiple activities in the same task, a new task will be created from that Activity
+            // and we want reset the leash of the original task.
+            t.setPosition(leash, positionInParent.x, positionInParent.y);
+            t.setWindowCrop(leash, null);
+        });
     }
 
     @Override
