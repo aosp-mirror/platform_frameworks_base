@@ -3306,9 +3306,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 final ActivityStack stack = r.getRootTask();
-                final Task task = stack.getDisplayArea().createStack(stack.getWindowingMode(),
-                        stack.getActivityType(), !ON_TOP, ainfo, intent,
-                        false /* createdByOrganizer */);
+                final Task task = new ActivityStack(this, stack.getDisplayArea().getNextStackId(),
+                        stack.getActivityType(), ainfo, intent, false /* createdByOrganizer */);
 
                 if (!mRecentTasks.addToBottom(task)) {
                     // The app has too many tasks already and we can't add any more
