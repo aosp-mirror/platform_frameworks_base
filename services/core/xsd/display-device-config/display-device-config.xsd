@@ -35,6 +35,18 @@
                 </xs:element>
                 <xs:element type="highBrightnessMode" name="highBrightnessMode" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="displayQuirks" name="quirks" minOccurs="0" maxOccurs="1" />
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastDecrease">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampFastIncrease">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowDecrease">
+                    <xs:annotation name="final"/>
+                </xs:element>
+                <xs:element type="nonNegativeDecimal" name="screenBrightnessRampSlowIncrease">
+                    <xs:annotation name="final"/>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
