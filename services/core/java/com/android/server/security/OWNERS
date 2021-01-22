@@ -1,0 +1,4 @@
+# Bug component: 36824
+
+per-file FileIntegrityService.java = victorhsieh@google.com
+per-file VerityUtils.java = victorhsieh@google.com
