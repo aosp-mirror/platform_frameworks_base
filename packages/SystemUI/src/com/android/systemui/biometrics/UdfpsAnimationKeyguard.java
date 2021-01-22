@@ -99,11 +99,6 @@ public class UdfpsAnimationKeyguard extends UdfpsAnimation implements DozeReceiv
     }
 
     @Override
-    public void setAlpha(int alpha) {
-
-    }
-
-    @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
 
     }

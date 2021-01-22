@@ -16,6 +16,10 @@
 
 package com.android.systemui.biometrics;
 
+import static com.android.systemui.statusbar.StatusBarState.FULLSCREEN_USER_SWITCHER;
+import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
+import static com.android.systemui.statusbar.StatusBarState.SHADE_LOCKED;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -35,15 +39,19 @@ import android.view.ViewTreeObserver;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.phone.ScrimController;
 
 /**
  * A full screen view with a configurable illumination dot and scrim.
  */
-public class UdfpsView extends View implements DozeReceiver {
+public class UdfpsView extends View implements DozeReceiver,
+        StatusBarStateController.StateListener,  ScrimController.ScrimChangedListener{
     private static final String TAG = "UdfpsView";
 
     // Values in pixels.
-    public static final float SENSOR_SHADOW_RADIUS = 2.0f;
+    private static final float SENSOR_SHADOW_RADIUS = 2.0f;
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
@@ -71,6 +79,9 @@ public class UdfpsView extends View implements DozeReceiver {
     private boolean mShowScrimAndDot;
     private boolean mIsHbmSupported;
     @Nullable private String mDebugMessage;
+    private int mStatusBarState;
+    private boolean mNotificationShadeExpanded;
+    private int mNotificationPanelAlpha;
 
     // Runnable that will be run after the illumination dot and scrim are shown.
     // The runnable is reset to null after it's executed once.
@@ -137,6 +148,22 @@ public class UdfpsView extends View implements DozeReceiver {
         }
     }
 
+    @Override
+    public void onExpandedChanged(boolean isExpanded) {
+        mNotificationShadeExpanded = isExpanded;
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        mStatusBarState = newState;
+    }
+
+    @Override
+    public void onAlphaChanged(float alpha) {
+        mNotificationPanelAlpha = (int) (alpha * 255);
+        postInvalidate();
+    }
+
     // The "h" and "w" are the display's height and width relative to its current rotation.
     protected void updateSensorRect(int h, int w) {
         // mSensorProps coordinates assume portrait mode.
@@ -148,10 +175,12 @@ public class UdfpsView extends View implements DozeReceiver {
         // Transform mSensorRect if the device is in landscape mode.
         switch (mContext.getDisplay().getRotation()) {
             case Surface.ROTATION_90:
+                //noinspection SuspiciousNameCombination
                 mSensorRect.set(mSensorRect.top, h - mSensorRect.right, mSensorRect.bottom,
                         h - mSensorRect.left);
                 break;
             case Surface.ROTATION_270:
+                //noinspection SuspiciousNameCombination
                 mSensorRect.set(w - mSensorRect.bottom, mSensorRect.left, w - mSensorRect.top,
                         mSensorRect.right);
                 break;
@@ -223,6 +252,8 @@ public class UdfpsView extends View implements DozeReceiver {
             canvas.drawOval(mSensorRect, mSensorPaint);
         } else {
             if (mUdfpsAnimation != null) {
+                final int alpha = shouldPauseAuth() ? 255 - mNotificationPanelAlpha : 255;
+                mUdfpsAnimation.setAlpha(alpha);
                 mUdfpsAnimation.draw(canvas);
             }
         }
@@ -261,7 +292,19 @@ public class UdfpsView extends View implements DozeReceiver {
         return x > (cx - rx * mSensorTouchAreaCoefficient)
                 && x < (cx + rx * mSensorTouchAreaCoefficient)
                 && y > (cy - ry * mSensorTouchAreaCoefficient)
-                && y < (cy + ry * mSensorTouchAreaCoefficient);
+                && y < (cy + ry * mSensorTouchAreaCoefficient)
+                && !shouldPauseAuth();
+    }
+
+    /**
+     * States where UDFPS should temporarily not be authenticating. Instead of completely stopping
+     * authentication which would cause the UDFPS icons to abruptly disappear, do it here by not
+     * sending onFingerDown and smoothly animating away.
+     */
+    private boolean shouldPauseAuth() {
+        return (mNotificationShadeExpanded && mStatusBarState != KEYGUARD)
+                || mStatusBarState == SHADE_LOCKED
+                || mStatusBarState == FULLSCREEN_USER_SWITCHER;
     }
 
     void setScrimAlpha(int alpha) {
