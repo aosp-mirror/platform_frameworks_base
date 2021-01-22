@@ -23,6 +23,7 @@ import android.hardware.biometrics.fingerprint.ISession;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.Map;
@@ -64,5 +65,10 @@ class FingerprintGetAuthenticatorIdClient extends HalClientMonitor<ISession> {
     void onAuthenticatorIdRetrieved(long authenticatorId) {
         mAuthenticatorIds.put(getTargetUserId(), authenticatorId);
         mCallback.onClientFinished(this, true /* success */);
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_GET_AUTHENTICATOR_ID;
     }
 }

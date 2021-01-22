@@ -50,7 +50,7 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public byte[] dumpSensorServiceStateProto() throws RemoteException {
+    public byte[] dumpSensorServiceStateProto(boolean clearSchedulerBuffer) throws RemoteException {
         return null;
     }
 

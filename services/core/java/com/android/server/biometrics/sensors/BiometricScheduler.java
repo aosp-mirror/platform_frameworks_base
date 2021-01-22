@@ -28,8 +28,11 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.biometrics.BiometricSchedulerProto;
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.fingerprint.GestureAvailabilityDispatcher;
 
 import java.io.PrintWriter;
@@ -51,6 +54,8 @@ import java.util.Locale;
 public class BiometricScheduler {
 
     private static final String BASE_TAG = "BiometricScheduler";
+    // Number of recent operations to keep in our logs for dumpsys
+    private static final int LOG_NUM_RECENT_OPERATIONS = 50;
 
     /**
      * Contains all the necessary information for a HAL operation.
@@ -200,6 +205,10 @@ public class BiometricScheduler {
     @VisibleForTesting @Nullable Operation mCurrentOperation;
     @NonNull private final ArrayDeque<CrashState> mCrashStates;
 
+    private int mTotalOperationsHandled;
+    private final int mRecentOperationsLimit;
+    @NonNull private final List<Integer> mRecentOperations;
+
     // Internal callback, notified when an operation is complete. Notifies the requester
     // that the operation is complete, before performing internal scheduler work (such as
     // starting the next client).
@@ -240,7 +249,12 @@ public class BiometricScheduler {
                             mCurrentOperation.mClientMonitor.getSensorId(), false /* active */);
                 }
 
+                if (mRecentOperations.size() >= mRecentOperationsLimit) {
+                    mRecentOperations.remove(0);
+                }
+                mRecentOperations.add(mCurrentOperation.mClientMonitor.getProtoEnum());
                 mCurrentOperation = null;
+                mTotalOperationsHandled++;
                 startNextOperationIfIdle();
             });
         }
@@ -249,13 +263,15 @@ public class BiometricScheduler {
     @VisibleForTesting
     BiometricScheduler(@NonNull String tag,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher,
-            @NonNull IBiometricService biometricService) {
+            @NonNull IBiometricService biometricService, int recentOperationsLimit) {
         mBiometricTag = tag;
         mInternalCallback = new InternalCallback();
         mGestureAvailabilityDispatcher = gestureAvailabilityDispatcher;
         mPendingOperations = new ArrayDeque<>();
         mBiometricService = biometricService;
         mCrashStates = new ArrayDeque<>();
+        mRecentOperationsLimit = recentOperationsLimit;
+        mRecentOperations = new ArrayList<>();
     }
 
     /**
@@ -267,7 +283,7 @@ public class BiometricScheduler {
     public BiometricScheduler(@NonNull String tag,
             @Nullable GestureAvailabilityDispatcher gestureAvailabilityDispatcher) {
         this(tag, gestureAvailabilityDispatcher, IBiometricService.Stub.asInterface(
-                ServiceManager.getService(Context.BIOMETRIC_SERVICE)));
+                ServiceManager.getService(Context.BIOMETRIC_SERVICE)), LOG_NUM_RECENT_OPERATIONS);
     }
 
     /**
@@ -600,6 +616,24 @@ public class BiometricScheduler {
         for (CrashState crashState : mCrashStates) {
             pw.println("Crash State " + crashState);
         }
+    }
+
+    public byte[] dumpProtoState(boolean clearSchedulerBuffer) {
+        final ProtoOutputStream proto = new ProtoOutputStream();
+        proto.write(BiometricSchedulerProto.CURRENT_OPERATION, mCurrentOperation != null
+                ? mCurrentOperation.mClientMonitor.getProtoEnum() : BiometricsProto.CM_NONE);
+        proto.write(BiometricSchedulerProto.TOTAL_OPERATIONS, mTotalOperationsHandled);
+        Slog.d(getTag(), "Total operations: " + mTotalOperationsHandled);
+        for (int i = 0; i < mRecentOperations.size(); i++) {
+            Slog.d(getTag(), "Operation: " + mRecentOperations.get(i));
+            proto.write(BiometricSchedulerProto.RECENT_OPERATIONS, mRecentOperations.get(i));
+        }
+        proto.flush();
+
+        if (clearSchedulerBuffer) {
+            mRecentOperations.clear();
+        }
+        return proto.getBytes();
     }
 
     /**

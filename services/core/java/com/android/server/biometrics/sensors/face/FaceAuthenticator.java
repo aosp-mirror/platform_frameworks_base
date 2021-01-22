@@ -52,8 +52,8 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public byte[] dumpSensorServiceStateProto() throws RemoteException {
-        return mFaceService.dumpSensorServiceStateProto(mSensorId);
+    public byte[] dumpSensorServiceStateProto(boolean clearSchedulerBuffer) throws RemoteException {
+        return mFaceService.dumpSensorServiceStateProto(mSensorId, clearSchedulerBuffer);
     }
 
     @Override

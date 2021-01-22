@@ -25,6 +25,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
@@ -87,5 +88,10 @@ public class FaceSetFeatureClient extends HalClientMonitor<IBiometricsFace> {
             Slog.e(TAG, "Unable to set feature: " + mFeature + " to enabled: " + mEnabled, e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_SET_FEATURE;
     }
 }
