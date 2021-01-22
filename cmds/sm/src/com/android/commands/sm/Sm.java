@@ -20,6 +20,7 @@ import android.os.IVoldTaskListener;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.storage.DiskInfo;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
@@ -30,6 +31,8 @@ import java.util.concurrent.CompletableFuture;
 
 public final class Sm {
     private static final String TAG = "Sm";
+    private static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
+            "persist.sys.vold_app_data_isolation_enabled";
 
     IStorageManager mSm;
 
@@ -254,6 +257,10 @@ public final class Sm {
     }
 
     public void runDisableAppDataIsolation() throws RemoteException {
+        if (!SystemProperties.getBoolean(
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false)) {
+            throw new IllegalStateException("Storage app data isolation is not enabled.");
+        }
         final String pkgName = nextArg();
         final int pid = Integer.parseInt(nextArg());
         final int userId = Integer.parseInt(nextArg());
