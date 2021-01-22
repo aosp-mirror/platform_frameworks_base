@@ -314,15 +314,17 @@ public class TelecomManager {
     public static final String EXTRA_HAS_PICTURE = "android.telecom.extra.HAS_PICTURE";
 
     /**
-     * A URI representing the picture that was downloaded when a call is received.
+     * A URI representing the picture that was downloaded when a call is received or uploaded
+     * when a call is placed.
+     *
      * This is a content URI within the call log provider which can be used to open a file
      * descriptor. This could be set a short time after a call is added to the Dialer app if the
-     * download is delayed for some reason. The Dialer app will receive a callback via
+     * download/upload is delayed for some reason. The Dialer app will receive a callback via
      * {@link Call.Callback#onDetailsChanged} when this value has changed.
      *
      * Reference: RCC.20 Section 2.4.3.2
      */
-    public static final String EXTRA_INCOMING_PICTURE = "android.telecom.extra.INCOMING_PICTURE";
+    public static final String EXTRA_PICTURE_URI = "android.telecom.extra.PICTURE_URI";
 
     /**
      * A ParcelUuid used as a token to represent a picture that was uploaded prior to the call
