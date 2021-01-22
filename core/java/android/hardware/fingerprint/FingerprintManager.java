@@ -89,6 +89,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_REMOVED = 105;
     private static final int MSG_CHALLENGE_GENERATED = 106;
     private static final int MSG_FINGERPRINT_DETECTED = 107;
+    private static final int MSG_UDFPS_POINTER_DOWN = 108;
+    private static final int MSG_UDFPS_POINTER_UP = 109;
 
     /**
      * Request authentication with any single sensor.
@@ -338,6 +340,20 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
          */
         @Override
         public void onAuthenticationAcquired(int acquireInfo) {}
+
+        /**
+         * Invoked for under-display fingerprint sensors when a touch has been detected on the
+         * sensor area.
+         * @hide
+         */
+        public void onUdfpsPointerDown(int sensorId) {}
+
+        /**
+         * Invoked for under-display fingerprint sensors when a touch has been removed from the
+         * sensor area.
+         * @hide
+         */
+        public void onUdfpsPointerUp(int sensorId) {}
     }
 
     /**
@@ -1005,6 +1021,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                     sendFingerprintDetected(msg.arg1 /* sensorId */, msg.arg2 /* userId */,
                             (boolean) msg.obj /* isStrongBiometric */);
                     break;
+                case MSG_UDFPS_POINTER_DOWN:
+                    sendUdfpsPointerDown(msg.arg1 /* sensorId */);
+                    break;
+                case MSG_UDFPS_POINTER_UP:
+                    sendUdfpsPointerUp(msg.arg1 /* sensorId */);
+                    break;
                 default:
                     Slog.w(TAG, "Unknown message: " + msg.what);
 
@@ -1101,6 +1123,22 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
             return;
         }
         mFingerprintDetectionCallback.onFingerprintDetected(sensorId, userId, isStrongBiometric);
+    }
+
+    private void sendUdfpsPointerDown(int sensorId) {
+        if (mAuthenticationCallback == null) {
+            Slog.e(TAG, "sendUdfpsPointerDown, callback null");
+            return;
+        }
+        mAuthenticationCallback.onUdfpsPointerDown(sensorId);
+    }
+
+    private void sendUdfpsPointerUp(int sensorId) {
+        if (mAuthenticationCallback == null) {
+            Slog.e(TAG, "sendUdfpsPointerUp, callback null");
+            return;
+        }
+        mAuthenticationCallback.onUdfpsPointerUp(sensorId);
     }
 
     /**
@@ -1279,6 +1317,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         public void onChallengeGenerated(int sensorId, long challenge) {
             mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, sensorId, 0, challenge)
                     .sendToTarget();
+        }
+
+        @Override // binder call
+        public void onUdfpsPointerDown(int sensorId) {
+            mHandler.obtainMessage(MSG_UDFPS_POINTER_DOWN, sensorId, 0).sendToTarget();
+        }
+
+        @Override // binder call
+        public void onUdfpsPointerUp(int sensorId) {
+            mHandler.obtainMessage(MSG_UDFPS_POINTER_UP, sensorId, 0).sendToTarget();
+
         }
     };
 

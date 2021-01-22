@@ -938,6 +938,7 @@ public final class NotificationEntry extends ListEntry {
 
     /** Whether or not the icon for this notification is visible in the shelf. */
     public void setShelfIconVisible(boolean shelfIconVisible) {
+        if (row == null) return;
         mShelfIconVisible = shelfIconVisible;
         updateShelfIconVisibility();
     }

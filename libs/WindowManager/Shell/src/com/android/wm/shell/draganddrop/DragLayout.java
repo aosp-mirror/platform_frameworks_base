@@ -42,7 +42,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen;
 
 import java.util.ArrayList;
 
@@ -61,7 +61,7 @@ public class DragLayout extends View {
     private boolean mIsShowing;
     private boolean mHasDropped;
 
-    public DragLayout(Context context, LegacySplitScreen splitscreen) {
+    public DragLayout(Context context, SplitScreen splitscreen) {
         super(context);
         mPolicy = new DragAndDropPolicy(context, splitscreen);
         mDisplayMargin = context.getResources().getDimensionPixelSize(

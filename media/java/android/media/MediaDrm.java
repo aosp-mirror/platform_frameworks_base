@@ -21,8 +21,10 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.media.metrics.PlaybackComponent;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
@@ -35,8 +37,8 @@ import dalvik.system.CloseGuard;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -48,7 +50,6 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
 
 /**
  * MediaDrm can be used to obtain keys for decrypting protected media streams, in
@@ -963,14 +964,30 @@ public final class MediaDrm implements AutoCloseable {
      * a session
      */
     @NonNull
-    public native byte[] openSession(@SecurityLevel int level) throws
+    public byte[] openSession(@SecurityLevel int level) throws
+            NotProvisionedException, ResourceBusyException {
+        byte[] sessionId = openSessionNative(level);
+        mPlaybackComponentMap.put(ByteBuffer.wrap(sessionId), new PlaybackComponentImpl(sessionId));
+        return sessionId;
+    }
+
+    @NonNull
+    private native byte[] openSessionNative(int level) throws
             NotProvisionedException, ResourceBusyException;
 
     /**
      * Close a session on the MediaDrm object that was previously opened
      * with {@link #openSession}.
      */
-    public native void closeSession(@NonNull byte[] sessionId);
+    public void closeSession(@NonNull byte[] sessionId) {
+        closeSessionNative(sessionId);
+        mPlaybackComponentMap.remove(ByteBuffer.wrap(sessionId));
+    }
+
+    private native void closeSessionNative(@NonNull byte[] sessionId);
+
+    private final Map<ByteBuffer, PlaybackComponent> mPlaybackComponentMap
+            = new ConcurrentHashMap<>();
 
     /**
      * This key request type species that the keys will be for online use, they will
@@ -2056,6 +2073,7 @@ public final class MediaDrm implements AutoCloseable {
         mCloseGuard.close();
         if (mClosed.compareAndSet(false, true)) {
             native_release();
+            mPlaybackComponentMap.clear();
         }
     }
 
@@ -2429,5 +2447,50 @@ public final class MediaDrm implements AutoCloseable {
          */
         public static final String EVENT_SESSION_RECLAIMED_COUNT
             = "drm.mediadrm.event.SESSION_RECLAIMED.count";
+    }
+
+    /**
+     * Obtain a {@link PlaybackComponent} associated with a DRM session.
+     * Call {@link PlaybackComponent#setPlaybackId(String)} on the returned object
+     * to associate a playback session with the DRM session.
+     *
+     * @param sessionId a DRM session ID obtained from {@link #openSession()}
+     * @return a {@link PlaybackComponent} associated with the session,
+     * or {@code null} if the session is closed or does not exist.
+     * @see PlaybackComponent
+     * @hide
+     */
+    @TestApi
+    @Nullable
+    public PlaybackComponent getPlaybackComponent(@NonNull byte[] sessionId) {
+        if (sessionId == null) {
+            throw new IllegalArgumentException("sessionId is null");
+        }
+        return mPlaybackComponentMap.get(ByteBuffer.wrap(sessionId));
+    }
+
+    private native void setPlaybackId(byte[] sessionId, String playbackId);
+
+    private final class PlaybackComponentImpl implements PlaybackComponent {
+        private final byte[] mSessionId;
+        private String mPlaybackId = "";
+
+        public PlaybackComponentImpl(byte[] sessionId) {
+            mSessionId = sessionId;
+        }
+
+        @Override
+        public void setPlaybackId(@NonNull String playbackId) {
+            if (playbackId == null) {
+                throw new IllegalArgumentException("playbackId is null");
+            }
+            MediaDrm.this.setPlaybackId(mSessionId, playbackId);
+            mPlaybackId = playbackId;
+        }
+
+        @Override
+        @NonNull public String getPlaybackId() {
+            return mPlaybackId;
+        }
     }
 }

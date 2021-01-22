@@ -45,6 +45,7 @@ package android {
     field public static final String BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE = "android.permission.BIND_PHONE_ACCOUNT_SUGGESTION_SERVICE";
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
+    field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
     field public static final String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
@@ -136,6 +137,7 @@ package android {
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
+    field public static final String MANAGE_TEST_NETWORKS = "android.permission.MANAGE_TEST_NETWORKS";
     field public static final String MANAGE_TIME_AND_ZONE_DETECTION = "android.permission.MANAGE_TIME_AND_ZONE_DETECTION";
     field public static final String MANAGE_UI_TRANSLATION = "android.permission.MANAGE_UI_TRANSLATION";
     field public static final String MANAGE_USB = "android.permission.MANAGE_USB";
@@ -1656,8 +1658,14 @@ package android.app.usage {
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
+    method @Nullable @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public android.bluetooth.BufferConstraints getBufferConstraints();
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice);
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public int getDynamicBufferSupport();
+    method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setBufferMillis(int, int);
     method @RequiresPermission(android.Manifest.permission.BLUETOOTH_PRIVILEGED) public boolean setConnectionPolicy(@NonNull android.bluetooth.BluetoothDevice, int);
+    field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD = 1; // 0x1
+    field public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2; // 0x2
+    field public static final int DYNAMIC_BUFFER_SUPPORT_NONE = 0; // 0x0
     field public static final int OPTIONAL_CODECS_NOT_SUPPORTED = 0; // 0x0
     field public static final int OPTIONAL_CODECS_PREF_DISABLED = 0; // 0x0
     field public static final int OPTIONAL_CODECS_PREF_ENABLED = 1; // 0x1
@@ -1837,6 +1845,25 @@ package android.bluetooth {
     field public static final int UUID_BYTES_128_BIT = 16; // 0x10
     field public static final int UUID_BYTES_16_BIT = 2; // 0x2
     field public static final int UUID_BYTES_32_BIT = 4; // 0x4
+  }
+
+  public final class BufferConstraint implements android.os.Parcelable {
+    ctor public BufferConstraint(int, int, int);
+    method public int describeContents();
+    method public int getDefaultMillis();
+    method public int getMaxMillis();
+    method public int getMinMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BufferConstraint> CREATOR;
+  }
+
+  public final class BufferConstraints implements android.os.Parcelable {
+    ctor public BufferConstraints(@NonNull java.util.List<android.bluetooth.BufferConstraint>);
+    method public int describeContents();
+    method @Nullable public android.bluetooth.BufferConstraint getCodec(int);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int BUFFER_CODEC_MAX_NUM = 32; // 0x20
+    field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.BufferConstraints> CREATOR;
   }
 
 }
@@ -9346,8 +9373,8 @@ package android.service.attestation {
   public abstract class ImpressionAttestationService extends android.app.Service {
     ctor public ImpressionAttestationService();
     method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull String, @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
-    method public abstract boolean onVerifyImpressionToken(@NonNull String, @NonNull android.service.attestation.ImpressionToken);
+    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
+    method public abstract boolean onVerifyImpressionToken(@NonNull byte[], @NonNull android.service.attestation.ImpressionToken);
   }
 
   public final class ImpressionToken implements android.os.Parcelable {
@@ -9881,6 +9908,18 @@ package android.service.resolver {
     method public void setTimeSpentScore(float);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.service.resolver.ResolverTarget> CREATOR;
+  }
+
+}
+
+package android.service.resumeonreboot {
+
+  public abstract class ResumeOnRebootService extends android.app.Service {
+    ctor public ResumeOnRebootService();
+    method @Nullable public android.os.IBinder onBind(@Nullable android.content.Intent);
+    method @NonNull public abstract byte[] onUnwrap(@NonNull byte[]) throws java.io.IOException;
+    method @NonNull public abstract byte[] onWrap(@NonNull byte[], long) throws java.io.IOException;
+    field public static final String SERVICE_INTERFACE = "android.service.resumeonreboot.ResumeOnRebootService";
   }
 
 }
@@ -13383,15 +13422,16 @@ package android.view {
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
+    method public boolean isSystemApplicationOverlay();
+    method @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public void setSystemApplicationOverlay(boolean);
     method public final void setUserActivityTimeout(long);
     field @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public static final int FLAG_BLUR_BEHIND = 4; // 0x4
     field @RequiresPermission(android.Manifest.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS) public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
     field @RequiresPermission(android.Manifest.permission.INTERNAL_SYSTEM_WINDOW) public static final int SYSTEM_FLAG_SHOW_FOR_ALL_USERS = 16; // 0x10
-    field @RequiresPermission(android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY) public static final int SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY = 8; // 0x8
     field @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public int backgroundBlurRadius;
   }
 
-  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
+  @IntDef(flag=true, prefix={"SYSTEM_FLAG_"}, value={android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS, android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS}) @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE) public static @interface WindowManager.LayoutParams.SystemFlags {
   }
 
 }

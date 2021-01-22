@@ -86,7 +86,7 @@ public class ImpressionAttestationController {
 
     private final Handler mHandler;
 
-    private final String mSalt;
+    private final byte[] mSalt;
 
     private final float[] mTmpFloat9 = new float[9];
     private final Matrix mTmpMatrix = new Matrix();
@@ -99,7 +99,7 @@ public class ImpressionAttestationController {
     ImpressionAttestationController(Context context) {
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
-        mSalt = UUID.randomUUID().toString();
+        mSalt = UUID.randomUUID().toString().getBytes();
     }
 
     String[] getSupportedImpressionAlgorithms() {

@@ -193,6 +193,7 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.StatusBarState;
@@ -372,6 +373,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
     private LightRevealScrim mLightRevealScrim;
+    private PowerButtonReveal mPowerButtonReveal;
 
     private final Object mQueueLock = new Object();
 
@@ -2945,6 +2947,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.updateResources();
         }
+
+        mPowerButtonReveal = new PowerButtonReveal(mContext.getResources().getDimensionPixelSize(
+                R.dimen.global_actions_top_padding));
     }
 
     // Visibility reporting
@@ -3651,6 +3656,16 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
+
+        final boolean usePowerButtonEffect =
+                (isDozing && mWakefulnessLifecycle.getLastSleepReason()
+                        == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
+                        || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
+                        == PowerManager.WAKE_REASON_POWER_BUTTON);
+
+        mLightRevealScrim.setRevealEffect(usePowerButtonEffect
+                ? mPowerButtonReveal
+                : LiftReveal.INSTANCE);
 
         mNotificationsController.requestNotificationUpdate("onDozingChanged");
         updateDozingState();

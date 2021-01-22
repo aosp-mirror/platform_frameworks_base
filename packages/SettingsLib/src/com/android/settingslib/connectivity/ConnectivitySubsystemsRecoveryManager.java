@@ -210,7 +210,8 @@ public class ConnectivitySubsystemsRecoveryManager {
     }
 
     private void checkIfAllSubsystemsRestartsAreDone() {
-        if (!mWifiRestartInProgress && !mTelephonyRestartInProgress) {
+        if (!mWifiRestartInProgress && !mTelephonyRestartInProgress
+                && mCurrentRecoveryCallback != null) {
             mCurrentRecoveryCallback.onSubsystemRestartOperationEnd();
             mCurrentRecoveryCallback = null;
         }
@@ -283,8 +284,10 @@ public class ConnectivitySubsystemsRecoveryManager {
                     stopTrackingTelephonyRestart();
                     mWifiRestartInProgress = false;
                     mTelephonyRestartInProgress = false;
-                    mCurrentRecoveryCallback.onSubsystemRestartOperationEnd();
-                    mCurrentRecoveryCallback = null;
+                    if (mCurrentRecoveryCallback != null) {
+                        mCurrentRecoveryCallback.onSubsystemRestartOperationEnd();
+                        mCurrentRecoveryCallback = null;
+                    }
                 }, RESTART_TIMEOUT_MS);
             }
         });

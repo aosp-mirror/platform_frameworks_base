@@ -1577,6 +1577,10 @@
         <item>network</item>
     </string-array>
 
+    <!-- Enables the GnssTimeUpdate service. This is the global switch for enabling Gnss time based
+         suggestions to TimeDetector service. See also config_autoTimeSourcesPriority. -->
+    <bool name="config_enableGnssTimeUpdateService">false</bool>
+
     <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
          zone update mechanism. -->
     <bool name="config_enableUpdateableTimeZoneRules">false</bool>
@@ -2648,6 +2652,11 @@
          in. -->
     <string name="config_usbResolverActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
+
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of privacy settings. -->
+    <string name="config_sensorUseStartedActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"

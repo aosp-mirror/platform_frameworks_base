@@ -17,11 +17,13 @@
 package android.media.metrics;
 
 import android.annotation.NonNull;
+import android.annotation.TestApi;
 
 /**
  * Interface for playback related components used by playback metrics.
  * @hide
  */
+@TestApi
 public interface PlaybackComponent {
 
     /**

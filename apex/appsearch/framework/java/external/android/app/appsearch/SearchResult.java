@@ -125,7 +125,6 @@ public final class SearchResult {
      * Contains the database name that stored the {@link GenericDocument}.
      *
      * @return Database name that stored the document
-     * @hide
      */
     @NonNull
     public String getDatabaseName() {

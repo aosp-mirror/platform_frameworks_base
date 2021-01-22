@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityOptions.KEY_LAUNCH_ROOT_TASK_TOKEN;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
@@ -25,6 +27,7 @@ import static com.android.wm.shell.splitscreen.SplitScreen.SIDE_STAGE_POSITION_T
 import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.WindowContainerTransaction;
@@ -142,6 +145,31 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
         mTaskOrganizer.applyTransaction(wct);
     }
 
+    void exitSplitScreen() {
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        mSideStage.removeAllTasks(wct);
+        mMainStage.deactivate(wct);
+        mTaskOrganizer.applyTransaction(wct);
+    }
+
+    void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+        outTopOrLeftBounds.set(mSplitLayout.getBounds1());
+        outBottomOrRightBounds.set(mSplitLayout.getBounds2());
+    }
+
+    void updateActivityOptions(Bundle opts, @SplitScreen.SideStagePosition int position) {
+        final StageTaskListener stage = position == mSideStagePosition ? mSideStage : mMainStage;
+        opts.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, stage.mRootTaskInfo.token);
+
+        if (!mMainStage.isActive()) {
+            // Activate the main stage in anticipation of an app launch.
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mMainStage.activate(getMainStageBounds(), wct);
+            mSideStage.setBounds(getSideStageBounds(), wct);
+            mTaskOrganizer.applyTransaction(wct);
+        }
+    }
+
     private void onStageRootTaskAppeared(StageListenerImpl stageListener) {
         if (mMainStageListener.mHasRootTask && mSideStageListener.mHasRootTask) {
             final WindowContainerTransaction wct = new WindowContainerTransaction();
@@ -173,6 +201,12 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
             } else {
                 mSplitLayout.release();
             }
+        }
+
+        if (!mainStageVisible && !sideStageVisible) {
+            // Exit split-screen if both stage are not visible.
+            // TODO: This is only a temporary request from UX and is likely to be removed soon...
+            exitSplitScreen();
         }
 
         if (mainStageVisible) {
@@ -252,10 +286,27 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     @Override
-    public void onSnappedToDismiss(boolean snappedToEnd) {
-        // TODO: What to do...what to do...
+    public void onSnappedToDismiss(boolean bottomOrRight) {
+        if (mSideStagePosition == SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT && bottomOrRight) {
+            // Main stage was fully expanded...Just side side-stage.
+            setSideStageVisibility(false);
+        } else {
+            // Side stage was fully expanded...Move its top task to the main stage
+            // and hide side-stage.
+            // TODO: Would UX prefer the side-stage go into fullscreen mode here?
+            final int taskId = mSideStage.getTopVisibleTaskId();
+            if (taskId == INVALID_TASK_ID) {
+                throw new IllegalStateException("Side stage doesn't have visible task? "
+                        + mSideStage);
+            }
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            mSideStage.removeTask(taskId, mMainStage.mRootTaskInfo.getToken(), wct);
+            mSideStage.setVisibility(false, wct);
+            mTaskOrganizer.applyTransaction(wct);
+        }
+
+        // Reset divider position.
         mSplitLayout.resetDividerPosition();
-        onBoundsChanged(mSplitLayout);
     }
 
     @Override

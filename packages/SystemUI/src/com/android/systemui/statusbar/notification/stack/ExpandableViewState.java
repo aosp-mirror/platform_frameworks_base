@@ -88,6 +88,12 @@ public class ExpandableViewState extends ViewState {
     public boolean hideSensitive;
     public boolean belowSpeedBump;
     public boolean inShelf;
+    public boolean shouldFadeForShadeOpen;
+
+    @Override
+    boolean shouldAnimateAlpha() {
+        return shouldFadeForShadeOpen;
+    }
 
     /**
      * A state indicating whether a headsup is currently fully visible, even when not scrolled.
@@ -169,6 +175,10 @@ public class ExpandableViewState extends ViewState {
                 expandableView.setHeadsUpIsVisible();
             }
         }
+    }
+
+    public void setShouldFadeForShadeOpen(boolean shouldFade) {
+        shouldFadeForShadeOpen = shouldFade;
     }
 
     @Override

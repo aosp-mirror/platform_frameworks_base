@@ -572,9 +572,9 @@ public class AudioService extends IAudioService.Stub
 
     // Pre-scale for Bluetooth Absolute Volume
     private float[] mPrescaleAbsoluteVolume = new float[] {
-        0.5f,    // Pre-scale for index 1
-        0.7f,    // Pre-scale for index 2
-        0.85f,   // Pre-scale for index 3
+        0.6f,    // Pre-scale for index 1
+        0.8f,    // Pre-scale for index 2
+        0.9f,   // Pre-scale for index 3
     };
 
     private NotificationManager mNm;

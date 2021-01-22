@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import androidx.test.filters.FlakyTest
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
@@ -51,6 +52,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 178015460)
 class CloseImeWindowToAppTest(
     testName: String,
     flickerSpec: Flicker

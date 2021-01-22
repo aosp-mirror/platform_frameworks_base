@@ -26,6 +26,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -113,6 +114,22 @@ public interface RegistrationManager {
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
                         AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
             }};
+
+    /** @hide */
+    @NonNull
+    static String registrationStateToString(
+            final @NetworkRegistrationInfo.RegistrationState int value) {
+        switch (value) {
+            case REGISTRATION_STATE_NOT_REGISTERED:
+                return "REGISTRATION_STATE_NOT_REGISTERED";
+            case REGISTRATION_STATE_REGISTERING:
+                return "REGISTRATION_STATE_REGISTERING";
+            case REGISTRATION_STATE_REGISTERED:
+                return "REGISTRATION_STATE_REGISTERED";
+            default:
+                return Integer.toString(value);
+        }
+    }
 
     /**
      * Callback class for receiving IMS network Registration callback events.

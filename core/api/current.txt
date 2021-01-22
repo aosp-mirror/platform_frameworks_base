@@ -31281,6 +31281,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectLeakedRegistrationObjects();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectLeakedSqlLiteObjects();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectNonSdkApiUsage();
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder detectUnsafeIntentLaunch();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder detectUntaggedSockets();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyDeath();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyDeathOnCleartextNetwork();
@@ -31289,6 +31290,7 @@ package android.os {
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyListener(@NonNull java.util.concurrent.Executor, @NonNull android.os.StrictMode.OnVmViolationListener);
     method @NonNull public android.os.StrictMode.VmPolicy.Builder penaltyLog();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder permitNonSdkApiUsage();
+    method @NonNull public android.os.StrictMode.VmPolicy.Builder permitUnsafeIntentLaunch();
     method @NonNull public android.os.StrictMode.VmPolicy.Builder setClassInstanceLimit(Class, int);
   }
 
@@ -31813,6 +31815,9 @@ package android.os.strictmode {
   }
 
   public final class UnbufferedIoViolation extends android.os.strictmode.Violation {
+  }
+
+  public final class UnsafeIntentLaunchViolation extends android.os.strictmode.Violation {
   }
 
   public final class UntaggedSocketViolation extends android.os.strictmode.Violation {
@@ -38197,6 +38202,7 @@ package android.service.textservice {
     ctor public SpellCheckerService.Session();
     method public android.os.Bundle getBundle();
     method public String getLocale();
+    method public int getSupportedAttributes();
     method public void onCancel();
     method public void onClose();
     method public abstract void onCreate();
@@ -41469,6 +41475,7 @@ package android.telephony {
 
   public final class SignalStrengthUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.os.IBinder getLiveToken();
     method @NonNull public java.util.Collection<android.telephony.SignalThresholdInfo> getSignalThresholdInfos();
     method public boolean isReportingRequestedWhileIdle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -41771,7 +41778,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
+    method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
+    method public void setSubscriptionOverrideUnmetered(int, boolean, @NonNull int[], long);
     method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
     field public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
@@ -41847,6 +41856,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method public boolean canChangeDtmfToneLength();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void clearSignalStrengthUpdateRequest(@NonNull android.telephony.SignalStrengthUpdateRequest);
     method @Nullable public android.telephony.TelephonyManager createForPhoneAccountHandle(android.telecom.PhoneAccountHandle);
     method public android.telephony.TelephonyManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean doesSwitchMultiSimConfigTriggerReboot();
@@ -41926,7 +41936,7 @@ package android.telephony {
     method @Deprecated public String iccTransmitApduLogicalChannel(int, int, int, int, int, int, String);
     method public boolean isConcurrentVoiceAndDataSupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isDataConnectionAllowed();
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean isDataEnabled();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabledForReason(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataRoamingEnabled();
     method public boolean isEmergencyNumber(@NonNull String);
@@ -41960,6 +41970,7 @@ package android.telephony {
     method public boolean setOperatorBrandOverride(String);
     method public boolean setPreferredNetworkTypeToGlobal();
     method public void setPreferredOpportunisticDataSubscription(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSignalStrengthUpdateRequest(@NonNull android.telephony.SignalStrengthUpdateRequest);
     method public void setVisualVoicemailSmsFilterSettings(android.telephony.VisualVoicemailSmsFilterSettings);
     method public boolean setVoiceMailNumber(String, String);
     method @Deprecated public void setVoicemailRingtoneUri(android.telecom.PhoneAccountHandle, android.net.Uri);
@@ -51789,7 +51800,8 @@ package android.view.textservice {
     method @Nullable public android.view.textservice.SpellCheckerSubtype getCurrentSpellCheckerSubtype(boolean);
     method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckersList();
     method public boolean isSpellCheckerEnabled();
-    method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean, int);
   }
 
 }

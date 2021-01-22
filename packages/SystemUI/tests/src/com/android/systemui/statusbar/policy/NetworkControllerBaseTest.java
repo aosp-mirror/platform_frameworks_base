@@ -62,6 +62,7 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.settingslib.R;
 import com.android.settingslib.graph.SignalDrawable;
 import com.android.settingslib.mobile.MobileMappings.Config;
@@ -82,6 +83,8 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.mockito.MockitoSession;
+import org.mockito.quality.Strictness;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -126,6 +129,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
     private ConnectivityManager.NetworkCallback mDefaultCallbackInNetworkController;
     private ConnectivityManager.NetworkCallback mNetworkCallback;
 
+    MockitoSession mMockingSession = null;
+
     @Rule
     public TestWatcher failWatcher = new TestWatcher() {
         @Override
@@ -145,7 +150,11 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
-        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL, true);
+        mMockingSession = ExtendedMockito.mockitoSession().strictness(Strictness.LENIENT)
+                .mockStatic(FeatureFlagUtils.class).startMocking();
+        ExtendedMockito.doReturn(true).when(() -> FeatureFlagUtils.isEnabled(mContext,
+                FeatureFlagUtils.SETTINGS_PROVIDER_MODEL));
+
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         Settings.Global.putInt(mContext.getContentResolver(), Global.AIRPLANE_MODE_ON, 0);
         TestableResources res = mContext.getOrCreateTestableResources();
@@ -227,7 +236,9 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
 
     @After
     public void tearDown() throws Exception {
-        FeatureFlagUtils.setEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL, false);
+        if (mMockingSession != null) {
+            mMockingSession.finishMocking();
+        }
     }
 
     protected void setupNetworkController() {

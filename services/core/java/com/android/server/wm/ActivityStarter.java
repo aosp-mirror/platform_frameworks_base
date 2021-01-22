@@ -2340,6 +2340,7 @@ class ActivityStarter {
                 mDoResume = false;
                 mAvoidMoveToFront = true;
             }
+            mTargetRootTask = Task.fromWindowContainerToken(mOptions.getLaunchRootTask());
         }
 
         mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? sourceRecord : null;
