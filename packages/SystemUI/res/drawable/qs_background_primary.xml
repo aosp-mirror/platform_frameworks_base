@@ -14,14 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<resources>
-    <bool name="are_flags_overrideable">true</bool>
-
-    <bool name="flag_notification_pipeline2">false</bool>
-    <bool name="flag_notification_pipeline2_rendering">false</bool>
-    <bool name="flag_shade_is_opaque">true</bool>
-
-    <!-- b/171917882 -->
-    <bool name="flag_notification_twocolumn">false</bool>
-</resources>
+<inset xmlns:android="http://schemas.android.com/apk/res/android">
+    <shape>
+        <solid android:color="?android:attr/colorBackground"/>
+        <corners android:radius="@dimen/notification_corner_radius" />
+    </shape>
+</inset>
