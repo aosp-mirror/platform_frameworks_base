@@ -3617,6 +3617,16 @@ public class NotificationPanelViewController extends PanelViewController {
             int oldState = mBarState;
             boolean keyguardShowing = statusBarState == KEYGUARD;
 
+            if (mDozeParameters.shouldControlUnlockedScreenOff() && isDozing() && keyguardShowing) {
+                // This means we're doing the screen off animation - position the keyguard status
+                // view where it'll be on AOD, so we can animate it in.
+                mKeyguardStatusViewController.updatePosition(
+                        mClockPositionResult.clockX,
+                        mClockPositionResult.clockYFullyDozing,
+                        mClockPositionResult.clockScale,
+                        false);
+            }
+
             mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
                     statusBarState,
                     keyguardFadingAway,
