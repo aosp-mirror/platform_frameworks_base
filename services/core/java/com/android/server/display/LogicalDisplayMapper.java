@@ -17,6 +17,7 @@
 package com.android.server.display;
 
 import android.content.Context;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
@@ -53,10 +54,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     public static final int LOGICAL_DISPLAY_EVENT_REMOVED = 3;
     public static final int LOGICAL_DISPLAY_EVENT_SWAPPED = 4;
     public static final int LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED = 5;
-
-    public static final int DISPLAY_GROUP_EVENT_ADDED = 1;
-    public static final int DISPLAY_GROUP_EVENT_CHANGED = 2;
-    public static final int DISPLAY_GROUP_EVENT_REMOVED = 3;
 
     /**
      * Temporary display info, used for comparing display configurations.
@@ -102,7 +99,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private int mNextNonDefaultGroupId = DisplayGroup.DEFAULT + 1;
 
     /** A mapping from logical display id to display group. */
-    private final SparseArray<DisplayGroup> mDisplayIdToGroupMap = new SparseArray<>();
+    private final SparseArray<DisplayGroup> mDisplayGroups = new SparseArray<>();
 
     private final DisplayDeviceRepository mDisplayDeviceRepo;
     private final Listener mListener;
@@ -157,6 +154,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         return null;
     }
 
+    public int[] getDisplayIdsLocked() {
+        return getDisplayIdsLocked(Process.SYSTEM_UID);
+    }
+
     public int[] getDisplayIdsLocked(int callingUid) {
         final int count = mLogicalDisplays.size();
         int[] displayIds = new int[count];
@@ -181,16 +182,13 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
     }
 
-    public DisplayGroup getDisplayGroupLocked(int groupId) {
-        final int size = mDisplayIdToGroupMap.size();
-        for (int i = 0; i < size; i++) {
-            final DisplayGroup displayGroup = mDisplayIdToGroupMap.valueAt(i);
-            if (displayGroup.getGroupId() == groupId) {
-                return displayGroup;
-            }
+    public int getDisplayGroupIdLocked(int displayId) {
+        final DisplayGroup displayGroup = mDisplayGroups.get(displayId);
+        if (displayGroup != null) {
+            return displayGroup.getGroupId();
         }
 
-        return null;
+        return -1;
     }
 
     public void dumpLocked(PrintWriter pw) {
@@ -327,31 +325,17 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mLogicalDisplays.put(displayId, display);
 
         final DisplayGroup displayGroup;
-        final boolean addNewDisplayGroup =
-                isDefault || (deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0;
-        if (addNewDisplayGroup) {
+        if (isDefault || (deviceInfo.flags & DisplayDeviceInfo.FLAG_OWN_DISPLAY_GROUP) != 0) {
             final int groupId = assignDisplayGroupIdLocked(isDefault);
             displayGroup = new DisplayGroup(groupId);
         } else {
-            displayGroup = mDisplayIdToGroupMap.get(Display.DEFAULT_DISPLAY);
+            displayGroup = mDisplayGroups.get(Display.DEFAULT_DISPLAY);
         }
-        displayGroup.addDisplayLocked(display);
-        mDisplayIdToGroupMap.append(displayId, displayGroup);
-
-        if (addNewDisplayGroup) {
-            // Group added events happen before Logical Display added events.
-            mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                    LogicalDisplayMapper.DISPLAY_GROUP_EVENT_ADDED);
-        }
+        displayGroup.addDisplay(display);
+        mDisplayGroups.append(displayId, displayGroup);
 
         mListener.onLogicalDisplayEventLocked(display,
                 LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_ADDED);
-
-        if (!addNewDisplayGroup) {
-            // Group changed events happen after Logical Display added events.
-            mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                    LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED);
-        }
     }
 
     /**
@@ -368,45 +352,31 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             DisplayEventReceiver.FrameRateOverride[] frameRatesOverrides =
                     display.getFrameRateOverrides();
             display.updateLocked(mDisplayDeviceRepo);
-            final DisplayGroup changedDisplayGroup;
             if (!display.isValidLocked()) {
                 mLogicalDisplays.removeAt(i);
-                final DisplayGroup displayGroup = mDisplayIdToGroupMap.removeReturnOld(displayId);
-                displayGroup.removeDisplayLocked(display);
+                mDisplayGroups.removeReturnOld(displayId).removeDisplay(display);
 
                 mListener.onLogicalDisplayEventLocked(display,
                         LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_REMOVED);
-
-                changedDisplayGroup = displayGroup;
             } else if (!mTempDisplayInfo.equals(display.getDisplayInfoLocked())) {
                 final int flags = display.getDisplayInfoLocked().flags;
-                final DisplayGroup defaultDisplayGroup = mDisplayIdToGroupMap.get(
+                final DisplayGroup defaultDisplayGroup = mDisplayGroups.get(
                         Display.DEFAULT_DISPLAY);
                 if ((flags & Display.FLAG_OWN_DISPLAY_GROUP) != 0) {
                     // The display should have its own DisplayGroup.
-                    if (defaultDisplayGroup.removeDisplayLocked(display)) {
+                    if (defaultDisplayGroup.removeDisplay(display)) {
                         final int groupId = assignDisplayGroupIdLocked(false);
                         final DisplayGroup displayGroup = new DisplayGroup(groupId);
-                        displayGroup.addDisplayLocked(display);
-                        mDisplayIdToGroupMap.append(display.getDisplayIdLocked(), displayGroup);
-                        mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                                LogicalDisplayMapper.DISPLAY_GROUP_EVENT_ADDED);
-                        changedDisplayGroup = defaultDisplayGroup;
-                    } else {
-                        changedDisplayGroup = null;
+                        displayGroup.addDisplay(display);
+                        mDisplayGroups.append(display.getDisplayIdLocked(), displayGroup);
                     }
                 } else {
                     // The display should be a part of the default DisplayGroup.
-                    final DisplayGroup displayGroup = mDisplayIdToGroupMap.get(displayId);
+                    final DisplayGroup displayGroup = mDisplayGroups.get(displayId);
                     if (displayGroup != defaultDisplayGroup) {
-                        displayGroup.removeDisplayLocked(display);
-                        defaultDisplayGroup.addDisplayLocked(display);
-                        mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
-                                LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED);
-                        mDisplayIdToGroupMap.put(displayId, defaultDisplayGroup);
-                        changedDisplayGroup = displayGroup;
-                    } else {
-                        changedDisplayGroup = null;
+                        displayGroup.removeDisplay(display);
+                        defaultDisplayGroup.addDisplay(display);
+                        mDisplayGroups.put(displayId, defaultDisplayGroup);
                     }
                 }
 
@@ -418,7 +388,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             } else if (!display.getPendingFrameRateOverrideUids().isEmpty()) {
                 mListener.onLogicalDisplayEventLocked(display,
                         LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_FRAME_RATE_OVERRIDES_CHANGED);
-                changedDisplayGroup = null;
             } else {
                 // While applications shouldn't know nor care about the non-overridden info, we
                 // still need to let WindowManager know so it can update its own internal state for
@@ -428,15 +397,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
                     mListener.onLogicalDisplayEventLocked(display,
                             LogicalDisplayMapper.LOGICAL_DISPLAY_EVENT_CHANGED);
                 }
-                changedDisplayGroup = null;
-            }
-
-            // CHANGED and REMOVED DisplayGroup events should always fire after Display events.
-            if (changedDisplayGroup != null) {
-                final int event = changedDisplayGroup.isEmptyLocked()
-                        ? LogicalDisplayMapper.DISPLAY_GROUP_EVENT_REMOVED
-                        : LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED;
-                mListener.onDisplayGroupEventLocked(changedDisplayGroup.getGroupId(), event);
             }
         }
     }
@@ -472,7 +432,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     public interface Listener {
         void onLogicalDisplayEventLocked(LogicalDisplay display, int event);
-        void onDisplayGroupEventLocked(int groupId, int event);
         void onTraversalRequested();
     }
 }
