@@ -32,7 +32,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
@@ -93,21 +92,31 @@ public class ImageExporterTest extends SysuiTestCase {
         ContentResolver contentResolver = context.getContentResolver();
         ImageExporter exporter = new ImageExporter(contentResolver);
 
+        String requestId = "some_random_unique_id";
         Bitmap original = createCheckerBitmap(10, 10, 10);
 
-        ListenableFuture<Uri> direct = exporter.export(DIRECT_EXECUTOR, original, CAPTURE_TIME);
+        ListenableFuture<ImageExporter.Result> direct =
+                exporter.export(DIRECT_EXECUTOR, requestId, original, CAPTURE_TIME);
         assertTrue("future should be done", direct.isDone());
         assertFalse("future should not be canceled", direct.isCancelled());
-        Uri result = direct.get();
+        ImageExporter.Result result = direct.get();
 
-        assertNotNull("Uri should not be null", result);
+        assertEquals("Result should contain the same request id", requestId, result.requestId);
+        assertEquals("Filename should contain the correct filename",
+                "Screenshot_20201215-131500.png", result.fileName);
+        assertNotNull("CompressFormat should be set", result.format);
+        assertEquals("The default CompressFormat should be PNG", CompressFormat.PNG, result.format);
+        assertNotNull("Uri should not be null", result.uri);
+        assertEquals("Timestamp should match input", CAPTURE_TIME.toInstant().toEpochMilli(),
+                result.timestamp);
+
         Bitmap decoded = null;
-        try (InputStream in = contentResolver.openInputStream(result)) {
+        try (InputStream in = contentResolver.openInputStream(result.uri)) {
             decoded = BitmapFactory.decodeStream(in);
             assertNotNull("decoded image should not be null", decoded);
             assertTrue("original and decoded image should be identical", original.sameAs(decoded));
 
-            try (ParcelFileDescriptor pfd = contentResolver.openFile(result, "r", null)) {
+            try (ParcelFileDescriptor pfd = contentResolver.openFile(result.uri, "r", null)) {
                 assertNotNull(pfd);
                 ExifInterface exifInterface = new ExifInterface(pfd.getFileDescriptor());
 
@@ -130,13 +139,14 @@ public class ImageExporterTest extends SysuiTestCase {
             if (decoded != null) {
                 decoded.recycle();
             }
-            contentResolver.delete(result, null);
+            contentResolver.delete(result.uri, null);
         }
     }
 
     @Test
     public void testMediaStoreMetadata() {
-        ContentValues values = ImageExporter.createMetadata(CAPTURE_TIME, CompressFormat.PNG);
+        String name = ImageExporter.createFilename(CAPTURE_TIME, CompressFormat.PNG);
+        ContentValues values = ImageExporter.createMetadata(CAPTURE_TIME, CompressFormat.PNG, name);
         assertEquals("Pictures/Screenshots",
                 values.getAsString(MediaStore.MediaColumns.RELATIVE_PATH));
         assertEquals("Screenshot_20201215-131500.png",

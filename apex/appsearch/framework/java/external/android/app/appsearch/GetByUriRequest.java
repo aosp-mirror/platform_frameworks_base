@@ -17,13 +17,17 @@
 package android.app.appsearch;
 
 import android.annotation.NonNull;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -32,12 +36,24 @@ import java.util.Set;
  * @see AppSearchSession#getByUri
  */
 public final class GetByUriRequest {
+    /**
+     * Schema type to be used in {@link android.app.appsearch.GetByUriRequest.Builder#addProjection}
+     * to apply property paths to all results, excepting any types that have had their own, specific
+     * property paths set.
+     */
+    public static final String PROJECTION_SCHEMA_TYPE_WILDCARD = "*";
+
     private final String mNamespace;
     private final Set<String> mUris;
+    private final Map<String, List<String>> mTypePropertyPathsMap;
 
-    GetByUriRequest(@NonNull String namespace, @NonNull Set<String> uris) {
-        mNamespace = namespace;
-        mUris = uris;
+    GetByUriRequest(
+            @NonNull String namespace,
+            @NonNull Set<String> uris,
+            @NonNull Map<String, List<String>> typePropertyPathsMap) {
+        mNamespace = Preconditions.checkNotNull(namespace);
+        mUris = Preconditions.checkNotNull(uris);
+        mTypePropertyPathsMap = Preconditions.checkNotNull(typePropertyPathsMap);
     }
 
     /** Returns the namespace to get documents from. */
@@ -52,10 +68,43 @@ public final class GetByUriRequest {
         return Collections.unmodifiableSet(mUris);
     }
 
+    /**
+     * Returns a map from schema type to property paths to be used for projection.
+     *
+     * <p>If the map is empty, then all properties will be retrieved for all results.
+     *
+     * <p>Calling this function repeatedly is inefficient. Prefer to retain the Map returned by this
+     * function, rather than calling it multiple times.
+     */
+    @NonNull
+    public Map<String, List<String>> getProjections() {
+        Map<String, List<String>> copy = new ArrayMap<>();
+        for (String key : mTypePropertyPathsMap.keySet()) {
+            copy.put(key, new ArrayList<>(mTypePropertyPathsMap.get(key)));
+        }
+        return copy;
+    }
+
+    /**
+     * Returns a map from schema type to property paths to be used for projection.
+     *
+     * <p>If the map is empty, then all properties will be retrieved for all results.
+     *
+     * <p>A more efficient version of {@link #getProjections}, but it returns a modifiable map. This
+     * is not meant to be unhidden and should only be used by internal classes.
+     *
+     * @hide
+     */
+    @NonNull
+    public Map<String, List<String>> getProjectionsVisibleToPackagesInternal() {
+        return mTypePropertyPathsMap;
+    }
+
     /** Builder for {@link GetByUriRequest} objects. */
     public static final class Builder {
         private String mNamespace = GenericDocument.DEFAULT_NAMESPACE;
         private final Set<String> mUris = new ArraySet<>();
+        private final Map<String, List<String>> mProjectionTypePropertyPaths = new ArrayMap<>();
         private boolean mBuilt = false;
 
         /**
@@ -87,12 +136,63 @@ public final class GetByUriRequest {
             return this;
         }
 
+        /**
+         * Adds property paths for the specified type to be used for projection. If property paths
+         * are added for a type, then only the properties referred to will be retrieved for results
+         * of that type. If a property path that is specified isn't present in a result, it will be
+         * ignored for that result. Property paths cannot be null.
+         *
+         * <p>If no property paths are added for a particular type, then all properties of results
+         * of that type will be retrieved.
+         *
+         * <p>If property path is added for the {@link
+         * GetByUriRequest#PROJECTION_SCHEMA_TYPE_WILDCARD}, then those property paths will apply to
+         * all results, excepting any types that have their own, specific property paths set.
+         *
+         * <p>{@see SearchSpec.Builder#addProjection(String, String...)}
+         */
+        @NonNull
+        public Builder addProjection(@NonNull String schemaType, @NonNull String... propertyPaths) {
+            Preconditions.checkNotNull(propertyPaths);
+            return addProjection(schemaType, Arrays.asList(propertyPaths));
+        }
+
+        /**
+         * Adds property paths for the specified type to be used for projection. If property paths
+         * are added for a type, then only the properties referred to will be retrieved for results
+         * of that type. If a property path that is specified isn't present in a result, it will be
+         * ignored for that result. Property paths cannot be null.
+         *
+         * <p>If no property paths are added for a particular type, then all properties of results
+         * of that type will be retrieved.
+         *
+         * <p>If property path is added for the {@link
+         * GetByUriRequest#PROJECTION_SCHEMA_TYPE_WILDCARD}, then those property paths will apply to
+         * all results, excepting any types that have their own, specific property paths set.
+         *
+         * <p>{@see SearchSpec.Builder#addProjection(String, String...)}
+         */
+        @NonNull
+        public Builder addProjection(
+                @NonNull String schemaType, @NonNull Collection<String> propertyPaths) {
+            Preconditions.checkState(!mBuilt, "Builder has already been used");
+            Preconditions.checkNotNull(schemaType);
+            Preconditions.checkNotNull(propertyPaths);
+            List<String> propertyPathsList = new ArrayList<>(propertyPaths.size());
+            for (String propertyPath : propertyPaths) {
+                Preconditions.checkNotNull(propertyPath);
+                propertyPathsList.add(propertyPath);
+            }
+            mProjectionTypePropertyPaths.put(schemaType, propertyPathsList);
+            return this;
+        }
+
         /** Builds a new {@link GetByUriRequest}. */
         @NonNull
         public GetByUriRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mBuilt = true;
-            return new GetByUriRequest(mNamespace, mUris);
+            return new GetByUriRequest(mNamespace, mUris, mProjectionTypePropertyPaths);
         }
     }
 }

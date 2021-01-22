@@ -2151,9 +2151,8 @@ public interface WindowManager extends ViewManager {
          * visible window.
          * @hide
          */
-        @SystemApi
         @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
-        public static final int SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x00000008;
+        public static final int PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x00000008;
 
         /** In a multiuser system if this flag is set and the owner is a system process then this
          * window will appear on all user screens. This overrides the default behavior of window
@@ -2352,7 +2351,6 @@ public interface WindowManager extends ViewManager {
         @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                 SYSTEM_FLAG_SHOW_FOR_ALL_USERS,
-                SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
         public @interface SystemFlags {}
 
@@ -2386,7 +2384,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
                 PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
-                SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
         public @interface PrivateFlags {}
 
@@ -2501,9 +2499,9 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                         name = "INTERCEPT_GLOBAL_DRAG_AND_DROP"),
                 @ViewDebug.FlagToString(
-                        mask = SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
-                        equals = SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY,
-                        name = "SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY")
+                        mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
@@ -3372,6 +3370,37 @@ public interface WindowManager extends ViewManager {
          */
         public void setTrustedOverlay() {
             privateFlags |= PRIVATE_FLAG_TRUSTED_OVERLAY;
+        }
+
+        /**
+         * When set on {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows they stay visible,
+         * even if {@link LayoutParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS} is set for
+         * another visible window.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
+        public void setSystemApplicationOverlay(boolean isSystemApplicationOverlay) {
+            if (isSystemApplicationOverlay) {
+                privateFlags |= PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+            } else {
+                privateFlags &= ~PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+            }
+        }
+
+        /**
+         * Returns if this window is marked as being a system application overlay.
+         * @see LayoutParams#setSystemApplicationOverlay(boolean)
+         *
+         * <p>Note: the owner of the window must hold
+         * {@link android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY} for this to have any
+         * effect.
+         * @hide
+         */
+        @SystemApi
+        public boolean isSystemApplicationOverlay() {
+            return (privateFlags & PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
+                    == PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
         }
 
         /**

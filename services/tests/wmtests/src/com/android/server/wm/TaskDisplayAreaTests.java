@@ -352,7 +352,8 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
             boolean reuseCandidate) {
         final TaskDisplayArea taskDisplayArea = candidateTask.getDisplayArea();
         final Task rootTask = taskDisplayArea.getOrCreateRootTask(windowingMode, activityType,
-                false /* onTop */, null /* intent */, candidateTask /* candidateTask */);
+                false /* onTop */, null /* intent */, candidateTask /* candidateTask */,
+                null /* activityOptions */);
         assertEquals(reuseCandidate, rootTask == candidateTask);
     }
 }

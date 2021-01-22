@@ -360,12 +360,9 @@
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"नया उपयोगकर्ता"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"वाई-फ़ाई"</string>
     <string name="quick_settings_internet_label" msgid="6603068555872455463">"इंटरनेट"</string>
-    <!-- no translation found for quick_settings_airplane_safe_label (2665758539772645899) -->
-    <skip />
-    <!-- no translation found for quick_settings_networks_available (1875138606855420438) -->
-    <skip />
-    <!-- no translation found for quick_settings_networks_unavailable (1167847013337940082) -->
-    <skip />
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"हवाई जहाज़ मोड पर, काम करने वाले सुरक्षित नेटवर्क"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"नेटवर्क उपलब्ध हैं"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"नेटवर्क उपलब्ध नहीं हैं"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"कनेक्ट नहीं है"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"कोई नेटवर्क नहीं"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"वाई-फ़ाई  बंद"</string>

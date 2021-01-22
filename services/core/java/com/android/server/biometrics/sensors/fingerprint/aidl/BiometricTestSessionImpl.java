@@ -96,6 +96,16 @@ class BiometricTestSessionImpl extends ITestSession.Stub {
         public void onChallengeGenerated(int sensorId, long challenge) {
 
         }
+
+        @Override
+        public void onUdfpsPointerDown(int sensorId) {
+
+        }
+
+        @Override
+        public void onUdfpsPointerUp(int sensorId) {
+
+        }
     };
 
     BiometricTestSessionImpl(@NonNull Context context, int sensorId,

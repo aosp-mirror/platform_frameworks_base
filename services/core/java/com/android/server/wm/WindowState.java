@@ -55,7 +55,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_SCALED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
-import static android.view.WindowManager.LayoutParams.FORMAT_CHANGED;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
@@ -68,7 +67,6 @@ import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
-import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
@@ -3049,8 +3047,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        if (mAttrs.type == TYPE_APPLICATION_OVERLAY && mSession.mCanCreateSystemApplicationOverlay
-                && (mAttrs.privateFlags & SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY) != 0) {
+        if (mAttrs.type == TYPE_APPLICATION_OVERLAY && mAttrs.isSystemApplicationOverlay()
+                && mSession.mCanCreateSystemApplicationOverlay) {
             return;
         }
 
@@ -4935,7 +4933,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return !mLastSurfaceInsets.equals(mAttrs.surfaceInsets);
     }
 
-    int relayoutVisibleWindow(int result, int attrChanges) {
+    int relayoutVisibleWindow(int result) {
         final boolean wasVisible = isVisible();
 
         result |= (!wasVisible || !isDrawn()) ? RELAYOUT_RES_FIRST_TIME : 0;
@@ -4968,18 +4966,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             prepareWindowToDisplayDuringRelayout(wasVisible);
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-        }
-
-        if ((attrChanges & FORMAT_CHANGED) != 0) {
-            // If the format can't be changed in place, preserve the old surface until the app draws
-            // on the new one. This prevents blinking when we change elevation of freeform and
-            // pinned windows.
-            if (!mWinAnimator.tryChangeFormatInPlaceLocked()) {
-                mWinAnimator.preserveSurfaceLocked(getSyncTransaction());
-                result |= RELAYOUT_RES_SURFACE_CHANGED
-                        | RELAYOUT_RES_FIRST_TIME;
-                scheduleAnimation();
-            }
         }
 
         // When we change the Surface size, in scenarios which may require changing

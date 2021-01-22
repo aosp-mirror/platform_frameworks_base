@@ -29,7 +29,6 @@ import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.telephony.PhoneStateListener;
 import android.telephony.SubscriptionManager;
@@ -114,8 +113,8 @@ public class MultinetworkPolicyTracker {
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_CONFIGURATION_CHANGED);
-        mContext.registerReceiverAsUser(
-                mBroadcastReceiver, UserHandle.ALL, intentFilter, null, mHandler);
+        mContext.registerReceiverForAllUsers(mBroadcastReceiver, intentFilter,
+                null /* broadcastPermission */, mHandler);
 
         reevaluate();
     }

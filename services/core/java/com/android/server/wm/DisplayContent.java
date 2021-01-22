@@ -1559,6 +1559,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         final int rotation = rotationForActivityInDifferentOrientation(r);
         if (rotation == ROTATION_UNDEFINED) {
+            // The display rotation won't be changed by current top activity. If there was fixed
+            // rotation activity, its rotated state should be cleared to cancel the adjustments.
+            if (hasTopFixedRotationLaunchingApp()
+                    // Avoid breaking recents animation.
+                    && !mFixedRotationLaunchingApp.getTask().isAnimatingByRecents()) {
+                clearFixedRotationLaunchingApp();
+            }
             return false;
         }
         if (!r.getParent().matchParentBounds()) {

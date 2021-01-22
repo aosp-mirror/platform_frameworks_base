@@ -407,7 +407,7 @@ final class InputMonitor {
         }
 
         mInputFocus = focusToken;
-        mInputTransaction.setFocusedWindow(mInputFocus, mDisplayId);
+        mInputTransaction.setFocusedWindow(mInputFocus, focus.getName(), mDisplayId);
         EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Focus request " + focus,
                 "reason=UpdateInputWindows");
         ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus requested for window=%s", focus);

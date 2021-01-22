@@ -2156,6 +2156,67 @@ public class DevicePolicyManager {
     public @interface ProvisioningPreCondition {}
 
     /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link #checkProvisioningPreCondition} returned an error code.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link UserManager#createProfileForUserEvenWhenDisallowed}
+     * returned {@code null}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link PackageManager#installExistingPackageAsUser} has failed.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link #setProfileOwner} returned {@code false}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates that starting the newly created profile has failed.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5;
+
+    /**
+     * Service-specific error codes for {@link #createAndProvisionManagedProfile} indicating
+     * all the errors during provisioning.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "PROVISIONING_RESULT_" }, value = {
+            PROVISIONING_RESULT_PRE_CONDITION_FAILED, PROVISIONING_RESULT_PROFILE_CREATION_FAILED,
+            PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
+            PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED,
+            PROVISIONING_RESULT_STARTING_PROFILE_FAILED
+    })
+    public @interface ProvisioningResult {}
+
+    /**
      * Disable all configurable SystemUI features during LockTask mode. This includes,
      * <ul>
      *     <li>system info area in the status bar (connectivity icons, clock, etc.)
@@ -5381,6 +5442,16 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
             "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
+
+    /**
+     * Broadcast action: notify managed provisioning that a new managed profile is created.
+     *
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MANAGED_PROFILE_CREATED =
+            "android.app.action.MANAGED_PROFILE_CREATED";
 
     /**
      * Widgets are enabled in keyguard
@@ -13099,6 +13170,40 @@ public class DevicePolicyManager {
             mService.setOrganizationIdForUser(packageName, enterpriseId, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates and provisions a managed profile and sets the
+     * {@link ManagedProfileProvisioningParams#getProfileAdminComponentName()} as the profile
+     * owner.
+     *
+     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * before calling this method.
+     *
+     * @param provisioningParams Params required to provision a managed profile,
+     * see {@link ManagedProfileProvisioningParams}.
+     * @return The {@link UserHandle} of the created profile or {@code null} if the service is
+     * not available.
+     * @throws SecurityException if the caller does not hold
+     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     * @throws ProvisioningException if an error occurred during provisioning.
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public UserHandle createAndProvisionManagedProfile(
+            @NonNull ManagedProfileProvisioningParams provisioningParams)
+            throws ProvisioningException {
+        if (mService == null) {
+            return null;
+        }
+        try {
+            return mService.createAndProvisionManagedProfile(provisioningParams);
+        } catch (ServiceSpecificException e) {
+            throw new ProvisioningException(e, e.errorCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
         }
     }
 }

@@ -1008,7 +1008,9 @@ public class ClipData implements Parcelable {
         for (int i = 0; i < size; i++) {
             final Item item = mItems.get(i);
             if (item.mIntent != null) {
-                item.mIntent.prepareToEnterProcess();
+                // We can't recursively claim that this data is from a protected
+                // component, since it may have been filled in by a malicious app
+                item.mIntent.prepareToEnterProcess(false);
             }
         }
     }

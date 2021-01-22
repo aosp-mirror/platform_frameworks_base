@@ -568,11 +568,14 @@ public class StackScrollAlgorithm {
             // Add padding before sections for overscroll effect.
             childViewState.yTranslation += ambientState.getSectionPadding();
         }
-        if (childViewState.yTranslation >= shelfStart) {
-            childViewState.hidden = !child.isExpandAnimationRunning() && !child.hasExpandingChild();
-            childViewState.inShelf = true;
-            childViewState.headsUpIsVisible = false;
-        }
+        boolean show = childViewState.yTranslation < shelfStart
+                && !ambientState.isAppearing();
+        childViewState.hidden = !show
+                && !child.isExpandAnimationRunning()
+                && !child.hasExpandingChild();
+        childViewState.inShelf = !show;
+        childViewState.headsUpIsVisible = show;
+        childViewState.alpha = show ? 1f : 0f;
     }
 
     protected int getMaxAllowedChildHeight(View child) {

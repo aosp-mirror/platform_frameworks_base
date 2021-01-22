@@ -30,6 +30,7 @@ import com.android.internal.inputmethod.IInputMethodInfoListResultCallback;
 import com.android.internal.inputmethod.IInputMethodSubtypeResultCallback;
 import com.android.internal.inputmethod.IInputMethodSubtypeListResultCallback;
 import com.android.internal.inputmethod.IIntResultCallback;
+import com.android.internal.inputmethod.IVoidResultCallback;
 
 /**
  * Public interface to the global input method manager, used by all client
@@ -66,10 +67,11 @@ interface IInputMethodManager {
             in IInputBindResultResultCallback inputBindResult);
 
     void showInputMethodPickerFromClient(in IInputMethodClient client,
-            int auxiliarySubtypeMode);
+            int auxiliarySubtypeMode, in IVoidResultCallback resultCallback);
     void showInputMethodPickerFromSystem(in IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId);
-    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId);
+            int displayId, in IVoidResultCallback resultCallback);
+    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId,
+            in IVoidResultCallback resultCallback);
     void isInputMethodPickerShownForTest(in IBooleanResultCallback resultCallback);
     void getCurrentInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
     void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
@@ -78,7 +80,7 @@ interface IInputMethodManager {
     void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback);
 
     void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
-            in float[] matrixValues);
+            in float[] matrixValues, in IVoidResultCallback resultCallback);
 
     oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */

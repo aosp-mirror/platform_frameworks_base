@@ -662,6 +662,11 @@ public class PermissionUsageHelper {
             // usage for that uid, keep it. Otherwise, remove it
             boolean isMostRecentForUid = true;
             for (int otherUsageNum = 0; otherUsageNum < rawUsages.size(); otherUsageNum++) {
+                // Do not compare this usage to itself
+                if (otherUsageNum == usageNum) {
+                    continue;
+                }
+
                 OpUsage otherUsage = rawUsages.get(otherUsageNum);
                 if (otherUsage.uid == usage.uid) {
                     if (otherUsage.isRunning && !usage.isRunning) {

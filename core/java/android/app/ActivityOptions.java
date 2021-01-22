@@ -199,6 +199,14 @@ public class ActivityOptions {
             "android.activity.launchTaskDisplayAreaToken";
 
     /**
+     * The root task token the activity should be launched into.
+     * @see #setLaunchRootTask(WindowContainerToken)
+     * @hide
+     */
+    public static final String KEY_LAUNCH_ROOT_TASK_TOKEN =
+            "android.activity.launchRootTaskToken";
+
+    /**
      * The windowing mode the activity should be launched into.
      * @hide
      */
@@ -306,7 +314,7 @@ public class ActivityOptions {
      * @see #setLaunchCookie
      * @hide
      */
-    private static final String KEY_LAUNCH_COOKIE = "android.activity.launchCookie";
+    public static final String KEY_LAUNCH_COOKIE = "android.activity.launchCookie";
 
     /** @hide */
     public static final int ANIM_UNDEFINED = -1;
@@ -362,6 +370,7 @@ public class ActivityOptions {
     private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mCallerDisplayId = INVALID_DISPLAY;
     private WindowContainerToken mLaunchTaskDisplayArea;
+    private WindowContainerToken mLaunchRootTask;
     @WindowConfiguration.WindowingMode
     private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
     @WindowConfiguration.ActivityType
@@ -1050,6 +1059,7 @@ public class ActivityOptions {
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN);
+        mLaunchRootTask = opts.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
@@ -1338,6 +1348,17 @@ public class ActivityOptions {
     public ActivityOptions setLaunchTaskDisplayArea(
             WindowContainerToken windowContainerToken) {
         mLaunchTaskDisplayArea = windowContainerToken;
+        return this;
+    }
+
+    /** @hide */
+    public WindowContainerToken getLaunchRootTask() {
+        return mLaunchRootTask;
+    }
+
+    /** @hide */
+    public ActivityOptions setLaunchRootTask(WindowContainerToken windowContainerToken) {
+        mLaunchRootTask = windowContainerToken;
         return this;
     }
 
@@ -1691,6 +1712,9 @@ public class ActivityOptions {
         }
         if (mLaunchTaskDisplayArea != null) {
             b.putParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN, mLaunchTaskDisplayArea);
+        }
+        if (mLaunchRootTask != null) {
+            b.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, mLaunchRootTask);
         }
         if (mLaunchWindowingMode != WINDOWING_MODE_UNDEFINED) {
             b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
