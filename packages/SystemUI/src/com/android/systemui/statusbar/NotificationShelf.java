@@ -205,30 +205,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
     }
 
     /**
-     * @return whether to clip bottom of given view
-     */
-    private boolean shouldClipBottom(ExpandableView view) {
-        final boolean showShelf = ((ShelfState) getViewState()).hasItemsInStableShelf;
-        if (showShelf) {
-            if (mAmbientState.isShadeOpening()) {
-                final float viewEnd = view.getTranslationY()
-                        + view.getActualHeight()
-                        + mPaddingBetweenElements;
-                final float finalShelfStart = mMaxLayoutHeight - getIntrinsicHeight();
-                // While the shade is opening, only clip view if it overlaps with shelf;
-                // otherwise leave view unclipped.
-                if (viewEnd < finalShelfStart) {
-                    return false;
-                }
-            }
-            // Clip for scrolling.
-            return true;
-        }
-        // Don't clip since we have enough space to show all views.
-        return false;
-    }
-
-    /**
      * Update the shelf appearance based on the other notifications around it. This transforms
      * the icons from the notification area into the shelf.
      */
@@ -369,9 +345,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         clipTransientViews();
 
         setClipTopAmount(clipTopAmount);
-        boolean isHidden = getViewState().hidden
-                || clipTopAmount >= getIntrinsicHeight()
-                || mAmbientState.isShadeOpening();
+        boolean isHidden = getViewState().hidden || clipTopAmount >= getIntrinsicHeight();
         if (mShowNotificationShelf) {
             setVisibility(isHidden ? View.INVISIBLE : View.VISIBLE);
         }
@@ -494,8 +468,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         } else {
             shouldClipOwnTop = view.showingPulsing();
         }
-        if (shouldClipBottom(view)
-                && viewEnd > notificationClipEnd && !shouldClipOwnTop
+        if (viewEnd > notificationClipEnd && !shouldClipOwnTop
                 && (mAmbientState.isShadeExpanded() || !isPinned)) {
             int clipBottomAmount = (int) (viewEnd - notificationClipEnd);
             if (isPinned) {
