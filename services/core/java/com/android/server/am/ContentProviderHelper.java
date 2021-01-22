@@ -1090,6 +1090,17 @@ public class ContentProviderHelper {
                 i--;
                 continue;
             }
+            final boolean isInstantApp = cpi.applicationInfo.isInstantApp();
+            final boolean splitInstalled = cpi.splitName == null || ArrayUtils.contains(
+                    cpi.applicationInfo.splitNames, cpi.splitName);
+            if (isInstantApp && !splitInstalled) {
+                // For instant app, allow provider that is defined in the provided split apk.
+                // Skipping it if the split apk is not installed.
+                providers.remove(i);
+                numProviders--;
+                i--;
+                continue;
+            }
 
             ComponentName comp = new ComponentName(cpi.packageName, cpi.name);
             ContentProviderRecord cpr = mProviderMap.getProviderByClass(comp, app.userId);
@@ -1112,7 +1123,7 @@ public class ContentProviderHelper {
             mService.notifyPackageUse(cpi.applicationInfo.packageName,
                     PackageManager.NOTIFY_PACKAGE_USE_CONTENT_PROVIDER);
         }
-        return providers;
+        return providers.isEmpty() ? null : providers;
     }
 
     private final class DevelopmentSettingsObserver extends ContentObserver {
@@ -1217,7 +1228,12 @@ public class ContentProviderHelper {
                                     final boolean userMatch = !mService.isSingleton(
                                             pi.processName, pi.applicationInfo, pi.name, pi.flags)
                                             || app.userId == UserHandle.USER_SYSTEM;
-                                    if (processMatch && userMatch) {
+                                    final boolean isInstantApp = pi.applicationInfo.isInstantApp();
+                                    final boolean splitInstalled = pi.splitName == null
+                                            || ArrayUtils.contains(pi.applicationInfo.splitNames,
+                                                    pi.splitName);
+                                    if (processMatch && userMatch
+                                            && (!isInstantApp || splitInstalled)) {
                                         Log.v(TAG, "Installing " + pi);
                                         app.thread.scheduleInstallProvider(pi);
                                     } else {
