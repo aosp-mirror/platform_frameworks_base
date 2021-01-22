@@ -1614,6 +1614,7 @@ package android {
     field public static final int windowAllowReturnTransitionOverlap = 16843835; // 0x101043b
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
+    field public static final int windowBackgroundBlurRadius = 16844331; // 0x101062b
     field public static final int windowBackgroundFallback = 16844035; // 0x1010503
     field public static final int windowBlurBehindEnabled = 16844316; // 0x101061c
     field public static final int windowBlurBehindRadius = 16844315; // 0x101061b
@@ -49353,6 +49354,7 @@ package android.view {
     method public void setAllowEnterTransitionOverlap(boolean);
     method public void setAllowReturnTransitionOverlap(boolean);
     method public void setAttributes(android.view.WindowManager.LayoutParams);
+    method public void setBackgroundBlurRadius(int);
     method public abstract void setBackgroundDrawable(android.graphics.drawable.Drawable);
     method public void setBackgroundDrawableResource(@DrawableRes int);
     method public void setCallback(android.view.Window.Callback);

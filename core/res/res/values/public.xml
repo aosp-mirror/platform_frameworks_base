@@ -3065,6 +3065,7 @@
     <public name="clipToOutline" />
     <public name="edgeEffectType" />
     <public name="knownCerts" />
+    <public name="windowBackgroundBlurRadius"/>
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">
