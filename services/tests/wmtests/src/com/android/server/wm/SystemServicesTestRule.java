@@ -297,7 +297,7 @@ public class SystemServicesTestRule implements TestRule {
         doReturn(true).when(mWmService.mRoot).hasAwakeDisplay();
         // Called when moving activity to pinned stack.
         doNothing().when(mWmService.mRoot).ensureActivitiesVisible(any(),
-                anyInt(), anyBoolean(), anyBoolean(), anyBoolean());
+                anyInt(), anyBoolean(), anyBoolean());
         spyOn(mWmService.mDisplayWindowSettings);
         spyOn(mWmService.mDisplayWindowSettingsProvider);
 

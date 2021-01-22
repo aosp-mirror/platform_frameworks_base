@@ -5606,6 +5606,10 @@ class Task extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    final boolean startPausingLocked(boolean uiSleeping, ActivityRecord resuming, String reason) {
+        return startPausingLocked(mTaskSupervisor.mUserLeaving, uiSleeping, resuming, reason);
+    }
+
     /**
      * Start pausing the currently resumed activity.  It is an error to call this if there
      * is already an activity being paused or there is no resumed activity.
@@ -5870,8 +5874,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */,
-                mTaskSupervisor.mUserLeaving);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
 
     /**
@@ -5888,16 +5891,14 @@ class Task extends WindowContainer<WindowContainer> {
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
      *                      if the screen should be frozen as part of
      *                      {@link mEnsureActivitiesVisibleHelper}.
-     * @param userLeaving Flag indicating whether a userLeaving callback should be issued in the
-     *                      case an activity is being set to invisible.
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
+            boolean preserveWindows, boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
-                    starting, configChanges, preserveWindows, notifyClients, userLeaving),
+                    starting, configChanges, preserveWindows, notifyClients),
                     true /* traverseTopToBottom */);
 
             // Notify WM shell that task visibilities may have changed
@@ -6093,11 +6094,6 @@ class Task extends WindowContainer<WindowContainer> {
 
         mRootWindowContainer.cancelInitializingActivities();
 
-        // Remember how we'll process this pause/resume situation, and ensure
-        // that the state is reset however we wind up proceeding.
-        boolean userLeaving = mTaskSupervisor.mUserLeaving;
-        mTaskSupervisor.mUserLeaving = false;
-
         if (!hasRunningActivity) {
             // There are no activities left in the stack, let's look somewhere else.
             return resumeNextFocusableActivityWhenRootTaskIsEmpty(prev, options);
@@ -6117,7 +6113,7 @@ class Task extends WindowContainer<WindowContainer> {
             // a fullscreen window forward to cover another freeform activity.)
             if (taskDisplayArea.inMultiWindowMode()) {
                 taskDisplayArea.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */, userLeaving);
+                        false /* preserveWindows */, true /* notifyClients */);
             }
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Top activity "
                     + "resumed %s", next);
@@ -6182,19 +6178,12 @@ class Task extends WindowContainer<WindowContainer> {
             // doesn't represent the last resumed activity. However, the last focus stack does if
             // it isn't null.
             lastResumed = lastFocusedRootTask.getResumedActivity();
-            if (userLeaving && inMultiWindowMode() && lastFocusedRootTask.shouldBeVisible(next)) {
-                // The user isn't leaving if this stack is the multi-window mode and the last
-                // focused stack should still be visible.
-                if(DEBUG_USER_LEAVING) Slog.i(TAG_USER_LEAVING, "Overriding userLeaving to false"
-                        + " next=" + next + " lastResumed=" + lastResumed);
-                userLeaving = false;
-            }
         }
 
-        boolean pausing = taskDisplayArea.pauseBackTasks(userLeaving, next);
+        boolean pausing = taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Pausing %s", mResumedActivity);
-            pausing |= startPausingLocked(userLeaving, false /* uiSleeping */, next,
+            pausing |= startPausingLocked(false /* uiSleeping */, next,
                     "resumeTopActivityInnerLocked");
         }
         if (pausing) {

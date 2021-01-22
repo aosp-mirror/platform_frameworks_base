@@ -843,7 +843,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (mPreQTopResumedActivity != null && mPreQTopResumedActivity.isState(RESUMED)) {
                 final Task task = mPreQTopResumedActivity.getTask();
                 if (task != null) {
-                    task.startPausingLocked(false /* userLeaving */, false /* uiSleeping */,
+                    boolean userLeaving = task.shouldBeVisible(null);
+                    task.startPausingLocked(userLeaving, false /* uiSleeping */,
                             activity, "top-resumed-changed");
                 }
             }

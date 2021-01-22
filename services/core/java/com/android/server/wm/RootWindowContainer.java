@@ -1796,8 +1796,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Passing null here for 'starting' param value, so that visibility of actual starting
         // activity will be properly updated.
         ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */, false /* notifyClients */,
-                mTaskSupervisor.mUserLeaving);
+                false /* preserveWindows */, false /* notifyClients */);
 
         if (displayId == INVALID_DISPLAY) {
             // The caller didn't provide a valid display id, skip updating config.
@@ -1973,15 +1972,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */,
-                mTaskSupervisor.mUserLeaving);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
 
     /**
      * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
+            boolean preserveWindows, boolean notifyClients) {
         if (mTaskSupervisor.inActivityVisibilityUpdate()) {
             // Don't do recursive work.
             return;
@@ -1993,7 +1991,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
                 final DisplayContent display = getChildAt(displayNdx);
                 display.ensureActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients, userLeaving);
+                        notifyClients);
             }
         } finally {
             mTaskSupervisor.endActivityVisibilityUpdate();
