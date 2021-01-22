@@ -646,7 +646,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, receiver, userId, operationId, restricted, opPackageName,
                     cookie, false /* requireConfirmation */, mSensorId, isStrongBiometric,
-                    statsClient, mLockoutTracker, mUsageStats);
+                    statsClient, mLockoutTracker, mUsageStats, isKeyguard);
             mScheduler.scheduleClientMonitor(client);
         });
     }

@@ -466,7 +466,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         operationId, restricted, opPackageName, cookie,
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                         mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
-                        mUdfpsOverlayController);
+                        mUdfpsOverlayController, isKeyguard);
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);

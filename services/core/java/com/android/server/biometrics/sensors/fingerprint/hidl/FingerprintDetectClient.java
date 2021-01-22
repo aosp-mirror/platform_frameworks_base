@@ -83,7 +83,8 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+        UdfpsHelper.showUdfpsOverlay(getSensorId(),
+                IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD,
                 mUdfpsOverlayController);
         try {
             getFreshDaemon().authenticate(0 /* operationId */, getTargetUserId());
