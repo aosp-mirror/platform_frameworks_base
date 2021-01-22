@@ -127,7 +127,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE;
-import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_STACKS;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.SEAMLESS_ROTATION_TIMEOUT_DURATION;
@@ -748,8 +747,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     private final Consumer<WindowState> mPerformLayout = w -> {
         // Don't do layout of a window if it is not visible, or soon won't be visible, to avoid
         // wasting time and funky changes while a window is animating away.
-        final boolean gone = (mTmpWindow != null && mWmService.mPolicy.canBeHiddenByKeyguardLw(w))
-                || w.isGoneForLayout();
+        final boolean gone = w.isGoneForLayout();
 
         if (DEBUG_LAYOUT && !w.mLayoutAttached) {
             Slog.v(TAG, "1ST PASS " + w + ": gone=" + gone + " mHaveFrame=" + w.mHaveFrame
@@ -824,9 +822,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // If this view is GONE, then skip it -- keep the current frame, and let the caller
             // know so they can ignore it if they want.  (We do the normal layout for INVISIBLE
             // windows, since that means "perform layout as normal, just don't display").
-            if (mTmpWindow != null && mWmService.mPolicy.canBeHiddenByKeyguardLw(w)) {
-                return;
-            }
             if ((w.mViewVisibility != GONE && w.mRelayoutCalled) || !w.mHaveFrame
                     || w.mLayoutNeeded) {
                 if (mTmpInitial) {
@@ -979,8 +974,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mSystemGestureExclusionLimit = mWmService.mConstants.mSystemGestureExclusionLimitDp
                 * mDisplayMetrics.densityDpi / DENSITY_DEFAULT;
         isDefaultDisplay = mDisplayId == DEFAULT_DISPLAY;
-        mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo,
-                calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
+        mInsetsStateController = new InsetsStateController(this);
+        mDisplayFrames = new DisplayFrames(mDisplayId, mInsetsStateController.getRawInsetsState(),
+                mDisplayInfo, calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
 
         mAppTransition = new AppTransition(mWmService.mContext, mWmService, this);
@@ -1063,7 +1059,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         onDisplayChanged(this);
 
         mInputMonitor = new InputMonitor(mWmService, this);
-        mInsetsStateController = new InsetsStateController(this);
         mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Creating display=" + display);
@@ -1687,7 +1682,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mTmpConfiguration.unset();
         final DisplayInfo info = computeScreenConfiguration(mTmpConfiguration, rotation);
         final WmDisplayCutout cutout = calculateDisplayCutoutForRotation(rotation);
-        final DisplayFrames displayFrames = new DisplayFrames(mDisplayId, info, cutout);
+        final DisplayFrames displayFrames = new DisplayFrames(mDisplayId, new InsetsState(), info,
+                cutout);
         token.applyFixedRotationTransform(info, displayFrames, mTmpConfiguration);
     }
 
@@ -1855,9 +1851,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         mDisplayPolicy.updateConfigurationAndScreenSizeDependentBehaviors();
         mDisplayRotation.configure(width, height, shortSizeDp, longSizeDp);
-
-        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
-                calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
     }
 
     /**
@@ -1916,6 +1909,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mCompatibleScreenScale = CompatibilityInfo.computeCompatibleScaling(mDisplayMetrics,
                     mCompatDisplayMetrics);
         }
+
+        onDisplayInfoChanged();
 
         return mDisplayInfo;
     }
@@ -2466,7 +2461,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
 
+        onDisplayInfoChanged();
         onDisplayChanged(this);
+    }
+
+    void onDisplayInfoChanged() {
+        final DisplayInfo info = mDisplayInfo;
+        mDisplayFrames.onDisplayInfoUpdated(info, calculateDisplayCutoutForRotation(info.rotation));
+        mInputMonitor.layoutInputConsumers(info.logicalWidth, info.logicalHeight);
+        mDisplayPolicy.onDisplayInfoChanged(info);
     }
 
     @Override
@@ -4185,17 +4188,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
         clearLayoutNeeded();
 
-        final int dw = mDisplayInfo.logicalWidth;
-        final int dh = mDisplayInfo.logicalHeight;
         if (DEBUG_LAYOUT) {
             Slog.v(TAG, "-------------------------------------");
-            Slog.v(TAG, "performLayout: needed=" + isLayoutNeeded() + " dw=" + dw
-                    + " dh=" + dh);
+            Slog.v(TAG, "performLayout: dw=" + mDisplayInfo.logicalWidth
+                    + " dh=" + mDisplayInfo.logicalHeight);
         }
-
-        mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
-                calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
-        mDisplayPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
 
         // Used to indicate that we have processed the insets windows. This needs to be after
         // beginLayoutLw to ensure the raw insets state display related info is initialized.
@@ -4209,18 +4206,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (seq < 0) seq = 0;
         mLayoutSeq = seq;
 
-        // Used to indicate that we have processed the dream window and all additional windows are
-        // behind it.
-        mTmpWindow = null;
         mTmpInitial = initial;
 
 
         // First perform layout of any root windows (not attached to another window).
         forAllWindows(mPerformLayout, true /* traverseTopToBottom */);
-
-        // Used to indicate that we have processed the dream window and all additional attached
-        // windows are behind it.
-        mTmpWindow = null;
 
         // Now perform layout of attached windows, which usually depend on the position of the
         // window they are attached to. XXX does not deal with windows that are attached to windows
@@ -4228,13 +4218,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         forAllWindows(mPerformLayoutAttached, true /* traverseTopToBottom */);
 
         // Window frames may have changed. Tell the input dispatcher about it.
-        mInputMonitor.layoutInputConsumers(dw, dh);
         mInputMonitor.setUpdateInputWindowsNeededLw();
         if (updateInputWindows) {
             mInputMonitor.updateInputWindowsLw(false /*force*/);
         }
-
-        mWmService.mH.sendEmptyMessage(UPDATE_MULTI_WINDOW_STACKS);
     }
 
     /**

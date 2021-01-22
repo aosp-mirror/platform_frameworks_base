@@ -404,7 +404,7 @@ class InsetsSourceProvider {
         updateVisibility();
     }
 
-    private void updateVisibility() {
+    protected void updateVisibility() {
         mSource.setVisible(mServerVisible && (isMirroredSource() || mClientVisible));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",

@@ -4155,20 +4155,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mStringNameCache;
     }
 
-    void transformClipRectFromScreenToSurfaceSpace(Rect clipRect) {
-        if (mHScale == 1 && mVScale == 1) {
-            return;
-        }
-        if (mHScale >= 0) {
-            clipRect.left = (int) (clipRect.left / mHScale);
-            clipRect.right = (int) Math.ceil(clipRect.right / mHScale);
-        }
-        if (mVScale >= 0) {
-            clipRect.top = (int) (clipRect.top / mVScale);
-            clipRect.bottom = (int) Math.ceil(clipRect.bottom / mVScale);
-        }
-    }
-
     private void applyGravityAndUpdateFrame(WindowFrames windowFrames, Rect containingFrame,
             Rect displayFrame) {
         final int pw = containingFrame.width();

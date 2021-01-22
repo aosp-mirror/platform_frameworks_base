@@ -33,8 +33,6 @@ import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.ActivityStarter.Request;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.PHASE_BOUNDS;
 import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
@@ -42,8 +40,6 @@ import static com.android.server.wm.LaunchParamsController.LaunchParamsModifier.
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -1477,12 +1473,6 @@ public class TaskLaunchParamsModifierTests extends WindowTestsBase {
         display.getConfiguration().orientation = ORIENTATION_LANDSCAPE;
         configInsetsState(display.getInsetsStateController().getRawInsetsState(),
                 DISPLAY_BOUNDS, DISPLAY_STABLE_BOUNDS);
-
-        // We didn't set up the overall environment for this test, so we need to mute the side
-        // effect of layout passes that loosen the stable frame.
-        final DisplayPolicy policy = display.getDisplayPolicy();
-        spyOn(policy);
-        doNothing().when(policy).beginLayoutLw(any(), anyInt());
         return display;
     }
 
