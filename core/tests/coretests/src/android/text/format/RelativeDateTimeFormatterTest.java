@@ -755,8 +755,8 @@ public class RelativeDateTimeFormatterTest {
         final Locale locale = new Locale("fr");
         android.icu.text.RelativeDateTimeFormatter icuFormatter =
                 android.icu.text.RelativeDateTimeFormatter.getInstance(locale);
-        assertEquals("D à T", icuFormatter.combineDateAndTime("D", "T"));
+        assertEquals("D, T", icuFormatter.combineDateAndTime("D", "T"));
         // Ensure single quote ' and curly braces {} are not interpreted in input values.
-        assertEquals("D'x' à T{0}", icuFormatter.combineDateAndTime("D'x'", "T{0}"));
+        assertEquals("D'x', T{0}", icuFormatter.combineDateAndTime("D'x'", "T{0}"));
     }
 }
