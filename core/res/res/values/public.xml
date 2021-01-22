@@ -3049,10 +3049,7 @@
     <public name="windowLayoutAffinity" />
     <public name="canPauseRecording" />
     <!-- @hide -->
-    <!-- @hide @SystemApi -->
     <public name="windowBackgroundBlurRadius"/>
-    <!-- @hide @SystemApi -->
-    <public name="windowBackgroundBlurEnabled"/>
     <public name="requireDeviceScreenOn" />
     <public name="pathSuffix" />
     <public name="sspSuffix" />
