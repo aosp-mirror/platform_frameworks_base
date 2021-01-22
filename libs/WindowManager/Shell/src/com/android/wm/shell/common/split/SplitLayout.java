@@ -101,6 +101,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
     private int mOrientation;
     private int mRotation;
 
+    private final boolean mDimNonImeSide;
+
     public SplitLayout(String windowName, Context context, Configuration configuration,
             SplitLayoutHandler splitLayoutHandler,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks,
@@ -125,6 +127,8 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext, mRootBounds);
         resetDividerPosition();
+
+        mDimNonImeSide = resources.getBoolean(R.bool.config_dimNonImeAttachedSide);
     }
 
     private int getDividerInsets(Resources resources, Display display) {
@@ -719,10 +723,10 @@ public final class SplitLayout implements DisplayInsetsController.OnInsetsChange
             // Update target dim values
             mLastDim1 = mDimValue1;
             mTargetDim1 = imeTargetPosition == SPLIT_POSITION_BOTTOM_OR_RIGHT && showing
-                    ? ADJUSTED_NONFOCUS_DIM : 0.0f;
+                    && mDimNonImeSide ? ADJUSTED_NONFOCUS_DIM : 0.0f;
             mLastDim2 = mDimValue2;
             mTargetDim2 = imeTargetPosition == SPLIT_POSITION_TOP_OR_LEFT && showing
-                    ? ADJUSTED_NONFOCUS_DIM : 0.0f;
+                    && mDimNonImeSide ? ADJUSTED_NONFOCUS_DIM : 0.0f;
 
             // Calculate target bounds offset for IME
             mLastYOffset = mYOffsetForIme;
