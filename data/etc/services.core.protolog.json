@@ -205,12 +205,6 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/TaskOrganizerController.java"
     },
-    "-1890326172": {
-      "message": "no-history finish of %s on new resume",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
-    },
     "-1884933373": {
       "message": "enableScreenAfterBoot: mDisplayEnabled=%b mForceDisplayEnabled=%b mShowingBootMessages=%b mSystemBooted=%b. %s",
       "level": "INFO",
@@ -1428,6 +1422,12 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-484194149": {
+      "message": "no-history finish of %s on new resume",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/ActivityTaskSupervisor.java"
     },
     "-481924678": {
       "message": "handleNotObscuredLocked w: %s, w.mHasSurface: %b, w.isOnScreen(): %b, w.isDisplayedLw(): %b, w.mAttrs.userActivityTimeout: %d",

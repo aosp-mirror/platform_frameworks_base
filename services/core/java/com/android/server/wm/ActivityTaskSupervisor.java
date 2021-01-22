@@ -277,6 +277,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
      * settle down before doing so.  It contains ActivityRecord objects. */
     final ArrayList<ActivityRecord> mFinishingActivities = new ArrayList<>();
 
+    /**
+     * Activities that specify No History must be removed once the user navigates away from them.
+     * If the device goes to sleep with such an activity in the paused state then we save it
+     * here and finish it later if another activity replaces it on wakeup.
+     */
+    final ArrayList<ActivityRecord> mNoHistoryActivities = new ArrayList<>();
+
     /** List of activities whose multi-window mode changed that we need to report to the
      * application */
     private final ArrayList<ActivityRecord> mMultiWindowModeChangedActivities = new ArrayList<>();
@@ -476,6 +483,20 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         final int currentTaskId = mCurTaskIdForUser.get(userId, -1);
         if (taskId > currentTaskId) {
             mCurTaskIdForUser.put(userId, taskId);
+        }
+    }
+
+    void finishNoHistoryActivitiesIfNeeded(ActivityRecord next) {
+        for (int i = mNoHistoryActivities.size() - 1; i >= 0; --i) {
+            final ActivityRecord noHistoryActivity = mNoHistoryActivities.get(i);
+            if (!noHistoryActivity.finishing && noHistoryActivity != next
+                    && next.occludesParent()
+                    && noHistoryActivity.getDisplayId() == next.getDisplayId()) {
+                ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s on new resume",
+                        noHistoryActivity);
+                noHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);
+                mNoHistoryActivities.remove(noHistoryActivity);
+            }
         }
     }
 

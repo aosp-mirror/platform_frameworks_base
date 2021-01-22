@@ -580,13 +580,6 @@ class Task extends WindowContainer<WindowContainer> {
     ActivityRecord mLastPausedActivity = null;
 
     /**
-     * Activities that specify No History must be removed once the user navigates away from them.
-     * If the device goes to sleep with such an activity in the paused state then we save it here
-     * and finish it later if another activity replaces it on wakeup.
-     */
-    ActivityRecord mLastNoHistoryActivity = null;
-
-    /**
      * Current activity that is resumed, or null if there is none.
      * Only set at leaf tasks.
      */
@@ -5689,7 +5682,9 @@ class Task extends WindowContainer<WindowContainer> {
         ProtoLog.v(WM_DEBUG_STATES, "Moving to PAUSING: %s", prev);
         mPausingActivity = prev;
         mLastPausedActivity = prev;
-        mLastNoHistoryActivity = prev.isNoHistory() ? prev : null;
+        if (prev.isNoHistory() && !mTaskSupervisor.mNoHistoryActivities.contains(prev)) {
+            mTaskSupervisor.mNoHistoryActivities.add(prev);
+        }
         prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
 
@@ -5735,13 +5730,13 @@ class Task extends WindowContainer<WindowContainer> {
                     Slog.w(TAG, "Exception thrown during pause", e);
                     mPausingActivity = null;
                     mLastPausedActivity = null;
-                    mLastNoHistoryActivity = null;
+                    mTaskSupervisor.mNoHistoryActivities.remove(prev);
                 }
             }
         } else {
             mPausingActivity = null;
             mLastPausedActivity = null;
-            mLastNoHistoryActivity = null;
+            mTaskSupervisor.mNoHistoryActivities.remove(prev);
         }
 
         // If we are not going to sleep, we want to ensure the device is
@@ -6249,13 +6244,8 @@ class Task extends WindowContainer<WindowContainer> {
         // If the most recent activity was noHistory but was only stopped rather
         // than stopped+finished because the device went to sleep, we need to make
         // sure to finish it as we're making a new activity topmost.
-        if (shouldSleepActivities() && mLastNoHistoryActivity != null
-                && !mLastNoHistoryActivity.finishing
-                && mLastNoHistoryActivity != next) {
-            ProtoLog.d(WM_DEBUG_STATES, "no-history finish of %s on new resume",
-                    mLastNoHistoryActivity);
-            mLastNoHistoryActivity.finishIfPossible("resume-no-history", false /* oomAdj */);
-            mLastNoHistoryActivity = null;
+        if (shouldSleepActivities()) {
+            mTaskSupervisor.finishNoHistoryActivitiesIfNeeded(next);
         }
 
         if (prev != null && prev != next && next.nowVisible) {
@@ -7236,8 +7226,10 @@ class Task extends WindowContainer<WindowContainer> {
             isPausingDied = true;
         }
         if (mLastPausedActivity != null && mLastPausedActivity.app == app) {
+            if (mLastPausedActivity.isNoHistory()) {
+                mTaskSupervisor.mNoHistoryActivities.remove(mLastPausedActivity);
+            }
             mLastPausedActivity = null;
-            mLastNoHistoryActivity = null;
         }
         return isPausingDied;
     }
@@ -7273,8 +7265,6 @@ class Task extends WindowContainer<WindowContainer> {
         if (dumpAll) {
             printed |= printThisActivity(pw, mLastPausedActivity, dumpPackage, false,
                     "    mLastPausedActivity: ", null);
-            printed |= printThisActivity(pw, mLastNoHistoryActivity, dumpPackage,
-                    false, "    mLastNoHistoryActivity: ", null);
         }
 
         printed |= dumpActivities(fd, pw, dumpAll, dumpClient, dumpPackage, false, headerPrinter);

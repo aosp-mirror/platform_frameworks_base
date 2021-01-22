@@ -2883,6 +2883,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final Transition newTransition = (!mAtmService.getTransitionController().isCollecting()
                     && mAtmService.getTransitionController().getTransitionPlayer() != null)
                     ? mAtmService.getTransitionController().createTransition(TRANSIT_CLOSE) : null;
+            mTaskSupervisor.mNoHistoryActivities.remove(this);
             makeFinishingLocked();
             // Make a local reference to its task since this.task could be set to null once this
             // activity is destroyed and detached from task.
