@@ -157,7 +157,6 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         });
         options.setLaunchCookie(launchCookie);
         options.setLaunchWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
-        options.setTaskAlwaysOnTop(true);
     }
 
     /**
