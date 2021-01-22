@@ -2759,18 +2759,6 @@ package android.debug {
 
 }
 
-package android.graphics.drawable {
-
-  public final class BackgroundBlurDrawable extends android.graphics.drawable.Drawable {
-    ctor @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR) public BackgroundBlurDrawable();
-    method public void setBlurRadius(int);
-    method public void setColor(@ColorInt int);
-    method public void setCornerRadius(float);
-    method public void setCornerRadius(float, float, float, float);
-  }
-
-}
-
 package android.graphics.fonts {
 
   public class FontManager {
