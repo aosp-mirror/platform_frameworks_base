@@ -38,6 +38,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.Rational;
 import android.util.Size;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.window.WindowContainerToken;
 
@@ -45,6 +46,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
@@ -196,11 +198,11 @@ public class PipTaskOrganizerTest extends ShellTestCase {
 
     private void preparePipTaskOrg() {
         final DisplayInfo info = new DisplayInfo();
-        mPipBoundsState.setDisplayInfo(info);
+        mPipBoundsState.setDisplayLayout(new DisplayLayout(info,
+                mContext.getResources(), true, true));
         when(mMockPipBoundsAlgorithm.getEntryDestinationBounds()).thenReturn(new Rect());
         when(mMockPipBoundsAlgorithm.getAdjustedDestinationBounds(any(), anyFloat()))
                 .thenReturn(new Rect());
-        mPipBoundsState.setDisplayInfo(info);
         mSpiedPipTaskOrganizer.setOneShotAnimationType(PipAnimationController.ANIM_TYPE_ALPHA);
         doNothing().when(mSpiedPipTaskOrganizer).enterPipWithAlphaAnimation(any(), anyLong());
         doNothing().when(mSpiedPipTaskOrganizer).scheduleAnimateResizePip(any(), anyInt(), any());
