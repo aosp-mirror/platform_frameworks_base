@@ -4133,11 +4133,6 @@
     <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_MODE"
         android:protectionLevel="signature" />
 
-    <!-- @SystemApi Allows an application to use background blur.
-         @hide -->
-    <permission android:name="android.permission.USE_BACKGROUND_BLUR"
-        android:protectionLevel="signature|privileged" />
-
     <!-- Allows an application to control the lights on the device.
          @hide
          @SystemApi
