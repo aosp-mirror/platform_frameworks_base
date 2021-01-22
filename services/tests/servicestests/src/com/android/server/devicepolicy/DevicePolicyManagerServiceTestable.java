@@ -352,8 +352,8 @@ public class DevicePolicyManagerServiceTestable extends DevicePolicyManagerServi
         }
 
         @Override
-        boolean userManagerIsSplitSystemUser() {
-            return services.userManagerForMock.isSplitSystemUser();
+        boolean userManagerIsHeadlessSystemUserMode() {
+            return services.userManagerForMock.isHeadlessSystemUserMode();
         }
 
         @Override
