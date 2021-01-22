@@ -39,11 +39,6 @@ public abstract class NetworkPolicyManagerInternal {
     public abstract void resetUserState(int userId);
 
     /**
-     * @return true if the given uid is restricted from doing networking on metered networks.
-     */
-    public abstract boolean isUidRestrictedOnMeteredNetworks(int uid);
-
-    /**
      * Figure out if networking is blocked for a given set of conditions.
      *
      * This is used by ConnectivityService via passing stale copies of conditions, so it must not
