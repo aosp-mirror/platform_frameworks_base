@@ -17,6 +17,7 @@ package com.android.server.audio;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -27,6 +28,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.util.Log;
@@ -58,7 +60,7 @@ public class AudioDeviceBrokerTest {
     @Mock private AudioService mMockAudioService;
     @Spy private AudioDeviceInventory mSpyDevInventory;
     @Spy private AudioSystemAdapter mSpyAudioSystem;
-    private SystemServerAdapter mSystemServer;
+    @Spy private SystemServerAdapter mSpySystemServer;
 
     private BluetoothDevice mFakeBtDevice;
 
@@ -69,9 +71,9 @@ public class AudioDeviceBrokerTest {
         mMockAudioService = mock(AudioService.class);
         mSpyAudioSystem = spy(new NoOpAudioSystemAdapter());
         mSpyDevInventory = spy(new AudioDeviceInventory(mSpyAudioSystem));
-        mSystemServer = new NoOpSystemServerAdapter();
+        mSpySystemServer = spy(new NoOpSystemServerAdapter());
         mAudioDeviceBroker = new AudioDeviceBroker(mContext, mMockAudioService, mSpyDevInventory,
-                mSystemServer);
+                mSpySystemServer);
         mSpyDevInventory.setDeviceBroker(mAudioDeviceBroker);
 
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
@@ -170,6 +172,30 @@ public class AudioDeviceBrokerTest {
                 // guarantee single connection since because of media playback the disconnection
                 // is supposed to be delayed, and thus cancelled because of the connection
                 true);
+    }
+
+    /**
+     * Test that device wired state intents are broadcasted on connection state change
+     * @throws Exception
+     */
+    @Test
+    public void testSetWiredDeviceConnectionState() throws Exception {
+        Log.i(TAG, "starting postSetWiredDeviceConnectionState");
+
+        final String address = "testAddress";
+        final String name = "testName";
+        final String caller = "testCaller";
+
+        doNothing().when(mSpySystemServer).broadcastStickyIntentToCurrentProfileGroup(
+                any(Intent.class));
+
+        mSpyDevInventory.setWiredDeviceConnectionState(AudioSystem.DEVICE_OUT_WIRED_HEADSET,
+                AudioService.CONNECTION_STATE_CONNECTED, address, name, caller);
+        Thread.sleep(MAX_MESSAGE_HANDLING_DELAY_MS);
+
+        // Verify that the sticky intent is broadcasted
+        verify(mSpySystemServer, times(1)).broadcastStickyIntentToCurrentProfileGroup(
+                any(Intent.class));
     }
 
     private void doTestConnectionDisconnectionReconnection(int delayAfterDisconnection,
