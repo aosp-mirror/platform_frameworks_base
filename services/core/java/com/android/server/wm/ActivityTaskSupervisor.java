@@ -1704,15 +1704,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     + " task=" + task);
         }
 
-        // It is ok to move the task to multi window only if the task supports multi window.
-        if (inMultiWindowMode && !stack.inPinnedWindowingMode()
-                && task.supportsNonPipMultiWindow()) {
-            return stack;
+        if (stack.inPinnedWindowingMode()) {
+            throw new IllegalArgumentException("No support to reparent to PIP, task=" + task);
         }
 
         // Leave the task in its current stack or a fullscreen stack if it isn't resizeable and the
         // preferred stack is in multi-window mode.
-        if (inMultiWindowMode && !task.isResizeable()) {
+        if (inMultiWindowMode && !task.supportsMultiWindow()) {
             Slog.w(TAG, "Can not move unresizeable task=" + task + " to multi-window stack=" + stack
                     + " Moving to a fullscreen stack instead.");
             if (prevStack != null) {

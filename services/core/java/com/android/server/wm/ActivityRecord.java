@@ -2288,7 +2288,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // An activity can not be docked even if it is considered resizeable because it only
         // supports picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && mAtmService.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
+                && mAtmService.mSupportsSplitScreenMultiWindow && supportsMultiWindow();
     }
 
     /**
@@ -2298,17 +2298,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     boolean supportsFreeform() {
         return mAtmService.mSupportsFreeformWindowManagement
                 // Either the activity is resizable, or we allow size compat in freeform.
-                && (supportsResizeableMultiWindow() || mAtmService.mSizeCompatFreeform);
+                && (supportsMultiWindow() || mAtmService.mSizeCompatFreeform);
     }
 
     /**
-     * @return whether this activity supports non-PiP multi-window.
+     * @return whether this activity supports multi-window.
      */
-    boolean supportsResizeableMultiWindow() {
+    boolean supportsMultiWindow() {
         return mAtmService.mSupportsMultiWindow && !isActivityTypeHome()
-                && (ActivityInfo.isResizeableMode(info.resizeMode)
-                    || mAtmService.mForceResizableActivities
-                    || mAtmService.mSupportsNonResizableMultiWindow);
+                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**
