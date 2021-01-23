@@ -885,6 +885,45 @@ public final class PowerManager {
     })
     public @interface LocationPowerSaveMode {}
 
+    /**
+     * In this mode, all active SoundTrigger recognitions are enabled by the SoundTrigger system
+     * service.
+     * @hide
+     */
+    @SystemApi
+    public static final int SOUND_TRIGGER_MODE_ALL_ENABLED = 0;
+    /**
+     * In this mode, only privileged components of the SoundTrigger system service should be
+     * enabled. This functionality is to be used to limit SoundTrigger recognitions to those only
+     * deemed necessary by the system.
+     * @hide
+     */
+    @SystemApi
+    public static final int SOUND_TRIGGER_MODE_CRITICAL_ONLY = 1;
+    /**
+     * In this mode, all active SoundTrigger recognitions should be disabled by the SoundTrigger
+     * system service.
+     * @hide
+     */
+    @SystemApi
+    public static final int SOUND_TRIGGER_MODE_ALL_DISABLED = 2;
+
+    /** @hide */
+    public static final int MIN_SOUND_TRIGGER_MODE = SOUND_TRIGGER_MODE_ALL_ENABLED;
+    /** @hide */
+    public static final int MAX_SOUND_TRIGGER_MODE = SOUND_TRIGGER_MODE_ALL_DISABLED;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SOUND_TRIGGER_MODE_"}, value = {
+            SOUND_TRIGGER_MODE_ALL_ENABLED,
+            SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+            SOUND_TRIGGER_MODE_ALL_DISABLED,
+    })
+    public @interface SoundTriggerPowerSaveMode {}
+
     /** @hide */
     public static String locationPowerSaveModeToString(@LocationPowerSaveMode int mode) {
         switch (mode) {
@@ -1830,6 +1869,26 @@ public final class PowerManager {
             return LOCATION_MODE_NO_CHANGE;
         }
         return powerSaveState.locationMode;
+    }
+
+    /**
+     * Returns how SoundTrigger features should behave when battery saver is on. When battery saver
+     * is off, this will always return {@link #SOUND_TRIGGER_MODE_ALL_ENABLED}.
+     *
+     * <p>This API is normally only useful for components that provide use SoundTrigger features.
+     *
+     * @see #isPowerSaveMode()
+     * @see #ACTION_POWER_SAVE_MODE_CHANGED
+     *
+     * @hide
+     */
+    @SoundTriggerPowerSaveMode
+    public int getSoundTriggerPowerSaveMode() {
+        final PowerSaveState powerSaveState = getPowerSaveState(ServiceType.SOUND);
+        if (!powerSaveState.batterySaverEnabled) {
+            return SOUND_TRIGGER_MODE_ALL_ENABLED;
+        }
+        return powerSaveState.soundTriggerMode;
     }
 
     /**

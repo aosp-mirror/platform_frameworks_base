@@ -237,6 +237,7 @@ package android {
     field public static final String SET_WALLPAPER_COMPONENT = "android.permission.SET_WALLPAPER_COMPONENT";
     field public static final String SHOW_KEYGUARD_MESSAGE = "android.permission.SHOW_KEYGUARD_MESSAGE";
     field public static final String SHUTDOWN = "android.permission.SHUTDOWN";
+    field public static final String SOUND_TRIGGER_RUN_IN_BATTERY_SAVER = "android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER";
     field public static final String START_ACTIVITIES_FROM_BACKGROUND = "android.permission.START_ACTIVITIES_FROM_BACKGROUND";
     field public static final String START_FOREGROUND_SERVICES_FROM_BACKGROUND = "android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND";
     field public static final String STATUS_BAR_SERVICE = "android.permission.STATUS_BAR_SERVICE";
@@ -5060,6 +5061,7 @@ package android.media.soundtrigger {
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
+    field public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 16; // 0x10
   }
 
   public abstract static class SoundTriggerDetector.Callback {
@@ -7870,7 +7872,7 @@ package android.os {
     method public boolean getDisableAod();
     method public boolean getDisableLaunchBoost();
     method public boolean getDisableOptionalSensors();
-    method public boolean getDisableSoundTrigger();
+    method @Deprecated public boolean getDisableSoundTrigger();
     method public boolean getDisableVibration();
     method public boolean getEnableAdjustBrightness();
     method public boolean getEnableDataSaver();
@@ -7880,6 +7882,7 @@ package android.os {
     method public boolean getForceAllAppsStandby();
     method public boolean getForceBackgroundCheck();
     method public int getLocationMode();
+    method public int getSoundTriggerMode();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.BatterySaverPolicyConfig> CREATOR;
   }
@@ -7896,7 +7899,7 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableAod(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableLaunchBoost(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableOptionalSensors(boolean);
-    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableSoundTrigger(boolean);
+    method @Deprecated @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableSoundTrigger(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setDisableVibration(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableAdjustBrightness(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setEnableDataSaver(boolean);
@@ -7906,6 +7909,7 @@ package android.os {
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceAllAppsStandby(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setForceBackgroundCheck(boolean);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setLocationMode(int);
+    method @NonNull public android.os.BatterySaverPolicyConfig.Builder setSoundTriggerMode(int);
   }
 
   public final class BatteryStatsManager {
@@ -8266,6 +8270,9 @@ package android.os {
     field public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1; // 0x1
     field public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0; // 0x0
     field public static final String REBOOT_USERSPACE = "userspace";
+    field public static final int SOUND_TRIGGER_MODE_ALL_DISABLED = 2; // 0x2
+    field public static final int SOUND_TRIGGER_MODE_ALL_ENABLED = 0; // 0x0
+    field public static final int SOUND_TRIGGER_MODE_CRITICAL_ONLY = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3; // 0x3
     field public static final int USER_ACTIVITY_EVENT_BUTTON = 1; // 0x1
     field public static final int USER_ACTIVITY_EVENT_OTHER = 0; // 0x0
@@ -10198,6 +10205,7 @@ package android.service.voice {
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION = 4; // 0x4
     field public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 8; // 0x8
+    field public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 16; // 0x10
     field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
     field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
     field public static final int STATE_ERROR = 3; // 0x3

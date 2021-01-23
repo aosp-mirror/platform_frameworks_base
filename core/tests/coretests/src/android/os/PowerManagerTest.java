@@ -53,10 +53,11 @@ public class PowerManagerTest extends AndroidTestCase {
     private native void nativeUnparcelAndVerifyWorkSource(Parcel parcel, int[] uids,
             String[] names);
     private native Parcel nativeObtainPowerSaveStateParcel(boolean batterySaverEnabled,
-            boolean globalBatterySaverEnabled, int locationMode, float brightnessFactor);
+            boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
+            float brightnessFactor);
     private native void nativeUnparcelAndVerifyPowerSaveState(Parcel parcel,
             boolean batterySaverEnabled, boolean globalBatterySaverEnabled,
-            int locationMode, float brightnessFactor);
+            int locationMode, int soundTriggerMode, float brightnessFactor);
     private native Parcel nativeObtainBSPConfigParcel(BatterySaverPolicyConfig bs,
             String[] keys, String[] values);
     private native void nativeUnparcelAndVerifyBSPConfig(Parcel parcel, BatterySaverPolicyConfig bs,
@@ -351,15 +352,17 @@ public class PowerManagerTest extends AndroidTestCase {
      * specified parameters, and verify the PowerSaveState object created from the parcel.
      */
     private void unparcelPowerSaveStateFromNativeAndVerify(boolean batterySaverEnabled,
-            boolean globalBatterySaverEnabled, int locationMode, float brightnessFactor) {
+            boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
+            float brightnessFactor) {
         // Obtain PowerSaveState as parcel from native, with parameters.
         Parcel psParcel = nativeObtainPowerSaveStateParcel(batterySaverEnabled,
-                 globalBatterySaverEnabled, locationMode, brightnessFactor);
+                 globalBatterySaverEnabled, locationMode, soundTriggerMode, brightnessFactor);
         // Verify the parcel.
         PowerSaveState ps = PowerSaveState.CREATOR.createFromParcel(psParcel);
         assertEquals(ps.batterySaverEnabled, batterySaverEnabled);
         assertEquals(ps.globalBatterySaverEnabled, globalBatterySaverEnabled);
         assertEquals(ps.locationMode, locationMode);
+        assertEquals(ps.soundTriggerMode, soundTriggerMode);
         assertEquals(ps.brightnessFactor, brightnessFactor, 0.01f);
     }
 
@@ -368,7 +371,8 @@ public class PowerManagerTest extends AndroidTestCase {
      * specified parameters. Native will verify the PowerSaveState in native is expected.
      */
     private void parcelPowerSaveStateToNativeAndVerify(boolean batterySaverEnabled,
-            boolean globalBatterySaverEnabled, int locationMode, float brightnessFactor) {
+            boolean globalBatterySaverEnabled, int locationMode, int soundTriggerMode,
+            float brightnessFactor) {
         Parcel psParcel = Parcel.obtain();
         // PowerSaveState API blocks Builder.build(), generate a parcel instead of object.
         PowerSaveState ps = new PowerSaveState.Builder()
@@ -380,7 +384,7 @@ public class PowerManagerTest extends AndroidTestCase {
         psParcel.setDataPosition(0);
         //Set the PowerSaveState as parcel to native and verify in native space.
         nativeUnparcelAndVerifyPowerSaveState(psParcel, batterySaverEnabled,
-                globalBatterySaverEnabled, locationMode, brightnessFactor);
+                globalBatterySaverEnabled, locationMode, soundTriggerMode, brightnessFactor);
     }
 
     /**
@@ -463,10 +467,13 @@ public class PowerManagerTest extends AndroidTestCase {
     public void testPowerSaveStateNativeToJava() {
         unparcelPowerSaveStateFromNativeAndVerify(false /* batterySaverEnabled */,
                 false /* globalBatterySaverEnabled */,
-                PowerManager.LOCATION_MODE_FOREGROUND_ONLY, 0.3f /* brightnessFactor */);
+                PowerManager.LOCATION_MODE_FOREGROUND_ONLY,
+                PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+                0.3f /* brightnessFactor */);
         unparcelPowerSaveStateFromNativeAndVerify(true /* batterySaverEnabled */,
                 true  /* globalBatterySaverEnabled */,
                 PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
+                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED,
                 0.5f /* brightnessFactor */);
     }
 
@@ -479,10 +486,13 @@ public class PowerManagerTest extends AndroidTestCase {
     public void testSetPowerSaveStateJavaToNative() {
         parcelPowerSaveStateToNativeAndVerify(false /* batterySaverEnabled */,
                 false /* globalBatterySaverEnabled */,
-                PowerManager.LOCATION_MODE_FOREGROUND_ONLY, 0.3f /* brightnessFactor */);
+                PowerManager.LOCATION_MODE_FOREGROUND_ONLY,
+                PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY,
+                0.3f /* brightnessFactor */);
         parcelPowerSaveStateToNativeAndVerify(true /* batterySaverEnabled */,
                 true  /* globalBatterySaverEnabled */,
                 PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF,
+                PowerManager.SOUND_TRIGGER_MODE_ALL_DISABLED,
                 0.5f /* brightnessFactor */);
     }
 

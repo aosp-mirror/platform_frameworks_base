@@ -41,7 +41,8 @@ interface IVoiceInteractionSoundTriggerSession {
      */
     int startRecognition(int keyphraseId, in String bcp47Locale,
             in IRecognitionStatusCallback callback,
-            in SoundTrigger.RecognitionConfig recognitionConfig);
+            in SoundTrigger.RecognitionConfig recognitionConfig,
+            boolean runInBatterySaver);
     /**
      * Stops a recognition for the given keyphrase.
      * Caller must be the active voice interaction service via
