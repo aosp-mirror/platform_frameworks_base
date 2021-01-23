@@ -346,10 +346,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"इनपुट विधि"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"जगह"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"जगह की जानकारी बंद है"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"कैमरा ब्लॉक करें"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"माइक्रोफ़ोन म्यूट करें"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"मीडिया डिवाइस"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"सिर्फ़ आपातकालीन कॉल"</string>
@@ -420,6 +418,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"स्क्रीन रिकॉर्ड"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"शुरू करें"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"रोकें"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"डिवाइस"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ऐप्लिकेशन बदलने के लिए ऊपर स्वाइप करें"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ऐप्लिकेशन को झटपट स्विच करने के लिए उसे दाईं ओर खींचें और छोड़ें"</string>
@@ -442,6 +444,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"खोलने के लिए फिर से टैप करें"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"खोलने के लिए ऊपर स्वाइप करें"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"फिर से कोशिश करने के लिए ऊपर की ओर स्वाइप करें"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"इस डिवाइस का मालिकाना हक आपके संगठन के पास है"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"इस डिवाइस का मालिकाना हक <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> के पास है"</string>
     <string name="phone_hint" msgid="6682125338461375925">"फ़ोन के लिए आइकॉन से स्वाइप करें"</string>

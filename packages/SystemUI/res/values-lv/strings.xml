@@ -345,10 +345,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Ievades metode"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Atrašanās vieta"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Atrašanās vieta izslēgta"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Bloķēt kameru"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Izslēgt mikrofonu"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Multivides ierīce"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Tikai ārkārtas izsaukumi"</string>
@@ -420,6 +418,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekrāna ierakstīšana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Sākt"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Apturēt"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Ierīce"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Velciet augšup, lai pārslēgtu lietotnes"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Lai ātri pārslēgtu lietotnes, velciet pa labi"</string>
@@ -442,6 +444,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Pieskarieties vēlreiz, lai atvērtu"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Velciet augšup, lai atvērtu"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Velciet augšup, lai mēģinātu vēlreiz"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Šī ierīce pieder jūsu organizācijai."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Šī ierīce pieder organizācijai <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Lai lietotu tālruni, velciet no ikonas"</string>

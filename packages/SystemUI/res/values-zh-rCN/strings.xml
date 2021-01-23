@@ -344,10 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"输入法"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"位置信息：关闭"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"停用摄像头"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"将麦克风静音"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"媒体设备"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"只能拨打紧急呼救电话"</string>
@@ -418,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"屏幕录制"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"开始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"设备"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑动可切换应用"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖动可快速切换应用"</string>
@@ -440,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"此设备归<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>所有"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑动图标即可拨打电话"</string>

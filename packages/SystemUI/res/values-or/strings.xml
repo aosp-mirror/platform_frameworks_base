@@ -344,10 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"ଇନପୁଟ୍ ପଦ୍ଧତି"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ଲୋକେସନ୍‍"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ଲୋକେସନ୍‍ ଅଫ୍‍"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"କ୍ୟାମେରାକୁ ବ୍ଲକ୍ କରନ୍ତୁ"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"ମାଇକ୍ରୋଫୋନକୁ ମ୍ୟୁଟ୍ କରନ୍ତୁ"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ମିଡିଆ ଡିଭାଇସ୍‌"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"କେବଳ ଜରୁରୀକାଳୀନ କଲ୍‌"</string>
@@ -418,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ସ୍କ୍ରିନ୍ ରେକର୍ଡ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ଡିଭାଇସ୍"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"ଆପ୍‌କୁ ବଦଳ କରିବା ପାଇଁ ସ୍ଵାଇପ୍ କରନ୍ତୁ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ଆପ୍‌ଗୁଡ଼ିକ ମଧ୍ୟରେ ଶୀଘ୍ର ବଦଳ କରିବା ପାଇଁ ଡାହାଣକୁ ଡ୍ରାଗ୍ କରନ୍ତୁ"</string>
@@ -440,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ଖୋଲିବା ପାଇଁ ପୁଣି ଟାପ୍‍ କରନ୍ତୁ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ଖୋଲିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ପୁଣି ଚେଷ୍ଟା କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍ କରନ୍ତୁ"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ଏହି ଡିଭାଇସଟି ଆପଣଙ୍କ ସଂସ୍ଥାର ଅଟେ"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ଏହି ଡିଭାଇସଟି <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>ର ଅଟେ"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ଫୋନ୍‍ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>

@@ -416,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"තිර පටිගත කිරීම"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ආරම්භ කරන්න"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"නතර කරන්න"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"උපාංගය"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"යෙදුම් මාරු කිරීමට ස්වයිප් කරන්න"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ඉක්මනින් යෙදුම් මාරු කිරීමට දකුණට අදින්න"</string>
@@ -438,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"විවෘත කිරීමට ස්වයිප් කරන්න"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"නැවත උත්සාහ කිරීමට ඉහළට ස්වයිප් කරන්න"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> සංවිධානයට අයිතිය"</string>
     <string name="phone_hint" msgid="6682125338461375925">"දුරකථනය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
