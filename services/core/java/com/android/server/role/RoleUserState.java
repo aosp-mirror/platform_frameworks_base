@@ -25,15 +25,14 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
-import android.util.Slog;
+import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.dump.DualDumpOutputStream;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.role.persistence.RolesPersistence;
 import com.android.role.persistence.RolesState;
+import com.android.server.role.util.BackgroundThread;
+import com.android.server.role.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -197,7 +196,7 @@ class RoleUserState {
         synchronized (mLock) {
             if (!mRoles.containsKey(roleName)) {
                 mRoles.put(roleName, new ArraySet<>());
-                Slog.i(LOG_TAG, "Added new role: " + roleName);
+                Log.i(LOG_TAG, "Added new role: " + roleName);
                 scheduleWriteFileLocked();
                 return true;
             } else {
@@ -221,7 +220,7 @@ class RoleUserState {
                 if (!roleNames.contains(roleName)) {
                     ArraySet<String> packageNames = mRoles.valueAt(i);
                     if (!packageNames.isEmpty()) {
-                        Slog.e(LOG_TAG, "Holders of a removed role should have been cleaned up,"
+                        Log.e(LOG_TAG, "Holders of a removed role should have been cleaned up,"
                                 + " role: " + roleName + ", holders: " + packageNames);
                     }
                     mRoles.removeAt(i);
@@ -255,7 +254,7 @@ class RoleUserState {
         synchronized (mLock) {
             ArraySet<String> roleHolders = mRoles.get(roleName);
             if (roleHolders == null) {
-                Slog.e(LOG_TAG, "Cannot add role holder for unknown role, role: " + roleName
+                Log.e(LOG_TAG, "Cannot add role holder for unknown role, role: " + roleName
                         + ", package: " + packageName);
                 return false;
             }
@@ -286,7 +285,7 @@ class RoleUserState {
         synchronized (mLock) {
             ArraySet<String> roleHolders = mRoles.get(roleName);
             if (roleHolders == null) {
-                Slog.e(LOG_TAG, "Cannot remove role holder for unknown role, role: " + roleName
+                Log.e(LOG_TAG, "Cannot remove role holder for unknown role, role: " + roleName
                         + ", package: " + packageName);
                 return false;
             }
@@ -330,8 +329,7 @@ class RoleUserState {
         }
 
         if (!mWriteScheduled) {
-            mWriteHandler.sendMessageDelayed(PooledLambda.obtainMessage(RoleUserState::writeFile,
-                    this), WRITE_DELAY_MILLIS);
+            mWriteHandler.postDelayed(this::writeFile, WRITE_DELAY_MILLIS);
             mWriteScheduled = true;
         }
     }

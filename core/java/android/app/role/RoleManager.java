@@ -32,14 +32,12 @@ import android.os.Binder;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.List;
 import java.util.Objects;
@@ -180,12 +178,16 @@ public final class RoleManager {
     private final Object mRoleControllerManagerLock = new Object();
 
     /**
+     * Create a new instance of this class.
+     *
+     * @param context the {@link Context}
+     * @param service the {@link IRoleManager} service
+     *
      * @hide
      */
-    public RoleManager(@NonNull Context context) throws ServiceManager.ServiceNotFoundException {
+    public RoleManager(@NonNull Context context, @NonNull IRoleManager service) {
         mContext = context;
-        mService = IRoleManager.Stub.asInterface(ServiceManager.getServiceOrThrow(
-                Context.ROLE_SERVICE));
+        mService = service;
     }
 
     /**
@@ -747,9 +749,8 @@ public final class RoleManager {
         public void onRoleHoldersChanged(@NonNull String roleName, @UserIdInt int userId) {
             final long token = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(PooledLambda.obtainRunnable(
-                        OnRoleHoldersChangedListener::onRoleHoldersChanged, mListener, roleName,
-                        UserHandle.of(userId)));
+                mExecutor.execute(() ->
+                        mListener.onRoleHoldersChanged(roleName, UserHandle.of(userId)));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
