@@ -24,6 +24,7 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.io.File;
@@ -90,5 +91,10 @@ public class FaceUpdateActiveUserClient extends HalClientMonitor<IBiometricsFace
             Slog.e(TAG, "Failed to setActiveUser: " + e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_UPDATE_ACTIVE_USER;
     }
 }

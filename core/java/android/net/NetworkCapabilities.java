@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.ConnectivityManager.NetworkCallback;
 import android.os.Build;
@@ -576,7 +575,6 @@ public final class NetworkCapabilities implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    @TestApi
     public @NetCapability int[] getCapabilities() {
         return BitUtils.unpackBits(mNetworkCapabilities);
     }
@@ -821,7 +819,7 @@ public final class NetworkCapabilities implements Parcelable {
      *
      * @hide
      */
-    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     public static final int TRANSPORT_TEST = 7;
 
     /** @hide */

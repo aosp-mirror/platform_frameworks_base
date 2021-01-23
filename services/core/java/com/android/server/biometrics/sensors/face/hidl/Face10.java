@@ -767,12 +767,13 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     }
 
     @Override
-    public void dumpProtoState(int sensorId, ProtoOutputStream proto) {
+    public void dumpProtoState(int sensorId, ProtoOutputStream proto,
+            boolean clearSchedulerBuffer) {
         final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.MODALITY, SensorStateProto.FACE);
-        proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
+        proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             final int userId = user.getUserHandle().getIdentifier();

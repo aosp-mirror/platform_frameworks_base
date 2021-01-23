@@ -121,7 +121,8 @@ public interface ServiceProvider {
 
     void scheduleInternalCleanup(int sensorId, int userId);
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto);
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
+            boolean clearSchedulerBuffer);
 
     void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
 

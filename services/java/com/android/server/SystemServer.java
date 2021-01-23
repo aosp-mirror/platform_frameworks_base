@@ -160,7 +160,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
-import com.android.server.policy.role.LegacyRoleStateProviderImpl;
+import com.android.server.policy.role.RoleServicePlatformHelperImpl;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
@@ -2033,7 +2033,7 @@ public final class SystemServer implements Dumpable {
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");
             mSystemServiceManager.startService(new RoleManagerService(
-                    mSystemContext, new LegacyRoleStateProviderImpl(mSystemContext)));
+                    mSystemContext, new RoleServicePlatformHelperImpl(mSystemContext)));
             t.traceEnd();
 
             // We need to always start this service, regardless of whether the

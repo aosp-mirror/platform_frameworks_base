@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
@@ -78,10 +79,13 @@ public class ImageExporterTest extends SysuiTestCase {
     public void testUpdateExifAttributes_timeZoneUTC() throws IOException {
         ExifInterface exifInterface = new ExifInterface(new ByteArrayInputStream(EXIF_FILE_TAG),
                 ExifInterface.STREAM_TYPE_EXIF_DATA_ONLY);
-
-        ImageExporter.updateExifAttributes(exifInterface, 100, 100,
+        ImageExporter.updateExifAttributes(exifInterface,
+                UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814"), 100, 100,
                 ZonedDateTime.of(LocalDateTime.of(2020, 12, 15, 18, 15), ZoneId.of("UTC")));
 
+        assertEquals("Exif " + ExifInterface.TAG_IMAGE_UNIQUE_ID,
+                "3c11da99-9284-4863-b1d5-6f3684976814",
+                exifInterface.getAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID));
         assertEquals("Exif " + ExifInterface.TAG_OFFSET_TIME_ORIGINAL, "+00:00",
                 exifInterface.getAttribute(ExifInterface.TAG_OFFSET_TIME_ORIGINAL));
     }
@@ -92,7 +96,7 @@ public class ImageExporterTest extends SysuiTestCase {
         ContentResolver contentResolver = context.getContentResolver();
         ImageExporter exporter = new ImageExporter(contentResolver);
 
-        String requestId = "some_random_unique_id";
+        UUID requestId = UUID.fromString("3c11da99-9284-4863-b1d5-6f3684976814");
         Bitmap original = createCheckerBitmap(10, 10, 10);
 
         ListenableFuture<ImageExporter.Result> direct =
@@ -119,6 +123,10 @@ public class ImageExporterTest extends SysuiTestCase {
             try (ParcelFileDescriptor pfd = contentResolver.openFile(result.uri, "r", null)) {
                 assertNotNull(pfd);
                 ExifInterface exifInterface = new ExifInterface(pfd.getFileDescriptor());
+
+                assertEquals("Exif " + ExifInterface.TAG_IMAGE_UNIQUE_ID,
+                        "3c11da99-9284-4863-b1d5-6f3684976814",
+                        exifInterface.getAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID));
 
                 assertEquals("Exif " + ExifInterface.TAG_SOFTWARE, "Android " + Build.DISPLAY,
                         exifInterface.getAttribute(ExifInterface.TAG_SOFTWARE));

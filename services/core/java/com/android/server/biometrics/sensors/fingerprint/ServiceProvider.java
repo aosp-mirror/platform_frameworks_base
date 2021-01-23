@@ -128,7 +128,8 @@ public interface ServiceProvider {
 
     void setUdfpsOverlayController(@NonNull IUdfpsOverlayController controller);
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto);
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
+            boolean clearSchedulerBuffer);
 
     void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
 

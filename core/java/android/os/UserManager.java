@@ -4058,14 +4058,18 @@ public class UserManager {
      * the current user, then set the user as ephemeral so that it will be removed when it is
      * stopped.
      *
+     * @param evenWhenDisallowed when {@code true}, user is removed even if the caller user has the
+     * {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
+     *
      * @return the {@link RemoveResult} code
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
+    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
+            boolean evenWhenDisallowed) {
         try {
-            return mService.removeUserOrSetEphemeral(userId);
+            return mService.removeUserOrSetEphemeral(userId, evenWhenDisallowed);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

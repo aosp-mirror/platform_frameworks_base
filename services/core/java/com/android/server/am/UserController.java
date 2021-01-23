@@ -3046,15 +3046,11 @@ class UserController implements Handler.Callback {
         }
 
         void reportGlobalUsageEventLocked(int event) {
-            synchronized (mService) {
-                mService.reportGlobalUsageEventLocked(event);
-            }
+            mService.reportGlobalUsageEvent(event);
         }
 
         void reportCurWakefulnessUsageEvent() {
-            synchronized (mService) {
-                mService.reportCurWakefulnessUsageEventLocked();
-            }
+            mService.reportCurWakefulnessUsageEvent();
         }
 
         void taskSupervisorRemoveUser(@UserIdInt int userId) {

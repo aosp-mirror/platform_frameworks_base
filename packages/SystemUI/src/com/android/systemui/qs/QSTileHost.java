@@ -457,6 +457,17 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
                 if (!addedDefault) {
                     List<String> defaultSpecs = getDefaultSpecs(context);
                     for (String spec : defaultSpecs) {
+                        // TODO(b/174753536): Move it into the config file.
+                        if (FeatureFlagUtils.isEnabled(
+                                context, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+                            if (spec.equals("wifi") || spec.equals("cell")) {
+                                continue;
+                            }
+                        } else {
+                            if (spec.equals("internet")) {
+                                continue;
+                            }
+                        }
                         if (!addedSpecs.contains(spec)) {
                             tiles.add(spec);
                             addedSpecs.add(spec);

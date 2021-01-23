@@ -42,7 +42,7 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     static final String TAG = "SoundTriggerHw2Enforcer";
 
     final ISoundTriggerHw2 mUnderlying;
-    Map<Integer, Boolean> mModelStates = new HashMap<>();
+    final Map<Integer, Boolean> mModelStates = new HashMap<>();
 
     public SoundTriggerHw2Enforcer(
             ISoundTriggerHw2 underlying) {
@@ -62,12 +62,12 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, Callback callback,
             int cookie) {
         try {
-            int handle = mUnderlying.loadSoundModel(soundModel, new CallbackEnforcer(callback),
-                    cookie);
             synchronized (mModelStates) {
+                int handle = mUnderlying.loadSoundModel(soundModel, new CallbackEnforcer(callback),
+                        cookie);
                 mModelStates.put(handle, false);
+                return handle;
             }
-            return handle;
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -77,13 +77,13 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel, Callback callback,
             int cookie) {
         try {
-            int handle = mUnderlying.loadPhraseSoundModel(soundModel,
-                    new CallbackEnforcer(callback),
-                    cookie);
             synchronized (mModelStates) {
+                int handle = mUnderlying.loadPhraseSoundModel(soundModel,
+                        new CallbackEnforcer(callback),
+                        cookie);
                 mModelStates.put(handle, false);
+                return handle;
             }
-            return handle;
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -92,8 +92,8 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     @Override
     public void unloadSoundModel(int modelHandle) {
         try {
-            mUnderlying.unloadSoundModel(modelHandle);
             synchronized (mModelStates) {
+                mUnderlying.unloadSoundModel(modelHandle);
                 mModelStates.remove(modelHandle);
             }
         } catch (RuntimeException e) {
@@ -104,8 +104,8 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     @Override
     public void stopRecognition(int modelHandle) {
         try {
-            mUnderlying.stopRecognition(modelHandle);
             synchronized (mModelStates) {
+                mUnderlying.stopRecognition(modelHandle);
                 mModelStates.replace(modelHandle, false);
             }
         } catch (RuntimeException e) {
@@ -116,8 +116,8 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     @Override
     public void stopAllRecognitions() {
         try {
-            mUnderlying.stopAllRecognitions();
             synchronized (mModelStates) {
+                mUnderlying.stopAllRecognitions();
                 for (Map.Entry<Integer, Boolean> entry : mModelStates.entrySet()) {
                     entry.setValue(false);
                 }
@@ -131,9 +131,9 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     public void startRecognition(int modelHandle, RecognitionConfig config, Callback callback,
             int cookie) {
         try {
-            mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback),
-                    cookie);
             synchronized (mModelStates) {
+                mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback),
+                        cookie);
                 mModelStates.replace(modelHandle, true);
             }
         } catch (RuntimeException e) {

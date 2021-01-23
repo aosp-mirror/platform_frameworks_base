@@ -5383,7 +5383,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     public boolean isUidNetworkingBlocked(int uid, boolean isNetworkMetered) {
         final long startTime = mStatLogger.getTime();
 
-        enforceAnyPermissionOf(OBSERVE_NETWORK_POLICY, PERMISSION_MAINLINE_NETWORK_STACK);
+        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         final int uidRules;
         final boolean isBackgroundRestricted;
         synchronized (mUidRulesFirstLock) {
@@ -5396,6 +5396,23 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
         mStatLogger.logDurationStat(Stats.IS_UID_NETWORKING_BLOCKED, startTime);
 
         return ret;
+    }
+
+    @Override
+    public boolean isUidRestrictedOnMeteredNetworks(int uid) {
+        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
+        final int uidRules;
+        final boolean isBackgroundRestricted;
+        synchronized (mUidRulesFirstLock) {
+            uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
+            isBackgroundRestricted = mRestrictBackground;
+        }
+        //TODO(b/177490332): The logic here might not be correct because it doesn't consider
+        // RULE_REJECT_METERED condition. And it could be replaced by
+        // isUidNetworkingBlockedInternal().
+        return isBackgroundRestricted
+                && !hasRule(uidRules, RULE_ALLOW_METERED)
+                && !hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED);
     }
 
     private static boolean isSystem(int uid) {
@@ -5464,22 +5481,6 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     }
                 }
             }
-        }
-
-        /**
-         * @return true if the given uid is restricted from doing networking on metered networks.
-         */
-        @Override
-        public boolean isUidRestrictedOnMeteredNetworks(int uid) {
-            final int uidRules;
-            final boolean isBackgroundRestricted;
-            synchronized (mUidRulesFirstLock) {
-                uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
-                isBackgroundRestricted = mRestrictBackground;
-            }
-            return isBackgroundRestricted
-                    && !hasRule(uidRules, RULE_ALLOW_METERED)
-                    && !hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED);
         }
 
         @Override

@@ -16,6 +16,8 @@
 
 package android.view.textclassifier;
 
+import static android.app.PendingIntent.FLAG_IMMUTABLE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
@@ -128,7 +130,8 @@ public class TextSelectionTest {
 
         final TextClassification classification = new TextClassification.Builder()
                 .addAction(new RemoteAction(icon1, "title1", "desc1",
-                        PendingIntent.getActivity(context, 0, new Intent("action1"), 0)))
+                        PendingIntent.getActivity(
+                                context, 0, new Intent("action1"), FLAG_IMMUTABLE)))
                 .setEntityType(TextClassifier.TYPE_ADDRESS, 1.0f)
                 .build();
         final TextSelection textSelection = new TextSelection.Builder(startIndex, endIndex)

@@ -22,6 +22,14 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.AppSearchManager.SearchContext.Builder setDatabaseName(@NonNull String);
   }
 
+  public interface AppSearchMigrationHelper {
+    method public void queryAndTransform(@NonNull String, @NonNull android.app.appsearch.AppSearchMigrationHelper.Transformer) throws java.lang.Exception;
+  }
+
+  public static interface AppSearchMigrationHelper.Transformer {
+    method @NonNull public android.app.appsearch.GenericDocument transform(int, int, @NonNull android.app.appsearch.GenericDocument) throws java.lang.Exception;
+  }
+
   public final class AppSearchResult<ValueType> {
     method @Nullable public String getErrorMessage();
     method public int getResultCode();
@@ -99,6 +107,11 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.AppSearchSchema.Int64PropertyConfig.Builder setCardinality(int);
   }
 
+  public static interface AppSearchSchema.Migrator {
+    method public default void onDowngrade(int, int, @NonNull android.app.appsearch.AppSearchMigrationHelper) throws java.lang.Exception;
+    method public default void onUpgrade(int, int, @NonNull android.app.appsearch.AppSearchMigrationHelper) throws java.lang.Exception;
+  }
+
   public abstract static class AppSearchSchema.PropertyConfig {
     method public int getCardinality();
     method public int getDataType();
@@ -135,7 +148,7 @@ package android.app.appsearch {
     method public void removeByQuery(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method public void removeByUri(@NonNull android.app.appsearch.RemoveByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
     method @NonNull public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
-    method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
+    method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
   }
 
   public interface BatchResultCallback<KeyType, ValueType> {
@@ -322,6 +335,7 @@ package android.app.appsearch {
   }
 
   public final class SetSchemaRequest {
+    method @NonNull public java.util.Map<java.lang.String,android.app.appsearch.AppSearchSchema.Migrator> getMigrators();
     method @NonNull public java.util.Set<android.app.appsearch.AppSearchSchema> getSchemas();
     method @NonNull public java.util.Set<java.lang.String> getSchemasNotVisibleToSystemUi();
     method @NonNull public java.util.Map<java.lang.String,java.util.Set<android.app.appsearch.PackageIdentifier>> getSchemasVisibleToPackages();
@@ -334,8 +348,24 @@ package android.app.appsearch {
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchema(@NonNull java.util.Collection<android.app.appsearch.AppSearchSchema>);
     method @NonNull public android.app.appsearch.SetSchemaRequest build();
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setForceOverride(boolean);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setMigrator(@NonNull String, @NonNull android.app.appsearch.AppSearchSchema.Migrator);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForPackage(@NonNull String, boolean, @NonNull android.app.appsearch.PackageIdentifier);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setSchemaTypeVisibilityForSystemUi(@NonNull String, boolean);
+  }
+
+  public class SetSchemaResponse {
+    method @NonNull public java.util.Set<java.lang.String> getDeletedTypes();
+    method @NonNull public java.util.Set<java.lang.String> getIncompatibleTypes();
+    method @NonNull public java.util.Set<java.lang.String> getMigratedTypes();
+    method @NonNull public java.util.List<android.app.appsearch.SetSchemaResponse.MigrationFailure> getMigrationFailures();
+    method public boolean isSuccess();
+  }
+
+  public static class SetSchemaResponse.MigrationFailure {
+    method @NonNull public android.app.appsearch.AppSearchResult<java.lang.Void> getAppSearchResult();
+    method @NonNull public String getNamespace();
+    method @NonNull public String getSchemaType();
+    method @NonNull public String getUri();
   }
 
 }

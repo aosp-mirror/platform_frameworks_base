@@ -150,7 +150,7 @@ public abstract class NotificationListenerService extends Service {
     public static final int HINT_HOST_DISABLE_NOTIFICATION_EFFECTS = 1 << 1;
 
     /** {@link #getCurrentListenerHints() Listener hints} constant - the primary device UI
-     * should disable phone call sounds, buyt not notification sound.
+     * should disable phone call sounds, but not notification sound.
      * This does not change the interruption filter, only the effects. **/
     public static final int HINT_HOST_DISABLE_CALL_EFFECTS = 1 << 2;
 

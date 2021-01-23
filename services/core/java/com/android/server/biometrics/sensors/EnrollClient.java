@@ -24,6 +24,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
+
 import java.util.Arrays;
 
 /**
@@ -105,5 +107,10 @@ public abstract class EnrollClient<T> extends AcquisitionClient<T> {
         logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
                 false /* enrollSuccessful */);
         super.onError(error, vendorCode);
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_ENROLL;
     }
 }
