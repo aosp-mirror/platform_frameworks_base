@@ -17,8 +17,10 @@
 #define LOG_TAG "DvrClient"
 
 #include <android-base/logging.h>
+#include <fmq/ConvertMQDescriptors.h>
 #include <utils/Log.h>
 
+#include "ClientHelper.h"
 #include "DvrClient.h"
 
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
@@ -28,16 +30,15 @@ namespace android {
 
 /////////////// DvrClient ///////////////////////
 
-// TODO: pending aidl interface
-DvrClient::DvrClient() {
-    //mTunerDvr = tunerDvr;
+DvrClient::DvrClient(shared_ptr<ITunerDvr> tunerDvr) {
+    mTunerDvr = tunerDvr;
     mFd = -1;
     mDvrMQ = NULL;
     mDvrMQEventFlag = NULL;
 }
 
 DvrClient::~DvrClient() {
-    //mTunerDvr = NULL;
+    mTunerDvr = NULL;
     mDvr = NULL;
     mFd = -1;
     mDvrMQ = NULL;
@@ -66,7 +67,7 @@ long DvrClient::readFromFile(long size) {
     long available = mDvrMQ->availableToWrite();
     long write = min(size, available);
 
-    MQ::MemTransaction tx;
+    AidlMQ::MemTransaction tx;
     long ret = 0;
     if (mDvrMQ->beginWrite(write, &tx)) {
         auto first = tx.getFirstRegion();
@@ -105,7 +106,7 @@ long DvrClient::readFromFile(long size) {
     return ret;
 }
 
-long DvrClient::readFromBuffer(uint8_t* buffer, long size) {
+long DvrClient::readFromBuffer(int8_t* buffer, long size) {
     if (mDvrMQ == NULL || mDvrMQEventFlag == NULL) {
         ALOGE("Failed to readFromBuffer. DVR mq is not configured");
         return -1;
@@ -141,7 +142,7 @@ long DvrClient::writeToFile(long size) {
     long toRead = min(size, available);
 
     long ret = 0;
-    MQ::MemTransaction tx;
+    AidlMQ::MemTransaction tx;
     if (mDvrMQ->beginRead(toRead, &tx)) {
         auto first = tx.getFirstRegion();
         auto data = first.getAddress();
@@ -178,7 +179,7 @@ long DvrClient::writeToFile(long size) {
     return ret;
 }
 
-long DvrClient::writeToBuffer(uint8_t* buffer, long size) {
+long DvrClient::writeToBuffer(int8_t* buffer, long size) {
     if (mDvrMQ == NULL || mDvrMQEventFlag == NULL) {
         ALOGE("Failed to writetoBuffer. DVR mq is not configured");
         return -1;
@@ -201,7 +202,25 @@ long DvrClient::writeToBuffer(uint8_t* buffer, long size) {
 }
 
 Result DvrClient::configure(DvrSettings settings) {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        TunerDvrSettings dvrSettings = getAidlDvrSettingsFromHidl(settings);
+        Status s = mTunerDvr->configure(dvrSettings);
+        Result res = ClientHelper::getServiceSpecificErrorCode(s);
+        if (res != Result::SUCCESS) {
+            return res;
+        }
+
+        AidlMQDesc* aidlMqDesc = NULL;
+        s = mTunerDvr->getQueueDesc(aidlMqDesc);
+        res = ClientHelper::getServiceSpecificErrorCode(s);
+        if (res != Result::SUCCESS) {
+            return res;
+        }
+
+        mDvrMQ = new (nothrow) AidlMQ(*aidlMqDesc);
+        EventFlag::createEventFlag(mDvrMQ->getEventFlagWord(), &mDvrMQEventFlag);
+        return res;
+    }
 
     if (mDvr != NULL) {
         Result res = mDvr->configure(settings);
@@ -209,7 +228,10 @@ Result DvrClient::configure(DvrSettings settings) {
             MQDescriptorSync<uint8_t> dvrMQDesc;
             res = getQueueDesc(dvrMQDesc);
             if (res == Result::SUCCESS) {
-                mDvrMQ = make_unique<MQ>(dvrMQDesc, true);
+                AidlMQDesc aidlMQDesc;
+                unsafeHidlToAidlMQDescriptor<uint8_t, int8_t, SynchronizedReadWrite>(
+                        dvrMQDesc,  &aidlMQDesc);
+                mDvrMQ = new (nothrow) AidlMessageQueue(aidlMQDesc);
                 EventFlag::createEventFlag(mDvrMQ->getEventFlagWord(), &mDvrMQEventFlag);
             }
         }
@@ -220,7 +242,10 @@ Result DvrClient::configure(DvrSettings settings) {
 }
 
 Result DvrClient::attachFilter(sp<FilterClient> filterClient) {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->attachFilter(filterClient->getAidlFilter());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDvr != NULL) {
         sp<IFilter> hidlFilter = filterClient->getHalFilter();
@@ -234,7 +259,10 @@ Result DvrClient::attachFilter(sp<FilterClient> filterClient) {
 }
 
 Result DvrClient::detachFilter(sp<FilterClient> filterClient) {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->detachFilter(filterClient->getAidlFilter());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDvr != NULL) {
         sp<IFilter> hidlFilter = filterClient->getHalFilter();
@@ -248,7 +276,10 @@ Result DvrClient::detachFilter(sp<FilterClient> filterClient) {
 }
 
 Result DvrClient::start() {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->start();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDvr != NULL) {
         return mDvr->start();
@@ -258,7 +289,10 @@ Result DvrClient::start() {
 }
 
 Result DvrClient::stop() {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->stop();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDvr != NULL) {
         return mDvr->stop();
@@ -268,7 +302,10 @@ Result DvrClient::stop() {
 }
 
 Result DvrClient::flush() {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->flush();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDvr != NULL) {
         return mDvr->flush();
@@ -278,7 +315,10 @@ Result DvrClient::flush() {
 }
 
 Result DvrClient::close() {
-    // pending aidl interface
+    if (mTunerDvr != NULL) {
+        Status s = mTunerDvr->close();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDvr != NULL) {
         Result res = mDvr->close();
@@ -310,11 +350,30 @@ Return<void> HidlDvrCallback::onPlaybackStatus(const PlaybackStatus status) {
     return Void();
 }
 
+/////////////// TunerDvrCallback ///////////////////////
+
+TunerDvrCallback::TunerDvrCallback(sp<DvrClientCallback> dvrClientCallback)
+        : mDvrClientCallback(dvrClientCallback) {}
+
+Status TunerDvrCallback::onRecordStatus(int status) {
+    if (mDvrClientCallback != NULL) {
+        mDvrClientCallback->onRecordStatus(static_cast<RecordStatus>(status));
+        return Status::ok();
+    }
+    return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
+}
+
+Status TunerDvrCallback::onPlaybackStatus(int status) {
+    if (mDvrClientCallback != NULL) {
+        mDvrClientCallback->onPlaybackStatus(static_cast<PlaybackStatus>(status));
+        return Status::ok();
+    }
+    return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
+}
+
 /////////////// DvrClient Helper Methods ///////////////////////
 
 Result DvrClient::getQueueDesc(MQDesc& dvrMQDesc) {
-    // pending aidl interface
-
     if (mDvr != NULL) {
         Result res = Result::UNKNOWN_ERROR;
         mDvr->getQueueDesc([&](Result r, const MQDesc& desc) {
@@ -325,5 +384,30 @@ Result DvrClient::getQueueDesc(MQDesc& dvrMQDesc) {
     }
 
     return Result::INVALID_STATE;
+}
+
+TunerDvrSettings DvrClient::getAidlDvrSettingsFromHidl(DvrSettings settings) {
+    TunerDvrSettings s;
+    switch (settings.getDiscriminator()) {
+        case DvrSettings::hidl_discriminator::record: {
+            s.statusMask = static_cast<int>(settings.record().statusMask);
+            s.lowThreshold = static_cast<int>(settings.record().lowThreshold);
+            s.highThreshold = static_cast<int>(settings.record().highThreshold);
+            s.dataFormat = static_cast<int>(settings.record().dataFormat);
+            s.packetSize = static_cast<int>(settings.record().packetSize);
+            return s;
+        }
+        case DvrSettings::hidl_discriminator::playback: {
+            s.statusMask = static_cast<int>(settings.playback().statusMask);
+            s.lowThreshold = static_cast<int>(settings.playback().lowThreshold);
+            s.highThreshold = static_cast<int>(settings.playback().highThreshold);
+            s.dataFormat = static_cast<int>(settings.playback().dataFormat);
+            s.packetSize = static_cast<int>(settings.playback().packetSize);
+            return s;
+        }
+        default:
+            break;
+    }
+    return s;
 }
 }  // namespace android

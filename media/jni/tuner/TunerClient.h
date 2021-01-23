@@ -24,9 +24,9 @@
 #include <android/hardware/tv/tuner/1.1/ITuner.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
+#include "DemuxClient.h"
 #include "ClientHelper.h"
 #include "FrontendClient.h"
-#include "DemuxClient.h"
 #include "DescramblerClient.h"
 #include "LnbClient.h"
 

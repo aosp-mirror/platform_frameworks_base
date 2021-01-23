@@ -21,8 +21,8 @@
 #include <android/hardware/tv/tuner/1.0/IDemux.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
-#include "ClientHelper.h"
 #include "DvrClient.h"
+#include "ClientHelper.h"
 #include "DvrClientCallback.h"
 #include "FilterClient.h"
 #include "FilterClientCallback.h"

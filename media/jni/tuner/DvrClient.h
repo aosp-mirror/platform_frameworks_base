@@ -17,16 +17,22 @@
 #ifndef _ANDROID_MEDIA_TV_DVR_CLIENT_H_
 #define _ANDROID_MEDIA_TV_DVR_CLIENT_H_
 
-//#include <aidl/android/media/tv/tuner/ITunerDvr.h>
+#include <aidl/android/media/tv/tuner/BnTunerDvrCallback.h>
+#include <aidl/android/media/tv/tuner/ITunerDvr.h>
 #include <android/hardware/tv/tuner/1.0/IDvr.h>
 #include <android/hardware/tv/tuner/1.0/IDvrCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
+#include <fmq/AidlMessageQueue.h>
 #include <fmq/MessageQueue.h>
 
 #include "DvrClientCallback.h"
 #include "FilterClient.h"
 
-//using ::aidl::android::media::tv::tuner::ITunerDvr;
+using Status = ::ndk::ScopedAStatus;
+using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
+using ::aidl::android::media::tv::tuner::BnTunerDvrCallback;
+using ::aidl::android::media::tv::tuner::ITunerDvr;
+using ::aidl::android::media::tv::tuner::TunerDvrSettings;
 
 using ::android::hardware::EventFlag;
 using ::android::hardware::MQDescriptorSync;
@@ -37,13 +43,14 @@ using ::android::hardware::tv::tuner::V1_0::IDvrCallback;
 
 using namespace std;
 
-using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
-using MQDesc = MQDescriptorSync<uint8_t>;
-
 namespace android {
 
-// TODO: pending aidl interface
-/*class TunerDvrCallback : public BnTunerDvrCallback {
+using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
+using MQDesc = MQDescriptorSync<uint8_t>;
+using AidlMQ = AidlMessageQueue<int8_t, SynchronizedReadWrite>;
+using AidlMQDesc = MQDescriptor<int8_t, SynchronizedReadWrite>;
+
+class TunerDvrCallback : public BnTunerDvrCallback {
 
 public:
     TunerDvrCallback(sp<DvrClientCallback> dvrClientCallback);
@@ -53,7 +60,7 @@ public:
 
 private:
     sp<DvrClientCallback> mDvrClientCallback;
-};*/
+};
 
 struct HidlDvrCallback : public IDvrCallback {
 
@@ -69,7 +76,7 @@ private:
 struct DvrClient : public RefBase {
 
 public:
-    DvrClient();
+    DvrClient(shared_ptr<ITunerDvr> tunerDvr);
     ~DvrClient();
 
     // TODO: remove after migration to Tuner Service is done.
@@ -88,7 +95,7 @@ public:
     /**
      * Read data from the given buffer with given size. Return the actual read size.
      */
-    long readFromBuffer(uint8_t* buffer, long size);
+    long readFromBuffer(int8_t* buffer, long size);
 
     /**
      * Write data to file with given size. Return the actual write size.
@@ -98,7 +105,7 @@ public:
     /**
      * Write data to the given buffer with given size. Return the actual write size.
      */
-    long writeToBuffer(uint8_t* buffer, long size);
+    long writeToBuffer(int8_t* buffer, long size);
 
     /**
      * Configure the DVR.
@@ -137,13 +144,13 @@ public:
 
 private:
     Result getQueueDesc(MQDesc& dvrMQDesc);
+    TunerDvrSettings getAidlDvrSettingsFromHidl(DvrSettings settings);
 
     /**
      * An AIDL Tuner Dvr Singleton assigned at the first time the Tuner Client
      * opens a dvr. Default null when dvr is not opened.
      */
-    // TODO: pending on aidl interface
-    //shared_ptr<ITunerDvr> mTunerDvr;
+    shared_ptr<ITunerDvr> mTunerDvr;
 
     /**
      * A Dvr HAL interface that is ready before migrating to the TunerDvr.
@@ -152,7 +159,7 @@ private:
      */
     sp<IDvr> mDvr;
 
-    unique_ptr<MQ> mDvrMQ;
+    AidlMQ* mDvrMQ;
     EventFlag* mDvrMQEventFlag;
     string mFilePath;
     int mFd;

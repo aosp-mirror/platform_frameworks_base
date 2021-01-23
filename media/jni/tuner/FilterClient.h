@@ -166,7 +166,7 @@ public:
     /**
      * Get the Aidl filter to build up filter linkage.
      */
-    //shared_ptr<ITunerFilter> getAidlFilter() { return mTunerFilter; }
+    shared_ptr<ITunerFilter> getAidlFilter() { return mTunerFilter; }
 
     /**
      * Close a new interface of ITunerFilter.
