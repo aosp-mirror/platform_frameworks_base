@@ -200,8 +200,8 @@ import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
+import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
-import android.net.VpnInfo;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
@@ -1075,7 +1075,7 @@ public class ConnectivityServiceTest {
         private boolean mAgentRegistered = false;
 
         private int mVpnType = VpnManager.TYPE_VPN_SERVICE;
-        private VpnInfo mVpnInfo;
+        private UnderlyingNetworkInfo mUnderlyingNetworkInfo;
 
         // These ConditionVariables allow tests to wait for LegacyVpnRunner to be stopped/started.
         // TODO: this scheme is ad-hoc and error-prone because it does not fail if, for example, the
@@ -1249,14 +1249,15 @@ public class ConnectivityServiceTest {
         }
 
         @Override
-        public synchronized VpnInfo getVpnInfo() {
-            if (mVpnInfo != null) return mVpnInfo;
+        public synchronized UnderlyingNetworkInfo getUnderlyingNetworkInfo() {
+            if (mUnderlyingNetworkInfo != null) return mUnderlyingNetworkInfo;
 
-            return super.getVpnInfo();
+            return super.getUnderlyingNetworkInfo();
         }
 
-        private synchronized void setVpnInfo(VpnInfo vpnInfo) {
-            mVpnInfo = vpnInfo;
+        private synchronized void setUnderlyingNetworkInfo(
+                UnderlyingNetworkInfo underlyingNetworkInfo) {
+            mUnderlyingNetworkInfo = underlyingNetworkInfo;
         }
     }
 
@@ -5194,20 +5195,22 @@ public class ConnectivityServiceTest {
     private void expectForceUpdateIfaces(Network[] networks, String defaultIface,
             Integer vpnUid, String vpnIfname, String[] underlyingIfaces) throws Exception {
         ArgumentCaptor<Network[]> networksCaptor = ArgumentCaptor.forClass(Network[].class);
-        ArgumentCaptor<VpnInfo[]> vpnInfosCaptor = ArgumentCaptor.forClass(VpnInfo[].class);
+        ArgumentCaptor<UnderlyingNetworkInfo[]> vpnInfosCaptor = ArgumentCaptor.forClass(
+                UnderlyingNetworkInfo[].class);
 
         verify(mStatsService, atLeastOnce()).forceUpdateIfaces(networksCaptor.capture(),
                 any(NetworkState[].class), eq(defaultIface), vpnInfosCaptor.capture());
 
         assertSameElementsNoDuplicates(networksCaptor.getValue(), networks);
 
-        VpnInfo[] infos = vpnInfosCaptor.getValue();
+        UnderlyingNetworkInfo[] infos = vpnInfosCaptor.getValue();
         if (vpnUid != null) {
             assertEquals("Should have exactly one VPN:", 1, infos.length);
-            VpnInfo info = infos[0];
+            UnderlyingNetworkInfo info = infos[0];
             assertEquals("Unexpected VPN owner:", (int) vpnUid, info.ownerUid);
-            assertEquals("Unexpected VPN interface:", vpnIfname, info.vpnIface);
-            assertSameElementsNoDuplicates(underlyingIfaces, info.underlyingIfaces);
+            assertEquals("Unexpected VPN interface:", vpnIfname, info.iface);
+            assertSameElementsNoDuplicates(underlyingIfaces,
+                    info.underlyingIfaces.toArray(new String[0]));
         } else {
             assertEquals(0, infos.length);
             return;
@@ -5268,7 +5271,7 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsService, never())
                 .forceUpdateIfaces(eq(onlyCell), any(NetworkState[].class), eq(MOBILE_IFNAME),
-                        eq(new VpnInfo[0]));
+                        eq(new UnderlyingNetworkInfo[0]));
         reset(mStatsService);
 
         // Roaming change should update ifaces
@@ -5351,8 +5354,8 @@ public class ConnectivityServiceTest {
         // network for the VPN...
         verify(mStatsService, never()).forceUpdateIfaces(any(Network[].class),
                 any(NetworkState[].class), any() /* anyString() doesn't match null */,
-                argThat(infos -> infos[0].underlyingIfaces.length == 1
-                        && WIFI_IFNAME.equals(infos[0].underlyingIfaces[0])));
+                argThat(infos -> infos[0].underlyingIfaces.size() == 1
+                        && WIFI_IFNAME.equals(infos[0].underlyingIfaces.get(0))));
         verifyNoMoreInteractions(mStatsService);
         reset(mStatsService);
 
@@ -5365,8 +5368,8 @@ public class ConnectivityServiceTest {
         waitForIdle();
         verify(mStatsService).forceUpdateIfaces(any(Network[].class),
                 any(NetworkState[].class), any() /* anyString() doesn't match null */,
-                argThat(vpnInfos -> vpnInfos[0].underlyingIfaces.length == 1
-                        && WIFI_IFNAME.equals(vpnInfos[0].underlyingIfaces[0])));
+                argThat(vpnInfos -> vpnInfos[0].underlyingIfaces.size() == 1
+                        && WIFI_IFNAME.equals(vpnInfos[0].underlyingIfaces.get(0))));
         mEthernetNetworkAgent.disconnect();
         waitForIdle();
         reset(mStatsService);
@@ -8323,8 +8326,9 @@ public class ConnectivityServiceTest {
         assertVpnUidRangesUpdated(true, vpnRange, vpnOwnerUid);
         mMockVpn.setVpnType(vpnType);
 
-        final VpnInfo vpnInfo = new VpnInfo(vpnOwnerUid, null, null);
-        mMockVpn.setVpnInfo(vpnInfo);
+        final UnderlyingNetworkInfo underlyingNetworkInfo =
+                new UnderlyingNetworkInfo(vpnOwnerUid, VPN_IFNAME, new ArrayList<String>());
+        mMockVpn.setUnderlyingNetworkInfo(underlyingNetworkInfo);
     }
 
     private void setupConnectionOwnerUidAsVpnApp(int vpnOwnerUid, @VpnManager.VpnType int vpnType)

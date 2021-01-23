@@ -132,8 +132,8 @@ import android.net.SocketKeepalive;
 import android.net.TetheringManager;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
+import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
-import android.net.VpnInfo;
 import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.metrics.INetdEventListener;
@@ -4854,28 +4854,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *
      * <p>Must be called on the handler thread.
      */
-    private VpnInfo[] getAllVpnInfo() {
+    private UnderlyingNetworkInfo[] getAllVpnInfo() {
         ensureRunningOnConnectivityServiceThread();
         synchronized (mVpns) {
             if (mLockdownEnabled) {
-                return new VpnInfo[0];
+                return new UnderlyingNetworkInfo[0];
             }
         }
-        List<VpnInfo> infoList = new ArrayList<>();
+        List<UnderlyingNetworkInfo> infoList = new ArrayList<>();
         for (NetworkAgentInfo nai : mNetworkAgentInfos) {
-            VpnInfo info = createVpnInfo(nai);
+            UnderlyingNetworkInfo info = createVpnInfo(nai);
             if (info != null) {
                 infoList.add(info);
             }
         }
-        return infoList.toArray(new VpnInfo[infoList.size()]);
+        return infoList.toArray(new UnderlyingNetworkInfo[infoList.size()]);
     }
 
     /**
      * @return VPN information for accounting, or null if we can't retrieve all required
      *         information, e.g underlying ifaces.
      */
-    private VpnInfo createVpnInfo(NetworkAgentInfo nai) {
+    private UnderlyingNetworkInfo createVpnInfo(NetworkAgentInfo nai) {
         if (!nai.isVPN()) return null;
 
         Network[] underlyingNetworks = nai.declaredUnderlyingNetworks;
@@ -4907,11 +4907,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Must be non-null or NetworkStatsService will crash.
         // Cannot happen in production code because Vpn only registers the NetworkAgent after the
         // tun or ipsec interface is created.
+        // TODO: Remove this check.
         if (nai.linkProperties.getInterfaceName() == null) return null;
 
-        return new VpnInfo(nai.networkCapabilities.getOwnerUid(),
-                nai.linkProperties.getInterfaceName(),
-                interfaces.toArray(new String[0]));
+        return new UnderlyingNetworkInfo(nai.networkCapabilities.getOwnerUid(),
+                nai.linkProperties.getInterfaceName(), interfaces);
     }
 
     /**
@@ -7989,10 +7989,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             activeIface = activeLinkProperties.getInterfaceName();
         }
 
-        final VpnInfo[] vpnInfos = getAllVpnInfo();
+        final UnderlyingNetworkInfo[] underlyingNetworkInfos = getAllVpnInfo();
         try {
-            mStatsService.forceUpdateIfaces(
-                    getDefaultNetworks(), getAllNetworkState(), activeIface, vpnInfos);
+            mStatsService.forceUpdateIfaces(getDefaultNetworks(), getAllNetworkState(), activeIface,
+                    underlyingNetworkInfos);
         } catch (Exception ignored) {
         }
     }
@@ -8252,6 +8252,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return getVpnIfOwner(mDeps.getCallingUid());
     }
 
+    // TODO: stop calling into Vpn.java and get this information from data in this class.
     @GuardedBy("mVpns")
     private Vpn getVpnIfOwner(int uid) {
         final int user = UserHandle.getUserId(uid);
@@ -8260,7 +8261,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (vpn == null) {
             return null;
         } else {
-            final VpnInfo info = vpn.getVpnInfo();
+            final UnderlyingNetworkInfo info = vpn.getUnderlyingNetworkInfo();
             return (info == null || info.ownerUid != uid) ? null : vpn;
         }
     }
