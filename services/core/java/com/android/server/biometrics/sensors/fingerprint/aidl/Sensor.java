@@ -481,12 +481,13 @@ class Sensor implements IBinder.DeathRecipient {
         mTestHalEnabled = enabled;
     }
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
+            boolean clearSchedulerBuffer) {
         final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
         proto.write(SensorStateProto.MODALITY, SensorStateProto.FINGERPRINT);
-        proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
+        proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             final int userId = user.getUserHandle().getIdentifier();

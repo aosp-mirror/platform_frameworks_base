@@ -21,8 +21,7 @@ import java.util.List;
 
 /**
  * Represents a collection of {@link LogicalDisplay}s which act in unison for certain behaviors and
- * operations; particularly display-state.
- *
+ * operations.
  * @hide
  */
 public class DisplayGroup {
@@ -36,44 +35,17 @@ public class DisplayGroup {
         mGroupId = groupId;
     }
 
-    /** Returns the identifier for the Group. */
     int getGroupId() {
         return mGroupId;
     }
 
-    /**
-     * Adds the provided {@code display} to the Group
-     *
-     * @param display the {@link LogicalDisplay} to add to the Group
-     */
-    void addDisplayLocked(LogicalDisplay display) {
+    void addDisplay(LogicalDisplay display) {
         if (!mDisplays.contains(display)) {
             mDisplays.add(display);
         }
     }
 
-    /**
-     * Removes the provided {@code display} from the Group.
-     *
-     * @param display The {@link LogicalDisplay} to remove from the Group.
-     * @return {@code true} if the {@code display} was removed; otherwise {@code false}
-     */
-    boolean removeDisplayLocked(LogicalDisplay display) {
+    boolean removeDisplay(LogicalDisplay display) {
         return mDisplays.remove(display);
-    }
-
-    /** Returns {@code true} if there are no {@link LogicalDisplay LogicalDisplays} in the Group. */
-    boolean isEmptyLocked() {
-        return mDisplays.isEmpty();
-    }
-
-    /** Returns the number of {@link LogicalDisplay LogicalDisplays} in the Group. */
-    int getSizeLocked() {
-        return mDisplays.size();
-    }
-
-    /** Returns the ID of the {@link LogicalDisplay} at the provided {@code index}. */
-    int getIdLocked(int index) {
-        return mDisplays.get(index).getDisplayIdLocked();
     }
 }

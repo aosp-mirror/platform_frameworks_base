@@ -1641,12 +1641,11 @@ public class DisplayContentTests extends WindowTestsBase {
             // The assertion will fail if DisplayArea#ensureActivitiesVisible is called twice.
             assertFalse(called[0]);
             called[0] = true;
-            mDisplayContent.ensureActivitiesVisible(null, 0, false, false, false);
+            mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
             return null;
-        }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean(),
-                anyBoolean());
+        }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean());
 
-        mDisplayContent.ensureActivitiesVisible(null, 0, false, false, false);
+        mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
     }
 
     @Test

@@ -815,12 +815,16 @@ public class BiometricService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (args.length > 0 && "--proto".equals(args[0])) {
+                    final boolean clearSchedulerBuffer = args.length > 1
+                            && "--clear-scheduler-buffer".equals(args[1]);
+                    Slog.d(TAG, "ClearSchedulerBuffer: " + clearSchedulerBuffer);
                     final ProtoOutputStream proto = new ProtoOutputStream(fd);
                     proto.write(BiometricServiceStateProto.AUTH_SESSION_STATE,
                             mCurrentAuthSession != null ? mCurrentAuthSession.getState()
                                     : STATE_AUTH_IDLE);
                     for (BiometricSensor sensor : mSensors) {
-                        byte[] serviceState = sensor.impl.dumpSensorServiceStateProto();
+                        byte[] serviceState = sensor.impl
+                                .dumpSensorServiceStateProto(clearSchedulerBuffer);
                         proto.write(BiometricServiceStateProto.SENSOR_SERVICE_STATES, serviceState);
                     }
                     proto.flush();

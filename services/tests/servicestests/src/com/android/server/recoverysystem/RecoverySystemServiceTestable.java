@@ -17,6 +17,7 @@
 package com.android.server.recoverysystem;
 
 import android.content.Context;
+import android.hardware.boot.V1_2.IBootControl;
 import android.os.PowerManager;
 
 import com.android.internal.widget.LockSettingsInternal;
@@ -30,16 +31,19 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         private final FileWriter mUncryptPackageFileWriter;
         private final UncryptSocket mUncryptSocket;
         private final LockSettingsInternal mLockSettingsInternal;
+        private final IBootControl mIBootControl;
 
         MockInjector(Context context, FakeSystemProperties systemProperties,
                 PowerManager powerManager, FileWriter uncryptPackageFileWriter,
-                UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal) {
+                UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal,
+                IBootControl bootControl) {
             super(context);
             mSystemProperties = systemProperties;
             mPowerManager = powerManager;
             mUncryptPackageFileWriter = uncryptPackageFileWriter;
             mUncryptSocket = uncryptSocket;
             mLockSettingsInternal = lockSettingsInternal;
+            mIBootControl = bootControl;
         }
 
         @Override
@@ -85,13 +89,19 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
         public LockSettingsInternal getLockSettingsService() {
             return mLockSettingsInternal;
         }
+
+        @Override
+        public IBootControl getBootControl() {
+            return mIBootControl;
+        }
     }
 
     RecoverySystemServiceTestable(Context context, FakeSystemProperties systemProperties,
             PowerManager powerManager, FileWriter uncryptPackageFileWriter,
-            UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal) {
+            UncryptSocket uncryptSocket, LockSettingsInternal lockSettingsInternal,
+            IBootControl bootControl) {
         super(new MockInjector(context, systemProperties, powerManager, uncryptPackageFileWriter,
-                uncryptSocket, lockSettingsInternal));
+                uncryptSocket, lockSettingsInternal, bootControl));
     }
 
     public static class FakeSystemProperties {
@@ -102,6 +112,8 @@ public class RecoverySystemServiceTestable extends RecoverySystemService {
                     || RecoverySystemService.INIT_SERVICE_SETUP_BCB.equals(key)
                     || RecoverySystemService.INIT_SERVICE_CLEAR_BCB.equals(key)) {
                 return null;
+            } else if (RecoverySystemService.AB_UPDATE.equals(key)) {
+                return "true";
             } else {
                 throw new IllegalArgumentException("unexpected test key: " + key);
             }

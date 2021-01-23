@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.BiometricsProto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -122,5 +123,10 @@ public abstract class InternalEnumerateClient<T> extends HalClientMonitor<T>
 
     public List<BiometricAuthenticator.Identifier> getUnknownHALTemplates() {
         return mUnknownHALTemplates;
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_ENUMERATE;
     }
 }

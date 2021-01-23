@@ -1588,6 +1588,7 @@ class ActivityStarter {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityStack = handleStartResult(r, result);
             mService.continueWindowLayout();
+            mSupervisor.mUserLeaving = false;
 
             // Transition housekeeping
             if (!ActivityManager.isStartResultSuccessful(result)) {

@@ -860,14 +860,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected int mScreenState = Display.STATE_UNKNOWN;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected StopwatchTimer mScreenOnTimer;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected StopwatchTimer mScreenDozeTimer;
+    StopwatchTimer mScreenOnTimer;
+    StopwatchTimer mScreenDozeTimer;
 
     int mScreenBrightnessBin = -1;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected final StopwatchTimer[] mScreenBrightnessTimer =
+    final StopwatchTimer[] mScreenBrightnessTimer =
             new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
 
     boolean mPretendScreenOff;
@@ -912,8 +909,7 @@ public class BatteryStatsImpl extends BatteryStats {
     int mUsbDataState = USB_DATA_UNKNOWN;
 
     int mGpsSignalQualityBin = -1;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected final StopwatchTimer[] mGpsSignalQualityTimer =
+    final StopwatchTimer[] mGpsSignalQualityTimer =
         new StopwatchTimer[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
 
     int mPhoneSignalStrengthBin = -1;
@@ -929,6 +925,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     final LongSamplingCounter[] mNetworkByteActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+
     final LongSamplingCounter[] mNetworkPacketActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
 
@@ -948,8 +945,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * The Bluetooth controller activity (time in tx, rx, idle, and power consumed) for the device.
      */
-    @VisibleForTesting
-    protected ControllerActivityCounterImpl mBluetoothActivity;
+    ControllerActivityCounterImpl mBluetoothActivity;
 
     /**
      * The Modem controller activity (time in tx, rx, idle, and power consumed) for the device.
@@ -993,8 +989,7 @@ public class BatteryStatsImpl extends BatteryStats {
     StopwatchTimer mWifiActiveTimer;
 
     int mBluetoothScanNesting;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected StopwatchTimer mBluetoothScanTimer;
+    StopwatchTimer mBluetoothScanTimer;
 
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTimeMs;
@@ -10718,6 +10713,31 @@ public class BatteryStatsImpl extends BatteryStats {
         mHandler = new MyHandler(handler.getLooper());
         mConstants = new Constants(mHandler);
         mStartCount++;
+        initTimersAndCounters();
+        mOnBattery = mOnBatteryInternal = false;
+        long uptimeUs = mClocks.uptimeMillis() * 1000;
+        long realtimeUs = mClocks.elapsedRealtime() * 1000;
+        initTimes(uptimeUs, realtimeUs);
+        mStartPlatformVersion = mEndPlatformVersion = Build.ID;
+        mDischargeStartLevel = 0;
+        mDischargeUnplugLevel = 0;
+        mDischargePlugLevel = -1;
+        mDischargeCurrentLevel = 0;
+        mCurrentBatteryLevel = 0;
+        initDischarge(realtimeUs);
+        clearHistoryLocked();
+        updateDailyDeadlineLocked();
+        mPlatformIdleStateCallback = cb;
+        mMeasuredEnergyRetriever = energyStatsCb;
+        mUserInfoProvider = userInfoProvider;
+
+        // Notify statsd that the system is initially not in doze.
+        mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
+        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
+    }
+
+    @VisibleForTesting
+    protected void initTimersAndCounters() {
         mScreenOnTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
         mScreenDozeTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -10789,26 +10809,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeLightDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeDeepDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
-        mOnBattery = mOnBatteryInternal = false;
-        long uptimeUs = mClocks.uptimeMillis() * 1000;
-        long realtimeUs = mClocks.elapsedRealtime() * 1000;
-        initTimes(uptimeUs, realtimeUs);
-        mStartPlatformVersion = mEndPlatformVersion = Build.ID;
-        mDischargeStartLevel = 0;
-        mDischargeUnplugLevel = 0;
-        mDischargePlugLevel = -1;
-        mDischargeCurrentLevel = 0;
-        mCurrentBatteryLevel = 0;
-        initDischarge(realtimeUs);
-        clearHistoryLocked();
-        updateDailyDeadlineLocked();
-        mPlatformIdleStateCallback = cb;
-        mMeasuredEnergyRetriever = energyStatsCb;
-        mUserInfoProvider = userInfoProvider;
-
-        // Notify statsd that the system is initially not in doze.
-        mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
-        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
     }
 
     @UnsupportedAppUsage
@@ -11623,7 +11623,8 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("mModemNetworkLock")
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
-    private NetworkStats readNetworkStatsLocked(String[] ifaces) {
+    @VisibleForTesting
+    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
         try {
             if (!ArrayUtils.isEmpty(ifaces)) {
                 INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
@@ -11922,7 +11923,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Distribute Cell radio energy info and network traffic to apps.
      */
-    public void updateMobileRadioState(@Nullable final ModemActivityInfo activityInfo,
+    public void noteModemControllerActivity(@Nullable final ModemActivityInfo activityInfo,
             long elapsedRealtimeMs, long uptimeMs) {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);

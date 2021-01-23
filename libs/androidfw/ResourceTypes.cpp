@@ -30,6 +30,7 @@
 #include <memory>
 #include <set>
 #include <type_traits>
+#include <vector>
 
 #include <android-base/macros.h>
 #include <androidfw/ByteBucketArray.h>
@@ -1029,7 +1030,7 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
             // But we don't want to hit the cache, so instead we will have a
             // local temporary allocation for the conversions.
             size_t convBufferLen = strLen + 4;
-            char16_t* convBuffer = (char16_t*)calloc(convBufferLen, sizeof(char16_t));
+            std::vector<char16_t> convBuffer(convBufferLen);
             ssize_t l = 0;
             ssize_t h = mHeader->stringCount-1;
 
@@ -1043,8 +1044,8 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
                 }
                 if (s.has_value()) {
                     char16_t* end = utf8_to_utf16(reinterpret_cast<const uint8_t*>(s->data()),
-                                                  s->size(), convBuffer, convBufferLen);
-                    c = strzcmp16(convBuffer, end-convBuffer, str, strLen);
+                                                  s->size(), convBuffer.data(), convBufferLen);
+                    c = strzcmp16(convBuffer.data(), end-convBuffer.data(), str, strLen);
                 }
                 if (kDebugStringPoolNoisy) {
                     ALOGI("Looking at %s, cmp=%d, l/mid/h=%d/%d/%d\n",
@@ -1054,7 +1055,6 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
                     if (kDebugStringPoolNoisy) {
                         ALOGI("MATCH!");
                     }
-                    free(convBuffer);
                     return mid;
                 } else if (c < 0) {
                     l = mid + 1;
@@ -1062,7 +1062,6 @@ base::expected<size_t, NullOrIOError> ResStringPool::indexOfString(const char16_
                     h = mid - 1;
                 }
             }
-            free(convBuffer);
         } else {
             // It is unusual to get the ID from an unsorted string block...
             // most often this happens because we want to get IDs for style

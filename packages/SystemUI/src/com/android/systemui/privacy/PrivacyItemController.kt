@@ -88,9 +88,9 @@ class PrivacyItemController @Inject constructor(
                 ALL_INDICATORS, DEFAULT_ALL_INDICATORS)
     }
 
-    // TODO(b/168209929) Remove hardcode
     private fun isMicCameraEnabled(): Boolean {
-        return true
+        return deviceConfigProxy.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                MIC_CAMERA, DEFAULT_MIC_CAMERA)
     }
 
     private fun isLocationEnabled(): Boolean {
@@ -140,11 +140,12 @@ class PrivacyItemController @Inject constructor(
                             DEFAULT_ALL_INDICATORS)
                     callbacks.forEach { it.get()?.onFlagAllChanged(allIndicatorsAvailable) }
                 }
-                // TODO(b/168209929) Uncomment
-//                if (properties.keyset.contains(MIC_CAMERA)) {
-//                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
-//                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
-//                }
+
+                if (properties.keyset.contains(MIC_CAMERA)) {
+                    micCameraAvailable = properties.getBoolean(MIC_CAMERA, DEFAULT_MIC_CAMERA)
+                    callbacks.forEach { it.get()?.onFlagMicCameraChanged(micCameraAvailable) }
+                }
+
                 if (properties.keyset.contains(LOCATION)) {
                     locationAvailable = properties.getBoolean(LOCATION, DEFAULT_LOCATION)
                     callbacks.forEach { it.get()?.onFlagLocationChanged(locationAvailable) }

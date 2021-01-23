@@ -23,6 +23,8 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IInvalidationCallback;
 
+import com.android.server.biometrics.BiometricsProto;
+
 /**
  * ClientMonitor subclass responsible for coordination of authenticatorId invalidation of other
  * sensors. See {@link InvalidationClient} for the ClientMonitor subclass responsible for initiating
@@ -88,5 +90,10 @@ public class InvalidationRequesterClient<S extends BiometricAuthenticator.Identi
         mUtils.setInvalidationInProgress(getContext(), getTargetUserId(), true /* inProgress */);
         mBiometricManager.invalidateAuthenticatorIds(getTargetUserId(), getSensorId(),
                 mInvalidationCallback);
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_INVALIDATION_REQUESTER;
     }
 }

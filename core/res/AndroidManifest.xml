@@ -321,6 +321,9 @@
 
     <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
+    <!-- For OMAPI -->
+    <protected-broadcast android:name="android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED" />
+
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.ALWAYS_ON_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
@@ -685,6 +688,10 @@
 
     <!-- Made protected in S (was added in R) -->
     <protected-broadcast android:name="com.android.internal.intent.action.BUGREPORT_REQUESTED" />
+
+    <!-- Added in S -->
+    <protected-broadcast android:name="android.app.action.MANAGED_PROFILE_CREATED" />
+    <protected-broadcast android:name="android.app.action.PROVISIONED_MANAGED_DEVICE" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->

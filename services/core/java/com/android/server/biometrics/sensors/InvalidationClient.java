@@ -24,6 +24,8 @@ import android.hardware.biometrics.IInvalidationCallback;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
+
 import java.util.Map;
 
 /**
@@ -69,5 +71,10 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     @Override
     public void unableToStart() {
 
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_INVALIDATE;
     }
 }

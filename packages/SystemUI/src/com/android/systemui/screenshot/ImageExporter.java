@@ -47,6 +47,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -74,7 +75,7 @@ class ImageExporter {
     private static final String EXIF_WRITE_EXCEPTION =
             "ExifInterface threw an exception writing to the file descriptor.";
     private static final String RESOLVER_UPDATE_ZERO_ROWS =
-            "Failed to publishEntry. ContentResolver#update reported no rows updated.";
+            "Failed to publish entry. ContentResolver#update reported no rows updated.";
     private static final String IMAGE_COMPRESS_RETURNED_FALSE =
             "Bitmap.compress returned false. (Failure unknown)";
 
@@ -116,7 +117,7 @@ class ImageExporter {
      *
      * @return a listenable future result
      */
-    ListenableFuture<Result> export(Executor executor, String requestId, Bitmap bitmap) {
+    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap) {
         return export(executor, requestId, bitmap, ZonedDateTime.now());
     }
 
@@ -128,7 +129,7 @@ class ImageExporter {
      *
      * @return a listenable future result
      */
-    ListenableFuture<Result> export(Executor executor, String requestId, Bitmap bitmap,
+    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
             ZonedDateTime captureTime) {
         final Task task =
                 new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat, mQuality);
@@ -147,7 +148,7 @@ class ImageExporter {
     }
 
     static class Result {
-        String requestId;
+        UUID requestId;
         String fileName;
         long timestamp;
         Uri uri;
@@ -156,14 +157,14 @@ class ImageExporter {
 
     private static class Task {
         private final ContentResolver mResolver;
-        private final String mRequestId;
+        private final UUID mRequestId;
         private final Bitmap mBitmap;
         private final ZonedDateTime mCaptureTime;
         private final CompressFormat mFormat;
         private final int mQuality;
         private final String mFileName;
 
-        Task(ContentResolver resolver, String requestId, Bitmap bitmap, ZonedDateTime captureTime,
+        Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
                 CompressFormat format, int quality) {
             mResolver = resolver;
             mRequestId = requestId;
@@ -191,7 +192,7 @@ class ImageExporter {
                 writeImage(mBitmap, mFormat, mQuality, uri);
                 throwIfInterrupted();
 
-                writeExif(uri, mBitmap.getWidth(), mBitmap.getHeight(), mCaptureTime);
+                writeExif(uri, mRequestId, mBitmap.getWidth(), mBitmap.getHeight(), mCaptureTime);
                 throwIfInterrupted();
 
                 publishEntry(uri);
@@ -251,7 +252,7 @@ class ImageExporter {
             }
         }
 
-        void writeExif(Uri uri, int width, int height, ZonedDateTime captureTime)
+        void writeExif(Uri uri, UUID requestId, int width, int height, ZonedDateTime captureTime)
                 throws ImageExportException {
             Trace.beginSection("ImageExporter_writeExif");
             ParcelFileDescriptor pfd = null;
@@ -267,7 +268,7 @@ class ImageExporter {
                     throw new ImageExportException(EXIF_READ_EXCEPTION, e);
                 }
 
-                updateExifAttributes(exif, width, height, captureTime);
+                updateExifAttributes(exif, requestId, width, height, captureTime);
                 try {
                     exif.saveAttributes();
                 } catch (IOException e) {
@@ -321,8 +322,10 @@ class ImageExporter {
         return values;
     }
 
-    static void updateExifAttributes(ExifInterface exif, int width, int height,
+    static void updateExifAttributes(ExifInterface exif, UUID uniqueId, int width, int height,
             ZonedDateTime captureTime) {
+        exif.setAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID, uniqueId.toString());
+
         exif.setAttribute(ExifInterface.TAG_SOFTWARE, "Android " + Build.DISPLAY);
         exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, Integer.toString(width));
         exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, Integer.toString(height));

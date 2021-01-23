@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.BiometricsProto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -165,5 +166,10 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             return;
         }
         ((EnumerateConsumer) mCurrentTask).onEnumerationResult(identifier, remaining);
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_INTERNAL_CLEANUP;
     }
 }

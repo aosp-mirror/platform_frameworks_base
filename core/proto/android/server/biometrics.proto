@@ -120,8 +120,8 @@ message SensorStateProto {
 
     optional Modality modality = 2;
 
-    // State of the sensor's scheduler. True if currently handling an operation, false if idle.
-    optional bool is_busy = 3;
+    // State of the sensor's scheduler.
+    optional BiometricSchedulerProto scheduler = 3;
 
     // User states for this sensor.
     repeated UserStateProto user_states = 4;
@@ -136,4 +136,39 @@ message UserStateProto {
 
     // Number of fingerprints enrolled
     optional int32 num_enrolled = 2;
+}
+
+// BiometricScheduler dump
+message BiometricSchedulerProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    // Operation currently being handled by the BiometricScheduler
+    optional ClientMonitorEnum current_operation = 1;
+
+    // Total number of operations that have been handled, not including the current one if one
+    // exists. Kept in FIFO order (most recent at the end of the array)
+    optional int32 total_operations = 2;
+
+    // A list of recent past operations in the order which they were handled
+    repeated ClientMonitorEnum recent_operations = 3;
+}
+
+// BaseClientMonitor subtypes
+enum ClientMonitorEnum {
+    CM_NONE = 0;
+    CM_UPDATE_ACTIVE_USER = 1;
+    CM_ENROLL = 2;
+    CM_AUTHENTICATE = 3;
+    CM_REMOVE = 4;
+    CM_GET_AUTHENTICATOR_ID = 5;
+    CM_ENUMERATE = 6;
+    CM_INTERNAL_CLEANUP = 7;
+    CM_SET_FEATURE = 8;
+    CM_GET_FEATURE = 9;
+    CM_GENERATE_CHALLENGE = 10;
+    CM_REVOKE_CHALLENGE = 11;
+    CM_RESET_LOCKOUT = 12;
+    CM_DETECT_INTERACTION = 13;
+    CM_INVALIDATION_REQUESTER = 14;
+    CM_INVALIDATE = 15;
 }

@@ -3947,6 +3947,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         int numChildren = getChildCount();
         for (int i = 0; i < numChildren; i++) {
             ExpandableView child = (ExpandableView) getChildAt(i);
+            child.setShouldFadeForShadeOpen(mAmbientState.isShadeOpening());
             child.applyViewState();
         }
 

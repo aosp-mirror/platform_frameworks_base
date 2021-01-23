@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.content.Context;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.hardware.boot.V1_2.IBootControl;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.IRecoverySystemProgressListener;
@@ -68,12 +69,13 @@ public class RecoverySystemServiceTest {
     private IThermalService mIThermalService;
     private FileWriter mUncryptUpdateFileWriter;
     private LockSettingsInternal mLockSettingsInternal;
+    private IBootControl mIBootControl;
 
     private static final String FAKE_OTA_PACKAGE_NAME = "fake.ota.package";
     private static final String FAKE_OTHER_PACKAGE_NAME = "fake.other.package";
 
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         mContext = mock(Context.class);
         mSystemProperties = new RecoverySystemServiceTestable.FakeSystemProperties();
         mUncryptSocket = mock(RecoverySystemService.UncryptSocket.class);
@@ -88,8 +90,13 @@ public class RecoverySystemServiceTest {
         PowerManager powerManager = new PowerManager(mock(Context.class), mIPowerManager,
                 mIThermalService, new Handler(looper));
 
+        mIBootControl = mock(IBootControl.class);
+        when(mIBootControl.getCurrentSlot()).thenReturn(0);
+        when(mIBootControl.getActiveBootSlot()).thenReturn(1);
+
         mRecoverySystemService = new RecoverySystemServiceTestable(mContext, mSystemProperties,
-                powerManager, mUncryptUpdateFileWriter, mUncryptSocket, mLockSettingsInternal);
+                powerManager, mUncryptUpdateFileWriter, mUncryptSocket, mLockSettingsInternal,
+                mIBootControl);
     }
 
     @Test
@@ -330,6 +337,15 @@ public class RecoverySystemServiceTest {
         assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", true),
                 is(true));
         verify(mIPowerManager).reboot(anyBoolean(), eq("ab-update"), anyBoolean());
+    }
+
+
+    @Test
+    public void rebootWithLskf_slotMismatch_Failure() throws Exception {
+        assertThat(mRecoverySystemService.requestLskf(FAKE_OTA_PACKAGE_NAME, null), is(true));
+        mRecoverySystemService.onPreparedForReboot(true);
+        assertThat(mRecoverySystemService.rebootWithLskf(FAKE_OTA_PACKAGE_NAME, "ab-update", false),
+                is(false));
     }
 
     @Test

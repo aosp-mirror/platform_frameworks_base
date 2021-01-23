@@ -21423,7 +21423,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mPermissionManager.onPackageInstalled(pkg,
                         PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT, userId);
                 if (applyUserRestrictions) {
-                    mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+                    mSettings.writePermissionStateForUserLPr(userId, false);
                 }
             }
 
@@ -27429,7 +27429,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void writePermissionSettings(int[] userIds, boolean async) {
             synchronized (mLock) {
                 for (int userId : userIds) {
-                    mSettings.writeRuntimePermissionsForUserLPr(userId, !async);
+                    mSettings.writePermissionStateForUserLPr(userId, !async);
                 }
             }
         }
@@ -28069,13 +28069,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * Temporary method that wraps mSettings.writeLPr() and calls mPermissionManager's
-     * writeLegacyPermissionsTEMP() and writeLegacyPermissionStateTEMP() beforehand.
+     * writeLegacyPermissionsTEMP() beforehand.
      *
      * TODO(zhanghai): This should be removed once we finish migration of permission storage.
      */
     private void writeSettingsLPrTEMP() {
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
-        mPermissionManager.writeLegacyPermissionStateTEMP();
         mSettings.writeLPr();
     }
 

@@ -5543,7 +5543,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
+            boolean preserveWindows, boolean notifyClients) {
         if (mInEnsureActivitiesVisible) {
             // Don't do recursive work.
             return;
@@ -5553,7 +5553,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         try {
             forAllRootTasks(rootTask -> {
                 rootTask.ensureActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients, userLeaving);
+                        notifyClients);
             });
         } finally {
             mAtmService.mTaskSupervisor.endActivityVisibilityUpdate();

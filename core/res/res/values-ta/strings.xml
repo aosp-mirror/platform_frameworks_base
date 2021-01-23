@@ -57,8 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"உள்வரும் அழைப்பாளர் ஐடி"</string>
-    <!-- no translation found for ClirMmi (6752346475055446417) -->
-    <skip />
+    <string name="ClirMmi" msgid="6752346475055446417">"வெளிச்செல்லும் அழைப்பாளர் ஐடியை மறைத்தல்"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"இணைக்கப்பட்ட லைன் ஐடி"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"இணைக்கப்பட்ட லைன் ஐடியை வரம்பிடல்"</string>
     <string name="CfMmi" msgid="8390012691099787178">"அழைப்பு திருப்பிவிடுதல்"</string>
@@ -204,6 +203,8 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"சென்சார் அறிவிப்புச் சேவை"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight சேவை"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"நேர மண்டல டிடெக்டர் (இணைப்பு இல்லை)"</string>
+    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
@@ -2204,4 +2205,12 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"திரை முழுவதையுமோ ஒரு பகுதியையோ பெரிதாக்கலாம்"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"அமைப்புகளில் ஆன் செய்க"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"மூடுக"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
+    <skip />
 </resources>

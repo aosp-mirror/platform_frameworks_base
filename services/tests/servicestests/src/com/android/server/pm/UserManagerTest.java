@@ -219,8 +219,8 @@ public final class UserManagerTest {
         mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
                 asHandle(currentUser));
         try {
-            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id)).isEqualTo(
-                    UserManager.REMOVE_RESULT_ERROR);
+            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
+                    /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
         } finally {
             mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
                     asHandle(currentUser));
@@ -232,9 +232,32 @@ public final class UserManagerTest {
 
     @MediumTest
     @Test
+    public void testRemoveUserOrSetEphemeral_evenWhenRestricted() throws Exception {
+        final int currentUser = ActivityManager.getCurrentUser();
+        final UserInfo user1 = createUser("User 1", /* flags= */ 0);
+        mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ true,
+                asHandle(currentUser));
+        try {
+            synchronized (mUserRemoveLock) {
+                assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
+                        /* evenWhenDisallowed= */ true))
+                                .isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
+                waitForUserRemovalLocked(user1.id);
+            }
+
+        } finally {
+            mUserManager.setUserRestriction(UserManager.DISALLOW_REMOVE_USER, /* value= */ false,
+                    asHandle(currentUser));
+        }
+
+        assertThat(hasUser(user1.id)).isFalse();
+    }
+
+    @MediumTest
+    @Test
     public void testRemoveUserOrSetEphemeral_systemUserReturnsError() throws Exception {
-        assertThat(mUserManager.removeUserOrSetEphemeral(UserHandle.USER_SYSTEM)).isEqualTo(
-                UserManager.REMOVE_RESULT_ERROR);
+        assertThat(mUserManager.removeUserOrSetEphemeral(UserHandle.USER_SYSTEM,
+                /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
 
         assertThat(hasUser(UserHandle.USER_SYSTEM)).isTrue();
     }
@@ -243,8 +266,8 @@ public final class UserManagerTest {
     @Test
     public void testRemoveUserOrSetEphemeral_invalidUserReturnsError() throws Exception {
         assertThat(hasUser(Integer.MAX_VALUE)).isFalse();
-        assertThat(mUserManager.removeUserOrSetEphemeral(Integer.MAX_VALUE)).isEqualTo(
-                UserManager.REMOVE_RESULT_ERROR);
+        assertThat(mUserManager.removeUserOrSetEphemeral(Integer.MAX_VALUE,
+                /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_ERROR);
     }
 
     @MediumTest
@@ -255,8 +278,8 @@ public final class UserManagerTest {
         // Switch to the user just created.
         switchUser(user1.id, null, /* ignoreHandle= */ true);
 
-        assertThat(mUserManager.removeUserOrSetEphemeral(user1.id)).isEqualTo(
-                UserManager.REMOVE_RESULT_SET_EPHEMERAL);
+        assertThat(mUserManager.removeUserOrSetEphemeral(user1.id, /* evenWhenDisallowed= */ false))
+                .isEqualTo(UserManager.REMOVE_RESULT_SET_EPHEMERAL);
 
         assertThat(hasUser(user1.id)).isTrue();
         assertThat(getUser(user1.id).isEphemeral()).isTrue();
@@ -276,8 +299,8 @@ public final class UserManagerTest {
     public void testRemoveUserOrSetEphemeral_nonCurrentUserRemoved() throws Exception {
         final UserInfo user1 = createUser("User 1", /* flags= */ 0);
         synchronized (mUserRemoveLock) {
-            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id)).isEqualTo(
-                    UserManager.REMOVE_RESULT_REMOVED);
+            assertThat(mUserManager.removeUserOrSetEphemeral(user1.id,
+                    /* evenWhenDisallowed= */ false)).isEqualTo(UserManager.REMOVE_RESULT_REMOVED);
             waitForUserRemovalLocked(user1.id);
         }
 
