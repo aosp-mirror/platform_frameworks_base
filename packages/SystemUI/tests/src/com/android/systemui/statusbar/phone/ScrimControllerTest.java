@@ -50,6 +50,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -104,6 +105,8 @@ public class ScrimControllerTest extends SysuiTestCase {
     private BlurUtils mBlurUtils;
     @Mock
     private ConfigurationController mConfigurationController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
 
 
     private static class AnimatorListener implements Animator.AnimatorListener {
@@ -211,13 +214,13 @@ public class ScrimControllerTest extends SysuiTestCase {
         when(mDelayedWakeLockBuilder.setTag(any(String.class)))
                 .thenReturn(mDelayedWakeLockBuilder);
         when(mDelayedWakeLockBuilder.build()).thenReturn(mWakeLock);
-
+        when(mFeatureFlags.isShadeOpaque()).thenReturn(true);
         when(mDockManager.isDocked()).thenReturn(false);
 
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParamenters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
-                mDockManager, mBlurUtils, mConfigurationController);
+                mDockManager, mBlurUtils, mConfigurationController, mFeatureFlags);
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mScrimInFront, mScrimForBubble);
         mScrimController.setAnimatorListener(mAnimatorListener);

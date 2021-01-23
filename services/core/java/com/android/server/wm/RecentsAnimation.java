@@ -392,6 +392,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     Slog.e(TAG, "Failed to clean up recents activity", e);
                     throw e;
                 } finally {
+                    mTaskSupervisor.mUserLeaving = false;
                     mService.continueWindowLayout();
                     // Make sure the surfaces are updated with the latest state. Sometimes the
                     // surface placement may be skipped if display configuration is changed (i.e.

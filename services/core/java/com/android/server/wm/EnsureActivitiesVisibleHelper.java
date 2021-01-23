@@ -33,7 +33,6 @@ class EnsureActivitiesVisibleHelper {
     private int mConfigChanges;
     private boolean mPreserveWindows;
     private boolean mNotifyClients;
-    private boolean mUserLeaving;
 
     EnsureActivitiesVisibleHelper(Task container) {
         mTask = container;
@@ -50,7 +49,7 @@ class EnsureActivitiesVisibleHelper {
      *                      be sent to the clients.
      */
     void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
-            boolean notifyClients, boolean userLeaving) {
+            boolean notifyClients) {
         mStarting = starting;
         mTop = mTask.topRunningActivity();
         // If the top activity is not fullscreen, then we need to make sure any activities under it
@@ -61,7 +60,6 @@ class EnsureActivitiesVisibleHelper {
         mConfigChanges = configChanges;
         mPreserveWindows = preserveWindows;
         mNotifyClients = notifyClients;
-        mUserLeaving = userLeaving;
     }
 
     /**
@@ -78,12 +76,10 @@ class EnsureActivitiesVisibleHelper {
      * @param preserveWindows Flag indicating whether windows should be preserved when updating.
      * @param notifyClients Flag indicating whether the configuration and visibility changes shoulc
      *                      be sent to the clients.
-     * @param userLeaving Flag indicating whether a userLeaving callback should be issued in the
-     *                      case the activity is being set to invisible.
      */
     void process(@Nullable ActivityRecord starting, int configChanges, boolean preserveWindows,
-            boolean notifyClients, boolean userLeaving) {
-        reset(starting, configChanges, preserveWindows, notifyClients, userLeaving);
+            boolean notifyClients) {
+        reset(starting, configChanges, preserveWindows, notifyClients);
 
         if (DEBUG_VISIBILITY) {
             Slog.v(TAG_VISIBILITY, "ensureActivitiesVisible behind " + mTop
@@ -177,7 +173,7 @@ class EnsureActivitiesVisibleHelper {
                         + " behindFullscreenActivity=" + mBehindFullscreenActivity
                         + " mLaunchTaskBehind=" + r.mLaunchTaskBehind);
             }
-            r.makeInvisible(mUserLeaving);
+            r.makeInvisible();
         }
 
         if (!mBehindFullscreenActivity && mTask.isActivityTypeHome() && r.isRootOfTask()) {

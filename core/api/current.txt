@@ -10311,6 +10311,7 @@ package android.content {
     method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendOrderedBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void sendStickyBroadcast(@RequiresPermission android.content.Intent);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public void sendStickyBroadcast(@NonNull @RequiresPermission android.content.Intent, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void sendStickyBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void sendStickyOrderedBroadcast(@RequiresPermission android.content.Intent, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void sendStickyOrderedBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
@@ -12383,6 +12384,7 @@ package android.content.pm {
     field public static final String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
     field public static final String FEATURE_SECURELY_REMOVES_USERS = "android.software.securely_removes_users";
     field public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
+    field public static final String FEATURE_SECURITY_MODEL_COMPATIBLE = "android.hardware.security.model.compatible";
     field public static final String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
     field public static final String FEATURE_SENSOR_AMBIENT_TEMPERATURE = "android.hardware.sensor.ambient_temperature";
     field public static final String FEATURE_SENSOR_BAROMETER = "android.hardware.sensor.barometer";
@@ -36459,6 +36461,9 @@ package android.se.omapi {
     method @NonNull public String getVersion();
     method public boolean isConnected();
     method public void shutdown();
+    field public static final String ACTION_SECURE_ELEMENT_STATE_CHANGED = "android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED";
+    field public static final String EXTRA_READER_NAME = "android.se.omapi.extra.READER_NAME";
+    field public static final String EXTRA_READER_STATE = "android.se.omapi.extra.READER_STATE";
   }
 
   public static interface SEService.OnConnectedListener {
@@ -42636,6 +42641,7 @@ package android.telephony.ims {
     field public static final int CODE_MEDIA_NO_DATA = 402; // 0x192
     field public static final int CODE_MEDIA_UNSPECIFIED = 404; // 0x194
     field public static final int CODE_MULTIENDPOINT_NOT_SUPPORTED = 902; // 0x386
+    field public static final int CODE_NETWORK_CONGESTION = 1624; // 0x658
     field public static final int CODE_NETWORK_DETACH = 1513; // 0x5e9
     field public static final int CODE_NETWORK_REJECT = 1504; // 0x5e0
     field public static final int CODE_NETWORK_RESP_TIMEOUT = 1503; // 0x5df

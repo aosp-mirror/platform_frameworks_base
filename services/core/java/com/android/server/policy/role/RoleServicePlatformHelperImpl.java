@@ -27,22 +27,27 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
+import android.content.pm.Signature;
 import android.os.Environment;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
+import android.util.PackageUtils;
 import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.R;
+import com.android.internal.util.CollectionUtils;
 import com.android.server.LocalServices;
-import com.android.server.role.LegacyRoleStateProvider;
+import com.android.server.role.RoleServicePlatformHelper;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -53,10 +58,10 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * Implementation to provide legacy role state.
+ * Implementation of {@link RoleServicePlatformHelper}.
  */
-public class LegacyRoleStateProviderImpl implements LegacyRoleStateProvider {
-    private static final String LOG_TAG = "LegacyRoleState";
+public class RoleServicePlatformHelperImpl implements RoleServicePlatformHelper {
+    private static final String LOG_TAG = RoleServicePlatformHelperImpl.class.getSimpleName();
 
     private static final String ROLES_FILE_NAME = "roles.xml";
 
@@ -68,7 +73,7 @@ public class LegacyRoleStateProviderImpl implements LegacyRoleStateProvider {
     @NonNull
     private final Context mContext;
 
-    public LegacyRoleStateProviderImpl(@NonNull Context context) {
+    public RoleServicePlatformHelperImpl(@NonNull Context context) {
         mContext = context;
     }
 
@@ -287,5 +292,45 @@ public class LegacyRoleStateProviderImpl implements LegacyRoleStateProvider {
             return false;
         }
         return Objects.equals(packageName, resolveInfo.activityInfo.packageName);
+    }
+
+    @NonNull
+    @Override
+    public String computePackageStateHash(@UserIdInt int userId) {
+        PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+        packageManagerInternal.forEachInstalledPackage(pkg -> {
+            try {
+                dataOutputStream.writeUTF(pkg.getPackageName());
+                dataOutputStream.writeLong(pkg.getLongVersionCode());
+                dataOutputStream.writeInt(packageManagerInternal.getApplicationEnabledState(
+                        pkg.getPackageName(), userId));
+
+                final ArraySet<String> enabledComponents =
+                        packageManagerInternal.getEnabledComponents(pkg.getPackageName(), userId);
+                final int enabledComponentsSize = CollectionUtils.size(enabledComponents);
+                dataOutputStream.writeInt(enabledComponentsSize);
+                for (int i = 0; i < enabledComponentsSize; i++) {
+                    dataOutputStream.writeUTF(enabledComponents.valueAt(i));
+                }
+
+                final ArraySet<String> disabledComponents =
+                        packageManagerInternal.getDisabledComponents(pkg.getPackageName(), userId);
+                final int disabledComponentsSize = CollectionUtils.size(disabledComponents);
+                for (int i = 0; i < disabledComponentsSize; i++) {
+                    dataOutputStream.writeUTF(disabledComponents.valueAt(i));
+                }
+
+                for (final Signature signature : pkg.getSigningDetails().signatures) {
+                    dataOutputStream.write(signature.toByteArray());
+                }
+            } catch (IOException e) {
+                // Never happens for ByteArrayOutputStream and DataOutputStream.
+                throw new AssertionError(e);
+            }
+        }, userId);
+        return PackageUtils.computeSha256Digest(byteArrayOutputStream.toByteArray());
     }
 }

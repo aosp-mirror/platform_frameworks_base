@@ -1361,53 +1361,58 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
             return;
         }
 
-        if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
-            mUserLeaving = true;
-        }
-
-        mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_TO_FRONT,
-                0 /* flags */, task, options != null ? options.getRemoteTransition() : null);
-        reason = reason + " findTaskToMoveToFront";
-        boolean reparented = false;
-        if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
-            final Rect bounds = options.getLaunchBounds();
-            task.setBounds(bounds);
-
-            Task stack =
-                    mRootWindowContainer.getLaunchRootTask(null, options, task, ON_TOP);
-
-            if (stack != currentStack) {
-                moveHomeRootTaskToFrontIfNeeded(flags, stack.getDisplayArea(), reason);
-                task.reparent(stack, ON_TOP, REPARENT_KEEP_ROOT_TASK_AT_FRONT, !ANIMATE,
-                        DEFER_RESUME, reason);
-                currentStack = stack;
-                reparented = true;
-                // task.reparent() should already placed the task on top,
-                // still need moveTaskToFrontLocked() below for any transition settings.
+        try {
+            if ((flags & ActivityManager.MOVE_TASK_NO_USER_ACTION) == 0) {
+                mUserLeaving = true;
             }
-            if (stack.shouldResizeRootTaskWithLaunchBounds()) {
-                stack.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
-            } else {
-                // WM resizeTask must be done after the task is moved to the correct stack,
-                // because Task's setBounds() also updates dim layer's bounds, but that has
-                // dependency on the stack.
-                task.resize(false /* relayout */, false /* forced */);
+
+            mService.getTransitionController().requestTransitionIfNeeded(TRANSIT_TO_FRONT,
+                    0 /* flags */, task, options != null ? options.getRemoteTransition() : null);
+            reason = reason + " findTaskToMoveToFront";
+            boolean reparented = false;
+            if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
+                final Rect bounds = options.getLaunchBounds();
+                task.setBounds(bounds);
+
+                Task stack =
+                        mRootWindowContainer.getLaunchRootTask(null, options, task, ON_TOP);
+
+                if (stack != currentStack) {
+                    moveHomeRootTaskToFrontIfNeeded(flags, stack.getDisplayArea(), reason);
+                    task.reparent(stack, ON_TOP, REPARENT_KEEP_ROOT_TASK_AT_FRONT, !ANIMATE,
+                            DEFER_RESUME, reason);
+                    currentStack = stack;
+                    reparented = true;
+                    // task.reparent() should already placed the task on top,
+                    // still need moveTaskToFrontLocked() below for any transition settings.
+                }
+                if (stack.shouldResizeRootTaskWithLaunchBounds()) {
+                    stack.resize(bounds, !PRESERVE_WINDOWS, !DEFER_RESUME);
+                } else {
+                    // WM resizeTask must be done after the task is moved to the correct stack,
+                    // because Task's setBounds() also updates dim layer's bounds, but that has
+                    // dependency on the stack.
+                    task.resize(false /* relayout */, false /* forced */);
+                }
             }
+
+            if (!reparented) {
+                moveHomeRootTaskToFrontIfNeeded(flags, currentStack.getDisplayArea(), reason);
+            }
+
+            final ActivityRecord r = task.getTopNonFinishingActivity();
+            currentStack.moveTaskToFront(task, false /* noAnimation */, options,
+                    r == null ? null : r.appTimeTracker, reason);
+
+            if (DEBUG_ROOT_TASK) Slog.d(TAG_ROOT_TASK,
+                    "findTaskToMoveToFront: moved to front of stack=" + currentStack);
+
+            handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
+                    mRootWindowContainer.getDefaultTaskDisplayArea(), currentStack,
+                    forceNonResizeable);
+        } finally {
+            mUserLeaving = false;
         }
-
-        if (!reparented) {
-            moveHomeRootTaskToFrontIfNeeded(flags, currentStack.getDisplayArea(), reason);
-        }
-
-        final ActivityRecord r = task.getTopNonFinishingActivity();
-        currentStack.moveTaskToFront(task, false /* noAnimation */, options,
-                r == null ? null : r.appTimeTracker, reason);
-
-        if (DEBUG_ROOT_TASK) Slog.d(TAG_ROOT_TASK,
-                "findTaskToMoveToFront: moved to front of stack=" + currentStack);
-
-        handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED,
-                mRootWindowContainer.getDefaultTaskDisplayArea(), currentStack, forceNonResizeable);
     }
 
     private void moveHomeRootTaskToFrontIfNeeded(int flags, TaskDisplayArea taskDisplayArea,
@@ -2209,7 +2214,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         .notifyActivityDismissingDockedStack();
                 taskDisplayArea.onSplitScreenModeDismissed(task);
                 taskDisplayArea.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
-                        true /* notifyClients */, mUserLeaving);
+                        true /* notifyClients */);
             }
             return;
         }

@@ -73,7 +73,12 @@ abstract public class VerityUtils {
         if (Files.size(Paths.get(signaturePath)) > MAX_SIGNATURE_FILE_SIZE_BYTES) {
             throw new SecurityException("Signature file is unexpectedly large: " + signaturePath);
         }
-        byte[] pkcs7Signature = Files.readAllBytes(Paths.get(signaturePath));
+        setUpFsverity(filePath, Files.readAllBytes(Paths.get(signaturePath)));
+    }
+
+    /** Enables fs-verity for the file with a PKCS#7 detached signature bytes. */
+    public static void setUpFsverity(@NonNull String filePath, @NonNull byte[] pkcs7Signature)
+            throws IOException {
         // This will fail if the public key is not already in .fs-verity kernel keyring.
         int errno = enableFsverityNative(filePath, pkcs7Signature);
         if (errno != 0) {

@@ -41,7 +41,7 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
             // Reserved: APP
             DRAIN_TYPE_BLUETOOTH,
             DRAIN_TYPE_CAMERA,
-            DRAIN_TYPE_CELL,
+            DRAIN_TYPE_MOBILE_RADIO,
             DRAIN_TYPE_FLASHLIGHT,
             DRAIN_TYPE_IDLE,
             DRAIN_TYPE_MEMORY,
@@ -59,7 +59,7 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
     public static final int DRAIN_TYPE_AMBIENT_DISPLAY = 0;
     public static final int DRAIN_TYPE_BLUETOOTH = 2;
     public static final int DRAIN_TYPE_CAMERA = 3;
-    public static final int DRAIN_TYPE_CELL = 4;
+    public static final int DRAIN_TYPE_MOBILE_RADIO = 4;
     public static final int DRAIN_TYPE_FLASHLIGHT = 5;
     public static final int DRAIN_TYPE_IDLE = 6;
     public static final int DRAIN_TYPE_MEMORY = 7;

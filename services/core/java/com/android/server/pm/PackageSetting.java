@@ -356,7 +356,7 @@ public class PackageSetting extends PackageSettingBase {
             proto.write(PackageProto.UserPermissionsProto.ID, user.id);
 
             runtimePermissionStates = dataProvider.getLegacyPermissionState(appId)
-                    .getRuntimePermissionStates(user.id);
+                    .getPermissionStates(user.id);
             for (LegacyPermissionState.PermissionState permission : runtimePermissionStates) {
                 if (permission.isGranted()) {
                     proto.write(PackageProto.UserPermissionsProto.GRANTED_PERMISSIONS,

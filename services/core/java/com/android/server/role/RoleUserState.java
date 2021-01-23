@@ -57,7 +57,7 @@ class RoleUserState {
     private final int mUserId;
 
     @NonNull
-    private final LegacyRoleStateProvider mLegacyStateProvider;
+    private final RoleServicePlatformHelper mPlatformHelper;
 
     @NonNull
     private final Callback mCallback;
@@ -92,13 +92,13 @@ class RoleUserState {
      * Create a new user state, and read its state from disk if previously persisted.
      *
      * @param userId the user id for this user state
-     * @param legacyStateProvider the provider for legacy role state
+     * @param platformHelper the platform helper
      * @param callback the callback for this user state
      */
-    public RoleUserState(@UserIdInt int userId,
-            @NonNull LegacyRoleStateProvider legacyStateProvider, @NonNull Callback callback) {
+    public RoleUserState(@UserIdInt int userId, @NonNull RoleServicePlatformHelper platformHelper,
+            @NonNull Callback callback) {
         mUserId = userId;
-        mLegacyStateProvider = legacyStateProvider;
+        mPlatformHelper = platformHelper;
         mCallback = callback;
 
         readFile();
@@ -363,7 +363,7 @@ class RoleUserState {
                 mPackagesHash = roleState.getPackagesHash();
                 roles = roleState.getRoles();
             } else {
-                roles = mLegacyStateProvider.getLegacyRoleState(mUserId);
+                roles = mPlatformHelper.getLegacyRoleState(mUserId);
             }
             mRoles.clear();
             for (Map.Entry<String, Set<String>> entry : roles.entrySet()) {

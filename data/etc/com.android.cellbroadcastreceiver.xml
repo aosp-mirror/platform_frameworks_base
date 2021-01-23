@@ -16,6 +16,7 @@
   -->
 <permissions>
     <privapp-permissions package="com.android.cellbroadcastreceiver">
+        <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
         <permission name="android.permission.MODIFY_PHONE_STATE"/>

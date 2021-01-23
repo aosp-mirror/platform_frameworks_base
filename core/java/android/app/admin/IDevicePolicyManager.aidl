@@ -26,6 +26,7 @@ import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
 import android.app.admin.ManagedProfileProvisioningParams;
+import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -496,4 +497,5 @@ interface IDevicePolicyManager {
     void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);
 
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams);
+    void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams);
 }

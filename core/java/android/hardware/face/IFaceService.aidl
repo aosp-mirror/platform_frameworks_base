@@ -35,7 +35,7 @@ interface IFaceService {
     ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Requests a proto dump of the specified sensor
-    byte[] dumpSensorServiceStateProto(int sensorId);
+    byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
 
     // Retrieve static sensor properties for all face sensors
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
