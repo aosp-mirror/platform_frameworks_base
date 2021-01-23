@@ -17,6 +17,7 @@
 package com.android.server.statusbar;
 
 import static android.app.StatusBarManager.DISABLE2_GLOBAL_ACTIONS;
+import static android.app.StatusBarManager.DISABLE2_NOTIFICATION_SHADE;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.Manifest;
@@ -613,12 +614,24 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         }
     };
 
+    /**
+     * Returns true if the target disable flag (target2) is set
+     */
+    private boolean isDisable2FlagSet(int target2) {
+        final int disabled2 = mDisplayUiState.get(DEFAULT_DISPLAY).getDisabled2();
+        return ((disabled2 & target2) == target2);
+    }
+
     // ================================================================================
     // From IStatusBarService
     // ================================================================================
     @Override
     public void expandNotificationsPanel() {
         enforceExpandStatusBar();
+
+        if (isDisable2FlagSet(DISABLE2_NOTIFICATION_SHADE)) {
+            return;
+        }
 
         if (mBar != null) {
             try {
@@ -657,6 +670,10 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     @Override
     public void togglePanel() {
         enforceExpandStatusBar();
+
+        if (isDisable2FlagSet(DISABLE2_NOTIFICATION_SHADE)) {
+            return;
+        }
 
         if (mBar != null) {
             try {
