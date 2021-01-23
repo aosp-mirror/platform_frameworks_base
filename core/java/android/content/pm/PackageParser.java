@@ -6264,6 +6264,55 @@ public class PackageParser {
         }
 
         /**
+         * Returns whether this {@code SigningDetails} has a signer in common with the provided
+         * {@code otherDetails} with the specified {@code flags} capabilities provided by this
+         * signer.
+         *
+         * <p>Note this method allows for the signing lineage to diverge, so this should only be
+         * used for instances where the only requirement is a common signer in the lineage with
+         * the specified capabilities. If the current signer of this instance is an ancestor of
+         * {@code otherDetails} then {@code true} is immediately returned since the current signer
+         * has all capabilities granted.
+         */
+        public boolean hasCommonSignerWithCapability(SigningDetails otherDetails,
+                @CertCapabilities int flags) {
+            if (this == UNKNOWN || otherDetails == UNKNOWN) {
+                return false;
+            }
+            // If either is signed with more than one signer then both must be signed by the same
+            // signers to consider the capabilities granted.
+            if (signatures.length > 1 || otherDetails.signatures.length > 1) {
+                return signaturesMatchExactly(otherDetails);
+            }
+            // The Signature class does not use the granted capabilities in the hashCode
+            // computation, so a Set can be used to check for a common signer.
+            Set<Signature> otherSignatures = new ArraySet<>();
+            if (otherDetails.hasPastSigningCertificates()) {
+                otherSignatures.addAll(Arrays.asList(otherDetails.pastSigningCertificates));
+            } else {
+                otherSignatures.addAll(Arrays.asList(otherDetails.signatures));
+            }
+            // If the current signer of this instance is an ancestor of the other than return true
+            // since all capabilities are granted to the current signer.
+            if (otherSignatures.contains(signatures[0])) {
+                return true;
+            }
+            if (hasPastSigningCertificates()) {
+                // Since the current signer was checked above and the last signature in the
+                // pastSigningCertificates is the current signer skip checking the last element.
+                for (int i = 0; i < pastSigningCertificates.length - 1; i++) {
+                    if (otherSignatures.contains(pastSigningCertificates[i])) {
+                        // If the caller specified multiple capabilities ensure all are set.
+                        if ((pastSigningCertificates[i].getFlags() & flags) == flags) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        /**
          * Determines if the provided {@code oldDetails} is an ancestor of this one, and whether or
          * not this one grants it the provided capability, represented by the {@code flags}
          * parameter.  In the event of signing certificate rotation, a package may still interact

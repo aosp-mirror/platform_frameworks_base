@@ -28,12 +28,15 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.pm.PackageParser.SigningDetails;
+import android.util.ArraySet;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -208,8 +211,8 @@ public class SigningDetailsTest {
         SigningDetails result1 = noLineageDetails.mergeLineageWith(lineageDetails);
         SigningDetails result2 = lineageDetails.mergeLineageWith(noLineageDetails);
 
-        assertTrue(result1 == lineageDetails);
-        assertTrue(result2 == lineageDetails);
+        assertSigningDetailsContainsLineage(result1, FIRST_SIGNATURE, SECOND_SIGNATURE);
+        assertSigningDetailsContainsLineage(result2, FIRST_SIGNATURE, SECOND_SIGNATURE);
     }
 
     @Test
@@ -271,8 +274,10 @@ public class SigningDetailsTest {
         SigningDetails result1 = singleSignerDetails.mergeLineageWith(fullLineageDetails);
         SigningDetails result2 = fullLineageDetails.mergeLineageWith(singleSignerDetails);
 
-        assertTrue(result1 == fullLineageDetails);
-        assertTrue(result2 == fullLineageDetails);
+        assertSigningDetailsContainsLineage(result1, FIRST_SIGNATURE, SECOND_SIGNATURE,
+                THIRD_SIGNATURE);
+        assertSigningDetailsContainsLineage(result2, FIRST_SIGNATURE, SECOND_SIGNATURE,
+                THIRD_SIGNATURE);
     }
 
     @Test
@@ -605,6 +610,213 @@ public class SigningDetailsTest {
         assertTrue(secondLineageDetails.hasCommonAncestor(firstLineageDetails));
     }
 
+    @Test
+    public void hasCommonSignerWithCapabilities_singleMatchingSigner_returnsTrue()
+            throws Exception {
+        // The hasCommonSignerWithCapabilities method is intended to grant the specified
+        // capabilities to a requesting package that has a common signer in the lineage (or as the
+        // current signer) even if their signing identities have diverged. This test verifies if the
+        // two SigningDetails have the same single signer then the requested capability can be
+        // granted since the current signer always has all capabilities granted.
+        SigningDetails firstDetails = createSigningDetails(FIRST_SIGNATURE);
+        SigningDetails secondSignerDetails = createSigningDetails(FIRST_SIGNATURE);
+
+        assertTrue(firstDetails.hasCommonSignerWithCapability(secondSignerDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_singleDifferentSigners_returnsFalse()
+            throws Exception {
+        // If each package is signed by a single different signer then the method should return
+        // false since there is no shared signer.
+        SigningDetails firstDetails = createSigningDetails(FIRST_SIGNATURE);
+        SigningDetails secondDetails = createSigningDetails(SECOND_SIGNATURE);
+
+        assertFalse(firstDetails.hasCommonSignerWithCapability(secondDetails, PERMISSION));
+        assertFalse(secondDetails.hasCommonSignerWithCapability(firstDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_oneWithMultipleSigners_returnsFalse()
+            throws Exception {
+        // If one of the packages is signed with multiple signers and the other only a single signer
+        // this method should return false since all signers must match exactly for multiple signer
+        // cases.
+        SigningDetails firstDetails = createSigningDetails(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        SigningDetails secondDetails = createSigningDetails(FIRST_SIGNATURE);
+
+        assertFalse(firstDetails.hasCommonSignerWithCapability(secondDetails, PERMISSION));
+        assertFalse(secondDetails.hasCommonSignerWithCapability(firstDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_multipleMatchingSigners_returnsTrue()
+            throws Exception {
+        // if both packages are signed by the same multiple signers then this method should return
+        // true since the current signer is granted all capabilities.
+        SigningDetails firstDetails = createSigningDetails(FIRST_SIGNATURE, SECOND_SIGNATURE);
+        SigningDetails secondDetails = createSigningDetails(SECOND_SIGNATURE, FIRST_SIGNATURE);
+
+        assertTrue(firstDetails.hasCommonSignerWithCapability(secondDetails, PERMISSION));
+        assertTrue(secondDetails.hasCommonSignerWithCapability(firstDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_singleSignerInLineage_returnsTrue()
+            throws Exception {
+        // if a single signer is in the lineage and that previous signer has the requested
+        // capability then this method should return true.
+        SigningDetails lineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE},
+                new int[]{DEFAULT_CAPABILITIES, DEFAULT_CAPABILITIES});
+        SigningDetails singleSignerDetails = createSigningDetails(FIRST_SIGNATURE);
+
+        assertTrue(lineageDetails.hasCommonSignerWithCapability(singleSignerDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_singleSignerInLineageWOCapability_returnsFalse()
+            throws Exception {
+        // If a single signer is in the lineage and that previous signer does not have the requested
+        // capability then this method should return false.
+        SigningDetails lineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE},
+                new int[]{SHARED_USER_ID, DEFAULT_CAPABILITIES});
+        SigningDetails singleSignerDetails = createSigningDetails(FIRST_SIGNATURE);
+
+        assertFalse(lineageDetails.hasCommonSignerWithCapability(singleSignerDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_singleSignerMatchesCurrentSigner_returnsTrue()
+            throws Exception {
+        // If a requesting app is signed by the same current signer as an app with a lineage the
+        // method should return true since the current signer is granted all capabilities.
+        SigningDetails lineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE},
+                new int[]{SHARED_USER_ID, DEFAULT_CAPABILITIES});
+        SigningDetails singleSignerDetails = createSigningDetails(SECOND_SIGNATURE);
+
+        assertTrue(lineageDetails.hasCommonSignerWithCapability(singleSignerDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_divergingSignersWithCommonSigner_returnsTrue()
+            throws Exception {
+        // This method is intended to allow granting a capability to another app that has a common
+        // signer in the lineage with the capability still granted; this test verifies when the
+        // current signers diverge but a common ancestor has the requested capability this method
+        // returns true.
+        SigningDetails firstLineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE, THIRD_SIGNATURE},
+                new int[]{DEFAULT_CAPABILITIES, DEFAULT_CAPABILITIES, DEFAULT_CAPABILITIES});
+        SigningDetails secondLineageDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE, FOURTH_SIGNATURE);
+
+        assertTrue(firstLineageDetails.hasCommonSignerWithCapability(secondLineageDetails,
+                PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_divergingSignersOneGrantsCapability_returnsTrue()
+            throws Exception {
+        // If apps have multiple common signers in the lineage with one denying the requested
+        // capability but the other granting it this method should return true.
+        SigningDetails firstLineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE, THIRD_SIGNATURE},
+                new int[]{SHARED_USER_ID, DEFAULT_CAPABILITIES, DEFAULT_CAPABILITIES});
+        SigningDetails secondLineageDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE, FOURTH_SIGNATURE);
+
+        assertTrue(firstLineageDetails.hasCommonSignerWithCapability(secondLineageDetails,
+                PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_divergingSignersNoneGrantCapability_returnsFalse()
+            throws Exception {
+        // If apps have multiple common signers in the lineage with all denying the requested
+        // capability this method should return false.
+        SigningDetails firstLineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE, THIRD_SIGNATURE},
+                new int[]{SHARED_USER_ID, AUTH, DEFAULT_CAPABILITIES});
+        SigningDetails secondLineageDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE, FOURTH_SIGNATURE);
+
+        assertFalse(firstLineageDetails.hasCommonSignerWithCapability(secondLineageDetails,
+                PERMISSION));
+    }
+
+    @Test
+    public void
+            hasCommonSignerWithCapabilities_divergingSignersNoneGrantsAllCapabilities_returnsTrue()
+            throws Exception {
+        // If an app has multiple common signers in the lineage, each granting one of the requested
+        // capabilities but neither granting all this method should return false since a single
+        // common ancestor must grant all requested capabilities.
+        SigningDetails firstLineageDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE, THIRD_SIGNATURE},
+                new int[]{SHARED_USER_ID, PERMISSION, DEFAULT_CAPABILITIES});
+        SigningDetails secondLineageDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE, FOURTH_SIGNATURE);
+
+        assertFalse(firstLineageDetails.hasCommonSignerWithCapability(secondLineageDetails,
+                PERMISSION | SHARED_USER_ID));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_currentSignerInLineageOfRequestingApp_returnsTrue()
+            throws Exception {
+        // If the current signer of an app is in the lineage of the requesting app then this method
+        // should return true since the current signer is granted all capabilities.
+        SigningDetails firstLineageDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE);
+        SigningDetails secondLineageDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE, THIRD_SIGNATURE);
+
+        assertTrue(firstLineageDetails.hasCommonSignerWithCapability(secondLineageDetails,
+                PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_currentSignerInLineageOfDeclaringApp_returnsTrue()
+            throws Exception {
+        // If the current signer of a requesting app with a lineage is in the lineage of the
+        // declaring app and that previous signature is granted the requested capability the method
+        // should return true.
+        SigningDetails declaringDetails = createSigningDetailsWithLineageAndCapabilities(
+                new String[]{FIRST_SIGNATURE, SECOND_SIGNATURE, THIRD_SIGNATURE},
+                new int[]{SHARED_USER_ID, DEFAULT_CAPABILITIES, DEFAULT_CAPABILITIES});
+        SigningDetails requestingDetails = createSigningDetailsWithLineage(FIRST_SIGNATURE,
+                SECOND_SIGNATURE);
+
+        assertTrue(declaringDetails.hasCommonSignerWithCapability(requestingDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_oneSignerNullLineage_returns() throws Exception {
+        // While the pastSigningCertificates should only be null in the case of multiple current
+        // signers there are instances where this can be null with a single signer; verify that a
+        // null pastSigningCertificates array in either SigningDetails does not result in a
+        // NullPointerException.
+        SigningDetails firstDetails = createSigningDetails(true, FIRST_SIGNATURE);
+        SigningDetails secondDetails = createSigningDetails(SECOND_SIGNATURE);
+
+        assertFalse(firstDetails.hasCommonSignerWithCapability(secondDetails, PERMISSION));
+        assertFalse(secondDetails.hasCommonSignerWithCapability(firstDetails, PERMISSION));
+    }
+
+    @Test
+    public void hasCommonSignerWithCapabilities_unknownSigner_returnsFalse() throws Exception {
+        // An unknown SigningDetails for either instance should immediately result in false being
+        // returned.
+        SigningDetails firstDetails = SigningDetails.UNKNOWN;
+        SigningDetails secondDetails = createSigningDetails(FIRST_SIGNATURE);
+
+        assertFalse(firstDetails.hasCommonSignerWithCapability(secondDetails, PERMISSION));
+        assertFalse(secondDetails.hasCommonSignerWithCapability(firstDetails, PERMISSION));
+    }
+
     private SigningDetails createSigningDetailsWithLineage(String... signers) throws Exception {
         int[] capabilities = new int[signers.length];
         for (int i = 0; i < capabilities.length; i++) {
@@ -629,10 +841,34 @@ public class SigningDetailsTest {
     }
 
     private SigningDetails createSigningDetails(String... signers) throws Exception {
+        return createSigningDetails(false, signers);
+    }
+
+    private SigningDetails createSigningDetails(boolean useNullPastSigners, String... signers)
+            throws Exception {
         Signature[] currentSignatures = new Signature[signers.length];
         for (int i = 0; i < signers.length; i++) {
             currentSignatures[i] = new Signature(signers[i]);
         }
-        return new SigningDetails(currentSignatures, SIGNING_BLOCK_V3, null);
+        // If there are multiple signers then the pastSigningCertificates should be set to null, but
+        // if there is only a single signer both the current signer and the past signers should be
+        // set to that one signer.
+        if (signers.length > 1) {
+            return new SigningDetails(currentSignatures, SIGNING_BLOCK_V3, null);
+        }
+        return new SigningDetails(currentSignatures, SIGNING_BLOCK_V3, currentSignatures);
+    }
+
+    private void assertSigningDetailsContainsLineage(SigningDetails details,
+            String... pastSigners) {
+        // This method should only be invoked for results that contain a single signer.
+        assertEquals(1, details.signatures.length);
+        assertTrue(details.signatures[0].toCharsString().equalsIgnoreCase(
+                pastSigners[pastSigners.length - 1]));
+        Set<String> signatures = new ArraySet<>(pastSigners);
+        for (Signature pastSignature : details.pastSigningCertificates) {
+            assertTrue(signatures.remove(pastSignature.toCharsString()));
+        }
+        assertEquals(0, signatures.size());
     }
 }
