@@ -84,9 +84,19 @@ public class PipSurfaceTransactionHelper {
      */
     public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
             Rect sourceBounds, Rect destinationBounds) {
+        return scale(tx, leash, sourceBounds, destinationBounds, 0 /* degrees */);
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash, along with a rotation.
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    public PipSurfaceTransactionHelper scale(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds, float degrees) {
         mTmpSourceRectF.set(sourceBounds);
         mTmpDestinationRectF.set(destinationBounds);
         mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
+        mTmpTransform.postRotate(degrees);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
                 .setPosition(leash, mTmpDestinationRectF.left, mTmpDestinationRectF.top);
         return this;
