@@ -5919,9 +5919,14 @@ public abstract class Context {
             throws PackageManager.NameNotFoundException;
 
     /**
-     * Get the user associated with this context
+     * Get the user associated with this context.
+     *
+     * @return the user associated with this context
+     *
      * @hide
      */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public UserHandle getUser() {
         return android.os.Process.myUserHandle();

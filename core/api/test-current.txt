@@ -630,7 +630,7 @@ package android.content {
   public abstract class Context {
     method @NonNull public java.io.File getCrateDir(@NonNull String);
     method public abstract int getDisplayId();
-    method public android.os.UserHandle getUser();
+    method @NonNull public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
@@ -685,7 +685,7 @@ package android.content.pm {
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
-    method @NonNull public abstract String getPermissionControllerPackageName();
+    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
