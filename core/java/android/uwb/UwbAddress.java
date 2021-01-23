@@ -18,6 +18,7 @@ package android.uwb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +29,7 @@ import java.util.Arrays;
  *
  * @hide
  */
+@SystemApi
 public final class UwbAddress implements Parcelable {
     public static final int SHORT_ADDRESS_BYTE_LENGTH = 2;
     public static final int EXTENDED_ADDRESS_BYTE_LENGTH = 8;

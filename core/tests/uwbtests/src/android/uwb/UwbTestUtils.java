@@ -42,8 +42,8 @@ public class UwbTestUtils {
 
     public static AngleOfArrivalMeasurement getAngleOfArrivalMeasurement() {
         return new AngleOfArrivalMeasurement.Builder()
-                .setAltitudeAngleMeasurement(getAngleMeasurement())
-                .setAzimuthAngleMeasurement(getAngleMeasurement())
+                .setAltitude(getAngleMeasurement())
+                .setAzimuth(getAngleMeasurement())
                 .build();
     }
 
