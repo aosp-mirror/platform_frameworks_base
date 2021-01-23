@@ -225,6 +225,7 @@ import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -2255,9 +2256,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || info.supportsPictureInPicture();
     }
 
-    /** @return whether this activity is non-resizeable or forced to be resizeable */
-    boolean isNonResizableOrForcedResizable(int windowingMode) {
+    /** @return whether this activity is non-resizeable but is forced to be resizable. */
+    boolean canForceResizeNonResizable(int windowingMode) {
         if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
+            return false;
+        }
+        if (WindowConfiguration.inMultiWindowMode(windowingMode)
+                && mAtmService.mSupportsNonResizableMultiWindow
+                && !mAtmService.mForceResizableActivities) {
+            // The non resizable app will be letterboxed instead of being forced resizable.
             return false;
         }
         return info.resizeMode != RESIZE_MODE_RESIZEABLE
@@ -2289,16 +2296,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         stack.
      */
     boolean supportsFreeform() {
-        return mAtmService.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
+        return mAtmService.mSupportsFreeformWindowManagement
+                // Either the activity is resizable, or we allow size compat in freeform.
+                && (supportsResizeableMultiWindow() || mAtmService.mSizeCompatFreeform);
     }
 
     /**
      * @return whether this activity supports non-PiP multi-window.
      */
-    private boolean supportsResizeableMultiWindow() {
+    boolean supportsResizeableMultiWindow() {
         return mAtmService.mSupportsMultiWindow && !isActivityTypeHome()
                 && (ActivityInfo.isResizeableMode(info.resizeMode)
-                        || mAtmService.mForceResizableActivities);
+                    || mAtmService.mForceResizableActivities
+                    || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**

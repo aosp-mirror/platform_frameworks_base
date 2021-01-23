@@ -1704,6 +1704,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     + " task=" + task);
         }
 
+        // It is ok to move the task to multi window only if the task supports multi window.
+        if (inMultiWindowMode && !stack.inPinnedWindowingMode()
+                && task.supportsNonPipMultiWindow()) {
+            return stack;
+        }
+
         // Leave the task in its current stack or a fullscreen stack if it isn't resizeable and the
         // preferred stack is in multi-window mode.
         if (inMultiWindowMode && !task.isResizeable()) {
@@ -2226,7 +2232,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private void handleForcedResizableTaskIfNeeded(Task task, int reason) {
         final ActivityRecord topActivity = task.getTopNonFinishingActivity();
         if (topActivity == null || topActivity.noDisplay
-                || !topActivity.isNonResizableOrForcedResizable(task.getWindowingMode())) {
+                || !topActivity.canForceResizeNonResizable(task.getWindowingMode())) {
             return;
         }
         mService.getTaskChangeNotificationController().notifyActivityForcedResizable(

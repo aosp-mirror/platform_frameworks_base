@@ -48,7 +48,6 @@ import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
 import android.view.SurfaceControl;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1485,14 +1484,18 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         boolean supportsPip = mAtmService.mSupportsPictureInPicture;
         if (supportsMultiWindow) {
             if (task != null) {
-                supportsMultiWindow = task.isResizeable();
                 supportsSplitScreen = task.supportsSplitScreenWindowingMode();
-                // TODO: Do we need to check for freeform and Pip support here?
+                supportsFreeform = task.supportsFreeform();
+                supportsMultiWindow = task.supportsNonPipMultiWindow()
+                        // When the activity needs to be moved to PIP while the Task is not in PIP,
+                        // it can be moved to a new created PIP Task, so WINDOWING_MODE_PINNED is
+                        // always valid for Task as long as the device supports it.
+                        || (windowingMode == WINDOWING_MODE_PINNED && supportsPip);
             } else if (r != null) {
-                supportsMultiWindow = r.isResizeable();
                 supportsSplitScreen = r.supportsSplitScreenWindowingMode();
                 supportsFreeform = r.supportsFreeform();
                 supportsPip = r.supportsPictureInPicture();
+                supportsMultiWindow = r.supportsResizeableMultiWindow() || supportsPip;
             }
         }
 
