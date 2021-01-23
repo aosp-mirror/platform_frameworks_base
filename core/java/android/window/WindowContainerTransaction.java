@@ -361,6 +361,11 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /** @hide */
+    public boolean isEmpty() {
+        return mChanges.isEmpty() && mHierarchyOps.isEmpty();
+    }
+
+    /** @hide */
     public Map<IBinder, Change> getChanges() {
         return mChanges;
     }

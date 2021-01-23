@@ -42,7 +42,9 @@ public class WindowOrganizer {
     @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS)
     public void applyTransaction(@NonNull WindowContainerTransaction t) {
         try {
-            getWindowOrganizerController().applyTransaction(t);
+            if (!t.isEmpty()) {
+                getWindowOrganizerController().applyTransaction(t);
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

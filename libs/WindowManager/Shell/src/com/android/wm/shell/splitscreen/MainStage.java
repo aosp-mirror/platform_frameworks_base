@@ -51,8 +51,7 @@ class MainStage extends StageTaskListener {
         if (mIsActive) return;
 
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setHidden(rootToken, false)
-                .setBounds(rootToken, rootBounds)
+        wct.setBounds(rootToken, rootBounds)
                 .setLaunchRoot(
                         rootToken,
                         CONTROLLED_WINDOWING_MODES,
@@ -63,7 +62,7 @@ class MainStage extends StageTaskListener {
                         CONTROLLED_WINDOWING_MODES,
                         CONTROLLED_ACTIVITY_TYPES,
                         true /* onTop */)
-                // Moving the root task to top after the child tasks were repareted , or the root
+                // Moving the root task to top after the child tasks were re-parented , or the root
                 // task cannot be visible and focused.
                 .reorder(rootToken, true /* onTop */);
 
@@ -71,13 +70,16 @@ class MainStage extends StageTaskListener {
     }
 
     void deactivate(WindowContainerTransaction wct) {
+        deactivate(wct, false /* toTop */);
+    }
+
+    void deactivate(WindowContainerTransaction wct, boolean toTop) {
         if (!mIsActive) return;
         mIsActive = false;
 
         if (mRootTaskInfo == null) return;
         final WindowContainerToken rootToken = mRootTaskInfo.token;
-        wct.setHidden(rootToken, true)
-                .setLaunchRoot(
+        wct.setLaunchRoot(
                         rootToken,
                         null,
                         null)
@@ -86,7 +88,9 @@ class MainStage extends StageTaskListener {
                         null /* newParent */,
                         CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
                         CONTROLLED_ACTIVITY_TYPES,
-                        false /* onTop */)
+                        toTop)
+                // We want this re-order to the bottom regardless since we are re-parenting
+                // all its tasks.
                 .reorder(rootToken, false /* onTop */);
     }
 
