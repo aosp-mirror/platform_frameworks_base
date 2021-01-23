@@ -775,6 +775,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     };
 
     /**
+     * @see #setSurfaceTranslationY(int)
+     */
+    private int mSurfaceTranslationY;
+
+    /**
      * Returns the visibility of the given {@link InternalInsetsType type} requested by the client.
      *
      * @param type the given {@link InternalInsetsType type}.
@@ -5358,6 +5363,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Expand for surface insets. See WindowState.expandForSurfaceInsets.
         transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
         outPoint.offset(-mTmpPoint.x, -mTmpPoint.y);
+
+        outPoint.y += mSurfaceTranslationY;
     }
 
     /**
@@ -5875,5 +5882,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         t.apply();
 
         return hadHandlers;
+    }
+
+    /**
+     * Adds an additional translation offset to be applied when positioning the surface. Used to
+     * correct offsets in specific reparenting situations, e.g. the navigation bar window attached
+     * on the lower split-screen app.
+     */
+    void setSurfaceTranslationY(int translationY) {
+        mSurfaceTranslationY = translationY;
     }
 }

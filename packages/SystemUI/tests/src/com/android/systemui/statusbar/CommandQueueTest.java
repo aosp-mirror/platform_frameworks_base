@@ -476,4 +476,11 @@ public class CommandQueueTest extends SysuiTestCase {
         waitForIdleSync();
         verify(mCallbacks).requestWindowMagnificationConnection(true);
     }
+
+    @Test
+    public void testSetEnableNavigationBarLumaSampling() {
+        mCommandQueue.setNavigationBarLumaSamplingEnabled(1, true);
+        waitForIdleSync();
+        verify(mCallbacks).setNavigationBarLumaSamplingEnabled(eq(1), eq(true));
+    }
 }
