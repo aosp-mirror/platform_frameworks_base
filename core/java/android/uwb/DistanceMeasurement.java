@@ -19,6 +19,7 @@ package android.uwb;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,6 +33,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class DistanceMeasurement implements Parcelable {
     private final double mMeters;
     private final double mErrorMeters;

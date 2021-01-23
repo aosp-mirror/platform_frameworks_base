@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -33,6 +34,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class RangingMeasurement implements Parcelable {
     private final UwbAddress mRemoteDeviceAddress;
     private final @Status int mStatus;
