@@ -37,7 +37,9 @@ int TunerClient::mTunerVersion;
 TunerClient::TunerClient() {
     // Get HIDL Tuner in migration stage.
     getHidlTuner();
-    updateTunerResources();
+    if (mTuner != NULL) {
+        updateTunerResources();
+    }
     // Connect with Tuner Service.
     ::ndk::SpAIBinder binder(AServiceManager_getService("media.tuner"));
     mTunerService = ITunerService::fromBinder(binder);
@@ -45,6 +47,9 @@ TunerClient::TunerClient() {
     mTunerService = NULL;
     if (mTunerService == NULL) {
         ALOGE("Failed to get tuner service");
+    } else {
+        // TODO: b/178124017 update TRM in TunerService independently.
+        mTunerService->updateTunerResources();
     }
 }
 
@@ -60,10 +65,8 @@ vector<FrontendId> TunerClient::getFrontendIds() {
 
     if (mTunerService != NULL) {
         vector<int32_t> v;
-        int aidl_return;
-        Status s = mTunerService->getFrontendIds(&v, &aidl_return);
-        if (!s.isOk() || aidl_return != (int) Result::SUCCESS
-                || v.size() == 0) {
+        Status s = mTunerService->getFrontendIds(&v);
+        if (getServiceSpecificErrorCode(s) != Result::SUCCESS || v.size() == 0) {
             ids.clear();
             return ids;
         }

@@ -51,8 +51,12 @@ Result LnbClient::setCallback(sp<LnbClientCallback> cb) {
         return TunerClient::getServiceSpecificErrorCode(s);
     }
 
-    mHidlCallback = new HidlLnbCallback(cb);
-    return mLnb->setCallback(mHidlCallback);
+    if (mLnb != NULL) {
+        mHidlCallback = new HidlLnbCallback(cb);
+        return mLnb->setCallback(mHidlCallback);
+    }
+
+    return Result::INVALID_STATE;
 }
 
 Result LnbClient::setVoltage(LnbVoltage voltage) {
