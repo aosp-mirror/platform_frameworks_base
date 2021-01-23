@@ -416,6 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Grabar pantalla"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Detener"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Para continuar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&amp;gt necesita acceso al micrófono del dispositivo."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Para continuar, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&amp;gt necesita acceso a la cámara del dispositivo."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Desliza el dedo hacia arriba para cambiar de app"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arrastra a la derecha para cambiar aplicaciones rápidamente"</string>
@@ -438,6 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Presiona de nuevo para abrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Desliza el dedo hacia arriba para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Desliza el dedo hacia arriba para volver a intentarlo"</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloquee el dispositivo para usar NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertenece a tu organización"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertenece a <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Desliza el dedo para desbloquear el teléfono."</string>
