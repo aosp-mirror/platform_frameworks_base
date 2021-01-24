@@ -87,6 +87,8 @@ final class InputMonitor {
     private final int mDisplayId;
     private final DisplayContent mDisplayContent;
     private boolean mDisplayRemoved;
+    private int mDisplayWidth;
+    private int mDisplayHeight;
 
     private final SurfaceControl.Transaction mInputTransaction;
     private final Handler mHandler;
@@ -187,6 +189,7 @@ final class InputMonitor {
     private void addInputConsumer(String name, InputConsumerImpl consumer) {
         mInputConsumers.put(name, consumer);
         consumer.linkToDeathRecipient();
+        consumer.layout(mInputTransaction, mDisplayWidth, mDisplayHeight);
         updateInputWindowsLw(true /* force */);
     }
 
@@ -211,6 +214,11 @@ final class InputMonitor {
     }
 
     void layoutInputConsumers(int dw, int dh) {
+        if (mDisplayWidth == dw && mDisplayHeight == dh) {
+            return;
+        }
+        mDisplayWidth = dw;
+        mDisplayHeight = dh;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "layoutInputConsumer");
             for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
