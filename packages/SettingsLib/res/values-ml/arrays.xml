@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", സജീവ (മീഡിയ)"</item>
     <item msgid="5001852592115448348">", സജീവമായ (ഫോൺ)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"ഓഫ്"</item>
+    <item msgid="7839165897132179888">"64K"</item>
+    <item msgid="2715700596495505626">"256K"</item>
+    <item msgid="7099386891713159947">"1M"</item>
+    <item msgid="6069075827077845520">"4M"</item>
+    <item msgid="6078203297886482480">"8M"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"ഓഫ്"</item>
     <item msgid="4064786181089783077">"64K"</item>
     <item msgid="3052710745383602630">"256K"</item>
     <item msgid="3691785423374588514">"1M"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"ഓഫ്"</item>
+    <item msgid="4195153527464162486">"ഓരോ ലോഗ് ബഫറിനും 64K"</item>
+    <item msgid="7464037639415220106">"ഓരോ ലോഗ് ബഫറിനും 256K"</item>
+    <item msgid="8539423820514360724">"ഓരോ ലോഗ് ബഫറിനും 1M"</item>
+    <item msgid="1984761927103140651">"ഓരോ ലോഗ് ബഫറിനും 4M"</item>
+    <item msgid="2983219471251787208">"ഓരോ ലോഗ് ബഫറിനും 8M"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"ഓഫ്"</item>
     <item msgid="6014837961827347618">"എല്ലാം"</item>

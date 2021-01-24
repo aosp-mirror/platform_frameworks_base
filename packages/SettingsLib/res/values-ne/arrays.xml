@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", सक्रिय (मिडिया)"</item>
     <item msgid="5001852592115448348">", सक्रिय (फोन)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"निष्क्रिय गर्नुहोस्"</item>
+    <item msgid="7839165897132179888">"६४के"</item>
+    <item msgid="2715700596495505626">"२५६के"</item>
+    <item msgid="7099386891713159947">"१एम"</item>
+    <item msgid="6069075827077845520">"४एम"</item>
+    <item msgid="6078203297886482480">"८ एम.बि."</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"निष्क्रिय गर्नुहोस्"</item>
     <item msgid="4064786181089783077">"६४के"</item>
     <item msgid="3052710745383602630">"२५६के"</item>
     <item msgid="3691785423374588514">"१एम"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"निष्क्रिय गर्नुहोस्"</item>
+    <item msgid="4195153527464162486">"६४के प्रति लग बफर"</item>
+    <item msgid="7464037639415220106">"२५६के प्रति लग बफर"</item>
+    <item msgid="8539423820514360724">"१एम प्रति लग बफर"</item>
+    <item msgid="1984761927103140651">"४एम प्रति लग बफर"</item>
+    <item msgid="2983219471251787208">"प्रति लग बफर ८ एम.बि."</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"निष्क्रिय"</item>
     <item msgid="6014837961827347618">"सबै"</item>
