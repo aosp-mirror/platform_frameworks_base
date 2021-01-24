@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">"، فعال (رسانه)"</item>
     <item msgid="5001852592115448348">"، فعال (تلفن)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"خاموش"</item>
+    <item msgid="7839165897132179888">"۶۴ هزار"</item>
+    <item msgid="2715700596495505626">"۲۵۶ هزار"</item>
+    <item msgid="7099386891713159947">"۱ میلیون"</item>
+    <item msgid="6069075827077845520">"۴ میلیون"</item>
+    <item msgid="6078203297886482480">"۸ مگابایت"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"خاموش"</item>
     <item msgid="4064786181089783077">"۶۴ هزار"</item>
     <item msgid="3052710745383602630">"۲۵۶ هزار"</item>
     <item msgid="3691785423374588514">"۱ میلیون"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"خاموش"</item>
+    <item msgid="4195153527464162486">"۶۴ هزار در هر بافر گزارش"</item>
+    <item msgid="7464037639415220106">"۲۵۶ هزار در هر بافر گزارش"</item>
+    <item msgid="8539423820514360724">"۱ میلیون در هر بافر گزارش"</item>
+    <item msgid="1984761927103140651">"۴ میلیون در هر بافر گزارش"</item>
+    <item msgid="2983219471251787208">"۸ مگابایت در هر میان‌گیری گزارش"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"خاموش"</item>
     <item msgid="6014837961827347618">"همه"</item>

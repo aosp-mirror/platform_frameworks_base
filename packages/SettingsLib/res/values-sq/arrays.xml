@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", aktiv (media)"</item>
     <item msgid="5001852592115448348">", aktiv (telefoni)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"Joaktiv"</item>
+    <item msgid="7839165897132179888">"64 mijë"</item>
+    <item msgid="2715700596495505626">"256 mijë"</item>
+    <item msgid="7099386891713159947">"1 milion"</item>
+    <item msgid="6069075827077845520">"4 milionë"</item>
+    <item msgid="6078203297886482480">"8 MB"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Joaktiv"</item>
     <item msgid="4064786181089783077">"64 mijë"</item>
     <item msgid="3052710745383602630">"256 mijë"</item>
     <item msgid="3691785423374588514">"1 milion"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"Joaktiv"</item>
+    <item msgid="4195153527464162486">"64 mijë/memorie regjistrimi"</item>
+    <item msgid="7464037639415220106">"256 mijë/memorie regjistrimi"</item>
+    <item msgid="8539423820514360724">"1 milion/memorie regjistrimi"</item>
+    <item msgid="1984761927103140651">"4 milionë/memorie regjistrimi"</item>
+    <item msgid="2983219471251787208">"8 MB për ndërmemorien e evidencës"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Joaktive"</item>
     <item msgid="6014837961827347618">"Të gjitha"</item>
