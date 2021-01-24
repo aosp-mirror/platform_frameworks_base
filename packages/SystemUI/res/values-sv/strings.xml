@@ -76,23 +76,23 @@
     <string name="learn_more" msgid="4690632085667273811">"Läs mer"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"Zooma för att fylla skärm"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Dra för att fylla skärmen"</string>
-    <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmdump"</string>
+    <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmbild"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har skickat en bild"</string>
-    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmdumpen sparas ..."</string>
-    <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmdumpen sparas ..."</string>
-    <string name="screenshot_saved_title" msgid="8893267638659083153">"Skärmdumpen har sparats"</string>
-    <string name="screenshot_saved_text" msgid="7778833104901642442">"Visa skärmdumpen genom att trycka här"</string>
-    <string name="screenshot_failed_title" msgid="3259148215671936891">"Det gick inte att spara skärmdumpen"</string>
-    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skärmdumpen kan bara sparas om enheten är upplåst"</string>
-    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmdump igen"</string>
-    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Det gick inte att spara skärmdumpen"</string>
-    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmdumpar"</string>
+    <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmbilden sparas ..."</string>
+    <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmbilden sparas ..."</string>
+    <string name="screenshot_saved_title" msgid="8893267638659083153">"Skärmbilden har sparats"</string>
+    <string name="screenshot_saved_text" msgid="7778833104901642442">"Visa skärmbilden genom att trycka här"</string>
+    <string name="screenshot_failed_title" msgid="3259148215671936891">"Det gick inte att spara skärmbilden"</string>
+    <string name="screenshot_failed_to_save_user_locked_text" msgid="6156607948256936920">"Skärmbilden kan bara sparas om enheten är upplåst"</string>
+    <string name="screenshot_failed_to_save_unknown_text" msgid="1506621600548684129">"Testa att ta en skärmbild igen"</string>
+    <string name="screenshot_failed_to_save_text" msgid="7232739948999195960">"Det gick inte att spara skärmbilden"</string>
+    <string name="screenshot_failed_to_capture_text" msgid="7818288545874407451">"Appen eller organisationen tillåter inte att du tar skärmbilder"</string>
     <string name="screenshot_edit_label" msgid="8754981973544133050">"Redigera"</string>
-    <string name="screenshot_edit_description" msgid="3333092254706788906">"Redigera skärmdump"</string>
+    <string name="screenshot_edit_description" msgid="3333092254706788906">"Redigera skärmbild"</string>
     <string name="screenshot_scroll_label" msgid="7682877978685434621">"Scrolla"</string>
-    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Rullande skärmdump"</string>
-    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Stäng skärmdump"</string>
-    <string name="screenshot_preview_description" msgid="7606510140714080474">"Förhandsgranskning av skärmdump"</string>
+    <string name="screenshot_scroll_description" msgid="7855773867093272175">"Rullande skärmbild"</string>
+    <string name="screenshot_dismiss_description" msgid="4702341245899508786">"Stäng skärmbild"</string>
+    <string name="screenshot_preview_description" msgid="7606510140714080474">"Förhandsgranskning av skärmbild"</string>
     <string name="screenrecord_name" msgid="2596401223859996572">"Skärminspelare"</string>
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Behandlar skärminspelning"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Avisering om att skärminspelning pågår"</string>
@@ -344,10 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Inmatningsmetod"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Plats"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Plats har inaktiverats"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Blockera Kamera"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Stäng av mikrofonen"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Medieenhet"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Endast nödsamtal"</string>
@@ -418,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Skärminspelning"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Starta"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Stoppa"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Enhet"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Byt appar genom att svepa uppåt"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Tryck och dra åt höger för att snabbt byta mellan appar"</string>
@@ -440,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Tryck igen för att öppna"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Öppna genom att svepa uppåt"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Svep uppåt om du vill försöka igen"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Den här enheten tillhör organisationen"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Den här enheten tillhör <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Svep från ikonen och öppna telefonen"</string>
@@ -920,7 +924,7 @@
     <string name="tuner_app" msgid="6949280415826686972">"Appen <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="notification_channel_alerts" msgid="3385787053375150046">"Aviseringar"</string>
     <string name="notification_channel_battery" msgid="9219995638046695106">"Batteri"</string>
-    <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skärmdumpar"</string>
+    <string name="notification_channel_screenshot" msgid="7665814998932211997">"Skärmbilder"</string>
     <string name="notification_channel_general" msgid="4384774889645929705">"Allmänna meddelanden"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"Lagring"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"Tips"</string>

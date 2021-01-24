@@ -20,15 +20,15 @@ import android.Manifest;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
-import android.app.ActivityThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteCallback;
 import android.util.Log;
 import android.util.SparseArray;
@@ -95,11 +95,10 @@ public class RoleControllerManager {
     private RoleControllerManager(@NonNull ComponentName remoteServiceComponentName,
             @NonNull Handler handler, @NonNull Context context) {
         synchronized (sRemoteServicesLock) {
-            int userId = context.getUserId();
+            int userId = context.getUser().getIdentifier();
             ServiceConnector<IRoleController> remoteService = sRemoteServices.get(userId);
             if (remoteService == null) {
-                remoteService = new ServiceConnector.Impl<IRoleController>(
-                        ActivityThread.currentApplication(),
+                remoteService = new ServiceConnector.Impl<IRoleController>(context,
                         new Intent(RoleControllerService.SERVICE_INTERFACE)
                                 .setComponent(remoteServiceComponentName),
                         0 /* bindingFlags */, userId, IRoleController.Stub::asInterface) {
@@ -119,7 +118,7 @@ public class RoleControllerManager {
      * @hide
      */
     public RoleControllerManager(@NonNull Context context) {
-        this(getRemoteServiceComponentName(context), context.getMainThreadHandler(), context);
+        this(getRemoteServiceComponentName(context), new Handler(Looper.getMainLooper()), context);
     }
 
     @NonNull
@@ -127,8 +126,8 @@ public class RoleControllerManager {
         Intent intent = new Intent(RoleControllerService.SERVICE_INTERFACE);
         PackageManager packageManager = context.getPackageManager();
         intent.setPackage(packageManager.getPermissionControllerPackageName());
-        ResolveInfo resolveInfo = packageManager.resolveService(intent, 0);
-        return resolveInfo.getComponentInfo().getComponentName();
+        ServiceInfo serviceInfo = packageManager.resolveService(intent, 0).serviceInfo;
+        return new ComponentName(serviceInfo.packageName, serviceInfo.name);
     }
 
     /**

@@ -23,6 +23,7 @@
 #include <android/hardware/tv/tuner/1.0/ILnbCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
+#include "ClientHelper.h"
 #include "LnbClientCallback.h"
 
 using Status = ::ndk::ScopedAStatus;
@@ -45,7 +46,6 @@ using namespace std;
 
 namespace android {
 
-// TODO: pending aidl interface
 class TunerLnbCallback : public BnTunerLnbCallback {
 
 public:

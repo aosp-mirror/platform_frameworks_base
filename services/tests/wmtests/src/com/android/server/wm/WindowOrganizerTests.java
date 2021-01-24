@@ -1216,6 +1216,34 @@ public class WindowOrganizerTests extends WindowTestsBase {
         return result;
     }
 
+    @Test
+    public void testReparentNonResizableTaskToSplitScreen() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .build();
+        final Task rootTask = activity.getRootTask();
+        rootTask.setResizeMode(activity.info.resizeMode);
+        final Task splitPrimaryRootTask = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                mDisplayContent, WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, null);
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.reparent(rootTask.mRemoteToken.toWindowContainerToken(),
+                splitPrimaryRootTask.mRemoteToken.toWindowContainerToken(), true /* onTop */);
+
+        // Can't reparent non-resizable to split screen
+        mAtm.mSupportsNonResizableMultiWindow = false;
+        mAtm.mWindowOrganizerController.applyTransaction(wct);
+
+        assertEquals(rootTask, activity.getRootTask());
+
+        // Allow reparent non-resizable to split screen
+        mAtm.mSupportsNonResizableMultiWindow = true;
+        mAtm.mWindowOrganizerController.applyTransaction(wct);
+
+        assertEquals(splitPrimaryRootTask, activity.getRootTask());
+    }
+
     /**
      * Verifies that task vanished is called for a specific task.
      */

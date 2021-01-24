@@ -1704,9 +1704,13 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                     + " task=" + task);
         }
 
+        if (stack.inPinnedWindowingMode()) {
+            throw new IllegalArgumentException("No support to reparent to PIP, task=" + task);
+        }
+
         // Leave the task in its current stack or a fullscreen stack if it isn't resizeable and the
         // preferred stack is in multi-window mode.
-        if (inMultiWindowMode && !task.isResizeable()) {
+        if (inMultiWindowMode && !task.supportsMultiWindow()) {
             Slog.w(TAG, "Can not move unresizeable task=" + task + " to multi-window stack=" + stack
                     + " Moving to a fullscreen stack instead.");
             if (prevStack != null) {
@@ -2226,7 +2230,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private void handleForcedResizableTaskIfNeeded(Task task, int reason) {
         final ActivityRecord topActivity = task.getTopNonFinishingActivity();
         if (topActivity == null || topActivity.noDisplay
-                || !topActivity.isNonResizableOrForcedResizable(task.getWindowingMode())) {
+                || !topActivity.canForceResizeNonResizable(task.getWindowingMode())) {
             return;
         }
         mService.getTaskChangeNotificationController().notifyActivityForcedResizable(

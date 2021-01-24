@@ -647,10 +647,12 @@ public class BubbleStackView extends FrameLayout
                 } else {
                     // Fling the stack to the edge, and save whether or not it's going to end up on
                     // the left side of the screen.
+                    final boolean oldOnLeft = mStackOnLeftOrWillBe;
                     mStackOnLeftOrWillBe =
                             mStackAnimationController.flingStackThenSpringToEdge(
                                     viewInitialX + dx, velX, velY) <= 0;
-                    updateBubbleIcons();
+                    final boolean updateForCollapsedStack = oldOnLeft != mStackOnLeftOrWillBe;
+                    updateBadgesAndZOrder(updateForCollapsedStack);
                     logBubbleEvent(null /* no bubble associated with bubble stack move */,
                             FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__STACK_MOVED);
                 }
@@ -1481,7 +1483,7 @@ public class BubbleStackView extends FrameLayout
         };
         if (mIsExpanded) {
             reorder.run();
-            updateBubbleIcons();
+            updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
         } else {
             List<View> bubbleViews = bubbles.stream()
                     .map(b -> b.getIconView()).collect(Collectors.toList());
@@ -2616,27 +2618,28 @@ public class BubbleStackView extends FrameLayout
         }
 
         mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        updateBubbleIcons();
+        updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
     }
 
     /**
      * Sets the appropriate Z-order, badge, and dot position for each bubble in the stack.
      * Animate dot and badge changes.
      */
-    private void updateBubbleIcons() {
+    private void updateBadgesAndZOrder(boolean setBadgeForCollapsedStack) {
         int bubbleCount = getBubbleCount();
         for (int i = 0; i < bubbleCount; i++) {
             BadgedImageView bv = (BadgedImageView) mBubbleContainer.getChildAt(i);
             bv.setZ((mMaxBubbles * mBubbleElevation) - i);
-
             if (mIsExpanded) {
                 // If we're not displaying vertically, we always show the badge on the left.
                 boolean onLeft = mPositioner.showBubblesVertically() && !mStackOnLeftOrWillBe;
                 bv.showDotAndBadge(onLeft);
-            } else if (i == 0) {
-                bv.showDotAndBadge(!mStackOnLeftOrWillBe);
-            } else {
-                bv.hideDotAndBadge(!mStackOnLeftOrWillBe);
+            } else if (setBadgeForCollapsedStack) {
+                if (i == 0) {
+                    bv.showDotAndBadge(!mStackOnLeftOrWillBe);
+                } else {
+                    bv.hideDotAndBadge(!mStackOnLeftOrWillBe);
+                }
             }
         }
     }

@@ -21,19 +21,19 @@ import android.annotation.Nullable;
 import android.app.role.IRoleManager;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
-import android.os.UserHandle;
 
 import com.android.modules.utils.BasicShellCommandHandler;
+import com.android.server.role.compat.UserHandleCompat;
 
 import java.io.PrintWriter;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-class RoleManagerShellCommand extends BasicShellCommandHandler {
+class RoleShellCommand extends BasicShellCommandHandler {
     @NonNull
     private final IRoleManager mRoleManager;
 
-    RoleManagerShellCommand(@NonNull IRoleManager roleManager) {
+    RoleShellCommand(@NonNull IRoleManager roleManager) {
         mRoleManager = roleManager;
     }
 
@@ -86,7 +86,7 @@ class RoleManagerShellCommand extends BasicShellCommandHandler {
     }
 
     private int getUserIdMaybe() {
-        int userId = UserHandle.USER_SYSTEM;
+        int userId = UserHandleCompat.USER_SYSTEM;
         String option = getNextOption();
         if (option != null && option.equals("--user")) {
             userId = Integer.parseInt(getNextArgRequired());
@@ -139,7 +139,7 @@ class RoleManagerShellCommand extends BasicShellCommandHandler {
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
-        pw.println("Role manager (role) commands:");
+        pw.println("Role (role) commands:");
         pw.println("  help or -h");
         pw.println("    Print this help text.");
         pw.println();

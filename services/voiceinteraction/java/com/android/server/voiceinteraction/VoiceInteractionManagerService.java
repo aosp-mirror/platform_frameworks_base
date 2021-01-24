@@ -1146,13 +1146,18 @@ public class VoiceInteractionManagerService extends SystemService {
 
             @Override
             public int startRecognition(int keyphraseId, String bcp47Locale,
-                    IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
+                    IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig,
+                    boolean runInBatterySaverMode) {
                 // Allow the call if this is the current voice interaction service.
                 synchronized (VoiceInteractionManagerServiceStub.this) {
                     enforceIsCurrentVoiceInteractionService();
 
                     if (callback == null || recognitionConfig == null || bcp47Locale == null) {
                         throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
+                    }
+                    if (runInBatterySaverMode) {
+                        enforceCallingPermission(
+                                Manifest.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER);
                     }
                 }
 
@@ -1173,7 +1178,8 @@ public class VoiceInteractionManagerService extends SystemService {
                             mLoadedKeyphraseIds.put(keyphraseId, this);
                         }
                         return mSession.startRecognition(
-                                keyphraseId, soundModel, callback, recognitionConfig);
+                                keyphraseId, soundModel, callback, recognitionConfig,
+                                runInBatterySaverMode);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(caller);

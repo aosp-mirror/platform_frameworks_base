@@ -553,6 +553,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM,
                 GlobalSettingsProto.Development.ENABLE_SIZECOMPAT_FREEFORM);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
+                GlobalSettingsProto.Development.ENABLE_NON_RESIZABLE_MULTI_WINDOW);
         p.end(developmentToken);
 
         final long deviceToken = p.start(GlobalSettingsProto.DEVICE);

@@ -31,7 +31,7 @@ import android.app.contentsuggestions.IContentSuggestionsManager;
 import android.app.job.JobSchedulerFrameworkInitializer;
 import android.app.people.PeopleManager;
 import android.app.prediction.AppPredictionManager;
-import android.app.role.RoleManager;
+import android.app.role.RoleFrameworkInitializer;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
 import android.app.time.TimeManager;
@@ -1320,14 +1320,6 @@ public final class SystemServiceRegistry {
                                 ctx.getMainThreadHandler());
                     }});
 
-        registerService(Context.ROLE_SERVICE, RoleManager.class,
-                new CachedServiceFetcher<RoleManager>() {
-                    @Override
-                    public RoleManager createService(ContextImpl ctx)
-                            throws ServiceNotFoundException {
-                        return new RoleManager(ctx.getOuterContext());
-                    }});
-
         registerService(Context.DYNAMIC_SYSTEM_SERVICE, DynamicSystemManager.class,
                 new CachedServiceFetcher<DynamicSystemManager>() {
                     @Override
@@ -1423,6 +1415,7 @@ public final class SystemServiceRegistry {
             RollbackManagerFrameworkInitializer.initialize();
             MediaFrameworkPlatformInitializer.registerServiceWrappers();
             MediaFrameworkInitializer.registerServiceWrappers();
+            RoleFrameworkInitializer.registerServiceWrappers();
         } finally {
             // If any of the above code throws, we're in a pretty bad shape and the process
             // will likely crash, but we'll reset it just in case there's an exception handler...

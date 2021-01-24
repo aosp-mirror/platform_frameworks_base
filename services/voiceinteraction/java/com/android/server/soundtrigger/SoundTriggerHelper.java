@@ -44,7 +44,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.PowerManager.ServiceType;
+import android.os.PowerManager.SoundTriggerPowerSaveMode;
 import android.os.RemoteException;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -107,7 +107,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
     private HashMap<Integer, UUID> mKeyphraseUuidMap;
 
     private boolean mCallActive = false;
-    private boolean mIsPowerSaveMode = false;
+    private @SoundTriggerPowerSaveMode int mSoundTriggerPowerSaveMode =
+            PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
     // Indicates if the native sound trigger service is disabled or not.
     // This is an indirect indication of the microphone being open in some other application.
     private boolean mServiceDisabled = false;
@@ -205,7 +206,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
      */
     int startGenericRecognition(UUID modelId, GenericSoundModel soundModel,
-            IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
+            IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig,
+            boolean runInBatterySaverMode) {
         MetricsLogger.count(mContext, "sth_start_recognition", 1);
         if (modelId == null || soundModel == null || callback == null ||
                 recognitionConfig == null) {
@@ -220,7 +222,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 return STATUS_ERROR;
             }
             return startRecognition(soundModel, modelData, callback, recognitionConfig,
-                    INVALID_VALUE /* keyphraseId */);
+                    INVALID_VALUE /* keyphraseId */, runInBatterySaverMode);
         }
     }
 
@@ -234,7 +236,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
      */
     int startKeyphraseRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
-            IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
+            IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig,
+            boolean runInBatterySaverMode) {
         synchronized (mLock) {
             MetricsLogger.count(mContext, "sth_start_recognition", 1);
             if (soundModel == null || callback == null || recognitionConfig == null) {
@@ -244,7 +247,8 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (DBG) {
                 Slog.d(TAG, "startKeyphraseRecognition for keyphraseId=" + keyphraseId
                         + " soundModel=" + soundModel + ", callback=" + callback.asBinder()
-                        + ", recognitionConfig=" + recognitionConfig);
+                        + ", recognitionConfig=" + recognitionConfig
+                        + ", runInBatterySaverMode=" + runInBatterySaverMode);
                 Slog.d(TAG, "moduleProperties=" + mModuleProperties);
                 dumpModelStateLocked();
             }
@@ -273,7 +277,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             }
 
             return startRecognition(soundModel, model, callback, recognitionConfig,
-                    keyphraseId);
+                    keyphraseId, runInBatterySaverMode);
         }
     }
 
@@ -334,7 +338,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
      */
     int startRecognition(SoundModel soundModel, ModelData modelData,
             IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig,
-            int keyphraseId) {
+            int keyphraseId, boolean runInBatterySaverMode) {
         synchronized (mLock) {
             if (mModuleProperties == null) {
                 Slog.w(TAG, "Attempting startRecognition without the capability");
@@ -387,10 +391,11 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             modelData.setCallback(callback);
             modelData.setRequested(true);
             modelData.setRecognitionConfig(recognitionConfig);
+            modelData.setRunInBatterySaverMode(runInBatterySaverMode);
             modelData.setSoundModel(soundModel);
 
-            if (!isRecognitionAllowed()) {
-                initializeTelephonyAndPowerStateListeners();
+            if (!isRecognitionAllowedByDeviceState(modelData)) {
+                initializeDeviceStateListeners();
                 return STATUS_OK;
             }
 
@@ -404,7 +409,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             // Initialize power save, call active state monitoring logic.
             if (status == STATUS_OK) {
-                initializeTelephonyAndPowerStateListeners();
+                initializeDeviceStateListeners();
             }
 
             return status;
@@ -519,8 +524,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             // Request stop recognition via the update() method.
             modelData.setRequested(false);
-            int status = updateRecognitionLocked(modelData, isRecognitionAllowed(),
-                    false /* don't notify for synchronous calls */);
+            int status = updateRecognitionLocked(modelData, false);
             if (status != SoundTrigger.STATUS_OK) {
                 return status;
             }
@@ -589,8 +593,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
 
             // Stop recognition if it's the current one.
             modelData.setRequested(false);
-            int status = updateRecognitionLocked(modelData, isRecognitionAllowed(),
-                    false /* don't notify */);
+            int status = updateRecognitionLocked(modelData, false);
             if (status != SoundTrigger.STATUS_OK) {
                 Slog.w(TAG, "Stop recognition failed for keyphrase ID:" + status);
             }
@@ -854,8 +857,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         model.setRequested(config.allowMultipleTriggers);
         // TODO: Remove this block if the lower layer supports multiple triggers.
         if (model.isRequested()) {
-            updateRecognitionLocked(model, isRecognitionAllowed() /* isAllowed */,
-                    true /* notify */);
+            updateRecognitionLocked(model, true);
         }
     }
 
@@ -896,15 +898,16 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
         mCallActive = callActive;
-        updateAllRecognitionsLocked(true /* notify */);
+        updateAllRecognitionsLocked();
     }
 
-    private void onPowerSaveModeChangedLocked(boolean isPowerSaveMode) {
-        if (mIsPowerSaveMode == isPowerSaveMode) {
+    private void onPowerSaveModeChangedLocked(
+            @SoundTriggerPowerSaveMode int soundTriggerPowerSaveMode) {
+        if (mSoundTriggerPowerSaveMode == soundTriggerPowerSaveMode) {
             return;
         }
-        mIsPowerSaveMode = isPowerSaveMode;
-        updateAllRecognitionsLocked(true /* notify */);
+        mSoundTriggerPowerSaveMode = soundTriggerPowerSaveMode;
+        updateAllRecognitionsLocked();
     }
 
     private void onSoundModelUpdatedLocked(SoundModelEvent event) {
@@ -916,7 +919,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return;
         }
         mServiceDisabled = disabled;
-        updateAllRecognitionsLocked(true /* notify */);
+        updateAllRecognitionsLocked();
     }
 
     private void onRecognitionAbortLocked(RecognitionEvent event) {
@@ -997,34 +1000,32 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         }
         // TODO: Remove this block if the lower layer supports multiple triggers.
         if (modelData.isRequested()) {
-            updateRecognitionLocked(modelData, isRecognitionAllowed(), true /* notify */);
+            updateRecognitionLocked(modelData, true);
         }
     }
 
-    private void updateAllRecognitionsLocked(boolean notify) {
-        boolean isAllowed = isRecognitionAllowed();
+    private void updateAllRecognitionsLocked() {
         // updateRecognitionLocked can possibly update the list of models
         ArrayList<ModelData> modelDatas = new ArrayList<ModelData>(mModelDataMap.values());
         for (ModelData modelData : modelDatas) {
-            updateRecognitionLocked(modelData, isAllowed, notify);
+            updateRecognitionLocked(modelData, true);
         }
     }
 
-    private int updateRecognitionLocked(ModelData model, boolean isAllowed,
-        boolean notify) {
-        boolean start = model.isRequested() && isAllowed;
-        if (start == model.isModelStarted()) {
+    private int updateRecognitionLocked(ModelData model, boolean notifyClientOnError) {
+        boolean shouldStartModel = model.isRequested() && isRecognitionAllowedByDeviceState(model);
+        if (shouldStartModel == model.isModelStarted()) {
             // No-op.
             return STATUS_OK;
         }
-        if (start) {
+        if (shouldStartModel) {
             int status = prepareForRecognition(model);
             if (status != STATUS_OK) {
                 return status;
             }
-            return startRecognitionLocked(model, notify);
+            return startRecognitionLocked(model, notifyClientOnError);
         } else {
-            return stopRecognitionLocked(model, notify);
+            return stopRecognitionLocked(model, notifyClientOnError);
         }
     }
 
@@ -1095,11 +1096,13 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             if (!PowerManager.ACTION_POWER_SAVE_MODE_CHANGED.equals(intent.getAction())) {
                 return;
             }
-            boolean active = mPowerManager.getPowerSaveState(ServiceType.SOUND)
-                    .batterySaverEnabled;
-            if (DBG) Slog.d(TAG, "onPowerSaveModeChanged: " + active);
+            @SoundTriggerPowerSaveMode int soundTriggerPowerSaveMode =
+                    mPowerManager.getSoundTriggerPowerSaveMode();
+            if (DBG) {
+                Slog.d(TAG, "onPowerSaveModeChanged: " + soundTriggerPowerSaveMode);
+            }
             synchronized (mLock) {
-                onPowerSaveModeChangedLocked(active);
+                onPowerSaveModeChangedLocked(soundTriggerPowerSaveMode);
             }
         }
     }
@@ -1108,14 +1111,15 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         synchronized (mLock) {
             pw.print("  module properties=");
             pw.println(mModuleProperties == null ? "null" : mModuleProperties);
-
-            pw.print("  call active="); pw.println(mCallActive);
-            pw.print("  power save mode active="); pw.println(mIsPowerSaveMode);
-            pw.print("  service disabled="); pw.println(mServiceDisabled);
+            pw.print("  call active=");
+            pw.println(mCallActive);
+            pw.println("  SoundTrigger Power State=" + mSoundTriggerPowerSaveMode);
+            pw.print("  service disabled=");
+            pw.println(mServiceDisabled);
         }
     }
 
-    private void initializeTelephonyAndPowerStateListeners() {
+    private void initializeDeviceStateListeners() {
         if (mRecognitionRequested) {
             return;
         }
@@ -1134,8 +1138,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                 mContext.registerReceiver(mPowerSaveModeListener,
                         new IntentFilter(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED));
             }
-            mIsPowerSaveMode = mPowerManager.getPowerSaveState(ServiceType.SOUND)
-                    .batterySaverEnabled;
+            mSoundTriggerPowerSaveMode = mPowerManager.getSoundTriggerPowerSaveMode();
 
             mRecognitionRequested = true;
         } finally {
@@ -1308,23 +1311,44 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         return null;
     }
 
-    // Whether we are allowed to run any recognition at all. The conditions that let us run
-    // a recognition include: no active phone call or not being in a power save mode. Also,
-    // the native service should be enabled.
-    private boolean isRecognitionAllowed() {
+    /**
+     * Determines if recognition is allowed at all based on device state
+     *
+     * <p>Depending on the state of the SoundTrigger service, whether a call is active, or if
+     * battery saver mode is enabled, a specific model may or may not be able to run. The result
+     * of this check is not permanent, and the state of the device can change at any time.
+     *
+     * @param modelData Model data to be used for recognition
+     * @return True if recognition is allowed to run at this time. False if not.
+     */
+    private boolean isRecognitionAllowedByDeviceState(ModelData modelData) {
         // if mRecognitionRequested is false, call and power state listeners are not registered so
         // we read current state directly from services
         if (!mRecognitionRequested) {
             mCallActive = mTelephonyManager.getCallState() == TelephonyManager.CALL_STATE_OFFHOOK;
-            mIsPowerSaveMode =
-                mPowerManager.getPowerSaveState(ServiceType.SOUND).batterySaverEnabled;
+            mSoundTriggerPowerSaveMode = mPowerManager.getSoundTriggerPowerSaveMode();
         }
-        return !mCallActive && !mServiceDisabled && !mIsPowerSaveMode;
+
+        return !mCallActive && !mServiceDisabled
+                && isRecognitionAllowedByPowerState(
+                modelData);
+    }
+
+    /**
+     * Helper function to validate if a recognition should run based on the current power state
+     *
+     * @param modelData Model data to be used for recognition
+     * @return True if device state allows recognition to run, false if not.
+     */
+    boolean isRecognitionAllowedByPowerState(ModelData modelData) {
+        return mSoundTriggerPowerSaveMode == PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED
+                || (mSoundTriggerPowerSaveMode == PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY
+                && modelData.shouldRunInBatterySaverMode());
     }
 
     // A single routine that implements the start recognition logic for both generic and keyphrase
     // models.
-    private int startRecognitionLocked(ModelData modelData, boolean notify) {
+    private int startRecognitionLocked(ModelData modelData, boolean notifyClientOnError) {
         IRecognitionStatusCallback callback = modelData.getCallback();
         RecognitionConfig config = modelData.getRecognitionConfig();
         if (callback == null || !modelData.isModelLoaded() || config == null) {
@@ -1334,7 +1358,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             return STATUS_ERROR;
         }
 
-        if (!isRecognitionAllowed()) {
+        if (!isRecognitionAllowedByDeviceState(modelData)) {
             // Nothing to do here.
             Slog.w(TAG, "startRecognition requested but not allowed.");
             MetricsLogger.count(mContext, "sth_start_recognition_not_allowed", 1);
@@ -1349,7 +1373,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             Slog.w(TAG, "startRecognition failed with " + status);
             MetricsLogger.count(mContext, "sth_start_recognition_error", 1);
             // Notify of error if needed.
-            if (notify) {
+            if (notifyClientOnError) {
                 try {
                     callback.onError(status);
                 } catch (DeadObjectException e) {
@@ -1363,7 +1387,7 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             MetricsLogger.count(mContext, "sth_start_recognition_success", 1);
             modelData.setStarted();
             // Notify of resume if needed.
-            if (notify) {
+            if (notifyClientOnError) {
                 try {
                     callback.onRecognitionResumed();
                 } catch (DeadObjectException e) {
@@ -1487,6 +1511,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
         // models.
         private int mModelHandle;
 
+        /**
+         * True if the service should continue listening when battery saver mode is enabled.
+         * Having this flag set requires the client calling
+         * {@link SoundTriggerModule#startRecognition(int, RecognitionConfig)} to be granted
+         * {@link android.Manifest.permission#SOUND_TRIGGER_RUN_IN_BATTERY_SAVER}.
+         */
+        public boolean mRunInBatterySaverMode = false;
+
         // The SoundModel instance, one of KeyphraseSoundModel or GenericSoundModel.
         private SoundModel mSoundModel = null;
 
@@ -1562,6 +1594,14 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
             mRecognitionConfig = config;
         }
 
+        synchronized void setRunInBatterySaverMode(boolean runInBatterySaverMode) {
+            mRunInBatterySaverMode = runInBatterySaverMode;
+        }
+
+        synchronized boolean shouldRunInBatterySaverMode() {
+            return mRunInBatterySaverMode;
+        }
+
         synchronized int getHandle() {
             return mModelHandle;
         }
@@ -1629,7 +1669,9 @@ public class SoundTriggerHelper implements SoundTrigger.StatusListener {
                     "ModelState: " + stateToString() + "\n" +
                     requestedToString() + "\n" +
                     callbackToString() + "\n" +
-                    uuidToString() + "\n" + modelTypeToString();
+                    uuidToString() + "\n" +
+                    modelTypeToString() +
+                    "RunInBatterySaverMode=" + mRunInBatterySaverMode;
         }
 
         synchronized String modelTypeToString() {

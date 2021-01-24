@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
+import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
@@ -1899,6 +1900,75 @@ public class ActivityRecordTests extends WindowTestsBase {
                 true /* shouldUpdate */, false /* activityChange */);
         verifyProcessInfoUpdate(activity, DESTROYED,
                 true /* shouldUpdate */, false /* activityChange */);
+    }
+
+    @Test
+    public void testSupportsSplitScreenWindowingMode() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .build();
+
+        // Non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = false;
+        assertFalse(activity.supportsSplitScreenWindowingMode());
+
+        // Force resizable
+        mAtm.mForceResizableActivities = true;
+        mAtm.mSupportsNonResizableMultiWindow = false;
+        assertTrue(activity.supportsSplitScreenWindowingMode());
+
+        // Allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = true;
+        assertTrue(activity.supportsSplitScreenWindowingMode());
+    }
+
+    @Test
+    public void testSupportsFreeform() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .build();
+
+        // Non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSizeCompatFreeform = false;
+        assertFalse(activity.supportsFreeform());
+
+        // Force resizable
+        mAtm.mForceResizableActivities = true;
+        mAtm.mSizeCompatFreeform = false;
+        assertTrue(activity.supportsFreeform());
+
+        // Allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSizeCompatFreeform = true;
+        assertTrue(activity.supportsFreeform());
+    }
+
+    @Test
+    public void testSupportsPictureInPicture() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setActivityFlags(FLAG_SUPPORTS_PICTURE_IN_PICTURE)
+                .build();
+
+        // Device not supports PIP
+        mAtm.mSupportsPictureInPicture = false;
+        assertFalse(activity.supportsPictureInPicture());
+
+        // Device and app support PIP
+        mAtm.mSupportsPictureInPicture = true;
+        assertTrue(activity.supportsPictureInPicture());
+
+        // Activity not supports PIP
+        activity.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        assertFalse(activity.supportsPictureInPicture());
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, ActivityState state,

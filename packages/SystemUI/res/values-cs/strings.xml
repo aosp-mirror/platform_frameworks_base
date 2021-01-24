@@ -346,10 +346,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Metoda zadávání dat"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Poloha vypnuta"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Blokovat fotoaparát"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Vypnout mikrofon"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Mediální zařízení"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Pouze tísňová volání"</string>
@@ -422,6 +420,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Záznam obrazovky"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Spustit"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Ukončit"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Zařízení"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Přejetím nahoru přepnete aplikace"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Přetažením doprava rychle přepnete aplikace"</string>
@@ -444,6 +446,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Oznámení otevřete opětovným klepnutím"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otevřete přejetím prstem nahoru"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Přejetím nahoru to zkusíte znovu"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zařízení patří vaší organizaci"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zařízení patří organizaci <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefon otevřete přejetím prstem od ikony"</string>
