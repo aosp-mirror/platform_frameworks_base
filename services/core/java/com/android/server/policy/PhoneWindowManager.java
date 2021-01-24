@@ -5432,6 +5432,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return "LONG_PRESS_HOME_ALL_APPS";
             case LONG_PRESS_HOME_ASSIST:
                 return "LONG_PRESS_HOME_ASSIST";
+            case LONG_PRESS_HOME_NOTIFICATION_PANEL:
+                return "LONG_PRESS_HOME_NOTIFICATION_PANEL";
             default:
                 return Integer.toString(behavior);
         }

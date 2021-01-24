@@ -116,7 +116,8 @@ public class PipAnimationController {
      * Construct and return an animator that animates from the {@param startBounds} to the
      * {@param endBounds} with the given {@param direction}. If {@param direction} is type
      * {@link ANIM_TYPE_BOUNDS}, then {@param sourceHintRect} will be used to animate
-     * in a better, more smooth manner.
+     * in a better, more smooth manner. If the original bound was rotated and a reset needs to
+     * happen, pass in {@param startingAngle}.
      *
      * In the case where one wants to start animation during an intermediate animation (for example,
      * if the user is currently doing a pinch-resize, and upon letting go now PiP needs to animate
@@ -128,11 +129,11 @@ public class PipAnimationController {
     @VisibleForTesting
     public PipTransitionAnimator getAnimator(SurfaceControl leash, Rect baseBounds,
             Rect startBounds, Rect endBounds, Rect sourceHintRect,
-            @PipAnimationController.TransitionDirection int direction) {
+            @PipAnimationController.TransitionDirection int direction, float startingAngle) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(leash, startBounds, startBounds, endBounds,
-                            sourceHintRect, direction));
+                            sourceHintRect, direction, 0 /* startingAngle */));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
                 && mCurrentAnimator.isRunning()) {
             // If we are still animating the fade into pip, then just move the surface and ensure
@@ -148,7 +149,7 @@ public class PipAnimationController {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
                     PipTransitionAnimator.ofBounds(leash, baseBounds, startBounds, endBounds,
-                            sourceHintRect, direction));
+                            sourceHintRect, direction, startingAngle));
         }
         return mCurrentAnimator;
     }
@@ -201,6 +202,7 @@ public class PipAnimationController {
         protected T mCurrentValue;
         protected T mStartValue;
         private T mEndValue;
+        private float mStartingAngle;
         private PipAnimationCallback mPipAnimationCallback;
         private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
                 mSurfaceControlTransactionFactory;
@@ -208,13 +210,15 @@ public class PipAnimationController {
         private @TransitionDirection int mTransitionDirection;
 
         private PipTransitionAnimator(SurfaceControl leash, @AnimationType int animationType,
-                Rect destinationBounds, T baseValue, T startValue, T endValue) {
+                Rect destinationBounds, T baseValue, T startValue, T endValue,
+                float startingAngle) {
             mLeash = leash;
             mAnimationType = animationType;
             mDestinationBounds.set(destinationBounds);
             mBaseValue = baseValue;
             mStartValue = startValue;
             mEndValue = endValue;
+            mStartingAngle = startingAngle;
             addListener(this);
             addUpdateListener(this);
             mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
@@ -363,7 +367,7 @@ public class PipAnimationController {
         static PipTransitionAnimator<Float> ofAlpha(SurfaceControl leash,
                 Rect destinationBounds, float startValue, float endValue) {
             return new PipTransitionAnimator<Float>(leash, ANIM_TYPE_ALPHA,
-                    destinationBounds, startValue, startValue, endValue) {
+                    destinationBounds, startValue, startValue, endValue, 0) {
                 @Override
                 void applySurfaceControlTransaction(SurfaceControl leash,
                         SurfaceControl.Transaction tx, float fraction) {
@@ -397,7 +401,7 @@ public class PipAnimationController {
 
         static PipTransitionAnimator<Rect> ofBounds(SurfaceControl leash,
                 Rect baseValue, Rect startValue, Rect endValue, Rect sourceHintRect,
-                @PipAnimationController.TransitionDirection int direction) {
+                @PipAnimationController.TransitionDirection int direction, float startingAngle) {
             // Just for simplicity we'll interpolate between the source rect hint insets and empty
             // insets to calculate the window crop
             final Rect initialSourceValue;
@@ -420,7 +424,8 @@ public class PipAnimationController {
 
             // construct new Rect instances in case they are recycled
             return new PipTransitionAnimator<Rect>(leash, ANIM_TYPE_BOUNDS,
-                    endValue, new Rect(baseValue), new Rect(startValue), new Rect(endValue)) {
+                    endValue, new Rect(baseValue), new Rect(startValue), new Rect(endValue),
+                    startingAngle) {
                 private final RectEvaluator mRectEvaluator = new RectEvaluator(new Rect());
                 private final RectEvaluator mInsetsEvaluator = new RectEvaluator(new Rect());
 
@@ -431,13 +436,14 @@ public class PipAnimationController {
                     final Rect start = getStartValue();
                     final Rect end = getEndValue();
                     Rect bounds = mRectEvaluator.evaluate(fraction, start, end);
+                    float angle = (1.0f - fraction) * startingAngle;
                     setCurrentValue(bounds);
                     if (inScaleTransition() || sourceHintRect == null) {
 
                         if (isOutPipDirection(direction)) {
                             getSurfaceTransactionHelper().scale(tx, leash, end, bounds);
                         } else {
-                            getSurfaceTransactionHelper().scale(tx, leash, base, bounds);
+                            getSurfaceTransactionHelper().scale(tx, leash, base, bounds, angle);
                         }
                     } else {
                         final Rect insets;

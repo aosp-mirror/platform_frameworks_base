@@ -17,15 +17,19 @@
 #ifndef _ANDROID_MEDIA_TV_FILTER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_FILTER_CLIENT_H_
 
-//#include <aidl/android/media/tv/tuner/ITunerFilter.h>
+#include <aidl/android/media/tv/tuner/ITunerFilter.h>
+#include <aidl/android/media/tv/tuner/BnTunerFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 #include <fmq/MessageQueue.h>
 
+#include "ClientHelper.h"
 #include "FilterClientCallback.h"
 
-//using ::aidl::android::media::tv::tuner::ITunerFilter;
+using Status = ::ndk::ScopedAStatus;
+using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
+using ::aidl::android::media::tv::tuner::ITunerFilter;
 
 using ::android::hardware::EventFlag;
 using ::android::hardware::MessageQueue;
@@ -51,18 +55,16 @@ struct SharedHandleInfo {
     uint64_t size;
 };
 
-// TODO: pending aidl interface
-/*class TunerFilterCallback : public BnTunerFilterCallback {
+class TunerFilterCallback : public BnTunerFilterCallback {
 
 public:
     TunerFilterCallback(sp<FilterClientCallback> filterClientCallback);
-
-    Status onFilterEvent(vector<TunerDemuxFilterEvent> events);
+    // TODO: complete TunerFilterCallback
     Status onFilterStatus(int status);
 
 private:
     sp<FilterClientCallback> mFilterClientCallback;
-};*/
+};
 
 struct HidlFilterCallback : public IFilterCallback {
 
@@ -80,8 +82,7 @@ private:
 struct FilterClient : public RefBase {
 
 public:
-    // TODO: pending aidl interface
-    FilterClient(DemuxFilterType type);
+    FilterClient(DemuxFilterType type, shared_ptr<ITunerFilter> tunerFilter);
     ~FilterClient();
 
     // TODO: remove after migration to Tuner Service is done.
@@ -179,8 +180,7 @@ private:
      * An AIDL Tuner Filter Singleton assigned at the first time when the Tuner Client
      * opens a filter. Default null when Tuner Service does not exist.
      */
-    // TODO: pending on aidl interface
-    //shared_ptr<ITunerFilter> mTunerFilter;
+    shared_ptr<ITunerFilter> mTunerFilter;
 
     /**
      * A 1.0 Filter HAL interface that is ready before migrating to the TunerFilter.
@@ -200,7 +200,6 @@ private:
     EventFlag* mFilterMQEventFlag;
 
     sp<FilterClientCallback> mCallback;
-    //shared_ptr<TunerFilterCallback> mAidlCallback;
     sp<HidlFilterCallback> mHidlCallback;
 
     native_handle_t* mAvSharedHandle;

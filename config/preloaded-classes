@@ -5418,10 +5418,6 @@ android.net.nsd.INsdManager$Stub
 android.net.nsd.INsdManager
 android.net.nsd.NsdManager$ServiceHandler
 android.net.nsd.NsdManager
-android.net.rtp.AudioCodec
-android.net.rtp.AudioGroup
-android.net.rtp.AudioStream
-android.net.rtp.RtpStream
 android.net.sip.ISipService$Default
 android.net.sip.ISipService$Stub$Proxy
 android.net.sip.ISipService$Stub

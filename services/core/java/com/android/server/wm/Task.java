@@ -1966,13 +1966,18 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private boolean supportsSplitScreenWindowingModeInner() {
-        // A task can not be docked even if it is considered resizeable because it only supports
-        // picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
                 && mAtmService.mSupportsSplitScreenMultiWindow
-                && (mAtmService.mForceResizableActivities
-                        || (isResizeable(false /* checkSupportsPip */)
-                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
+                && supportsMultiWindow();
+    }
+
+    boolean supportsFreeform() {
+        return mAtmService.mSupportsFreeformWindowManagement && supportsMultiWindow();
+    }
+
+    boolean supportsMultiWindow() {
+        return mAtmService.mSupportsMultiWindow
+                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**
@@ -2818,14 +2823,15 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         // Do not allow non-resizable tasks to be in a multi-window mode, unless it is in pinned
-        // windowing mode or is in size compat freeform mode
+        // windowing mode or supports non-resizable tasks in multi-window mode.
         if (!isResizeable()) {
             final int candidateWindowingMode =
                     windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
             if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
                     && candidateWindowingMode != WINDOWING_MODE_PINNED
                     && (candidateWindowingMode != WINDOWING_MODE_FREEFORM
-                            || !mTaskSupervisor.mService.mSizeCompatFreeform)) {
+                            || !mTaskSupervisor.mService.mSizeCompatFreeform)
+                    && !mTaskSupervisor.mService.mSupportsNonResizableMultiWindow) {
                 getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
                         WINDOWING_MODE_FULLSCREEN);
             }
@@ -3382,15 +3388,11 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    boolean isResizeable(boolean checkSupportsPip) {
+    boolean isResizeable() {
         final boolean forceResizable = mAtmService.mForceResizableActivities
                 && getActivityType() == ACTIVITY_TYPE_STANDARD;
-        return (forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
-                || (checkSupportsPip && mSupportsPictureInPicture));
-    }
-
-    boolean isResizeable() {
-        return isResizeable(true /* checkSupportsPip */);
+        return forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
+                || mSupportsPictureInPicture;
     }
 
     /**
@@ -5361,7 +5363,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
-                && topActivity.isNonResizableOrForcedResizable(likelyResolvedMode)) {
+                && topActivity.canForceResizeNonResizable(likelyResolvedMode)) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
             final String packageName = topActivity.info.applicationInfo.packageName;

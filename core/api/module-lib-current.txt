@@ -40,6 +40,22 @@ package android.app.role {
 
 }
 
+package android.content {
+
+  public abstract class Context {
+    method @NonNull public android.os.UserHandle getUser();
+  }
+
+}
+
+package android.content.pm {
+
+  public abstract class PackageManager {
+    method @NonNull public String getPermissionControllerPackageName();
+  }
+
+}
+
 package android.content.rollback {
 
   public class RollbackManagerFrameworkInitializer {

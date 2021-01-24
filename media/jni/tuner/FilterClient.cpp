@@ -30,16 +30,14 @@ namespace android {
 
 /////////////// FilterClient ///////////////////////
 
-// TODO: pending aidl interface
-// TODO: add filter callback
-FilterClient::FilterClient(DemuxFilterType type) {
-    //mTunerFilter = tunerFilter;
+FilterClient::FilterClient(DemuxFilterType type, shared_ptr<ITunerFilter> tunerFilter) {
+    mTunerFilter = tunerFilter;
     mAvSharedHandle = NULL;
     checkIsMediaFilter(type);
 }
 
 FilterClient::~FilterClient() {
-    //mTunerFilter = NULL;
+    mTunerFilter = NULL;
     mFilter = NULL;
     mFilter_1_1 = NULL;
     mAvSharedHandle = NULL;
@@ -154,7 +152,12 @@ Result FilterClient::flush() {
 }
 
 Result FilterClient::getId(uint32_t& id) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        int32_t id32Bit;
+        Status s = mTunerFilter->getId(&id32Bit);
+        id = static_cast<uint32_t>(id32Bit);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         Result res;
@@ -169,7 +172,12 @@ Result FilterClient::getId(uint32_t& id) {
 }
 
 Result FilterClient::getId64Bit(uint64_t& id) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        int64_t id64Bit;
+        Status s = mTunerFilter->getId64Bit(&id64Bit);
+        id = static_cast<uint64_t>(id64Bit);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         Result res;
@@ -246,6 +254,19 @@ Return<void> HidlFilterCallback::onFilterEvent_1_1(const DemuxFilterEvent& filte
         mFilterClientCallback->onFilterEvent_1_1(filterEvent, filterEventExt);
     }
     return Void();
+}
+
+/////////////// TunerFilterCallback ///////////////////////
+
+TunerFilterCallback::TunerFilterCallback(sp<FilterClientCallback> filterClientCallback)
+        : mFilterClientCallback(filterClientCallback) {}
+
+Status TunerFilterCallback::onFilterStatus(int status) {
+    if (mFilterClientCallback != NULL) {
+        mFilterClientCallback->onFilterStatus(static_cast<DemuxFilterStatus>(status));
+        return Status::ok();
+    }
+    return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
 }
 
 /////////////// FilterClient Helper Methods ///////////////////////

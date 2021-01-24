@@ -131,7 +131,11 @@ public class BadgedImageView extends ImageView {
      */
     public void setRenderedBubble(BubbleViewProvider bubble) {
         mBubble = bubble;
-        showBadge();
+        if (mDotSuppressionFlags.contains(SuppressionFlag.BEHIND_STACK)) {
+            hideBadge();
+        } else {
+            showBadge();
+        }
         mDotColor = bubble.getDotColor();
         drawDot(bubble.getDotPath());
     }

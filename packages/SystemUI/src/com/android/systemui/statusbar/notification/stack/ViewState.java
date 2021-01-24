@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static com.android.systemui.statusbar.notification.stack.StackStateAnimator.ANIMATION_DURATION_FADE_IN;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -58,16 +56,6 @@ public class ViewState implements Dumpable {
             return mAnimationFilter;
         }
     };
-
-    protected static final AnimationProperties ANIMATE_ALPHA = new AnimationProperties() {
-        AnimationFilter mAnimationFilter = new AnimationFilter();
-        @Override
-        public AnimationFilter getAnimationFilter() {
-            mAnimationFilter.animateAlpha();
-            return mAnimationFilter;
-        }
-    }.setDuration(ANIMATION_DURATION_FADE_IN);
-
     private static final int TAG_ANIMATOR_TRANSLATION_X = R.id.translation_x_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Y = R.id.translation_y_animator_tag;
     private static final int TAG_ANIMATOR_TRANSLATION_Z = R.id.translation_z_animator_tag;
@@ -160,10 +148,6 @@ public class ViewState implements Dumpable {
         scaleY = view.getScaleY();
     }
 
-    boolean shouldAnimateAlpha() {
-        return false;
-    }
-
     /**
      * Applies a {@link ViewState} to a normal view.
      */
@@ -216,26 +200,24 @@ public class ViewState implements Dumpable {
         int oldVisibility = view.getVisibility();
         boolean becomesInvisible = this.alpha == 0.0f
                 || (this.hidden && (!isAnimating(view) || oldVisibility != View.VISIBLE));
-        if (isAnimating(view, TAG_ANIMATOR_ALPHA)) {
-            startAlphaAnimation(view, NO_NEW_ANIMATIONS);
+        boolean animatingAlpha = isAnimating(view, TAG_ANIMATOR_ALPHA);
+        if (animatingAlpha) {
+            updateAlphaAnimation(view);
         } else if (view.getAlpha() != this.alpha) {
-            if (shouldAnimateAlpha()) {
-                startAlphaAnimation(view, ANIMATE_ALPHA);
-            } else {
-                // apply layer type
-                boolean becomesFullyVisible = this.alpha == 1.0f;
-                boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
-                        && view.hasOverlappingRendering();
-                int layerType = view.getLayerType();
-                int newLayerType = newLayerTypeIsHardware
-                        ? View.LAYER_TYPE_HARDWARE
-                        : View.LAYER_TYPE_NONE;
-                if (layerType != newLayerType) {
-                    view.setLayerType(newLayerType, null);
-                }
-                // apply alpha
-                view.setAlpha(this.alpha);
+            // apply layer type
+            boolean becomesFullyVisible = this.alpha == 1.0f;
+            boolean newLayerTypeIsHardware = !becomesInvisible && !becomesFullyVisible
+                    && view.hasOverlappingRendering();
+            int layerType = view.getLayerType();
+            int newLayerType = newLayerTypeIsHardware
+                    ? View.LAYER_TYPE_HARDWARE
+                    : View.LAYER_TYPE_NONE;
+            if (layerType != newLayerType) {
+                view.setLayerType(newLayerType, null);
             }
+
+            // apply alpha
+            view.setAlpha(this.alpha);
         }
 
         // apply visibility
@@ -338,6 +320,10 @@ public class ViewState implements Dumpable {
         }  else {
             abortAnimation(child, TAG_ANIMATOR_ALPHA);
         }
+    }
+
+    private void updateAlphaAnimation(View view) {
+        startAlphaAnimation(view, NO_NEW_ANIMATIONS);
     }
 
     private void startAlphaAnimation(final View child, AnimationProperties properties) {

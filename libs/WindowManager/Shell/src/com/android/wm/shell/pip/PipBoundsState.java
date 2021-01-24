@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Size;
 import android.view.DisplayInfo;
@@ -59,6 +60,8 @@ public final class PipBoundsState {
     private final @NonNull Rect mExpandedBounds = new Rect();
     private final @NonNull Rect mNormalMovementBounds = new Rect();
     private final @NonNull Rect mExpandedMovementBounds = new Rect();
+    private final Point mMaxSize = new Point();
+    private final Point mMinSize = new Point();
     private final @NonNull Context mContext;
     private float mAspectRatio;
     private int mStashedState = STASH_TYPE_NONE;
@@ -149,6 +152,24 @@ public final class PipBoundsState {
     /** Set the expanded movement bounds. */
     public void setExpandedMovementBounds(@NonNull Rect bounds) {
         mExpandedMovementBounds.set(bounds);
+    }
+
+    /** Sets the max possible size for resize. */
+    public void setMaxSize(int width, int height) {
+        mMaxSize.set(width, height);
+    }
+
+    /** Sets the min possible size for resize. */
+    public void setMinSize(int width, int height) {
+        mMinSize.set(width, height);
+    }
+
+    public Point getMaxSize() {
+        return mMaxSize;
+    }
+
+    public Point getMinSize() {
+        return mMinSize;
     }
 
     /** Returns the expanded movement bounds. */
