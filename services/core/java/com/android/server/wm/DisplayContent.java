@@ -113,6 +113,8 @@ import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
 import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
@@ -163,6 +165,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.graphics.Region.Op;
+import android.hardware.HardwareBuffer;
 import android.hardware.display.DisplayManagerInternal;
 import android.metrics.LogMaker;
 import android.os.Binder;
@@ -605,6 +608,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** If {@code true} hold off on modifying the animation layer of {@link #mImeLayeringTarget} */
     boolean mImeLayeringTargetWaitingAnim;
+
+    /** The screenshot IME surface to place on the task while transitioning to the next task. */
+    SurfaceControl mImeScreenshot;
 
     private final PointerEventDispatcher mPointerEventDispatcher;
 
@@ -3530,7 +3536,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (updateImeTarget) {
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from "
                         + mImeLayeringTarget + " to null since mInputMethodWindow is null");
-                setImeLayeringTarget(null, mImeLayeringTargetWaitingAnim);
+                setImeLayeringTargetInner(null);
             }
             return null;
         }
@@ -3547,40 +3553,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mUpdateImeTarget = updateImeTarget;
         WindowState target = getWindow(mComputeImeTargetPredicate);
 
-        // Keeps the IME target with the last window while swiping up to recents to prevent
-        // flickering due to IME hide animation on top of recents.
-        // TODO(b/166736352): This logic should go away once we switch over target immediately
-        //  and do the screenshot to preserve IME on disappearing target
-        if (target != null && curTarget != null && target.isActivityTypeHome()
-                && curTarget.getInsetsState().getSource(ITYPE_IME).isVisible()) {
-            return curTarget;
-        }
-
-        // Yet more tricksyness!  If this window is a "starting" window, we do actually want
-        // to be on top of it, but it is not -really- where input will go. So look down below
-        // for a real window to target...
-        if (target != null && target.mAttrs.type == TYPE_APPLICATION_STARTING) {
-            final ActivityRecord activity = target.mActivityRecord;
-            if (activity != null) {
-                final WindowState betterTarget = activity.getImeTargetBelowWindow(target);
-                if (betterTarget != null) {
-                    target = betterTarget;
-                }
-            }
-        }
-
         if (DEBUG_INPUT_METHOD && updateImeTarget) Slog.v(TAG_WM,
                 "Proposed new IME target: " + target + " for display: " + getDisplayId());
-
-        // Now, a special case -- if the last target's window is in the process of exiting, but
-        // not removed, keep on the last target to avoid IME flicker. The exception is if the
-        // current target is home since we want opening apps to become the IME target right away.
-        if (curTarget != null && !curTarget.mRemoved && curTarget.isDisplayed()
-                && curTarget.isClosing() && !curTarget.isActivityTypeHome()) {
-            if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Not changing target till current window is"
-                    + " closing and not removed");
-            return curTarget;
-        }
 
         if (DEBUG_INPUT_METHOD) Slog.v(TAG_WM, "Desired input method target=" + target
                 + " updateImeTarget=" + updateImeTarget);
@@ -3590,42 +3564,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget
                         + " to null." + (SHOW_STACK_CRAWLS ? " Callers="
                         + Debug.getCallers(4) : ""));
-                setImeLayeringTarget(null, mImeLayeringTargetWaitingAnim);
+                setImeLayeringTargetInner(null);
             }
 
             return null;
         }
 
         if (updateImeTarget) {
-            ActivityRecord activity = curTarget == null ? null : curTarget.mActivityRecord;
-            if (activity != null) {
-
-                // Now some fun for dealing with window animations that modify the Z order. We need
-                // to look at all windows below the current target that are in this app, finding the
-                // highest visible one in layering.
-                WindowState highestTarget = null;
-                if (activity.isAnimating(PARENTS | TRANSITION)) {
-                    highestTarget = activity.getHighestAnimLayerWindow(curTarget);
-                }
-
-                if (highestTarget != null) {
-                    if (DEBUG_INPUT_METHOD) {
-                        Slog.v(TAG_WM, mAppTransition + " " + highestTarget + " animating="
-                                + highestTarget.isAnimating(TRANSITION | PARENTS));
-                    }
-
-                    if (mAppTransition.isTransitionSet()) {
-                        // If we are currently setting up for an animation, hold everything until we
-                        // can find out what will happen.
-                        setImeLayeringTarget(highestTarget, true);
-                        return highestTarget;
-                    }
-                }
-            }
-
             if (DEBUG_INPUT_METHOD) Slog.w(TAG_WM, "Moving IM target from " + curTarget + " to "
                     + target + (SHOW_STACK_CRAWLS ? " Callers=" + Debug.getCallers(4) : ""));
-            setImeLayeringTarget(target, false);
+            setImeLayeringTargetInner(target);
         }
 
         return target;
@@ -3727,16 +3675,21 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Sets the window the IME is on top of.
      * @param target window to place the IME surface on top of. If {@code null}, the IME will be
      *               placed at its parent's surface.
-     * @param targetWaitingAnim if {@code true}, hold off on modifying the animation layer of
-     *                          the target.
      */
-    private void setImeLayeringTarget(@Nullable WindowState target, boolean targetWaitingAnim) {
-        if (target == mImeLayeringTarget && mImeLayeringTargetWaitingAnim == targetWaitingAnim) {
+    private void setImeLayeringTargetInner(@Nullable WindowState target) {
+        if (target == mImeLayeringTarget) {
             return;
         }
+        // Prepare the IME screenshot for the last IME target when its task is applying app
+        // transition. This is for the better IME transition to keep IME visibility when
+        // transitioning to the next task.
+        if (mImeLayeringTarget != null && mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+            attachAndShowImeScreenshotOnTarget();
+        }
+
         ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
         mImeLayeringTarget = target;
-        mImeLayeringTargetWaitingAnim = targetWaitingAnim;
 
         // 1. Reparent the IME container window to the target root DA to get the correct bounds and
         // config. (Only happens when the target window is in a different root DA)
@@ -3748,13 +3701,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 targetRoot.placeImeContainer(mImeWindowsContainer);
             }
         }
-        // 2. Reparent the IME container surface to either the input target app, or the IME window
-        // parent.
-        updateImeParent();
-        // 3. Assign window layers based on the IME surface parent to make sure it is on top of the
+        // 2. Assign window layers based on the IME surface parent to make sure it is on top of the
         // app.
         assignWindowLayers(true /* setLayoutNeeded */);
-        // 4. Update the IME control target to apply any inset change and animation.
+        // 3. Update the IME control target to apply any inset change and animation.
+        // 4. Reparent the IME container surface to either the input target app, or the IME window
+        // parent.
         updateImeControlTarget();
     }
 
@@ -3766,6 +3718,109 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     void setImeControlTarget(InsetsControlTarget target) {
         mImeControlTarget = target;
+    }
+
+    @VisibleForTesting
+    void attachAndShowImeScreenshotOnTarget() {
+        // No need to attach screenshot if the IME target not exists or screen is off.
+        if (!isImeAttachedToApp() || !mWmService.mPolicy.isScreenOn()) {
+            return;
+        }
+
+        final SurfaceControl.Transaction t = getPendingTransaction();
+        // Prepare IME screenshot for the target if it allows to attach into.
+        if (mInputMethodWindow != null && mInputMethodWindow.isVisible()) {
+            final Task task = mImeLayeringTarget.getTask();
+            // Re-new the IME screenshot when it does not exist or the size changed.
+            final boolean renewImeSurface = mImeScreenshot == null
+                    || mImeScreenshot.getWidth() != mInputMethodWindow.getFrame().width()
+                    || mImeScreenshot.getHeight() != mInputMethodWindow.getFrame().height();
+            if (task != null && !task.isHomeOrRecentsRootTask()) {
+                SurfaceControl.ScreenshotHardwareBuffer imeBuffer = renewImeSurface
+                        ? mWmService.mTaskSnapshotController.snapshotImeFromAttachedTask(task)
+                        : null;
+                if (imeBuffer != null) {
+                    // Remove the last IME surface when the surface needs to renew.
+                    removeImeSurfaceImmediately();
+                    mImeScreenshot = createImeSurface(imeBuffer, t);
+                }
+            }
+        }
+
+        final boolean isValidSnapshot = mImeScreenshot != null && mImeScreenshot.isValid();
+        // Showing the IME screenshot if the target has already in app transition stage.
+        // Note that if the current IME insets is not showing, no need to show IME screenshot
+        // to reflect the true IME insets visibility and the app task layout as possible.
+        if (isValidSnapshot && getInsetsStateController().getImeSourceProvider().isImeShowing()) {
+            if (DEBUG_INPUT_METHOD) {
+                Slog.d(TAG, "show IME snapshot, ime target=" + mImeLayeringTarget);
+            }
+            t.show(mImeScreenshot);
+        } else if (!isValidSnapshot) {
+            removeImeSurfaceImmediately();
+        }
+    }
+
+    @VisibleForTesting
+    SurfaceControl createImeSurface(SurfaceControl.ScreenshotHardwareBuffer imeBuffer,
+            Transaction t) {
+        final HardwareBuffer buffer = imeBuffer.getHardwareBuffer();
+        if (DEBUG_INPUT_METHOD) Slog.d(TAG, "create IME snapshot for "
+                + mImeLayeringTarget + ", buff width=" + buffer.getWidth()
+                + ", height=" + buffer.getHeight());
+        final ActivityRecord activity = mImeLayeringTarget.mActivityRecord;
+        final SurfaceControl imeSurface = mWmService.mSurfaceControlFactory.apply(null)
+                .setName("IME-snapshot-surface")
+                .setBufferSize(buffer.getWidth(), buffer.getHeight())
+                .setFormat(buffer.getFormat())
+                .setParent(activity.getSurfaceControl())
+                .setCallsite("DisplayContent.attachAndShowImeScreenshotOnTarget")
+                .build();
+        // Make IME snapshot as trusted overlay
+        InputMonitor.setTrustedOverlayInputInfo(imeSurface, t, getDisplayId(),
+                "IME-snapshot-surface");
+        Surface surface = mWmService.mSurfaceFactory.get();
+        surface.copyFrom(imeSurface);
+        surface.attachAndQueueBufferWithColorSpace(buffer, null);
+        surface.release();
+        t.setRelativeLayer(imeSurface, activity.getSurfaceControl(), 1);
+        t.setPosition(imeSurface, mInputMethodWindow.getDisplayFrame().left,
+                mInputMethodWindow.getDisplayFrame().top);
+        return imeSurface;
+    }
+
+    /**
+     * Shows the IME screenshot and attach to the IME target window.
+     *
+     * Used when the IME target window with IME visible is transitioning to the next target.
+     * e.g. App transitioning or swiping this the task of the IME target window to recents app.
+     */
+    void showImeScreenshot() {
+        attachAndShowImeScreenshotOnTarget();
+    }
+
+    /**
+     * Removes the IME screenshot when necessary.
+     *
+     * Used when app transition animation finished or obsoleted screenshot surface like size
+     * changed by rotation.
+     */
+    void removeImeScreenshotIfPossible() {
+        if (mImeLayeringTarget == null
+                || mImeLayeringTarget.mAttrs.type != TYPE_APPLICATION_STARTING
+                && !mImeLayeringTarget.isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS)) {
+            removeImeSurfaceImmediately();
+        }
+    }
+
+    /** Removes the IME screenshot immediately. */
+    void removeImeSurfaceImmediately() {
+        if (mImeScreenshot != null) {
+            if (DEBUG_INPUT_METHOD) Slog.d(TAG, "remove IME snapshot");
+            getSyncTransaction().remove(mImeScreenshot);
+            mImeScreenshot = null;
+        }
     }
 
     /**
@@ -3781,8 +3836,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     void updateImeControlTarget() {
+        InsetsControlTarget prevImeControlTarget = mImeControlTarget;
         mImeControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mImeControlTarget);
+        // Update Ime parent when IME insets leash created, which is the best time that default
+        // IME visibility has been settled down after IME control target changed.
+        if (prevImeControlTarget != mImeControlTarget) {
+            updateImeParent();
+        }
 
         final WindowState win = InsetsControlTarget.asWindowOrNull(mImeControlTarget);
         final IBinder token = win != null ? win.mClient.asBinder() : null;
@@ -4035,6 +4096,16 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             Slog.w(TAG_WM, "Force clearing orientation change: " + w);
         }, true /* traverseTopToBottom */);
         mWmService.mWindowPlacerLocked.performSurfacePlacement();
+    }
+
+    /**
+     * Callbacks when the given type of {@link WindowContainer} animation finished running in the
+     * hierarchy.
+     */
+    void onWindowAnimationFinished(int type) {
+        if (type == ANIMATION_TYPE_APP_TRANSITION || type == ANIMATION_TYPE_RECENTS) {
+            removeImeSurfaceImmediately();
+        }
     }
 
     // TODO: Super unexpected long method that should be broken down...

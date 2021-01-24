@@ -65,7 +65,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -81,6 +85,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
@@ -299,22 +304,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(startingWin, imeTarget);
         startingWin.mHidden = false;
 
-        // Verify that an app window launching behind the starting window becomes the target
+        // Verify that the starting window still be an ime target even an app window launching
+        // behind it.
         final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, activity, "appWin");
         appWin.setHasSurface(true);
         assertTrue(appWin.canBeImeTarget());
 
         imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
-        assertEquals(appWin, imeTarget);
+        assertEquals(startingWin, imeTarget);
         appWin.mHidden = false;
 
-        // Verify that an child window can be an ime target even behind a launching app window
+        // Verify that the starting window still be an ime target even the child window behind a
+        // launching app window
         final WindowState childWin = createWindow(appWin,
                 TYPE_APPLICATION_ATTACHED_DIALOG, "childWin");
         childWin.setHasSurface(true);
         assertTrue(childWin.canBeImeTarget());
         imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
-        assertEquals(childWin, imeTarget);
+        assertEquals(startingWin, imeTarget);
     }
 
     @UseTestDisplay(addAllCommonWindows = true)
@@ -1730,6 +1737,63 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent).computeImeTarget(true);
         assertNull(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
         verify(child1, never()).needsRelativeLayeringToIme();
+    }
+
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD}, addAllCommonWindows = true)
+    @Test
+    public void testAttachAndShowImeScreenshotOnTarget() {
+        // Preparation: Simulate screen state is on.
+        spyOn(mWm.mPolicy);
+        doReturn(true).when(mWm.mPolicy).isScreenOn();
+
+        // Preparation: Simulate snapshot IME surface.
+        spyOn(mWm.mTaskSnapshotController);
+        doReturn(mock(SurfaceControl.ScreenshotHardwareBuffer.class)).when(
+                mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(any());
+        final SurfaceControl imeSurface = mock(SurfaceControl.class);
+        spyOn(imeSurface);
+        doReturn(true).when(imeSurface).isValid();
+        doReturn(imeSurface).when(mDisplayContent).createImeSurface(any(), any());
+
+        // Preparation: Simulate snapshot Task.
+        ActivityRecord act1 = createActivityRecord(mDisplayContent);
+        final WindowState appWin1 = createWindow(null, TYPE_BASE_APPLICATION, act1, "appWin1");
+        spyOn(appWin1);
+        spyOn(appWin1.mWinAnimator);
+        appWin1.setHasSurface(true);
+        assertTrue(appWin1.canBeImeTarget());
+        doReturn(true).when(appWin1.mWinAnimator).getShown();
+        doReturn(true).when(appWin1.mActivityRecord).isSurfaceShowing();
+        appWin1.mWinAnimator.mLastAlpha = 1f;
+
+        // Test step 1: appWin1 is the current IME target and soft-keyboard is visible.
+        mDisplayContent.computeImeTarget(true);
+        assertEquals(appWin1, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+        spyOn(mDisplayContent.mInputMethodWindow);
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
+
+        // Test step 2: Simulate launching appWin2 and appWin1 is in app transition.
+        ActivityRecord act2 = createActivityRecord(mDisplayContent);
+        final WindowState appWin2 = createWindow(null, TYPE_BASE_APPLICATION, act2, "appWin2");
+        appWin2.setHasSurface(true);
+        assertTrue(appWin2.canBeImeTarget());
+        doReturn(true).when(appWin1).isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+
+        // Test step 3: Verify appWin2 will be the next IME target and the IME snapshot surface will
+        // be shown at this time.
+        final Transaction t = mDisplayContent.getPendingTransaction();
+        spyOn(t);
+        mDisplayContent.setImeInputTarget(appWin2);
+        mDisplayContent.computeImeTarget(true);
+        assertEquals(appWin2, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+        assertTrue(mDisplayContent.isImeAttachedToApp());
+
+        verify(mDisplayContent, atLeast(1)).attachAndShowImeScreenshotOnTarget();
+        verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());
+        assertNotNull(mDisplayContent.mImeScreenshot);
+        verify(t).show(mDisplayContent.mImeScreenshot);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

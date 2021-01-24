@@ -2682,6 +2682,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
             @TransitionOldType int transit, boolean isVoiceInteraction,
             @Nullable ArrayList<WindowContainer> sources) {
+        final Task task = asTask();
+        if (task != null && !enter && !task.isHomeOrRecentsRootTask()) {
+            mDisplayContent.showImeScreenshot();
+        }
         final Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp,
                 transit, enter, isVoiceInteraction);
         AnimationAdapter adapter = adapters.first;
@@ -2826,6 +2830,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mSurfaceAnimationSources.valueAt(i).onAnimationFinished(type, anim);
         }
         mSurfaceAnimationSources.clear();
+        if (mDisplayContent != null) {
+            mDisplayContent.onWindowAnimationFinished(type);
+        }
     }
 
     /**
