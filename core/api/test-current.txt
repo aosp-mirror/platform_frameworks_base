@@ -630,7 +630,7 @@ package android.content {
   public abstract class Context {
     method @NonNull public java.io.File getCrateDir(@NonNull String);
     method public abstract int getDisplayId();
-    method public android.os.UserHandle getUser();
+    method @NonNull public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
@@ -685,7 +685,7 @@ package android.content.pm {
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
-    method @NonNull public abstract String getPermissionControllerPackageName();
+    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
@@ -1648,6 +1648,7 @@ package android.provider {
     field public static final String APP_OPS_CONSTANTS = "app_ops_constants";
     field public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
     field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
+    field public static final String DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW = "enable_non_resizable_multi_window";
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";

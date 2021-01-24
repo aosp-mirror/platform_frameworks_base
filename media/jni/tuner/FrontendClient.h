@@ -23,6 +23,7 @@
 #include <android/hardware/tv/tuner/1.1/IFrontendCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
+#include "ClientHelper.h"
 #include "FrontendClientCallback.h"
 #include "LnbClient.h"
 

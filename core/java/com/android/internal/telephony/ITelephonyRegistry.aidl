@@ -95,4 +95,5 @@ interface ITelephonyRegistry {
     void notifyPhysicalChannelConfigForSubscriber(in int subId,
             in List<PhysicalChannelConfig> configs);
     void notifyDataEnabled(boolean enabled, int reason);
+    void notifyAllowedNetworkTypesChanged(in int phoneId, in int subId, in Map allowedNetworkTypeList);
 }

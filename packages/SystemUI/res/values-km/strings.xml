@@ -344,10 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"វិធីសាស្ត្រ​បញ្ចូល"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ទី​តាំង​"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ទីតាំង​បាន​បិទ"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"ទប់ស្កាត់​កាមេរ៉ា"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"បិទសំឡេង​មីក្រូហ្វូន"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"ឧបករណ៍​មេឌៀ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់​តែប៉ុណ្ណោះ"</string>
@@ -418,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ការថត​អេក្រង់"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ចាប់ផ្ដើម"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ឈប់"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"ឧបករណ៍"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"អូស​ឡើង​លើ​ដើម្បី​ប្តូរ​កម្មវិធី"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"អូសទៅស្ដាំដើម្បីប្ដូរកម្មវិធីបានរហ័ស"</string>
@@ -440,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ប៉ះ​ម្ដង​ទៀត ដើម្បី​បើក"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"អូសឡើងលើ​ដើម្បីបើក"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"អូសឡើងលើ ដើម្បី​ព្យាយាម​ម្ដងទៀត"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ឧបករណ៍​នេះគឺជា​កម្មសិទ្ធិរបស់​ស្ថាប័ន​អ្នក"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ឧបករណ៍នេះ​គឺជា​កម្មសិទ្ធិ​របស់ <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"អូសចេញពីរូបតំណាងដើម្បីប្រើទូរស័ព្ទ"</string>

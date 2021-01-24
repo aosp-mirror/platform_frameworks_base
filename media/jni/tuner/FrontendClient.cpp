@@ -89,9 +89,8 @@ Result FrontendClient::tune(const FrontendSettings& settings,
         // TODO: parse hidl settings to aidl settings
         // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
         TunerFrontendSettings settings;
-        // TODO: handle error message.
-        mTunerFrontend->tune(settings);
-        return Result::SUCCESS;
+        Status s = mTunerFrontend->tune(settings);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     Result result;
@@ -110,9 +109,8 @@ Result FrontendClient::tune(const FrontendSettings& settings,
 
 Result FrontendClient::stopTune() {
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
-        mTunerFrontend->stopTune();
-        return Result::SUCCESS;
+        Status s = mTunerFrontend->stopTune();
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend != NULL) {
@@ -129,9 +127,8 @@ Result FrontendClient::scan(const FrontendSettings& settings, FrontendScanType t
         // TODO: parse hidl settings to aidl settings
         // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
         TunerFrontendSettings settings;
-        // TODO: handle error message.
-        mTunerFrontend->scan(settings, (int)type);
-        return Result::SUCCESS;
+        Status s = mTunerFrontend->scan(settings, (int)type);
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     Result result;
@@ -150,9 +147,8 @@ Result FrontendClient::scan(const FrontendSettings& settings, FrontendScanType t
 
 Result FrontendClient::stopScan() {
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
-        mTunerFrontend->stopScan();
-        return Result::SUCCESS;
+        Status s = mTunerFrontend->stopScan();
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend != NULL) {
@@ -284,8 +280,8 @@ Result FrontendClient::unlinkCiCamToFrontend(int ciCamId) {
 Result FrontendClient::close() {
     if (mTunerFrontend != NULL) {
         // TODO: handle error message.
-        mTunerFrontend->close();
-        return Result::SUCCESS;
+        Status s = mTunerFrontend->close();
+        return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     if (mFrontend != NULL) {

@@ -1730,7 +1730,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
             updateQsExpansionEnabled();
-            if ((state1 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
+            if ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
                 mShadeController.animateCollapsePanels();
             }
         }
