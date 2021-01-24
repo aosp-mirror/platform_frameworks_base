@@ -24,7 +24,7 @@
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Hakuna arifa"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Arifa"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Huenda chaji itaisha hivi karibuni"</string>
+    <string name="battery_low_title" msgid="6891106956328275225">"Chaji inaweza kuisha hivi karibuni"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Imesalia <xliff:g id="PERCENTAGE">%1$s</xliff:g>, itadumu takribani <xliff:g id="TIME">%2$s</xliff:g> kulingana na jinsi unavyotumia"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Imesalia <xliff:g id="PERCENTAGE">%1$s</xliff:g>, itadumu takribani <xliff:g id="TIME">%2$s</xliff:g>"</string>
@@ -344,10 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Mbinu ya uingizaji"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Kutambua Mahali"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Kitambua eneo kimezimwa"</string>
-    <!-- no translation found for quick_settings_camera_label (1367149596242401934) -->
-    <skip />
-    <!-- no translation found for quick_settings_mic_label (8245831073612564953) -->
-    <skip />
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Zuia Kamera"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Zima Maikrofoni"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Kifaa cha faili"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Simu za Dharura Pekee"</string>
@@ -418,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Rekodi ya Skrini"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Anza kurekodi"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Acha kurekodi"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Kifaa"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Telezesha kidole juu ili ubadilishe programu"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Buruta kulia ili ubadilishe programu haraka"</string>
@@ -440,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Gusa tena ili ufungue"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Telezesha kidole juu ili ufungue"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Telezesha kidole juu ili ujaribu tena"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Kifaa hiki kinamilikiwa na shirika lako"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Kifaa hiki kinamilikiwa na <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telezesha kidole kutoka kwa aikoni ili ufikie simu"</string>
