@@ -26,6 +26,7 @@ apex_defaults {
     certificate: ":com.android.permission.certificate",
     java_libs: [
         "framework-permission",
+        "framework-permission-s",
         "service-permission",
     ],
     apps: ["PermissionController"],
