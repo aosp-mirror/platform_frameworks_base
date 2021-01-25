@@ -20,19 +20,19 @@ import android.annotation.NonNull;
 import android.os.RemoteException;
 
 /**
- * @hide
+ * This class gives information about, and interacts with media metrics.
  */
-public class PlaybackMetricsManager {
+public class MediaMetricsManager {
     // TODO: unhide APIs.
-    private static final String TAG = "PlaybackMetricsManager";
+    private static final String TAG = "MediaMetricsManager";
 
-    private IPlaybackMetricsManager mService;
+    private IMediaMetricsManager mService;
     private int mUserId;
 
     /**
      * @hide
      */
-    public PlaybackMetricsManager(IPlaybackMetricsManager service, int userId) {
+    public MediaMetricsManager(IMediaMetricsManager service, int userId) {
         mService = service;
         mUserId = userId;
     }
@@ -87,7 +87,8 @@ public class PlaybackMetricsManager {
     /**
      * Creates a playback session.
      */
-    public PlaybackSession createSession() {
+    @NonNull
+    public PlaybackSession createPlaybackSession() {
         try {
             String id = mService.getSessionId(mUserId);
             PlaybackSession session = new PlaybackSession(id, this);
