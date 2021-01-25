@@ -666,6 +666,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private ScrollCaptureConnection mScrollCaptureConnection;
 
+    private boolean mIsSurfaceOpaque;
+
     private final BackgroundBlurDrawable.Aggregator mBlurRegionAggregator =
             new BackgroundBlurDrawable.Aggregator(this);
 
@@ -2716,6 +2718,14 @@ public final class ViewRootImpl implements ViewParent,
                     mViewFrameInfo.flags |= FrameInfo.FLAG_WINDOW_LAYOUT_CHANGED;
                 }
                 relayoutResult = relayoutWindow(params, viewVisibility, insetsPending);
+                final boolean freeformResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
+                final boolean dockedResizing = (relayoutResult
+                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
+                final boolean dragResizing = freeformResizing || dockedResizing;
+                if (mSurfaceControl.isValid()) {
+                    updateOpacity(params, dragResizing);
+                }
 
                 if (DEBUG_LAYOUT) Log.v(mTag, "relayout: frame=" + frame.toShortString()
                         + " surface=" + mSurface);
@@ -2840,11 +2850,6 @@ public final class ViewRootImpl implements ViewParent,
                     notifySurfaceReplaced();
                 }
 
-                final boolean freeformResizing = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM) != 0;
-                final boolean dockedResizing = (relayoutResult
-                        & WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED) != 0;
-                final boolean dragResizing = freeformResizing || dockedResizing;
                 if (mDragResizing != dragResizing) {
                     if (dragResizing) {
                         mResizeMode = freeformResizing
@@ -7638,6 +7643,29 @@ public final class ViewRootImpl implements ViewParent,
         mInsetsController.onStateChanged(mTempInsets);
         mInsetsController.onControlsChanged(mTempControls);
         return relayoutResult;
+    }
+
+    private void updateOpacity(@Nullable WindowManager.LayoutParams params, boolean dragResizing) {
+        boolean opaque = false;
+        if (params != null && !PixelFormat.formatHasAlpha(params.format)
+                // Don't make surface with surfaceInsets opaque as they display a
+                // translucent shadow.
+                && params.surfaceInsets.left == 0
+                && params.surfaceInsets.top == 0
+                && params.surfaceInsets.right == 0
+                && params.surfaceInsets.bottom == 0
+                // Don't make surface opaque when resizing to reduce the amount of
+                // artifacts shown in areas the app isn't drawing content to.
+                && !dragResizing) {
+            opaque = true;
+        }
+
+        if (mIsSurfaceOpaque == opaque) {
+            return;
+        }
+
+        mTransaction.setOpaque(mSurfaceControl, opaque).apply();
+        mIsSurfaceOpaque = opaque;
     }
 
     private void setFrame(Rect frame) {
