@@ -26,7 +26,10 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.FileDescriptor;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
@@ -124,5 +127,40 @@ public class QosSocketFilter extends QosFilter {
     @Override
     public Network getNetwork() {
         return mQosSocketInfo.getNetwork();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    public boolean matchesLocalAddress(@NonNull final InetAddress address, final int startPort,
+            final int endPort) {
+        if (mQosSocketInfo.getLocalSocketAddress() == null) {
+            return false;
+        }
+
+        return matchesLocalAddress(mQosSocketInfo.getLocalSocketAddress(), address, startPort,
+                endPort);
+    }
+
+    /**
+     * Called from {@link QosSocketFilter#matchesLocalAddress(InetAddress, int, int)} with the
+     * filterSocketAddress coming from {@link QosSocketInfo#getLocalSocketAddress()}.
+     * <p>
+     * This method exists for testing purposes since {@link QosSocketInfo} couldn't be mocked
+     * due to being final.
+     *
+     * @param filterSocketAddress the socket address of the filter
+     * @param address the address to compare the filterSocketAddressWith
+     * @param startPort the start of the port range to check
+     * @param endPort the end of the port range to check
+     */
+    @VisibleForTesting
+    public static boolean matchesLocalAddress(@NonNull final InetSocketAddress filterSocketAddress,
+            @NonNull final InetAddress address,
+            final int startPort, final int endPort) {
+        return startPort <= filterSocketAddress.getPort()
+                && endPort >= filterSocketAddress.getPort()
+                && filterSocketAddress.getAddress().equals(address);
     }
 }
