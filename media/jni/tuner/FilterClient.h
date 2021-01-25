@@ -19,6 +19,7 @@
 
 #include <aidl/android/media/tv/tuner/ITunerFilter.h>
 #include <aidl/android/media/tv/tuner/BnTunerFilterCallback.h>
+#include <aidl/android/media/tv/tuner/TunerFilterEvent.h>
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
@@ -30,6 +31,7 @@
 using Status = ::ndk::ScopedAStatus;
 using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
 using ::aidl::android::media::tv::tuner::ITunerFilter;
+using ::aidl::android::media::tv::tuner::TunerFilterEvent;
 
 using ::android::hardware::EventFlag;
 using ::android::hardware::MessageQueue;
@@ -61,6 +63,7 @@ public:
     TunerFilterCallback(sp<FilterClientCallback> filterClientCallback);
     // TODO: complete TunerFilterCallback
     Status onFilterStatus(int status);
+    Status onFilterEvent(vector<TunerFilterEvent>* filterEvent);
 
 private:
     sp<FilterClientCallback> mFilterClientCallback;
