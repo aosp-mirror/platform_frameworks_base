@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -49,6 +50,7 @@ import org.junit.runners.Parameterized
  * Test app closes by pressing home button.
  * To run this test: `atest FlickerTests:CloseAppHomeButtonTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -92,7 +94,7 @@ class CloseAppHomeButtonTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 174635878)
+                            visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173689015)
 
                             launcherReplacesAppWindowAsTopWindow(testApp)
                             wallpaperWindowBecomesVisible()
@@ -108,7 +110,7 @@ class CloseAppHomeButtonTest(
                                 Surface.ROTATION_0, enabled = isRotation0)
                             navBarLayerIsAlwaysVisible()
                             statusBarLayerIsAlwaysVisible()
-                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 174635878)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173689015)
 
                             wallpaperLayerReplacesAppLayer(testApp)
                         }
