@@ -16,45 +16,34 @@
 
 package com.android.systemui.biometrics;
 
-import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
-import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.MathUtils;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
-import com.android.internal.graphics.ColorUtils;
-import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 
 /**
  * A full screen view with a configurable illumination dot and scrim.
  */
-public class UdfpsView extends View implements DozeReceiver,
-        StatusBarStateController.StateListener {
+public class UdfpsView extends View implements DozeReceiver {
     private static final String TAG = "UdfpsView";
 
     // Values in pixels.
-    private static final float SENSOR_SHADOW_RADIUS = 2.0f;
-    private static final float SENSOR_OUTLINE_WIDTH = 2.0f;
+    public static final float SENSOR_SHADOW_RADIUS = 2.0f;
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
@@ -65,8 +54,7 @@ public class UdfpsView extends View implements DozeReceiver,
     @NonNull private final RectF mSensorRect;
     @NonNull private final Paint mSensorPaint;
     private final float mSensorTouchAreaCoefficient;
-    private final int mMaxBurnInOffsetX;
-    private final int mMaxBurnInOffsetY;
+
 
     // Stores rounded up values from mSensorRect. Necessary for APIs that only take Rect (not RecF).
     @NonNull private final Rect mTouchableRegion;
@@ -75,17 +63,11 @@ public class UdfpsView extends View implements DozeReceiver,
     // mInsetsListener to restrict the touchable region and allow the touches outside of the sensor
     // to propagate to the rest of the UI.
     @NonNull private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
-    @NonNull private final Drawable mFingerprintDrawable;
+    @Nullable private UdfpsAnimation mUdfpsAnimation;
 
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
 
-    // AOD anti-burn-in offsets
-    private float mInterpolatedDarkAmount;
-    private float mBurnInOffsetX;
-    private float mBurnInOffsetY;
-
-    private int mShowReason;
     private boolean mShowScrimAndDot;
     private boolean mIsHbmSupported;
     @Nullable private String mDebugMessage;
@@ -110,10 +92,6 @@ public class UdfpsView extends View implements DozeReceiver,
             a.recycle();
         }
 
-        mMaxBurnInOffsetX = getResources()
-                .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_x);
-        mMaxBurnInOffsetY = getResources()
-                .getDimensionPixelSize(R.dimen.udfps_burn_in_offset_y);
 
         mScrimRect = new Rect();
         mScrimPaint = new Paint(0 /* flags */);
@@ -131,8 +109,6 @@ public class UdfpsView extends View implements DozeReceiver,
         mDebugTextPaint.setColor(Color.BLUE);
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
-        mFingerprintDrawable = getResources().getDrawable(R.drawable.ic_fingerprint, null);
-
         mTouchableRegion = new Rect();
         // When the device is rotated, it's important that mTouchableRegion is updated before
         // this listener is called. This listener is usually called shortly after onLayout.
@@ -149,39 +125,20 @@ public class UdfpsView extends View implements DozeReceiver,
         mSensorProps = properties;
     }
 
-    /**
-     * @param reason See {@link android.hardware.fingerprint.IUdfpsOverlayController}
-     */
-    void setShowReason(int reason) {
-        mShowReason = reason;
+    void setUdfpsAnimation(@Nullable UdfpsAnimation animation) {
+        mUdfpsAnimation = animation;
     }
+
 
     @Override
     public void dozeTimeTick() {
-        updateAodPositionAndColor();
-    }
-
-    @Override
-    public void onDozeAmountChanged(float linear, float eased) {
-        mInterpolatedDarkAmount = eased;
-        updateAodPositionAndColor();
-    }
-
-    private void updateAodPositionAndColor() {
-        mBurnInOffsetX = MathUtils.lerp(0f,
-                getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
-                        - mMaxBurnInOffsetX,
-                mInterpolatedDarkAmount);
-        mBurnInOffsetY = MathUtils.lerp(0f,
-                getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
-                        - 0.5f * mMaxBurnInOffsetY,
-                mInterpolatedDarkAmount);
-        updateColor();
-        postInvalidate();
+        if (mUdfpsAnimation instanceof DozeReceiver) {
+            ((DozeReceiver) mUdfpsAnimation).dozeTimeTick();
+        }
     }
 
     // The "h" and "w" are the display's height and width relative to its current rotation.
-    private void updateSensorRect(int h, int w) {
+    protected void updateSensorRect(int h, int w) {
         // mSensorProps coordinates assume portrait mode.
         mSensorRect.set(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
                 mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
@@ -202,12 +159,9 @@ public class UdfpsView extends View implements DozeReceiver,
                 // Do nothing to stay in portrait mode.
         }
 
-        int margin =  (int) (mSensorRect.bottom - mSensorRect.top) / 5;
-        mFingerprintDrawable.setBounds(
-                (int) mSensorRect.left + margin,
-                (int) mSensorRect.top + margin,
-                (int) mSensorRect.right - margin,
-                (int) mSensorRect.bottom - margin);
+        if (mUdfpsAnimation != null) {
+            mUdfpsAnimation.onSensorRectUpdated(new RectF(mSensorRect));
+        }
     }
 
     @Override
@@ -239,14 +193,8 @@ public class UdfpsView extends View implements DozeReceiver,
     }
 
     private void updateColor() {
-        if (mShowReason == IUdfpsOverlayController.REASON_AUTH) {
-            final int lockScreenIconColor = Utils.getColorAttrDefaultColor(mContext,
-                    com.android.systemui.R.attr.wallpaperTextColor);
-            final int ambientDisplayIconColor = Color.WHITE;
-            mFingerprintDrawable.setTint(ColorUtils.blendARGB(lockScreenIconColor,
-                    ambientDisplayIconColor, mInterpolatedDarkAmount));
-        } else if (mShowReason == IUdfpsOverlayController.REASON_ENROLL) {
-            mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
+        if (mUdfpsAnimation != null) {
+            mUdfpsAnimation.updateColor();
         }
     }
 
@@ -266,9 +214,6 @@ public class UdfpsView extends View implements DozeReceiver,
             canvas.drawRect(mScrimRect, mScrimPaint);
         }
 
-        // Translation should affect everything but the scrim.
-        canvas.save();
-        canvas.translate(mBurnInOffsetX, mBurnInOffsetY);
         if (!TextUtils.isEmpty(mDebugMessage)) {
             canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
         }
@@ -277,16 +222,10 @@ public class UdfpsView extends View implements DozeReceiver,
             // draw dot (white circle)
             canvas.drawOval(mSensorRect, mSensorPaint);
         } else {
-            final boolean isNightMode = (getResources().getConfiguration().uiMode
-                    & Configuration.UI_MODE_NIGHT_YES) != 0;
-            if (mShowReason == IUdfpsOverlayController.REASON_ENROLL && !isNightMode) {
-                canvas.drawOval(mSensorRect, mSensorPaint);
+            if (mUdfpsAnimation != null) {
+                mUdfpsAnimation.draw(canvas);
             }
-            // draw fingerprint icon
-            mFingerprintDrawable.draw(canvas);
         }
-
-        canvas.restore();
 
         if (mShowScrimAndDot && mRunAfterShowingScrimAndDot != null) {
             post(mRunAfterShowingScrimAndDot);

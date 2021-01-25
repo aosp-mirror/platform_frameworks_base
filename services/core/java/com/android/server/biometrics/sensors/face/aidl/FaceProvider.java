@@ -451,7 +451,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         mContext, mSensors.get(sensorId).getLazySession(), token, callback, userId,
                         operationId, restricted, opPackageName, cookie,
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
-                        mUsageStats, mSensors.get(sensorId).getLockoutCache());
+                        mUsageStats, mSensors.get(sensorId).getLockoutCache(), isKeyguard);
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);

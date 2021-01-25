@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutCache;
@@ -58,11 +59,11 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
             boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
             int sensorId, boolean isStrongBiometric, int statsClient,
             @Nullable TaskStackListener taskStackListener, @NonNull LockoutCache lockoutCache,
-            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+            @Nullable IUdfpsOverlayController udfpsOverlayController, boolean isKeyguard) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted, owner,
                 cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutCache);
+                lockoutCache, isKeyguard);
         mLockoutCache = lockoutCache;
         mUdfpsOverlayController = udfpsOverlayController;
     }
@@ -87,7 +88,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), Utils.getUdfpsAuthReason(this),
                 mUdfpsOverlayController);
         try {
             mCancellationSignal = getFreshDaemon().authenticate(mSequentialId, mOperationId);

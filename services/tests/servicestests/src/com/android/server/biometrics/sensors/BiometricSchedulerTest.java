@@ -34,7 +34,6 @@ import android.hardware.biometrics.IBiometricService;
 import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
-import android.util.proto.ProtoOutputStream;
 
 import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
@@ -279,7 +278,8 @@ public class BiometricSchedulerTest {
             super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
                     false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
                     TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
-                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class));
+                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
+                    false /* isKeyguard */);
         }
 
         @Override
