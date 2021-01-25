@@ -17,6 +17,8 @@
 package com.android.wm.shell.flicker
 
 import android.content.pm.PackageManager
+import android.content.pm.PackageManager.FEATURE_LEANBACK
+import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
 import android.os.RemoteException
 import android.os.SystemClock
 import android.platform.helpers.IAppHelper
@@ -24,6 +26,8 @@ import android.view.Surface
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.server.wm.flicker.Flicker
+import org.junit.Assume.assumeFalse
+import org.junit.Before
 
 /**
  * Base class of all Flicker test that performs common functions for all flicker tests:
@@ -36,15 +40,21 @@ import com.android.server.wm.flicker.Flicker
  * - Fails tests if results are not available for any test due to jank.
  */
 abstract class FlickerTestBase {
-    val instrumentation by lazy {
-        InstrumentationRegistry.getInstrumentation()
+    val instrumentation by lazy { InstrumentationRegistry.getInstrumentation() }
+    val uiDevice by lazy { UiDevice.getInstance(instrumentation) }
+    val packageManager: PackageManager by lazy { instrumentation.context.getPackageManager() }
+    protected val isTelevision: Boolean by lazy {
+        packageManager.run {
+            hasSystemFeature(FEATURE_LEANBACK) || hasSystemFeature(FEATURE_LEANBACK_ONLY)
+        }
     }
-    val uiDevice by lazy {
-        UiDevice.getInstance(instrumentation)
-    }
-    val packageManager: PackageManager by lazy {
-        instrumentation.context.getPackageManager()
-    }
+
+    /**
+     * By default WmShellFlickerTests do not run on TV devices.
+     * If the test should run on TV - it should override this method.
+     */
+    @Before
+    open fun televisionSetUp() = assumeFalse(isTelevision)
 
     /**
      * Build a test tag for the test

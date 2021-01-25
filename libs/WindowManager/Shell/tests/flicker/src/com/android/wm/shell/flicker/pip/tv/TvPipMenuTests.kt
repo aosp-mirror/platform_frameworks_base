@@ -51,8 +51,7 @@ class TvPipMenuTests : TvPipTestBase() {
     }
 
     @Before
-    override fun setUp() {
-        super.setUp()
+    fun tvPipMenuTestsTestUp() {
         // Launch the app and go to PiP
         testApp.launchViaIntent()
     }
