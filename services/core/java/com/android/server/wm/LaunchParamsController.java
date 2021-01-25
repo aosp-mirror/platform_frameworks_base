@@ -277,7 +277,8 @@ class LaunchParamsController {
         @interface Phase {}
 
         /**
-         * Stops once we are done with preferred display calculation.
+         * Stops once we are done with preferred display calculation. The result returned from this
+         * phase is only guaranteed to have a display area which display is the launch display.
          */
         int PHASE_DISPLAY = 0;
 
@@ -287,9 +288,14 @@ class LaunchParamsController {
         int PHASE_WINDOWING_MODE = 1;
 
         /**
+         * Stops once we are done with display area calculation.
+         */
+        int PHASE_DISPLAY_AREA = 2;
+
+        /**
          * Stops once we are done with window bounds calculation.
          */
-        int PHASE_BOUNDS = 2;
+        int PHASE_BOUNDS = 3;
 
         /**
          * Returns the launch params that the provided activity launch params should be overridden
