@@ -754,7 +754,7 @@ public final class ProcessList {
         mAppDataIsolationEnabled =
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
-                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
+                ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mAppDataIsolationAllowlistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 
