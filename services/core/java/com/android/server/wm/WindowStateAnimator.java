@@ -443,20 +443,9 @@ class WindowStateAnimator {
         // Set up surface control with initial size.
         try {
 
+            // This can be removed once we move all Buffer Layers to use BLAST.
             final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
             final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-            if (!PixelFormat.formatHasAlpha(attrs.format)
-                    // Don't make surface with surfaceInsets opaque as they display a
-                    // translucent shadow.
-                    && attrs.surfaceInsets.left == 0
-                    && attrs.surfaceInsets.top == 0
-                    && attrs.surfaceInsets.right == 0
-                    && attrs.surfaceInsets.bottom == 0
-                    // Don't make surface opaque when resizing to reduce the amount of
-                    // artifacts shown in areas the app isn't drawing content to.
-                    && !w.isDragResizing()) {
-                flags |= SurfaceControl.OPAQUE;
-            }
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
                     height, format, flags, this, windowType);
