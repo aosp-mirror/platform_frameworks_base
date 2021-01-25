@@ -42,4 +42,7 @@
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.toast.ToastUI</item>
     </string-array>
+
+    <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
+    <integer name="recents_svelte_level">3</integer>
 </resources>
