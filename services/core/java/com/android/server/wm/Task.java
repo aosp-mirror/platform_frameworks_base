@@ -6041,7 +6041,9 @@ class Task extends WindowContainer<WindowContainer> {
             mInResumeTopActivity = true;
 
             if (isLeafTask()) {
-                someActivityResumed = resumeTopActivityInnerLocked(prev, options);
+                if (isFocusableAndVisible()) {
+                    someActivityResumed = resumeTopActivityInnerLocked(prev, options);
+                }
             } else {
                 int idx = mChildren.size() - 1;
                 while (idx >= 0) {
