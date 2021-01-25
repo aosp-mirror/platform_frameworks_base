@@ -5726,8 +5726,6 @@ public class WindowManagerService extends IWindowManager.Stub
         if (!w.mToken.okToDisplay() && mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
             ProtoLog.v(WM_DEBUG_ORIENTATION, "Changing surface while display frozen: %s", w);
             w.setOrientationChanging(true);
-            w.mLastFreezeDuration = 0;
-            mRoot.mOrientationChangeComplete = false;
             if (mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_NONE) {
                 mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
                 // XXX should probably keep timeout from
