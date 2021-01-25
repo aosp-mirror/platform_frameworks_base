@@ -2296,31 +2296,35 @@ public final class QuotaController extends StateController {
 
         @Override
         public void onAppAdded(int uid) {
-            final long nowElapsed = sElapsedRealtimeClock.millis();
-            mTempAllowlistCache.put(uid, true);
-            final ArraySet<String> packages = getPackagesForUid(uid);
-            if (packages != null) {
-                final int userId = UserHandle.getUserId(uid);
-                for (int i = packages.size() - 1; i >= 0; --i) {
-                    Timer t = mEJPkgTimers.get(userId, packages.valueAt(i));
-                    if (t != null) {
-                        t.onStateChangedLocked(nowElapsed, true);
+            synchronized (mLock) {
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                mTempAllowlistCache.put(uid, true);
+                final ArraySet<String> packages = getPackagesForUidLocked(uid);
+                if (packages != null) {
+                    final int userId = UserHandle.getUserId(uid);
+                    for (int i = packages.size() - 1; i >= 0; --i) {
+                        Timer t = mEJPkgTimers.get(userId, packages.valueAt(i));
+                        if (t != null) {
+                            t.onStateChangedLocked(nowElapsed, true);
+                        }
                     }
-                }
-                if (maybeUpdateConstraintForUidLocked(uid)) {
-                    mStateChangedListener.onControllerStateChanged();
+                    if (maybeUpdateConstraintForUidLocked(uid)) {
+                        mStateChangedListener.onControllerStateChanged();
+                    }
                 }
             }
         }
 
         @Override
         public void onAppRemoved(int uid) {
-            final long nowElapsed = sElapsedRealtimeClock.millis();
-            final long endElapsed = nowElapsed + mEJTempAllowlistGracePeriodMs;
-            mTempAllowlistCache.delete(uid);
-            mTempAllowlistGraceCache.put(uid, endElapsed);
-            Message msg = mHandler.obtainMessage(MSG_END_GRACE_PERIOD, uid, 0);
-            mHandler.sendMessageDelayed(msg, mEJTempAllowlistGracePeriodMs);
+            synchronized (mLock) {
+                final long nowElapsed = sElapsedRealtimeClock.millis();
+                final long endElapsed = nowElapsed + mEJTempAllowlistGracePeriodMs;
+                mTempAllowlistCache.delete(uid);
+                mTempAllowlistGraceCache.put(uid, endElapsed);
+                Message msg = mHandler.obtainMessage(MSG_END_GRACE_PERIOD, uid, 0);
+                mHandler.sendMessageDelayed(msg, mEJTempAllowlistGracePeriodMs);
+            }
         }
     }
 
@@ -2351,7 +2355,7 @@ public final class QuotaController extends StateController {
     }
 
     @Nullable
-    private ArraySet<String> getPackagesForUid(final int uid) {
+    private ArraySet<String> getPackagesForUidLocked(final int uid) {
         ArraySet<String> packages = mUidToPackageCache.get(uid);
         if (packages == null) {
             try {
@@ -2475,7 +2479,7 @@ public final class QuotaController extends StateController {
                             // Update Timers first.
                             if (mPkgTimers.indexOfKey(userId) >= 0
                                     || mEJPkgTimers.indexOfKey(userId) >= 0) {
-                                final ArraySet<String> packages = getPackagesForUid(uid);
+                                final ArraySet<String> packages = getPackagesForUidLocked(uid);
                                 if (packages != null) {
                                     for (int i = packages.size() - 1; i >= 0; --i) {
                                         Timer t = mEJPkgTimers.get(userId, packages.valueAt(i));
@@ -2544,7 +2548,7 @@ public final class QuotaController extends StateController {
                             if (DEBUG) {
                                 Slog.d(TAG, uid + " is now out of grace period");
                             }
-                            final ArraySet<String> packages = getPackagesForUid(uid);
+                            final ArraySet<String> packages = getPackagesForUidLocked(uid);
                             if (packages != null) {
                                 final int userId = UserHandle.getUserId(uid);
                                 final long nowElapsed = sElapsedRealtimeClock.millis();
