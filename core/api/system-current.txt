@@ -8415,6 +8415,11 @@ package android.security.keystore {
     method @Deprecated @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUid(int);
   }
 
+  public abstract class KeyProperties {
+    field public static final int NAMESPACE_APPLICATION = -1; // 0xffffffff
+    field public static final int NAMESPACE_WIFI = 102; // 0x66
+  }
+
 }
 
 package android.security.keystore.recovery {
