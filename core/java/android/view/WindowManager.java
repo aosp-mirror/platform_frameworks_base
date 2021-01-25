@@ -83,6 +83,7 @@ import static android.view.WindowLayoutParamsProto.Y;
 import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -99,6 +100,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -2846,12 +2848,14 @@ public interface WindowManager extends ViewManager {
 
         /**
          * The token of {@link android.app.WindowContext}. It is usually a
-         * {@link android.app.WindowTokenClient} and is used for updating
-         * {@link android.content.res.Resources} from {@link Configuration} propagated from the
-         * server side.
+         * {@link android.app.WindowTokenClient} and is used for associating the params with an
+         * existing node in the WindowManager hierarchy and getting the corresponding
+         * {@link Configuration} and {@link android.content.res.Resources} values with updates
+         * propagated from the server side.
          *
          * @hide
          */
+        @Nullable
         public IBinder mWindowContextToken = null;
 
         /**
@@ -3536,6 +3540,37 @@ public interface WindowManager extends ViewManager {
         @SystemApi
         public final long getUserActivityTimeout() {
             return userActivityTimeout;
+        }
+
+        /**
+         * Sets the {@link android.app.WindowContext} token.
+         *
+         * @see #getWindowContextToken()
+         *
+         * @hide
+         */
+        @TestApi
+        public final void setWindowContextToken(@NonNull IBinder token) {
+            mWindowContextToken = token;
+        }
+
+        /**
+         * Gets the {@link android.app.WindowContext} token.
+         *
+         * The token is usually a {@link android.app.WindowTokenClient} and is used for associating
+         * the params with an existing node in the WindowManager hierarchy and getting the
+         * corresponding {@link Configuration} and {@link android.content.res.Resources} values with
+         * updates propagated from the server side.
+         *
+         * @see android.app.WindowTokenClient
+         * @see Context#createWindowContext(Display, int, Bundle)
+         *
+         * @hide
+         */
+        @TestApi
+        @Nullable
+        public final IBinder getWindowContextToken() {
+            return mWindowContextToken;
         }
 
         public int describeContents() {
