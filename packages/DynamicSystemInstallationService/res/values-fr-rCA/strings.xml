@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Le système dynamique est prêt. Pour commencer à l\'utiliser, redémarrez votre appareil."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Installation en cours…"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Échec de l\'installation"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Impossible de valider l\'image. Annulation de l\'installation."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Impossible de valider l\'image. Annulez l\'installation."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Un système dynamique est en cours d\'exécution. Pour utiliser la version originale d\'Android, redémarrez l\'appareil."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Annuler"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Annuler"</string>
