@@ -2522,12 +2522,19 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         final ActivityOptions activityOptions = options != null
                 ? options.getOptions(this)
                 : null;
+        boolean moveHomeTaskForward = true;
         if (activityOptions != null) {
             activityType = activityOptions.getLaunchActivityType();
             windowingMode = activityOptions.getLaunchWindowingMode();
             if (activityOptions.freezeRecentTasksReordering()
                     && mRecentTasks.isCallerRecents(callingUid)) {
                 mRecentTasks.setFreezeTaskListReordering();
+            }
+            if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                    || activityOptions.getLaunchRootTask() != null) {
+                // Don't move home activity forward if we are launching into primary split or there
+                // is a launch root set.
+                moveHomeTaskForward = false;
             }
         }
         if (activityType == ACTIVITY_TYPE_HOME || activityType == ACTIVITY_TYPE_RECENTS) {
@@ -2545,7 +2552,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         "startActivityFromRecents: Task " + taskId + " not found.");
             }
 
-            if (windowingMode != WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
+            if (moveHomeTaskForward) {
                 // We always want to return to the home activity instead of the recents activity
                 // from whatever is started from the recents activity, so move the home stack
                 // forward.
