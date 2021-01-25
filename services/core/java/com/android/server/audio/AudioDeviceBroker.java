@@ -154,6 +154,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
         mPreferredDeviceforComm = null;
         initCommunicationStrategyId();
+
+        mSystemServer.registerUserStartedReceiver(mContext);
     }
 
     /*package*/ Context getContext() {
@@ -991,6 +993,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         synchronized (mDeviceStateLock) {
             return mBtHelper.getA2dpCodec(device);
         }
+    }
+
+    /*package*/ void broadcastStickyIntentToCurrentProfileGroup(Intent intent) {
+        mSystemServer.broadcastStickyIntentToCurrentProfileGroup(intent);
     }
 
     /*package*/ void dump(PrintWriter pw, String prefix) {

@@ -85,17 +85,17 @@ import com.android.keyguard.KeyguardUpdateMonitorCallback;
 import com.android.keyguard.KeyguardViewController;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dumpable;
-import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.navigationbar.NavigationModeController;
+import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.BiometricUnlockController;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -149,7 +149,8 @@ import dagger.Lazy;
  * directly to the keyguard UI is posted to a {@link android.os.Handler} to ensure it is taken on the UI
  * thread of the keyguard.
  */
-public class KeyguardViewMediator extends SystemUI implements Dumpable {
+public class KeyguardViewMediator extends SystemUI implements Dumpable,
+        StatusBarStateController.StateListener {
     private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
@@ -223,6 +224,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
     private boolean mBootSendUserPresent;
     private boolean mShuttingDown;
     private boolean mDozing;
+    private boolean mAnimatingScreenOff;
     private final FalsingCollector mFalsingCollector;
 
     /** High level access to the power manager for WakeLocks */
@@ -709,6 +711,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
     };
 
     private DeviceConfigProxy mDeviceConfig;
+    private DozeParameters mDozeParameters;
 
     /**
      * Injected constructor. See {@link KeyguardModule}.
@@ -725,7 +728,9 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             TrustManager trustManager,
             DeviceConfigProxy deviceConfig,
             NavigationModeController navigationModeController,
-            KeyguardDisplayManager keyguardDisplayManager) {
+            KeyguardDisplayManager keyguardDisplayManager,
+            DozeParameters dozeParameters,
+            StatusBarStateController statusBarStateController) {
         super(context);
         mFalsingCollector = falsingCollector;
         mLockPatternUtils = lockPatternUtils;
@@ -751,6 +756,8 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                 QuickStepContract.isGesturalMode(navigationModeController.addListener(mode -> {
                     mInGestureNavigationMode = QuickStepContract.isGesturalMode(mode);
                 }));
+        mDozeParameters = dozeParameters;
+        statusBarStateController.addCallback(this);
     }
 
     public void userActivity() {
@@ -863,11 +870,11 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
     /**
      * Called to let us know the screen was turned off.
-     * @param why either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
-     *   {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
+     * @param offReason either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
+     * {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
      */
-    public void onStartedGoingToSleep(int why) {
-        if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + why + ")");
+    public void onStartedGoingToSleep(@WindowManagerPolicyConstants.OffReason int offReason) {
+        if (DEBUG) Log.d(TAG, "onStartedGoingToSleep(" + offReason + ")");
         synchronized (this) {
             mDeviceInteractive = false;
             mGoingToSleep = true;
@@ -900,8 +907,11 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                 }
             } else if (mShowing) {
                 mPendingReset = true;
-            } else if ((why == WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT && timeout > 0)
-                    || (why == WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER && !lockImmediately)) {
+            } else if (
+                    (offReason == WindowManagerPolicyConstants.OFF_BECAUSE_OF_TIMEOUT
+                            && timeout > 0)
+                            || (offReason == WindowManagerPolicyConstants.OFF_BECAUSE_OF_USER
+                            && !lockImmediately)) {
                 doKeyguardLaterLocked(timeout);
                 mLockLater = true;
             } else if (!mLockPatternUtils.isLockScreenDisabled(currentUser)) {
@@ -912,16 +922,23 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
                 playSounds(true);
             }
         }
-        mUpdateMonitor.dispatchStartedGoingToSleep(why);
+        mUpdateMonitor.dispatchStartedGoingToSleep(offReason);
         notifyStartedGoingToSleep();
     }
 
-    public void onFinishedGoingToSleep(int why, boolean cameraGestureTriggered) {
-        if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + why + ")");
+    /**
+     * Called to let us know the screen finished turning off.
+     * @param offReason either {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_USER} or
+     * {@link WindowManagerPolicyConstants#OFF_BECAUSE_OF_TIMEOUT}.
+     */
+    public void onFinishedGoingToSleep(
+            @WindowManagerPolicyConstants.OffReason int offReason, boolean cameraGestureTriggered) {
+        if (DEBUG) Log.d(TAG, "onFinishedGoingToSleep(" + offReason + ")");
         synchronized (this) {
             mDeviceInteractive = false;
             mGoingToSleep = false;
             mWakeAndUnlocking = false;
+            mAnimatingScreenOff = mDozeParameters.shouldControlUnlockedScreenOff();
 
             resetKeyguardDonePendingLocked();
             mHideAnimationRun = false;
@@ -957,7 +974,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
             }
 
         }
-        mUpdateMonitor.dispatchFinishedGoingToSleep(why);
+        mUpdateMonitor.dispatchFinishedGoingToSleep(offReason);
     }
 
     private boolean isKeyguardServiceEnabled() {
@@ -1074,6 +1091,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         // TODO: Rename all screen off/on references to interactive/sleeping
         synchronized (this) {
             mDeviceInteractive = true;
+            mAnimatingScreenOff = false;
             cancelDoKeyguardLaterLocked();
             cancelDoKeyguardForChildProfilesLocked();
             if (DEBUG) Log.d(TAG, "onStartedWakingUp, seq = " + mDelayedShowingSequence);
@@ -1285,6 +1303,10 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
     public boolean isHiding() {
         return mHiding;
+    }
+
+    public boolean isAnimatingScreenOff() {
+        return mAnimatingScreenOff;
     }
 
     /**
@@ -2259,6 +2281,16 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         setShowingLocked(mShowing);
     }
 
+    @Override
+    public void onDozeAmountChanged(float linear, float interpolated) {
+        // If we were animating the screen off, and we've completed the doze animation (doze amount
+        // is 1f), then show the activity lock screen.
+        if (mAnimatingScreenOff && mDozing && linear == 1f) {
+            mAnimatingScreenOff = false;
+            setShowingLocked(mShowing);
+        }
+    }
+
     /**
      * @param pulsing true when device temporarily wakes up to display an incoming notification.
      */
@@ -2289,7 +2321,14 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
         mAodShowing = aodShowing;
         if (notifyDefaultDisplayCallbacks) {
             notifyDefaultDisplayCallbacks(showing);
-            updateActivityLockScreenState(showing, aodShowing);
+
+            if (!showing || !mAnimatingScreenOff) {
+                // Update the activity lock screen state unless we're animating in the keyguard
+                // for a screen off animation. In that case, we want the activity to remain visible
+                // until the animation completes. setShowingLocked is called again when the
+                // animation ends, so the activity lock screen will be shown at that time.
+                updateActivityLockScreenState(showing, aodShowing);
+            }
         }
     }
 

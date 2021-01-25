@@ -593,7 +593,7 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         }
 
         if (modemInfo != null) {
-            mStats.updateMobileRadioState(modemInfo, elapsedRealtime, uptime);
+            mStats.noteModemControllerActivity(modemInfo, elapsedRealtime, uptime);
         }
 
         if (updateFlags == UPDATE_ALL) {

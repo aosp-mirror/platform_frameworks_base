@@ -16,10 +16,12 @@
 
 package com.android.server.translation;
 
+import static android.Manifest.permission.MANAGE_UI_TRANSLATION;
 import static android.content.Context.TRANSLATION_MANAGER_SERVICE;
 import static android.view.translation.TranslationManager.STATUS_SYNC_CALL_FAIL;
 
 import android.content.Context;
+import android.os.Binder;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
@@ -58,6 +60,12 @@ public final class TranslationManagerService
         return new TranslationManagerServiceImpl(this, mLock, resolvedUserId, disabled);
     }
 
+    private void enforceCallerHasPermission(String permission) {
+        final String msg = "Permission Denial from pid =" + Binder.getCallingPid() + ", uid="
+                + Binder.getCallingUid() + " doesn't hold " + permission;
+        getContext().enforceCallingPermission(permission, msg);
+    }
+
     final class TranslationManagerServiceStub extends ITranslationManager.Stub {
         @Override
         public void getSupportedLocales(IResultReceiver receiver, int userId)
@@ -91,6 +99,7 @@ public final class TranslationManagerService
         public void updateUiTranslationState(@UiTranslationState int state,
                 TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
                 int taskId, int userId) {
+            enforceCallerHasPermission(MANAGE_UI_TRANSLATION);
             synchronized (mLock) {
                 final TranslationManagerServiceImpl service = getServiceForUserLocked(userId);
                 if (service != null) {

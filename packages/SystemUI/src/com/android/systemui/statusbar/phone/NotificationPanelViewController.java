@@ -896,9 +896,8 @@ public class NotificationPanelViewController extends PanelViewController {
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
-            final boolean hasVisibleNotifications = !bypassEnabled
-                    && (mNotificationStackScrollLayoutController.getVisibleNotificationCount() != 0
-                    || mMediaDataManager.hasActiveMedia());
+            final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                    .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
             mKeyguardStatusViewController.setHasVisibleNotifications(hasVisibleNotifications);
             mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
@@ -3616,6 +3615,16 @@ public class NotificationPanelViewController extends PanelViewController {
             boolean keyguardFadingAway = mKeyguardStateController.isKeyguardFadingAway();
             int oldState = mBarState;
             boolean keyguardShowing = statusBarState == KEYGUARD;
+
+            if (mDozeParameters.shouldControlUnlockedScreenOff() && isDozing() && keyguardShowing) {
+                // This means we're doing the screen off animation - position the keyguard status
+                // view where it'll be on AOD, so we can animate it in.
+                mKeyguardStatusViewController.updatePosition(
+                        mClockPositionResult.clockX,
+                        mClockPositionResult.clockYFullyDozing,
+                        mClockPositionResult.clockScale,
+                        false);
+            }
 
             mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
                     statusBarState,

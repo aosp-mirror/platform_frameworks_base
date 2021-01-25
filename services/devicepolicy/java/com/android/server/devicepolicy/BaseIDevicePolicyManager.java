@@ -17,8 +17,11 @@ package com.android.server.devicepolicy;
 
 import android.annotation.NonNull;
 import android.app.admin.DevicePolicySafetyChecker;
+import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.ManagedProfileProvisioningParams;
 import android.content.ComponentName;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.server.SystemService;
@@ -115,4 +118,13 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     public void setOrganizationIdForUser(
             @NonNull String callerPackage, @NonNull String enterpriseId, int userId) {}
+
+    public UserHandle createAndProvisionManagedProfile(
+            @NonNull ManagedProfileProvisioningParams provisioningParams) {
+        return null;
+    }
+
+    public void provisionFullyManagedDevice(
+            FullyManagedDeviceProvisioningParams provisioningParams) {
+    }
 }

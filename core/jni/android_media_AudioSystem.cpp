@@ -1023,7 +1023,9 @@ static jint convertAudioPortConfigFromNative(JNIEnv *env,
     audio_channel_mask_t nMask;
     jint jMask;
 
-    int gainIndex = nAudioPortConfig->gain.index;
+    int gainIndex = (nAudioPortConfig->config_mask & AUDIO_PORT_CONFIG_GAIN)
+            ? nAudioPortConfig->gain.index
+            : -1;
     if (gainIndex >= 0) {
         ALOGV("convertAudioPortConfigFromNative gain found with index %d mode %x",
               gainIndex, nAudioPortConfig->gain.mode);
@@ -1120,7 +1122,9 @@ static jint convertAudioPortConfigFromNative(JNIEnv *env,
             goto exit;
         }
     }
-    nMask = nAudioPortConfig->channel_mask;
+    nMask = (nAudioPortConfig->config_mask & AUDIO_PORT_CONFIG_CHANNEL_MASK)
+            ? nAudioPortConfig->channel_mask
+            : AUDIO_CONFIG_BASE_INITIALIZER.channel_mask;
     if (useInMask) {
         jMask = inChannelMaskFromNative(nMask);
         ALOGV("convertAudioPortConfigFromNative IN mask java %x native %x", jMask, nMask);
@@ -1129,12 +1133,17 @@ static jint convertAudioPortConfigFromNative(JNIEnv *env,
         ALOGV("convertAudioPortConfigFromNative OUT mask java %x native %x", jMask, nMask);
     }
 
-    *jAudioPortConfig = env->NewObject(clazz, methodID,
-                                       jAudioPort,
-                                       nAudioPortConfig->sample_rate,
-                                       jMask,
-                                       audioFormatFromNative(nAudioPortConfig->format),
-                                       jAudioGainConfig);
+    *jAudioPortConfig =
+            env->NewObject(clazz, methodID, jAudioPort,
+                           (nAudioPortConfig->config_mask & AUDIO_PORT_CONFIG_SAMPLE_RATE)
+                                   ? nAudioPortConfig->sample_rate
+                                   : AUDIO_CONFIG_BASE_INITIALIZER.sample_rate,
+                           jMask,
+                           audioFormatFromNative(
+                                   (nAudioPortConfig->config_mask & AUDIO_PORT_CONFIG_FORMAT)
+                                           ? nAudioPortConfig->format
+                                           : AUDIO_CONFIG_BASE_INITIALIZER.format),
+                           jAudioGainConfig);
     if (*jAudioPortConfig == NULL) {
         ALOGV("convertAudioPortConfigFromNative could not create new port config");
         jStatus = (jint)AUDIO_JAVA_ERROR;
@@ -1936,6 +1945,7 @@ static jint convertAudioMixToNative(JNIEnv *env,
     nAudioMix->mCbFlags = env->GetIntField(jAudioMix, gAudioMixFields.mCallbackFlags);
 
     jobject jFormat = env->GetObjectField(jAudioMix, gAudioMixFields.mFormat);
+    nAudioMix->mFormat = AUDIO_CONFIG_INITIALIZER;
     nAudioMix->mFormat.sample_rate = env->GetIntField(jFormat,
                                                      gAudioFormatFields.mSampleRate);
     nAudioMix->mFormat.channel_mask = outChannelMaskToNative(env->GetIntField(jFormat,

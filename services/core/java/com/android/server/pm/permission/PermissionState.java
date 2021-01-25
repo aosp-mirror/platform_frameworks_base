@@ -32,9 +32,6 @@ public final class PermissionState {
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private boolean mRuntime;
-
-    @GuardedBy("mLock")
     private boolean mGranted;
 
     @GuardedBy("mLock")
@@ -64,12 +61,6 @@ public final class PermissionState {
     @NonNull
     public int[] computeGids(@UserIdInt int userId) {
         return mPermission.computeGids(userId);
-    }
-
-    public boolean isRuntime() {
-        synchronized (mLock) {
-            return mPermission.isRuntime();
-        }
     }
 
     public boolean isGranted() {

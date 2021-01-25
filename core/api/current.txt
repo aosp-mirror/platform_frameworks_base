@@ -10311,6 +10311,7 @@ package android.content {
     method public void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable String, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission("android.permission.INTERACT_ACROSS_USERS") public abstract void sendOrderedBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void sendStickyBroadcast(@RequiresPermission android.content.Intent);
+    method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public void sendStickyBroadcast(@NonNull @RequiresPermission android.content.Intent, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void sendStickyBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY) public abstract void sendStickyOrderedBroadcast(@RequiresPermission android.content.Intent, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @Deprecated @RequiresPermission(allOf={"android.permission.INTERACT_ACROSS_USERS", android.Manifest.permission.BROADCAST_STICKY}) public abstract void sendStickyOrderedBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
@@ -12383,6 +12384,7 @@ package android.content.pm {
     field public static final String FEATURE_SCREEN_PORTRAIT = "android.hardware.screen.portrait";
     field public static final String FEATURE_SECURELY_REMOVES_USERS = "android.software.securely_removes_users";
     field public static final String FEATURE_SECURE_LOCK_SCREEN = "android.software.secure_lock_screen";
+    field public static final String FEATURE_SECURITY_MODEL_COMPATIBLE = "android.hardware.security.model.compatible";
     field public static final String FEATURE_SENSOR_ACCELEROMETER = "android.hardware.sensor.accelerometer";
     field public static final String FEATURE_SENSOR_AMBIENT_TEMPERATURE = "android.hardware.sensor.ambient_temperature";
     field public static final String FEATURE_SENSOR_BAROMETER = "android.hardware.sensor.barometer";
@@ -36459,6 +36461,9 @@ package android.se.omapi {
     method @NonNull public String getVersion();
     method public boolean isConnected();
     method public void shutdown();
+    field public static final String ACTION_SECURE_ELEMENT_STATE_CHANGED = "android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED";
+    field public static final String EXTRA_READER_NAME = "android.se.omapi.extra.READER_NAME";
+    field public static final String EXTRA_READER_STATE = "android.se.omapi.extra.READER_STATE";
   }
 
   public static interface SEService.OnConnectedListener {
@@ -38202,6 +38207,7 @@ package android.service.textservice {
     ctor public SpellCheckerService.Session();
     method public android.os.Bundle getBundle();
     method public String getLocale();
+    method public int getSupportedAttributes();
     method public void onCancel();
     method public void onClose();
     method public abstract void onCreate();
@@ -39942,6 +39948,9 @@ package android.telephony {
     method public static boolean isConfigForIdentifiedCarrier(android.os.PersistableBundle);
     method public void notifyConfigChangedForSubId(int);
     field public static final String ACTION_CARRIER_CONFIG_CHANGED = "android.telephony.action.CARRIER_CONFIG_CHANGED";
+    field public static final int CARRIER_NR_AVAILABILITY_NONE = 0; // 0x0
+    field public static final int CARRIER_NR_AVAILABILITY_NSA = 1; // 0x1
+    field public static final int CARRIER_NR_AVAILABILITY_SA = 2; // 0x2
     field public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_ONLY = 0; // 0x0
     field public static final int CROSS_SIM_SPN_FORMAT_CARRIER_NAME_WITH_BRANDING = 1; // 0x1
     field public static final int DATA_CYCLE_THRESHOLD_DISABLED = -2; // 0xfffffffe
@@ -40004,6 +40013,7 @@ package android.telephony {
     field public static final String KEY_CARRIER_INSTANT_LETTERING_LENGTH_LIMIT_INT = "carrier_instant_lettering_length_limit_int";
     field public static final String KEY_CARRIER_NAME_OVERRIDE_BOOL = "carrier_name_override_bool";
     field public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
+    field public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
     field public static final String KEY_CARRIER_RCS_PROVISIONING_REQUIRED_BOOL = "carrier_rcs_provisioning_required_bool";
     field public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING = "carrier_settings_activity_component_name_string";
     field public static final String KEY_CARRIER_SETTINGS_ENABLE_BOOL = "carrier_settings_enable_bool";
@@ -41474,6 +41484,7 @@ package android.telephony {
 
   public final class SignalStrengthUpdateRequest implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.os.IBinder getLiveToken();
     method @NonNull public java.util.Collection<android.telephony.SignalThresholdInfo> getSignalThresholdInfos();
     method public boolean isReportingRequestedWhileIdle();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
@@ -41776,7 +41787,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
+    method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
+    method public void setSubscriptionOverrideUnmetered(int, boolean, @NonNull int[], long);
     method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
     field public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
@@ -41852,6 +41865,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method public boolean canChangeDtmfToneLength();
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void clearSignalStrengthUpdateRequest(@NonNull android.telephony.SignalStrengthUpdateRequest);
     method @Nullable public android.telephony.TelephonyManager createForPhoneAccountHandle(android.telecom.PhoneAccountHandle);
     method public android.telephony.TelephonyManager createForSubscriptionId(int);
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public boolean doesSwitchMultiSimConfigTriggerReboot();
@@ -41931,7 +41945,7 @@ package android.telephony {
     method @Deprecated public String iccTransmitApduLogicalChannel(int, int, int, int, int, int, String);
     method public boolean isConcurrentVoiceAndDataSupported();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE, "android.permission.READ_PRIVILEGED_PHONE_STATE"}) public boolean isDataConnectionAllowed();
-    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE}) public boolean isDataEnabled();
+    method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.MODIFY_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabled();
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataEnabledForReason(int);
     method @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_NETWORK_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isDataRoamingEnabled();
     method public boolean isEmergencyNumber(@NonNull String);
@@ -41965,6 +41979,7 @@ package android.telephony {
     method public boolean setOperatorBrandOverride(String);
     method public boolean setPreferredNetworkTypeToGlobal();
     method public void setPreferredOpportunisticDataSubscription(int, boolean, @Nullable java.util.concurrent.Executor, @Nullable java.util.function.Consumer<java.lang.Integer>);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setSignalStrengthUpdateRequest(@NonNull android.telephony.SignalStrengthUpdateRequest);
     method public void setVisualVoicemailSmsFilterSettings(android.telephony.VisualVoicemailSmsFilterSettings);
     method public boolean setVoiceMailNumber(String, String);
     method @Deprecated public void setVoicemailRingtoneUri(android.telecom.PhoneAccountHandle, android.net.Uri);
@@ -42630,6 +42645,7 @@ package android.telephony.ims {
     field public static final int CODE_MEDIA_NO_DATA = 402; // 0x192
     field public static final int CODE_MEDIA_UNSPECIFIED = 404; // 0x194
     field public static final int CODE_MULTIENDPOINT_NOT_SUPPORTED = 902; // 0x386
+    field public static final int CODE_NETWORK_CONGESTION = 1624; // 0x658
     field public static final int CODE_NETWORK_DETACH = 1513; // 0x5e9
     field public static final int CODE_NETWORK_REJECT = 1504; // 0x5e0
     field public static final int CODE_NETWORK_RESP_TIMEOUT = 1503; // 0x5df
@@ -51794,7 +51810,8 @@ package android.view.textservice {
     method @Nullable public android.view.textservice.SpellCheckerSubtype getCurrentSpellCheckerSubtype(boolean);
     method @Nullable public java.util.List<android.view.textservice.SpellCheckerInfo> getEnabledSpellCheckersList();
     method public boolean isSpellCheckerEnabled();
-    method public android.view.textservice.SpellCheckerSession newSpellCheckerSession(android.os.Bundle, java.util.Locale, android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean);
+    method @Nullable public android.view.textservice.SpellCheckerSession newSpellCheckerSession(@Nullable android.os.Bundle, @Nullable java.util.Locale, @NonNull android.view.textservice.SpellCheckerSession.SpellCheckerSessionListener, boolean, int);
   }
 
 }

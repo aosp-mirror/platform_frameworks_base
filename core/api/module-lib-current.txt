@@ -40,6 +40,22 @@ package android.app.role {
 
 }
 
+package android.content {
+
+  public abstract class Context {
+    method @NonNull public android.os.UserHandle getUser();
+  }
+
+}
+
+package android.content.pm {
+
+  public abstract class PackageManager {
+    method @NonNull public String getPermissionControllerPackageName();
+  }
+
+}
+
 package android.content.rollback {
 
   public class RollbackManagerFrameworkInitializer {
@@ -136,6 +152,14 @@ package android.media.session {
 
 package android.net {
 
+  public class ConnectivityManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+  }
+
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    field public static final int TRANSPORT_TEST = 7; // 0x7
+  }
+
   public final class TcpRepairWindow {
     ctor public TcpRepairWindow(int, int, int, int, int, int);
     field public final int maxWindow;
@@ -168,6 +192,10 @@ package android.os {
 
   public class Binder implements android.os.IBinder {
     method public final void markVintfStability();
+  }
+
+  public static class Build.VERSION {
+    field public static final int FIRST_SDK_INT;
   }
 
   public interface Parcelable {

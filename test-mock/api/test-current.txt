@@ -9,7 +9,6 @@ package android.test.mock {
     method public int getInstallReason(String, android.os.UserHandle);
     method public java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method public String[] getNamesForUids(int[]);
-    method public String getPermissionControllerPackageName();
     method @NonNull public String getServicesSystemSharedLibraryPackageName();
     method @NonNull public String getSharedSystemSharedLibraryPackageName();
   }

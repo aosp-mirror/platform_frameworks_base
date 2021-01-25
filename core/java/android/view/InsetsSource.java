@@ -65,6 +65,14 @@ public class InsetsSource implements Parcelable {
                 : null;
     }
 
+    public void set(InsetsSource other) {
+        mFrame.set(other.mFrame);
+        mVisible = other.mVisible;
+        mVisibleFrame = other.mVisibleFrame != null
+                ? new Rect(other.mVisibleFrame)
+                : null;
+    }
+
     public void setFrame(int left, int top, int right, int bottom) {
         mFrame.set(left, top, right, bottom);
     }

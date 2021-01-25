@@ -331,8 +331,10 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private BrightnessReason mBrightnessReasonTemp = new BrightnessReason();
 
     // Brightness animation ramp rates in brightness units per second
-    private final float mBrightnessRampRateSlow;
-    private final float mBrightnessRampRateFast;
+    private float mBrightnessRampRateFastDecrease;
+    private float mBrightnessRampRateFastIncrease;
+    private float mBrightnessRampRateSlowDecrease;
+    private float mBrightnessRampRateSlowIncrease;
 
 
     // Whether or not to skip the initial brightness ramps into STATE_ON.
@@ -459,10 +461,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
 
-        mBrightnessRampRateFast = BrightnessSynchronizer.brightnessIntToFloat(resources.getInteger(
-                com.android.internal.R.integer.config_brightness_ramp_rate_fast));
-        mBrightnessRampRateSlow = BrightnessSynchronizer.brightnessIntToFloat(resources.getInteger(
-                com.android.internal.R.integer.config_brightness_ramp_rate_slow));
+
+        DisplayDeviceConfig displayDeviceConfig = logicalDisplay
+                .getPrimaryDisplayDeviceLocked().getDisplayDeviceConfig();
+        // TODO: (b/178183143) Ensure that the ddc is not null
+        if (displayDeviceConfig != null) {
+            mBrightnessRampRateFastDecrease = displayDeviceConfig.getBrightnessRampFastDecrease();
+            mBrightnessRampRateFastIncrease = displayDeviceConfig.getBrightnessRampFastIncrease();
+            mBrightnessRampRateSlowDecrease = displayDeviceConfig.getBrightnessRampSlowDecrease();
+            mBrightnessRampRateSlowIncrease = displayDeviceConfig.getBrightnessRampSlowIncrease();
+        } else {
+            mBrightnessRampRateFastDecrease = 1.0f;
+            mBrightnessRampRateFastIncrease = 1.0f;
+            mBrightnessRampRateSlowDecrease = 1.0f;
+            mBrightnessRampRateSlowIncrease = 1.0f;
+        }
         mSkipScreenOnBrightnessRamp = resources.getBoolean(
                 com.android.internal.R.bool.config_skipScreenOnBrightnessRamp);
 
@@ -772,7 +785,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         boolean mustInitialize = false;
         int brightnessAdjustmentFlags = 0;
         mBrightnessReasonTemp.set(null);
-
         synchronized (mLock) {
             mPendingUpdatePowerStateLocked = false;
             if (mPendingRequestLocked == null) {
@@ -1111,13 +1123,25 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             // user even when the display is all black.
             float animateValue = brightnessState == PowerManager.BRIGHTNESS_OFF_FLOAT
                     ? PowerManager.BRIGHTNESS_MIN : brightnessState;
-            if (isValidBrightnessValue(animateValue)) {
+            final float currentBrightness = mPowerState.getScreenBrightness();
+            if (isValidBrightnessValue(animateValue)
+                    && !BrightnessSynchronizer.floatEquals(animateValue, currentBrightness)) {
                 if (initialRampSkip || hasBrightnessBuckets
                         || wasOrWillBeInVr || !isDisplayContentVisible || brightnessIsTemporary) {
                     animateScreenBrightness(animateValue, SCREEN_ANIMATION_RATE_MINIMUM);
                 } else {
-                    animateScreenBrightness(animateValue,
-                            slowChange ? mBrightnessRampRateSlow : mBrightnessRampRateFast);
+                    boolean isIncreasing = animateValue > currentBrightness;
+                    final float rampSpeed;
+                    if (isIncreasing && slowChange) {
+                        rampSpeed = mBrightnessRampRateSlowIncrease;
+                    } else if (isIncreasing && !slowChange) {
+                        rampSpeed = mBrightnessRampRateFastIncrease;
+                    } else if (!isIncreasing && slowChange) {
+                        rampSpeed = mBrightnessRampRateSlowDecrease;
+                    } else {
+                        rampSpeed = mBrightnessRampRateFastDecrease;
+                    }
+                    animateScreenBrightness(animateValue, rampSpeed);
                 }
             }
 

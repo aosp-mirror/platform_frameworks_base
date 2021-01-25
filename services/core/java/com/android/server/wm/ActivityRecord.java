@@ -225,6 +225,7 @@ import android.app.PendingIntent;
 import android.app.PictureInPictureParams;
 import android.app.ResultInfo;
 import android.app.WaitResult;
+import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityLifecycleItem;
 import android.app.servertransaction.ActivityRelaunchItem;
@@ -2255,9 +2256,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 || info.supportsPictureInPicture();
     }
 
-    /** @return whether this activity is non-resizeable or forced to be resizeable */
-    boolean isNonResizableOrForcedResizable(int windowingMode) {
+    /** @return whether this activity is non-resizeable but is forced to be resizable. */
+    boolean canForceResizeNonResizable(int windowingMode) {
         if (windowingMode == WINDOWING_MODE_PINNED && info.supportsPictureInPicture()) {
+            return false;
+        }
+        if (WindowConfiguration.inMultiWindowMode(windowingMode)
+                && mAtmService.mSupportsNonResizableMultiWindow
+                && !mAtmService.mForceResizableActivities) {
+            // The non resizable app will be letterboxed instead of being forced resizable.
             return false;
         }
         return info.resizeMode != RESIZE_MODE_RESIZEABLE
@@ -2281,7 +2288,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // An activity can not be docked even if it is considered resizeable because it only
         // supports picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
-                && mAtmService.mSupportsSplitScreenMultiWindow && supportsResizeableMultiWindow();
+                && mAtmService.mSupportsSplitScreenMultiWindow && supportsMultiWindow();
     }
 
     /**
@@ -2289,16 +2296,17 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         stack.
      */
     boolean supportsFreeform() {
-        return mAtmService.mSupportsFreeformWindowManagement && supportsResizeableMultiWindow();
+        return mAtmService.mSupportsFreeformWindowManagement
+                // Either the activity is resizable, or we allow size compat in freeform.
+                && (supportsMultiWindow() || mAtmService.mSizeCompatFreeform);
     }
 
     /**
-     * @return whether this activity supports non-PiP multi-window.
+     * @return whether this activity supports multi-window.
      */
-    private boolean supportsResizeableMultiWindow() {
+    boolean supportsMultiWindow() {
         return mAtmService.mSupportsMultiWindow && !isActivityTypeHome()
-                && (ActivityInfo.isResizeableMode(info.resizeMode)
-                        || mAtmService.mForceResizableActivities);
+                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**
@@ -2749,8 +2757,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             if (ensureVisibility) {
                 mDisplayContent.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */,
-                        mTaskSupervisor.mUserLeaving);
+                        false /* preserveWindows */, true /* notifyClients */);
             }
         }
 
@@ -4823,7 +4830,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         handleAlreadyVisible();
     }
 
-    void makeInvisible(boolean userLeaving) {
+    void makeInvisible() {
         if (!mVisibleRequested) {
             if (DEBUG_VISIBILITY) Slog.v(TAG_VISIBILITY, "Already invisible: " + this);
             return;
@@ -4864,7 +4871,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // If the app is capable of entering PIP, we should try pausing it now
                     // so it can PIP correctly.
                     if (deferHidingClient) {
-                        task.startPausingLocked(userLeaving, false /* uiSleeping */,
+                        task.startPausingLocked(false /* uiSleeping */,
                                 null /* resuming */, "makeInvisible");
                         break;
                     }

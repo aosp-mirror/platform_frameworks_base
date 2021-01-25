@@ -33,7 +33,6 @@ import android.os.RemoteCallback;
 import android.os.UserHandle;
 
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -85,9 +84,7 @@ public abstract class RoleControllerService extends Service {
 
                 Objects.requireNonNull(callback, "callback cannot be null");
 
-                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                        RoleControllerService::grantDefaultRoles, RoleControllerService.this,
-                        callback));
+                mWorkerHandler.post(() -> RoleControllerService.this.grantDefaultRoles(callback));
             }
 
             @Override
@@ -100,9 +97,8 @@ public abstract class RoleControllerService extends Service {
                         "packageName cannot be null or empty");
                 Objects.requireNonNull(callback, "callback cannot be null");
 
-                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                        RoleControllerService::onAddRoleHolder, RoleControllerService.this,
-                        roleName, packageName, flags, callback));
+                mWorkerHandler.post(() -> RoleControllerService.this.onAddRoleHolder(roleName,
+                        packageName, flags, callback));
             }
 
             @Override
@@ -115,9 +111,8 @@ public abstract class RoleControllerService extends Service {
                         "packageName cannot be null or empty");
                 Objects.requireNonNull(callback, "callback cannot be null");
 
-                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                        RoleControllerService::onRemoveRoleHolder, RoleControllerService.this,
-                        roleName, packageName, flags, callback));
+                mWorkerHandler.post(() -> RoleControllerService.this.onRemoveRoleHolder(roleName,
+                        packageName, flags, callback));
             }
 
             @Override
@@ -127,9 +122,8 @@ public abstract class RoleControllerService extends Service {
                 Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
                 Objects.requireNonNull(callback, "callback cannot be null");
 
-                mWorkerHandler.sendMessage(PooledLambda.obtainMessage(
-                        RoleControllerService::onClearRoleHolders, RoleControllerService.this,
-                        roleName, flags, callback));
+                mWorkerHandler.post(() -> RoleControllerService.this.onClearRoleHolders(roleName,
+                        flags, callback));
             }
 
             private void enforceCallerSystemUid(@NonNull String methodName) {
@@ -274,6 +268,7 @@ public abstract class RoleControllerService extends Service {
      *
      * @deprecated Implement {@link #onIsApplicationVisibleForRole(String, String)} instead.
      */
+    @Deprecated
     public abstract boolean onIsApplicationQualifiedForRole(@NonNull String roleName,
             @NonNull String packageName);
 

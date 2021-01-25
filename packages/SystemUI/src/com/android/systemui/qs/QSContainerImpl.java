@@ -67,6 +67,7 @@ public class QSContainerImpl extends FrameLayout {
 
     private int mSideMargins;
     private boolean mQsDisabled;
+    private boolean mBackgroundVisible;
     private int mContentPadding = -1;
     private boolean mAnimateBottomOnNextLayout;
 
@@ -122,6 +123,14 @@ public class QSContainerImpl extends FrameLayout {
         return true;
     }
 
+    /**
+     * If QS should have a solid or transparent background.
+     */
+    public void setBackgroundVisible(boolean visible) {
+        mBackgroundVisible = visible;
+        updateBackgroundVisibility();
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         // QSPanel will show as many rows as it can (up to TileLayout.MAX_ROWS) such that the
@@ -174,7 +183,11 @@ public class QSContainerImpl extends FrameLayout {
         final boolean disabled = (state2 & DISABLE2_QUICK_SETTINGS) != 0;
         if (disabled == mQsDisabled) return;
         mQsDisabled = disabled;
-        mBackground.setVisibility(mQsDisabled ? View.GONE : View.VISIBLE);
+        updateBackgroundVisibility();
+    }
+
+    private void updateBackgroundVisibility() {
+        mBackground.setVisibility(mQsDisabled || !mBackgroundVisible ? GONE : VISIBLE);
     }
 
     void updateResources(QSPanelController qsPanelController,

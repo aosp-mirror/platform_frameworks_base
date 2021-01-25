@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
@@ -128,6 +129,21 @@ public class WindowManagerSettingsTests extends WindowTestsBase {
             mWm.mSettingsObserver.onChange(false, enableSizeCompatFreeformUri);
 
             assertEquals(mWm.mAtmService.mSizeCompatFreeform, enableSizeCompatFreeform);
+        }
+    }
+
+    @Test
+    public void testSupportsNonResizableMultiWindow() {
+        try (BoolSettingsSession supportsNonResizableMultiWindowSession = new
+                BoolSettingsSession(DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW)) {
+            final boolean supportsNonResizableMultiWindow =
+                    !supportsNonResizableMultiWindowSession.getSetting();
+            final Uri supportsNonResizableMultiWindowUri = supportsNonResizableMultiWindowSession
+                    .setSetting(supportsNonResizableMultiWindow);
+            mWm.mSettingsObserver.onChange(false, supportsNonResizableMultiWindowUri);
+
+            assertEquals(mWm.mAtmService.mSupportsNonResizableMultiWindow,
+                    supportsNonResizableMultiWindow);
         }
     }
 

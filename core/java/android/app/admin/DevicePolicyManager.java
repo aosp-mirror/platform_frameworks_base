@@ -85,9 +85,11 @@ import android.security.keystore.StrongBoxUnavailableException;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.net.NetworkUtilsInternal;
@@ -148,6 +150,7 @@ import java.util.concurrent.Executor;
  */
 @SystemService(Context.DEVICE_POLICY_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_DEVICE_ADMIN)
+@SuppressLint("UseIcu")
 public class DevicePolicyManager {
 
     private static String TAG = "DevicePolicyManager";
@@ -1992,6 +1995,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_OK = 0;
 
     /**
@@ -2003,6 +2007,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_HAS_DEVICE_OWNER = 1;
 
     /**
@@ -2014,6 +2019,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_USER_HAS_PROFILE_OWNER = 2;
 
     /**
@@ -2024,6 +2030,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_USER_NOT_RUNNING = 3;
 
     /**
@@ -2035,6 +2042,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_USER_SETUP_COMPLETED = 4;
 
     /**
@@ -2042,6 +2050,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_NONSYSTEM_USER_EXISTS = 5;
 
     /**
@@ -2049,6 +2058,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_ACCOUNTS_NOT_EMPTY = 6;
 
     /**
@@ -2059,6 +2069,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_NOT_SYSTEM_USER = 7;
 
     /**
@@ -2070,6 +2081,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_HAS_PAIRED = 8;
 
     /**
@@ -2081,6 +2093,7 @@ public class DevicePolicyManager {
      * @see {@link PackageManager#FEATURE_MANAGED_USERS}
      * @hide
      */
+    @TestApi
     public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9;
 
     /**
@@ -2092,6 +2105,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_SYSTEM_USER = 10;
 
     /**
@@ -2102,6 +2116,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11;
 
     /**
@@ -2114,6 +2129,7 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12;
 
     /**
@@ -2121,11 +2137,12 @@ public class DevicePolicyManager {
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
      * {@link #ACTION_PROVISION_MANAGED_PROFILE}, {@link #ACTION_PROVISION_MANAGED_USER} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} on devices which do no support device
+     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} on devices which do not support device
      * admins.
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13;
 
     /**
@@ -2137,7 +2154,19 @@ public class DevicePolicyManager {
      *
      * @hide
      */
+    @TestApi
     public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
+
+    /**
+     * Result code for {@link #checkProvisioningPreCondition}.
+     *
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} on devices which do not support provisioning.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15;
 
     /**
      * Result codes for {@link #checkProvisioningPreCondition} indicating all the provisioning pre
@@ -2151,9 +2180,92 @@ public class DevicePolicyManager {
             CODE_USER_SETUP_COMPLETED, CODE_NOT_SYSTEM_USER, CODE_HAS_PAIRED,
             CODE_MANAGED_USERS_NOT_SUPPORTED, CODE_SYSTEM_USER, CODE_CANNOT_ADD_MANAGED_PROFILE,
             CODE_NOT_SYSTEM_USER_SPLIT, CODE_DEVICE_ADMIN_NOT_SUPPORTED,
-            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER
+            CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER,
+            CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS
     })
     public @interface ProvisioningPreCondition {}
+
+    /**
+     * Service-specific error code for {@link #provisionFullyManagedDevice} and
+     * {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link #checkProvisioningPreCondition} returned an error code.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link UserManager#createProfileForUserEvenWhenDisallowed}
+     * returned {@code null}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link PackageManager#installExistingPackageAsUser} has failed.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates the call to {@link #setProfileOwner} returned {@code false}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4;
+
+    /**
+     * Service-specific error code for {@link #createAndProvisionManagedProfile}:
+     * Indicates that starting the newly created profile has failed.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5;
+
+    /**
+     * Service-specific error code for {@link #provisionFullyManagedDevice}:
+     * Indicates that removing the non required apps have failed.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED = 6;
+
+    /**
+     * Service-specific error code for {@link #provisionFullyManagedDevice}:
+     * Indicates the call to {@link #setDeviceOwner} returned {@code false}.
+     *
+     * @hide
+     */
+    @TestApi
+    public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7;
+
+    /**
+     * Service-specific error codes for {@link #createAndProvisionManagedProfile} and
+     * {@link #provisionFullyManagedDevice} indicating all the errors during provisioning.
+     *
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "PROVISIONING_RESULT_" }, value = {
+            PROVISIONING_RESULT_PRE_CONDITION_FAILED, PROVISIONING_RESULT_PROFILE_CREATION_FAILED,
+            PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
+            PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED,
+            PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
+            PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED,
+            PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED
+    })
+    public @interface ProvisioningResult {}
 
     /**
      * Disable all configurable SystemUI features during LockTask mode. This includes,
@@ -5215,30 +5327,10 @@ public class DevicePolicyManager {
                     if (!proxySpec.type().equals(Proxy.Type.HTTP)) {
                         throw new IllegalArgumentException();
                     }
-                    InetSocketAddress sa = (InetSocketAddress)proxySpec.address();
-                    String hostName = sa.getHostName();
-                    int port = sa.getPort();
-                    StringBuilder hostBuilder = new StringBuilder();
-                    hostSpec = hostBuilder.append(hostName)
-                        .append(":").append(Integer.toString(port)).toString();
-                    if (exclusionList == null) {
-                        exclSpec = "";
-                    } else {
-                        StringBuilder listBuilder = new StringBuilder();
-                        boolean firstDomain = true;
-                        for (String exclDomain : exclusionList) {
-                            if (!firstDomain) {
-                                listBuilder = listBuilder.append(",");
-                            } else {
-                                firstDomain = false;
-                            }
-                            listBuilder = listBuilder.append(exclDomain.trim());
-                        }
-                        exclSpec = listBuilder.toString();
-                    }
-                    if (android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec)
-                            != android.net.Proxy.PROXY_VALID)
-                        throw new IllegalArgumentException();
+                    final Pair<String, String> proxyParams =
+                            getProxyParameters(proxySpec, exclusionList);
+                    hostSpec = proxyParams.first;
+                    exclSpec = proxyParams.second;
                 }
                 return mService.setGlobalProxy(admin, hostSpec, exclSpec);
             } catch (RemoteException e) {
@@ -5246,6 +5338,35 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Build HTTP proxy parameters for {@link IDevicePolicyManager#setGlobalProxy}.
+     * @throws IllegalArgumentException Invalid proxySpec
+     * @hide
+     */
+    @VisibleForTesting
+    public Pair<String, String> getProxyParameters(Proxy proxySpec, List<String> exclusionList) {
+        InetSocketAddress sa = (InetSocketAddress) proxySpec.address();
+        String hostName = sa.getHostName();
+        int port = sa.getPort();
+        final List<String> trimmedExclList;
+        if (exclusionList == null) {
+            trimmedExclList = Collections.emptyList();
+        } else {
+            trimmedExclList = new ArrayList<>(exclusionList.size());
+            for (String exclDomain : exclusionList) {
+                trimmedExclList.add(exclDomain.trim());
+            }
+        }
+        final ProxyInfo info = ProxyInfo.buildDirectProxy(hostName, port, trimmedExclList);
+        // The hostSpec is built assuming that there is a specified port and hostname,
+        // but ProxyInfo.isValid() accepts 0 / empty as unspecified: also reject them.
+        if (port == 0 || TextUtils.isEmpty(hostName) || !info.isValid()) {
+            throw new IllegalArgumentException();
+        }
+
+        return new Pair<>(hostName + ":" + port, TextUtils.join(",", trimmedExclList));
     }
 
     /**
@@ -5381,6 +5502,26 @@ public class DevicePolicyManager {
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_SHOW_NEW_USER_DISCLAIMER =
             "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
+
+    /**
+     * Broadcast action: notify managed provisioning that the device has been provisioned.
+     *
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_PROVISIONED_MANAGED_DEVICE =
+            "android.app.action.PROVISIONED_MANAGED_DEVICE";
+
+    /**
+     * Broadcast action: notify managed provisioning that a new managed profile is created.
+     *
+     * @hide
+     */
+    @TestApi
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_MANAGED_PROFILE_CREATED =
+            "android.app.action.MANAGED_PROFILE_CREATED";
 
     /**
      * Widgets are enabled in keyguard
@@ -10598,8 +10739,9 @@ public class DevicePolicyManager {
      * @return A {@link ProvisioningPreCondition} value indicating whether provisioning is allowed.
      * @hide
      */
+    @TestApi
     public @ProvisioningPreCondition int checkProvisioningPreCondition(
-            String action, @NonNull String packageName) {
+            @Nullable String action, @NonNull String packageName) {
         try {
             return mService.checkProvisioningPreCondition(action, packageName);
         } catch (RemoteException re) {
@@ -13099,6 +13241,72 @@ public class DevicePolicyManager {
             mService.setOrganizationIdForUser(packageName, enterpriseId, userId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Creates and provisions a managed profile and sets the
+     * {@link ManagedProfileProvisioningParams#getProfileAdminComponentName()} as the profile
+     * owner.
+     *
+     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * before calling this method.
+     *
+     * @param provisioningParams Params required to provision a managed profile,
+     * see {@link ManagedProfileProvisioningParams}.
+     * @return The {@link UserHandle} of the created profile or {@code null} if the service is
+     * not available.
+     * @throws SecurityException if the caller does not hold
+     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     * @throws ProvisioningException if an error occurred during provisioning.
+     * @hide
+     */
+    @Nullable
+    @TestApi
+    public UserHandle createAndProvisionManagedProfile(
+            @NonNull ManagedProfileProvisioningParams provisioningParams)
+            throws ProvisioningException {
+        if (mService == null) {
+            return null;
+        }
+        try {
+            return mService.createAndProvisionManagedProfile(provisioningParams);
+        } catch (ServiceSpecificException e) {
+            throw new ProvisioningException(e, e.errorCode);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provisions a managed device and sets the {@code deviceAdminComponentName} as the device
+     * owner.
+     *
+     * <p>The method {@link #checkProvisioningPreCondition} must be returning {@link #CODE_OK}
+     * before calling this method.
+     *
+     * @param provisioningParams Params required to provision a fully managed device,
+     * see {@link FullyManagedDeviceProvisioningParams}.
+     *
+     * @throws SecurityException if the caller does not hold
+     * {@link android.Manifest.permission#MANAGE_PROFILE_AND_DEVICE_OWNERS}.
+     * @throws ProvisioningException if an error occurred during provisioning.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS)
+    public void provisionFullyManagedDevice(
+            @NonNull FullyManagedDeviceProvisioningParams provisioningParams)
+            throws ProvisioningException {
+        if (mService != null) {
+            try {
+                mService.provisionFullyManagedDevice(provisioningParams);
+            } catch (ServiceSpecificException e) {
+                throw new ProvisioningException(e, e.errorCode);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
         }
     }
 }

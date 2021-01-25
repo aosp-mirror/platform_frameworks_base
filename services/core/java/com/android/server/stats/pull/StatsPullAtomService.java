@@ -156,12 +156,13 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.BatteryService;
 import com.android.server.BinderCallsStatsService;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.notification.NotificationManagerService;
-import com.android.server.role.RoleManagerInternal;
+import com.android.server.role.RoleManagerLocal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
@@ -2916,7 +2917,8 @@ public class StatsPullAtomService extends SystemService {
         final long callingToken = Binder.clearCallingIdentity();
         try {
             PackageManager pm = mContext.getPackageManager();
-            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
+            RoleManagerLocal roleManagerLocal = LocalManagerRegistry.getManager(
+                    RoleManagerLocal.class);
 
             List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
 
@@ -2924,27 +2926,23 @@ public class StatsPullAtomService extends SystemService {
             for (int userNum = 0; userNum < numUsers; userNum++) {
                 int userId = users.get(userNum).getUserHandle().getIdentifier();
 
-                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(userId);
+                Map<String, Set<String>> roles = roleManagerLocal.getRolesAndHolders(userId);
 
-                int numRoles = roles.size();
-                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
-                    String roleName = roles.keyAt(roleNum);
-                    ArraySet<String> holders = roles.valueAt(roleNum);
+                for (Map.Entry<String, Set<String>> roleEntry : roles.entrySet()) {
+                    String roleName = roleEntry.getKey();
+                    Set<String> packageNames = roleEntry.getValue();
 
-                    int numHolders = holders.size();
-                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
-                        String holderName = holders.valueAt(holderNum);
-
+                    for (String packageName : packageNames) {
                         PackageInfo pkg;
                         try {
-                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
+                            pkg = pm.getPackageInfoAsUser(packageName, 0, userId);
                         } catch (PackageManager.NameNotFoundException e) {
-                            Slog.w(TAG, "Role holder " + holderName + " not found");
+                            Slog.w(TAG, "Role holder " + packageName + " not found");
                             return StatsManager.PULL_SKIP;
                         }
 
                         pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                                atomTag, pkg.applicationInfo.uid, holderName, roleName));
+                                atomTag, pkg.applicationInfo.uid, packageName, roleName));
                     }
                 }
             }

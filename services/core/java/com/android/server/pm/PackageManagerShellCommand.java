@@ -2732,7 +2732,7 @@ class PackageManagerShellCommand extends ShellCommand {
     private int removeUserOrSetEphemeral(IUserManager um, @UserIdInt int userId)
             throws RemoteException {
         Slog.i(TAG, "Removing " + userId + " or set as ephemeral if in use.");
-        int result = um.removeUserOrSetEphemeral(userId);
+        int result = um.removeUserOrSetEphemeral(userId, /* evenWhenDisallowed= */ false);
         switch (result) {
             case UserManager.REMOVE_RESULT_REMOVED:
                 getOutPrintWriter().printf("Success: user %d removed\n", userId);

@@ -53,8 +53,8 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     }
 
     @Override
-    public byte[] dumpSensorServiceStateProto() throws RemoteException {
-        return mFingerprintService.dumpSensorServiceStateProto(mSensorId);
+    public byte[] dumpSensorServiceStateProto(boolean clearSchedulerBuffer) throws RemoteException {
+        return mFingerprintService.dumpSensorServiceStateProto(mSensorId, clearSchedulerBuffer);
     }
 
     @Override

@@ -133,7 +133,7 @@ public final class CachedAppOptimizer {
     static final int REPORT_UNFREEZE_MSG = 4;
 
     //TODO:change this static definition into a configurable flag.
-    static final int FREEZE_TIMEOUT_MS = 10000;
+    static final long FREEZE_TIMEOUT_MS = 600000;
 
     static final int DO_FREEZE = 1;
     static final int REPORT_UNFREEZE = 2;

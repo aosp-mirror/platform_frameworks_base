@@ -8802,7 +8802,17 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public String getPermissionControllerPackageName() {
         synchronized (mLock) {
-            return mRequiredPermissionControllerPackage;
+            if (mRequiredPermissionControllerPackage != null) {
+                final PackageSetting ps = getPackageSetting(mRequiredPermissionControllerPackage);
+                if (ps != null) {
+                    final int callingUid = Binder.getCallingUid();
+                    final int callingUserId = UserHandle.getUserId(callingUid);
+                    if (!shouldFilterApplicationLocked(ps, callingUid, callingUserId)) {
+                        return mRequiredPermissionControllerPackage;
+                    }
+                }
+            }
+            throw new IllegalStateException("PermissionController is not found");
         }
     }
 
@@ -13316,6 +13326,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkgSetting.getInstantApp(userId)) {
             mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
         }
+        pkgSetting.setStatesOnCommit();
 
         return pkg;
     }
@@ -19155,7 +19166,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDexManager.notifyPackageUpdated(pkg.getPackageName(),
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
-            reconciledPkg.pkgSetting.setStatesOnCommit();
 
             // Prepare the application profiles for the new code paths.
             // This needs to be done before invoking dexopt so that any install-time profile
@@ -21423,7 +21433,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 mPermissionManager.onPackageInstalled(pkg,
                         PermissionManagerServiceInternal.PackageInstalledParams.DEFAULT, userId);
                 if (applyUserRestrictions) {
-                    mSettings.writeRuntimePermissionsForUserLPr(userId, false);
+                    mSettings.writePermissionStateForUserLPr(userId, false);
                 }
             }
 
@@ -27429,7 +27439,7 @@ public class PackageManagerService extends IPackageManager.Stub
         public void writePermissionSettings(int[] userIds, boolean async) {
             synchronized (mLock) {
                 for (int userId : userIds) {
-                    mSettings.writeRuntimePermissionsForUserLPr(userId, !async);
+                    mSettings.writePermissionStateForUserLPr(userId, !async);
                 }
             }
         }
@@ -28069,13 +28079,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * Temporary method that wraps mSettings.writeLPr() and calls mPermissionManager's
-     * writeLegacyPermissionsTEMP() and writeLegacyPermissionStateTEMP() beforehand.
+     * writeLegacyPermissionsTEMP() beforehand.
      *
      * TODO(zhanghai): This should be removed once we finish migration of permission storage.
      */
     private void writeSettingsLPrTEMP() {
         mPermissionManager.writeLegacyPermissionsTEMP(mSettings.mPermissions);
-        mPermissionManager.writeLegacyPermissionStateTEMP();
         mSettings.writeLPr();
     }
 

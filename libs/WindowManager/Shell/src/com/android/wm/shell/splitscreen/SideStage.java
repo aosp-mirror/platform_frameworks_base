@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.splitscreen;
 
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+
 import android.app.ActivityManager;
 import android.graphics.Rect;
 import android.window.WindowContainerToken;
@@ -48,6 +50,17 @@ class SideStage extends StageTaskListener {
                 .reorder(rootToken, true);
     }
 
+    boolean removeAllTasks(WindowContainerTransaction wct) {
+        if (mChildrenTaskInfo.size() == 0) return false;
+        wct.reparentTasks(
+                mRootTaskInfo.token,
+                null /* newParent */,
+                CONTROLLED_WINDOWING_MODES_WHEN_ACTIVE,
+                CONTROLLED_ACTIVITY_TYPES,
+                false /* onTop */);
+        return true;
+    }
+
     boolean removeTask(int taskId, WindowContainerToken newParent, WindowContainerTransaction wct) {
         final ActivityManager.RunningTaskInfo task = mChildrenTaskInfo.get(taskId);
         if (task == null) return false;
@@ -56,5 +69,13 @@ class SideStage extends StageTaskListener {
                 .reorder(mRootTaskInfo.token, false)
                 .reparent(task.token, newParent, false /* onTop */);
         return true;
+    }
+
+    int getTopVisibleTaskId() {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            final ActivityManager.RunningTaskInfo task = mChildrenTaskInfo.valueAt(i);
+            if (task.isVisible) return task.taskId;
+        }
+        return INVALID_TASK_ID;
     }
 }

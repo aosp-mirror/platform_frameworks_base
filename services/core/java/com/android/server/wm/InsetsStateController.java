@@ -303,13 +303,13 @@ class InsetsStateController {
     /**
      * Computes insets state of the insets provider window in the display frames.
      *
-     * @param state The output state.
      * @param win The owner window of insets provider.
      * @param displayFrames The display frames to create insets source.
      * @param windowFrames The specified frames to represent the owner window.
      */
-    void computeSimulatedState(InsetsState state, WindowState win, DisplayFrames displayFrames,
+    void computeSimulatedState(WindowState win, DisplayFrames displayFrames,
             WindowFrames windowFrames) {
+        final InsetsState state = displayFrames.mInsetsState;
         for (int i = mProviders.size() - 1; i >= 0; i--) {
             final InsetsSourceProvider provider = mProviders.valueAt(i);
             if (provider.mWin == win) {

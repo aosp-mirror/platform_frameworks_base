@@ -194,6 +194,16 @@ public class DozeParameters implements TunerService.Tunable,
         mPowerManager.setDozeAfterScreenOff(!controlScreenOffAnimation);
     }
 
+    /**
+     * Whether we want to control the screen off animation when the device is unlocked. If we do,
+     * we'll animate in AOD before turning off the screen, rather than simply fading to black and
+     * then abruptly showing AOD.
+     */
+    public boolean shouldControlUnlockedScreenOff() {
+        return getAlwaysOn() && SystemProperties.getBoolean(
+                "persist.sysui.show_new_screen_on_transitions", false);
+    }
+
     private boolean getBoolean(String propName, int resId) {
         return SystemProperties.getBoolean(propName, mResources.getBoolean(resId));
     }

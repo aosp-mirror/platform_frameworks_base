@@ -50,9 +50,11 @@ public final class SystemFonts {
     private static final String DEFAULT_FAMILY = "sans-serif";
 
     private static final String FONTS_XML = "/system/etc/fonts.xml";
-    private static final String SYSTEM_FONT_DIR = "/system/fonts/";
+    /** @hide */
+    public static final String SYSTEM_FONT_DIR = "/system/fonts/";
     private static final String OEM_XML = "/product/etc/fonts_customization.xml";
-    private static final String OEM_FONT_DIR = "/product/fonts/";
+    /** @hide */
+    public static final String OEM_FONT_DIR = "/product/fonts/";
 
     private SystemFonts() {}  // Do not instansiate.
 

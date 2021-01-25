@@ -22,7 +22,6 @@ package android.media {
     method @NonNull public android.media.ApplicationMediaCapabilities.Builder addUnsupportedHdrType(@NonNull String);
     method @NonNull public android.media.ApplicationMediaCapabilities.Builder addUnsupportedVideoMimeType(@NonNull String);
     method @NonNull public android.media.ApplicationMediaCapabilities build();
-    method @NonNull public android.media.ApplicationMediaCapabilities.Builder setSlowMotionSupported(boolean);
   }
 
   public static class ApplicationMediaCapabilities.FormatNotFoundException extends android.util.AndroidException {

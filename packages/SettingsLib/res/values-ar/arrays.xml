@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">"، مُفعَّل (وسائط)"</item>
     <item msgid="5001852592115448348">"، مُفعَّل (هاتف)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"إيقاف"</item>
+    <item msgid="7839165897132179888">"٦٤ كيلوبايت"</item>
+    <item msgid="2715700596495505626">"٢٥٦ كيلوبايت"</item>
+    <item msgid="7099386891713159947">"1 ميغابايت"</item>
+    <item msgid="6069075827077845520">"٤ ميغابايت"</item>
+    <item msgid="6078203297886482480">"8 ميغابايت"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"إيقاف"</item>
     <item msgid="4064786181089783077">"٦٤ كيلوبايت"</item>
     <item msgid="3052710745383602630">"٢٥٦ كيلوبايت"</item>
     <item msgid="3691785423374588514">"1 ميغابايت"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"إيقاف"</item>
+    <item msgid="4195153527464162486">"٦٤ كيلوبايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
+    <item msgid="7464037639415220106">"٢٥٦ كيلوبايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
+    <item msgid="8539423820514360724">"1 ميغابايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
+    <item msgid="1984761927103140651">"٤ ميغابايت لكل ذاكرة تخزين مؤقت للتسجيل"</item>
+    <item msgid="2983219471251787208">"8 ميغابايت لكل مخزن مؤقت للتسجيل"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"إيقاف"</item>
     <item msgid="6014837961827347618">"الكل"</item>

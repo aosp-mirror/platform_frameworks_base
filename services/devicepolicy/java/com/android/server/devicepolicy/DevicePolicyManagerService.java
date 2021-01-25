@@ -21,8 +21,11 @@ import static android.Manifest.permission.MANAGE_CA_CERTIFICATES;
 import static android.Manifest.permission.REQUEST_PASSWORD_COMPLEXITY;
 import static android.accessibilityservice.AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.admin.DeviceAdminReceiver.EXTRA_TRANSFER_OWNERSHIP_ADMIN_EXTRAS_BUNDLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
+import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE;
+import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_PROFILE;
 import static android.app.admin.DevicePolicyManager.ACTION_PROVISION_MANAGED_USER;
 import static android.app.admin.DevicePolicyManager.CODE_ACCOUNTS_NOT_EMPTY;
 import static android.app.admin.DevicePolicyManager.CODE_CANNOT_ADD_MANAGED_PROFILE;
@@ -34,6 +37,7 @@ import static android.app.admin.DevicePolicyManager.CODE_NONSYSTEM_USER_EXISTS;
 import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER_SPLIT;
 import static android.app.admin.DevicePolicyManager.CODE_OK;
+import static android.app.admin.DevicePolicyManager.CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
 import static android.app.admin.DevicePolicyManager.CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.CODE_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.CODE_USER_HAS_PROFILE_OWNER;
@@ -83,16 +87,25 @@ import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_MODE_UNKNOWN;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
 import static android.app.admin.DevicePolicyManager.PRIVATE_DNS_SET_NO_ERROR;
 import static android.app.admin.DevicePolicyManager.PROFILE_KEYGUARD_FEATURES_AFFECT_OWNER;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_PRE_CONDITION_FAILED;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_PROFILE_CREATION_FAILED;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED;
+import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_STARTING_PROFILE_FAILED;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
 import static android.app.admin.DevicePolicyManager.WIPE_SILENTLY;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.provider.Settings.Global.PRIVATE_DNS_MODE;
 import static android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER;
+import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.provider.Telephony.Carriers.DPC_URI;
 import static android.provider.Telephony.Carriers.ENFORCE_KEY;
 import static android.provider.Telephony.Carriers.ENFORCE_MANAGED_URI;
@@ -109,10 +122,14 @@ import static com.android.server.pm.UserManagerInternal.OWNER_TYPE_DEVICE_OWNER;
 import static com.android.server.pm.UserManagerInternal.OWNER_TYPE_PROFILE_OWNER;
 import static com.android.server.pm.UserManagerInternal.OWNER_TYPE_PROFILE_OWNER_OF_ORGANIZATION_OWNED_DEVICE;
 
+import android.Manifest;
 import android.Manifest.permission;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accounts.Account;
 import android.accounts.AccountManager;
+import android.accounts.AccountManagerFuture;
+import android.accounts.AuthenticatorException;
+import android.accounts.OperationCanceledException;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -146,6 +163,8 @@ import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.DeviceStateCache;
 import android.app.admin.FactoryResetProtectionPolicy;
+import android.app.admin.FullyManagedDeviceProvisioningParams;
+import android.app.admin.ManagedProfileProvisioningParams;
 import android.app.admin.NetworkEvent;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.PasswordPolicy;
@@ -267,6 +286,7 @@ import android.view.inputmethod.InputMethodInfo;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.app.LocalePicker;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.net.NetworkUtilsInternal;
@@ -325,12 +345,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of the device policy APIs.
@@ -379,6 +401,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private static final String NOT_CREDENTIAL_MANAGEMENT_APP = "notCredentialManagementApp";
 
     private static final String NULL_STRING_ARRAY = "nullStringArray";
+
+    private static final String ALLOW_USER_PROVISIONING_KEY = "ro.config.allowuserprovisioning";
 
     // Comprehensive list of delegations.
     private static final String DELEGATIONS[] = {
@@ -1229,6 +1253,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         LockSettingsInternal getLockSettingsInternal() {
             return LocalServices.getService(LockSettingsInternal.class);
+        }
+
+        CrossProfileApps getCrossProfileApps() {
+            return mContext.getSystemService(CrossProfileApps.class);
         }
 
         boolean hasUserSetupCompleted(DevicePolicyData userData) {
@@ -11327,7 +11355,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     private void showLocationSettingsEnabledNotification(UserHandle user) {
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                .addFlags(FLAG_ACTIVITY_NEW_TASK);
         // Fill the component explicitly to prevent the PendingIntent from being intercepted
         // and fired with crafted target. b/155183624
         ActivityInfo targetInfo = intent.resolveActivityInfo(
@@ -12188,7 +12216,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final Intent intent = new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS);
         intent.putExtra(Intent.EXTRA_USER_ID, userId);
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, admin);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         return intent;
     }
 
@@ -12666,6 +12694,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             logMissingFeatureAction("Cannot check provisioning for action " + action);
             return CODE_DEVICE_ADMIN_NOT_SUPPORTED;
         }
+        if (!isProvisioningAllowed()) {
+            return CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
+        }
         final int code = checkProvisioningPreConditionSkipPermissionNoLog(action, packageName);
         if (code != CODE_OK) {
             Slog.d(LOG_TAG, "checkProvisioningPreCondition(" + action + ", " + packageName
@@ -12673,6 +12704,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     + computeProvisioningErrorString(code, mInjector.userHandleGetCallingUserId()));
         }
         return code;
+    }
+
+    /**
+     *  Checks if provisioning is allowed during regular usage (non-developer/CTS). This could
+     *  return {@code false} if the device has an overlaid config value set to false. If not set,
+     *  the default is true.
+     */
+    private boolean isProvisioningAllowed() {
+        boolean isDeveloperMode = isDeveloperMode(mContext);
+        boolean isProvisioningAllowedForNormalUsers = SystemProperties.getBoolean(
+                ALLOW_USER_PROVISIONING_KEY, /* defValue= */ true);
+
+        return isDeveloperMode || isProvisioningAllowedForNormalUsers;
+    }
+
+    private static boolean isDeveloperMode(Context context) {
+        return Global.getInt(context.getContentResolver(), Global.ADB_ENABLED, 0) > 0;
     }
 
     private int checkProvisioningPreConditionSkipPermissionNoLog(String action,
@@ -12831,14 +12879,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         callingUserHandle, hasDeviceOwner));
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
-            // If there's a restriction on removing the managed profile then we have to take it
-            // into account when checking whether more profiles can be added.
-            boolean canRemoveProfile =
-                    !mUserManager.hasUserRestriction(UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
-                    callingUserHandle);
-            if (!mUserManager.canAddMoreManagedProfiles(callingUserId, canRemoveProfile)) {
-                Slog.i(LOG_TAG, String.format(
-                        "Cannot add more profiles: Can remove current? %b", canRemoveProfile));
+
+            // Bail out if we are trying to provision a work profile but one already exists.
+            if (!mUserManager.canAddMoreManagedProfiles(
+                    callingUserId, /* allowedToRemoveOne= */ false)) {
+                Slog.i(LOG_TAG, String.format("A work profile already exists."));
                 return CODE_CANNOT_ADD_MANAGED_PROFILE;
             }
         } finally {
@@ -13765,7 +13810,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         final Uri packageURI = Uri.parse("package:" + packageName);
         final Intent uninstallIntent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE, packageURI);
-        uninstallIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        uninstallIntent.setFlags(FLAG_ACTIVITY_NEW_TASK);
         mContext.startActivityAsUser(uninstallIntent, UserHandle.of(userId));
     }
 
@@ -15956,5 +16001,416 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .setAdmin(ownerPackage)
                 .setBoolean(isManagedProfile(userId))
                 .write();
+    }
+
+    @Override
+    public UserHandle createAndProvisionManagedProfile(
+            @NonNull ManagedProfileProvisioningParams provisioningParams) {
+        final ComponentName admin = provisioningParams.getProfileAdminComponentName();
+        Objects.requireNonNull(admin, "admin is null");
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        UserInfo userInfo = null;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            final int result = checkProvisioningPreConditionSkipPermission(
+                    ACTION_PROVISION_MANAGED_PROFILE, admin.getPackageName());
+            if (result != CODE_OK) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_PRE_CONDITION_FAILED,
+                        "Provisioning preconditions failed with result: " + result);
+            }
+
+            final Set<String> nonRequiredApps = provisioningParams.isLeaveAllSystemAppsEnabled()
+                    ? Collections.emptySet()
+                    : mOverlayPackagesProvider.getNonRequiredApps(
+                            admin, caller.getUserId(), ACTION_PROVISION_MANAGED_PROFILE);
+            userInfo = mUserManager.createProfileForUserEvenWhenDisallowed(
+                    provisioningParams.getProfileName(),
+                    UserManager.USER_TYPE_PROFILE_MANAGED,
+                    UserInfo.FLAG_DISABLED,
+                    caller.getUserId(),
+                    nonRequiredApps.toArray(new String[nonRequiredApps.size()]));
+            if (userInfo == null) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_PROFILE_CREATION_FAILED,
+                        "Error creating profile, createProfileForUserEvenWhenDisallowed "
+                                + "returned null.");
+            }
+
+            resetInteractAcrossProfilesAppOps();
+            installExistingAdminPackage(userInfo.id, admin.getPackageName());
+            if (!enableAdminAndSetProfileOwner(
+                    userInfo.id, caller.getUserId(), admin, provisioningParams.getOwnerName())) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED,
+                        "Error setting profile owner.");
+            }
+            setUserSetupComplete(userInfo.id);
+
+            startUser(userInfo.id);
+            maybeMigrateAccount(
+                    userInfo.id, caller.getUserId(), provisioningParams.getAccountToMigrate(),
+                    provisioningParams.isKeepAccountMigrated());
+
+            if (provisioningParams.isOrganizationOwnedProvisioning()) {
+                markIsProfileOwnerOnOrganizationOwnedDevice(admin, userInfo.id);
+                restrictRemovalOfManagedProfile(admin, userInfo.id);
+            }
+
+            final Intent intent = new Intent(DevicePolicyManager.ACTION_MANAGED_PROFILE_CREATED)
+                    .putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id)
+                    .putExtra(
+                            DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
+                            provisioningParams.isLeaveAllSystemAppsEnabled())
+                    .setPackage(getManagedProvisioningPackage(mContext))
+                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+
+            return userInfo.getUserHandle();
+        } catch (Exception e) {
+            // in case of any errors during provisioning, remove the newly created profile.
+            if (userInfo != null) {
+                mUserManager.removeUserEvenWhenDisallowed(userInfo.id);
+            }
+            throw e;
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void resetInteractAcrossProfilesAppOps() {
+        mInjector.getCrossProfileApps().clearInteractAcrossProfilesAppOps();
+        pregrantDefaultInteractAcrossProfilesAppOps();
+    }
+
+    private void pregrantDefaultInteractAcrossProfilesAppOps() {
+        final String op =
+                AppOpsManager.permissionToOp(Manifest.permission.INTERACT_ACROSS_PROFILES);
+        for (String packageName : getConfigurableDefaultCrossProfilePackages()) {
+            if (appOpIsChangedFromDefault(op, packageName)) {
+                continue;
+            }
+            mInjector.getCrossProfileApps().setInteractAcrossProfilesAppOp(
+                    packageName, MODE_ALLOWED);
+        }
+    }
+
+    private Set<String> getConfigurableDefaultCrossProfilePackages() {
+        List<String> defaultPackages = getDefaultCrossProfilePackages();
+        return defaultPackages.stream().filter(
+                mInjector.getCrossProfileApps()::canConfigureInteractAcrossProfiles).collect(
+                Collectors.toSet());
+    }
+
+    private boolean appOpIsChangedFromDefault(String op, String packageName) {
+        try {
+            final int uid = mContext.getPackageManager().getPackageUid(
+                    packageName, /* flags= */ 0);
+            return mInjector.getAppOpsManager().unsafeCheckOpNoThrow(
+                    op, uid, packageName)
+                    != AppOpsManager.MODE_DEFAULT;
+        } catch (NameNotFoundException e) {
+            return false;
+        }
+    }
+
+    private void installExistingAdminPackage(int userId, String packageName) {
+        try {
+            final int status = mContext.getPackageManager().installExistingPackageAsUser(
+                    packageName,
+                    userId);
+            if (status != PackageManager.INSTALL_SUCCEEDED) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
+                        String.format("Failed to install existing package %s for user %d with "
+                                        + "result code %d",
+                                packageName, userId, status));
+            }
+        } catch (NameNotFoundException e) {
+            throw new ServiceSpecificException(
+                    PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED,
+                    String.format("Failed to install existing package %s for user %d: %s",
+                            packageName, userId, e.getMessage()));
+        }
+    }
+
+    private boolean enableAdminAndSetProfileOwner(
+            @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent,
+            String ownerName) {
+        enableAndSetActiveAdmin(userId, callingUserId, adminComponent);
+        return setProfileOwner(adminComponent, ownerName, userId);
+    }
+
+    private void enableAndSetActiveAdmin(
+            @UserIdInt int userId, @UserIdInt int callingUserId, ComponentName adminComponent) {
+        final String adminPackage = adminComponent.getPackageName();
+        enablePackage(adminPackage, callingUserId);
+        setActiveAdmin(adminComponent, /* refreshing= */ true, userId);
+    }
+
+    private void enablePackage(String packageName, @UserIdInt int userId) {
+        try {
+            final int enabledSetting = mIPackageManager.getApplicationEnabledSetting(
+                    packageName, userId);
+            if (enabledSetting != PackageManager.COMPONENT_ENABLED_STATE_DEFAULT
+                    && enabledSetting != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                mIPackageManager.setApplicationEnabledSetting(
+                        packageName,
+                        PackageManager.COMPONENT_ENABLED_STATE_DEFAULT,
+                        // Device policy app may have launched ManagedProvisioning, play nice and
+                        // don't kill it as a side-effect of this call.
+                        PackageManager.DONT_KILL_APP,
+                        userId,
+                        mContext.getOpPackageName());
+            }
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+        }
+    }
+
+    private void setUserSetupComplete(@UserIdInt int userId) {
+        Settings.Secure.putIntForUser(
+                mContext.getContentResolver(), USER_SETUP_COMPLETE, 1, userId);
+    }
+
+    private void startUser(@UserIdInt int userId) throws IllegalStateException {
+        final UserUnlockedBlockingReceiver unlockedReceiver = new UserUnlockedBlockingReceiver(
+                userId);
+        mContext.registerReceiverAsUser(
+                unlockedReceiver,
+                new UserHandle(userId),
+                new IntentFilter(Intent.ACTION_USER_UNLOCKED),
+                /* broadcastPermission = */ null,
+                /* scheduler= */ null);
+        try {
+            if (!mInjector.getIActivityManager().startUserInBackground(userId)) {
+                throw new ServiceSpecificException(PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
+                        String.format("Unable to start user %d in background", userId));
+            }
+
+            if (!unlockedReceiver.waitForUserUnlocked()) {
+                throw new ServiceSpecificException(PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
+                        String.format("Timeout whilst waiting for unlock of user %d.", userId));
+            }
+        } catch (RemoteException e) {
+            // Shouldn't happen.
+        } finally {
+            mContext.unregisterReceiver(unlockedReceiver);
+        }
+    }
+
+    void maybeMigrateAccount(
+            @UserIdInt int targetUserId, @UserIdInt int sourceUserId, Account accountToMigrate,
+            boolean keepAccountMigrated) {
+        final UserHandle sourceUser = UserHandle.of(sourceUserId);
+        final UserHandle targetUser = UserHandle.of(targetUserId);
+        if (accountToMigrate == null) {
+            Slog.d(LOG_TAG, "No account to migrate.");
+            return;
+        }
+        if (sourceUser.equals(targetUser)) {
+            Slog.w(LOG_TAG, "sourceUser and targetUser are the same, won't migrate account.");
+            return;
+        }
+        copyAccount(targetUser, sourceUser, accountToMigrate);
+        if (!keepAccountMigrated) {
+            removeAccount(accountToMigrate);
+        }
+    }
+
+    void copyAccount(UserHandle targetUser, UserHandle sourceUser, Account accountToMigrate) {
+        try {
+            final AccountManager accountManager = mContext.getSystemService(AccountManager.class);
+            final boolean copySucceeded = accountManager.copyAccountToUser(
+                    accountToMigrate,
+                    sourceUser,
+                    targetUser,
+                    /* callback= */ null, /* handler= */ null)
+                    .getResult(60 * 3, TimeUnit.SECONDS);
+            if (!copySucceeded) {
+                Slog.e(LOG_TAG, "Failed to copy account to " + targetUser);
+            }
+        } catch (OperationCanceledException | AuthenticatorException | IOException e) {
+            // Account migration is not considered a critical operation.
+            Slog.e(LOG_TAG, "Exception copying account to " + targetUser, e);
+        }
+    }
+
+    void removeAccount(Account account) {
+        final AccountManager accountManager =
+                mContext.getSystemService(AccountManager.class);
+        final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
+                null, null /* callback */, null /* handler */);
+        try {
+            final Bundle result = bundle.getResult();
+            if (result.getBoolean(AccountManager.KEY_BOOLEAN_RESULT, /* default */ false)) {
+                Slog.i(LOG_TAG, "Account removed from the primary user.");
+            } else {
+                // TODO(174768447): Revisit start activity logic.
+                final Intent removeIntent = result.getParcelable(AccountManager.KEY_INTENT);
+                removeIntent.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                if (removeIntent != null) {
+                    Slog.i(LOG_TAG, "Starting activity to remove account");
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        mContext.startActivity(removeIntent);
+                    });
+                } else {
+                    Slog.e(LOG_TAG, "Could not remove account from the primary user.");
+                }
+            }
+        } catch (OperationCanceledException | AuthenticatorException | IOException e) {
+            Slog.e(LOG_TAG, "Exception removing account from the primary user.", e);
+        }
+    }
+
+    private void markIsProfileOwnerOnOrganizationOwnedDevice(
+            ComponentName admin, @UserIdInt int profileId) {
+        getDpmForProfile(profileId).markProfileOwnerOnOrganizationOwnedDevice(admin);
+    }
+
+    private void restrictRemovalOfManagedProfile(
+            ComponentName admin, @UserIdInt int profileId) {
+        getDpmForProfile(profileId).addUserRestriction(
+                admin, UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
+    }
+
+    private DevicePolicyManager getDpmForProfile(@UserIdInt int profileId) {
+        final Context profileContext = mContext.createContextAsUser(
+                UserHandle.of(profileId), /* flags= */ 0);
+        return profileContext.getSystemService(DevicePolicyManager.class);
+    }
+
+    @Override
+    public void provisionFullyManagedDevice(
+            FullyManagedDeviceProvisioningParams provisioningParams) {
+        ComponentName deviceAdmin = provisioningParams.getDeviceAdminComponentName();
+
+        Objects.requireNonNull(deviceAdmin, "admin is null.");
+        Objects.requireNonNull(provisioningParams.getOwnerName(), "owner name is null.");
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(
+                hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
+
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            int result = checkProvisioningPreConditionSkipPermission(
+                    ACTION_PROVISION_MANAGED_DEVICE, deviceAdmin.getPackageName());
+            if (result != CODE_OK) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_PRE_CONDITION_FAILED,
+                        "Provisioning preconditions failed with result: " + result);
+            }
+
+            setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
+            setLocale(provisioningParams.getLocale());
+
+            if (!removeNonRequiredAppsForManagedDevice(
+                    caller.getUserId(),
+                    provisioningParams.isLeaveAllSystemAppsEnabled(),
+                    deviceAdmin)) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED,
+                        "PackageManager failed to remove non required apps.");
+            }
+
+            if (!setActiveAdminAndDeviceOwner(
+                    caller.getUserId(), deviceAdmin, provisioningParams.getOwnerName())) {
+                throw new ServiceSpecificException(
+                        PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED,
+                        "Failed to set device owner.");
+            }
+
+            disallowAddUser();
+
+            final Intent intent = new Intent(DevicePolicyManager.ACTION_PROVISIONED_MANAGED_DEVICE)
+                    .putExtra(Intent.EXTRA_USER_HANDLE, caller.getUserId())
+                    .putExtra(
+                            DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
+                            provisioningParams.isLeaveAllSystemAppsEnabled())
+                    .setPackage(getManagedProvisioningPackage(mContext))
+                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
+            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    private void setTimeAndTimezone(String timeZone, long localTime) {
+        try {
+            final AlarmManager alarmManager = mContext.getSystemService(AlarmManager.class);
+            if (timeZone != null) {
+                alarmManager.setTimeZone(timeZone);
+            }
+            if (localTime > 0) {
+                alarmManager.setTime(localTime);
+            }
+        } catch (Exception e) {
+            // Do not stop provisioning and ignore this error.
+            Slog.e(LOG_TAG, "Alarm manager failed to set the system time/timezone.", e);
+        }
+    }
+
+    private void setLocale(Locale locale) {
+        if (locale == null || locale.equals(Locale.getDefault())) {
+            return;
+        }
+        try {
+            // If locale is different from current locale this results in a configuration change,
+            // which will trigger the restarting of the activity.
+            LocalePicker.updateLocale(locale);
+        } catch (Exception e) {
+            // Do not stop provisioning and ignore this error.
+            Slog.e(LOG_TAG, "Failed to set the system locale.", e);
+        }
+    }
+
+    private boolean removeNonRequiredAppsForManagedDevice(
+            int userId, boolean leaveAllSystemAppsEnabled, ComponentName admin) {
+        Set<String> packagesToDelete = leaveAllSystemAppsEnabled
+                ? Collections.emptySet()
+                : mOverlayPackagesProvider.getNonRequiredApps(
+                        admin, userId, ACTION_PROVISION_MANAGED_DEVICE);
+        if (packagesToDelete.isEmpty()) {
+            return true;
+        }
+        NonRequiredPackageDeleteObserver packageDeleteObserver =
+                new NonRequiredPackageDeleteObserver(packagesToDelete.size());
+        for (String packageName : packagesToDelete) {
+            if (isPackageInstalledForUser(packageName, userId)) {
+                Slog.i(LOG_TAG, "Deleting package [" + packageName + "] as user " + userId);
+                mContext.getPackageManager().deletePackageAsUser(
+                        packageName,
+                        packageDeleteObserver,
+                        PackageManager.DELETE_SYSTEM_APP,
+                        userId);
+            }
+        }
+        Slog.i(LOG_TAG, "Waiting for non required apps to be deleted");
+        return packageDeleteObserver.awaitPackagesDeletion();
+    }
+
+    private void disallowAddUser() {
+        if (mInjector.userManagerIsHeadlessSystemUserMode()) {
+            Slog.i(LOG_TAG, "Not setting DISALLOW_ADD_USER on headless system user mode.");
+            return;
+        }
+        for (UserInfo userInfo : mUserManager.getUsers()) {
+            UserHandle userHandle = userInfo.getUserHandle();
+            if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_ADD_USER, userHandle)) {
+                mUserManager.setUserRestriction(
+                        UserManager.DISALLOW_ADD_USER, /* value= */ true, userHandle);
+            }
+        }
+    }
+
+    private boolean setActiveAdminAndDeviceOwner(
+            @UserIdInt int userId, ComponentName adminComponent, String name) {
+        enableAndSetActiveAdmin(userId, userId, adminComponent);
+        return setDeviceOwner(adminComponent, name, userId);
     }
 }

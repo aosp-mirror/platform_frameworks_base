@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.IBinder;
@@ -44,6 +45,7 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@SystemApi
 @SystemService(Context.UWB_SERVICE)
 public final class UwbManager {
     private IUwbAdapter mUwbAdapter;

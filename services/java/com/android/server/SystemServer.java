@@ -160,7 +160,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
-import com.android.server.policy.role.LegacyRoleStateProviderImpl;
+import com.android.server.policy.role.RoleServicePlatformHelperImpl;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
@@ -168,7 +168,7 @@ import com.android.server.powerstats.PowerStatsService;
 import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
-import com.android.server.role.RoleManagerService;
+import com.android.server.role.RoleServicePlatformHelper;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -353,6 +353,7 @@ public final class SystemServer implements Dumpable {
             "com.android.server.ConnectivityServiceInitializer";
     private static final String IP_CONNECTIVITY_METRICS_CLASS =
             "com.android.server.connectivity.IpConnectivityMetrics";
+    private static final String ROLE_SERVICE_CLASS = "com.android.server.role.RoleService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -2032,8 +2033,9 @@ public final class SystemServer implements Dumpable {
 
             // Grants default permissions and defines roles
             t.traceBegin("StartRoleManagerService");
-            mSystemServiceManager.startService(new RoleManagerService(
-                    mSystemContext, new LegacyRoleStateProviderImpl(mSystemContext)));
+            LocalManagerRegistry.addManager(RoleServicePlatformHelper.class,
+                    new RoleServicePlatformHelperImpl(mSystemContext));
+            mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
             t.traceEnd();
 
             // We need to always start this service, regardless of whether the

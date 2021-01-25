@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -122,5 +123,10 @@ class FingerprintDetectClient extends AcquisitionClient<IBiometricsFingerprint>
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when sending onDetected", e);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_DETECT_INTERACTION;
     }
 }

@@ -78,6 +78,7 @@ public class LingerMonitorTest {
     @Mock Context mCtx;
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
+    @Mock QosCallbackTracker mQosCallbackTracker;
 
     @Before
     public void setUp() {
@@ -358,7 +359,7 @@ public class LingerMonitorTest {
         NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info,
                 new LinkProperties(), caps, 50, mCtx, null, new NetworkAgentConfig() /* config */,
                 mConnService, mNetd, mDnsResolver, mNMS, NetworkProvider.ID_NONE,
-                Binder.getCallingUid());
+                Binder.getCallingUid(), mQosCallbackTracker);
         nai.everValidated = true;
         return nai;
     }

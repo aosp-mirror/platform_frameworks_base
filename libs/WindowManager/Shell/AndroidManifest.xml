@@ -17,4 +17,5 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.wm.shell">
+    <uses-permission android:name="android.permission.ROTATE_SURFACE_FLINGER" />
 </manifest>

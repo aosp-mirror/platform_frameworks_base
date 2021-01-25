@@ -37,6 +37,7 @@ java_sdk_library {
         "com.android.permission",
         "test_com.android.permission",
     ],
+    min_sdk_version: "30",
     permitted_packages: [
         "android.permission",
         "android.app.role",

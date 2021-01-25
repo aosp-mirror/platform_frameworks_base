@@ -3965,8 +3965,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             if (!usedPermissions.contains(permissionState.getName())) {
                 Permission bp = mRegistry.getPermission(permissionState.getName());
                 if (bp != null) {
-                    if (uidState.removePermissionState(bp.getName())
-                            && permissionState.isRuntime()) {
+                    if (uidState.removePermissionState(bp.getName()) && bp.isRuntime()) {
                         runtimePermissionChanged = true;
                     }
                 }
@@ -4573,9 +4572,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                     uidState.reset();
                     uidState.setMissing(legacyState.isMissing(userId));
                     readLegacyPermissionStatesLocked(uidState,
-                            legacyState.getInstallPermissionStates());
-                    readLegacyPermissionStatesLocked(uidState,
-                            legacyState.getRuntimePermissionStates(userId));
+                            legacyState.getPermissionStates(userId));
                 }
             }
         });
@@ -4634,12 +4631,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                         final LegacyPermissionState.PermissionState legacyPermissionState =
                                 new LegacyPermissionState.PermissionState(permissionState.getName(),
+                                        permissionState.getPermission().isRuntime(),
                                         permissionState.isGranted(), permissionState.getFlags());
-                        if (permissionState.isRuntime()) {
-                            legacyState.putRuntimePermissionState(legacyPermissionState, userId);
-                        } else {
-                            legacyState.putInstallPermissionState(legacyPermissionState);
-                        }
+                        legacyState.putPermissionState(legacyPermissionState, userId);
                     }
                 }
             }
@@ -4904,12 +4898,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                     final LegacyPermissionState.PermissionState legacyPermissionState =
                             new LegacyPermissionState.PermissionState(permissionState.getName(),
+                                    permissionState.getPermission().isRuntime(),
                                     permissionState.isGranted(), permissionState.getFlags());
-                    if (permissionState.isRuntime()) {
-                        legacyState.putRuntimePermissionState(legacyPermissionState, userId);
-                    } else if (userId == UserHandle.USER_SYSTEM) {
-                        legacyState.putInstallPermissionState(legacyPermissionState);
-                    }
+                    legacyState.putPermissionState(legacyPermissionState, userId);
                 }
             }
         }

@@ -48,7 +48,6 @@ import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
 import android.view.SurfaceControl;
-import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -1314,11 +1313,10 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
      * pause activities in visible root tasks, so if an activity is launched within the same root
      * task, hen we should explicitly pause that root task's top activity.
      *
-     * @param userLeaving Passed to pauseActivity() to indicate whether to call onUserLeaving().
      * @param resuming    The resuming activity.
      * @return {@code true} if any activity was paused as a result of this call.
      */
-    boolean pauseBackTasks(boolean userLeaving, ActivityRecord resuming) {
+    boolean pauseBackTasks(ActivityRecord resuming) {
         final int[] someActivityPaused = {0};
         forAllLeafTasks((task) -> {
             final ActivityRecord resumedActivity = task.getResumedActivity();
@@ -1327,7 +1325,7 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
                     || !task.isTopActivityFocusable())) {
                 ProtoLog.d(WM_DEBUG_STATES, "pauseBackTasks: task=%s "
                         + "mResumedActivity=%s", task, resumedActivity);
-                if (task.startPausingLocked(userLeaving, false /* uiSleeping*/,
+                if (task.startPausingLocked(false /* uiSleeping*/,
                         resuming, "pauseBackTasks")) {
                     someActivityPaused[0]++;
                 }
@@ -1486,14 +1484,18 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
         boolean supportsPip = mAtmService.mSupportsPictureInPicture;
         if (supportsMultiWindow) {
             if (task != null) {
-                supportsMultiWindow = task.isResizeable();
                 supportsSplitScreen = task.supportsSplitScreenWindowingMode();
-                // TODO: Do we need to check for freeform and Pip support here?
+                supportsFreeform = task.supportsFreeform();
+                supportsMultiWindow = task.supportsMultiWindow()
+                        // When the activity needs to be moved to PIP while the Task is not in PIP,
+                        // it can be moved to a new created PIP Task, so WINDOWING_MODE_PINNED is
+                        // always valid for Task as long as the device supports it.
+                        || (windowingMode == WINDOWING_MODE_PINNED && supportsPip);
             } else if (r != null) {
-                supportsMultiWindow = r.isResizeable();
                 supportsSplitScreen = r.supportsSplitScreenWindowingMode();
                 supportsFreeform = r.supportsFreeform();
                 supportsPip = r.supportsPictureInPicture();
+                supportsMultiWindow = r.supportsMultiWindow();
             }
         }
 
@@ -1833,12 +1835,12 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
     }
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
+            boolean preserveWindows, boolean notifyClients) {
         mAtmService.mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             forAllRootTasks(rootTask -> {
                 rootTask.ensureActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients, userLeaving);
+                        notifyClients);
             });
         } finally {
             mAtmService.mTaskSupervisor.endActivityVisibilityUpdate();

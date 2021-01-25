@@ -33,6 +33,9 @@
          (includes 2x keyguard_security_view_top_margin) -->
     <dimen name="keyguard_security_max_height">450dp</dimen>
 
+    <!-- pin/password field max height -->
+    <dimen name="keyguard_password_height">80dp</dimen>
+
     <!-- Margin around the various security views -->
     <dimen name="keyguard_security_view_top_margin">8dp</dimen>
     <dimen name="keyguard_security_view_lateral_margin">36dp</dimen>
@@ -81,4 +84,7 @@
 
     <!-- The translation for disappearing security views after having solved them. -->
     <dimen name="disappear_y_translation">-32dp</dimen>
+
+    <!-- Spacing around each button used for PIN view -->
+    <dimen name="num_pad_key_margin">2dp</dimen>
 </resources>
