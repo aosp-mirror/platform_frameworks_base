@@ -29,7 +29,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
@@ -46,7 +45,7 @@ import java.util.Objects;
  *     {@link WindowManagerService#registerWindowContextListener(IBinder, int, int, Bundle)}
  *     automatically.</li>
  *   <li>When the {@link android.app.WindowContext} adds the first window to the screen via
- *     {@link android.view.WindowManager#addView(View, ViewGroup.LayoutParams)},
+ *     {@link android.view.WindowManager#addView(View, android.view.ViewGroup.LayoutParams)},
  *     {@link WindowManagerService} then updates the {@link WindowContextListenerImpl} to listen
  *     to corresponding {@link WindowToken} via this controller.</li>
  *   <li>When the {@link android.app.WindowContext} is GCed, it unregisters the previously
