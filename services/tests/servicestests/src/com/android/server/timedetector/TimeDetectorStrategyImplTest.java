@@ -16,6 +16,7 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_EXTERNAL;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_GNSS;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
 import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPHONY;
@@ -26,6 +27,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.app.timedetector.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -602,18 +604,49 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
-    public void gnssTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
+    public void testSuggestExternalTime_autoTimeEnabled() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
-                .pokeAutoOriginPriorities(ORIGIN_GNSS)
+                .pokeAutoOriginPriorities(ORIGIN_EXTERNAL)
+                .pokeAutoTimeDetectionEnabled(true);
+
+        ExternalTimeSuggestion timeSuggestion =
+                mScript.generateExternalTimeSuggestion(ARBITRARY_TEST_TIME);
+
+        mScript.simulateTimePassing();
+
+        long expectedSystemClockMillis =
+                mScript.calculateTimeInMillisForNow(timeSuggestion.getUtcTime());
+        mScript.simulateExternalTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(expectedSystemClockMillis);
+    }
+
+    @Test
+    public void testSuggestExternalTime_autoTimeDisabled() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoOriginPriorities(ORIGIN_EXTERNAL)
+                .pokeAutoTimeDetectionEnabled(false);
+
+        ExternalTimeSuggestion timeSuggestion =
+                mScript.generateExternalTimeSuggestion(ARBITRARY_TEST_TIME);
+
+        mScript.simulateTimePassing()
+                .simulateExternalTimeSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void externalTimeSuggestion_ignoredWhenReferencedTimeIsInThePast() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoOriginPriorities(ORIGIN_EXTERNAL)
                 .pokeAutoTimeDetectionEnabled(true);
 
         Instant suggestedTime = TIME_LOWER_BOUND.minus(Duration.ofDays(1));
-        GnssTimeSuggestion timeSuggestion = mScript
-                .generateGnssTimeSuggestion(suggestedTime);
+        ExternalTimeSuggestion timeSuggestion = mScript
+                .generateExternalTimeSuggestion(suggestedTime);
 
-        mScript.simulateGnssTimeSuggestion(timeSuggestion)
+        mScript.simulateExternalTimeSuggestion(timeSuggestion)
                 .verifySystemClockWasNotSetAndResetCallTracking()
-                .assertLatestGnssSuggestion(null);
+                .assertLatestExternalSuggestion(null);
     }
 
     @Test
@@ -823,26 +856,135 @@ public class TimeDetectorStrategyImplTest {
     }
 
     @Test
+    public void highPrioritySuggestionsBeatLowerPrioritySuggestions_networkExternalOrigins() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_NETWORK, ORIGIN_EXTERNAL);
+
+        // Three obviously different times that could not be mistaken for each other.
+        Instant externalTime1 = ARBITRARY_TEST_TIME;
+        Instant externalTime2 = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
+        Instant networkTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(60));
+        // A small increment used to simulate the passage of time, but not enough to interfere with
+        // macro-level time changes associated with suggestion age.
+        final long smallTimeIncrementMillis = 101;
+
+        // A external suggestion is made. It should be used because there is no network suggestion.
+        ExternalTimeSuggestion externalTimeSuggestion1 =
+                mScript.generateExternalTimeSuggestion(externalTime1);
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .simulateExternalTimeSuggestion(externalTimeSuggestion1)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        mScript.calculateTimeInMillisForNow(externalTimeSuggestion1.getUtcTime()));
+
+        // Check internal state.
+        mScript.assertLatestNetworkSuggestion(null)
+                .assertLatestExternalSuggestion(externalTimeSuggestion1);
+        assertEquals(externalTimeSuggestion1, mScript.peekLatestValidExternalSuggestion());
+        assertNull("No network suggestions were made:", mScript.peekLatestValidNetworkSuggestion());
+
+        // Simulate a little time passing.
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Now a network suggestion is made. Network suggestions are prioritized over external
+        // suggestions so it should "win".
+        NetworkTimeSuggestion networkTimeSuggestion =
+                mScript.generateNetworkTimeSuggestion(networkTime);
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .simulateNetworkTimeSuggestion(networkTimeSuggestion)
+                .verifySystemClockWasSetAndResetCallTracking(
+                        mScript.calculateTimeInMillisForNow(networkTimeSuggestion.getUtcTime()));
+
+        // Check internal state.
+        mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestExternalSuggestion(externalTimeSuggestion1);
+        assertEquals(externalTimeSuggestion1, mScript.peekLatestValidExternalSuggestion());
+        assertEquals(networkTimeSuggestion, mScript.peekLatestValidNetworkSuggestion());
+
+        // Simulate some significant time passing: half the time allowed before a time signal
+        // becomes "too old to use".
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Now another external suggestion is made. Network suggestions are prioritized over
+        // external suggestions so the latest network suggestion should still "win".
+        ExternalTimeSuggestion externalTimeSuggestion2 =
+                mScript.generateExternalTimeSuggestion(externalTime2);
+        mScript.simulateTimePassing(smallTimeIncrementMillis)
+                .simulateExternalTimeSuggestion(externalTimeSuggestion2)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Check internal state.
+        mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestExternalSuggestion(externalTimeSuggestion2);
+        assertEquals(externalTimeSuggestion2, mScript.peekLatestValidExternalSuggestion());
+        assertEquals(networkTimeSuggestion, mScript.peekLatestValidNetworkSuggestion());
+
+        // Simulate some significant time passing: half the time allowed before a time signal
+        // becomes "too old to use". This should mean that networkTimeSuggestion is now too old to
+        // be used but externalTimeSuggestion2 is not.
+        mScript.simulateTimePassing(TimeDetectorStrategyImpl.MAX_UTC_TIME_AGE_MILLIS / 2);
+
+        // NOTE: The TimeDetectorStrategyImpl doesn't set an alarm for the point when the last
+        // suggestion it used becomes too old: it requires a new suggestion or an auto-time toggle
+        // to re-run the detection logic. This may change in future but until then we rely on a
+        // steady stream of suggestions to re-evaluate.
+        mScript.verifySystemClockWasNotSetAndResetCallTracking();
+
+        // Check internal state.
+        mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestExternalSuggestion(externalTimeSuggestion2);
+        assertEquals(externalTimeSuggestion2, mScript.peekLatestValidExternalSuggestion());
+        assertNull(
+                "Network suggestion should be expired:",
+                mScript.peekLatestValidNetworkSuggestion());
+
+        // Toggle auto-time off and on to force the detection logic to run.
+        mScript.simulateAutoTimeDetectionToggle()
+                .simulateTimePassing(smallTimeIncrementMillis)
+                .simulateAutoTimeDetectionToggle();
+
+        // Verify the latest external time now wins.
+        mScript.verifySystemClockWasSetAndResetCallTracking(
+                mScript.calculateTimeInMillisForNow(externalTimeSuggestion2.getUtcTime()));
+
+        // Check internal state.
+        mScript.assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestExternalSuggestion(externalTimeSuggestion2);
+        assertEquals(externalTimeSuggestion2, mScript.peekLatestValidExternalSuggestion());
+        assertNull(
+                "Network suggestion should still be expired:",
+                mScript.peekLatestValidNetworkSuggestion());
+    }
+
+    @Test
     public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_lowerPriorityComesFirst() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_GNSS);
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_EXTERNAL,
+                          ORIGIN_GNSS);
 
         Instant networkTime = ARBITRARY_TEST_TIME;
+        Instant externalTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(15));
         Instant gnssTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
         Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(60));
 
         NetworkTimeSuggestion networkTimeSuggestion =
                 mScript.generateNetworkTimeSuggestion(networkTime);
+        ExternalTimeSuggestion externalTimeSuggestion =
+                mScript.generateExternalTimeSuggestion(externalTime);
         GnssTimeSuggestion gnssTimeSuggestion =
                 mScript.generateGnssTimeSuggestion(gnssTime);
         TelephonyTimeSuggestion telephonyTimeSuggestion =
                 mScript.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, telephonyTime);
 
         mScript.simulateNetworkTimeSuggestion(networkTimeSuggestion)
+                .simulateExternalTimeSuggestion(externalTimeSuggestion)
                 .simulateGnssTimeSuggestion(gnssTimeSuggestion)
                 .simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
                 .assertLatestNetworkSuggestion(networkTimeSuggestion)
+                .assertLatestExternalSuggestion(externalTimeSuggestion)
                 .assertLatestGnssSuggestion(gnssTimeSuggestion)
                 .assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(telephonyTime.toEpochMilli());
@@ -852,10 +994,12 @@ public class TimeDetectorStrategyImplTest {
     public void whenAllTimeSuggestionsAreAvailable_higherPriorityWins_higherPriorityComesFirst() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_GNSS);
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK,
+                        ORIGIN_EXTERNAL, ORIGIN_GNSS);
 
         Instant networkTime = ARBITRARY_TEST_TIME;
         Instant telephonyTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(30));
+        Instant externalTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(50));
         Instant gnssTime = ARBITRARY_TEST_TIME.plus(Duration.ofDays(60));
 
         NetworkTimeSuggestion networkTimeSuggestion =
@@ -864,13 +1008,17 @@ public class TimeDetectorStrategyImplTest {
                 mScript.generateTelephonyTimeSuggestion(ARBITRARY_SLOT_INDEX, telephonyTime);
         GnssTimeSuggestion gnssTimeSuggestion =
                 mScript.generateGnssTimeSuggestion(gnssTime);
+        ExternalTimeSuggestion externalTimeSuggestion =
+                mScript.generateExternalTimeSuggestion(externalTime);
 
         mScript.simulateTelephonyTimeSuggestion(telephonyTimeSuggestion)
                 .simulateNetworkTimeSuggestion(networkTimeSuggestion)
                 .simulateGnssTimeSuggestion(gnssTimeSuggestion)
+                .simulateExternalTimeSuggestion(externalTimeSuggestion)
                 .assertLatestNetworkSuggestion(networkTimeSuggestion)
                 .assertLatestTelephonySuggestion(ARBITRARY_SLOT_INDEX, telephonyTimeSuggestion)
                 .assertLatestGnssSuggestion(gnssTimeSuggestion)
+                .assertLatestExternalSuggestion(externalTimeSuggestion)
                 .verifySystemClockWasSetAndResetCallTracking(telephonyTime.toEpochMilli());
     }
 
@@ -892,7 +1040,8 @@ public class TimeDetectorStrategyImplTest {
     public void whenHigherPrioritySuggestionsAreNotAvailable_fallbacksToNext() {
         mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
                 .pokeAutoTimeDetectionEnabled(true)
-                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK, ORIGIN_GNSS);
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY, ORIGIN_NETWORK,
+                                ORIGIN_EXTERNAL, ORIGIN_GNSS);
 
         GnssTimeSuggestion timeSuggestion =
                 mScript.generateGnssTimeSuggestion(ARBITRARY_TEST_TIME);
@@ -943,6 +1092,20 @@ public class TimeDetectorStrategyImplTest {
 
         mScript.simulateGnssTimeSuggestion(timeSuggestion)
                 .assertLatestGnssSuggestion(timeSuggestion)
+                .verifySystemClockWasNotSetAndResetCallTracking();
+    }
+
+    @Test
+    public void suggestionsFromExternalOriginNotInPriorityList_areIgnored() {
+        mScript.pokeFakeClocks(ARBITRARY_CLOCK_INITIALIZATION_INFO)
+                .pokeAutoTimeDetectionEnabled(true)
+                .pokeAutoOriginPriorities(ORIGIN_TELEPHONY);
+
+        ExternalTimeSuggestion timeSuggestion = mScript.generateExternalTimeSuggestion(
+                ARBITRARY_TEST_TIME);
+
+        mScript.simulateExternalTimeSuggestion(timeSuggestion)
+                .assertLatestExternalSuggestion(timeSuggestion)
                 .verifySystemClockWasNotSetAndResetCallTracking();
     }
 
@@ -1155,6 +1318,11 @@ public class TimeDetectorStrategyImplTest {
             return this;
         }
 
+        Script simulateExternalTimeSuggestion(ExternalTimeSuggestion timeSuggestion) {
+            mTimeDetectorStrategy.suggestExternalTime(timeSuggestion);
+            return this;
+        }
+
         Script simulateAutoTimeDetectionToggle() {
             mFakeCallback.simulateAutoTimeZoneDetectionToggle();
             mTimeDetectorStrategy.handleAutoTimeConfigChanged();
@@ -1213,6 +1381,14 @@ public class TimeDetectorStrategyImplTest {
         }
 
         /**
+         * White box test info: Asserts the latest external suggestion is as expected.
+         */
+        Script assertLatestExternalSuggestion(ExternalTimeSuggestion expected) {
+            assertEquals(expected, mTimeDetectorStrategy.getLatestExternalSuggestion());
+            return this;
+        }
+
+        /**
          * White box test info: Returns the telephony suggestion that would be used, if any, given
          * the current elapsed real time clock and regardless of origin prioritization.
          */
@@ -1234,6 +1410,14 @@ public class TimeDetectorStrategyImplTest {
          */
         GnssTimeSuggestion peekLatestValidGnssSuggestion() {
             return mTimeDetectorStrategy.findLatestValidGnssSuggestionForTests();
+        }
+
+        /**
+         * White box test info: Returns the external suggestion that would be used, if any, given
+         * the current elapsed real time clock and regardless of origin prioritization.
+         */
+        ExternalTimeSuggestion peekLatestValidExternalSuggestion() {
+            return mTimeDetectorStrategy.findLatestValidExternalSuggestionForTests();
         }
 
         /**
@@ -1292,6 +1476,18 @@ public class TimeDetectorStrategyImplTest {
                             mFakeCallback.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new GnssTimeSuggestion(utcTime);
+        }
+
+        /**
+         * Generates a ExternalTimeSuggestion using the current elapsed realtime clock for the
+         * reference time.
+         */
+        ExternalTimeSuggestion generateExternalTimeSuggestion(Instant suggestedTime) {
+            TimestampedValue<Long> utcTime =
+                    new TimestampedValue<>(
+                            mFakeCallback.peekElapsedRealtimeMillis(),
+                            suggestedTime.toEpochMilli());
+            return new ExternalTimeSuggestion(utcTime);
         }
 
         /**

@@ -79,4 +79,12 @@ public interface TimeDetector {
      */
     @RequiresPermission(android.Manifest.permission.SET_TIME)
     void suggestGnssTime(GnssTimeSuggestion timeSuggestion);
+
+    /**
+     * Suggests the time according to an external time source (form factor specific HAL, etc).
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.SET_TIME)
+    void suggestExternalTime(ExternalTimeSuggestion timeSuggestion);
 }
