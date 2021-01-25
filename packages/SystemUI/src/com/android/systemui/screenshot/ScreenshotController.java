@@ -55,13 +55,13 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -177,13 +177,13 @@ public class ScreenshotController {
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
-    private final DisplayMetrics mDisplayMetrics;
     private final AccessibilityManager mAccessibilityManager;
     private final MediaActionSound mCameraSound;
     private final ScrollCaptureClient mScrollCaptureClient;
     private final DeviceConfigProxy mConfigProxy;
     private final PhoneWindow mWindow;
     private final View mDecorView;
+    private final DisplayManager mDisplayManager;
 
     private final Binder mWindowToken;
     private ScreenshotView mScreenshotView;
@@ -239,9 +239,8 @@ public class ScreenshotController {
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
 
-        final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
-        final Display display = dm.getDisplay(DEFAULT_DISPLAY);
-        final Context displayContext = context.createDisplayContext(display);
+        mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
+        final Context displayContext = context.createDisplayContext(getDefaultDisplay());
         mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
@@ -277,9 +276,6 @@ public class ScreenshotController {
 
         reloadAssets();
 
-        mDisplayMetrics = new DisplayMetrics();
-        display.getRealMetrics(mDisplayMetrics);
-
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
         mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
@@ -288,9 +284,11 @@ public class ScreenshotController {
     void takeScreenshotFullscreen(Consumer<Uri> finisher, Runnable onComplete) {
         mOnCompleteRunnable = onComplete;
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getDefaultDisplay().getRealMetrics(displayMetrics);
         takeScreenshotInternal(
                 finisher,
-                new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+                new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
     }
 
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
@@ -440,15 +438,27 @@ public class ScreenshotController {
         Rect screenRect = new Rect(crop);
         int width = crop.width();
         int height = crop.height();
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        final SurfaceControl.DisplayCaptureArgs captureArgs =
-                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                        .setSourceCrop(crop)
-                        .setSize(width, height)
-                        .build();
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                SurfaceControl.captureDisplay(captureArgs);
-        Bitmap screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+
+        Bitmap screenshot = null;
+        final Display display = getDefaultDisplay();
+        final DisplayAddress address = display.getAddress();
+        if (!(address instanceof DisplayAddress.Physical)) {
+            Log.e(TAG, "Skipping Screenshot - Default display does not have a physical address: "
+                    + display);
+        } else {
+            final DisplayAddress.Physical physicalAddress = (DisplayAddress.Physical) address;
+
+            final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(
+                    physicalAddress.getPhysicalDisplayId());
+            final SurfaceControl.DisplayCaptureArgs captureArgs =
+                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                            .setSourceCrop(crop)
+                            .setSize(width, height)
+                            .build();
+            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    SurfaceControl.captureDisplay(captureArgs);
+            screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        }
 
         if (screenshot == null) {
             Log.e(TAG, "takeScreenshotInternal: Screenshot bitmap was null");
@@ -751,6 +761,10 @@ public class ScreenshotController {
         if (mDecorView.isAttachedToWindow()) {
             mWindowManager.updateViewLayout(mDecorView, mWindowLayoutParams);
         }
+    }
+
+    private Display getDefaultDisplay() {
+        return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
     }
 
     /** Does the aspect ratio of the bitmap with insets removed match the bounds. */
