@@ -14235,6 +14235,7 @@ public class BatteryStatsImpl extends BatteryStats {
             for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
                 if (mGlobalMeasuredEnergyStats.isEnergyBucketSupported(i)
                         != supportedEnergyBuckets[i]) {
+                    mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(supportedEnergyBuckets);
                     supportedBucketMismatch = true;
                     break;
                 }

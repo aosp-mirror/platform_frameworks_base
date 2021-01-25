@@ -30,6 +30,7 @@ import android.os.UserHandle;
 import android.power.PowerStatsInternal;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -71,6 +72,7 @@ public class PowerStatsService extends SystemService {
 
     @VisibleForTesting
     static class Injector {
+        @GuardedBy("this")
         private IPowerStatsHALWrapper mPowerStatsHALWrapper;
 
         File createDataStoragePath() {
@@ -95,10 +97,12 @@ public class PowerStatsService extends SystemService {
         }
 
         IPowerStatsHALWrapper getPowerStatsHALWrapperImpl() {
-            if (mPowerStatsHALWrapper == null) {
-                mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
+            synchronized (this) {
+                if (mPowerStatsHALWrapper == null) {
+                    mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
+                }
+                return mPowerStatsHALWrapper;
             }
-            return mPowerStatsHALWrapper;
         }
 
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
@@ -204,6 +208,12 @@ public class PowerStatsService extends SystemService {
             HandlerThread thread = new HandlerThread(TAG);
             thread.start();
             mHandler = new Handler(thread.getLooper());
+        }
+
+
+        @Override
+        public EnergyConsumer[] getEnergyConsumerInfo() {
+            return getPowerStatsHal().getEnergyConsumerInfo();
         }
 
         @Override
