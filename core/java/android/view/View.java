@@ -139,6 +139,7 @@ import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
+import android.view.translation.TranslationRequest;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
@@ -30629,5 +30630,73 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         } else {
             mPrivateFlags4 &= ~PFLAG4_DETACHED;
         }
+    }
+
+    /**
+     * Returns a {@link TranslationRequest} to the {@link onStartUiTranslation} which represents
+     * the content to be translated.
+     *
+     * <p>The default implementation does nothing and return null.</p>
+     *
+     * @hide
+     *
+     * @return the {@link TranslationRequest} which contains the information to be translated.
+     */
+    @Nullable
+    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
+    public TranslationRequest onCreateTranslationRequest() {
+        return null;
+    }
+
+    /**
+     * Called when the user wants to show the original text instead of the translated text.
+     *
+     * @hide
+     *
+     * <p> The default implementation does nothing.
+     */
+    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
+    public void onPauseUiTranslation() {
+        // no-op
+    }
+
+    /**
+     * User can switch back to show the original text, this method called when the user wants to
+     * re-show the translated text again.
+     *
+     * @hide
+     *
+     * <p> The default implementation does nothing.</p>
+     */
+    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
+    public void onRestoreUiTranslation() {
+        // no-op
+    }
+
+    /**
+     * Called when the user finish the Ui translation and no longer to show the translated text.
+     *
+     * @hide
+     *
+     * <p> The default implementation does nothing.</p>
+     */
+    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
+    public void onFinishUiTranslation() {
+        // no-op
+    }
+
+    /**
+     * Called when the request from {@link onStartUiTranslation} is completed by the translation
+     * service so that the translation result can be shown.
+     *
+     * @hide
+     *
+     * <p> The default implementation does nothing.</p>
+     *
+     * @param request the translated information which can be shown in the view.
+     */
+    //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
+    public void onTranslationComplete(@NonNull TranslationRequest request) {
+        // no-op
     }
 }
