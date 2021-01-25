@@ -17,23 +17,26 @@
 package com.android.server.wm;
 
 import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.LayoutParams.INVALID_WINDOW_TYPE;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_ERROR;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.IWindowToken;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.view.View;
+import android.view.WindowManager.LayoutParams.WindowType;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -61,7 +64,7 @@ import java.util.Objects;
  */
 class WindowContextListenerController {
     @VisibleForTesting
-    final Map<IBinder, WindowContextListenerImpl> mListeners = new ArrayMap<>();
+    final ArrayMap<IBinder, WindowContextListenerImpl> mListeners = new ArrayMap<>();
 
     /**
      * Registers the listener to a {@code container} which is associated with
@@ -73,12 +76,16 @@ class WindowContextListenerController {
      * @param clientToken the token to associate with the listener
      * @param container the {@link WindowContainer} which the listener is going to listen to.
      * @param ownerUid the caller UID
+     * @param type the window type
+     * @param options a bundle used to pass window-related options.
      */
     void registerWindowContainerListener(@NonNull IBinder clientToken,
-            @NonNull WindowContainer container, int ownerUid) {
+            @NonNull WindowContainer container, int ownerUid, @WindowType int type,
+            @Nullable Bundle options) {
         WindowContextListenerImpl listener = mListeners.get(clientToken);
         if (listener == null) {
-            listener = new WindowContextListenerImpl(clientToken, container, ownerUid);
+            listener = new WindowContextListenerImpl(clientToken, container, ownerUid, type,
+                    options);
             listener.register();
         } else {
             listener.updateContainer(container);
@@ -113,11 +120,53 @@ class WindowContextListenerController {
         return true;
     }
 
+    boolean hasListener(IBinder clientToken) {
+        return mListeners.containsKey(clientToken);
+    }
+
+    @WindowType int getWindowType(IBinder clientToken) {
+        final WindowContextListenerImpl listener = mListeners.get(clientToken);
+        return listener != null ? listener.mType : INVALID_WINDOW_TYPE;
+    }
+
+    @Nullable Bundle getOptions(IBinder clientToken) {
+        final WindowContextListenerImpl listener = mListeners.get(clientToken);
+        return listener != null ? listener.mOptions : null;
+    }
+
+    @Nullable WindowContainer getContainer(IBinder clientToken) {
+        final WindowContextListenerImpl listener = mListeners.get(clientToken);
+        return listener != null ? listener.mContainer : null;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder builder = new StringBuilder("WindowContextListenerController{");
+        builder.append("mListeners=[");
+
+        final int size = mListeners.values().size();
+        for (int i = 0; i < size; i++) {
+            builder.append(mListeners.valueAt(i));
+            if (i != size - 1) {
+                builder.append(", ");
+            }
+        }
+        builder.append("]}");
+        return builder.toString();
+    }
+
     @VisibleForTesting
     class WindowContextListenerImpl implements WindowContainerListener {
         @NonNull private final IBinder mClientToken;
         private final int mOwnerUid;
         @NonNull private WindowContainer mContainer;
+        /**
+         * The options from {@link Context#createWindowContext(int, Bundle)}.
+         * <p>It can be used for choosing the {@link DisplayArea} where the window context
+         * is located. </p>
+         */
+        @Nullable private final Bundle mOptions;
+        @WindowType private final int mType;
 
         private DeathRecipient mDeathRecipient;
 
@@ -125,10 +174,12 @@ class WindowContextListenerController {
         private Configuration mLastReportedConfig;
 
         private WindowContextListenerImpl(IBinder clientToken, WindowContainer container,
-                int ownerUid) {
+                int ownerUid, @WindowType int type, @Nullable Bundle options) {
             mClientToken = clientToken;
             mContainer = Objects.requireNonNull(container);
             mOwnerUid = ownerUid;
+            mType = type;
+            mOptions = options;
 
             final DeathRecipient deathRecipient = new DeathRecipient();
             try {
@@ -224,6 +275,12 @@ class WindowContextListenerController {
                 ProtoLog.w(WM_ERROR, "Could not report token removal to the window token client.");
             }
             unregister();
+        }
+
+        @Override
+        public String toString() {
+            return "WindowContextListenerImpl{clientToken=" + mClientToken + ", "
+                    + "container=" + mContainer + "}";
         }
 
         private class DeathRecipient implements IBinder.DeathRecipient {

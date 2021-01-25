@@ -1466,7 +1466,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
         int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
                 appOp);
-        if (res != WindowManagerGlobal.ADD_OKAY) {
+        if (res != ADD_OKAY) {
             return res;
         }
 
@@ -1556,6 +1556,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean addToastWindowRequiresToken = false;
 
+            final IBinder windowContextToken = attrs.mWindowContextToken;
+
             if (token == null) {
                 if (!unprivilegedAppCanCreateTokenWith(parentWindow, callingUid, type,
                         rootType, attrs.token, attrs.packageName)) {
@@ -1564,6 +1566,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (hasParent) {
                     // Use existing parent window token for child windows.
                     token = parentWindow.mToken;
+                } else if (mWindowContextListenerController.hasListener(windowContextToken)) {
+                    // Respect the window context token if the user provided it.
+                    final IBinder binder = attrs.token != null ? attrs.token : windowContextToken;
+                    final Bundle options = mWindowContextListenerController
+                            .getOptions(windowContextToken);
+                    token = new WindowToken(this, binder, type, false /* persistOnEmpty */,
+                            displayContent, session.mCanAddInternalSystemWindow, callingUid,
+                            isRoundedCornerOverlay, true /* fromClientToken */, options);
                 } else {
                     final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
                     token = new WindowToken(this, binder, type, false, displayContent,
@@ -1632,8 +1642,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, client.asBinder(), type, false, displayContent,
-                        session.mCanAddInternalSystemWindow);
+                token = new WindowToken(this, client.asBinder(), type, false /* persistOnEmpty */,
+                        displayContent, session.mCanAddInternalSystemWindow);
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
@@ -1657,7 +1667,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.updateRequestedVisibility(requestedVisibility);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
-            if (res != WindowManagerGlobal.ADD_OKAY) {
+            if (res != ADD_OKAY) {
                 return res;
             }
 
@@ -1688,7 +1698,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // show a focusable toasts while it has focus which will be kept on
                 // the screen after the activity goes away.
                 if (addToastWindowRequiresToken
-                        || (attrs.flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0
+                        || (attrs.flags & FLAG_NOT_FOCUSABLE) == 0
                         || displayContent.mCurrentFocus == null
                         || displayContent.mCurrentFocus.mOwnerUid != callingUid) {
                     mH.sendMessageDelayed(
@@ -1697,9 +1707,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            // Switch to listen to the {@link WindowToken token}'s configuration changes when
+            // adding a window to the window context.
+            if (mWindowContextListenerController.hasListener(windowContextToken)) {
+                final int windowContextType = mWindowContextListenerController
+                        .getWindowType(windowContextToken);
+                if (type != windowContextType) {
+                    ProtoLog.w(WM_ERROR, "Window types in WindowContext and"
+                            + " LayoutParams.type should match! Type from LayoutParams is %d,"
+                            + " but type from WindowContext is %d", type, windowContextType);
+                    return WindowManagerGlobal.ADD_INVALID_TYPE;
+                }
+                final Bundle options = mWindowContextListenerController
+                        .getOptions(windowContextToken);
+                mWindowContextListenerController.registerWindowContainerListener(
+                        windowContextToken, token, callingUid, type, options);
+            }
+
             // From now on, no exceptions or errors allowed!
 
-            res = WindowManagerGlobal.ADD_OKAY;
+            res = ADD_OKAY;
 
             if (mUseBLAST) {
                 res |= WindowManagerGlobal.ADD_FLAG_USE_BLAST;
@@ -2763,7 +2790,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayArea da = dc.getAreaForWindowToken(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
-                        callingUid);
+                        callingUid, type, options);
                 return true;
             }
         } finally {
@@ -2779,9 +2806,18 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
+                if (!mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
                         callerCanManageAppTokens, callingUid)) {
-                    mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+                    return;
+                }
+                final WindowContainer wc = mWindowContextListenerController
+                        .getContainer(clientToken);
+
+                mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+
+                final WindowToken token = wc.asWindowToken();
+                if (token != null && token.isFromClient()) {
+                    removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
             }
         } finally {
@@ -2792,13 +2828,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isWindowToken(IBinder binder) {
         synchronized (mGlobalLock) {
-            final WindowToken windowToken = mRoot.getWindowToken(binder);
-            if (windowToken == null) {
-                return false;
-            }
-            // We don't allow activity tokens in WindowContext. TODO(window-context): rename method
-            return windowToken.asActivityRecord() == null;
+            return mRoot.getWindowToken(binder) != null;
         }
+
     }
 
     @Override

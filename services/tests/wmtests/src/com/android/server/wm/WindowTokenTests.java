@@ -186,24 +186,24 @@ public class WindowTokenTests extends WindowTestsBase {
      * Test that {@link WindowToken} constructor parameters is set with expectation.
      */
     @Test
-    public void testWindowTokenConstructorSanity() {
+    public void testWindowTokenConstructorValidity() {
         WindowToken token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class),
                 TYPE_TOAST, true /* persistOnEmpty */, mDisplayContent,
                 true /* ownerCanManageAppTokens */);
         assertFalse(token.mRoundedCornerOverlay);
-        assertFalse(token.mFromClientToken);
+        assertFalse(token.isFromClient());
 
         token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
                 true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
                 true /* roundedCornerOverlay */);
         assertTrue(token.mRoundedCornerOverlay);
-        assertFalse(token.mFromClientToken);
+        assertFalse(token.isFromClient());
 
         token = new WindowToken(mDisplayContent.mWmService, mock(IBinder.class), TYPE_TOAST,
                 true /* persistOnEmpty */, mDisplayContent, true /* ownerCanManageAppTokens */,
                 INVALID_UID, true /* roundedCornerOverlay */, true /* fromClientToken */);
         assertTrue(token.mRoundedCornerOverlay);
-        assertTrue(token.mFromClientToken);
+        assertTrue(token.isFromClient());
     }
 
     /**
