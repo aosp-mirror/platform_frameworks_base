@@ -418,10 +418,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snimanje ekrana"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Započnite"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavite"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Da nastavite, aplikaciji &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; je potreban pristup mikrofonu vašeg uređaja."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Da nastavite, aplikaciji &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; je potreban pristup kameri vašeg uređaja."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Prevucite prema gore za promjenu aplikacije"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Prevucite udesno za brzu promjenu aplikacija"</string>
@@ -444,8 +442,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite ponovo da otvorite"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prevucite da otvorite"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prevucite prema gore da pokušate ponovo"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da koristite NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada vašoj organizaciji"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Prevucite preko ikone da otvorite telefon"</string>
