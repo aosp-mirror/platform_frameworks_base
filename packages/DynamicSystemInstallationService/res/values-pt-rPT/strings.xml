@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"O sistema dinâmico está pronto. Para o começar a utilizar, reinicie o dispositivo."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Instalação em curso"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Falha na instalação"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Falha ao validar a imagem. A instalação foi interrompida."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Falha ao validar a imagem. Interrompa a instalação."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Está atualmente em execução um sistema dinâmico. Reinicie para utilizar a versão original do Android."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Cancelar"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Rejeitar"</string>
