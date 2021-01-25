@@ -253,6 +253,7 @@ package android {
     field public static final String TV_VIRTUAL_REMOTE_CONTROLLER = "android.permission.TV_VIRTUAL_REMOTE_CONTROLLER";
     field public static final String UNLIMITED_SHORTCUTS_API_CALLS = "android.permission.UNLIMITED_SHORTCUTS_API_CALLS";
     field public static final String UPDATE_APP_OPS_STATS = "android.permission.UPDATE_APP_OPS_STATS";
+    field public static final String UPDATE_FONTS = "android.permission.UPDATE_FONTS";
     field public static final String UPDATE_LOCK = "android.permission.UPDATE_LOCK";
     field public static final String UPDATE_TIME_ZONE_RULES = "android.permission.UPDATE_TIME_ZONE_RULES";
     field public static final String UPGRADE_RUNTIME_PERMISSIONS = "android.permission.UPGRADE_RUNTIME_PERMISSIONS";
