@@ -168,9 +168,6 @@
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
 
-    <!-- Whether to enable KeyguardService or not -->
-    <bool name="config_enableKeyguardService">true</bool>
-
     <!-- The maximum count of notifications on Keyguard. The rest will be collapsed in an overflow
      card. -->
     <integer name="keyguard_max_notification_count">3</integer>
