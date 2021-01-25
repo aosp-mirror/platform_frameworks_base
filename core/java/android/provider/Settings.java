@@ -9224,6 +9224,14 @@ public final class Settings {
                 "accessibility_floating_menu_icon_type";
 
         /**
+         * Whether the fade effect for the accessibility floating menu is enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED =
+                "accessibility_floating_menu_fade_enabled";
+
+        /**
          * The opacity value for the accessibility floating menu fade out effect, from 0.0
          * (transparent) to 1.0 (opaque).
          *

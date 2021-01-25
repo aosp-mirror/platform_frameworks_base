@@ -1822,6 +1822,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_FLOATING_MENU_OPACITY,
                 SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_OPACITY);
+        dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED,
+                SecureSettingsProto.Accessibility.ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED);
         p.end(accessibilityToken);
 
         final long adaptiveSleepToken = p.start(SecureSettingsProto.ADAPTIVE_SLEEP);
