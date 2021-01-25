@@ -130,6 +130,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsFlags;
 import android.view.InsetsSource;
@@ -1433,8 +1434,8 @@ public class DisplayPolicy {
     }
 
     private void simulateLayoutDecorWindow(WindowState win, DisplayFrames displayFrames,
-            InsetsState insetsState, WindowFrames simulatedWindowFrames,
-            SparseArray<Rect> contentFrames, Consumer<Rect> layout) {
+            WindowFrames simulatedWindowFrames, SparseArray<Rect> contentFrames,
+            Consumer<Rect> layout) {
         win.setSimulatedWindowFrames(simulatedWindowFrames);
         final Rect contentFrame = new Rect();
         try {
@@ -1443,46 +1444,31 @@ public class DisplayPolicy {
             win.setSimulatedWindowFrames(null);
         }
         contentFrames.put(win.mAttrs.type, contentFrame);
-        mDisplayContent.getInsetsStateController().computeSimulatedState(insetsState, win,
-                displayFrames, simulatedWindowFrames);
+        mDisplayContent.getInsetsStateController().computeSimulatedState(
+                win, displayFrames, simulatedWindowFrames);
     }
 
     /**
      * Computes the frames of display (its logical size, rotation and cutout should already be set)
-     * used to layout window. The result of display frames and insets state should be the same as
-     * using {@link #beginLayoutLw}, but this method only changes the given display frames, insets
-     * state and some temporal states. In other words, it doesn't change the window frames used to
-     * show on screen.
+     * used to layout window. This method only changes the given display frames, insets state and
+     * some temporal states, but doesn't change the window frames used to show on screen.
      */
-    void simulateLayoutDisplay(DisplayFrames displayFrames, InsetsState insetsState,
-            SparseArray<Rect> barContentFrames) {
-        displayFrames.onBeginLayout(insetsState);
+    void simulateLayoutDisplay(DisplayFrames displayFrames, SparseArray<Rect> barContentFrames) {
         final WindowFrames simulatedWindowFrames = new WindowFrames();
         if (mNavigationBar != null) {
-            simulateLayoutDecorWindow(mNavigationBar, displayFrames, insetsState,
-                    simulatedWindowFrames, barContentFrames,
-                    contentFrame -> layoutNavigationBar(displayFrames,
-                            mDisplayContent.getConfiguration().uiMode, contentFrame));
+            simulateLayoutDecorWindow(mNavigationBar, displayFrames, simulatedWindowFrames,
+                    barContentFrames, contentFrame -> layoutNavigationBar(displayFrames,
+                            contentFrame));
         }
         if (mStatusBar != null) {
-            simulateLayoutDecorWindow(mStatusBar, displayFrames, insetsState,
-                    simulatedWindowFrames, barContentFrames,
-                    contentFrame -> layoutStatusBar(displayFrames, contentFrame));
+            simulateLayoutDecorWindow(mStatusBar, displayFrames, simulatedWindowFrames,
+                    barContentFrames, contentFrame -> layoutStatusBar(displayFrames, contentFrame));
         }
     }
 
-    /**
-     * Called when layout of the windows is about to start.
-     *
-     * @param displayFrames frames of the display we are doing layout on.
-     * @param uiMode The current uiMode in configuration.
-     */
-    public void beginLayoutLw(DisplayFrames displayFrames, int uiMode) {
-        displayFrames.onBeginLayout(mDisplayContent.getInsetsStateController().getRawInsetsState());
-        mSystemGestures.screenWidth = displayFrames.mUnrestricted.width();
-        mSystemGestures.screenHeight = displayFrames.mUnrestricted.height();
-        layoutNavigationBar(displayFrames, uiMode, null /* simulatedContentFrame */);
-        layoutStatusBar(displayFrames, null /* simulatedContentFrame */);
+    void onDisplayInfoChanged(DisplayInfo info) {
+        mSystemGestures.screenWidth = info.logicalWidth;
+        mSystemGestures.screenHeight = info.logicalHeight;
     }
 
     private void layoutStatusBar(DisplayFrames displayFrames, Rect simulatedContentFrame) {
@@ -1524,12 +1510,12 @@ public class DisplayPolicy {
         }
     }
 
-    private void layoutNavigationBar(DisplayFrames displayFrames, int uiMode,
-            Rect simulatedContentFrame) {
+    private void layoutNavigationBar(DisplayFrames displayFrames, Rect simulatedContentFrame) {
         if (mNavigationBar == null) {
             return;
         }
 
+        final int uiMode = mDisplayContent.getConfiguration().uiMode;
         final Rect navigationFrame = sTmpNavFrame;
         // Force the navigation bar to its appropriate place and size. We need to do this directly,
         // instead of relying on it to bubble up from the nav bar, because this needs to change
@@ -1620,10 +1606,12 @@ public class DisplayPolicy {
      * @param displayFrames The display frames.
      */
     public void layoutWindowLw(WindowState win, WindowState attached, DisplayFrames displayFrames) {
-        // We've already done the navigation bar, status bar, and all screen decor windows. If the
-        // status bar can receive input, we need to layout it again to accommodate for the IME
-        // window.
-        if ((win == mStatusBar && !canReceiveInput(win)) || win == mNavigationBar) {
+        if (win == mNavigationBar) {
+            layoutNavigationBar(displayFrames, null /* simulatedContentFrame */);
+            return;
+        }
+        if ((win == mStatusBar && !canReceiveInput(win))) {
+            layoutStatusBar(displayFrames, null /* simulatedContentFrame */);
             return;
         }
         final WindowManager.LayoutParams attrs = win.getAttrs();

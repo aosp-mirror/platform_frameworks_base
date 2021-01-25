@@ -61,7 +61,6 @@ static struct BatterySaverPolicyConfigFieldId {
     jfieldID disableAod;
     jfieldID disableLaunchBoost;
     jfieldID disableOptionalSensors;
-    jfieldID disableSoundTrigger;
     jfieldID disableVibration;
     jfieldID enableAdjustBrightness;
     jfieldID enableDataSaver;
@@ -71,6 +70,7 @@ static struct BatterySaverPolicyConfigFieldId {
     jfieldID forceAllAppsStandby;
     jfieldID forceBackgroundCheck;
     jfieldID locationMode;
+    jfieldID soundTriggerMode;
 } gBSPCFieldIds;
 
 static jobject nativeObtainParcel(JNIEnv* env) {
@@ -171,10 +171,11 @@ static void nativeUnparcelAndVerifyWorkSource(JNIEnv* env, jobject /* obj */, jo
 
 static jobject nativeObtainPowerSaveStateParcel(JNIEnv* env, jobject /* obj */,
         jboolean batterySaverEnabled, jboolean globalBatterySaverEnabled,
-        jint locationMode, jfloat brightnessFactor) {
+        jint locationMode, jint soundTriggerMode, jfloat brightnessFactor) {
     PowerSaveState ps = PowerSaveState(static_cast<bool>(batterySaverEnabled),
             static_cast<bool>(globalBatterySaverEnabled),
             static_cast<LocationMode>(locationMode),
+            static_cast<SoundTriggerMode>(soundTriggerMode),
             static_cast<float>(brightnessFactor));
     jobject psParcel = nativeObtainParcel(env);
     Parcel* parcel = nativeGetParcelData(env, psParcel);
@@ -189,7 +190,7 @@ static jobject nativeObtainPowerSaveStateParcel(JNIEnv* env, jobject /* obj */,
 
 static void nativeUnparcelAndVerifyPowerSaveState(JNIEnv* env, jobject /* obj */, jobject psParcel,
         jboolean batterySaverEnabled, jboolean globalBatterySaverEnabled,
-        jint locationMode, jfloat brightnessFactor) {
+        jint locationMode, jint soundTriggerMode, jfloat brightnessFactor) {
     PowerSaveState ps = {};
     Parcel* parcel = nativeGetParcelData(env, psParcel);
     status_t err = ps.readFromParcel(parcel);
@@ -200,6 +201,7 @@ static void nativeUnparcelAndVerifyPowerSaveState(JNIEnv* env, jobject /* obj */
     PowerSaveState psOrig = PowerSaveState(static_cast<bool>(batterySaverEnabled),
             static_cast<bool>(globalBatterySaverEnabled),
             static_cast<LocationMode>(locationMode),
+            static_cast<SoundTriggerMode>(soundTriggerMode),
             static_cast<float>(brightnessFactor));
     if (ps == psOrig) {
         return;
@@ -229,7 +231,6 @@ static jobject nativeObtainBSPConfigParcel(JNIEnv* env, jobject /* obj */,
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableAod),
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableLaunchBoost),
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableOptionalSensors),
-        env->GetBooleanField(bsObj, gBSPCFieldIds.disableSoundTrigger),
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableVibration),
         env->GetBooleanField(bsObj, gBSPCFieldIds.enableAdjustBrightness),
         env->GetBooleanField(bsObj, gBSPCFieldIds.enableDataSaver),
@@ -238,7 +239,8 @@ static jobject nativeObtainBSPConfigParcel(JNIEnv* env, jobject /* obj */,
         env->GetBooleanField(bsObj, gBSPCFieldIds.enableQuickDoze),
         env->GetBooleanField(bsObj, gBSPCFieldIds.forceAllAppsStandby),
         env->GetBooleanField(bsObj, gBSPCFieldIds.forceBackgroundCheck),
-        static_cast<LocationMode>(env->GetIntField(bsObj, gBSPCFieldIds.locationMode)));
+        static_cast<LocationMode>(env->GetIntField(bsObj, gBSPCFieldIds.locationMode)),
+        static_cast<SoundTriggerMode>(env->GetIntField(bsObj, gBSPCFieldIds.soundTriggerMode)));
 
     jobject bsParcel = nativeObtainParcel(env);
     Parcel* parcel = nativeGetParcelData(env, bsParcel);
@@ -279,7 +281,6 @@ static void nativeUnparcelAndVerifyBSPConfig(JNIEnv* env, jobject /* obj */,
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableAod),
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableLaunchBoost),
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableOptionalSensors),
-        env->GetBooleanField(bsObj, gBSPCFieldIds.disableSoundTrigger),
         env->GetBooleanField(bsObj, gBSPCFieldIds.disableVibration),
         env->GetBooleanField(bsObj, gBSPCFieldIds.enableAdjustBrightness),
         env->GetBooleanField(bsObj, gBSPCFieldIds.enableDataSaver),
@@ -288,7 +289,8 @@ static void nativeUnparcelAndVerifyBSPConfig(JNIEnv* env, jobject /* obj */,
         env->GetBooleanField(bsObj, gBSPCFieldIds.enableQuickDoze),
         env->GetBooleanField(bsObj, gBSPCFieldIds.forceAllAppsStandby),
         env->GetBooleanField(bsObj, gBSPCFieldIds.forceBackgroundCheck),
-        static_cast<LocationMode>(env->GetIntField(bsObj, gBSPCFieldIds.locationMode)));
+        static_cast<LocationMode>(env->GetIntField(bsObj, gBSPCFieldIds.locationMode)),
+        static_cast<SoundTriggerMode>(env->GetIntField(bsObj, gBSPCFieldIds.soundTriggerMode)));
 
     if (bs == bsOrig) {
         return;
@@ -307,9 +309,9 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
                 (void*) nativeObtainWorkSourceParcel },
         { "nativeUnparcelAndVerifyWorkSource", "(Landroid/os/Parcel;[I[Ljava/lang/String;)V",
                 (void*) nativeUnparcelAndVerifyWorkSource },
-        { "nativeObtainPowerSaveStateParcel", "(ZZIF)Landroid/os/Parcel;",
+        { "nativeObtainPowerSaveStateParcel", "(ZZIIF)Landroid/os/Parcel;",
                 (void*) nativeObtainPowerSaveStateParcel },
-        { "nativeUnparcelAndVerifyPowerSaveState", "(Landroid/os/Parcel;ZZIF)V",
+        { "nativeUnparcelAndVerifyPowerSaveState", "(Landroid/os/Parcel;ZZIIF)V",
                 (void*) nativeUnparcelAndVerifyPowerSaveState },
         { "nativeObtainBSPConfigParcel",
                 "(Landroid/os/BatterySaverPolicyConfig;"
@@ -340,7 +342,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     GET_FIELD_ID(gBSPCFieldIds.disableAod, bspcClazz, "mDisableAod", "Z");
     GET_FIELD_ID(gBSPCFieldIds.disableLaunchBoost, bspcClazz, "mDisableLaunchBoost", "Z");
     GET_FIELD_ID(gBSPCFieldIds.disableOptionalSensors, bspcClazz, "mDisableOptionalSensors", "Z");
-    GET_FIELD_ID(gBSPCFieldIds.disableSoundTrigger, bspcClazz, "mDisableSoundTrigger", "Z");
     GET_FIELD_ID(gBSPCFieldIds.disableVibration, bspcClazz, "mDisableVibration", "Z");
     GET_FIELD_ID(gBSPCFieldIds.enableAdjustBrightness, bspcClazz, "mEnableAdjustBrightness", "Z");
     GET_FIELD_ID(gBSPCFieldIds.enableDataSaver, bspcClazz, "mEnableDataSaver", "Z");
@@ -350,6 +351,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     GET_FIELD_ID(gBSPCFieldIds.forceAllAppsStandby, bspcClazz, "mForceAllAppsStandby", "Z");
     GET_FIELD_ID(gBSPCFieldIds.forceBackgroundCheck, bspcClazz, "mForceBackgroundCheck", "Z");
     GET_FIELD_ID(gBSPCFieldIds.locationMode, bspcClazz, "mLocationMode", "I");
+    GET_FIELD_ID(gBSPCFieldIds.soundTriggerMode, bspcClazz, "mSoundTriggerMode", "I");
 
     jniRegisterNativeMethods(env, "android/os/PowerManagerTest", methodTable,
                 sizeof(methodTable) / sizeof(JNINativeMethod));

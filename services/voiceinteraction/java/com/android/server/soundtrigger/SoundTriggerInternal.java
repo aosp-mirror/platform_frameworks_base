@@ -26,7 +26,6 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel;
 import android.hardware.soundtrigger.SoundTrigger.ModelParamRange;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
-import android.media.permission.Identity;
 import android.os.IBinder;
 
 import com.android.server.voiceinteraction.VoiceInteractionManagerService;
@@ -63,10 +62,13 @@ public interface SoundTriggerInternal {
          * @param soundModel  The sound model to use for recognition.
          * @param listener    The listener for the recognition events related to the given
          *                    keyphrase.
+         * @param runInBatterySaverMode flag that indicates whether the recognition should continue
+         *                              after battery saver mode is enabled.
          * @return One of {@link #STATUS_ERROR} or {@link #STATUS_OK}.
          */
         int startRecognition(int keyphraseId, KeyphraseSoundModel soundModel,
-                IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig);
+                IRecognitionStatusCallback listener, RecognitionConfig recognitionConfig,
+                boolean runInBatterySaverMode);
 
         /**
          * Stops recognition for the given {@link Keyphrase} if a recognition is

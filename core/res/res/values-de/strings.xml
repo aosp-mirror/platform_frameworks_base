@@ -57,8 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"Anrufer-ID für eingehenden Anruf"</string>
-    <!-- no translation found for ClirMmi (6752346475055446417) -->
-    <skip />
+    <string name="ClirMmi" msgid="6752346475055446417">"Anrufer-ID für ausgehende Anrufe verbergen"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID der verbundenen Leitung"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Beschränkung für ID der verbundenen Leitung"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Rufweiterleitung"</string>

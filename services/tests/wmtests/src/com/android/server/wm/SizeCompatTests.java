@@ -939,8 +939,7 @@ public class SizeCompatTests extends WindowTestsBase {
                         com.android.internal.R.dimen.status_bar_height));
 
         displayPolicy.addWindowLw(statusBar, attrs);
-        displayPolicy.beginLayoutLw(displayContent.mDisplayFrames,
-                displayContent.getConfiguration().uiMode);
+        displayPolicy.layoutWindowLw(statusBar, null, displayContent.mDisplayFrames);
     }
 
     static void prepareUnresizable(ActivityRecord activity, int screenOrientation) {

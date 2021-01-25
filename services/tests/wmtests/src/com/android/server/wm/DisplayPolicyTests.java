@@ -296,20 +296,20 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayInfo.logicalWidth = 1000;
         displayInfo.logicalHeight = 2000;
         displayInfo.rotation = ROTATION_0;
-        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
-                displayInfo, null /* displayCutout */);
 
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         mImeWindow.mAboveInsetsState = state;
+        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
+                state, displayInfo, null /* displayCutout */);
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
         mImeWindow.mGivenContentInsets.set(0, displayInfo.logicalHeight, 0, 0);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
-        displayPolicy.beginLayoutLw(mDisplayContent.mDisplayFrames, 0 /* UI mode */);
+        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
         displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
 
         final InsetsSource imeSource = state.peekSource(ITYPE_IME);
