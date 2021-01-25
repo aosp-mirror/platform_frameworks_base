@@ -103,7 +103,6 @@ import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_DOCKED;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_DRAG_RESIZING_FREEFORM;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME;
-import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
@@ -2242,7 +2241,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         disposeInputChannel();
 
-        mWinAnimator.destroyDeferredSurfaceLocked(mTmpTransaction);
         mWinAnimator.destroySurfaceLocked(mTmpTransaction);
         mTmpTransaction.apply();
         mSession.windowRemovedLocked();
@@ -3306,11 +3304,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (!(appStopped || mWindowRemovalAllowed || cleanupOnResume)) {
             return destroyedSomething;
-        }
-
-        if (appStopped || mWindowRemovalAllowed) {
-            mWinAnimator.destroyPreservedSurfaceLocked(mTmpTransaction);
-            mTmpTransaction.apply();
         }
 
         if (mDestroying) {
@@ -5000,23 +4993,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
         }
 
-        // When we change the Surface size, in scenarios which may require changing
-        // the surface position in sync with the resize, we use a preserved surface
-        // so we can freeze it while waiting for the client to report draw on the newly
-        // sized surface. At the moment this logic is only in place for switching
-        // in and out of the big surface for split screen resize.
         if (isDragResizeChanged()) {
             setDragResizing();
-            // We can only change top level windows to the full-screen surface when
-            // resizing (as we only have one full-screen surface). So there is no need
-            // to preserve and destroy windows which are attached to another, they
-            // will keep their surface and its size may change over time.
-            if (mHasSurface && !isChildWindow()) {
-                mWinAnimator.preserveSurfaceLocked(getSyncTransaction());
-                result |= RELAYOUT_RES_SURFACE_CHANGED |
-                    RELAYOUT_RES_FIRST_TIME;
-                scheduleAnimation();
-            }
         }
         final boolean freeformResizing = isDragResizing()
                 && getResizeMode() == DRAG_RESIZE_MODE_FREEFORM;

@@ -1365,7 +1365,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final boolean surfaceReady = w.isDrawn()  // Regular case
-                || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
         final boolean needsLetterbox = surfaceReady && isLetterboxed(w);
         updateRoundedCorners(w);

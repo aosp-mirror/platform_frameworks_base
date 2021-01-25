@@ -83,7 +83,6 @@ import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_RELAUNCH;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
 import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
-import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_BLAST_SYNC;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_INVALID;
@@ -624,13 +623,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * Windows whose surface should be destroyed.
      */
     final ArrayList<WindowState> mDestroySurface = new ArrayList<>();
-
-    /**
-     * Windows with a preserved surface waiting to be destroyed. These windows
-     * are going through a surface change. We keep the old surface around until
-     * the first frame on the new surface finishes drawing.
-     */
-    final ArrayList<WindowState> mDestroyPreservedSurface = new ArrayList<>();
 
     /**
      * This is set when we have run out of memory, and will either be an empty
@@ -2328,7 +2320,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (DEBUG_LAYOUT) Slog.v(TAG_WM, "Relayout " + win + ": viewVisibility=" + viewVisibility
                     + " req=" + requestedWidth + "x" + requestedHeight + " " + win.mAttrs);
-            winAnimator.mSurfaceDestroyDeferred = (flags & RELAYOUT_DEFER_SURFACE_DESTROY) != 0;
             if ((attrChanges & WindowManager.LayoutParams.ALPHA_CHANGED) != 0) {
                 winAnimator.mAlpha = attrs.alpha;
             }
@@ -5488,14 +5479,6 @@ public class WindowManagerService extends IWindowManager.Stub
             removeMessages(what, obj);
             sendMessageDelayed(obtainMessage(what, obj), delayMillis);
         }
-    }
-
-    void destroyPreservedSurfaceLocked() {
-        for (int i = mDestroyPreservedSurface.size() - 1; i >= 0 ; i--) {
-            final WindowState w = mDestroyPreservedSurface.get(i);
-            w.mWinAnimator.destroyPreservedSurfaceLocked(w.getSyncTransaction());
-        }
-        mDestroyPreservedSurface.clear();
     }
 
     // -------------------------------------------------------------
