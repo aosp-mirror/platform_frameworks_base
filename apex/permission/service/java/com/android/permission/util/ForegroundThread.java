@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.role.util;
+package com.android.permission.util;
 
 import android.annotation.NonNull;
 import android.os.Handler;
@@ -26,26 +26,26 @@ import com.android.internal.annotations.GuardedBy;
 import java.util.concurrent.Executor;
 
 /**
- * Shared singleton background thread.
+ * Shared singleton foreground thread.
  */
-public class BackgroundThread extends HandlerThread {
+public class ForegroundThread extends HandlerThread {
     private static final Object sLock = new Object();
 
     @GuardedBy("sLock")
-    private static BackgroundThread sInstance;
+    private static ForegroundThread sInstance;
     @GuardedBy("sLock")
     private static Handler sHandler;
     @GuardedBy("sLock")
     private static Executor sExecutor;
 
-    private BackgroundThread() {
-        super(BackgroundThread.class.getName());
+    private ForegroundThread() {
+        super(ForegroundThread.class.getName());
     }
 
     @GuardedBy("sLock")
     private static void ensureInstanceLocked() {
         if (sInstance == null) {
-            sInstance = new BackgroundThread();
+            sInstance = new ForegroundThread();
             sInstance.start();
             sHandler = new Handler(sInstance.getLooper());
             sExecutor = new HandlerExecutor(sHandler);
@@ -58,7 +58,7 @@ public class BackgroundThread extends HandlerThread {
      * @return the singleton instance of thi class
      */
     @NonNull
-    public static BackgroundThread get() {
+    public static ForegroundThread get() {
         synchronized (sLock) {
             ensureInstanceLocked();
             return sInstance;

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package com.android.server.role;
+package com.android.role;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Set;
  *
  * @hide
  */
-//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface RoleManagerLocal {
     /**
      * Get all roles and their holders.

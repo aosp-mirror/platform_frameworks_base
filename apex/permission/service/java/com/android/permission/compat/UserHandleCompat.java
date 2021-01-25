@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.role.compat;
+package com.android.permission.compat;
 
 import android.annotation.UserIdInt;
 import android.os.UserHandle;
