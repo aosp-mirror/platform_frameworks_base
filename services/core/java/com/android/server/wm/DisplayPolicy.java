@@ -185,11 +185,11 @@ public class DisplayPolicy {
     // app shows again. If that doesn't happen for 30s we drop the gesture.
     private static final long PANIC_GESTURE_EXPIRATION = 30000;
 
-    // Controls navigation bar opacity depending on which workspace stacks are currently
+    // Controls navigation bar opacity depending on which workspace root tasks are currently
     // visible.
-    // Nav bar is always opaque when either the freeform stack or docked stack is visible.
+    // Nav bar is always opaque when either the freeform root task or docked root task is visible.
     private static final int NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED = 0;
-    // Nav bar is always translucent when the freeform stack is visible, otherwise always opaque.
+    // Nav bar is always translucent when the freeform rootTask is visible, otherwise always opaque.
     private static final int NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE = 1;
     // Nav bar is never forced opaque.
     private static final int NAV_BAR_FORCE_TRANSPARENT = 2;
@@ -317,10 +317,10 @@ public class DisplayPolicy {
     private int mLastFullscreenAppearance;
     private int mLastDockedAppearance;
     private int mLastBehavior;
-    private final Rect mNonDockedStackBounds = new Rect();
-    private final Rect mDockedStackBounds = new Rect();
-    private final Rect mLastNonDockedStackBounds = new Rect();
-    private final Rect mLastDockedStackBounds = new Rect();
+    private final Rect mNonDockedRootTaskBounds = new Rect();
+    private final Rect mDockedRootTaskBounds = new Rect();
+    private final Rect mLastNonDockedRootTaskBounds = new Rect();
+    private final Rect mLastDockedRootTaskBounds = new Rect();
 
     // What we last reported to system UI about whether the focused window is fullscreen/immersive.
     private boolean mLastFocusIsFullscreen = false;
@@ -1838,9 +1838,9 @@ public class DisplayPolicy {
             mTopFullscreenOpaqueOrDimmingWindowState = win;
         }
 
-        // We need to keep track of the top "fullscreen" opaque window for the docked stack
+        // We need to keep track of the top "fullscreen" opaque window for the docked root task
         // separately, because both the "real fullscreen" opaque window and the one for the docked
-        // stack can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
+        // root task can control View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR.
         if (mTopDockedOpaqueWindowState == null && affectsSystemUi && appWindow && attached == null
                 && attrs.isFullscreen() && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             mTopDockedOpaqueWindowState = win;
@@ -1857,7 +1857,7 @@ public class DisplayPolicy {
         }
 
         // Also keep track of any windows that are dimming but not necessarily fullscreen in the
-        // docked stack.
+        // docked root task.
         if (mTopDockedOpaqueOrDimmingWindowState == null && affectsSystemUi && win.isDimming()
                 && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
             mTopDockedOpaqueOrDimmingWindowState = win;
@@ -2528,20 +2528,20 @@ public class DisplayPolicy {
         final boolean inSplitScreen =
                 mService.mRoot.getDefaultTaskDisplayArea().isSplitScreenModeActivated();
         if (inSplitScreen) {
-            mService.getStackBounds(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
-                    mDockedStackBounds);
+            mService.getRootTaskBounds(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD,
+                    mDockedRootTaskBounds);
         } else {
-            mDockedStackBounds.setEmpty();
+            mDockedRootTaskBounds.setEmpty();
         }
-        mService.getStackBounds(inSplitScreen ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+        mService.getRootTaskBounds(inSplitScreen ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
                         : WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_UNDEFINED, mNonDockedStackBounds);
+                ACTIVITY_TYPE_UNDEFINED, mNonDockedRootTaskBounds);
         final int fullscreenAppearance = updateLightStatusBarLw(0 /* appearance */,
                 mTopFullscreenOpaqueWindowState, mTopFullscreenOpaqueOrDimmingWindowState,
-                mNonDockedStackBounds);
+                mNonDockedRootTaskBounds);
         final int dockedAppearance = updateLightStatusBarLw(0 /* appearance */,
                 mTopDockedOpaqueWindowState, mTopDockedOpaqueOrDimmingWindowState,
-                mDockedStackBounds);
+                mDockedRootTaskBounds);
         final int disableFlags = win.getDisableFlags();
         final int opaqueAppearance = updateSystemBarsLw(win, disableFlags);
         final WindowState navColorWin = chooseNavigationColorWindowLw(
@@ -2562,8 +2562,8 @@ public class DisplayPolicy {
                 && mLastDockedAppearance == dockedAppearance
                 && mLastBehavior == behavior
                 && mLastFocusIsFullscreen == isFullscreen
-                && mLastNonDockedStackBounds.equals(mNonDockedStackBounds)
-                && mLastDockedStackBounds.equals(mDockedStackBounds)) {
+                && mLastNonDockedRootTaskBounds.equals(mNonDockedRootTaskBounds)
+                && mLastDockedRootTaskBounds.equals(mDockedRootTaskBounds)) {
             return false;
         }
         if (mDisplayContent.isDefaultDisplay && mLastFocusIsFullscreen != isFullscreen
@@ -2577,16 +2577,16 @@ public class DisplayPolicy {
         mLastDockedAppearance = dockedAppearance;
         mLastBehavior = behavior;
         mLastFocusIsFullscreen = isFullscreen;
-        mLastNonDockedStackBounds.set(mNonDockedStackBounds);
-        mLastDockedStackBounds.set(mDockedStackBounds);
-        final Rect fullscreenStackBounds = new Rect(mNonDockedStackBounds);
-        final Rect dockedStackBounds = new Rect(mDockedStackBounds);
+        mLastNonDockedRootTaskBounds.set(mNonDockedRootTaskBounds);
+        mLastDockedRootTaskBounds.set(mDockedRootTaskBounds);
+        final Rect fullscreenRootTaskBounds = new Rect(mNonDockedRootTaskBounds);
+        final Rect dockedRootTaskBounds = new Rect(mDockedRootTaskBounds);
         final AppearanceRegion[] appearanceRegions = inSplitScreen
                 ? new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds),
-                        new AppearanceRegion(dockedAppearance, dockedStackBounds)}
+                        new AppearanceRegion(fullscreenAppearance, fullscreenRootTaskBounds),
+                        new AppearanceRegion(dockedAppearance, dockedRootTaskBounds)}
                 : new AppearanceRegion[]{
-                        new AppearanceRegion(fullscreenAppearance, fullscreenStackBounds)};
+                        new AppearanceRegion(fullscreenAppearance, fullscreenRootTaskBounds)};
         String cause = win.toString();
         mHandler.post(() -> {
             StatusBarManagerInternal statusBar = getStatusBarManagerInternal();
@@ -2602,14 +2602,14 @@ public class DisplayPolicy {
     }
 
     private int updateLightStatusBarLw(@Appearance int appearance, WindowState opaque,
-            WindowState opaqueOrDimming, Rect stackBounds) {
+            WindowState opaqueOrDimming, Rect rootTaskBounds) {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
         final int statusBarHeight = mStatusBarHeightForRotation[displayRotation.getRotation()];
-        final boolean stackBoundsContainStatusBar =
-                stackBounds.isEmpty() ? false : stackBounds.top < statusBarHeight;
+        final boolean rootTaskBoundsContainStatusBar =
+                rootTaskBounds.isEmpty() ? false : rootTaskBounds.top < statusBarHeight;
         final boolean onKeyguard = isKeyguardShowing() && !isKeyguardOccluded();
         final WindowState statusColorWin = onKeyguard ? mNotificationShade : opaqueOrDimming;
-        if (stackBoundsContainStatusBar && statusColorWin != null) {
+        if (rootTaskBoundsContainStatusBar && statusColorWin != null) {
             if (statusColorWin == opaque || onKeyguard) {
                 // If the top fullscreen-or-dimming window is also the top fullscreen, respect
                 // its light flag.
@@ -2691,16 +2691,16 @@ public class DisplayPolicy {
     }
 
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
-        final boolean dockedStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+        final boolean dockedRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
                 .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        final boolean freeformStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+        final boolean freeformRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
                 .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
         final boolean resizing = mDisplayContent.getDockedDividerController().isResizing();
 
-        // We need to force system bars when the docked stack is visible, when the freeform stack
-        // is focused but also when we are resizing for the transitions when docked stack
-        // visibility changes.
-        mForceShowSystemBars = dockedStackVisible || win.inFreeformWindowingMode() || resizing;
+        // We need to force system bars when the docked root task is visible, when the freeform
+        // root task is focused but also when we are resizing for the transitions when docked
+        // root task visibility changes.
+        mForceShowSystemBars = dockedRootTaskVisible || win.inFreeformWindowingMode() || resizing;
         final boolean forceOpaqueStatusBar = mForceShowSystemBars && !isKeyguardShowing();
 
         final boolean fullscreenDrawsStatusBarBackground =
@@ -2718,8 +2718,8 @@ public class DisplayPolicy {
             appearance &= ~APPEARANCE_OPAQUE_STATUS_BARS;
         }
 
-        appearance = configureNavBarOpacity(appearance, dockedStackVisible,
-                freeformStackVisible, resizing, fullscreenDrawsNavBarBackground,
+        appearance = configureNavBarOpacity(appearance, dockedRootTaskVisible,
+                freeformRootTaskVisible, resizing, fullscreenDrawsNavBarBackground,
                 dockedDrawsNavigationBarBackground);
 
         final boolean requestHideNavBar = !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
@@ -2782,17 +2782,17 @@ public class DisplayPolicy {
      * @return the current visibility flags with the nav-bar opacity related flags toggled based
      *         on the nav bar opacity rules chosen by {@link #mNavBarOpacityMode}.
      */
-    private int configureNavBarOpacity(int appearance, boolean dockedStackVisible,
-            boolean freeformStackVisible, boolean isDockedDividerResizing,
+    private int configureNavBarOpacity(int appearance, boolean dockedRootTaskVisible,
+            boolean freeformRootTaskVisible, boolean isDockedDividerResizing,
             boolean fullscreenDrawsBackground, boolean dockedDrawsNavigationBarBackground) {
         if (mNavBarOpacityMode == NAV_BAR_FORCE_TRANSPARENT) {
             if (fullscreenDrawsBackground && dockedDrawsNavigationBarBackground) {
                 appearance = clearNavBarOpaqueFlag(appearance);
-            } else if (dockedStackVisible) {
+            } else if (dockedRootTaskVisible) {
                 appearance = setNavBarOpaqueFlag(appearance);
             }
         } else if (mNavBarOpacityMode == NAV_BAR_OPAQUE_WHEN_FREEFORM_OR_DOCKED) {
-            if (dockedStackVisible || freeformStackVisible || isDockedDividerResizing) {
+            if (dockedRootTaskVisible || freeformRootTaskVisible || isDockedDividerResizing) {
                 if (mIsFreeformWindowOverlappingWithNavBar) {
                     appearance = clearNavBarOpaqueFlag(appearance);
                 } else {
@@ -2804,7 +2804,7 @@ public class DisplayPolicy {
         } else if (mNavBarOpacityMode == NAV_BAR_TRANSLUCENT_WHEN_FREEFORM_OPAQUE_OTHERWISE) {
             if (isDockedDividerResizing) {
                 appearance = setNavBarOpaqueFlag(appearance);
-            } else if (freeformStackVisible) {
+            } else if (freeformRootTaskVisible) {
                 appearance = clearNavBarOpaqueFlag(appearance);
             } else {
                 appearance = setNavBarOpaqueFlag(appearance);

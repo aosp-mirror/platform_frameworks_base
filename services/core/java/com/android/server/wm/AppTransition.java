@@ -86,8 +86,8 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
 import android.annotation.DrawableRes;
 import android.annotation.NonNull;
@@ -1770,12 +1770,12 @@ public class AppTransition implements Dump {
                 transit == TRANSIT_OLD_KEYGUARD_GOING_AWAY_ON_WALLPAPER, toShade, subtle);
     }
 
-    int getAppStackClipMode() {
+    int getAppRootTaskClipMode() {
         return mNextAppTransitionRequests.contains(TRANSIT_RELAUNCH)
                 || mNextAppTransitionRequests.contains(TRANSIT_KEYGUARD_GOING_AWAY)
                 || mNextAppTransitionType == NEXT_TRANSIT_TYPE_CLIP_REVEAL
-                ? STACK_CLIP_NONE
-                : STACK_CLIP_AFTER_ANIM;
+                ? ROOT_TASK_CLIP_NONE
+                : ROOT_TASK_CLIP_AFTER_ANIM;
     }
 
     @TransitionFlags
