@@ -203,8 +203,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"ছেন্সৰ জাননী সেৱা"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight সেৱা"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"সময় মণ্ডল চিনাক্তকাৰী (সংযোগ নাই)"</string>
-    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
-    <skip />
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS সময় আপডে’ট প্ৰদান কৰা সেৱা"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"আপোনাৰ ডিভাইচৰ ডেটা মচা হ\'ব"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"এই প্ৰশাসক এপটো ব্যৱহাৰ কৰিব নোৱাৰি। এতিয়া আপোনাৰ ডিভাইচটোৰ ডেটা মচা হ\'ব।\n\nআপোনাৰ কিবা প্ৰশ্ন থাকিলে আপোনাৰ প্ৰতিষ্ঠানৰ প্ৰশাসকৰ সৈতে যোগাযোগ কৰক।"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"প্ৰিণ্ট কৰা কাৰ্য <xliff:g id="OWNER_APP">%s</xliff:g>এ অক্ষম কৰি ৰাখিছে।"</string>
@@ -2205,12 +2204,8 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"আপুনি সকলো অথবা কেইখনমান স্ক্ৰীন বিবৰ্ধন কৰিব পাৰে"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ছেটিঙত অন কৰক"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"অগ্ৰাহ্য কৰক"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"অব্যাহত ৰাখিবলৈ &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;এ আপোনাৰ ডিভাইচৰ মাইক্ৰ’ফ’ন এক্সেছ কৰাৰ আৱশ্যক।"</string>
+    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"অব্যাহত ৰাখিবলৈ &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;এ আপোনাৰ ডিভাইচৰ কেমেৰা এক্সেছ কৰাৰ আৱশ্যক।"</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"অন কৰক"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"ছেন্সৰ সম্পৰ্কীয় গোপনীয়তাৰ নীতি"</string>
 </resources>
