@@ -453,59 +453,6 @@ public class DevicePolicyManager {
             "android.app.action.PROVISION_FINANCED_DEVICE";
 
     /**
-     * Activity action: Starts the provisioning flow which sets up a managed device.
-     * Must be started with {@link android.app.Activity#startActivityForResult(Intent, int)}.
-     *
-     * <p>NOTE: This is only supported on split system user devices, and puts the device into a
-     * management state that is distinct from that reached by
-     * {@link #ACTION_PROVISION_MANAGED_DEVICE} - specifically the device owner runs on the system
-     * user, and only has control over device-wide policies, not individual users and their data.
-     * The primary benefit is that multiple non-system users are supported when provisioning using
-     * this form of device management.
-     *
-     * <p>During device owner provisioning a device admin app is set as the owner of the device.
-     * A device owner has full control over the device. The device owner can not be modified by the
-     * user.
-     *
-     * <p>A typical use case would be a device that is owned by a company, but used by either an
-     * employee or client.
-     *
-     * <p>An intent with this action can be sent only on an unprovisioned device.
-     * It is possible to check if provisioning is allowed or not by querying the method
-     * {@link #isProvisioningAllowed(String)}.
-     *
-     * <p>The intent contains the following extras:
-     * <ul>
-     * <li>{@link #EXTRA_PROVISIONING_DEVICE_ADMIN_COMPONENT_NAME}</li>
-     * <li>{@link #EXTRA_PROVISIONING_SKIP_ENCRYPTION}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_ADMIN_EXTRAS_BUNDLE}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_LOGO_URI}, optional</li>
-     * <li>{@link #EXTRA_PROVISIONING_MAIN_COLOR}, optional</li>
-     * </ul>
-     *
-     * <p>When device owner provisioning has completed, an intent of the type
-     * {@link DeviceAdminReceiver#ACTION_PROFILE_PROVISIONING_COMPLETE} is broadcast to the
-     * device owner.
-     *
-     * <p>From version {@link android.os.Build.VERSION_CODES#O}, when device owner provisioning has
-     * completed, along with the above broadcast, activity intent
-     * {@link #ACTION_PROVISIONING_SUCCESSFUL} will also be sent to the device owner.
-     *
-     * <p>If provisioning fails, the device is factory reset.
-     *
-     * <p>A result code of {@link android.app.Activity#RESULT_OK} implies that the synchronous part
-     * of the provisioning flow was successful, although this doesn't guarantee the full flow will
-     * succeed. Conversely a result code of {@link android.app.Activity#RESULT_CANCELED} implies
-     * that the user backed-out of provisioning, or some precondition for provisioning wasn't met.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE
-        = "android.app.action.PROVISION_MANAGED_SHAREABLE_DEVICE";
-
-    /**
      * Activity action: Finalizes management provisioning, should be used after user-setup
      * has been completed and {@link #getUserProvisioningState()} returns one of:
      * <ul>
@@ -1990,8 +1937,8 @@ public class DevicePolicyManager {
      * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE}, {@link #ACTION_PROVISION_MANAGED_USER} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when provisioning is allowed.
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} and {@link #ACTION_PROVISION_MANAGED_USER}
+     * when provisioning is allowed.
      *
      * @hide
      */
@@ -2001,9 +1948,8 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when the device already has a device
-     * owner.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the device already has a
+     * device owner.
      *
      * @hide
      */
@@ -2013,9 +1959,8 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when the user has a profile owner and for
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE} when the profile owner is already set.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the user has a profile owner
+     *  and for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the profile owner is already set.
      *
      * @hide
      */
@@ -2025,8 +1970,7 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} when the user isn't running.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} when the user isn't running.
      *
      * @hide
      */
@@ -2036,9 +1980,8 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} if the device has already been setup and
-     * for {@link #ACTION_PROVISION_MANAGED_USER} if the user has already been setup.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} if the device has already been
+     * setup and for {@link #ACTION_PROVISION_MANAGED_USER} if the user has already been setup.
      *
      * @hide
      */
@@ -2064,8 +2007,7 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} if the user is not a system user.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} if the user is not a system user.
      *
      * @hide
      */
@@ -2075,9 +2017,8 @@ public class DevicePolicyManager {
     /**
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} and {@link #ACTION_PROVISION_MANAGED_USER}
-     * when the device is a watch and is already paired.
+     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE} and
+     * {@link #ACTION_PROVISION_MANAGED_USER} when the device is a watch and is already paired.
      *
      * @hide
      */
@@ -2121,14 +2062,11 @@ public class DevicePolicyManager {
 
     /**
      * TODO (b/137101239): clean up split system user codes
-     * Result code for {@link #checkProvisioningPreCondition}.
-     *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_USER} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} on devices not running with split system
-     * user.
      *
      * @hide
-     */
+     * @deprecated not used anymore but can't be removed since it's a @TestApi.
+     **/
+    @Deprecated
     @TestApi
     public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12;
 
@@ -2136,8 +2074,7 @@ public class DevicePolicyManager {
      * Result code for {@link #checkProvisioningPreCondition}.
      *
      * <p>Returned for {@link #ACTION_PROVISION_MANAGED_DEVICE},
-     * {@link #ACTION_PROVISION_MANAGED_PROFILE}, {@link #ACTION_PROVISION_MANAGED_USER} and
-     * {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE} on devices which do not support device
+     * {@link #ACTION_PROVISION_MANAGED_PROFILE} on devices which do not support device
      * admins.
      *
      * @hide
@@ -2149,11 +2086,10 @@ public class DevicePolicyManager {
      * TODO (b/137101239): clean up split system user codes
      * Result code for {@link #checkProvisioningPreCondition}.
      *
-     * <p>Returned for {@link #ACTION_PROVISION_MANAGED_PROFILE} when the device the user is a
-     * system user on a split system user device.
-     *
      * @hide
+     * @deprecated not used anymore but can't be removed since it's a @TestApi.
      */
+    @Deprecated
     @TestApi
     public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14;
 
@@ -7147,17 +7083,9 @@ public class DevicePolicyManager {
     }
 
     /**
+     * TODO (b/137101239): remove this method in follow-up CL
+     * since it's only used for split system user.
      * Called by a device owner to set whether all users created on the device should be ephemeral.
-     * <p>
-     * The system user is exempt from this policy - it is never ephemeral.
-     * <p>
-     * The calling device admin must be the device owner. If it is not, a security exception will be
-     * thrown.
-     *
-     * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
-     * @param forceEphemeralUsers If true, all the existing users will be deleted and all
-     *            subsequently created users will be ephemeral.
-     * @throws SecurityException if {@code admin} is not a device owner.
      * @hide
      */
     public void setForceEphemeralUsers(
@@ -7173,6 +7101,8 @@ public class DevicePolicyManager {
     }
 
     /**
+     * TODO (b/137101239): remove this method in follow-up CL
+     * since it's only used for split system user.
      * @return true if all users are created ephemeral.
      * @throws SecurityException if {@code admin} is not a device owner.
      * @hide
@@ -10731,9 +10661,7 @@ public class DevicePolicyManager {
      * profile or user, setting the given package as owner.
      *
      * @param action One of {@link #ACTION_PROVISION_MANAGED_DEVICE},
-     *        {@link #ACTION_PROVISION_MANAGED_PROFILE},
-     *        {@link #ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE},
-     *        {@link #ACTION_PROVISION_MANAGED_USER}
+     *        {@link #ACTION_PROVISION_MANAGED_PROFILE}
      * @param packageName The package of the component that would be set as device, user, or profile
      *        owner.
      * @return A {@link ProvisioningPreCondition} value indicating whether provisioning is allowed.
