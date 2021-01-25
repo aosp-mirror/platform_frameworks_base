@@ -1548,6 +1548,11 @@ package android.os.storage {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.storage.CrateInfo> CREATOR;
   }
 
+  public class StorageManager {
+    method @NonNull public static java.util.UUID convert(@NonNull String);
+    method @NonNull public static String convert(@NonNull java.util.UUID);
+  }
+
   public final class StorageVolume implements android.os.Parcelable {
     method public String getPath();
   }
