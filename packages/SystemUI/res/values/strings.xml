@@ -2808,4 +2808,7 @@
     <!-- Text to display in a notification when ACTION_BATTERY_CHANGED.EXTRA_PRESENT field is false
     [CHAR LIMIT=NONE] -->
     <string name="battery_state_unknown_notification_text">Tap for more information</string>
+
+    <!-- No translation [CHAR LIMIT=0] -->
+    <string name="qs_remove_labels" translatable="false"></string>
 </resources>

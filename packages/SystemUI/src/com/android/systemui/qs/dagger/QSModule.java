@@ -40,7 +40,7 @@ import dagger.Provides;
  * Module for QS dependencies
  */
 @Module(subcomponents = {QSFragmentComponent.class},
-        includes = {MediaModule.class})
+        includes = {MediaModule.class, QSFlagsModule.class})
 public interface QSModule {
 
     @Provides
@@ -74,4 +74,5 @@ public interface QSModule {
     /** */
     @Binds
     QSHost provideQsHost(QSTileHost controllerImpl);
+
 }

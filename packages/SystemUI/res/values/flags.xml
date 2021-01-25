@@ -24,4 +24,6 @@
 
     <!-- b/171917882 -->
     <bool name="flag_notification_twocolumn">false</bool>
+
+    <bool name="flag_qs_labels">false</bool>
 </resources>

@@ -26,7 +26,6 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.Gravity;
@@ -113,7 +112,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private int mMediaTotalBottomMargin;
     private int mFooterMarginStartHorizontal;
     private Consumer<Boolean> mMediaVisibilityChangedListener;
-    private final boolean mSideLabels;
+    private boolean mSideLabels;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -121,12 +120,15 @@ public class QSPanel extends LinearLayout implements Tunable {
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mContext = context;
-        mSideLabels = Settings.Secure.getInt(
-                mContext.getContentResolver(), "sysui_side_labels", 0) != 0;
 
         setOrientation(VERTICAL);
 
         mMovableContentStartIndex = getChildCount();
+
+    }
+
+    void initialize(boolean sideLabels) {
+        mSideLabels = sideLabels;
         mRegularTileLayout = createRegularTileLayout();
         mTileLayout = mRegularTileLayout;
 
