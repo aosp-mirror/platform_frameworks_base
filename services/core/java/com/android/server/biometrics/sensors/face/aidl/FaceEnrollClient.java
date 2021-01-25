@@ -116,9 +116,9 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
         try {
             // TODO(b/172593978): Pass features.
             // TODO(b/174619156): Handle accessibility enrollment.
-            mCancellationSignal = getFreshDaemon().enroll(mSequentialId, EnrollmentType.DEFAULT,
+            mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
-                    mPreviewSurface);
+                    EnrollmentType.DEFAULT, new byte[0], mPreviewSurface);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);

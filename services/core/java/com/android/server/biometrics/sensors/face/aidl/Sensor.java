@@ -357,6 +357,16 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
+        public void onFeaturesRetrieved(byte[] features, int enrollmentId) {
+
+        }
+
+        @Override
+        public void onFeatureSet(int enrollmentId, byte feature) {
+
+        }
+
+        @Override
         public void onEnrollmentsRemoved(int[] enrollmentIds) {
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
