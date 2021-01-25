@@ -17,9 +17,11 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.widget.Switch;
 
+import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.PreferenceViewHolder;
 import androidx.preference.TwoStatePreference;
 
@@ -38,30 +40,29 @@ public class MainSwitchPreference extends TwoStatePreference {
     private final List<OnMainSwitchChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
     private MainSwitchBar mMainSwitchBar;
-    private Switch mSwitch;
     private String mTitle;
 
     private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin;
 
     public MainSwitchPreference(Context context) {
         super(context);
-        init();
+        init(context, null);
     }
 
     public MainSwitchPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public MainSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
     public MainSwitchPreference(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs);
     }
 
     @Override
@@ -76,8 +77,21 @@ public class MainSwitchPreference extends TwoStatePreference {
         registerListenerToSwitchBar();
     }
 
-    private void init() {
+    private void init(Context context, AttributeSet attrs) {
         setLayoutResource(R.layout.main_switch_layout);
+
+        if (attrs != null) {
+            TypedArray a = context.obtainStyledAttributes(attrs,
+                    androidx.preference.R.styleable.Preference, 0 /*defStyleAttr*/,
+                    0 /*defStyleRes*/);
+            final CharSequence title = TypedArrayUtils.getText(a,
+                    androidx.preference.R.styleable.Preference_title,
+                    androidx.preference.R.styleable.Preference_android_title);
+            if (!TextUtils.isEmpty(title)) {
+                setTitle(title.toString());
+            }
+            a.recycle();
+        }
     }
 
     /**
