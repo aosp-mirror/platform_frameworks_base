@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +57,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
     @Mock
     private KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     @Mock
+    private HistoryTracker mHistoryTracker;
+    @Mock
     private ProximitySensor mProximitySensor;
     @Mock
     private SysuiStatusBarStateController mStatusBarStateController;
@@ -67,7 +70,8 @@ public class FalsingCollectorImplTest extends SysuiTestCase {
         when(mStatusBarStateController.getState()).thenReturn(StatusBarState.KEYGUARD);
 
         mFalsingCollector = new FalsingCollectorImpl(mFalsingDataProvider, mFalsingManager,
-                mKeyguardUpdateMonitor, mProximitySensor, mStatusBarStateController);
+                mKeyguardUpdateMonitor, mHistoryTracker, mProximitySensor,
+                mStatusBarStateController, new FakeSystemClock());
     }
 
     @Test

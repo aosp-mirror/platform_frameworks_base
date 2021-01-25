@@ -62,7 +62,7 @@ class DiagonalClassifier extends FalsingClassifier {
                 VERTICAL_ANGLE_RANGE);
     }
 
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         float angle = getAngle();
 
         if (angle == Float.MAX_VALUE) {  // Unknown angle

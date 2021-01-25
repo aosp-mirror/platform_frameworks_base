@@ -25,15 +25,14 @@ import android.view.View.OnTouchListener;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
-import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.classifier.SingleTapClassifier;
 
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
 
     private final LiftToActivateListener mLiftToActivateListener;
-    private final FalsingCollector mFalsingCollector;
     protected PasswordTextView mPasswordEntry;
 
     private final OnKeyListener mOnKeyListener = (v, keyCode, event) -> {
@@ -50,19 +49,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         return false;
     };
 
-    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
-        @Override
-        public boolean onInterceptTouchEvent(MotionEvent ev) {
-            mFalsingCollector.avoidGesture();
-            return false;
-        }
-
-        @Override
-        public boolean onTouchEvent(MotionEvent ev) {
-            return false;
-        }
-    };
-
     protected KeyguardPinBasedInputViewController(T view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecurityMode securityMode,
@@ -71,19 +57,18 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker,
             LiftToActivateListener liftToActivateListener,
-            FalsingCollector falsingCollector) {
+            FalsingCollector falsingCollector,
+            SingleTapClassifier singleTapClassifier) {
         super(view, keyguardUpdateMonitor, securityMode, lockPatternUtils, keyguardSecurityCallback,
-                messageAreaControllerFactory, latencyTracker);
+                messageAreaControllerFactory, latencyTracker, falsingCollector,
+                singleTapClassifier);
         mLiftToActivateListener = liftToActivateListener;
-        mFalsingCollector = falsingCollector;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
     }
 
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
-
-        mView.addMotionEventListener(mGlobalTouchListener);
 
         mPasswordEntry.setOnKeyListener(mOnKeyListener);
         mPasswordEntry.setUserActivityListener(this::onUserInput);
@@ -120,11 +105,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
         }
     }
 
-    @Override
-    protected void onViewDetached() {
-        super.onViewDetached();
-        mView.removeMotionEventListener(mGlobalTouchListener);
-    }
 
     @Override
     public void onResume(int reason) {

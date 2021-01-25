@@ -147,7 +147,7 @@ class DistanceClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         return !getPassedFlingThreshold()
                 ? Result.falsed(0.5, getReason()) : Result.passed(0.5);
     }

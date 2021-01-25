@@ -38,7 +38,7 @@ public class TypeClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         boolean vertical = isVertical();
         boolean up = isUp();
         boolean right = isRight();

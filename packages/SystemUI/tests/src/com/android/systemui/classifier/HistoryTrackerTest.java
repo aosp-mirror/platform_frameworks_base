@@ -48,14 +48,14 @@ public class HistoryTrackerTest extends SysuiTestCase {
 
     @Test
     public void testNoDataNoPenalty() {
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(0);
+        assertThat(mHistoryTracker.falseBelief()).isEqualTo(0.5);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(0);
     }
 
     @Test
     public void testOneResultFullConfidence() {
         addResult(true, 1);
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(1);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.001).of(1);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(1);
     }
 
@@ -64,8 +64,8 @@ public class HistoryTrackerTest extends SysuiTestCase {
         addResult(true, 1);
         addResult(false, 1);
 
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(0.5);
-        assertThat(mHistoryTracker.falseConfidence()).isEqualTo(0.5);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.001).of(0.5);
+        assertThat(mHistoryTracker.falseConfidence()).isWithin(0.001).of(0.5);
     }
 
     @Test
@@ -73,20 +73,20 @@ public class HistoryTrackerTest extends SysuiTestCase {
         addResult(true, 1);
         addResult(true, 0);
 
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(0.75);
-        assertThat(mHistoryTracker.falseConfidence()).isEqualTo(.75);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.001).of(1);
+        assertThat(mHistoryTracker.falseConfidence()).isWithin(0.001).of(.75);
     }
 
     @Test
     public void testDecay() {
         addResult(true, 1);
 
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(1);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.001).of(1);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(1);
 
-        mSystemClock.advanceTime(1000);
+        mSystemClock.advanceTime(9999);
 
-        assertThat(mHistoryTracker.falsePenalty()).isWithin(0.01).of(0.1);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.005).of(0.55);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(1);
     }
 
@@ -96,25 +96,25 @@ public class HistoryTrackerTest extends SysuiTestCase {
         mSystemClock.advanceTime(1000);
         addResult(false, .5);
 
-        assertThat(mHistoryTracker.falsePenalty()).isWithin(0.01).of(0.17);
-        assertThat(mHistoryTracker.falseConfidence()).isEqualTo(0.625);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.01).of(0.74);
+        assertThat(mHistoryTracker.falseConfidence()).isWithin(0.001).of(0.625);
     }
 
     @Test
     public void testCompleteDecay() {
         addResult(true, 1);
 
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(1);
+        assertThat(mHistoryTracker.falseBelief()).isWithin(0.001).of(1);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(1);
 
-        mSystemClock.advanceTime(2999);
+        mSystemClock.advanceTime(9999);
 
-        assertThat(mHistoryTracker.falsePenalty()).isGreaterThan(0);
+        assertThat(mHistoryTracker.falseBelief()).isGreaterThan(0);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(1);
 
         mSystemClock.advanceTime(1);
 
-        assertThat(mHistoryTracker.falsePenalty()).isEqualTo(0);
+        assertThat(mHistoryTracker.falseBelief()).isEqualTo(0.5);
         assertThat(mHistoryTracker.falseConfidence()).isEqualTo(0);
     }
 

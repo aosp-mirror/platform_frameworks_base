@@ -153,4 +153,8 @@ public class FalsingCollectorFake implements FalsingCollector {
     @Override
     public void cleanup() {
     }
+
+    @Override
+    public void updateFalseConfidence(FalsingClassifier.Result result) {
+    }
 }

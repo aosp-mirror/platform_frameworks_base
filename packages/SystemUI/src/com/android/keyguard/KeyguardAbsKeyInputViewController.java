@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.os.SystemClock;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternChecker;
@@ -34,13 +35,21 @@ import com.android.internal.widget.LockscreenCredential;
 import com.android.keyguard.EmergencyButton.EmergencyButtonCallback;
 import com.android.keyguard.KeyguardAbsKeyInputView.KeyDownListener;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
+import com.android.systemui.Gefingerpoken;
 import com.android.systemui.R;
+import com.android.systemui.classifier.FalsingClassifier;
+import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.classifier.SingleTapClassifier;
+
+import java.util.Arrays;
 
 public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKeyInputView>
         extends KeyguardInputViewController<T> {
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final LockPatternUtils mLockPatternUtils;
     private final LatencyTracker mLatencyTracker;
+    private final FalsingCollector mFalsingCollector;
+    private final SingleTapClassifier mSingleTapClassifier;
     private CountDownTimer mCountdownTimer;
     protected KeyguardMessageAreaController mMessageAreaController;
     private boolean mDismissing;
@@ -64,17 +73,61 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
         }
     };
 
+    private final Gefingerpoken mGlobalTouchListener = new Gefingerpoken() {
+        private MotionEvent mTouchDown;
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent ev) {
+            mFalsingCollector.avoidGesture();
+            // Do just a bit of our own falsing. People should only be tapping on the input, not
+            // swiping.
+            if (ev.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                if (mTouchDown != null) {
+                    mTouchDown.recycle();
+                    mTouchDown = null;
+                }
+                mTouchDown = MotionEvent.obtain(ev);
+            } else if (mTouchDown != null) {
+                FalsingClassifier.Result tapResult =
+                        mSingleTapClassifier.isTap(Arrays.asList(mTouchDown, ev));
+                if (tapResult.isFalse()
+                        || ev.getActionMasked() == MotionEvent.ACTION_UP
+                        || ev.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                    // TODO: if we've gotten too false, retract input.
+                    if (tapResult.isFalse()) {
+                        mFalsingCollector.updateFalseConfidence(tapResult);
+                    } else {
+                        // The classifier returns 0 confidence when a tap is detected.
+                        // We can be more sure that the tap was intentional here.
+                        mFalsingCollector.updateFalseConfidence(
+                                FalsingClassifier.Result.passed(0.6));
+                    }
+                    mTouchDown.recycle();
+                    mTouchDown = null;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent ev) {
+            return false;
+        }
+    };
+
     protected KeyguardAbsKeyInputViewController(T view,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             SecurityMode securityMode,
             LockPatternUtils lockPatternUtils,
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
-            LatencyTracker latencyTracker) {
+            LatencyTracker latencyTracker, FalsingCollector falsingCollector,
+            SingleTapClassifier singleTapClassifier) {
         super(view, securityMode, keyguardSecurityCallback);
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mLockPatternUtils = lockPatternUtils;
         mLatencyTracker = latencyTracker;
+        mFalsingCollector = falsingCollector;
+        mSingleTapClassifier = singleTapClassifier;
         KeyguardMessageArea kma = KeyguardMessageArea.findSecurityMessageDisplay(mView);
         mMessageAreaController = messageAreaControllerFactory.create(kma);
     }
@@ -89,12 +142,19 @@ public abstract class KeyguardAbsKeyInputViewController<T extends KeyguardAbsKey
     @Override
     protected void onViewAttached() {
         super.onViewAttached();
+        mView.addMotionEventListener(mGlobalTouchListener);
         mView.setKeyDownListener(mKeyDownListener);
         mView.setEnableHaptics(mLockPatternUtils.isTactileFeedbackEnabled());
         EmergencyButton button = mView.findViewById(R.id.emergency_call_button);
         if (button != null) {
             button.setCallback(mEmergencyButtonCallback);
         }
+    }
+
+    @Override
+    protected void onViewDetached() {
+        super.onViewDetached();
+        mView.removeMotionEventListener(mGlobalTouchListener);
     }
 
     @Override

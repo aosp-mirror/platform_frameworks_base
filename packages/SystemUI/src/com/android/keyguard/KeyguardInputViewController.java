@@ -27,6 +27,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingCollector;
+import com.android.systemui.classifier.SingleTapClassifier;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.util.ViewController;
@@ -158,6 +159,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
         private LiftToActivateListener mLiftToActivateListener;
         private TelephonyManager mTelephonyManager;
         private final FalsingCollector mFalsingCollector;
+        private final SingleTapClassifier mSingleTapClassifier;
         private final boolean mIsNewLayoutEnabled;
 
         @Inject
@@ -169,6 +171,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 @Main Resources resources, LiftToActivateListener liftToActivateListener,
                 TelephonyManager telephonyManager,
                 FalsingCollector falsingCollector,
+                SingleTapClassifier singleTapClassifier,
                 FeatureFlags featureFlags) {
             mKeyguardUpdateMonitor = keyguardUpdateMonitor;
             mLockPatternUtils = lockPatternUtils;
@@ -180,6 +183,7 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
             mLiftToActivateListener = liftToActivateListener;
             mTelephonyManager = telephonyManager;
             mFalsingCollector = falsingCollector;
+            mSingleTapClassifier = singleTapClassifier;
             mIsNewLayoutEnabled = featureFlags.isKeyguardLayoutEnabled();
         }
 
@@ -194,24 +198,26 @@ public abstract class KeyguardInputViewController<T extends KeyguardInputView>
                 return new KeyguardPasswordViewController((KeyguardPasswordView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mInputMethodManager, mMainExecutor, mResources);
+                        mInputMethodManager, mMainExecutor, mResources, mFalsingCollector,
+                        mSingleTapClassifier);
             } else if (keyguardInputView instanceof KeyguardPINView) {
                 return new KeyguardPinViewController((KeyguardPINView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mFalsingCollector, mIsNewLayoutEnabled);
+                        mLiftToActivateListener, mFalsingCollector, mSingleTapClassifier,
+                        mIsNewLayoutEnabled);
             } else if (keyguardInputView instanceof KeyguardSimPinView) {
                 return new KeyguardSimPinViewController((KeyguardSimPinView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mTelephonyManager,
-                        mFalsingCollector, mIsNewLayoutEnabled);
+                        mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
+                        mSingleTapClassifier, mIsNewLayoutEnabled);
             } else if (keyguardInputView instanceof KeyguardSimPukView) {
                 return new KeyguardSimPukViewController((KeyguardSimPukView) keyguardInputView,
                         mKeyguardUpdateMonitor, securityMode, mLockPatternUtils,
                         keyguardSecurityCallback, mMessageAreaControllerFactory, mLatencyTracker,
-                        mLiftToActivateListener, mTelephonyManager,
-                        mFalsingCollector, mIsNewLayoutEnabled);
+                        mLiftToActivateListener, mTelephonyManager, mFalsingCollector,
+                        mSingleTapClassifier, mIsNewLayoutEnabled);
             }
 
             throw new RuntimeException("Unable to find controller for " + keyguardInputView);

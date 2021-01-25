@@ -120,5 +120,8 @@ public interface FalsingCollector {
 
     /** */
     void cleanup();
+
+    /** */
+    void updateFalseConfidence(FalsingClassifier.Result result);
 }
 

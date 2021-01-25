@@ -76,7 +76,7 @@ import javax.inject.Inject;
  * Manages creating, showing, hiding and resetting the keyguard within the status bar. Calls back
  * via {@link ViewMediatorCallback} to poke the wake lock and report that the keyguard is done,
  * which is in turn, reported to this class by the current
- * {@link com.android.keyguard.KeyguardViewBase}.
+ * {@link com.android.keyguard.KeyguardViewController}.
  */
 @SysUISingleton
 public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,

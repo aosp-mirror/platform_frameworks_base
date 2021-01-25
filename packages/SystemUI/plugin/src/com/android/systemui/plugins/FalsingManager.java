@@ -44,7 +44,7 @@ public interface FalsingManager {
     /**
      * Returns true if the FalsingManager thinks the last gesure was not a valid tap.
      *
-     * Accepts one parameter, robustCheck, that distinctly changes behavior. When set to false,
+     * The first parameter, robustCheck, distinctly changes behavior. When set to false,
      * this method simply looks at the last gesture and returns whether it is a tap or not, (as
      * opposed to a swipe or other non-tap gesture). When set to true, a more thorough analysis
      * is performed that can include historical interactions and other contextual cues to see
@@ -53,8 +53,11 @@ public interface FalsingManager {
      * Set robustCheck to true if you want to validate a tap for launching an action, like opening
      * a notification. Set to false if you simply want to know if the last gesture looked like a
      * tap.
+     *
+     * The second parameter, falsePenalty, indicates how much this should affect future gesture
+     * classifications if this tap looks like a false.
      */
-    boolean isFalseTap(boolean robustCheck);
+    boolean isFalseTap(boolean robustCheck, double falsePenalty);
 
     /**
      * Returns true if the last two gestures do not look like a double tap.

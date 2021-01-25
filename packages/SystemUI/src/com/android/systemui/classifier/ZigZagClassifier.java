@@ -84,7 +84,7 @@ class ZigZagClassifier extends FalsingClassifier {
     }
 
     @Override
-    Result calculateFalsingResult(double historyPenalty, double historyConfidence) {
+    Result calculateFalsingResult(double historyBelief, double historyConfidence) {
         List<MotionEvent> motionEvents = getRecentMotionEvents();
         // Rotate horizontal gestures to be horizontal between their first and last point.
         // Rotate vertical gestures to be vertical between their first and last point.

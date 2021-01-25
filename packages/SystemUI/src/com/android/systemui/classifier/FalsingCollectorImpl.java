@@ -29,6 +29,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.sensors.ThresholdSensor;
+import com.android.systemui.util.time.SystemClock;
+
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -42,8 +45,10 @@ class FalsingCollectorImpl implements FalsingCollector {
     private final FalsingDataProvider mFalsingDataProvider;
     private final FalsingManager mFalsingManager;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
+    private final HistoryTracker mHistoryTracker;
     private final ProximitySensor mProximitySensor;
     private final StatusBarStateController mStatusBarStateController;
+    private final SystemClock mSystemClock;
 
     private int mState;
     private boolean mShowingAod;
@@ -80,13 +85,16 @@ class FalsingCollectorImpl implements FalsingCollector {
 
     @Inject
     FalsingCollectorImpl(FalsingDataProvider falsingDataProvider, FalsingManager falsingManager,
-            KeyguardUpdateMonitor keyguardUpdateMonitor,
-            ProximitySensor proximitySensor, StatusBarStateController statusBarStateController) {
+            KeyguardUpdateMonitor keyguardUpdateMonitor, HistoryTracker historyTracker,
+            ProximitySensor proximitySensor, StatusBarStateController statusBarStateController,
+            SystemClock systemClock) {
         mFalsingDataProvider = falsingDataProvider;
         mFalsingManager = falsingManager;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
+        mHistoryTracker = historyTracker;
         mProximitySensor = proximitySensor;
         mStatusBarStateController = statusBarStateController;
+        mSystemClock = systemClock;
 
 
         mProximitySensor.setTag(PROXIMITY_SENSOR_TAG);
@@ -280,6 +288,11 @@ class FalsingCollectorImpl implements FalsingCollector {
         unregisterSensors();
         mKeyguardUpdateMonitor.removeCallback(mKeyguardUpdateCallback);
         mStatusBarStateController.removeCallback(mStatusBarStateListener);
+    }
+
+    @Override
+    public void updateFalseConfidence(FalsingClassifier.Result result) {
+        mHistoryTracker.addResults(Collections.singleton(result), mSystemClock.uptimeMillis());
     }
 
     private void updateInteractionType(@Classifier.InteractionType int type) {
