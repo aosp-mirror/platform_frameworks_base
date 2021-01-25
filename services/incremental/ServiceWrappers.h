@@ -85,7 +85,8 @@ public:
     virtual ~IncFsWrapper() = default;
     virtual void listExistingMounts(const ExistingMountCallback& cb) const = 0;
     virtual Control openMount(std::string_view path) const = 0;
-    virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const = 0;
+    virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
+                                  IncFsFd blocksWritten) const = 0;
     virtual ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                                incfs::NewFileParams params) const = 0;
     virtual ErrorCode makeDir(const Control& control, std::string_view path, int mode) const = 0;
