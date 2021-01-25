@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.widget.LockPatternView;
 import com.android.settingslib.animation.AppearAnimationCreator;
 import com.android.settingslib.animation.AppearAnimationUtils;
@@ -143,7 +144,8 @@ public class KeyguardPatternView extends KeyguardInputView
         setAlpha(1f);
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 500 /* duration */,
-                0, mAppearAnimationUtils.getInterpolator());
+                0, mAppearAnimationUtils.getInterpolator(),
+                getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PATTERN_APPEAR));
         mAppearAnimationUtils.startAnimation2d(
                 mLockPatternView.getCellStates(),
                 () -> enableClipping(true),
@@ -167,7 +169,8 @@ public class KeyguardPatternView extends KeyguardInputView
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */,
                 (long) (300 * durationMultiplier),
                 -mDisappearAnimationUtils.getStartTranslation(),
-                mDisappearAnimationUtils.getInterpolator());
+                mDisappearAnimationUtils.getInterpolator(),
+                getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PATTERN_DISAPPEAR));
 
         DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
                         ? mDisappearAnimationUtilsLocked : mDisappearAnimationUtils;

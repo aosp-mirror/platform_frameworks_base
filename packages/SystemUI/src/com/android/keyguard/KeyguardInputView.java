@@ -16,6 +16,8 @@
 
 package com.android.keyguard;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -23,6 +25,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.Nullable;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.systemui.Gefingerpoken;
 
 import java.util.ArrayList;
@@ -83,4 +86,30 @@ public abstract class KeyguardInputView extends LinearLayout {
                 listener -> listener.onInterceptTouchEvent(event))
                 || super.onInterceptTouchEvent(event);
     }
+
+    protected AnimatorListenerAdapter getAnimationListener(int cuj) {
+        return new AnimatorListenerAdapter() {
+            private boolean mIsCancel;
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+                mIsCancel = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                if (mIsCancel) {
+                    InteractionJankMonitor.getInstance().cancel(cuj);
+                } else {
+                    InteractionJankMonitor.getInstance().end(cuj);
+                }
+            }
+
+            @Override
+            public void onAnimationStart(Animator animation) {
+                InteractionJankMonitor.getInstance().begin(KeyguardInputView.this, cuj);
+            }
+        };
+    }
+
 }
