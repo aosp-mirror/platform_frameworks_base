@@ -20,13 +20,13 @@ import android.annotation.BytesLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.app.ActivityManager;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -98,7 +98,7 @@ public class DvrPlayback implements AutoCloseable {
     private native long nativeRead(byte[] bytes, long offset, long size);
 
     private DvrPlayback() {
-        mUserId = ActivityManager.getCurrentUser();
+        mUserId = Process.myUid();
         mSegmentId = (sInstantId & 0x0000ffff) << 16;
         sInstantId++;
     }
