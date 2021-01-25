@@ -38,10 +38,12 @@ public class HdmiCecAtomWriter {
      * @param message      The HDMI CEC message
      * @param direction    Whether the message is incoming, outgoing, or neither
      * @param errorCode    The error code from the final attempt to send the message
+     * @param callingUid   The calling uid of the app that triggered this message
      */
-    public void messageReported(HdmiCecMessage message, int direction, int errorCode) {
+    public void messageReported(
+            HdmiCecMessage message, int direction, int callingUid, int errorCode) {
         MessageReportedGenericArgs genericArgs = createMessageReportedGenericArgs(
-                message, direction, errorCode);
+                message, direction, errorCode, callingUid);
         MessageReportedSpecialArgs specialArgs = createMessageReportedSpecialArgs(message);
         messageReportedBase(genericArgs, specialArgs);
     }
@@ -51,9 +53,10 @@ public class HdmiCecAtomWriter {
      *
      * @param message      The HDMI CEC message
      * @param direction    Whether the message is incoming, outgoing, or neither
+     * @param callingUid   The calling uid of the app that triggered this message
      */
-    public void messageReported(HdmiCecMessage message, int direction) {
-        messageReported(message, direction, ERROR_CODE_UNKNOWN);
+    public void messageReported(HdmiCecMessage message, int direction, int callingUid) {
+        messageReported(message, direction, callingUid, ERROR_CODE_UNKNOWN);
     }
 
     /**
@@ -65,11 +68,11 @@ public class HdmiCecAtomWriter {
      *                     otherwise, ERROR_CODE_UNKNOWN
      */
     private MessageReportedGenericArgs createMessageReportedGenericArgs(
-            HdmiCecMessage message, int direction, int errorCode) {
+            HdmiCecMessage message, int direction, int errorCode, int callingUid) {
         int sendMessageResult = errorCode == ERROR_CODE_UNKNOWN
                 ? HdmiStatsEnums.SEND_MESSAGE_RESULT_UNKNOWN
                 : errorCode + 10;
-        return new MessageReportedGenericArgs(direction, message.getSource(),
+        return new MessageReportedGenericArgs(callingUid, direction, message.getSource(),
                 message.getDestination(), message.getOpcode(), sendMessageResult);
     }
 
@@ -134,7 +137,7 @@ public class HdmiCecAtomWriter {
             MessageReportedSpecialArgs specialArgs) {
         FrameworkStatsLog.write(
                 FrameworkStatsLog.HDMI_CEC_MESSAGE_REPORTED,
-                0, // Placeholder field
+                genericArgs.mUid,
                 genericArgs.mDirection,
                 genericArgs.mInitiatorLogicalAddress,
                 genericArgs.mDestinationLogicalAddress,
@@ -167,14 +170,16 @@ public class HdmiCecAtomWriter {
      * Contains the required arguments for creating any HdmiCecMessageReported atom
      */
     private class MessageReportedGenericArgs {
+        final int mUid;
         final int mDirection;
         final int mInitiatorLogicalAddress;
         final int mDestinationLogicalAddress;
         final int mOpcode;
         final int mSendMessageResult;
 
-        MessageReportedGenericArgs(int direction, int initiatorLogicalAddress,
+        MessageReportedGenericArgs(int uid, int direction, int initiatorLogicalAddress,
                 int destinationLogicalAddress, int opcode, int sendMessageResult) {
+            this.mUid = uid;
             this.mDirection = direction;
             this.mInitiatorLogicalAddress = initiatorLogicalAddress;
             this.mDestinationLogicalAddress = destinationLogicalAddress;

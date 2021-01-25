@@ -18,6 +18,8 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
+import android.app.ActivityManager;
 import android.app.time.ITimeZoneDetectorListener;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
 import android.app.time.TimeZoneConfiguration;
@@ -25,7 +27,7 @@ import android.app.timezonedetector.ITimeZoneDetectorService;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.content.Context;
-import android.location.LocationManager;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -163,9 +165,13 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     @Override
     @NonNull
     public TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfig() {
+        int userId = mCallerIdentityInjector.getCallingUserId();
+        return getCapabilitiesAndConfig(userId);
+    }
+
+    TimeZoneCapabilitiesAndConfig getCapabilitiesAndConfig(@UserIdInt int userId) {
         enforceManageTimeZoneDetectorPermission();
 
-        int userId = mCallerIdentityInjector.getCallingUserId();
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
             ConfigurationInternal configurationInternal =
@@ -178,13 +184,22 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
 
     @Override
     public boolean updateConfiguration(@NonNull TimeZoneConfiguration configuration) {
+        int callingUserId = mCallerIdentityInjector.getCallingUserId();
+        return updateConfiguration(callingUserId, configuration);
+    }
+
+    boolean updateConfiguration(
+            @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration) {
+        userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
+                userId, false, false, "updateConfiguration", null);
+
         enforceManageTimeZoneDetectorPermission();
+
         Objects.requireNonNull(configuration);
 
-        int callingUserId = mCallerIdentityInjector.getCallingUserId();
         final long token = mCallerIdentityInjector.clearCallingIdentity();
         try {
-            return mTimeZoneDetectorStrategy.updateConfiguration(callingUserId, configuration);
+            return mTimeZoneDetectorStrategy.updateConfiguration(userId, configuration);
         } finally {
             mCallerIdentityInjector.restoreCallingIdentity(token);
         }
@@ -316,13 +331,6 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         enforceManageTimeZoneDetectorPermission();
 
         return isGeoLocationTimeZoneDetectionEnabled(mContext);
-    }
-
-    boolean isLocationEnabled() {
-        enforceManageTimeZoneDetectorPermission();
-
-        return mContext.getSystemService(LocationManager.class)
-                .isLocationEnabledForUser(mContext.getUser());
     }
 
     @Override

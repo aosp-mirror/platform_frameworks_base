@@ -24,7 +24,6 @@ import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.TestCase.fail;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,7 +34,6 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,7 +43,6 @@ import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.fingerprint.FingerprintManager;
@@ -87,7 +84,6 @@ import com.android.systemui.classifier.FalsingCollectorFake;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.demomode.DemoModeController;
-import com.android.systemui.emergency.EmergencyGesture;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
@@ -151,10 +147,8 @@ import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -323,7 +317,7 @@ public class StatusBarTest extends SysuiTestCase {
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
         WakefulnessLifecycle wakefulnessLifecycle = new WakefulnessLifecycle();
-        wakefulnessLifecycle.dispatchStartedWakingUp();
+        wakefulnessLifecycle.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         wakefulnessLifecycle.dispatchFinishedWakingUp();
 
         when(mGradientColors.supportsDarkText()).thenReturn(true);
@@ -885,19 +879,6 @@ public class StatusBarTest extends SysuiTestCase {
     public void testSuppressAmbientDisplay_unsuppress() {
         mStatusBar.suppressAmbientDisplay(false);
         verify(mDozeServiceHost).setDozeSuppressed(false);
-    }
-
-    @Ignore // TODO (b/175240607) - Figure out if the device will actually dial 911.
-    @Test
-    public void onEmergencyActionLaunchGesture_launchesEmergencyIntent() {
-        ArgumentCaptor<Intent> intentCaptor = ArgumentCaptor.forClass(Intent.class);
-        StatusBar statusBarSpy = spy(mStatusBar);
-
-        statusBarSpy.onEmergencyActionLaunchGestureDetected();
-
-        verify(statusBarSpy).startActivity(intentCaptor.capture(), eq(true));
-        Intent sentIntent = intentCaptor.getValue();
-        assertEquals(sentIntent.getAction(), EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
     }
 
     public static class TestableNotificationInterruptStateProviderImpl extends

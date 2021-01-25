@@ -2393,8 +2393,19 @@ public class Intent implements Parcelable, Cloneable {
      * Broadcast Action: This is broadcast when a user action should request a
      * temporary system dialog to dismiss.  Some examples of temporary system
      * dialogs are the notification window-shade and the recent tasks dialog.
+     *
+     * @deprecated This intent is deprecated for third-party applications starting from Android
+     *     {@link Build.VERSION_CODES#S} for security reasons. Unauthorized usage by applications
+     *     will result in the broadcast intent being dropped for apps targeting API level less than
+     *     {@link Build.VERSION_CODES#S} and in a {@link SecurityException} for apps targeting SDK
+     *     level {@link Build.VERSION_CODES#S} or higher. Instrumentation initiated from the shell
+     *     (eg. tests) is still able to use the intent. The platform will automatically collapse
+     *     the proper system dialogs in the proper use-cases. For all others, the user is the one in
+     *     control of closing dialogs.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS)
+    @Deprecated
     public static final String ACTION_CLOSE_SYSTEM_DIALOGS = "android.intent.action.CLOSE_SYSTEM_DIALOGS";
     /**
      * Broadcast Action: Trigger the download and eventual installation
@@ -3649,7 +3660,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent by the system when a user is started. Carries an extra
-     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is only sent to
+     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only sent to
      * registered receivers, not manifest receivers.  It is sent to the user
      * that has been started.  This is sent as a foreground
      * broadcast, since it is part of a visible user interaction; be as quick
@@ -3661,7 +3672,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent when a user is in the process of starting.  Carries an extra
-     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is only
+     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only
      * sent to registered receivers, not manifest receivers.  It is sent to all
      * users (including the one that is being started).  You must hold
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
@@ -3678,7 +3689,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent when a user is going to be stopped.  Carries an extra
-     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is only
+     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is only
      * sent to registered receivers, not manifest receivers.  It is sent to all
      * users (including the one that is being stopped).  You must hold
      * {@link android.Manifest.permission#INTERACT_ACROSS_USERS} to receive
@@ -3696,7 +3707,7 @@ public class Intent implements Parcelable, Cloneable {
 
     /**
      * Broadcast sent to the system when a user is stopped. Carries an extra
-     * EXTRA_USER_HANDLE that has the userHandle of the user.  This is similar to
+     * {@link EXTRA_USER_HANDLE} that has the userHandle of the user.  This is similar to
      * {@link #ACTION_PACKAGE_RESTARTED}, but for an entire user instead of a
      * specific package.  This is only sent to registered receivers, not manifest
      * receivers.  It is sent to all running users <em>except</em> the one that
@@ -3798,6 +3809,22 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_MANAGED_PROFILE_UNAVAILABLE =
             "android.intent.action.MANAGED_PROFILE_UNAVAILABLE";
+
+    /**
+     * Broadcast sent to the parent user when an associated profile has been started and unlocked.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile.
+     * This is only sent to registered receivers, not manifest receivers.
+     */
+    public static final String ACTION_PROFILE_ACCESSIBLE =
+            "android.intent.action.PROFILE_ACCESSIBLE";
+
+    /**
+     * Broadcast sent to the parent user when an associated profile has stopped.
+     * Carries an extra {@link #EXTRA_USER} that specifies the {@link UserHandle} of the profile.
+     * This is only sent to registered receivers, not manifest receivers.
+     */
+    public static final String ACTION_PROFILE_INACCESSIBLE =
+            "android.intent.action.PROFILE_INACCESSIBLE";
 
     /**
      * Broadcast sent to the system user when the 'device locked' state changes for any user.
@@ -6654,6 +6681,25 @@ public class Intent implements Parcelable, Cloneable {
             | FLAG_GRANT_WRITE_URI_PERMISSION | FLAG_GRANT_PERSISTABLE_URI_PERMISSION
             | FLAG_GRANT_PREFIX_URI_PERMISSION;
 
+    /**
+     * Local flag indicating this instance was created by copy constructor.
+     */
+    private static final int LOCAL_FLAG_FROM_COPY = 1 << 0;
+
+    /**
+     * Local flag indicating this instance was created from a {@link Parcel}.
+     */
+    private static final int LOCAL_FLAG_FROM_PARCEL = 1 << 1;
+
+    /**
+     * Local flag indicating this instance was delivered through a protected
+     * component, such as an activity that requires a signature permission, or a
+     * protected broadcast. Note that this flag <em>cannot</em> be recursively
+     * applied to any contained instances, since a malicious app may have
+     * controlled them via {@link #fillIn(Intent, int)}.
+     */
+    private static final int LOCAL_FLAG_FROM_PROTECTED_COMPONENT = 1 << 2;
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // toUri() and parseUri() options.
@@ -6771,6 +6817,8 @@ public class Intent implements Parcelable, Cloneable {
     private String mPackage;
     private ComponentName mComponent;
     private int mFlags;
+    /** Set of in-process flags which are never parceled */
+    private int mLocalFlags;
     private ArraySet<String> mCategories;
     @UnsupportedAppUsage
     private Bundle mExtras;
@@ -6820,6 +6868,11 @@ public class Intent implements Parcelable, Cloneable {
         if (o.mCategories != null) {
             this.mCategories = new ArraySet<>(o.mCategories);
         }
+
+        // Inherit flags from the original, plus mark that we were
+        // created by this copy constructor
+        this.mLocalFlags = o.mLocalFlags;
+        this.mLocalFlags |= LOCAL_FLAG_FROM_COPY;
 
         if (copyMode != COPY_MODE_FILTER) {
             this.mFlags = o.mFlags;
@@ -10904,6 +10957,9 @@ public class Intent implements Parcelable, Cloneable {
 
     /** @hide */
     protected Intent(Parcel in) {
+        // Remember that we came from a remote process to help detect security
+        // issues caused by later unsafe launches
+        mLocalFlags = LOCAL_FLAG_FROM_PARCEL;
         readFromParcel(in);
     }
 
@@ -11215,18 +11271,27 @@ public class Intent implements Parcelable, Cloneable {
                 mData = Uri.fromFile(after);
             }
         }
+
+        // Detect cases where we're about to launch a potentially unsafe intent
+        if ((mLocalFlags & LOCAL_FLAG_FROM_PARCEL) != 0
+                && (mLocalFlags & LOCAL_FLAG_FROM_PROTECTED_COMPONENT) == 0
+                && StrictMode.vmUnsafeIntentLaunchEnabled()) {
+            StrictMode.onUnsafeIntentLaunch(this);
+        }
     }
 
     /**
      * @hide
      */
-    public void prepareToEnterProcess() {
+    public void prepareToEnterProcess(boolean fromProtectedComponent) {
         // We just entered destination process, so we should be able to read all
         // parcelables inside.
         setDefusable(true);
 
         if (mSelector != null) {
-            mSelector.prepareToEnterProcess();
+            // We can't recursively claim that this data is from a protected
+            // component, since it may have been filled in by a malicious app
+            mSelector.prepareToEnterProcess(false);
         }
         if (mClipData != null) {
             mClipData.prepareToEnterProcess();
@@ -11237,6 +11302,10 @@ public class Intent implements Parcelable, Cloneable {
                 fixUris(mContentUserHint);
                 mContentUserHint = UserHandle.USER_CURRENT;
             }
+        }
+
+        if (fromProtectedComponent) {
+            mLocalFlags |= LOCAL_FLAG_FROM_PROTECTED_COMPONENT;
         }
     }
 

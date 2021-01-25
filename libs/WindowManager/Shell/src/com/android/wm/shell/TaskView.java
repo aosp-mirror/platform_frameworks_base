@@ -252,7 +252,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, true);
         // TODO: Synchronize show with the resize
         onLocationChanged();
-        setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+        if (taskInfo.taskDescription != null) {
+            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+        }
 
         if (mListener != null) {
             mListenerExecutor.execute(() -> {
@@ -279,8 +281,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
 
     @Override
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        mTaskInfo.taskDescription = taskInfo.taskDescription;
-        setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+        if (taskInfo.taskDescription != null) {
+            setResizeBackgroundColor(taskInfo.taskDescription.getBackgroundColor());
+        }
     }
 
     @Override

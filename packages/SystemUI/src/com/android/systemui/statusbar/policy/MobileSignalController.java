@@ -36,6 +36,7 @@ import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -66,6 +67,7 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
     private final String mNetworkNameDefault;
     private final String mNetworkNameSeparator;
     private final ContentObserver mObserver;
+    private final boolean mProviderModel;
     // Save entire info for logging, we only use the id.
     final SubscriptionInfo mSubscriptionInfo;
     // @VisibleForDemoMode
@@ -140,6 +142,8 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         };
         mMobileStatusTracker = new MobileStatusTracker(mPhone, receiverLooper,
                 info, mDefaults, mCallback);
+        mProviderModel = FeatureFlagUtils.isEnabled(
+                mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 
     public void setConfiguration(Config config) {
@@ -236,6 +240,11 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
 
     @Override
     public void notifyListeners(SignalCallback callback) {
+        // If the device is on carrier merged WiFi, we should let WifiSignalController to control
+        // the SysUI states.
+        if (mNetworkController.isCarrierMergedWifi(mSubscriptionInfo.getSubscriptionId())) {
+            return;
+        }
         MobileIconGroup icons = getIcons();
 
         String contentDescription = getTextIfExists(getContentDescription()).toString();
@@ -253,33 +262,65 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                 || (mCurrentState.iconGroup == TelephonyIcons.NOT_DEFAULT_DATA))
                 && mCurrentState.userSetup;
 
-        // Show icon in QS when we are connected or data is disabled.
-        boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
-        IconState statusIcon = new IconState(mCurrentState.enabled && !mCurrentState.airplaneMode,
-                getCurrentIconId(), contentDescription);
+        if (mProviderModel) {
+            // Show icon in QS when we are connected or data is disabled.
+            boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
 
-        int qsTypeIcon = 0;
-        IconState qsIcon = null;
-        CharSequence description = null;
-        // Only send data sim callbacks to QS.
-        if (mCurrentState.dataSim) {
-            qsTypeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
-            qsIcon = new IconState(mCurrentState.enabled
-                    && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
-            description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
+            int qsTypeIcon = 0;
+            IconState qsIcon = null;
+            CharSequence description = null;
+            // Only send data sim callbacks to QS.
+            if (mCurrentState.dataSim && mCurrentState.isDefault) {
+                qsTypeIcon =
+                        (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
+                qsIcon = new IconState(mCurrentState.enabled
+                        && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
+                description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
+            }
+            boolean activityIn = mCurrentState.dataConnected
+                    && !mCurrentState.carrierNetworkChangeMode
+                    && mCurrentState.activityIn;
+            boolean activityOut = mCurrentState.dataConnected
+                    && !mCurrentState.carrierNetworkChangeMode
+                    && mCurrentState.activityOut;
+            showDataIcon &= mCurrentState.dataSim && mCurrentState.isDefault;
+            IconState statusIcon = new IconState(showDataIcon && !mCurrentState.airplaneMode,
+                    getCurrentIconId(), contentDescription);
+            int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
+            callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+                    activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
+                    description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
+                    mCurrentState.roaming);
+        } else {
+            boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
+            IconState statusIcon = new IconState(
+                    mCurrentState.enabled && !mCurrentState.airplaneMode,
+                    getCurrentIconId(), contentDescription);
+
+            int qsTypeIcon = 0;
+            IconState qsIcon = null;
+            CharSequence description = null;
+            // Only send data sim callbacks to QS.
+            if (mCurrentState.dataSim) {
+                qsTypeIcon =
+                        (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.qsDataType : 0;
+                qsIcon = new IconState(mCurrentState.enabled
+                        && !mCurrentState.isEmergency, getQsCurrentIconId(), contentDescription);
+                description = mCurrentState.isEmergency ? null : mCurrentState.networkName;
+            }
+            boolean activityIn = mCurrentState.dataConnected
+                    && !mCurrentState.carrierNetworkChangeMode
+                    && mCurrentState.activityIn;
+            boolean activityOut = mCurrentState.dataConnected
+                    && !mCurrentState.carrierNetworkChangeMode
+                    && mCurrentState.activityOut;
+            showDataIcon &= mCurrentState.isDefault || dataDisabled;
+            int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
+            callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
+                    activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
+                    description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
+                    mCurrentState.roaming);
         }
-        boolean activityIn = mCurrentState.dataConnected
-                && !mCurrentState.carrierNetworkChangeMode
-                && mCurrentState.activityIn;
-        boolean activityOut = mCurrentState.dataConnected
-                && !mCurrentState.carrierNetworkChangeMode
-                && mCurrentState.activityOut;
-        showDataIcon &= mCurrentState.isDefault || dataDisabled;
-        int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
-        callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
-                activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
-                description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
-                mCurrentState.roaming);
     }
 
     @Override
@@ -297,6 +338,18 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
 
     public boolean isInService() {
         return Utils.isInService(mServiceState);
+    }
+
+    String getNonDefaultCarrierName() {
+        if (!mCurrentState.networkNameData.equals(mNetworkNameDefault)) {
+            return mCurrentState.networkNameData;
+        } else if (mSubscriptionInfo.getCarrierName() != null) {
+            return mSubscriptionInfo.getCarrierName().toString();
+        } else if (mSubscriptionInfo.getDisplayName() != null) {
+            return mSubscriptionInfo.getDisplayName().toString();
+        } else {
+            return "";
+        }
     }
 
     private boolean isRoaming() {
@@ -405,9 +458,24 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
         mCurrentState.dataSim = mobileStatus.dataSim;
         mCurrentState.carrierNetworkChangeMode = mobileStatus.carrierNetworkChangeMode;
         mDataState = mobileStatus.dataState;
-        mServiceState = mobileStatus.serviceState;
         mSignalStrength = mobileStatus.signalStrength;
         mTelephonyDisplayInfo = mobileStatus.telephonyDisplayInfo;
+        int lastVoiceState = mServiceState != null ? mServiceState.getState() : -1;
+        mServiceState = mobileStatus.serviceState;
+        int currentVoiceState =  mServiceState != null ? mServiceState.getState() : -1;
+        // Only update the no calling Status in the below scenarios
+        // 1. The first valid voice state has been received
+        // 2. The voice state has been changed and either the last or current state is
+        //    ServiceState.STATE_IN_SERVICE
+        if (mProviderModel
+                && lastVoiceState != currentVoiceState
+                && (lastVoiceState == -1
+                        || (lastVoiceState == ServiceState.STATE_IN_SERVICE
+                                || currentVoiceState == ServiceState.STATE_IN_SERVICE))) {
+            notifyNoCallingStatusChange(
+                    currentVoiceState != ServiceState.STATE_IN_SERVICE,
+                    mSubscriptionInfo.getSubscriptionId());
+        }
     }
 
     /**

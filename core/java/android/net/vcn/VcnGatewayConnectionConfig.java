@@ -15,8 +15,6 @@
  */
 package android.net.vcn;
 
-import static android.net.NetworkCapabilities.NetCapability;
-
 import static com.android.internal.annotations.VisibleForTesting.Visibility;
 
 import android.annotation.IntRange;
@@ -233,7 +231,7 @@ public final class VcnGatewayConnectionConfig {
      *
      * @param capability the capability to check for
      */
-    public boolean hasExposedCapability(@NetCapability int capability) {
+    public boolean hasExposedCapability(int capability) {
         checkValidCapability(capability);
 
         return mExposedCapabilities.contains(capability);
@@ -254,7 +252,7 @@ public final class VcnGatewayConnectionConfig {
      *
      * @param capability the capability to check for
      */
-    public boolean requiresUnderlyingCapability(@NetCapability int capability) {
+    public boolean requiresUnderlyingCapability(int capability) {
         checkValidCapability(capability);
 
         return mUnderlyingCapabilities.contains(capability);
@@ -341,7 +339,7 @@ public final class VcnGatewayConnectionConfig {
          * @see VcnGatewayConnectionConfig for a list of capabilities may be exposed by a Gateway
          *     Connection
          */
-        public Builder addExposedCapability(@NetCapability int exposedCapability) {
+        public Builder addExposedCapability(int exposedCapability) {
             checkValidCapability(exposedCapability);
 
             mExposedCapabilities.add(exposedCapability);
@@ -357,7 +355,7 @@ public final class VcnGatewayConnectionConfig {
          * @see VcnGatewayConnectionConfig for a list of capabilities may be exposed by a Gateway
          *     Connection
          */
-        public Builder removeExposedCapability(@NetCapability int exposedCapability) {
+        public Builder removeExposedCapability(int exposedCapability) {
             checkValidCapability(exposedCapability);
 
             mExposedCapabilities.remove(exposedCapability);
@@ -373,7 +371,7 @@ public final class VcnGatewayConnectionConfig {
          * @see VcnGatewayConnectionConfig for a list of capabilities may be required of underlying
          *     networks
          */
-        public Builder addRequiredUnderlyingCapability(@NetCapability int underlyingCapability) {
+        public Builder addRequiredUnderlyingCapability(int underlyingCapability) {
             checkValidCapability(underlyingCapability);
 
             mUnderlyingCapabilities.add(underlyingCapability);
@@ -393,7 +391,7 @@ public final class VcnGatewayConnectionConfig {
          * @see VcnGatewayConnectionConfig for a list of capabilities may be required of underlying
          *     networks
          */
-        public Builder removeRequiredUnderlyingCapability(@NetCapability int underlyingCapability) {
+        public Builder removeRequiredUnderlyingCapability(int underlyingCapability) {
             checkValidCapability(underlyingCapability);
 
             mUnderlyingCapabilities.remove(underlyingCapability);

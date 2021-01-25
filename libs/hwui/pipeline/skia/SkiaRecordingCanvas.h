@@ -39,11 +39,12 @@ public:
     }
 
     virtual void resetRecording(int width, int height,
-                                uirenderer::RenderNode* renderNode) override {
+                                uirenderer::RenderNode* renderNode = nullptr) override {
         initDisplayList(renderNode, width, height);
     }
 
-    virtual uirenderer::DisplayList* finishRecording() override;
+    virtual void finishRecording(uirenderer::RenderNode* destination) override;
+    std::unique_ptr<SkiaDisplayList> finishRecording();
 
     virtual void drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) override;
     virtual void drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint* paint) override;
@@ -71,7 +72,7 @@ public:
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint,
                             uirenderer::CanvasPropertyPrimitive* progress,
-                            sk_sp<SkRuntimeEffect> runtimeEffect) override;
+                            const SkRuntimeShaderBuilder& effectBuilder) override;
 
     virtual void drawVectorDrawable(VectorDrawableRoot* vectorDrawable) override;
 

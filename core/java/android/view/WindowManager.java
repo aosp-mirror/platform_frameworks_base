@@ -93,6 +93,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -663,22 +664,32 @@ public interface WindowManager extends ViewManager {
     }
 
     /**
-     * Message for taking fullscreen screenshot
+     * Invoke screenshot flow to capture a full-screen image.
      * @hide
      */
     int TAKE_SCREENSHOT_FULLSCREEN = 1;
 
     /**
-     * Message for taking screenshot of selected region.
+     * Invoke screenshot flow allowing the user to select a region.
      * @hide
      */
     int TAKE_SCREENSHOT_SELECTED_REGION = 2;
 
     /**
-     * Message for handling a screenshot flow with an image provided by the caller.
+     * Invoke screenshot flow with an image provided by the caller.
      * @hide
      */
     int TAKE_SCREENSHOT_PROVIDED_IMAGE = 3;
+
+    /**
+     * Enum listing the types of screenshot requests available.
+     *
+     * @hide
+     */
+    @IntDef({TAKE_SCREENSHOT_FULLSCREEN,
+            TAKE_SCREENSHOT_SELECTED_REGION,
+            TAKE_SCREENSHOT_PROVIDED_IMAGE})
+    @interface ScreenshotType {}
 
     /**
      * Enum listing the possible sources from which a screenshot was originated. Used for logging.
@@ -1498,9 +1509,13 @@ public interface WindowManager extends ViewManager {
          *  Use {@link #dimAmount} to control the amount of dim. */
         public static final int FLAG_DIM_BEHIND        = 0x00000002;
 
-        /** Window flag: blur everything behind this window.
-         * @deprecated Blurring is no longer supported. */
-        @Deprecated
+        /** Window flag: enable blurring behind this window.
+         * To set the amount of blur, use {@link #backgroundBlurRadius}
+         *
+         * @hide
+         */
+        @RequiresPermission(permission.USE_BACKGROUND_BLUR)
+        @SystemApi
         public static final int FLAG_BLUR_BEHIND        = 0x00000004;
 
         /** Window flag: this window won't ever get key input focus, so the
@@ -1518,7 +1533,54 @@ public interface WindowManager extends ViewManager {
          * can use {@link #FLAG_ALT_FOCUSABLE_IM} to modify this behavior. */
         public static final int FLAG_NOT_FOCUSABLE      = 0x00000008;
 
-        /** Window flag: this window can never receive touch events. */
+        /**
+         * Window flag: this window can never receive touch events.
+         *
+         * <p>The intention of this flag is to leave the touch to be handled by some window below
+         * this window (in Z order).
+         *
+         * <p>Starting from Android {@link Build.VERSION_CODES#S}, for security reasons, touch
+         * events that pass through windows containing this flag (ie. are within the bounds of the
+         * window) will only be delivered to the touch-consuming window if one (or more) of the
+         * items below are true:
+         * <ol>
+         *   <li><b>Same UID</b>: This window belongs to the same UID that owns the touch-consuming
+         *   window.
+         *   <li><b>Trusted windows</b>: This window is trusted. Trusted windows include (but are
+         *   not limited to) accessibility windows ({@link #TYPE_ACCESSIBILITY_OVERLAY}), the IME
+         *   ({@link #TYPE_INPUT_METHOD}) and assistant windows (TYPE_VOICE_INTERACTION). Windows of
+         *   type {@link #TYPE_APPLICATION_OVERLAY} are <b>not</b> trusted, see below.
+         *   <li><b>Invisible windows</b>: This window is {@link View#GONE} or
+         *   {@link View#INVISIBLE}.
+         *   <li><b>Fully transparent windows</b>: This window has {@link LayoutParams#alpha} equal
+         *   to 0.
+         *   <li><b>One SAW window with enough transparency</b>: This window is of type {@link
+         *   #TYPE_APPLICATION_OVERLAY}, has {@link LayoutParams#alpha} below or equal to <b>0.8</b>
+         *   and it's the <b>only</b> window of type {@link #TYPE_APPLICATION_OVERLAY} from this UID
+         *   in the touch path.
+         *   <li><b>Multiple SAW windows with enough transparency</b>: The multiple overlapping
+         *   {@link #TYPE_APPLICATION_OVERLAY} windows in the
+         *   touch path from this UID have a <b>combined obscuring opacity</b> below or equal to
+         *   <b>0.8</b>. See section below on how to compute this value.
+         * </ol>
+         * <p>If none of these cases hold, the touch will not be delivered and a message will be
+         * logged to logcat.</p>
+         *
+         * <a name="ObscuringOpacity"></a>
+         * <h3>Combined obscuring opacity</h3>
+         *
+         * <p>The <b>combined obscuring opacity</b> of a set of windows is obtained by combining the
+         * opacity values of all windows in the set using the associative and commutative operation
+         * defined as:
+         * <pre>
+         * opacity({A,B}) = 1 - (1 - opacity(A))*(1 - opacity(B))
+         * </pre>
+         * <p>where {@code opacity(X)} is the {@link LayoutParams#alpha} of window X. So, for a set
+         * of windows {@code {W1, .., Wn}}, the combined obscuring opacity will be:
+         * <pre>
+         * opacity({W1, .., Wn}) = 1 - (1 - opacity(W1)) * ... * (1 - opacity(Wn))
+         * </pre>
+         */
         public static final int FLAG_NOT_TOUCHABLE      = 0x00000010;
 
         /** Window flag: even when this window is focusable (its
@@ -2084,6 +2146,15 @@ public interface WindowManager extends ViewManager {
          */
         public static final int PRIVATE_FLAG_WANTS_OFFSET_NOTIFICATIONS = 0x00000004;
 
+        /**
+         * When set {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows will stay visible, even if
+         * {@link LayoutParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS} is set for another
+         * visible window.
+         * @hide
+         */
+        @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
+        public static final int PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY = 0x00000008;
+
         /** In a multiuser system if this flag is set and the owner is a system process then this
          * window will appear on all user screens. This overrides the default behavior of window
          * types that normally only appear on the owning user's screen. Refer to each window type
@@ -2131,15 +2202,6 @@ public interface WindowManager extends ViewManager {
          * {@hide}
          */
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
-
-        /**
-         * Flag indicating that the x, y, width, and height members should be
-         * ignored (and thus their previous value preserved). For example
-         * because they are being managed externally through repositionChild.
-         *
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_PRESERVE_GEOMETRY = 0x00002000;
 
         /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
@@ -2297,7 +2359,6 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                 PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
-                PRIVATE_FLAG_PRESERVE_GEOMETRY,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -2314,6 +2375,7 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_TRUSTED_OVERLAY,
                 PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME,
                 PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
+                PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
         })
         public @interface PrivateFlags {}
 
@@ -2359,10 +2421,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         name = "FORCE_STATUS_BAR_VISIBLE"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_PRESERVE_GEOMETRY,
-                        equals = PRIVATE_FLAG_PRESERVE_GEOMETRY,
-                        name = "PRESERVE_GEOMETRY"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
@@ -2426,7 +2484,11 @@ public interface WindowManager extends ViewManager {
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
                         equals = PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP,
-                        name = "INTERCEPT_GLOBAL_DRAG_AND_DROP")
+                        name = "INTERCEPT_GLOBAL_DRAG_AND_DROP"),
+                @ViewDebug.FlagToString(
+                        mask = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        equals = PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY,
+                        name = "PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY")
         })
         @PrivateFlags
         @TestApi
@@ -2781,6 +2843,16 @@ public interface WindowManager extends ViewManager {
          * you.
          */
         public IBinder token = null;
+
+        /**
+         * The token of {@link android.app.WindowContext}. It is usually a
+         * {@link android.app.WindowTokenClient} and is used for updating
+         * {@link android.content.res.Resources} from {@link Configuration} propagated from the
+         * server side.
+         *
+         * @hide
+         */
+        public IBinder mWindowContextToken = null;
 
         /**
          * Name of the package owning this window.
@@ -3152,10 +3224,14 @@ public interface WindowManager extends ViewManager {
         public boolean preferMinimalPostProcessing = false;
 
         /**
-         * Indicates that this window wants to have blurred content behind it.
+         * When {@link FLAG_BLUR_BEHIND} is set, this is the amount of blur in pixels that this
+         * window will use to blur behind itself.
+         * The range is from 0, which means no blur, to 150.
          *
          * @hide
          */
+        @SystemApi
+        @RequiresPermission(permission.USE_BACKGROUND_BLUR)
         public int backgroundBlurRadius = 0;
 
         /**
@@ -3291,6 +3367,37 @@ public interface WindowManager extends ViewManager {
          */
         public void setTrustedOverlay() {
             privateFlags |= PRIVATE_FLAG_TRUSTED_OVERLAY;
+        }
+
+        /**
+         * When set on {@link LayoutParams#TYPE_APPLICATION_OVERLAY} windows they stay visible,
+         * even if {@link LayoutParams#SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS} is set for
+         * another visible window.
+         * @hide
+         */
+        @SystemApi
+        @RequiresPermission(permission.SYSTEM_APPLICATION_OVERLAY)
+        public void setSystemApplicationOverlay(boolean isSystemApplicationOverlay) {
+            if (isSystemApplicationOverlay) {
+                privateFlags |= PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+            } else {
+                privateFlags &= ~PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
+            }
+        }
+
+        /**
+         * Returns if this window is marked as being a system application overlay.
+         * @see LayoutParams#setSystemApplicationOverlay(boolean)
+         *
+         * <p>Note: the owner of the window must hold
+         * {@link android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY} for this to have any
+         * effect.
+         * @hide
+         */
+        @SystemApi
+        public boolean isSystemApplicationOverlay() {
+            return (privateFlags & PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY)
+                    == PRIVATE_FLAG_SYSTEM_APPLICATION_OVERLAY;
         }
 
         /**
@@ -3456,6 +3563,7 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(buttonBrightness);
             out.writeInt(rotationAnimation);
             out.writeStrongBinder(token);
+            out.writeStrongBinder(mWindowContextToken);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
@@ -3524,6 +3632,7 @@ public interface WindowManager extends ViewManager {
             buttonBrightness = in.readFloat();
             rotationAnimation = in.readInt();
             token = in.readStrongBinder();
+            mWindowContextToken = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
@@ -3684,6 +3793,11 @@ public interface WindowManager extends ViewManager {
                 // NOTE: token only copied if the recipient doesn't
                 // already have one.
                 token = o.token;
+            }
+            if (mWindowContextToken == null) {
+                // NOTE: token only copied if the recipient doesn't
+                // already have one.
+                mWindowContextToken = o.mWindowContextToken;
             }
             if (packageName == null) {
                 // NOTE: packageName only copied if the recipient doesn't

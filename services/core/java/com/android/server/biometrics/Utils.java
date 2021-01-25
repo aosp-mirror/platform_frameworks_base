@@ -52,7 +52,6 @@ import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Binder;
 import android.os.Build;
-import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -62,7 +61,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.util.List;
 
@@ -409,7 +408,7 @@ public class Utils {
         return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
     }
 
-    public static String getClientName(@Nullable ClientMonitor<?> client) {
+    public static String getClientName(@Nullable BaseClientMonitor client) {
         return client != null ? client.getClass().getSimpleName() : "null";
     }
 

@@ -17,7 +17,6 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.Bundle;
@@ -28,6 +27,7 @@ import com.android.internal.infra.AndroidFuture;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -46,6 +46,7 @@ import java.util.function.Consumer;
 public class AppSearchManager {
     /**
      * The default empty database name.
+     *
      * @hide
      */
     public static final String DEFAULT_DATABASE_NAME = "";
@@ -70,8 +71,8 @@ public class AppSearchManager {
         /**
          * Returns the name of the database to create or open.
          *
-         * <p>Databases with different names are fully separate with distinct types, namespaces,
-         * and data.
+         * <p>Databases with different names are fully separate with distinct types, namespaces, and
+         * data.
          */
         @NonNull
         public String getDatabaseName() {
@@ -122,15 +123,15 @@ public class AppSearchManager {
     /**
      * Creates a new {@link AppSearchSession}.
      *
-     * <p>This process requires an AppSearch native indexing file system for each user. If it's not
-     * created for this user, the initialization process will create one under user's directory.
+     * <p>This process requires an AppSearch native indexing file system. If it's not created, the
+     * initialization process will create one under the user's credential encrypted directory.
      *
      * @param searchContext The {@link SearchContext} contains all information to create a new
-     *                      {@link AppSearchSession}
-     * @param executor      Executor on which to invoke the callback.
-     * @param callback      The {@link AppSearchResult}&lt;{@link AppSearchSession}&gt; of
-     *                      performing this operation. Or a {@link AppSearchResult} with failure
-     *                      reason code and error information.
+     *     {@link AppSearchSession}
+     * @param executor Executor on which to invoke the callback.
+     * @param callback The {@link AppSearchResult}&lt;{@link AppSearchSession}&gt; of performing
+     *     this operation. Or a {@link AppSearchResult} with failure reason code and error
+     *     information.
      */
     public void createSearchSession(
             @NonNull SearchContext searchContext,
@@ -140,29 +141,32 @@ public class AppSearchManager {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         AppSearchSession.createSearchSession(
-                searchContext, mService, mContext.getUserId(), executor, callback);
+                searchContext,
+                mService,
+                mContext.getUserId(),
+                getPackageName(),
+                executor,
+                callback);
     }
 
     /**
      * Creates a new {@link GlobalSearchSession}.
      *
-     * <p>This process requires an AppSearch native indexing file system for each user. If it's not
-     * created for this user, the initialization process will create one under user's directory.
+     * <p>This process requires an AppSearch native indexing file system. If it's not created, the
+     * initialization process will create one under the user's credential encrypted directory.
      *
-     * @param executor      Executor on which to invoke the callback.
-     * @param callback      The {@link AppSearchResult}&lt;{@link GlobalSearchSession}&gt; of
-     *                      performing this operation. Or a {@link AppSearchResult} with failure
-     *                      reason code and error information.
-     * @hide
+     * @param executor Executor on which to invoke the callback.
+     * @param callback The {@link AppSearchResult}&lt;{@link GlobalSearchSession}&gt; of performing
+     *     this operation. Or a {@link AppSearchResult} with failure reason code and error
+     *     information.
      */
-    @SystemApi
     public void createGlobalSearchSession(
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
         GlobalSearchSession.createGlobalSearchSession(
-                mService, mContext.getUserId(), executor, callback);
+                mService, mContext.getUserId(), getPackageName(), executor, callback);
     }
 
     /**
@@ -172,40 +176,42 @@ public class AppSearchManager {
      * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
      * types of schema modifications are always safe and are made without deleting any existing
      * documents:
+     *
      * <ul>
-     *     <li>Addition of new types
-     *     <li>Addition of new
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
-     *             OPTIONAL} or
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED
-     *             REPEATED} properties to a type
-     *     <li>Changing the cardinality of a data type to be less restrictive (e.g. changing an
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
-     *             OPTIONAL} property into a
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED
-     *             REPEATED} property.
+     *   <li>Addition of new types
+     *   <li>Addition of new {@link
+     *       android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL} or
+     *       {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED
+     *       REPEATED} properties to a type
+     *   <li>Changing the cardinality of a data type to be less restrictive (e.g. changing an {@link
+     *       android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL}
+     *       property into a {@link
+     *       android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REPEATED REPEATED}
+     *       property.
      * </ul>
      *
      * <p>The following types of schema changes are not backwards-compatible:
+     *
      * <ul>
-     *     <li>Removal of an existing type
-     *     <li>Removal of a property from a type
-     *     <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
-     *     <li>For properties of {@code GenericDocument} type, changing the schema type of
-     *         {@code GenericDocument}s of that property
-     *     <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL
-     *             OPTIONAL} property into a
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED
-     *             REQUIRED} property).
-     *     <li>Adding a
-     *         {@link android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED
-     *             REQUIRED} property.
+     *   <li>Removal of an existing type
+     *   <li>Removal of a property from a type
+     *   <li>Changing the data type ({@code boolean}, {@code long}, etc.) of an existing property
+     *   <li>For properties of {@code GenericDocument} type, changing the schema type of {@code
+     *       GenericDocument}s of that property
+     *   <li>Changing the cardinality of a data type to be more restrictive (e.g. changing an {@link
+     *       android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_OPTIONAL OPTIONAL}
+     *       property into a {@link
+     *       android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED}
+     *       property).
+     *   <li>Adding a {@link
+     *       android.app.appsearch.AppSearchSchema.PropertyConfig#CARDINALITY_REQUIRED REQUIRED}
+     *       property.
      * </ul>
-     * <p>Supplying a schema with such changes will result in this call returning an
-     * {@link AppSearchResult} with a code of {@link AppSearchResult#RESULT_INVALID_SCHEMA} and an
-     * error message describing the incompatibility. In this case the previously set schema will
-     * remain active.
+     *
+     * <p>Supplying a schema with such changes will result in this call returning an {@link
+     * AppSearchResult} with a code of {@link AppSearchResult#RESULT_INVALID_SCHEMA} and an error
+     * message describing the incompatibility. In this case the previously set schema will remain
+     * active.
      *
      * <p>If you need to make non-backwards-compatible changes as described above, instead use the
      * {@link #setSchema(List, boolean)} method with the {@code forceOverride} parameter set to
@@ -216,8 +222,8 @@ public class AppSearchManager {
      *
      * @param request The schema update request.
      * @return the result of performing this operation.
-     * @deprecated use {@link AppSearchSession#setSchema} instead.
      * @hide
+     * @deprecated use {@link AppSearchSession#setSchema} instead.
      */
     @NonNull
     public AppSearchResult<Void> setSchema(@NonNull SetSchemaRequest request) {
@@ -231,9 +237,11 @@ public class AppSearchManager {
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
             mService.setSchema(
+                    getPackageName(),
                     DEFAULT_DATABASE_NAME,
                     schemaBundles,
                     new ArrayList<>(request.getSchemasNotVisibleToSystemUi()),
+                    /*schemasPackageAccessible=*/ Collections.emptyMap(),
                     request.isForceOverride(),
                     mContext.getUserId(),
                     new IAppSearchResultCallback.Stub() {
@@ -250,21 +258,19 @@ public class AppSearchManager {
     /**
      * Index {@link GenericDocument}s into AppSearch.
      *
-     * <p>You should not call this method directly; instead, use the
-     * {@code AppSearch#putDocuments()} API provided by JetPack.
+     * <p>You should not call this method directly; instead, use the {@code
+     * AppSearch#putDocuments()} API provided by JetPack.
      *
      * <p>Each {@link GenericDocument}'s {@code schemaType} field must be set to the name of a
      * schema type previously registered via the {@link #setSchema} method.
      *
      * @param request {@link PutDocumentsRequest} containing documents to be indexed
-     * @return The pending result of performing this operation. The keys of the returned
-     * {@link AppSearchBatchResult} are the URIs of the input documents. The values are
-     * {@code null} if they were successfully indexed, or a failed {@link AppSearchResult}
-     * otherwise.
+     * @return The pending result of performing this operation. The keys of the returned {@link
+     *     AppSearchBatchResult} are the URIs of the input documents. The values are {@code null} if
+     *     they were successfully indexed, or a failed {@link AppSearchResult} otherwise.
      * @throws RuntimeException If an error occurred during the execution.
-     *
-     * @deprecated use {@link AppSearchSession#putDocuments} instead.
      * @hide
+     * @deprecated use {@link AppSearchSession#putDocuments} instead.
      */
     public AppSearchBatchResult<String, Void> putDocuments(@NonNull PutDocumentsRequest request) {
         // TODO(b/146386470): Transmit these documents as a RemoteStream instead of sending them in
@@ -276,7 +282,11 @@ public class AppSearchManager {
         }
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.putDocuments(DEFAULT_DATABASE_NAME, documentBundles, mContext.getUserId(),
+            mService.putDocuments(
+                    getPackageName(),
+                    DEFAULT_DATABASE_NAME,
+                    documentBundles,
+                    mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
                             future.complete(result);
@@ -295,19 +305,18 @@ public class AppSearchManager {
     /**
      * Retrieves {@link GenericDocument}s by URI.
      *
-     * <p>You should not call this method directly; instead, use the
-     * {@code AppSearch#getDocuments()} API provided by JetPack.
+     * <p>You should not call this method directly; instead, use the {@code
+     * AppSearch#getDocuments()} API provided by JetPack.
      *
      * @param request {@link GetByUriRequest} containing URIs to be retrieved.
-     * @return The pending result of performing this operation. The keys of the returned
-     * {@link AppSearchBatchResult} are the input URIs. The values are the returned
-     * {@link GenericDocument}s on success, or a failed {@link AppSearchResult} otherwise.
-     * URIs that are not found will return a failed {@link AppSearchResult} with a result code
-     * of {@link AppSearchResult#RESULT_NOT_FOUND}.
+     * @return The pending result of performing this operation. The keys of the returned {@link
+     *     AppSearchBatchResult} are the input URIs. The values are the returned {@link
+     *     GenericDocument}s on success, or a failed {@link AppSearchResult} otherwise. URIs that
+     *     are not found will return a failed {@link AppSearchResult} with a result code of {@link
+     *     AppSearchResult#RESULT_NOT_FOUND}.
      * @throws RuntimeException If an error occurred during the execution.
-     *
-     * @deprecated use {@link AppSearchSession#getByUri} instead.
      * @hide
+     * @deprecated use {@link AppSearchSession#getByUri} instead.
      */
     public AppSearchBatchResult<String, GenericDocument> getByUri(
             @NonNull GetByUriRequest request) {
@@ -316,7 +325,12 @@ public class AppSearchManager {
         List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.getDocuments(DEFAULT_DATABASE_NAME, request.getNamespace(), uris,
+            mService.getDocuments(
+                    getPackageName(),
+                    DEFAULT_DATABASE_NAME,
+                    request.getNamespace(),
+                    uris,
+                    request.getProjectionsVisibleToPackagesInternal(),
                     mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
@@ -372,43 +386,39 @@ public class AppSearchManager {
      * provided by JetPack.
      *
      * <p>Currently we support following features in the raw query format:
+     *
      * <ul>
-     *     <li>AND
-     *     <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and
-     *     ‘cat’”).
-     *     Example: hello world matches documents that have both ‘hello’ and ‘world’
-     *     <li>OR
-     *     <p>OR joins (e.g. “match documents that have either the term ‘dog’ or
-     *     ‘cat’”).
-     *     Example: dog OR puppy
-     *     <li>Exclusion
-     *     <p>Exclude a term (e.g. “match documents that do
-     *     not have the term ‘dog’”).
-     *     Example: -dog excludes the term ‘dog’
-     *     <li>Grouping terms
-     *     <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
-     *     “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
-     *     Example: (dog puppy) (cat kitten) two one group containing two terms.
-     *     <li>Property restricts
-     *     <p> Specifies which properties of a document to specifically match terms in (e.g.
-     *     “match documents where the ‘subject’ property contains ‘important’”).
-     *     Example: subject:important matches documents with the term ‘important’ in the
-     *     ‘subject’ property
-     *     <li>Schema type restricts
-     *     <p>This is similar to property restricts, but allows for restricts on top-level document
-     *     fields, such as schema_type. Clients should be able to limit their query to documents of
-     *     a certain schema_type (e.g. “match documents that are of the ‘Email’ schema_type”).
-     *     Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will match documents
-     *     that contain the query term ‘dog’ and are of either the ‘Email’ schema type or the
-     *     ‘Video’ schema type.
+     *   <li>AND
+     *       <p>AND joins (e.g. “match documents that have both the terms ‘dog’ and ‘cat’”).
+     *       Example: hello world matches documents that have both ‘hello’ and ‘world’
+     *   <li>OR
+     *       <p>OR joins (e.g. “match documents that have either the term ‘dog’ or ‘cat’”). Example:
+     *       dog OR puppy
+     *   <li>Exclusion
+     *       <p>Exclude a term (e.g. “match documents that do not have the term ‘dog’”). Example:
+     *       -dog excludes the term ‘dog’
+     *   <li>Grouping terms
+     *       <p>Allow for conceptual grouping of subqueries to enable hierarchical structures (e.g.
+     *       “match documents that have either ‘dog’ or ‘puppy’, and either ‘cat’ or ‘kitten’”).
+     *       Example: (dog puppy) (cat kitten) two one group containing two terms.
+     *   <li>Property restricts
+     *       <p>Specifies which properties of a document to specifically match terms in (e.g. “match
+     *       documents where the ‘subject’ property contains ‘important’”). Example:
+     *       subject:important matches documents with the term ‘important’ in the ‘subject’ property
+     *   <li>Schema type restricts
+     *       <p>This is similar to property restricts, but allows for restricts on top-level
+     *       document fields, such as schema_type. Clients should be able to limit their query to
+     *       documents of a certain schema_type (e.g. “match documents that are of the ‘Email’
+     *       schema_type”). Example: { schema_type_filters: “Email”, “Video”,query: “dog” } will
+     *       match documents that contain the query term ‘dog’ and are of either the ‘Email’ schema
+     *       type or the ‘Video’ schema type.
      * </ul>
      *
      * @param queryExpression Query String to search.
      * @param searchSpec Spec for setting filters, raw query etc.
      * @throws RuntimeException If an error occurred during the execution.
-     *
-     * @deprecated use AppSearchSession#query instead.
      * @hide
+     * @deprecated use AppSearchSession#query instead.
      */
     @NonNull
     public AppSearchResult<List<SearchResult>> query(
@@ -417,7 +427,11 @@ public class AppSearchManager {
         //     them in one big list.
         AndroidFuture<AppSearchResult> future = new AndroidFuture<>();
         try {
-            mService.query(DEFAULT_DATABASE_NAME, queryExpression, searchSpec.getBundle(),
+            mService.query(
+                    getPackageName(),
+                    DEFAULT_DATABASE_NAME,
+                    queryExpression,
+                    searchSpec.getBundle(),
                     mContext.getUserId(),
                     new IAppSearchResultCallback.Stub() {
                         public void onResult(AppSearchResult result) {
@@ -426,8 +440,8 @@ public class AppSearchManager {
                     });
             AppSearchResult<Bundle> bundleResult = getFutureOrThrow(future);
             if (!bundleResult.isSuccess()) {
-                return AppSearchResult.newFailedResult(bundleResult.getResultCode(),
-                        bundleResult.getErrorMessage());
+                return AppSearchResult.newFailedResult(
+                        bundleResult.getResultCode(), bundleResult.getErrorMessage());
             }
             SearchResultPage searchResultPage = new SearchResultPage(bundleResult.getResultValue());
             return AppSearchResult.newSuccessfulResult(searchResultPage.getResults());
@@ -445,21 +459,23 @@ public class AppSearchManager {
      * provided by JetPack.
      *
      * @param request Request containing URIs to be removed.
-     * @return The pending result of performing this operation. The keys of the returned
-     * {@link AppSearchBatchResult} are the input URIs. The values are {@code null} on success,
-     * or a failed {@link AppSearchResult} otherwise. URIs that are not found will return a
-     * failed {@link AppSearchResult} with a result code of
-     * {@link AppSearchResult#RESULT_NOT_FOUND}.
+     * @return The pending result of performing this operation. The keys of the returned {@link
+     *     AppSearchBatchResult} are the input URIs. The values are {@code null} on success, or a
+     *     failed {@link AppSearchResult} otherwise. URIs that are not found will return a failed
+     *     {@link AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
      * @throws RuntimeException If an error occurred during the execution.
-     *
-     * @deprecated use {@link AppSearchSession#removeByUri} instead.
      * @hide
+     * @deprecated use {@link AppSearchSession#removeByUri} instead.
      */
     public AppSearchBatchResult<String, Void> removeByUri(@NonNull RemoveByUriRequest request) {
         List<String> uris = new ArrayList<>(request.getUris());
         AndroidFuture<AppSearchBatchResult> future = new AndroidFuture<>();
         try {
-            mService.removeByUri(DEFAULT_DATABASE_NAME, request.getNamespace(), uris,
+            mService.removeByUri(
+                    getPackageName(),
+                    DEFAULT_DATABASE_NAME,
+                    request.getNamespace(),
+                    uris,
                     mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
@@ -474,6 +490,12 @@ public class AppSearchManager {
             future.completeExceptionally(e);
         }
         return getFutureOrThrow(future);
+    }
+
+    /** Returns the package name that should be used for uid verification. */
+    @NonNull
+    private String getPackageName() {
+        return mContext.getOpPackageName();
     }
 
     private static <T> T getFutureOrThrow(@NonNull AndroidFuture<T> future) {

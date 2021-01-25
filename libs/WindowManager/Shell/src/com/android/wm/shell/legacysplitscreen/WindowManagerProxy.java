@@ -18,7 +18,10 @@ package com.android.wm.shell.legacysplitscreen;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
@@ -39,13 +42,11 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Proxy to simplify calls into window manager/activity manager
@@ -54,6 +55,17 @@ class WindowManagerProxy {
 
     private static final String TAG = "WindowManagerProxy";
     private static final int[] HOME_AND_RECENTS = {ACTIVITY_TYPE_HOME, ACTIVITY_TYPE_RECENTS};
+    private static final int[] CONTROLLED_ACTIVITY_TYPES = {
+            ACTIVITY_TYPE_STANDARD,
+            ACTIVITY_TYPE_HOME,
+            ACTIVITY_TYPE_RECENTS,
+            ACTIVITY_TYPE_UNDEFINED
+    };
+    private static final int[] CONTROLLED_WINDOWING_MODES = {
+            WINDOWING_MODE_FULLSCREEN,
+            WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+            WINDOWING_MODE_UNDEFINED
+    };
 
     @GuardedBy("mDockedRect")
     private final Rect mDockedRect = new Rect();
@@ -63,25 +75,7 @@ class WindowManagerProxy {
     @GuardedBy("mDockedRect")
     private final Rect mTouchableRegion = new Rect();
 
-    private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
-
     private final SyncTransactionQueue mSyncTransactionQueue;
-
-    private final Runnable mSetTouchableRegionRunnable = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                synchronized (mDockedRect) {
-                    mTmpRect1.set(mTouchableRegion);
-                }
-                WindowManagerGlobal.getWindowManagerService().setDockedStackDividerTouchRegion(
-                        mTmpRect1);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Failed to set touchable region: " + e);
-            }
-        }
-    };
-
     private final TaskOrganizer mTaskOrganizer;
 
     WindowManagerProxy(SyncTransactionQueue syncQueue, TaskOrganizer taskOrganizer) {
@@ -94,29 +88,29 @@ class WindowManagerProxy {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             tiles.mSplitScreenController.startDismissSplit(!dismissOrMaximize, true /* snapped */);
         } else {
-            mExecutor.execute(() -> applyDismissSplit(tiles, layout, dismissOrMaximize));
+            applyDismissSplit(tiles, layout, dismissOrMaximize);
         }
     }
 
     public void setResizing(final boolean resizing) {
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    ActivityTaskManager.getService().setSplitScreenResizing(resizing);
-                } catch (RemoteException e) {
-                    Log.w(TAG, "Error calling setDockedStackResizing: " + e);
-                }
-            }
-        });
+        try {
+            ActivityTaskManager.getService().setSplitScreenResizing(resizing);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error calling setDockedStackResizing: " + e);
+        }
     }
 
     /** Sets a touch region */
     public void setTouchRegion(Rect region) {
-        synchronized (mDockedRect) {
-            mTouchableRegion.set(region);
+        try {
+            synchronized (mDockedRect) {
+                mTouchableRegion.set(region);
+            }
+            WindowManagerGlobal.getWindowManagerService().setDockedStackDividerTouchRegion(
+                    mTouchableRegion);
+        } catch (RemoteException e) {
+            Log.w(TAG, "Failed to set touchable region: " + e);
         }
-        mExecutor.execute(mSetTouchableRegionRunnable);
     }
 
     void applyResizeSplits(int position, LegacySplitDisplayLayout splitLayout) {
@@ -191,8 +185,9 @@ class WindowManagerProxy {
         // Set launchtile first so that any stack created after
         // getAllRootTaskInfos and before reparent (even if unlikely) are placed
         // correctly.
-        mTaskOrganizer.setLaunchRoot(DEFAULT_DISPLAY, tiles.mSecondary.token);
         WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setLaunchRoot(tiles.mSecondary.token, CONTROLLED_WINDOWING_MODES,
+                CONTROLLED_ACTIVITY_TYPES);
         final boolean isHomeResizable = buildEnterSplit(wct, tiles, layout);
         applySyncTransaction(wct);
         return isHomeResizable;
@@ -251,12 +246,12 @@ class WindowManagerProxy {
     /** @see #buildDismissSplit */
     void applyDismissSplit(LegacySplitScreenTaskListener tiles, LegacySplitDisplayLayout layout,
             boolean dismissOrMaximize) {
-        // Set launch root first so that any task created after getChildContainers and
-        // before reparent (pretty unlikely) are put into fullscreen.
-        mTaskOrganizer.setLaunchRoot(Display.DEFAULT_DISPLAY, null);
         // TODO(task-org): Once task-org is more complete, consider using Appeared/Vanished
         //                 plus specific APIs to clean this up.
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        // Set launch root first so that any task created after getChildContainers and
+        // before reparent (pretty unlikely) are put into fullscreen.
+        wct.setLaunchRoot(tiles.mSecondary.token, null, null);
         buildDismissSplit(wct, tiles, layout, dismissOrMaximize);
         applySyncTransaction(wct);
     }

@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.legacysplitscreen
 
+import android.platform.test.annotations.Presubmit
 import android.graphics.Region
 import android.util.Rational
 import android.view.Surface
@@ -28,7 +29,6 @@ import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
-import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.focusDoesNotChange
 import com.android.server.wm.flicker.helpers.WindowUtils
@@ -50,6 +50,8 @@ import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.traces.layers.getVisibleBounds
+import com.android.wm.shell.flicker.helpers.SimpleAppHelper
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -61,14 +63,16 @@ import org.junit.runners.Parameterized
  *
  * Currently it runs only in 0 degrees because of b/156100803
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 159096424)
 class ResizeLegacySplitScreenTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         private const val sSimpleActivity = "SimpleActivity"
         private const val sImeActivity = "ImeActivity"
@@ -79,18 +83,16 @@ class ResizeLegacySplitScreenTest(
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val testAppTop = StandardAppHelper(instrumentation,
-                "com.android.wm.shell.flicker.testapp", "SimpleApp")
+            val testAppTop = SimpleAppHelper(instrumentation)
             val testAppBottom = ImeAppHelper(instrumentation)
 
-            return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
+            return FlickerTestRunnerFactory(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0))
                 .buildTest { configuration ->
                     withTestName {
                         val description = (startRatio.toString().replace("/", "-") + "_to_" +
                             stopRatio.toString().replace("/", "-"))
-                        buildTestTag("resizeSplitScreen", testAppTop.launcherName,
-                            configuration.startRotation, configuration.endRotation,
-                            testAppBottom.launcherName, description)
+                        buildTestTag("resizeSplitScreen", configuration, description)
                     }
                     repeat { configuration.repetitions }
                     setup {
@@ -98,9 +100,9 @@ class ResizeLegacySplitScreenTest(
                             device.wakeUpAndGoToHomeScreen()
                             this.setRotation(configuration.startRotation)
                             this.launcherStrategy.clearRecentAppsFromOverview()
-                            testAppBottom.open()
+                            testAppBottom.launchViaIntent(wmHelper)
                             device.pressHome()
-                            testAppTop.open()
+                            testAppTop.launchViaIntent(wmHelper)
                             device.waitForIdle()
                             device.launchSplitScreen()
                             val snapshot =
@@ -166,8 +168,6 @@ class ResizeLegacySplitScreenTest(
 
                             start("appsStartingBounds", enabled = false) {
                                 val displayBounds = WindowUtils.displayBounds
-                                val entry = this.trace.entries.firstOrNull()
-                                    ?: throw IllegalStateException("Trace is empty")
                                 val dividerBounds =
                                     entry.getVisibleBounds(DOCKED_STACK_DIVIDER).bounds
 
@@ -178,14 +178,11 @@ class ResizeLegacySplitScreenTest(
                                     displayBounds.right,
                                     displayBounds.bottom - WindowUtils.navigationBarHeight)
                                 this.hasVisibleRegion("SimpleActivity", topAppBounds)
-                                    .and()
                                     .hasVisibleRegion("ImeActivity", bottomAppBounds)
                             }
 
                             end("appsEndingBounds", enabled = false) {
                                 val displayBounds = WindowUtils.displayBounds
-                                val entry = this.trace.entries.lastOrNull()
-                                    ?: throw IllegalStateException("Trace is empty")
                                 val dividerBounds =
                                     entry.getVisibleBounds(DOCKED_STACK_DIVIDER).bounds
 
@@ -197,7 +194,6 @@ class ResizeLegacySplitScreenTest(
                                     displayBounds.bottom - WindowUtils.navigationBarHeight)
 
                                 this.hasVisibleRegion(sSimpleActivity, topAppBounds)
-                                    .and()
                                     .hasVisibleRegion(sImeActivity, bottomAppBounds)
                             }
                         }

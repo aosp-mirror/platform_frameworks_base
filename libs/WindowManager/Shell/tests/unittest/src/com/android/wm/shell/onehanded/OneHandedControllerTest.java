@@ -25,14 +25,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.om.IOverlayManager;
+import android.os.Handler;
 import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 
 import org.junit.Before;
@@ -45,7 +46,6 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedControllerTest extends OneHandedTestCase {
     Display mDisplay;
     OneHandedController mOneHandedController;
@@ -53,6 +53,8 @@ public class OneHandedControllerTest extends OneHandedTestCase {
 
     @Mock
     DisplayController mMockDisplayController;
+    @Mock
+    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
     @Mock
@@ -64,25 +66,36 @@ public class OneHandedControllerTest extends OneHandedTestCase {
     @Mock
     OneHandedTimeoutHandler mMockTimeoutHandler;
     @Mock
+    OneHandedUiEventLogger mMockUiEventLogger;
+    @Mock
     IOverlayManager mMockOverlayManager;
     @Mock
     TaskStackListenerImpl mMockTaskStackListener;
+    @Mock
+    ShellExecutor mMockShellMainExecutor;
+    @Mock
+    Handler mMockShellMainHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mDisplay = mContext.getDisplay();
+        mTimeoutHandler = Mockito.spy(new OneHandedTimeoutHandler(mMockShellMainExecutor));
         OneHandedController oneHandedController = new OneHandedController(
                 mContext,
                 mMockDisplayController,
+                mMockBackgroundOrganizer,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
                 mMockTutorialHandler,
                 mMockGestureHandler,
+                mTimeoutHandler,
+                mMockUiEventLogger,
                 mMockOverlayManager,
-                mMockTaskStackListener);
+                mMockTaskStackListener,
+                mMockShellMainExecutor,
+                mMockShellMainHandler);
         mOneHandedController = Mockito.spy(oneHandedController);
-        mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
@@ -94,7 +107,7 @@ public class OneHandedControllerTest extends OneHandedTestCase {
                 mContext);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
                 mContext, mMockDisplayController, animationController, mMockTutorialHandler,
-                Runnable::run);
+                mMockBackgroundOrganizer, mMockShellMainExecutor);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }

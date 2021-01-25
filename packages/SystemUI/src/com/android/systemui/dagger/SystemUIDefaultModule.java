@@ -20,6 +20,7 @@ import static com.android.systemui.Dependency.ALLOW_NOTIFICATION_LONG_PRESS_NAME
 import static com.android.systemui.Dependency.LEAK_REPORT_EMAIL_NAME;
 
 import android.content.Context;
+import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
 import android.os.PowerManager;
 
@@ -62,6 +63,10 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedControllerImpl;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyControllerImpl;
+import com.android.systemui.statusbar.policy.SensorPrivacyController;
+import com.android.systemui.statusbar.policy.SensorPrivacyControllerImpl;
 
 import javax.inject.Named;
 
@@ -114,6 +119,25 @@ public abstract class SystemUIDefaultModule {
                 bgHandler);
         bC.init();
         return bC;
+    }
+
+    @Provides
+    @SysUISingleton
+    static SensorPrivacyController provideSensorPrivacyController(
+            SensorPrivacyManager sensorPrivacyManager) {
+        SensorPrivacyController spC = new SensorPrivacyControllerImpl(sensorPrivacyManager);
+        spC.init();
+        return spC;
+    }
+
+    @Provides
+    @SysUISingleton
+    static IndividualSensorPrivacyController provideIndividualSensorPrivacyController(
+            SensorPrivacyManager sensorPrivacyManager) {
+        IndividualSensorPrivacyController spC = new IndividualSensorPrivacyControllerImpl(
+                sensorPrivacyManager);
+        spC.init();
+        return spC;
     }
 
     @Binds

@@ -410,6 +410,11 @@ public class InputMethodService extends AbstractInputMethodService {
     private static final int BACK_DISPOSITION_MIN = BACK_DISPOSITION_DEFAULT;
     private static final int BACK_DISPOSITION_MAX = BACK_DISPOSITION_ADJUST_NOTHING;
 
+    /**
+     * Timeout after which hidden IME surface will be removed from memory
+     */
+    private static final long TIMEOUT_SURFACE_REMOVAL_MILLIS = 5000;
+
     InputMethodManager mImm;
     private InputMethodPrivilegedOperations mPrivOps = new InputMethodPrivilegedOperations();
 
@@ -506,6 +511,8 @@ public class InputMethodService extends AbstractInputMethodService {
 
     private boolean mAutomotiveHideNavBarForKeyboard;
     private boolean mIsAutomotive;
+    private Handler mHandler;
+    private boolean mImeSurfaceScheduledForRemoval;
 
     /**
      * An opaque {@link Binder} token of window requesting {@link InputMethodImpl#showSoftInput}
@@ -903,10 +910,30 @@ public class InputMethodService extends AbstractInputMethodService {
         requestHideSelf(0);
     }
 
+    private void scheduleImeSurfaceRemoval() {
+        if (mShowInputRequested || mWindowVisible || mWindow == null
+                || mImeSurfaceScheduledForRemoval) {
+            return;
+        }
+        if (mHandler == null) {
+            mHandler = new Handler(getMainLooper());
+        }
+        mImeSurfaceScheduledForRemoval = true;
+        mHandler.postDelayed(() -> removeImeSurface(), TIMEOUT_SURFACE_REMOVAL_MILLIS);
+    }
+
     private void removeImeSurface() {
-        if (!mShowInputRequested && !mWindowVisible) {
-            // hiding a window removes its surface.
+        // hiding a window removes its surface.
+        if (mWindow != null) {
             mWindow.hide();
+        }
+        mImeSurfaceScheduledForRemoval = false;
+    }
+
+    private void cancelImeSurfaceRemoval() {
+        if (mHandler != null && mImeSurfaceScheduledForRemoval) {
+            mHandler.removeCallbacksAndMessages(null /* token */);
+            mImeSurfaceScheduledForRemoval = false;
         }
     }
 
@@ -1043,7 +1070,7 @@ public class InputMethodService extends AbstractInputMethodService {
          * @hide
          */
         public final void removeImeSurface() {
-            InputMethodService.this.removeImeSurface();
+            InputMethodService.this.scheduleImeSurfaceRemoval();
         }
     }
     
@@ -2271,6 +2298,9 @@ public class InputMethodService extends AbstractInputMethodService {
         ImeTracing.getInstance().triggerServiceDump(
                 "InputMethodService#applyVisibilityInInsetsConsumerIfNecessary", this,
                 null /* icProto */);
+        if (setVisible) {
+            cancelImeSurfaceRemoval();
+        }
         mPrivOps.applyImeVisibility(setVisible
                 ? mCurShowInputToken : mCurHideInputToken, setVisible);
     }

@@ -86,6 +86,35 @@ object LiftReveal : LightRevealEffect {
     }
 }
 
+class PowerButtonReveal(
+    /** Approximate Y-value of the center of the power button on the physical device. */
+    val powerButtonY: Float
+) : LightRevealEffect {
+
+    private val OVAL_INITIAL_HEIGHT = 50f
+
+    private val WIDTH_INCREASE_MULTIPLIER = 1.25f
+
+    override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
+        val interpolatedAmount = Interpolators.FAST_OUT_SLOW_IN_REVERSE.getInterpolation(amount)
+        val fadeAmount =
+                LightRevealEffect.getPercentPastThreshold(interpolatedAmount, 0.5f)
+
+        with(scrim) {
+            revealGradientEndColorAlpha = 1f - fadeAmount
+            setRevealGradientBounds(
+                    width -
+                            width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
+                    powerButtonY - (OVAL_INITIAL_HEIGHT / 2f) -
+                            height * interpolatedAmount,
+                    width * WIDTH_INCREASE_MULTIPLIER +
+                            width * WIDTH_INCREASE_MULTIPLIER * interpolatedAmount,
+                    powerButtonY + (OVAL_INITIAL_HEIGHT / 2f) +
+                            height * interpolatedAmount)
+        }
+    }
+}
+
 /**
  * Scrim view that partially reveals the content underneath it using a [RadialGradient] with a
  * transparent center. The center position, size, and stops of the gradient can be manipulated to

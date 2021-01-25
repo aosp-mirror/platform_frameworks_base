@@ -25,6 +25,8 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.common.ShellExecutor;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,11 +51,14 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
     @Mock
     private SurfaceControl mMockLeash;
 
+    @Mock
+    private ShellExecutor mMainExecutor;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        mTutorialHandler = new OneHandedTutorialHandler(mContext);
+        mTutorialHandler = new OneHandedTutorialHandler(mContext, mMainExecutor);
         mOneHandedAnimationController = new OneHandedAnimationController(mContext);
     }
 

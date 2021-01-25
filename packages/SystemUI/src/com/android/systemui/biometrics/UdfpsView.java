@@ -21,6 +21,7 @@ import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -29,6 +30,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -37,6 +39,8 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import com.android.internal.graphics.ColorUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -81,9 +85,14 @@ public class UdfpsView extends View implements DozeReceiver,
     private float mBurnInOffsetX;
     private float mBurnInOffsetY;
 
+    private int mShowReason;
     private boolean mShowScrimAndDot;
     private boolean mIsHbmSupported;
     @Nullable private String mDebugMessage;
+
+    // Runnable that will be run after the illumination dot and scrim are shown.
+    // The runnable is reset to null after it's executed once.
+    @Nullable private Runnable mRunAfterShowingScrimAndDot;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -140,18 +149,25 @@ public class UdfpsView extends View implements DozeReceiver,
         mSensorProps = properties;
     }
 
+    /**
+     * @param reason See {@link android.hardware.fingerprint.IUdfpsOverlayController}
+     */
+    void setShowReason(int reason) {
+        mShowReason = reason;
+    }
+
     @Override
     public void dozeTimeTick() {
-        updateAodPosition();
+        updateAodPositionAndColor();
     }
 
     @Override
     public void onDozeAmountChanged(float linear, float eased) {
         mInterpolatedDarkAmount = eased;
-        updateAodPosition();
+        updateAodPositionAndColor();
     }
 
-    private void updateAodPosition() {
+    private void updateAodPositionAndColor() {
         mBurnInOffsetX = MathUtils.lerp(0f,
                 getBurnInOffset(mMaxBurnInOffsetX * 2, true /* xAxis */)
                         - mMaxBurnInOffsetX,
@@ -160,6 +176,7 @@ public class UdfpsView extends View implements DozeReceiver,
                 getBurnInOffset(mMaxBurnInOffsetY * 2, false /* xAxis */)
                         - 0.5f * mMaxBurnInOffsetY,
                 mInterpolatedDarkAmount);
+        updateColor();
         postInvalidate();
     }
 
@@ -208,15 +225,29 @@ public class UdfpsView extends View implements DozeReceiver,
         // is finished, mTouchableRegion will be used by mInsetsListener to compute the touch
         // insets.
         mSensorRect.roundOut(mTouchableRegion);
-
-
     }
 
     @Override
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         Log.v(TAG, "onAttachedToWindow");
+
+        // Retrieve the colors each time, since it depends on day/night mode
+        updateColor();
+
         getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
+    }
+
+    private void updateColor() {
+        if (mShowReason == IUdfpsOverlayController.REASON_AUTH) {
+            final int lockScreenIconColor = Utils.getColorAttrDefaultColor(mContext,
+                    com.android.systemui.R.attr.wallpaperTextColor);
+            final int ambientDisplayIconColor = Color.WHITE;
+            mFingerprintDrawable.setTint(ColorUtils.blendARGB(lockScreenIconColor,
+                    ambientDisplayIconColor, mInterpolatedDarkAmount));
+        } else if (mShowReason == IUdfpsOverlayController.REASON_ENROLL) {
+            mFingerprintDrawable.setTint(mContext.getColor(R.color.udfps_enroll_icon));
+        }
     }
 
     @Override
@@ -246,11 +277,21 @@ public class UdfpsView extends View implements DozeReceiver,
             // draw dot (white circle)
             canvas.drawOval(mSensorRect, mSensorPaint);
         } else {
+            final boolean isNightMode = (getResources().getConfiguration().uiMode
+                    & Configuration.UI_MODE_NIGHT_YES) != 0;
+            if (mShowReason == IUdfpsOverlayController.REASON_ENROLL && !isNightMode) {
+                canvas.drawOval(mSensorRect, mSensorPaint);
+            }
             // draw fingerprint icon
             mFingerprintDrawable.draw(canvas);
         }
 
         canvas.restore();
+
+        if (mShowScrimAndDot && mRunAfterShowingScrimAndDot != null) {
+            post(mRunAfterShowingScrimAndDot);
+            mRunAfterShowingScrimAndDot = null;
+        }
     }
 
     RectF getSensorRect() {
@@ -264,6 +305,10 @@ public class UdfpsView extends View implements DozeReceiver,
     void setDebugMessage(String message) {
         mDebugMessage = message;
         postInvalidate();
+    }
+
+    void setRunAfterShowingScrimAndDot(Runnable runnable) {
+        mRunAfterShowingScrimAndDot = runnable;
     }
 
     boolean isValidTouch(float x, float y, float pressure) {

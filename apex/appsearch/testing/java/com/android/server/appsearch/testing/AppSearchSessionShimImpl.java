@@ -28,10 +28,12 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.PutDocumentsRequest;
 import android.app.appsearch.RemoveByUriRequest;
+import android.app.appsearch.ReportUsageRequest;
 import android.app.appsearch.SearchResults;
 import android.app.appsearch.SearchResultsShim;
 import android.app.appsearch.SearchSpec;
 import android.app.appsearch.SetSchemaRequest;
+import android.app.appsearch.SetSchemaResponse;
 import android.app.appsearch.exceptions.AppSearchException;
 import android.content.Context;
 
@@ -84,8 +86,8 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
-    public ListenableFuture<Void> setSchema(@NonNull SetSchemaRequest request) {
-        SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
+    public ListenableFuture<SetSchemaResponse> setSchema(@NonNull SetSchemaRequest request) {
+        SettableFuture<AppSearchResult<SetSchemaResponse>> future = SettableFuture.create();
         mAppSearchSession.setSchema(request, mExecutor, future::set);
         return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
@@ -129,6 +131,14 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
+    public ListenableFuture<Void> reportUsage(@NonNull ReportUsageRequest request) {
+        SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
+        mAppSearchSession.reportUsage(request, mExecutor, future::set);
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
+    }
+
+    @Override
+    @NonNull
     public ListenableFuture<AppSearchBatchResult<String, Void>> removeByUri(
             @NonNull RemoveByUriRequest request) {
         SettableFuture<AppSearchBatchResult<String, Void>> future = SettableFuture.create();
@@ -148,6 +158,16 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
     @Override
     public void close() {
         mAppSearchSession.close();
+    }
+
+    @Override
+    @NonNull
+    public ListenableFuture<Void> maybeFlush() {
+        SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
+        // The data in platform will be flushed by scheduled task. AppSearchSession won't do
+        // anything extra flush.
+        future.set(AppSearchResult.newSuccessfulResult(null));
+        return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 
     private <T> ListenableFuture<T> transformResult(

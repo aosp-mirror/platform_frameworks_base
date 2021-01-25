@@ -47,6 +47,9 @@ public class SearchResults implements Closeable {
 
     private final IAppSearchManager mService;
 
+    // The package name of the caller.
+    private final String mPackageName;
+
     // The database name to search over. If null, this will search over all database names.
     @Nullable
     private final String mDatabaseName;
@@ -68,12 +71,14 @@ public class SearchResults implements Closeable {
 
     SearchResults(
             @NonNull IAppSearchManager service,
+            @NonNull String packageName,
             @Nullable String databaseName,
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec,
             @UserIdInt int userId,
             @NonNull @CallbackExecutor Executor executor) {
         mService = Objects.requireNonNull(service);
+        mPackageName = packageName;
         mDatabaseName = databaseName;
         mQueryExpression = Objects.requireNonNull(queryExpression);
         mSearchSpec = Objects.requireNonNull(searchSpec);
@@ -98,13 +103,12 @@ public class SearchResults implements Closeable {
                 mIsFirstLoad = false;
                 if (mDatabaseName == null) {
                     // Global query, there's no one package-database combination to check.
-                    mService.globalQuery(mQueryExpression, mSearchSpec.getBundle(), mUserId,
-                            wrapCallback(callback));
+                    mService.globalQuery(mPackageName, mQueryExpression,
+                            mSearchSpec.getBundle(), mUserId, wrapCallback(callback));
                 } else {
                     // Normal local query, pass in specified database.
-                    mService.query(
-                            mDatabaseName, mQueryExpression, mSearchSpec.getBundle(), mUserId,
-                            wrapCallback(callback));
+                    mService.query(mPackageName, mDatabaseName, mQueryExpression,
+                            mSearchSpec.getBundle(), mUserId, wrapCallback(callback));
                 }
             } else {
                 mService.getNextPage(mNextPageToken, mUserId, wrapCallback(callback));

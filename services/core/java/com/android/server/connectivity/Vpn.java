@@ -439,6 +439,11 @@ public class Vpn {
         mEnableTeardown = enableTeardown;
     }
 
+    @VisibleForTesting
+    public boolean getEnableTeardown() {
+        return mEnableTeardown;
+    }
+
     /**
      * Update current state, dispatching event to listeners.
      */
@@ -1229,7 +1234,8 @@ public class Vpn {
     private boolean canHaveRestrictedProfile(int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
-            return UserManager.get(mContext).canHaveRestrictedProfile(userId);
+            final Context userContext = mContext.createContextAsUser(UserHandle.of(userId), 0);
+            return userContext.getSystemService(UserManager.class).canHaveRestrictedProfile();
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -1850,34 +1856,6 @@ public class Vpn {
         }
     }
 
-    /**
-     * @param uid The target uid.
-     *
-     * @return {@code true} if {@code uid} is included in one of the mBlockedUidsAsToldToNetd
-     * ranges and the VPN is not connected, or if the VPN is connected but does not apply to
-     * the {@code uid}.
-     *
-     * @apiNote This method don't check VPN lockdown status.
-     * @see #mBlockedUidsAsToldToConnectivity
-     */
-    public synchronized boolean isBlockingUid(int uid) {
-        if (mNetworkInfo.isConnected()) {
-            return !appliesToUid(uid);
-        } else {
-            return containsUid(mBlockedUidsAsToldToConnectivity, uid);
-        }
-    }
-
-    private boolean containsUid(Collection<UidRangeParcel> ranges, int uid) {
-        if (ranges == null) return false;
-        for (UidRangeParcel range : ranges) {
-            if (range.start <= uid && uid <= range.stop) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void updateAlwaysOnNotification(DetailedState networkState) {
         final boolean visible = (mAlwaysOn && networkState != DetailedState.CONNECTED);
 
@@ -2173,6 +2151,11 @@ public class Vpn {
 
         // Start a new LegacyVpnRunner and we are done!
         mVpnRunner = new LegacyVpnRunner(config, racoon, mtpd, profile);
+        startLegacyVpnRunner();
+    }
+
+    @VisibleForTesting
+    protected void startLegacyVpnRunner() {
         mVpnRunner.start();
     }
 

@@ -321,9 +321,14 @@
 
     <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
+    <!-- For OMAPI -->
+    <protected-broadcast android:name="android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED" />
+
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.ALWAYS_ON_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="android.nfc.action.REQUIRE_UNLOCK_FOR_NFC" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_UP" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_DOWN" />
     <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
@@ -434,6 +439,8 @@
 
     <protected-broadcast android:name="android.location.PROVIDERS_CHANGED" />
     <protected-broadcast android:name="android.location.MODE_CHANGED" />
+    <protected-broadcast android:name="android.location.action.GNSS_CAPABILITIES_CHANGED" />
+
     <protected-broadcast android:name="android.net.proxy.PAC_REFRESH" />
 
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
@@ -617,6 +624,9 @@
     <protected-broadcast android:name="android.intent.action.MANAGED_PROFILE_UNAVAILABLE" />
     <protected-broadcast android:name="com.android.server.pm.DISABLE_QUIET_MODE_AFTER_UNLOCK" />
 
+    <protected-broadcast android:name="android.intent.action.PROFILE_ACCESSIBLE" />
+    <protected-broadcast android:name="android.intent.action.PROFILE_INACCESSIBLE" />
+
     <protected-broadcast android:name="com.android.server.retaildemo.ACTION_RESET_DEMO" />
 
     <protected-broadcast android:name="android.intent.action.DEVICE_LOCKED_CHANGED" />
@@ -678,6 +688,10 @@
 
     <!-- Made protected in S (was added in R) -->
     <protected-broadcast android:name="com.android.internal.intent.action.BUGREPORT_REQUESTED" />
+
+    <!-- Added in S -->
+    <protected-broadcast android:name="android.app.action.MANAGED_PROFILE_CREATED" />
+    <protected-broadcast android:name="android.app.action.PROVISIONED_MANAGED_DEVICE" />
 
     <!-- ====================================================================== -->
     <!--                          RUNTIME PERMISSIONS                           -->
@@ -1688,7 +1702,7 @@
     <permission android:name="android.permission.MANAGE_IPSEC_TUNNELS"
         android:protectionLevel="signature|appop" />
 
-    <!-- @hide Allows apps to create and manage Test Networks.
+    <!-- @SystemApi @hide Allows apps to create and manage Test Networks.
          <p>Granted only to shell. CTS tests will use
          UiAutomation.AdoptShellPermissionIdentity() to gain access.
     -->
@@ -2652,8 +2666,9 @@
     <permission android:name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE"
         android:protectionLevel="signature|privileged|development" />
 
-    <!-- Allows use of PendingIntent.getIntent().
-         @hide -->
+    <!-- Allows use of PendingIntent.getIntent(), .
+         @hide @SystemApi(client=android.annotation.SystemApi.Client.MODULE_LIBRARIES)
+         -->
     <permission android:name="android.permission.GET_INTENT_SENDER_INTENT"
         android:protectionLevel="signature" />
 
@@ -2676,11 +2691,24 @@
          The app can check whether it has this authorization by calling
          {@link android.provider.Settings#canDrawOverlays
          Settings.canDrawOverlays()}.
-         <p>Protection level: signature|preinstalled|appop|pre23|development -->
+         <p>Protection level: signature|appop|preinstalled|pre23|development -->
     <permission android:name="android.permission.SYSTEM_ALERT_WINDOW"
         android:label="@string/permlab_systemAlertWindow"
         android:description="@string/permdesc_systemAlertWindow"
-        android:protectionLevel="signature|preinstalled|appop|pre23|development" />
+        android:protectionLevel="signature|appop|preinstalled|pre23|development" />
+
+    <!-- @SystemApi @hide Allows an application to create windows using the type
+         {@link android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY},
+         shown on top of all other apps.
+
+         Allows an application to use
+         {@link android.view.WindowManager.LayoutsParams#SYSTEM_FLAG_SYSTEM_APPLICATION_OVERLAY}
+         to create overlays that will stay visible, even if another window is requesting overlays to
+         be hidden through {@link android.view.Window#setHideOverlayWindows(boolean)}.
+
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"
+                android:protectionLevel="signature|wellbeing"/>
 
     <!-- @deprecated Use {@link android.Manifest.permission#REQUEST_COMPANION_RUN_IN_BACKGROUND}
          @hide
@@ -3089,10 +3117,16 @@
     <permission android:name="android.permission.RECOVERY"
         android:protectionLevel="signature|privileged" />
 
+    <!-- @SystemApi Allows an application to do certain operations needed for
+         resume on reboot feature.
+         @hide -->
+    <permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE"
+        android:protectionLevel="signature" />
+
     <!-- @SystemApi Allows an application to read system update info.
          @hide -->
     <permission android:name="android.permission.READ_SYSTEM_UPDATE_INFO"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|privileged" />
 
     <!-- Allows the system to bind to an application's task services
          @hide -->
@@ -3145,6 +3179,16 @@
          runtime resource overlays.
          @hide -->
     <permission android:name="android.permission.CHANGE_OVERLAY_PACKAGES"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- Allows an application to set, update and remove the credential management app.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP"
+        android:protectionLevel="signature" />
+
+    <!-- Allows a font updater application to request that the system installs/uninstalls/updates
+         font files. @SystemApi @hide -->
+    <permission android:name="android.permission.UPDATE_FONTS"
         android:protectionLevel="signature|privileged" />
 
     <!-- ========================================= -->
@@ -3590,6 +3634,23 @@
     -->
     <permission android:name="android.permission.BIND_CONTENT_CAPTURE_SERVICE"
                 android:protectionLevel="signature" />
+
+    <!-- Must be required by a android.service.translation.TranslationService,
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+     -->
+    <permission android:name="android.permission.BIND_TRANSLATION_SERVICE"
+                android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows apps to use ui translation functions.
+         <p>Protection level: signature|privileged
+         <p> TODO(b/177703453): Restrict to a specific Role instead of allowing access to any
+         privileged app.
+         @hide Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.MANAGE_UI_TRANSLATION"
+                android:protectionLevel="signature|privileged" />
 
     <!-- Must be required by a android.service.contentsuggestions.ContentSuggestionsService,
          to ensure that only the system can bind to it.
@@ -4049,6 +4110,11 @@
     <permission android:name="android.permission.CONFIGURE_DISPLAY_COLOR_MODE"
         android:protectionLevel="signature" />
 
+    <!-- @SystemApi Allows an application to use background blur.
+         @hide -->
+    <permission android:name="android.permission.USE_BACKGROUND_BLUR"
+        android:protectionLevel="signature|privileged" />
+
     <!-- Allows an application to control the lights on the device.
          @hide
          @SystemApi
@@ -4289,7 +4355,7 @@
          <p>Not for use by third-party applications.
     -->
     <permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-        android:protectionLevel="signature|recents" />
+        android:protectionLevel="signature|privileged|recents" />
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
     <!-- Allows an application to broadcast a notification that an application
@@ -4974,6 +5040,13 @@
     <permission android:name="android.permission.MANAGE_SOUND_TRIGGER"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by system/priv apps to run sound trigger recognition sessions while in
+         battery saver mode.
+         @hide
+         @SystemApi -->
+    <permission android:name="android.permission.SOUND_TRIGGER_RUN_IN_BATTERY_SAVER"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by system/priv apps implementing sound trigger detection services
          @hide
          @SystemApi -->
@@ -5317,6 +5390,12 @@
     <permission android:name="android.permission.BIND_IMPRESSION_ATTESTATION_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- @hide @TestApi Allows an application to enable/disable toast rate limiting.
+         <p>Not for use by third-party applications.
+    -->
+    <permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
@@ -5334,6 +5413,9 @@
          on-device data -->
     <attribution android:tag="OfflineLocationTimeZoneProviderService"
                  android:label="@string/offline_location_time_zone_detection_service_attribution"/>
+    <!-- Attribution for Gnss Time Update service. -->
+    <attribution android:tag="GnssTimeUpdateService"
+                 android:label="@string/gnss_time_update_service"/>
 
     <application android:process="system"
                  android:persistent="true"

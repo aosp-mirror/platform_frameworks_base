@@ -3096,11 +3096,140 @@ public class AudioManager {
      * @see #playSoundEffect(int)
      */
     public static final int FX_KEYPRESS_INVALID = 9;
+
+    /**
+     * Back sound
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_BACK = 10;
+
+    /**
+     * @hide Home sound
+     * Played by the framework when the home app becomes active if config_enableHomeSound is set to
+     * true. This is currently only used on TV devices.
+     * Note that this sound is only available if a sound file is specified in audio_assets.xml.
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_HOME = 11;
+
+    /**
+     * @hide Fast scroll sound 1
+     * To be by the framework when a fast-scrolling is performed and
+     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * This is currently only used on TV devices.
+     * Note that this sound is only available if a sound file is specified in audio_assets.xml
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_FAST_SCROLL_1 = 12;
+
+    /**
+     * @hide Fast scroll sound 2
+     * To be by the framework when a fast-scrolling is performed and
+     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * This is currently only used on TV devices.
+     * Note that this sound is only available if a sound file is specified in audio_assets.xml
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_FAST_SCROLL_2 = 13;
+
+    /**
+     * @hide Fast scroll sound 3
+     * To be by the framework when a fast-scrolling is performed and
+     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * This is currently only used on TV devices.
+     * Note that this sound is only available if a sound file is specified in audio_assets.xml
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_FAST_SCROLL_3 = 14;
+
+    /**
+     * @hide Fast scroll sound 4
+     * To be by the framework when a fast-scrolling is performed and
+     * {@link #areFastScrollSoundEffectsEnabled()} is true.
+     * This is currently only used on TV devices.
+     * Note that this sound is only available if a sound file is specified in audio_assets.xml
+     * @see #playSoundEffect(int)
+     */
+    public static final int FX_FAST_SCROLL_4 = 15;
+
     /**
      * @hide Number of sound effects
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final int NUM_SOUND_EFFECTS = 10;
+    public static final int NUM_SOUND_EFFECTS = 16;
+
+    /**
+     * @hide Number of fast scroll sound effects
+     */
+    public static final int NUM_FAST_SCROLL_SOUND_EFFECTS = 4;
+
+    /**
+     * @hide
+     * @param n a value in [0, {@link #NUM_FAST_SCROLL_SOUND_EFFECTS}[
+     * @return The id of a fast scroll sound effect or -1 if out of bounds
+     */
+    public static int getNthFastScrollSoundEffectId(int n) {
+        switch (n) {
+            case 0:
+                return FX_FAST_SCROLL_1;
+            case 1:
+                return FX_FAST_SCROLL_2;
+            case 2:
+                return FX_FAST_SCROLL_3;
+            case 3:
+                return FX_FAST_SCROLL_4;
+            default:
+                Log.w(TAG, "Invalid fast-scroll sound effect id: " + n);
+                return -1;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    public void setFastScrollSoundEffectsEnabled(boolean enabled) {
+        try {
+            getService().setFastScrollSoundEffectsEnabled(enabled);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * @hide
+     * @return true if the fast scroll sound effects are enabled
+     */
+    public boolean areFastScrollSoundEffectsEnabled() {
+        try {
+            return getService().areFastScrollSoundEffectsEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     * @param enabled
+     */
+    public void setHomeSoundEffectEnabled(boolean enabled) {
+        try {
+            getService().setHomeSoundEffectEnabled(enabled);
+        } catch (RemoteException e) {
+
+        }
+    }
+
+    /**
+     * @hide
+     * @return true if the home sound effect is enabled
+     */
+    public boolean isHomeSoundEffectEnabled() {
+        try {
+            return getService().isHomeSoundEffectEnabled();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Plays a sound effect (Key clicks, lid open/close...)
@@ -3115,10 +3244,11 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
      *            {@link #FX_KEYPRESS_INVALID},
+     *            {@link #FX_BACK},
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
      */
-    public void  playSoundEffect(int effectType) {
+    public void playSoundEffect(int effectType) {
         if (effectType < 0 || effectType >= NUM_SOUND_EFFECTS) {
             return;
         }
@@ -3148,6 +3278,7 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
      *            {@link #FX_KEYPRESS_INVALID},
+     *            {@link #FX_BACK},
      * @param userId The current user to pull sound settings from
      * NOTE: This version uses the UI settings to determine
      * whether sounds are heard or not.
@@ -3183,6 +3314,7 @@ public class AudioManager {
      *            {@link #FX_KEYPRESS_DELETE},
      *            {@link #FX_KEYPRESS_RETURN},
      *            {@link #FX_KEYPRESS_INVALID},
+     *            {@link #FX_BACK},
      * @param volume Sound effect volume.
      * The volume value is a raw scalar so UI controls should be scaled logarithmically.
      * If a volume of -1 is specified, the AudioManager.STREAM_MUSIC stream volume minus 3dB will be used.
@@ -5493,8 +5625,12 @@ public class AudioManager {
     public boolean setAdditionalOutputDeviceDelay(
             @NonNull AudioDeviceInfo device, @IntRange(from = 0) long delayMillis) {
         Objects.requireNonNull(device);
-        // Implement the setter in r-dev or r-tv-dev as needed.
-        return false;
+        try {
+            return getService().setAdditionalOutputDeviceDelay(
+                new AudioDeviceAttributes(device), delayMillis);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -5509,8 +5645,11 @@ public class AudioManager {
     @IntRange(from = 0)
     public long getAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
         Objects.requireNonNull(device);
-        // Implement the getter in r-dev or r-tv-dev as needed.
-        return 0;
+        try {
+            return getService().getAdditionalOutputDeviceDelay(new AudioDeviceAttributes(device));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -5527,8 +5666,12 @@ public class AudioManager {
     @IntRange(from = 0)
     public long getMaxAdditionalOutputDeviceDelay(@NonNull AudioDeviceInfo device) {
         Objects.requireNonNull(device);
-        // Implement the getter in r-dev or r-tv-dev as needed.
-        return 0;
+        try {
+            return getService().getMaxAdditionalOutputDeviceDelay(
+                    new AudioDeviceAttributes(device));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

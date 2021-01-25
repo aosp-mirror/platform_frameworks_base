@@ -228,6 +228,23 @@ public final class ConnectivityController extends RestrictingController implemen
             return;
         }
 
+        if (jobStatus.shouldTreatAsExpeditedJob()) {
+            if (!jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
+                // Don't request a direct hole through any of the firewalls. Instead, mark the
+                // constraint as satisfied if the network is available, and the job will get
+                // through the firewalls once it starts running and the proc state is elevated.
+                // This is the same behavior that FGS see.
+                updateConstraintsSatisfied(jobStatus);
+            }
+            // Don't need to update constraint here if the network goes away. We'll do that as part
+            // of regular processing when we're notified about the drop.
+        } else if (jobStatus.isRequestedExpeditedJob()
+                && jobStatus.isConstraintSatisfied(JobStatus.CONSTRAINT_CONNECTIVITY)) {
+            // Make sure we don't accidentally keep the constraint as satisfied if the job went
+            // from being expedited-ready to not-expeditable.
+            updateConstraintsSatisfied(jobStatus);
+        }
+
         // Always check the full job readiness stat in case the component has been disabled.
         if (wouldBeReadyWithConstraintLocked(jobStatus, JobStatus.CONSTRAINT_CONNECTIVITY)
                 && isNetworkAvailable(jobStatus)) {
@@ -442,7 +459,8 @@ public final class ConnectivityController extends RestrictingController implemen
     }
 
     private boolean updateConstraintsSatisfied(JobStatus jobStatus) {
-        final Network network = mConnManager.getActiveNetworkForUid(jobStatus.getSourceUid());
+        final Network network = mConnManager.getActiveNetworkForUid(
+                jobStatus.getSourceUid(), jobStatus.shouldIgnoreNetworkBlocking());
         final NetworkCapabilities capabilities = getNetworkCapabilities(network);
         return updateConstraintsSatisfied(jobStatus, network, capabilities);
     }
@@ -503,20 +521,42 @@ public final class ConnectivityController extends RestrictingController implemen
             return false;
         }
 
-        final Network network = mConnManager.getActiveNetworkForUid(jobs.valueAt(0).getSourceUid());
+        final Network network =
+                mConnManager.getActiveNetworkForUid(jobs.valueAt(0).getSourceUid(), false);
         final NetworkCapabilities capabilities = getNetworkCapabilities(network);
         final boolean networkMatch = (filterNetwork == null
                 || Objects.equals(filterNetwork, network));
+        boolean exemptedLoaded = false;
+        Network exemptedNetwork = null;
+        NetworkCapabilities exemptedNetworkCapabilities = null;
+        boolean exemptedNetworkMatch = false;
 
         boolean changed = false;
         for (int i = jobs.size() - 1; i >= 0; i--) {
             final JobStatus js = jobs.valueAt(i);
 
+            Network net = network;
+            NetworkCapabilities netCap = capabilities;
+            boolean match = networkMatch;
+
+            if (js.shouldIgnoreNetworkBlocking()) {
+                if (!exemptedLoaded) {
+                    exemptedLoaded = true;
+                    exemptedNetwork = mConnManager.getActiveNetworkForUid(js.getSourceUid(), true);
+                    exemptedNetworkCapabilities = getNetworkCapabilities(exemptedNetwork);
+                    exemptedNetworkMatch = (filterNetwork == null
+                            || Objects.equals(filterNetwork, exemptedNetwork));
+                }
+                net = exemptedNetwork;
+                netCap = exemptedNetworkCapabilities;
+                match = exemptedNetworkMatch;
+            }
+
             // Update either when we have a network match, or when the
             // job hasn't yet been evaluated against the currently
             // active network; typically when we just lost a network.
-            if (networkMatch || !Objects.equals(js.network, network)) {
-                changed |= updateConstraintsSatisfied(js, network, capabilities);
+            if (match || !Objects.equals(js.network, net)) {
+                changed |= updateConstraintsSatisfied(js, net, netCap);
             }
         }
         return changed;

@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.CONFIG_ORIENTATION;
 import static android.content.pm.ActivityInfo.CONFIG_SCREEN_LAYOUT;
+import static android.content.pm.ActivityInfo.FLAG_SUPPORTS_PICTURE_IN_PICTURE;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
@@ -79,6 +80,7 @@ import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ClientTransaction;
+import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -1063,6 +1065,21 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     /**
+     * Verify that finish bottom activity from a task won't boost it to top.
+     */
+    @Test
+    public void testFinishBottomActivityIfPossible_noZBoost() {
+        final ActivityRecord bottomActivity = createActivityWithTask();
+        final ActivityRecord topActivity = new ActivityBuilder(mAtm)
+                .setTask(bottomActivity.getTask()).build();
+        topActivity.mVisibleRequested = true;
+        // simulating bottomActivity as a trampoline activity.
+        bottomActivity.setState(RESUMED, "test");
+        bottomActivity.finishIfPossible("test", false);
+        assertFalse(bottomActivity.mNeedsZBoost);
+    }
+
+    /**
      * Verify that complete finish request for visible activity must be delayed before the next one
      * becomes visible.
      */
@@ -1235,8 +1252,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         topActivity.setState(RESUMED, "true");
         doCallRealMethod().when(mRootWindowContainer).ensureActivitiesVisible(
                 any() /* starting */, anyInt() /* configChanges */,
-                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */,
-                anyBoolean() /* userLeaving */);
+                anyBoolean() /* preserveWindows */, anyBoolean() /* notifyClients */);
         topActivity.setShowWhenLocked(true);
 
         // Verify the stack-top activity is occluded keyguard.
@@ -1283,7 +1299,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         secondActivity.completeFinishing("test");
         verify(secondActivity.mDisplayContent).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
-                true /* notifyClients */, false /* userLeaving */);
+                true /* notifyClients */);
 
         // Finish the first activity
         firstActivity.finishing = true;
@@ -1291,7 +1307,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         firstActivity.completeFinishing("test");
         verify(firstActivity.mDisplayContent, times(2)).ensureActivitiesVisible(null /* starting */,
                 0 /* configChanges */ , false /* preserveWindows */,
-                true /* notifyClients */, false /* userLeaving */);
+                true /* notifyClients */);
     }
 
     /**
@@ -1449,6 +1465,19 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveImmediately() throws RemoteException {
+        final ActivityRecord activity = createActivityWithTask();
+        final WindowProcessController wpc = activity.app;
+        activity.getTask().removeImmediately("test");
+
+        verify(mAtm.getLifecycleManager()).scheduleTransaction(any(), eq(activity.appToken),
+                isA(DestroyActivityItem.class));
+        assertNull(activity.app);
+        assertEquals(DESTROYED, activity.getState());
+        assertFalse(wpc.hasActivities());
+    }
+
+    @Test
     public void testRemoveFromHistory() {
         final ActivityRecord activity = createActivityWithTask();
         final Task rootTask = activity.getRootTask();
@@ -1507,7 +1536,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = createActivityWithTask();
         final WindowProcessController wpc = activity.app;
         assertTrue(wpc.registeredForActivityConfigChanges());
-        assertFalse(wpc.registeredForDisplayConfigChanges());
+        assertFalse(wpc.registeredForDisplayAreaConfigChanges());
 
         final ActivityRecord secondaryDisplayActivity =
                 createActivityOnDisplay(false /* defaultDisplay */, null /* process */);
@@ -1701,7 +1730,7 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(wpc.registeredForActivityConfigChanges());
         assertEquals(0, secondActivityRecord.getMergedOverrideConfiguration()
                 .diff(wpc.getRequestedOverrideConfiguration()));
-        assertFalse(wpc.registeredForDisplayConfigChanges());
+        assertFalse(wpc.registeredForDisplayAreaConfigChanges());
     }
 
     @Test
@@ -1871,6 +1900,75 @@ public class ActivityRecordTests extends WindowTestsBase {
                 true /* shouldUpdate */, false /* activityChange */);
         verifyProcessInfoUpdate(activity, DESTROYED,
                 true /* shouldUpdate */, false /* activityChange */);
+    }
+
+    @Test
+    public void testSupportsSplitScreenWindowingMode() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .build();
+
+        // Non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = false;
+        assertFalse(activity.supportsSplitScreenWindowingMode());
+
+        // Force resizable
+        mAtm.mForceResizableActivities = true;
+        mAtm.mSupportsNonResizableMultiWindow = false;
+        assertTrue(activity.supportsSplitScreenWindowingMode());
+
+        // Allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSupportsNonResizableMultiWindow = true;
+        assertTrue(activity.supportsSplitScreenWindowingMode());
+    }
+
+    @Test
+    public void testSupportsFreeform() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
+                .build();
+
+        // Non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSizeCompatFreeform = false;
+        assertFalse(activity.supportsFreeform());
+
+        // Force resizable
+        mAtm.mForceResizableActivities = true;
+        mAtm.mSizeCompatFreeform = false;
+        assertTrue(activity.supportsFreeform());
+
+        // Allow non-resizable
+        mAtm.mForceResizableActivities = false;
+        mAtm.mSizeCompatFreeform = true;
+        assertTrue(activity.supportsFreeform());
+    }
+
+    @Test
+    public void testSupportsPictureInPicture() {
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setCreateTask(true)
+                .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
+                .setActivityFlags(FLAG_SUPPORTS_PICTURE_IN_PICTURE)
+                .build();
+
+        // Device not supports PIP
+        mAtm.mSupportsPictureInPicture = false;
+        assertFalse(activity.supportsPictureInPicture());
+
+        // Device and app support PIP
+        mAtm.mSupportsPictureInPicture = true;
+        assertTrue(activity.supportsPictureInPicture());
+
+        // Activity not supports PIP
+        activity.info.flags &= ~FLAG_SUPPORTS_PICTURE_IN_PICTURE;
+        assertFalse(activity.supportsPictureInPicture());
     }
 
     private void verifyProcessInfoUpdate(ActivityRecord activity, ActivityState state,

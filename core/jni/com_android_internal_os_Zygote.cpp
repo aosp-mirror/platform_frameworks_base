@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Disable optimization of this file if we are compiling with the address
- * sanitizer.  This is a mitigation for b/122921367 and can be removed once the
- * bug is fixed.
- */
-#if __has_feature(address_sanitizer)
-#pragma clang optimize off
-#endif
-
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
@@ -1542,7 +1533,6 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
     jobjectArray whitelisted_data_info_list, uid_t uid, const char* process_name,
     jstring managed_nice_name, fail_fn_t fail_fn) {
 
-  ensureInAppMountNamespace(fail_fn);
   std::vector<std::string> merged_data_info_list;
   insertPackagesToMergedList(env, merged_data_info_list, pkg_data_info_list,
           process_name, managed_nice_name, fail_fn);
@@ -1689,10 +1679,11 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 
   MountEmulatedStorage(uid, mount_external, need_pre_initialize_native_bridge, fail_fn);
 
-  // System services, isolated process, webview/app zygote, old target sdk app, should
-  // give a null in same_uid_pkgs and private_volumes so they don't need app data isolation.
-  // Isolated process / webview / app zygote should be gated by SELinux and file permission
-  // so they can't even traverse CE / DE directories.
+  // Make sure app is running in its own mount namespace before isolating its data directories.
+  ensureInAppMountNamespace(fail_fn);
+
+  // Sandbox data and jit profile directories by overlaying a tmpfs on those dirs and bind
+  // mount all related packages separately.
   if (mount_data_dirs) {
     isolateAppData(env, pkg_data_info_list, whitelisted_data_info_list,
             uid, process_name, managed_nice_name, fail_fn);
@@ -1793,7 +1784,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
       break;
   }
-  android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+  mallopt(M_BIONIC_SET_HEAP_TAGGING_LEVEL, heap_tagging_level);
   // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
   runtime_flags &= ~RuntimeFlags::MEMORY_TAG_LEVEL_MASK;
 

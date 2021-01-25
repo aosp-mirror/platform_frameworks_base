@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.INPUT_CONSUMER_NAVIGATION;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
 import static android.view.WindowManager.INPUT_CONSUMER_WALLPAPER;
@@ -53,7 +52,6 @@ import android.graphics.Region;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -89,6 +87,8 @@ final class InputMonitor {
     private final int mDisplayId;
     private final DisplayContent mDisplayContent;
     private boolean mDisplayRemoved;
+    private int mDisplayWidth;
+    private int mDisplayHeight;
 
     private final SurfaceControl.Transaction mInputTransaction;
     private final Handler mHandler;
@@ -189,6 +189,7 @@ final class InputMonitor {
     private void addInputConsumer(String name, InputConsumerImpl consumer) {
         mInputConsumers.put(name, consumer);
         consumer.linkToDeathRecipient();
+        consumer.layout(mInputTransaction, mDisplayWidth, mDisplayHeight);
         updateInputWindowsLw(true /* force */);
     }
 
@@ -213,6 +214,11 @@ final class InputMonitor {
     }
 
     void layoutInputConsumers(int dw, int dh) {
+        if (mDisplayWidth == dw && mDisplayHeight == dh) {
+            return;
+        }
+        mDisplayWidth = dw;
+        mDisplayHeight = dh;
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "layoutInputConsumer");
             for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
@@ -230,24 +236,6 @@ final class InputMonitor {
         for (int i = mInputConsumers.size() - 1; i >= 0; i--) {
             mInputConsumers.valueAt(i).hide(t);
         }
-    }
-
-    EventReceiverInputConsumer createInputConsumer(Looper looper, String name,
-            InputEventReceiver.Factory inputEventReceiverFactory) {
-        if (!name.contentEquals(INPUT_CONSUMER_NAVIGATION)) {
-            throw new IllegalArgumentException("Illegal input consumer : " + name
-                    + ", display: " + mDisplayId);
-        }
-
-        if (mInputConsumers.containsKey(name)) {
-            throw new IllegalStateException("Existing input consumer found with name: " + name
-                    + ", display: " + mDisplayId);
-        }
-        final EventReceiverInputConsumer consumer = new EventReceiverInputConsumer(mService,
-                this, looper, name, inputEventReceiverFactory, Process.myPid(),
-                UserHandle.SYSTEM, mDisplayId);
-        addInputConsumer(name, consumer);
-        return consumer;
     }
 
     void createInputConsumer(IBinder token, String name, InputChannel inputChannel, int clientPid,
@@ -427,7 +415,7 @@ final class InputMonitor {
         }
 
         mInputFocus = focusToken;
-        mInputTransaction.setFocusedWindow(mInputFocus, mDisplayId);
+        mInputTransaction.setFocusedWindow(mInputFocus, focus.getName(), mDisplayId);
         EventLog.writeEvent(LOGTAG_INPUT_FOCUS, "Focus request " + focus,
                 "reason=UpdateInputWindows");
         ProtoLog.v(WM_DEBUG_FOCUS_LIGHT, "Focus requested for window=%s", focus);
@@ -472,12 +460,10 @@ final class InputMonitor {
     }
 
     private final class UpdateInputForAllWindowsConsumer implements Consumer<WindowState> {
-        InputConsumerImpl mNavInputConsumer;
         InputConsumerImpl mPipInputConsumer;
         InputConsumerImpl mWallpaperInputConsumer;
         InputConsumerImpl mRecentsAnimationInputConsumer;
 
-        private boolean mAddNavInputConsumerHandle;
         private boolean mAddPipInputConsumerHandle;
         private boolean mAddWallpaperInputConsumerHandle;
         private boolean mAddRecentsAnimationInputConsumerHandle;
@@ -487,12 +473,10 @@ final class InputMonitor {
         private void updateInputWindows(boolean inDrag) {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "updateInputWindows");
 
-            mNavInputConsumer = getInputConsumer(INPUT_CONSUMER_NAVIGATION);
             mPipInputConsumer = getInputConsumer(INPUT_CONSUMER_PIP);
             mWallpaperInputConsumer = getInputConsumer(INPUT_CONSUMER_WALLPAPER);
             mRecentsAnimationInputConsumer = getInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
 
-            mAddNavInputConsumerHandle = mNavInputConsumer != null;
             mAddPipInputConsumerHandle = mPipInputConsumer != null;
             mAddWallpaperInputConsumerHandle = mWallpaperInputConsumer != null;
             mAddRecentsAnimationInputConsumerHandle = mRecentsAnimationInputConsumer != null;
@@ -540,7 +524,7 @@ final class InputMonitor {
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle)) {
-                    mRecentsAnimationInputConsumer.show(mInputTransaction, w);
+                    mRecentsAnimationInputConsumer.show(mInputTransaction, w.mActivityRecord);
                     mAddRecentsAnimationInputConsumerHandle = false;
                 }
             }
@@ -555,12 +539,6 @@ final class InputMonitor {
                     mPipInputConsumer.show(mInputTransaction, Integer.MAX_VALUE - 1);
                     mAddPipInputConsumerHandle = false;
                 }
-            }
-
-            if (mAddNavInputConsumerHandle) {
-                // We set the layer to z=MAX-1 so that it's always on top.
-                mNavInputConsumer.show(mInputTransaction, Integer.MAX_VALUE - 1);
-                mAddNavInputConsumerHandle = false;
             }
 
             if (mAddWallpaperInputConsumerHandle) {

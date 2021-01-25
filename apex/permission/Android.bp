@@ -26,6 +26,7 @@ apex_defaults {
     certificate: ":com.android.permission.certificate",
     java_libs: [
         "framework-permission",
+        "framework-permission-s",
         "service-permission",
     ],
     apps: ["PermissionController"],
@@ -40,4 +41,9 @@ apex_key {
 android_app_certificate {
     name: "com.android.permission.certificate",
     certificate: "com.android.permission",
+}
+
+filegroup {
+    name: "permission-jarjar-rules",
+    srcs: ["jarjar-rules.txt"],
 }

@@ -21,7 +21,9 @@ import android.content.Context;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 
-public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
+import com.android.server.biometrics.BiometricsProto;
+
+public abstract class RevokeChallengeClient<T> extends HalClientMonitor<T> {
 
     public RevokeChallengeClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
             @NonNull IBinder token, @NonNull String owner, int sensorId) {
@@ -41,5 +43,10 @@ public abstract class RevokeChallengeClient<T> extends ClientMonitor<T> {
 
         startHalOperation();
         mCallback.onClientFinished(this, true /* success */);
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_REVOKE_CHALLENGE;
     }
 }

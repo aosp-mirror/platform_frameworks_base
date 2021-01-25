@@ -1,3 +1,6 @@
+#undef LOG_TAG
+#define LOG_TAG "ShaderJNI"
+
 #include "GraphicsJNI.h"
 #include "SkColorFilter.h"
 #include "SkGradientShader.h"
@@ -232,53 +235,73 @@ static jlong ComposeShader_create(JNIEnv* env, jobject o, jlong matrixPtr,
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderFactory, jlong matrixPtr,
-        jbyteArray inputs, jlongArray inputShaders, jlong colorSpaceHandle, jboolean isOpaque) {
-    SkRuntimeEffect* effect = reinterpret_cast<SkRuntimeEffect*>(shaderFactory);
-    AutoJavaByteArray arInputs(env, inputs);
-
-    std::vector<sk_sp<SkShader>> shaderVector;
-    if (inputShaders) {
-        jsize shaderCount = env->GetArrayLength(inputShaders);
-        shaderVector.resize(shaderCount);
-        jlong* arrayPtr = env->GetLongArrayElements(inputShaders, NULL);
-        for (int i = 0; i < shaderCount; i++) {
-            shaderVector[i] = sk_ref_sp(reinterpret_cast<SkShader*>(arrayPtr[i]));
-        }
-        env->ReleaseLongArrayElements(inputShaders, arrayPtr, 0);
-    }
-
-    sk_sp<SkData> fData;
-    fData = SkData::MakeWithCopy(arInputs.ptr(), arInputs.length());
-    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
-    sk_sp<SkShader> shader = effect->makeShader(fData, shaderVector.data(), shaderVector.size(),
-                                                matrix, isOpaque == JNI_TRUE);
-    ThrowIAE_IfNull(env, shader);
-
-    return reinterpret_cast<jlong>(shader.release());
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
-static jlong RuntimeShader_createShaderFactory(JNIEnv* env, jobject, jstring sksl) {
+static jlong RuntimeShader_createShaderBuilder(JNIEnv* env, jobject, jstring sksl) {
     ScopedUtfChars strSksl(env, sksl);
     auto result = SkRuntimeEffect::Make(SkString(strSksl.c_str()));
     sk_sp<SkRuntimeEffect> effect = std::get<0>(result);
-    if (!effect) {
+    if (effect.get() == nullptr) {
         const auto& err = std::get<1>(result);
         doThrowIAE(env, err.c_str());
+        return 0;
     }
-    return reinterpret_cast<jlong>(effect.release());
+    return reinterpret_cast<jlong>(new SkRuntimeShaderBuilder(std::move(effect)));
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-
-static void Effect_safeUnref(SkRuntimeEffect* effect) {
-    SkSafeUnref(effect);
+static void SkRuntimeShaderBuilder_delete(SkRuntimeShaderBuilder* builder) {
+    delete builder;
 }
 
 static jlong RuntimeShader_getNativeFinalizer(JNIEnv*, jobject) {
-    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&Effect_safeUnref));
+    return static_cast<jlong>(reinterpret_cast<uintptr_t>(&SkRuntimeShaderBuilder_delete));
+}
+
+static jlong RuntimeShader_create(JNIEnv* env, jobject, jlong shaderBuilder, jlong matrixPtr,
+                                  jboolean isOpaque) {
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
+    const SkMatrix* matrix = reinterpret_cast<const SkMatrix*>(matrixPtr);
+    sk_sp<SkShader> shader = builder->makeShader(matrix, isOpaque == JNI_TRUE);
+    ThrowIAE_IfNull(env, shader);
+    return reinterpret_cast<jlong>(shader.release());
+}
+
+static inline int ThrowIAEFmt(JNIEnv* env, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    int ret = jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", fmt, args);
+    va_end(args);
+    return ret;
+}
+
+static void RuntimeShader_updateUniforms(JNIEnv* env, jobject, jlong shaderBuilder,
+                                         jstring jUniformName, jfloatArray jvalues) {
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
+    ScopedUtfChars name(env, jUniformName);
+    AutoJavaFloatArray autoValues(env, jvalues, 0, kRO_JNIAccess);
+
+    SkRuntimeShaderBuilder::BuilderUniform uniform = builder->uniform(name.c_str());
+    if (uniform.fVar == nullptr) {
+        ThrowIAEFmt(env, "unable to find uniform named %s", name.c_str());
+    } else if (!uniform.set<float>(autoValues.ptr(), autoValues.length())) {
+        ThrowIAEFmt(env, "mismatch in byte size for uniform [expected: %zu actual: %zu]",
+              uniform.fVar->sizeInBytes(), sizeof(float) * autoValues.length());
+    }
+}
+
+static void RuntimeShader_updateShader(JNIEnv* env, jobject, jlong shaderBuilder,
+                                           jstring jUniformName, jlong shaderHandle) {
+    SkRuntimeShaderBuilder* builder = reinterpret_cast<SkRuntimeShaderBuilder*>(shaderBuilder);
+    ScopedUtfChars name(env, jUniformName);
+    SkShader* shader = reinterpret_cast<SkShader*>(shaderHandle);
+
+    SkRuntimeShaderBuilder::BuilderChild child = builder->child(name.c_str());
+    if (child.fIndex == -1) {
+        ThrowIAEFmt(env, "unable to find shader named %s", name.c_str());
+        return;
+    }
+
+    builder->child(name.c_str()) = sk_ref_sp(shader);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -313,10 +336,11 @@ static const JNINativeMethod gComposeShaderMethods[] = {
 };
 
 static const JNINativeMethod gRuntimeShaderMethods[] = {
-    { "nativeGetFinalizer",   "()J",    (void*)RuntimeShader_getNativeFinalizer },
-    { "nativeCreate",     "(JJ[B[JJZ)J",  (void*)RuntimeShader_create     },
-    { "nativeCreateShaderFactory",     "(Ljava/lang/String;)J",
-      (void*)RuntimeShader_createShaderFactory     },
+        {"nativeGetFinalizer", "()J", (void*)RuntimeShader_getNativeFinalizer},
+        {"nativeCreateShader", "(JJZ)J", (void*)RuntimeShader_create},
+        {"nativeCreateBuilder", "(Ljava/lang/String;)J", (void*)RuntimeShader_createShaderBuilder},
+        {"nativeUpdateUniforms", "(JLjava/lang/String;[F)V", (void*)RuntimeShader_updateUniforms},
+        {"nativeUpdateShader", "(JLjava/lang/String;J)V", (void*)RuntimeShader_updateShader},
 };
 
 int register_android_graphics_Shader(JNIEnv* env)

@@ -21,6 +21,7 @@
 #include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoader.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
+#include <android/os/incremental/PerUidReadTimeouts.h>
 #include <binder/IAppOpsCallback.h>
 #include <binder/IServiceManager.h>
 #include <binder/Status.h>
@@ -84,7 +85,8 @@ public:
     virtual ~IncFsWrapper() = default;
     virtual void listExistingMounts(const ExistingMountCallback& cb) const = 0;
     virtual Control openMount(std::string_view path) const = 0;
-    virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const = 0;
+    virtual Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
+                                  IncFsFd blocksWritten) const = 0;
     virtual ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                                incfs::NewFileParams params) const = 0;
     virtual ErrorCode makeDir(const Control& control, std::string_view path, int mode) const = 0;
@@ -103,6 +105,10 @@ public:
     virtual WaitResult waitForPendingReads(
             const Control& control, std::chrono::milliseconds timeout,
             std::vector<incfs::ReadInfo>* pendingReadsBuffer) const = 0;
+    virtual ErrorCode setUidReadTimeouts(
+            const Control& control,
+            const std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts)
+            const = 0;
 };
 
 class AppOpsManagerWrapper {

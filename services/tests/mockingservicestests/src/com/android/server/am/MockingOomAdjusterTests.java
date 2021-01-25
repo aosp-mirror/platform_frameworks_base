@@ -1655,7 +1655,7 @@ public class MockingOomAdjusterTests {
         sService.mConstants.KEEP_WARMING_SERVICES.clear();
         final ServiceInfo si = mock(ServiceInfo.class);
         si.applicationInfo = mock(ApplicationInfo.class);
-        ServiceRecord s = spy(new ServiceRecord(sService, null, cn, cn, null, 0, null,
+        ServiceRecord s = spy(new ServiceRecord(sService, cn, cn, null, 0, null,
                 si, false, null));
         doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s).getConnections();
         s.startRequested = true;
@@ -1668,7 +1668,7 @@ public class MockingOomAdjusterTests {
         final ServiceInfo si2 = mock(ServiceInfo.class);
         si2.applicationInfo = mock(ApplicationInfo.class);
         si2.applicationInfo.uid = MOCKAPP2_UID_OTHER;
-        ServiceRecord s2 = spy(new ServiceRecord(sService, null, cn2, cn2, null, 0, null,
+        ServiceRecord s2 = spy(new ServiceRecord(sService, cn2, cn2, null, 0, null,
                 si2, false, null));
         doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s2).getConnections();
         s2.startRequested = true;
@@ -1708,7 +1708,7 @@ public class MockingOomAdjusterTests {
         app.hasShownUi = true;
         sService.mConstants.KEEP_WARMING_SERVICES.add(cn);
         sService.mConstants.KEEP_WARMING_SERVICES.add(cn2);
-        s = spy(new ServiceRecord(sService, null, cn, cn, null, 0, null,
+        s = spy(new ServiceRecord(sService, cn, cn, null, 0, null,
                 si, false, null));
         doReturn(new ArrayMap<IBinder, ArrayList<ConnectionRecord>>()).when(s).getConnections();
         s.startRequested = true;

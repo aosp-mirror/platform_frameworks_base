@@ -28,6 +28,8 @@ import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
+import static android.app.ActivityManager.DROP_CLOSE_SYSTEM_DIALOGS;
+import static android.app.ActivityManager.LOCK_DOWN_CLOSE_SYSTEM_DIALOGS;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -54,6 +56,7 @@ import static android.os.Process.FIRST_APPLICATION_UID;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RTL;
@@ -147,6 +150,7 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
+import android.app.compat.CompatChanges;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -252,6 +256,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 
@@ -341,6 +346,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The cached sys ui service component name from package manager. */
     private ComponentName mSysUiServiceComponent;
     private PermissionPolicyInternal mPermissionPolicyInternal;
+    private StatusBarManagerInternal mStatusBarManagerInternal;
     @VisibleForTesting
     final ActivityTaskManagerInternal mInternal;
     PowerManagerInternal mPowerManagerInternal;
@@ -563,6 +569,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     boolean mSupportsMultiDisplay;
     boolean mForceResizableActivities;
     boolean mSizeCompatFreeform;
+    boolean mSupportsNonResizableMultiWindow;
 
     final List<ActivityTaskManagerInternal.ScreenObserver> mScreenObservers = new ArrayList<>();
 
@@ -780,6 +787,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 resolver, DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
         final boolean sizeCompatFreeform = Settings.Global.getInt(
                 resolver, DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
+        final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(
+                resolver, DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
 
         // Transfer any global setting for forcing RTL layout, into a System Property
         DisplayProperties.debug_force_rtl(forceRtl);
@@ -794,6 +803,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             mForceResizableActivities = forceResizable;
             mSizeCompatFreeform = sizeCompatFreeform;
+            mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
             final boolean multiWindowFormEnabled = freeformWindowManagement
                     || supportsSplitScreenMultiWindow
                     || supportsPictureInPicture
@@ -1935,7 +1945,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 } else {
                     stack.setWindowingMode(windowingMode);
                     stack.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
-                            true /* notifyClients */, mTaskSupervisor.mUserLeaving);
+                            true /* notifyClients */);
                 }
                 return true;
             } finally {
@@ -2669,8 +2679,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         .setWindowingMode(rootTask.getWindowingMode())
                         .setActivityType(rootTask.getActivityType())
                         .setActivityInfo(ainfo)
-                        .setParent(rootTask.getDisplayArea())
                         .setIntent(intent)
+                        .setTaskId(rootTask.getDisplayArea().getNextRootTaskId())
                         .build();
 
                 if (!mRecentTasks.addToBottom(task)) {
@@ -2898,6 +2908,103 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         } else {
             mAmInternal.enforceCallingPermission(permission, func);
         }
+    }
+
+    /**
+     * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
+     * SecurityException} or returns false with a logcat message depending on whether the app
+     * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
+     */
+    private boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
+        final WindowProcessController process;
+        synchronized (mGlobalLock) {
+            process = mProcessMap.getProcess(pid);
+        }
+        if (packageName == null && process != null) {
+            // WindowProcessController.mInfo is final, so after the synchronized memory barrier
+            // above, process.mInfo can't change. As for reading mInfo.packageName,
+            // WindowProcessController doesn't own the ApplicationInfo object referenced by mInfo.
+            // ProcessRecord for example also holds a reference to that object, so protecting access
+            // to packageName with the WM lock would not be enough as we'd also need to synchronize
+            // on the AM lock if we are worried about races, but we can't synchronize on AM lock
+            // here. Hence, since this is only used for logging, we don't synchronize here.
+            packageName = process.mInfo.packageName;
+        }
+        String caller = "(pid=" + pid + ", uid=" + uid + ")";
+        if (packageName != null) {
+            caller = packageName + " " + caller;
+        }
+        if (!canCloseSystemDialogs(pid, uid, process)) {
+            // The app can't close system dialogs, throw only if it targets S+
+            if (CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
+                throw new SecurityException(
+                        "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+                                + " broadcast from " + caller + " requires "
+                                + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS + ".");
+            } else if (CompatChanges.isChangeEnabled(DROP_CLOSE_SYSTEM_DIALOGS, uid)) {
+                Slog.e(TAG,
+                        "Permission Denial: " + Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+                                + " broadcast from " + caller + " requires "
+                                + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
+                                + ", dropping broadcast.");
+                return false;
+            } else {
+                Slog.w(TAG, Intent.ACTION_CLOSE_SYSTEM_DIALOGS
+                        + " broadcast from " + caller + " will require "
+                        + Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
+                        + " in future builds.");
+                return true;
+            }
+        }
+        return true;
+    }
+
+    private boolean canCloseSystemDialogs(int pid, int uid,
+            @Nullable WindowProcessController process) {
+        if (checkPermission(Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, pid, uid)
+                == PERMISSION_GRANTED) {
+            return true;
+        }
+        if (process == null) {
+            synchronized (mGlobalLock) {
+                process = mProcessMap.getProcess(pid);
+            }
+        }
+        if (process != null) {
+            // Check if the instrumentation of the process has the permission. This covers the
+            // usual test started from the shell (which has the permission) case. This is needed
+            // for apps targeting SDK level < S but we are also allowing for targetSdk S+ as a
+            // convenience to avoid breaking a bunch of existing tests and asking them to adopt
+            // shell permissions to do this.
+            // Note that these getters all read from volatile fields in WindowProcessController, so
+            // no need to lock.
+            int sourceUid = process.getInstrumentationSourceUid();
+            if (process.isInstrumenting() && sourceUid != -1 && checkPermission(
+                    Manifest.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS, -1, sourceUid)
+                    == PERMISSION_GRANTED) {
+                return true;
+            }
+            // This is the notification trampoline use-case for example, where apps use Intent.ACSD
+            // to close the shade prior to starting an activity.
+            if (process.canCloseSystemDialogsByToken()) {
+                return true;
+            }
+        }
+        // This covers the case where the app is displaying some UI on top of the notification shade
+        // and wants to start an activity. The app then sends the intent in order to move the
+        // notification shade out of the way and show the activity to the user. This is fine since
+        // the caller already has privilege to show a visible window on top of the notification
+        // shade, so it can already prevent the user from accessing the shade if it wants to.
+        // We only allow for targetSdk < S, for S+ we automatically collapse the shade on
+        // startActivity() for these apps.
+        if (!CompatChanges.isChangeEnabled(LOCK_DOWN_CLOSE_SYSTEM_DIALOGS, uid)) {
+            synchronized (mGlobalLock) {
+                if (mRootWindowContainer.hasVisibleWindowAboveNotificationShade(uid)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     static void enforceTaskPermission(String func) {
@@ -3200,33 +3307,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "suppressResizeConfigChanges()");
         synchronized (mGlobalLock) {
             mSuppressResizeConfigChanges = suppress;
-        }
-    }
-
-    /**
-     * Moves the top activity in the input rootTaskId to the pinned root task.
-     *
-     * @param rootTaskId Id of root task to move the top activity to pinned root task.
-     * @param bounds     Bounds to use for pinned root task.
-     * @return True if the top activity of the input stack was successfully moved to the pinned root
-     * task.
-     */
-    @Override
-    public boolean moveTopActivityToPinnedRootTask(int rootTaskId, Rect bounds) {
-        enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_TASKS,
-                "moveTopActivityToPinnedRootTask()");
-        synchronized (mGlobalLock) {
-            if (!mSupportsPictureInPicture) {
-                throw new IllegalStateException("moveTopActivityToPinnedRootTask:"
-                        + "Device doesn't support picture-in-picture mode");
-            }
-
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                return mRootWindowContainer.moveTopRootTaskActivityToPinnedRootTask(rootTaskId);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
         }
     }
 
@@ -4728,6 +4808,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mPermissionPolicyInternal;
     }
 
+    StatusBarManagerInternal getStatusBarManagerInternal() {
+        if (mStatusBarManagerInternal == null) {
+            mStatusBarManagerInternal = LocalServices.getService(StatusBarManagerInternal.class);
+        }
+        return mStatusBarManagerInternal;
+    }
+
     AppWarnings getAppWarningsLocked() {
         return mAppWarnings;
     }
@@ -4930,6 +5017,34 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             throw e;
         }
+    }
+
+    /**
+     * Sets the corresponding {@link DisplayArea} information for the process global
+     * configuration. To be called when we need to show IME on a different {@link DisplayArea}
+     * or display.
+     *
+     * @param pid The process id associated with the IME window.
+     * @param imeContainer The DisplayArea that contains the IME window.
+     */
+    void onImeWindowSetOnDisplayArea(final int pid, @NonNull final DisplayArea imeContainer) {
+        // Don't update process-level configuration for Multi-Client IME process since other
+        // IMEs on other displays will also receive this configuration change due to IME
+        // services use the same application config/context.
+        if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
+
+        if (pid == MY_PID || pid < 0) {
+            ProtoLog.w(WM_DEBUG_CONFIGURATION,
+                    "Trying to update display configuration for system/invalid process.");
+            return;
+        }
+        final WindowProcessController process = mProcessMap.getProcess(pid);
+        if (process == null) {
+            ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
+                    + "configuration for invalid process, pid=%d", pid);
+            return;
+        }
+        process.registerDisplayAreaConfigurationListener(imeContainer);
     }
 
     final class H extends Handler {
@@ -5174,6 +5289,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
             ActivityTaskManagerService.this.enforceCallerIsRecentsOrHasPermission(permission, func);
+        }
+
+        @Override
+        public boolean checkCanCloseSystemDialogs(int pid, int uid, @Nullable String packageName) {
+            return ActivityTaskManagerService.this.checkCanCloseSystemDialogs(pid, uid,
+                    packageName);
+        }
+
+        @Override
+        public boolean canCloseSystemDialogs(int pid, int uid) {
+            return ActivityTaskManagerService.this.canCloseSystemDialogs(pid, uid,
+                    null /* process */);
         }
 
         @Override
@@ -5423,44 +5550,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         }
 
-        /**
-         * Set the corresponding display information for the process global configuration. To be
-         * called when we need to show IME on a different display.
-         *
-         * @param pid       The process id associated with the IME window.
-         * @param displayId The ID of the display showing the IME.
-         */
-        @Override
-        public void onImeWindowSetOnDisplay(final int pid, final int displayId) {
-            // Don't update process-level configuration for Multi-Client IME process since other
-            // IMEs on other displays will also receive this configuration change due to IME
-            // services use the same application config/context.
-            if (InputMethodSystemProperty.MULTI_CLIENT_IME_ENABLED) return;
-
-            if (pid == MY_PID || pid < 0) {
-                ProtoLog.w(WM_DEBUG_CONFIGURATION,
-                        "Trying to update display configuration for system/invalid process.");
-                return;
-            }
-            synchronized (mGlobalLock) {
-                final DisplayContent displayContent =
-                        mRootWindowContainer.getDisplayContent(displayId);
-                if (displayContent == null) {
-                    // Call might come when display is not yet added or has been removed.
-                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                            + "configuration for non-existing displayId=%d", displayId);
-                    return;
-                }
-                final WindowProcessController process = mProcessMap.getProcess(pid);
-                if (process == null) {
-                    ProtoLog.w(WM_DEBUG_CONFIGURATION, "Trying to update display "
-                            + "configuration for invalid process, pid=%d", pid);
-                    return;
-                }
-                process.registerDisplayConfigurationListener(displayContent);
-            }
-        }
-
         @Override
         public void sendActivityResult(int callingUid, IBinder activityToken, String resultWho,
                 int requestCode, int resultCode, Intent data) {
@@ -5676,9 +5765,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void closeSystemDialogs(String reason) {
             enforceNotIsolatedCaller("closeSystemDialogs");
-
             final int pid = Binder.getCallingPid();
             final int uid = Binder.getCallingUid();
+            if (!checkCanCloseSystemDialogs(pid, uid, null)) {
+                return;
+            }
+
             final long origId = Binder.clearCallingIdentity();
             try {
                 synchronized (mGlobalLock) {
@@ -6299,17 +6391,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void setCompanionAppPackages(int userId, Set<String> companionAppPackages) {
-            // Translate package names into UIDs
-            final Set<Integer> result = new HashSet<>();
-            for (String pkg : companionAppPackages) {
-                final int uid = getPackageManagerInternalLocked().getPackageUid(pkg, 0, userId);
-                if (uid >= 0) {
-                    result.add(uid);
-                }
-            }
+        public void setCompanionAppUids(int userId, Set<Integer> companionAppUids) {
             synchronized (mGlobalLock) {
-                mCompanionAppUidsMap.put(userId, result);
+                mCompanionAppUidsMap.put(userId, companionAppUids);
             }
         }
 

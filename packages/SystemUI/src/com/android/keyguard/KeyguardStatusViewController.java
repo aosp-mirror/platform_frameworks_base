@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -53,8 +54,9 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
     private final ConfigurationController mConfigurationController;
     private final NotificationIconAreaController mNotificationIconAreaController;
+    private final DozeParameters mDozeParameters;
 
-    private boolean mKeyguardStatusViewAnimating;
+    private boolean mKeyguardStatusViewVisibilityAnimating;
     private int mLockScreenMode = KeyguardUpdateMonitor.LOCK_SCREEN_MODE_NORMAL;
 
     @Inject
@@ -65,7 +67,8 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ConfigurationController configurationController,
-            NotificationIconAreaController notificationIconAreaController) {
+            NotificationIconAreaController notificationIconAreaController,
+            DozeParameters dozeParameters) {
         super(keyguardStatusView);
         mKeyguardSliceViewController = keyguardSliceViewController;
         mKeyguardClockSwitchController = keyguardClockSwitchController;
@@ -73,6 +76,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mConfigurationController = configurationController;
         mNotificationIconAreaController = notificationIconAreaController;
+        mDozeParameters = dozeParameters;
     }
 
     @Override
@@ -140,7 +144,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Set keyguard status view alpha.
      */
     public void setAlpha(float alpha) {
-        if (!mKeyguardStatusViewAnimating) {
+        if (!mKeyguardStatusViewVisibilityAnimating) {
             mView.setAlpha(alpha);
         }
     }
@@ -194,8 +198,12 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, float scale, boolean animate) {
-        PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
-                animate);
+        // We animate the status view visible/invisible using Y translation, so don't change it
+        // while the animation is running.
+        if (!mKeyguardStatusViewVisibilityAnimating) {
+            PropertyAnimator.setProperty(mView, AnimatableProperty.Y, y, CLOCK_ANIMATION_PROPERTIES,
+                    animate);
+        }
 
         if (mLockScreenMode == KeyguardUpdateMonitor.LOCK_SCREEN_MODE_LAYOUT_1) {
             // reset any prior movement
@@ -223,10 +231,10 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             boolean goingToFullShade,
             int oldStatusBarState) {
         mView.animate().cancel();
-        mKeyguardStatusViewAnimating = false;
+        mKeyguardStatusViewVisibilityAnimating = false;
         if ((!keyguardFadingAway && oldStatusBarState == KEYGUARD
                 && statusBarState != KEYGUARD) || goingToFullShade) {
-            mKeyguardStatusViewAnimating = true;
+            mKeyguardStatusViewVisibilityAnimating = true;
             mView.animate()
                     .alpha(0f)
                     .setStartDelay(0)
@@ -242,7 +250,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
             }
         } else if (oldStatusBarState == StatusBarState.SHADE_LOCKED && statusBarState == KEYGUARD) {
             mView.setVisibility(View.VISIBLE);
-            mKeyguardStatusViewAnimating = true;
+            mKeyguardStatusViewVisibilityAnimating = true;
             mView.setAlpha(0f);
             mView.animate()
                     .alpha(1f)
@@ -252,7 +260,7 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                     .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable);
         } else if (statusBarState == KEYGUARD) {
             if (keyguardFadingAway) {
-                mKeyguardStatusViewAnimating = true;
+                mKeyguardStatusViewVisibilityAnimating = true;
                 mView.animate()
                         .alpha(0)
                         .translationYBy(-getHeight() * 0.05f)
@@ -260,6 +268,22 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
                         .setDuration(125)
                         .setStartDelay(0)
                         .withEndAction(mAnimateKeyguardStatusViewInvisibleEndRunnable)
+                        .start();
+            } else if (mDozeParameters.shouldControlUnlockedScreenOff()) {
+                mKeyguardStatusViewVisibilityAnimating = true;
+
+                mView.setVisibility(View.VISIBLE);
+                mView.setAlpha(0f);
+
+                float curTranslationY = mView.getTranslationY();
+                mView.setTranslationY(curTranslationY - getHeight() * 0.1f);
+                mView.animate()
+                        .setStartDelay((int) (StackStateAnimator.ANIMATION_DURATION_WAKEUP * .6f))
+                        .setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP)
+                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
+                        .alpha(1f)
+                        .translationY(curTranslationY)
+                        .withEndAction(mAnimateKeyguardStatusViewVisibleEndRunnable)
                         .start();
             } else {
                 mView.setVisibility(View.VISIBLE);
@@ -367,17 +391,17 @@ public class KeyguardStatusViewController extends ViewController<KeyguardStatusV
     };
 
     private final Runnable mAnimateKeyguardStatusViewInvisibleEndRunnable = () -> {
-        mKeyguardStatusViewAnimating = false;
+        mKeyguardStatusViewVisibilityAnimating = false;
         mView.setVisibility(View.INVISIBLE);
     };
 
 
     private final Runnable mAnimateKeyguardStatusViewGoneEndRunnable = () -> {
-        mKeyguardStatusViewAnimating = false;
+        mKeyguardStatusViewVisibilityAnimating = false;
         mView.setVisibility(View.GONE);
     };
 
     private final Runnable mAnimateKeyguardStatusViewVisibleEndRunnable = () -> {
-        mKeyguardStatusViewAnimating = false;
+        mKeyguardStatusViewVisibilityAnimating = false;
     };
 }

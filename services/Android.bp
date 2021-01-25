@@ -30,6 +30,7 @@ filegroup {
         ":services.searchui-sources",
         ":services.startop.iorap-sources",
         ":services.systemcaptions-sources",
+        ":services.translation-sources",
         ":services.usage-sources",
         ":services.usb-sources",
         ":services.voiceinteraction-sources",
@@ -76,12 +77,12 @@ java_library {
         "services.searchui",
         "services.startop",
         "services.systemcaptions",
+        "services.translation",
         "services.usage",
         "services.usb",
         "services.voiceinteraction",
         "services.wifi",
         "service-blobstore",
-        "service-connectivity",
         "service-jobscheduler",
         "android.hidl.base-V1.0-java",
     ],
@@ -146,11 +147,20 @@ droidstubs {
             baseline_file: "api/lint-baseline.txt",
         },
     },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/system-server/api",
-        dest: "android.txt",
-    },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "android.txt",
+            tag: ".api.txt"
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system-server/api",
+            dest: "removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ]
 }
 
 java_library {

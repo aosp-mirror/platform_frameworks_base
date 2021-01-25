@@ -15,7 +15,10 @@
  */
 package com.android.internal.os;
 
+import android.os.BatteryConsumer;
 import android.os.BatteryStats;
+import android.os.BatteryUsageStatsQuery;
+import android.os.UidBatteryConsumer;
 
 /**
  * Power calculator for the camera subsystem, excluding the flashlight.
@@ -23,26 +26,33 @@ import android.os.BatteryStats;
  * Note: Power draw for the flash unit should be included in the FlashlightPowerCalculator.
  */
 public class CameraPowerCalculator extends PowerCalculator {
-    private final double mCameraPowerOnAvg;
+    // Calculate camera power usage.  Right now, this is a (very) rough estimate based on the
+    // average power usage for a typical camera application.
+    private final UsageBasedPowerEstimator mPowerEstimator;
 
     public CameraPowerCalculator(PowerProfile profile) {
-        mCameraPowerOnAvg = profile.getAveragePower(PowerProfile.POWER_CAMERA);
+        mPowerEstimator = new UsageBasedPowerEstimator(
+                profile.getAveragePower(PowerProfile.POWER_CAMERA));
+    }
+
+    @Override
+    protected void calculateApp(UidBatteryConsumer.Builder app, BatteryStats.Uid u,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final long durationMs =
+                mPowerEstimator.calculateDuration(u.getCameraTurnedOnTimer(), rawRealtimeUs,
+                        BatteryStats.STATS_SINCE_CHARGED);
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        app.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CAMERA, durationMs)
+                .setConsumedPower(BatteryConsumer.POWER_COMPONENT_CAMERA, powerMah);
     }
 
     @Override
     protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
-                             long rawUptimeUs, int statsType) {
-
-        // Calculate camera power usage.  Right now, this is a (very) rough estimate based on the
-        // average power usage for a typical camera application.
-        final BatteryStats.Timer timer = u.getCameraTurnedOnTimer();
-        if (timer != null) {
-            final long totalTime = timer.getTotalTimeLocked(rawRealtimeUs, statsType) / 1000;
-            app.cameraTimeMs = totalTime;
-            app.cameraPowerMah = (totalTime * mCameraPowerOnAvg) / (1000*60*60);
-        } else {
-            app.cameraTimeMs = 0;
-            app.cameraPowerMah = 0;
-        }
+            long rawUptimeUs, int statsType) {
+        final long durationMs = mPowerEstimator.calculateDuration(u.getCameraTurnedOnTimer(),
+                rawRealtimeUs, statsType);
+        final double powerMah = mPowerEstimator.calculatePower(durationMs);
+        app.cameraTimeMs = durationMs;
+        app.cameraPowerMah = powerMah;
     }
 }

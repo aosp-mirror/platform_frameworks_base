@@ -55,14 +55,15 @@ public class SplitLayout {
     private Context mContext;
     private DividerSnapAlgorithm mDividerSnapAlgorithm;
     private int mDividePosition;
+    private boolean mInitialized = false;
 
-    public SplitLayout(Context context, Configuration configuration,
+    public SplitLayout(String windowName, Context context, Configuration configuration,
             LayoutChangeListener layoutChangeListener,
             SplitWindowManager.ParentContainerCallbacks parentContainerCallbacks) {
         mContext = context.createConfigurationContext(configuration);
         mLayoutChangeListener = layoutChangeListener;
         mSplitWindowManager = new SplitWindowManager(
-                mContext, configuration, parentContainerCallbacks);
+                windowName, mContext, configuration, parentContainerCallbacks);
 
         mDividerWindowWidth = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
@@ -72,8 +73,7 @@ public class SplitLayout {
 
         mRootBounds.set(configuration.windowConfiguration.getBounds());
         mDividerSnapAlgorithm = getSnapAlgorithm(context.getResources(), mRootBounds);
-        mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
-        updateBounds(mDividePosition);
+        resetDividerPosition();
     }
 
     /** Gets bounds of the primary split. */
@@ -112,8 +112,13 @@ public class SplitLayout {
         mSplitWindowManager.setConfiguration(configuration);
         mRootBounds.set(rootBounds);
         mDividerSnapAlgorithm = getSnapAlgorithm(mContext.getResources(), mRootBounds);
-        mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
-        updateBounds(mDividePosition);
+        resetDividerPosition();
+
+        // Don't inflate divider bar if it is not initialized.
+        if (!mInitialized) {
+            return false;
+        }
+
         release();
         init();
         return true;
@@ -141,11 +146,15 @@ public class SplitLayout {
 
     /** Inflates {@link DividerView} on the root surface. */
     public void init() {
+        if (mInitialized) return;
+        mInitialized = true;
         mSplitWindowManager.init(this);
     }
 
     /** Releases the surface holding the current {@link DividerView}. */
     public void release() {
+        if (!mInitialized) return;
+        mInitialized = false;
         mSplitWindowManager.release();
     }
 
@@ -166,6 +175,12 @@ public class SplitLayout {
         mSplitWindowManager.setResizingSplits(false);
     }
 
+    /** Resets divider position. */
+    public void resetDividerPosition() {
+        mDividePosition = mDividerSnapAlgorithm.getMiddleTarget().position;
+        updateBounds(mDividePosition);
+    }
+
     /**
      * Sets new divide position and updates bounds correspondingly. Notifies listener if the new
      * target indicates dismissing split.
@@ -173,11 +188,11 @@ public class SplitLayout {
     public void snapToTarget(int currentPosition, DividerSnapAlgorithm.SnapTarget snapTarget) {
         switch (snapTarget.flag) {
             case FLAG_DISMISS_START:
-                mLayoutChangeListener.onSnappedToDismiss(false /* snappedToEnd */);
+                mLayoutChangeListener.onSnappedToDismiss(false /* bottomOrRight */);
                 mSplitWindowManager.setResizingSplits(false);
                 break;
             case FLAG_DISMISS_END:
-                mLayoutChangeListener.onSnappedToDismiss(true /* snappedToEnd */);
+                mLayoutChangeListener.onSnappedToDismiss(true /* bottomOrRight */);
                 mSplitWindowManager.setResizingSplits(false);
                 break;
             default:
@@ -186,11 +201,17 @@ public class SplitLayout {
         }
     }
 
+    void onDoubleTappedDivider() {
+        mLayoutChangeListener.onDoubleTappedDivider();
+    }
+
     /**
      * Returns {@link DividerSnapAlgorithm.SnapTarget} which matches passing position and velocity.
+     * If hardDismiss is set to {@code true}, it will be harder to reach dismiss target.
      */
-    public DividerSnapAlgorithm.SnapTarget findSnapTarget(int position, float velocity) {
-        return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity);
+    public DividerSnapAlgorithm.SnapTarget findSnapTarget(int position, float velocity,
+            boolean hardDismiss) {
+        return mDividerSnapAlgorithm.calculateSnapTarget(position, velocity, hardDismiss);
     }
 
     private DividerSnapAlgorithm getSnapAlgorithm(Resources resources, Rect rootBounds) {
@@ -234,9 +255,15 @@ public class SplitLayout {
     public interface LayoutChangeListener {
         /** Calls when dismissing split. */
         void onSnappedToDismiss(boolean snappedToEnd);
+
         /** Calls when the bounds is changing due to animation or dragging divider bar. */
         void onBoundsChanging(SplitLayout layout);
+
         /** Calls when the target bounds changed. */
         void onBoundsChanged(SplitLayout layout);
+
+        /** Calls when user double tapped on the divider bar. */
+        default void onDoubleTappedDivider() {
+        }
     }
 }

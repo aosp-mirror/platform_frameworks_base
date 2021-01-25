@@ -52,6 +52,7 @@ ImageDecoder::ImageDecoder(std::unique_ptr<SkAndroidCodec> codec, sk_sp<SkPngChu
     , mOutColorType(mCodec->computeOutputColorType(kN32_SkColorType))
     , mUnpremultipliedRequired(false)
     , mOutColorSpace(getDefaultColorSpace())
+    , mHandleRestorePrevious(true)
 {
     mTargetSize = swapWidthHeight() ? SkISize { mDecodeSize.height(), mDecodeSize.width() }
                                     : mDecodeSize;
@@ -73,6 +74,11 @@ static bool requires_matrix_scaling(bool swapWidthHeight, const SkISize& decodeS
                                     const SkISize& targetSize) {
     return (swapWidthHeight && decodeSize != swapped(targetSize))
           || (!swapWidthHeight && decodeSize != targetSize);
+}
+
+SkISize ImageDecoder::getSampledDimensions(int sampleSize) const {
+    auto size = mCodec->getSampledDimensions(sampleSize);
+    return swapWidthHeight() ? swapped(size) : size;
 }
 
 bool ImageDecoder::setTargetSize(int width, int height) {
@@ -230,6 +236,13 @@ bool ImageDecoder::rewind() {
     return true;
 }
 
+void ImageDecoder::setHandleRestorePrevious(bool handle) {
+    mHandleRestorePrevious = handle;
+    if (!handle) {
+        mRestoreFrame = nullptr;
+    }
+}
+
 bool ImageDecoder::advanceFrame() {
     const int frameIndex = ++mOptions.fFrameIndex;
     const int frameCount = mCodec->codec()->getFrameCount();
@@ -255,6 +268,7 @@ bool ImageDecoder::advanceFrame() {
             case RestoreState::kDoNothing:
             case RestoreState::kNeedsRestore:
                 mRestoreState = RestoreState::kFirstRPFrame;
+                mOptions.fPriorFrame = frameIndex - 1;
                 break;
             case RestoreState::kFirstRPFrame:
                 mRestoreState = RestoreState::kRPFrame;
@@ -315,29 +329,19 @@ bool ImageDecoder::finished() const {
     return mOptions.fFrameIndex >= mCodec->codec()->getFrameCount();
 }
 
-SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
-    // This was checked inside setTargetSize, but it's possible the first frame
-    // was opaque, so that method succeeded, but after calling advanceFrame, the
-    // current frame is not opaque.
-    if (mUnpremultipliedRequired && !opaque()) {
-        // Allow using a matrix to handle orientation, but not scaling.
-        if (requires_matrix_scaling(swapWidthHeight(), mDecodeSize, mTargetSize)) {
-            return SkCodec::kInvalidScale;
-        }
+bool ImageDecoder::handleRestorePrevious(const SkImageInfo& outputInfo, void* pixels,
+                                         size_t rowBytes) {
+    if (!mHandleRestorePrevious) {
+        return true;
     }
 
-    void* decodePixels = pixels;
-    size_t decodeRowBytes = rowBytes;
-    const auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, getOutAlphaType(),
-                                              getOutputColorSpace());
-    const auto outputInfo = getOutputInfo();
     switch (mRestoreState) {
         case RestoreState::kFirstRPFrame:{
             // This frame is marked kRestorePrevious. The prior frame should be in
             // |pixels|, and it is what we'll restore after each consecutive
             // kRestorePrevious frame. Cache it now.
             if (!(mRestoreFrame = Bitmap::allocateHeapBitmap(outputInfo))) {
-                return SkCodec::kInternalError;
+                return false;
             }
 
             const uint8_t* srcRow = static_cast<uint8_t*>(pixels);
@@ -366,7 +370,29 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
         case RestoreState::kDoNothing:
             break;
     }
+    return true;
+}
 
+SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
+    // This was checked inside setTargetSize, but it's possible the first frame
+    // was opaque, so that method succeeded, but after calling advanceFrame, the
+    // current frame is not opaque.
+    if (mUnpremultipliedRequired && !opaque()) {
+        // Allow using a matrix to handle orientation, but not scaling.
+        if (requires_matrix_scaling(swapWidthHeight(), mDecodeSize, mTargetSize)) {
+            return SkCodec::kInvalidScale;
+        }
+    }
+
+    const auto outputInfo = getOutputInfo();
+    if (!handleRestorePrevious(outputInfo, pixels, rowBytes)) {
+        return SkCodec::kInternalError;
+    }
+
+    void* decodePixels = pixels;
+    size_t decodeRowBytes = rowBytes;
+    const auto decodeInfo = SkImageInfo::Make(mDecodeSize, mOutColorType, getOutAlphaType(),
+                                              getOutputColorSpace());
     // Used if we need a temporary before scaling or subsetting.
     // FIXME: Use scanline decoding on only a couple lines to save memory. b/70709380.
     SkBitmap tmp;

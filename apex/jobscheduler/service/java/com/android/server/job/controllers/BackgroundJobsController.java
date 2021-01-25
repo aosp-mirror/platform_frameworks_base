@@ -203,7 +203,7 @@ public final class BackgroundJobsController extends StateController {
             isActive = (activeState == KNOWN_ACTIVE);
         }
         if (isActive && jobStatus.getStandbyBucket() == NEVER_INDEX) {
-            Slog.wtf(TAG, "App " + packageName + " became active but still in NEVER bucket");
+            jobStatus.maybeLogBucketMismatch();
         }
         boolean didChange = jobStatus.setBackgroundNotRestrictedConstraintSatisfied(canRun);
         didChange |= jobStatus.setUidActive(isActive);

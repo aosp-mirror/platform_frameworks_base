@@ -29,6 +29,7 @@ import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
@@ -208,6 +209,7 @@ import android.view.WindowManager.TransitionOldType;
 import android.window.ITaskOrganizer;
 import android.window.StartingWindowInfo;
 import android.window.TaskSnapshot;
+import android.window.WindowContainerToken;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -424,12 +426,16 @@ class Task extends WindowContainer<WindowContainer> {
     /** If original intent did not allow relinquishing task identity, save that information */
     private boolean mNeverRelinquishIdentity = true;
 
+    /** Avoid reentrant of {@link #removeImmediately(String)}. */
+    private boolean mRemoving;
+
     // Used in the unique case where we are clearing the task in order to reuse it. In that case we
     // do not want to delete the stack when the task goes empty.
     private boolean mReuseTask = false;
 
     CharSequence lastDescription; // Last description captured for this item.
 
+    Task mAdjacentTask; // Task adjacent to this one.
     int mAffiliatedTaskId; // taskId of parent affiliation or self if no parent.
     Task mPrevAffiliate; // previous task in affiliated chain.
     int mPrevAffiliateTaskId = INVALID_TASK_ID; // previous id for persistence.
@@ -456,6 +462,15 @@ class Task extends WindowContainer<WindowContainer> {
     // default minimal width/height.
     int mMinWidth;
     int mMinHeight;
+
+    // The bounds of the target when recents animation is finished.
+    // This is originally introduced to carry out the current surface control position and window
+    // crop when a multi-activity task enters pip with autoEnterPip enabled. In such case,
+    // the surface control of the task will be animated in Launcher and then the top activity is
+    // reparented to pinned root task.
+    // Do not forget to reset this to null after reparenting.
+    // TODO: remove this once the recents animation is moved to the Shell
+    final Rect mLastRecentsAnimationBounds = new Rect();
 
     static final int LAYER_RANK_INVISIBLE = -1;
     // Ranking (from top) of this task among all visible tasks. (-1 means it's not visible)
@@ -875,6 +890,11 @@ class Task extends WindowContainer<WindowContainer> {
         EventLogTags.writeWmTaskCreated(mTaskId, isRootTask() ? INVALID_TASK_ID : getRootTaskId());
     }
 
+    static Task fromWindowContainerToken(WindowContainerToken token) {
+        if (token == null) return null;
+        return fromBinder(token.asBinder()).asTask();
+    }
+
     Task reuseAsLeafTask(IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
             Intent intent, ActivityInfo info, ActivityRecord activity) {
         voiceSession = _voiceSession;
@@ -916,21 +936,26 @@ class Task extends WindowContainer<WindowContainer> {
             mTaskSupervisor.mRecentTasks.remove(this);
         }
 
-        removeIfPossible();
+        removeIfPossible("cleanUpResourcesForDestroy");
     }
 
     @VisibleForTesting
     @Override
     void removeIfPossible() {
+        removeIfPossible("removeTaskIfPossible");
+    }
+
+    void removeIfPossible(String reason) {
         final boolean isRootTask = isRootTask();
         if (!isRootTask) {
             mAtmService.getLockTaskController().clearLockedTask(this);
         }
         if (shouldDeferRemoval()) {
-            if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask: deferring removing taskId=" + mTaskId);
+            if (DEBUG_ROOT_TASK) Slog.i(TAG,
+                    "removeTask:" + reason + " deferring removing taskId=" + mTaskId);
             return;
         }
-        removeImmediately();
+        removeImmediately(reason);
         if (isLeafTask()) {
             mAtmService.getTaskChangeNotificationController().notifyTaskRemoved(mTaskId);
 
@@ -1402,7 +1427,6 @@ class Task extends WindowContainer<WindowContainer> {
         //                    from the display, so we should probably consolidate it there instead.
 
         if (getParent() == null && mDisplayContent != null) {
-            EventLogTags.writeWmStackRemoved(getRootTaskId());
             mDisplayContent = null;
             mWmService.mWindowPlacerLocked.requestTraversal();
         }
@@ -1555,6 +1579,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         mAtmService.mWindowManager.mTaskSnapshotController.notifyTaskRemovedFromRecents(
                 mTaskId, mUserId);
+    }
+
+    void setAdjacentTask(Task adjacent) {
+        mAdjacentTask = adjacent;
+        adjacent.mAdjacentTask = this;
     }
 
     void setTaskToAffiliateWith(Task taskToAffiliateWith) {
@@ -1774,8 +1803,8 @@ class Task extends WindowContainer<WindowContainer> {
                 getRootTask().removeChild(this, reason);
             }
             EventLogTags.writeWmTaskRemoved(mTaskId,
-                    "removeChild: last r=" + r + " in t=" + this);
-            removeIfPossible();
+                    "removeChild:" + reason + " last r=" + r + " in t=" + this);
+            removeIfPossible(reason);
         }
     }
 
@@ -1818,7 +1847,7 @@ class Task extends WindowContainer<WindowContainer> {
                 if (r.finishing) return;
                 // Task was restored from persistent storage.
                 r.takeFromHistory();
-                removeChild(r);
+                removeChild(r, reason);
             });
         } else {
             forAllActivities((r) -> {
@@ -1937,13 +1966,18 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     private boolean supportsSplitScreenWindowingModeInner() {
-        // A task can not be docked even if it is considered resizeable because it only supports
-        // picture-in-picture mode but has a non-resizeable resizeMode
         return super.supportsSplitScreenWindowingMode()
                 && mAtmService.mSupportsSplitScreenMultiWindow
-                && (mAtmService.mForceResizableActivities
-                        || (isResizeable(false /* checkSupportsPip */)
-                                && !ActivityInfo.isPreserveOrientationMode(mResizeMode)));
+                && supportsMultiWindow();
+    }
+
+    boolean supportsFreeform() {
+        return mAtmService.mSupportsFreeformWindowManagement && supportsMultiWindow();
+    }
+
+    boolean supportsMultiWindow() {
+        return mAtmService.mSupportsMultiWindow
+                && (isResizeable() || mAtmService.mSupportsNonResizableMultiWindow);
     }
 
     /**
@@ -2789,14 +2823,15 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         // Do not allow non-resizable tasks to be in a multi-window mode, unless it is in pinned
-        // windowing mode or is in size compat freeform mode
+        // windowing mode or supports non-resizable tasks in multi-window mode.
         if (!isResizeable()) {
             final int candidateWindowingMode =
                     windowingMode != WINDOWING_MODE_UNDEFINED ? windowingMode : parentWindowingMode;
             if (WindowConfiguration.inMultiWindowMode(candidateWindowingMode)
                     && candidateWindowingMode != WINDOWING_MODE_PINNED
                     && (candidateWindowingMode != WINDOWING_MODE_FREEFORM
-                            || !mTaskSupervisor.mService.mSizeCompatFreeform)) {
+                            || !mTaskSupervisor.mService.mSizeCompatFreeform)
+                    && !mTaskSupervisor.mService.mSupportsNonResizableMultiWindow) {
                 getResolvedOverrideConfiguration().windowConfiguration.setWindowingMode(
                         WINDOWING_MODE_FULLSCREEN);
             }
@@ -2821,9 +2856,7 @@ class Task extends WindowContainer<WindowContainer> {
                 getResolvedOverrideConfiguration().windowConfiguration.getBounds();
 
         if (windowingMode == WINDOWING_MODE_FULLSCREEN) {
-            computeFullscreenBounds(outOverrideBounds, null /* refActivity */,
-                    newParentConfig.windowConfiguration.getBounds(),
-                    newParentConfig.orientation);
+            computeFullscreenBounds(outOverrideBounds, newParentConfig);
             // The bounds for fullscreen mode shouldn't be adjusted by minimal size. Otherwise if
             // the parent or display is smaller than the size, the content may be cropped.
             return;
@@ -2863,19 +2896,19 @@ class Task extends WindowContainer<WindowContainer> {
      * {@link WindowConfiguration#WINDOWING_MODE_FULLSCREEN} when the parent doesn't handle the
      * orientation change and the requested orientation is different from the parent.
      */
-    void computeFullscreenBounds(@NonNull Rect outBounds, @Nullable ActivityRecord refActivity,
-            @NonNull Rect parentBounds, int parentOrientation) {
+    void computeFullscreenBounds(@NonNull Rect outBounds, @NonNull Configuration newParentConfig) {
         // In FULLSCREEN mode, always start with empty bounds to indicate "fill parent".
         outBounds.setEmpty();
         if (handlesOrientationChangeFromDescendant()) {
+            // No need to letterbox at task level. Display will handle fixed-orientation requests.
             return;
         }
-        if (refActivity == null) {
-            // Use the top activity as the reference of orientation. Don't include overlays because
-            // it is usually not the actual content or just temporarily shown.
-            // E.g. ForcedResizableInfoActivity.
-            refActivity = getTopNonFinishingActivity(false /* includeOverlays */);
-        }
+
+        final int parentOrientation = newParentConfig.orientation;
+        // Use the top activity as the reference of orientation. Don't include overlays because
+        // it is usually not the actual content or just temporarily shown.
+        // E.g. ForcedResizableInfoActivity.
+        final ActivityRecord refActivity = getTopNonFinishingActivity(false /* includeOverlays */);
 
         // If the task or the reference activity requires a different orientation (either by
         // override or activityInfo), make it fit the available bounds by scaling down its bounds.
@@ -2887,11 +2920,17 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        if (refActivity != null && refActivity.hasCompatDisplayInsets()) {
+        final ActivityRecord.CompatDisplayInsets compatDisplayInsets =
+                refActivity == null ? null : refActivity.getCompatDisplayInsets();
+        if (compatDisplayInsets != null && !compatDisplayInsets.mIsTaskLetterboxed) {
             // App prefers to keep its original size.
+            // If the size compat is from previous task letterboxing, we may want to have task
+            // letterbox again, otherwise it will show the size compat restart button even if the
+            // restart bounds will be the same.
             return;
         }
 
+        final Rect parentBounds = newParentConfig.windowConfiguration.getBounds();
         final int parentWidth = parentBounds.width();
         final int parentHeight = parentBounds.height();
         float aspect = Math.max(parentWidth, parentHeight)
@@ -2925,6 +2964,18 @@ class Task extends WindowContainer<WindowContainer> {
             final int width = (int) Math.rint(parentHeight / aspect);
             final int left = parentBounds.centerX() - width / 2;
             outBounds.set(left, parentBounds.top, left + width, parentBounds.bottom);
+        }
+
+        if (compatDisplayInsets != null) {
+            compatDisplayInsets.getBoundsByRotation(
+                    mTmpBounds, newParentConfig.windowConfiguration.getRotation());
+            if (outBounds.width() != mTmpBounds.width()
+                    || outBounds.height() != mTmpBounds.height()) {
+                // The app shouldn't be resized, we only do task letterboxing if the compat bounds
+                // is also from the same task letterbox. Otherwise, clear the task bounds to show
+                // app in size compat mode.
+                outBounds.setEmpty();
+            }
         }
     }
 
@@ -3214,13 +3265,23 @@ class Task extends WindowContainer<WindowContainer> {
 
     @Override
     void removeImmediately() {
-        if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
-        EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
+        removeImmediately("removeTask");
+    }
+
+    void removeImmediately(String reason) {
+        if (DEBUG_ROOT_TASK) Slog.i(TAG, "removeTask:" + reason + " removing taskId=" + mTaskId);
+        if (mRemoving) {
+            return;
+        }
+        mRemoving = true;
+
+        EventLogTags.writeWmTaskRemoved(mTaskId, reason);
 
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
 
         super.removeImmediately();
+        mRemoving = false;
     }
 
     // TODO: Consolidate this with Task.reparent()
@@ -3296,6 +3357,14 @@ class Task extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    @Override
+    boolean handlesOrientationChangeFromDescendant() {
+        return super.handlesOrientationChangeFromDescendant()
+                // Display won't rotate for the orientation request if the TaskDisplayArea can't
+                // specify orientation.
+                && getDisplayArea().canSpecifyOrientation();
+    }
+
     void resize(boolean relayout, boolean forced) {
         if (setBounds(getRequestedOverrideBounds(), forced) != BOUNDS_CHANGE_NONE && relayout) {
             getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
@@ -3319,15 +3388,11 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
-    boolean isResizeable(boolean checkSupportsPip) {
+    boolean isResizeable() {
         final boolean forceResizable = mAtmService.mForceResizableActivities
                 && getActivityType() == ACTIVITY_TYPE_STANDARD;
-        return (forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
-                || (checkSupportsPip && mSupportsPictureInPicture));
-    }
-
-    boolean isResizeable() {
-        return isResizeable(true /* checkSupportsPip */);
+        return forceResizable || ActivityInfo.isResizeableMode(mResizeMode)
+                || mSupportsPictureInPicture;
     }
 
     /**
@@ -4085,6 +4150,7 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.launchCookies.clear();
         info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
             info.addLaunchCookie(r.mLaunchCookie);
@@ -4103,9 +4169,9 @@ class Task extends WindowContainer<WindowContainer> {
 
     private @Nullable PictureInPictureParams getPictureInPictureParams(Task top) {
         if (top == null) return null;
-        final ActivityRecord rootActivity = top.getRootActivity();
-        return (rootActivity == null || rootActivity.pictureInPictureArgs.empty())
-                ? null : new PictureInPictureParams(rootActivity.pictureInPictureArgs);
+        final ActivityRecord topVisibleActivity = top.getTopVisibleActivity();
+        return (topVisibleActivity == null || topVisibleActivity.pictureInPictureArgs.empty())
+                ? null : new PictureInPictureParams(topVisibleActivity.pictureInPictureArgs);
     }
 
     /**
@@ -4202,6 +4268,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
         }
 
+        final List<Task> adjacentTasks = new ArrayList<>();
         final int windowingMode = getWindowingMode();
         final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = parent.getChildCount() - 1; i >= 0; --i) {
@@ -4230,6 +4297,15 @@ class Task extends WindowContainer<WindowContainer> {
                     gotTranslucentFullscreen = true;
                     continue;
                 }
+                return TASK_VISIBILITY_INVISIBLE;
+            } else if (otherWindowingMode == WINDOWING_MODE_MULTI_WINDOW
+                    && other.matchParentBounds()) {
+                if (other.isTranslucent(starting)) {
+                    // Can be visible behind a translucent task.
+                    gotTranslucentFullscreen = true;
+                    continue;
+                }
+                // Multi-window task that matches parent bounds would occlude other children.
                 return TASK_VISIBILITY_INVISIBLE;
             } else if (otherWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                     && !gotOpaqueSplitScreenPrimary) {
@@ -4262,6 +4338,20 @@ class Task extends WindowContainer<WindowContainer> {
                 // making sense, it also works around an issue here we boost the z-order of the
                 // assistant window surfaces in window manager whenever it is visible.
                 return TASK_VISIBILITY_INVISIBLE;
+            }
+            if (other.mAdjacentTask != null) {
+                if (adjacentTasks.contains(other.mAdjacentTask)) {
+                    if (other.isTranslucent(starting)
+                            || other.mAdjacentTask.isTranslucent(starting)) {
+                        // Can be visible behind a translucent adjacent tasks.
+                        gotTranslucentFullscreen = true;
+                        continue;
+                    }
+                    // Can not be visible behind adjacent tasks.
+                    return TASK_VISIBILITY_INVISIBLE;
+                } else {
+                    adjacentTasks.add(other);
+                }
             }
         }
 
@@ -4404,7 +4494,8 @@ class Task extends WindowContainer<WindowContainer> {
         if (mRootProcess != null) {
             pw.print(prefix); pw.print("mRootProcess="); pw.println(mRootProcess);
         }
-        pw.print(prefix); pw.print("taskId=" + mTaskId); pw.println(" stackId=" + getRootTaskId());
+        pw.print(prefix); pw.print("taskId=" + mTaskId);
+        pw.println(" rootTaskId=" + getRootTaskId());
         pw.print(prefix); pw.print("mHasBeenVisible="); pw.println(getHasBeenVisible());
         pw.print(prefix); pw.print("mResizeMode=");
         pw.print(ActivityInfo.resizeModeToString(mResizeMode));
@@ -4904,7 +4995,7 @@ class Task extends WindowContainer<WindowContainer> {
                 commitPendingTransaction();
             }
 
-            sendTaskAppeared();
+            if (!mDeferTaskAppear) sendTaskAppeared();
             if (!isRootTask()) {
                 getRootTask().setHasBeenVisible(true);
             }
@@ -4983,10 +5074,9 @@ class Task extends WindowContainer<WindowContainer> {
             }
         } else {
             // No longer managed by any organizer.
-            mTaskAppearedSent = false;
             setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, false /* set */);
             if (mCreatedByOrganizer) {
-                removeImmediately();
+                removeImmediately("setTaskOrganizer");
             }
         }
 
@@ -5009,7 +5099,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     boolean updateTaskOrganizerState(boolean forceUpdate, boolean skipTaskAppeared) {
         if (getSurfaceControl() == null) {
-            // Can't call onTaskAppeared without a surfacecontrol, so defer this until after one
+            // Can't call onTaskAppeared without a surfacecontrol, so defer this until next one
             // is created.
             return false;
         }
@@ -5104,7 +5194,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     void onPictureInPictureParamsChanged() {
-        dispatchTaskInfoChangedIfNeeded(true /* force */);
+        if (inPinnedWindowingMode()) {
+            dispatchTaskInfoChangedIfNeeded(true /* force */);
+        }
     }
 
     /**
@@ -5271,7 +5363,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
         if (likelyResolvedMode != WINDOWING_MODE_FULLSCREEN
                 && topActivity != null && !topActivity.noDisplay
-                && topActivity.isNonResizableOrForcedResizable(likelyResolvedMode)) {
+                && topActivity.canForceResizeNonResizable(likelyResolvedMode)) {
             // Inform the user that they are starting an app that may not work correctly in
             // multi-window mode.
             final String packageName = topActivity.info.applicationInfo.packageName;
@@ -5399,9 +5491,13 @@ class Task extends WindowContainer<WindowContainer> {
                 final Task lastFocusedTask = displayArea.getFocusedRootTask();
                 displayArea.positionChildAt(POSITION_BOTTOM, this, false /*includingParents*/);
                 displayArea.updateLastFocusedRootTask(lastFocusedTask, reason);
+                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                        getTaskInfo());
             }
             if (task != null && task != this) {
                 positionChildAtBottom(task);
+                mAtmService.getTaskChangeNotificationController().notifyTaskMovedToBack(
+                        task.getTaskInfo());
             }
             return;
         }
@@ -5434,14 +5530,6 @@ class Task extends WindowContainer<WindowContainer> {
                 + "callers=%s", r, Debug.getCallers(5));
         r.setState(RESUMED, "minimalResumeActivityLocked");
         r.completeResumeLocked();
-    }
-
-    private void clearLaunchTime(ActivityRecord r) {
-        // Make sure that there is no activity waiting for this to launch.
-        if (!mTaskSupervisor.mWaitingActivityLaunched.isEmpty()) {
-            mTaskSupervisor.removeIdleTimeoutForActivity(r);
-            mTaskSupervisor.scheduleIdleTimeout(r);
-        }
     }
 
     void awakeFromSleepingLocked() {
@@ -5529,6 +5617,10 @@ class Task extends WindowContainer<WindowContainer> {
         return false;
     }
 
+    final boolean startPausingLocked(boolean uiSleeping, ActivityRecord resuming, String reason) {
+        return startPausingLocked(mTaskSupervisor.mUserLeaving, uiSleeping, resuming, reason);
+    }
+
     /**
      * Start pausing the currently resumed activity.  It is an error to call this if there
      * is already an activity being paused or there is no resumed activity.
@@ -5586,7 +5678,6 @@ class Task extends WindowContainer<WindowContainer> {
         mLastNoHistoryActivity = prev.isNoHistory() ? prev : null;
         prev.setState(PAUSING, "startPausingLocked");
         prev.getTask().touchActiveTime();
-        clearLaunchTime(prev);
 
         mAtmService.updateCpuStats();
 
@@ -5794,8 +5885,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */,
-                mTaskSupervisor.mUserLeaving);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
 
     /**
@@ -5812,16 +5902,14 @@ class Task extends WindowContainer<WindowContainer> {
      * @param configChanges Parts of the configuration that changed for this activity for evaluating
      *                      if the screen should be frozen as part of
      *                      {@link mEnsureActivitiesVisibleHelper}.
-     * @param userLeaving Flag indicating whether a userLeaving callback should be issued in the
-     *                      case an activity is being set to invisible.
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
     void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
+            boolean preserveWindows, boolean notifyClients) {
         mTaskSupervisor.beginActivityVisibilityUpdate();
         try {
             forAllLeafTasks(task -> task.mEnsureActivitiesVisibleHelper.process(
-                    starting, configChanges, preserveWindows, notifyClients, userLeaving),
+                    starting, configChanges, preserveWindows, notifyClients),
                     true /* traverseTopToBottom */);
 
             // Notify WM shell that task visibilities may have changed
@@ -6017,11 +6105,6 @@ class Task extends WindowContainer<WindowContainer> {
 
         mRootWindowContainer.cancelInitializingActivities();
 
-        // Remember how we'll process this pause/resume situation, and ensure
-        // that the state is reset however we wind up proceeding.
-        boolean userLeaving = mTaskSupervisor.mUserLeaving;
-        mTaskSupervisor.mUserLeaving = false;
-
         if (!hasRunningActivity) {
             // There are no activities left in the stack, let's look somewhere else.
             return resumeNextFocusableActivityWhenRootTaskIsEmpty(prev, options);
@@ -6033,8 +6116,6 @@ class Task extends WindowContainer<WindowContainer> {
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.isState(RESUMED)
                 && taskDisplayArea.allResumedActivitiesComplete()) {
-            // The activity may be waiting for stop, but that is no longer appropriate for it.
-            mTaskSupervisor.mStoppingActivities.remove(next);
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
@@ -6043,7 +6124,7 @@ class Task extends WindowContainer<WindowContainer> {
             // a fullscreen window forward to cover another freeform activity.)
             if (taskDisplayArea.inMultiWindowMode()) {
                 taskDisplayArea.ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                        false /* preserveWindows */, true /* notifyClients */, userLeaving);
+                        false /* preserveWindows */, true /* notifyClients */);
             }
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Top activity "
                     + "resumed %s", next);
@@ -6102,25 +6183,18 @@ class Task extends WindowContainer<WindowContainer> {
         mTaskSupervisor.setLaunchSource(next.info.applicationInfo.uid);
 
         ActivityRecord lastResumed = null;
-        final Task lastFocusedStack = taskDisplayArea.getLastFocusedRootTask();
-        if (lastFocusedStack != null && lastFocusedStack != this) {
+        final Task lastFocusedRootTask = taskDisplayArea.getLastFocusedRootTask();
+        if (lastFocusedRootTask != null && lastFocusedRootTask != getRootTask()) {
             // So, why aren't we using prev here??? See the param comment on the method. prev
             // doesn't represent the last resumed activity. However, the last focus stack does if
             // it isn't null.
-            lastResumed = lastFocusedStack.getResumedActivity();
-            if (userLeaving && inMultiWindowMode() && lastFocusedStack.shouldBeVisible(next)) {
-                // The user isn't leaving if this stack is the multi-window mode and the last
-                // focused stack should still be visible.
-                if(DEBUG_USER_LEAVING) Slog.i(TAG_USER_LEAVING, "Overriding userLeaving to false"
-                        + " next=" + next + " lastResumed=" + lastResumed);
-                userLeaving = false;
-            }
+            lastResumed = lastFocusedRootTask.getResumedActivity();
         }
 
-        boolean pausing = taskDisplayArea.pauseBackTasks(userLeaving, next);
+        boolean pausing = taskDisplayArea.pauseBackTasks(next);
         if (mResumedActivity != null) {
             ProtoLog.d(WM_DEBUG_STATES, "resumeTopActivityLocked: Pausing %s", mResumedActivity);
-            pausing |= startPausingLocked(userLeaving, false /* uiSleeping */, next,
+            pausing |= startPausingLocked(false /* uiSleeping */, next,
                     "resumeTopActivityInnerLocked");
         }
         if (pausing) {
@@ -6262,10 +6336,10 @@ class Task extends WindowContainer<WindowContainer> {
             // Launcher is already visible in this case. If we don't add it to opening
             // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
             // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
-            final boolean lastActivityTranslucent = lastFocusedStack != null
-                    && (lastFocusedStack.inMultiWindowMode()
-                    || (lastFocusedStack.mLastPausedActivity != null
-                    && !lastFocusedStack.mLastPausedActivity.occludesParent()));
+            final boolean lastActivityTranslucent = lastFocusedRootTask != null
+                    && (lastFocusedRootTask.inMultiWindowMode()
+                    || (lastFocusedRootTask.mLastPausedActivity != null
+                    && !lastFocusedRootTask.mLastPausedActivity.occludesParent()));
 
             // This activity is now becoming visible.
             if (!next.mVisibleRequested || next.stopped || lastActivityTranslucent) {
@@ -6276,7 +6350,7 @@ class Task extends WindowContainer<WindowContainer> {
             next.startLaunchTickingLocked();
 
             ActivityRecord lastResumedActivity =
-                    lastFocusedStack == null ? null : lastFocusedStack.getResumedActivity();
+                    lastFocusedRootTask == null ? null : lastFocusedRootTask.getResumedActivity();
             final ActivityState lastState = next.getState();
 
             mAtmService.updateCpuStats();
@@ -6373,8 +6447,8 @@ class Task extends WindowContainer<WindowContainer> {
                 Slog.i(TAG, "Restarting because process died: " + next);
                 if (!next.hasBeenLaunched) {
                     next.hasBeenLaunched = true;
-                } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedStack != null
-                        && lastFocusedStack.isTopRootTaskInDisplayArea()) {
+                } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedRootTask != null
+                        && lastFocusedRootTask.isTopRootTaskInDisplayArea()) {
                     next.showStartingWindow(null /* prev */, false /* newTask */,
                             false /* taskSwitch */);
                 }
@@ -6715,7 +6789,7 @@ class Task extends WindowContainer<WindowContainer> {
     /** Finish all activities in the stack without waiting. */
     void finishAllActivitiesImmediately() {
         if (!hasChild()) {
-            removeIfPossible();
+            removeIfPossible("finishAllActivitiesImmediately");
             return;
         }
         forAllActivities((r) -> {
@@ -7159,11 +7233,12 @@ class Task extends WindowContainer<WindowContainer> {
             if (needSep) {
                 pw.println();
             }
-            pw.println("  Stack #" + getRootTaskId()
+            pw.println("  RootTask #" + getRootTaskId()
                     + ": type=" + activityTypeToString(getActivityType())
                     + " mode=" + windowingModeToString(getWindowingMode()));
             pw.println("  isSleeping=" + shouldSleepActivities());
             pw.println("  mBounds=" + getRequestedOverrideBounds());
+            pw.println("  mCreatedByOrganizer=" + mCreatedByOrganizer);
         };
 
         boolean printed = false;
@@ -7311,6 +7386,7 @@ class Task extends WindowContainer<WindowContainer> {
             task = new Task.Builder(mAtmService)
                     .setTaskId(taskId)
                     .setActivityInfo(info)
+                    .setActivityOptions(options)
                     .setIntent(intent)
                     .setVoiceSession(voiceSession)
                     .setVoiceInteractor(voiceInteractor)
@@ -7524,6 +7600,17 @@ class Task extends WindowContainer<WindowContainer> {
         reparent(newParent, onTop ? POSITION_TOP : POSITION_BOTTOM);
     }
 
+    void maybeApplyLastRecentsAnimationBounds() {
+        if (!mLastRecentsAnimationBounds.isEmpty()) {
+            getPendingTransaction()
+                    .setPosition(mSurfaceControl, mLastRecentsAnimationBounds.left,
+                            mLastRecentsAnimationBounds.top)
+                    .setWindowCrop(mSurfaceControl, mLastRecentsAnimationBounds.width(),
+                            mLastRecentsAnimationBounds.height());
+            mLastRecentsAnimationBounds.setEmpty();
+        }
+    }
+
     private void updateSurfaceBounds() {
         updateSurfaceSize(getSyncTransaction());
         updateSurfacePositionNonOrganized();
@@ -7669,7 +7756,7 @@ class Task extends WindowContainer<WindowContainer> {
 
     void dispatchTaskInfoChangedIfNeeded(boolean force) {
         if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, force);
+            mAtmService.mTaskOrganizerController.onTaskInfoChanged(this, force);
         }
     }
 
@@ -7750,6 +7837,7 @@ class Task extends WindowContainer<WindowContainer> {
         private int mMinWidth = INVALID_MIN_SIZE;
         private int mMinHeight = INVALID_MIN_SIZE;
         private ActivityInfo mActivityInfo;
+        private ActivityOptions mActivityOptions;
         private IVoiceInteractionSession mVoiceSession;
         private IVoiceInteractor mVoiceInteractor;
         private int mActivityType;
@@ -7758,6 +7846,7 @@ class Task extends WindowContainer<WindowContainer> {
         private boolean mDeferTaskAppear;
         private IBinder mLaunchCookie;
         private boolean mOnTop;
+        private boolean mHasBeenVisible;
 
         Builder(ActivityTaskManagerService atm) {
             mAtmService = atm;
@@ -7800,6 +7889,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         Builder setActivityInfo(ActivityInfo info) {
             mActivityInfo = info;
+            return this;
+        }
+
+        Builder setActivityOptions(ActivityOptions opts) {
+            mActivityOptions = opts;
             return this;
         }
 
@@ -7847,6 +7941,11 @@ class Task extends WindowContainer<WindowContainer> {
 
         Builder setOnTop(boolean onTop) {
             mOnTop = onTop;
+            return this;
+        }
+
+        Builder setHasBeenVisible(boolean hasBeenVisible) {
+            mHasBeenVisible = hasBeenVisible;
             return this;
         }
 
@@ -8009,7 +8108,7 @@ class Task extends WindowContainer<WindowContainer> {
 
             // Task created by organizer are added as root.
             final Task launchRootTask = mCreatedByOrganizer
-                    ? null : tda.updateLaunchRootTask(mWindowingMode);
+                    ? null : tda.getLaunchRootTask(mWindowingMode, mActivityType, mActivityOptions);
             if (launchRootTask != null) {
                 // Since this task will be put into a root task, its windowingMode will be
                 // inherited.
@@ -8043,6 +8142,7 @@ class Task extends WindowContainer<WindowContainer> {
             }
 
             final Task task = buildInner();
+            task.mHasBeenVisible = mHasBeenVisible;
 
             // Set activity type before adding the root task to TaskDisplayArea, so home task can
             // be cached, see TaskDisplayArea#addRootTaskReferenceIfNeeded().

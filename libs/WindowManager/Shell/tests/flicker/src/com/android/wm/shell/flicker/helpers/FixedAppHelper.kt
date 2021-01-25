@@ -17,13 +17,10 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import com.android.wm.shell.flicker.TEST_APP_FIXED_ACTIVITY_LABEL
 import com.android.wm.shell.flicker.testapp.Components
 
-class FixedAppHelper(
-    instrumentation: Instrumentation
-) : BaseAppHelper(
-        instrumentation,
-        TEST_APP_FIXED_ACTIVITY_LABEL,
-        Components.FixedActivity()
+class FixedAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
+    instrumentation,
+    Components.FixedActivity.LABEL,
+    Components.FixedActivity.COMPONENT
 )

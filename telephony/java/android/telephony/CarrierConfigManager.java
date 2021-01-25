@@ -38,6 +38,8 @@ import android.telephony.ims.ImsSsData;
 import com.android.internal.telephony.ICarrierConfigLoader;
 import com.android.telephony.Rlog;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -107,6 +109,32 @@ public class CarrierConfigManager {
      * {@link #KEY_CARRIER_USSD_METHOD_INT}
      */
     public static final int USSD_OVER_IMS_ONLY       = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "CARRIER_NR_AVAILABILITY_" }, value = {
+            CARRIER_NR_AVAILABILITY_NONE,
+            CARRIER_NR_AVAILABILITY_NSA,
+            CARRIER_NR_AVAILABILITY_SA,
+    })
+    public @interface DeviceNrCapability {}
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_NONE determine that the carrier does not enable 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_NONE = 0;
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_NSA determine that the carrier enable the non-standalone
+     * (NSA) mode of 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_NSA = 1 << 0;
+
+    /**
+     * Indicates CARRIER_NR_AVAILABILITY_SA determine that the carrier enable the standalone (SA)
+     * mode of 5G NR.
+     */
+    public static final int CARRIER_NR_AVAILABILITY_SA = 1 << 1;
 
     private final Context mContext;
 
@@ -1812,10 +1840,23 @@ public class CarrierConfigManager {
             "show_precise_failed_cause_bool";
 
     /**
-     * Boolean to decide whether NR is enabled.
-     * @hide
+     * Bit-field integer to determine whether the carrier enable the non-standalone (NSA) mode of
+     * 5G NR, standalone (SA) mode of 5G NR
+     *
+     * <UL>
+     *  <LI>CARRIER_NR_AVAILABILITY_NONE: non-NR = 0 </LI>
+     *  <LI>CARRIER_NR_AVAILABILITY_NSA: NSA = 1 << 0</LI>
+     *  <LI>CARRIER_NR_AVAILABILITY_SA: SA = 1 << 1</LI>
+     * </UL>
+     * <p> The value of this key must be bitwise OR of
+     * {@link #CARRIER_NR_AVAILABILITY_NONE}, {@link #CARRIER_NR_AVAILABILITY_NSA},
+     * {@link #CARRIER_NR_AVAILABILITY_SA}.
+     *
+     * <p> For example, if both NSA and SA are used, the value of key is 3 (1 << 0 | 1 << 1).
+     * If the carrier doesn't support 5G NR, the value of key is 0 (non-NR).
+     * If the key is invalid or not configured, a default value 3 (NSA|SA = 3) will apply.
      */
-    public static final String KEY_NR_ENABLED_BOOL = "nr_enabled_bool";
+    public static final String KEY_CARRIER_NR_AVAILABILITY_INT = "carrier_nr_availability_int";
 
     /**
      * Boolean to decide whether LTE is enabled.
@@ -2812,6 +2853,30 @@ public class CarrierConfigManager {
     public static final String IMSI_KEY_DOWNLOAD_URL_STRING = "imsi_key_download_url_string";
 
     /**
+     * String representation of a carrier's public key used for IMSI encryption for ePDG. If this
+     * is provided, the device will use it as a fallback when no key exists on device, but the key
+     * download will still initiate.
+     * Example string:
+     *         "-----BEGIN CERTIFICATE-----\nabcde12345abcde12345abcde12345abcde1234
+     * 5abcde12345abcde12345\nabcde12345abcde12345abcde12345abcde12345a\n-----END CERTIFICATE-----"
+     * @hide
+     */
+    public static final String IMSI_CARRIER_PUBLIC_KEY_EPDG_STRING =
+            "imsi_carrier_public_key_epdg_string";
+
+    /**
+     * String representation of a carrier's public key used for IMSI encryption for WLAN. If this
+     * is provided, the device will use it as a fallback when no key exists on device, but the key
+     * download will still initiate.
+     * Example string:
+     *         "-----BEGIN CERTIFICATE-----\nabcde12345abcde12345abcde12345abcde1234
+     * 5abcde12345abcde12345\nabcde12345abcde12345abcde12345abcde12345a\n-----END CERTIFICATE-----"
+     * @hide
+     */
+    public static final String IMSI_CARRIER_PUBLIC_KEY_WLAN_STRING =
+            "imsi_carrier_public_key_wlan_string";
+
+    /**
      * Identifies if the key is available for WLAN or EPDG or both. The value is a bitmask.
      * 0 indicates that neither EPDG or WLAN is enabled.
      * 1 indicates that key type TelephonyManager#KEY_TYPE_EPDG is enabled.
@@ -3590,6 +3655,28 @@ public class CarrierConfigManager {
      *   EAP-AKA_PRIME: "6"
      */
     public static final String ENABLE_EAP_METHOD_PREFIX_BOOL = "enable_eap_method_prefix_bool";
+
+
+    /**
+     * Configs used by ImsServiceEntitlement.
+     */
+    public static final class ImsServiceEntitlement {
+        private ImsServiceEntitlement() {}
+
+        /** Prefix of all ImsServiceEntitlement.KEY_* constants. */
+        public static final String KEY_PREFIX = "imsserviceentitlement.";
+
+
+        /** The address of the entitlement configuration server. */
+        public static final String KEY_AES_URL_STRING = KEY_PREFIX + "aes_url_string";
+
+
+        private static PersistableBundle getDefaults() {
+            PersistableBundle defaults = new PersistableBundle();
+            defaults.putString(KEY_AES_URL_STRING, "");
+            return defaults;
+        }
+    }
 
     /**
      * GPS configs. See the GNSS HAL documentation for more details.
@@ -4616,10 +4703,29 @@ public class CarrierConfigManager {
             "use_lower_mtu_value_if_both_received";
 
     /**
+     * Determines the default RTT mode.
+     *
+     * Upon first boot, when the user has not yet set a value for their preferred RTT mode,
+     * the value of this config will be sent to the IMS stack. Valid values are the same as for
+     * {@link Settings.Secure#RTT_CALLING_MODE}.
+     *
+     * @hide
+     */
+    public static final String KEY_DEFAULT_RTT_MODE_INT =
+            "default_rtt_mode_int";
+
+    /**
      * Indicates if auto-configuration server is used for the RCS config
      * Reference: GSMA RCC.14
      */
     public static final String KEY_USE_ACS_FOR_RCS_BOOL = "use_acs_for_rcs_bool";
+
+    /**
+     * Indicates temporarily unmetered mobile data is supported by the carrier.
+     * @hide
+     */
+    public static final String KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL =
+            "network_temp_not_metered_supported_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -4974,6 +5080,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL, false);
         sDefaults.putInt(IMSI_KEY_AVAILABILITY_INT, 0);
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
+        sDefaults.putString(IMSI_CARRIER_PUBLIC_KEY_EPDG_STRING, null);
+        sDefaults.putString(IMSI_CARRIER_PUBLIC_KEY_WLAN_STRING, null);
         sDefaults.putBoolean(KEY_CONVERT_CDMA_CALLER_ID_MMI_CODES_WHILE_ROAMING_ON_3GPP_BOOL,
                 false);
         sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
@@ -4995,7 +5103,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_SHOW_CARRIER_DATA_ICON_PATTERN_STRING, "");
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
         sDefaults.putInt(KEY_LTE_PLUS_THRESHOLD_BANDWIDTH_KHZ_INT, 20000);
-        sDefaults.putBoolean(KEY_NR_ENABLED_BOOL, true);
+        sDefaults.putInt(KEY_CARRIER_NR_AVAILABILITY_INT,
+                CARRIER_NR_AVAILABILITY_NSA | CARRIER_NR_AVAILABILITY_SA);
         sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
@@ -5119,6 +5228,7 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_BACKOFF_TIME_LONG, 10000);
         /* Default value is 60 seconds. */
         sDefaults.putLong(KEY_OPPORTUNISTIC_NETWORK_MAX_BACKOFF_TIME_LONG, 60000);
+        sDefaults.putAll(ImsServiceEntitlement.getDefaults());
         sDefaults.putAll(Gps.getDefaults());
         sDefaults.putIntArray(KEY_CDMA_ENHANCED_ROAMING_INDICATOR_FOR_HOME_NETWORK_INT_ARRAY,
                 new int[] {
@@ -5170,6 +5280,8 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
         sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
+        sDefaults.putBoolean(KEY_NETWORK_TEMP_NOT_METERED_SUPPORTED_BOOL, true);
+        sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
     }
 
     /**
@@ -5188,9 +5300,25 @@ public class CarrierConfigManager {
         public static final String KEY_HOTSPOT_MAX_CLIENT_COUNT =
                 KEY_PREFIX + "hotspot_maximum_client_count";
 
+        /**
+         * This configuration is intended to be a narrow exception for provisioning
+         * {@link android.net.wifi.WifiNetworkSuggestion} of widely-known carrier networks that do
+         * not support using randomized MAC address.
+         * Carrier provisioned {@link android.net.wifi.WifiNetworkSuggestion} with SSIDs included
+         * in this list will have MAC randomization disabled.
+         *
+         * Note: the SSIDs in the list are expected to be interpreted as is - do not add double
+         * quotes to the SSIDs.
+         */
+        public static final String KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED =
+                KEY_PREFIX + "suggestion_ssid_list_with_mac_randomization_disabled";
+
         private static PersistableBundle getDefaults() {
             PersistableBundle defaults = new PersistableBundle();
             defaults.putInt(KEY_HOTSPOT_MAX_CLIENT_COUNT, 0);
+            defaults.putStringArray(KEY_SUGGESTION_SSID_LIST_WITH_MAC_RANDOMIZATION_DISABLED,
+                    new String[0]);
+
             return defaults;
         }
 

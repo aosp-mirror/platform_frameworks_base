@@ -38,16 +38,19 @@ public final class SetSchemaRequest {
     private final Set<AppSearchSchema> mSchemas;
     private final Set<String> mSchemasNotVisibleToSystemUi;
     private final Map<String, Set<PackageIdentifier>> mSchemasVisibleToPackages;
+    private final Map<String, AppSearchSchema.Migrator> mMigrators;
     private final boolean mForceOverride;
 
     SetSchemaRequest(
             @NonNull Set<AppSearchSchema> schemas,
             @NonNull Set<String> schemasNotVisibleToSystemUi,
             @NonNull Map<String, Set<PackageIdentifier>> schemasVisibleToPackages,
+            @NonNull Map<String, AppSearchSchema.Migrator> migrators,
             boolean forceOverride) {
         mSchemas = Preconditions.checkNotNull(schemas);
         mSchemasNotVisibleToSystemUi = Preconditions.checkNotNull(schemasNotVisibleToSystemUi);
         mSchemasVisibleToPackages = Preconditions.checkNotNull(schemasVisibleToPackages);
+        mMigrators = Preconditions.checkNotNull(migrators);
         mForceOverride = forceOverride;
     }
 
@@ -59,7 +62,6 @@ public final class SetSchemaRequest {
 
     /**
      * Returns the set of schema types that have opted out of being visible on system UI surfaces.
-     * @hide
      */
     @NonNull
     public Set<String> getSchemasNotVisibleToSystemUi() {
@@ -72,7 +74,6 @@ public final class SetSchemaRequest {
      * certificate.
      *
      * <p>This method is inefficient to call repeatedly.
-     * @hide
      */
     @NonNull
     public Map<String, Set<PackageIdentifier>> getSchemasVisibleToPackages() {
@@ -81,6 +82,12 @@ public final class SetSchemaRequest {
             copy.put(key, new ArraySet<>(mSchemasVisibleToPackages.get(key)));
         }
         return copy;
+    }
+
+    /** Returns the map of {@link android.app.appsearch.AppSearchSchema.Migrator}. */
+    @NonNull
+    public Map<String, AppSearchSchema.Migrator> getMigrators() {
+        return Collections.unmodifiableMap(mMigrators);
     }
 
     /**
@@ -109,6 +116,7 @@ public final class SetSchemaRequest {
         private final Set<String> mSchemasNotVisibleToSystemUi = new ArraySet<>();
         private final Map<String, Set<PackageIdentifier>> mSchemasVisibleToPackages =
                 new ArrayMap<>();
+        private final Map<String, AppSearchSchema.Migrator> mMigrators = new ArrayMap<>();
         private boolean mForceOverride = false;
         private boolean mBuilt = false;
 
@@ -141,7 +149,6 @@ public final class SetSchemaRequest {
          *
          * @param schemaType The schema type to set visibility on.
          * @param visible Whether the {@code schemaType} will be visible or not.
-         * @hide
          */
         // Merged list available from getSchemasNotVisibleToSystemUi
         @SuppressLint("MissingGetterMatchingBuilder")
@@ -165,7 +172,6 @@ public final class SetSchemaRequest {
          * @param schemaType The schema type to set visibility on.
          * @param visible Whether the {@code schemaType} will be visible or not.
          * @param packageIdentifier Represents the package that will be granted visibility.
-         * @hide
          */
         // Merged list available from getSchemasVisibleToPackages
         @SuppressLint("MissingGetterMatchingBuilder")
@@ -197,6 +203,23 @@ public final class SetSchemaRequest {
                 }
             }
 
+            return this;
+        }
+
+        /**
+         * Sets the {@link android.app.appsearch.AppSearchSchema.Migrator}.
+         *
+         * @param schemaType The schema type to set migrator on.
+         * @param migrator The migrator translate a document from it's old version to a new
+         *     incompatible version.
+         */
+        @NonNull
+        @SuppressLint("MissingGetterMatchingBuilder") // Getter return plural objects.
+        public Builder setMigrator(
+                @NonNull String schemaType, @NonNull AppSearchSchema.Migrator migrator) {
+            Preconditions.checkNotNull(schemaType);
+            Preconditions.checkNotNull(migrator);
+            mMigrators.put(schemaType, migrator);
             return this;
         }
 
@@ -245,6 +268,7 @@ public final class SetSchemaRequest {
                     mSchemas,
                     mSchemasNotVisibleToSystemUi,
                     mSchemasVisibleToPackages,
+                    mMigrators,
                     mForceOverride);
         }
     }

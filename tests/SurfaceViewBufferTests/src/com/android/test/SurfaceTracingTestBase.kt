@@ -23,7 +23,7 @@ import android.util.Log
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.android.server.wm.flicker.monitor.LayersTraceMonitor
 import com.android.server.wm.flicker.monitor.withSFTracing
-import com.android.server.wm.traces.parser.layers.LayersTrace
+import com.android.server.wm.traces.common.layers.LayersTrace
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -57,6 +57,13 @@ open class SurfaceTracingTestBase(useBlastAdapter: Boolean) :
             scenarioRule.getScenario().onActivity {
                 predicate(it)
             }
+        }
+    }
+
+    fun withTrace(predicate: () -> Unit): LayersTrace {
+        return withSFTracing(TRACE_FLAGS,
+                outputDir = instrumentation.targetContext.dataDir.toPath()) {
+                predicate()
         }
     }
 

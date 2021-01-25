@@ -24,7 +24,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -38,8 +37,7 @@ public class FooterPreference extends Preference {
     static final int ORDER_FOOTER = Integer.MAX_VALUE - 1;
 
     public FooterPreference(Context context, AttributeSet attrs) {
-        super(context, attrs, TypedArrayUtils.getAttr(
-                context, R.attr.footerPreferenceStyle, android.R.attr.preferenceStyle));
+        super(context, attrs, R.attr.footerPreferenceStyle);
         init();
     }
 
@@ -72,6 +70,7 @@ public class FooterPreference extends Preference {
     }
 
     private void init() {
+        setLayoutResource(R.layout.preference_footer);
         if (getIcon() == null) {
             setIcon(R.drawable.ic_info_outline_24);
         }

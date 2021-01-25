@@ -17,6 +17,7 @@ package android.hardware.face;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.face.IFaceServiceReceiver;
 import android.hardware.face.Face;
@@ -34,7 +35,7 @@ interface IFaceService {
     ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Requests a proto dump of the specified sensor
-    byte[] dumpSensorServiceStateProto(int sensorId);
+    byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
 
     // Retrieve static sensor properties for all face sensors
     List<FaceSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
@@ -103,6 +104,9 @@ interface IFaceService {
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int sensorId, int userId);
+
+    // Requests for the specified sensor+userId's authenticatorId to be invalidated
+    void invalidateAuthenticatorId(int sensorId, int userId, IInvalidationCallback callback);
 
     // Gets the authenticator ID for face
     long getAuthenticatorId(int sensorId, int callingUserId);

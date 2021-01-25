@@ -63,6 +63,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Log;
@@ -605,7 +606,9 @@ public class WallpaperManager {
      *     or {@code null} if no system wallpaper exists or if the calling application
      *     is not able to access the wallpaper.
      */
+    @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable getDrawable() {
+        assertUiContext("getDrawable");
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, true, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
@@ -673,6 +676,7 @@ public class WallpaperManager {
      */
     public Drawable getBuiltInDrawable(int outWidth, int outHeight, boolean scaleToFit,
             float horizontalAlignment, float verticalAlignment, @SetWallpaperFlags int which) {
+        assertUiContext("getBuiltInDrawable");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -838,6 +842,7 @@ public class WallpaperManager {
      * null pointer if these is none.
      */
     public Drawable peekDrawable() {
+        assertUiContext("peekDrawable");
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
@@ -880,6 +885,7 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
     public Drawable peekFastDrawable() {
+        assertUiContext("peekFastDrawable");
         final ColorManagementProxy cmProxy = getColorManagementProxy();
         Bitmap bm = sGlobals.peekWallpaperBitmap(mContext, false, FLAG_SYSTEM, cmProxy);
         if (bm != null) {
@@ -1046,6 +1052,7 @@ public class WallpaperManager {
      */
     @UnsupportedAppUsage
     public @Nullable WallpaperColors getWallpaperColors(int which, int userId) {
+        assertUiContext("getWallpaperColors");
         return sGlobals.getWallpaperColors(which, userId, mContext.getDisplayId());
     }
 
@@ -1261,6 +1268,7 @@ public class WallpaperManager {
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public int setResource(@RawRes int resid, @SetWallpaperFlags int which)
             throws IOException {
+        assertUiContext("setResource");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -1581,6 +1589,7 @@ public class WallpaperManager {
      * @see #getDesiredMinimumHeight()
      */
     public int getDesiredMinimumWidth() {
+        assertUiContext("getDesiredMinimumWidth");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -1609,6 +1618,7 @@ public class WallpaperManager {
      * @see #getDesiredMinimumWidth()
      */
     public int getDesiredMinimumHeight() {
+        assertUiContext("getDesiredMinimumHeight");
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -1639,6 +1649,7 @@ public class WallpaperManager {
      * @param minimumHeight Desired minimum height
      */
     public void suggestDesiredDimensions(int minimumWidth, int minimumHeight) {
+        assertUiContext("suggestDesiredDimensions");
         try {
             /**
              * The framework makes no attempt to limit the window size
@@ -1694,6 +1705,7 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_HINTS)
     public void setDisplayPadding(Rect padding) {
+        assertUiContext("setDisplayPadding");
         try {
             if (sGlobals.mService == null) {
                 Log.w(TAG, "WallpaperService not running");
@@ -1946,6 +1958,7 @@ public class WallpaperManager {
      */
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public void clear() throws IOException {
+        assertUiContext("clear");
         setStream(openDefaultWallpaper(mContext, FLAG_SYSTEM), null, false);
     }
 
@@ -2092,6 +2105,10 @@ public class WallpaperManager {
      */
     public ColorManagementProxy getColorManagementProxy() {
         return mCmProxy;
+    }
+
+    private void assertUiContext(final String methodName) {
+        StrictMode.assertUiContext(mContext, methodName);
     }
 
     /**

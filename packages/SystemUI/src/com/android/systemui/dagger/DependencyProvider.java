@@ -56,6 +56,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.navigationbar.NavigationBarController;
+import com.android.systemui.navigationbar.NavigationBarOverlayController;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -81,8 +82,8 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.theme.ThemeOverlayApplier;
 import com.android.systemui.util.leak.LeakDetector;
-import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.pip.Pip;
 
 import java.util.Optional;
 import java.util.concurrent.Executor;
@@ -221,6 +222,7 @@ public class DependencyProvider {
             SystemActions systemActions,
             @Main Handler mainHandler,
             UiEventLogger uiEventLogger,
+            NavigationBarOverlayController navBarOverlayController,
             ConfigurationController configurationController) {
         return new NavigationBarController(context,
                 windowManager,
@@ -244,6 +246,7 @@ public class DependencyProvider {
                 systemActions,
                 mainHandler,
                 uiEventLogger,
+                navBarOverlayController,
                 configurationController);
     }
 

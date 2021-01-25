@@ -2486,7 +2486,8 @@
         <attr name="singleUser" />
         <attr name="directBootAware" />
         <attr name="visibleToInstantApps" />
-        <!-- The code for this component is located in the given split. -->
+        <!-- The code for this component is located in the given split.
+             <p>NOTE: This is only applicable to instant app. -->
         <attr name="splitName" />
     </declare-styleable>
 
@@ -2494,7 +2495,11 @@
          <code>grant-uri-permission</code> tag, a child of the
          {@link #AndroidManifestProvider provider} tag, describing a specific
          URI path that can be granted as a permission.  This tag can be
-         specified multiple time to supply multiple paths. -->
+         specified multiple time to supply multiple paths. If multiple
+         path matching attributes are supplied, they will be evaluated in the
+         following order with the first attribute being the only one honored:
+          <code>pathAdvancedPattern</code>, <code>pathPattern</code>,
+          <code>pathPrefix</code>, <code>pathSuffix</code>, <code>path</code>. -->
     <declare-styleable name="AndroidManifestGrantUriPermission"  parent="AndroidManifestProvider">
         <!-- Specify a URI path that must exactly match, as per
              {@link android.os.PatternMatcher} with
@@ -2514,18 +2519,37 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="pathPattern" format="string" />
+        <!-- Specify a URI path that matches an advanced pattern, as per
+             {@link android.os.PatternMatcher} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="pathAdvancedPattern" format="string"/>
+        <!-- Specify a URI path that must be a suffix to match, as per
+             {@link android.os.PatternMatcher} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="pathSuffix" format="string" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml
          <code>path-permission</code> tag, a child of the
          {@link #AndroidManifestProvider provider} tag, describing a permission
          that allows access to a specific path in the provider.  This tag can be
-         specified multiple time to supply multiple paths. -->
+         specified multiple time to supply multiple paths. If multiple
+         path matching attributes are supplied, they will be evaluated in the
+         following order with the first attribute being the only one honored:
+          <code>pathAdvancedPattern</code>, <code>pathPattern</code>,
+          <code>pathPrefix</code>, <code>pathSuffix</code>, <code>path</code>.-->
     <declare-styleable name="AndroidManifestPathPermission"  parent="AndroidManifestProvider">
         <attr name="path" />
         <attr name="pathPrefix" />
         <attr name="pathPattern" />
         <attr name="pathAdvancedPattern" format="string"/>
+        <attr name="pathSuffix" />
         <attr name="permission" />
         <attr name="readPermission" />
         <attr name="writePermission" />
@@ -2579,7 +2603,8 @@
              must also be {@link android.R.attr#exported} if this flag is set. -->
         <attr name="externalService" format="boolean" />
         <attr name="visibleToInstantApps" />
-        <!-- The code for this component is located in the given split. -->
+        <!-- The code for this component is located in the given split.
+             <p>NOTE: This is only applicable to instant app. -->
         <attr name="splitName" />
         <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
              will be spawned from an Application Zygote, instead of the regular Zygote.
@@ -2977,6 +3002,22 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="sspPattern" format="string" />
+        <!-- Specify a URI scheme specific part that matches an advanced pattern, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_ADVANCED_GLOB}.
+             Note that because '\' is used as an escape character when
+             reading the string from XML (before it is parsed as a pattern),
+             you will need to double-escape: for example a literal "*" would
+             be written as "\\*" and a literal "\" would be written as
+             "\\\\".  This is basically the same as what you would need to
+             write if constructing the string in Java code. -->
+        <attr name="sspAdvancedPattern" format="string" />
+        <!-- Specify a URI scheme specific part that must be a suffix to match, as per
+             {@link android.content.IntentFilter#addDataSchemeSpecificPart
+             IntentFilter.addDataSchemeSpecificPart()} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="sspSuffix" format="string" />
         <!-- Specify a URI authority host that is handled, as per
              {@link android.content.IntentFilter#addDataAuthority
              IntentFilter.addDataAuthority()}.
@@ -3021,6 +3062,11 @@
              "\\\\".  This is basically the same as what you would need to
              write if constructing the string in Java code. -->
         <attr name="pathAdvancedPattern" />
+        <!-- Specify a URI path that must be a suffix to match, as per
+             {@link android.content.IntentFilter#addDataPath
+             IntentFilter.addDataPath()} with
+             {@link android.os.PatternMatcher#PATTERN_SUFFIX}. -->
+        <attr name="pathSuffix" />
     </declare-styleable>
 
     <!-- Attributes that can be supplied in an AndroidManifest.xml

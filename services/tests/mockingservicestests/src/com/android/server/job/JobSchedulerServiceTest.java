@@ -59,6 +59,7 @@ import com.android.server.AppStateTracker;
 import com.android.server.AppStateTrackerImpl;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.LocalServices;
+import com.android.server.PowerAllowlistInternal;
 import com.android.server.SystemServiceManager;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.usage.AppStandbyInternal;
@@ -134,6 +135,8 @@ public class JobSchedulerServiceTest {
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getResources()).thenReturn(mock(Resources.class));
         // Called in QuotaController constructor.
+        doReturn(mock(PowerAllowlistInternal.class))
+                .when(() -> LocalServices.getService(PowerAllowlistInternal.class));
         IActivityManager activityManager = ActivityManager.getService();
         spyOn(activityManager);
         try {

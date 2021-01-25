@@ -37,7 +37,6 @@ import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
-import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -61,8 +60,6 @@ import java.util.Random;
 public final class AuthSession implements IBinder.DeathRecipient {
     private static final String TAG = "BiometricService/AuthSession";
     private static final boolean DEBUG = false;
-
-
 
     /*
      * Defined in biometrics.proto
@@ -805,7 +802,7 @@ public final class AuthSession implements IBinder.DeathRecipient {
     @Override
     public String toString() {
         return "State: " + mState
-                + "\nisCrypto: " + isCrypto()
-                + "\nPreAuthInfo: " + mPreAuthInfo;
+                + ", isCrypto: " + isCrypto()
+                + ", PreAuthInfo: " + mPreAuthInfo;
     }
 }

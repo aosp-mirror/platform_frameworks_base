@@ -23,13 +23,15 @@
 #include <android/hardware/tv/tuner/1.1/IFrontendCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
+#include "ClientHelper.h"
 #include "FrontendClientCallback.h"
+#include "LnbClient.h"
 
 using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::media::tv::tuner::BnTunerFrontendCallback;
 using ::aidl::android::media::tv::tuner::ITunerFrontend;
-using ::aidl::android::media::tv::tuner::TunerAtsc3PlpInfo;
+using ::aidl::android::media::tv::tuner::TunerFrontendScanMessage;
 
 using ::android::hardware::Return;
 using ::android::hardware::Void;
@@ -37,13 +39,18 @@ using ::android::hardware::tv::tuner::V1_0::FrontendInfo;
 using ::android::hardware::tv::tuner::V1_0::FrontendEventType;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessage;
 using ::android::hardware::tv::tuner::V1_0::FrontendScanMessageType;
+using ::android::hardware::tv::tuner::V1_0::FrontendScanType;
 using ::android::hardware::tv::tuner::V1_0::FrontendSettings;
+using ::android::hardware::tv::tuner::V1_0::FrontendStatus;
+using ::android::hardware::tv::tuner::V1_0::FrontendStatusType;
 using ::android::hardware::tv::tuner::V1_0::IFrontend;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendScanMessageTypeExt1_1;
 using ::android::hardware::tv::tuner::V1_1::FrontendSettingsExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendStatusExt1_1;
+using ::android::hardware::tv::tuner::V1_1::FrontendStatusTypeExt1_1;
 using ::android::hardware::tv::tuner::V1_1::IFrontendCallback;
 
 using namespace std;
@@ -57,34 +64,18 @@ public:
 
     Status onEvent(int frontendEventType);
 
-    Status onLocked();
+    Status onScanMessage(int messageType, const TunerFrontendScanMessage& message);
 
-    Status onScanStopped();
-
-    Status onProgress(int percent);
-
-    Status onFrequenciesReport(const vector<int>& frequency);
-
-    Status onSymbolRates(const vector<int>& rates);
-
-    Status onHierarchy(int hierarchy);
-
-    Status onSignalType(int signalType);
-
-    Status onPlpIds(const vector<int>& plpIds);
-
-    Status onGroupIds(const vector<int>& groupIds);
-
-    Status onInputStreamIds(const vector<int>& inputStreamIds);
-
-    Status onDvbsStandard(int dvbsStandandard);
-
-    Status onAnalogSifStandard(int sifStandandard);
-
-    Status onAtsc3PlpInfos(const vector<TunerAtsc3PlpInfo>& atsc3PlpInfos);
+    void setFrontendType(int frontendType) { mType = frontendType; }
 
 private:
+    FrontendScanMessage getHalScanMessage(int messageType, const TunerFrontendScanMessage& message);
+    FrontendScanMessageExt1_1 getHalScanMessageExt1_1(int messageType,
+            const TunerFrontendScanMessage& message);
+    bool is1_1ExtendedScanMessage(int messageType);
+
     sp<FrontendClientCallback> mFrontendClientCallback;
+    int mType;
 };
 
 struct HidlFrontendCallback : public IFrontendCallback {
@@ -105,7 +96,7 @@ private:
 struct FrontendClient : public RefBase {
 
 public:
-    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int frontendHandle);
+    FrontendClient(shared_ptr<ITunerFrontend> tunerFrontend, int id, int type);
     ~FrontendClient();
 
     /**
@@ -127,6 +118,50 @@ public:
     Result stopTune();
 
     /**
+     * Scan the frontend to use the settings given.
+     */
+    Result scan(const FrontendSettings& settings, FrontendScanType frontendScanType,
+            const FrontendSettingsExt1_1& settingsExt1_1);
+
+    /**
+     * Stop the previous scanning.
+     */
+    Result stopScan();
+
+    /**
+     * Gets the statuses of the frontend.
+     */
+    vector<FrontendStatus> getStatus(vector<FrontendStatusType> statusTypes);
+
+    /**
+     * Gets the 1.1 extended statuses of the frontend.
+     */
+    vector<FrontendStatusExt1_1> getStatusExtended_1_1(
+            vector<FrontendStatusTypeExt1_1> statusTypes);
+
+    /**
+     * Sets Low-Noise Block downconverter (LNB) for satellite frontend.
+     */
+    Result setLnb(sp<LnbClient> lnbClient);
+
+    /**
+     * Enable or Disable Low Noise Amplifier (LNA).
+     */
+    Result setLna(bool bEnable);
+
+    /**
+     * Link Frontend to the cicam with given id.
+     *
+     * @return lts id
+     */
+    int linkCiCamToFrontend(int ciCamId);
+
+    /**
+     * Unink Frontend to the cicam with given id.
+     */
+    Result unlinkCiCamToFrontend(int ciCamId);
+
+    /**
      * Close Frontend.
      */
     Result close();
@@ -134,10 +169,6 @@ public:
     shared_ptr<ITunerFrontend> getAidlFrontend();
 
     int getId();
-
-    static int getResourceIdFromHandle(int handle) {
-        return (handle & 0x00ff0000) >> 16;
-    }
 
 private:
     /**
@@ -163,7 +194,8 @@ private:
     shared_ptr<TunerFrontendCallback> mAidlCallback;
     sp<HidlFrontendCallback> mHidlCallback;
 
-    int mFrontendHandle;
+    int mId;
+    int mType;
 };
 }  // namespace android
 

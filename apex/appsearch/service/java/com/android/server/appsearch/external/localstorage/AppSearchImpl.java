@@ -21,10 +21,15 @@ import android.annotation.WorkerThread;
 import android.app.appsearch.AppSearchResult;
 import android.app.appsearch.AppSearchSchema;
 import android.app.appsearch.GenericDocument;
+import android.app.appsearch.GetByUriRequest;
+import android.app.appsearch.PackageIdentifier;
 import android.app.appsearch.SearchResultPage;
 import android.app.appsearch.SearchSpec;
+import android.app.appsearch.SetSchemaResult;
 import android.app.appsearch.exceptions.AppSearchException;
+import android.content.Context;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -32,16 +37,21 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 import com.android.server.appsearch.external.localstorage.converter.GenericDocumentToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.ResultCodeToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SchemaToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SearchResultToProtoConverter;
 import com.android.server.appsearch.external.localstorage.converter.SearchSpecToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.SetSchemaResultToProtoConverter;
+import com.android.server.appsearch.external.localstorage.converter.TypePropertyPathToProtoConverter;
 
 import com.google.android.icing.IcingSearchEngine;
+import com.google.android.icing.proto.DeleteByQueryResultProto;
 import com.google.android.icing.proto.DeleteResultProto;
 import com.google.android.icing.proto.DocumentProto;
 import com.google.android.icing.proto.GetAllNamespacesResultProto;
 import com.google.android.icing.proto.GetOptimizeInfoResultProto;
 import com.google.android.icing.proto.GetResultProto;
+import com.google.android.icing.proto.GetResultSpecProto;
 import com.google.android.icing.proto.GetSchemaResultProto;
 import com.google.android.icing.proto.IcingSearchEngineOptions;
 import com.google.android.icing.proto.InitializeResultProto;
@@ -50,6 +60,7 @@ import com.google.android.icing.proto.PersistToDiskResultProto;
 import com.google.android.icing.proto.PropertyConfigProto;
 import com.google.android.icing.proto.PropertyProto;
 import com.google.android.icing.proto.PutResultProto;
+import com.google.android.icing.proto.ReportUsageResultProto;
 import com.google.android.icing.proto.ResetResultProto;
 import com.google.android.icing.proto.ResultSpecProto;
 import com.google.android.icing.proto.SchemaProto;
@@ -59,6 +70,8 @@ import com.google.android.icing.proto.SearchResultProto;
 import com.google.android.icing.proto.SearchSpecProto;
 import com.google.android.icing.proto.SetSchemaResultProto;
 import com.google.android.icing.proto.StatusProto;
+import com.google.android.icing.proto.TypePropertyMask;
+import com.google.android.icing.proto.UsageReport;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -149,14 +162,27 @@ public final class AppSearchImpl {
      * folder.
      */
     @NonNull
-    public static AppSearchImpl create(@NonNull File icingDir) throws AppSearchException {
+    public static AppSearchImpl create(
+            @NonNull File icingDir,
+            @NonNull Context context,
+            int userId,
+            @NonNull String globalQuerierPackage)
+            throws AppSearchException {
         Preconditions.checkNotNull(icingDir);
-        AppSearchImpl appSearchImpl = new AppSearchImpl(icingDir);
+        Preconditions.checkNotNull(context);
+        Preconditions.checkNotNull(globalQuerierPackage);
+        AppSearchImpl appSearchImpl =
+                new AppSearchImpl(icingDir, context, userId, globalQuerierPackage);
         appSearchImpl.initializeVisibilityStore();
         return appSearchImpl;
     }
 
-    private AppSearchImpl(@NonNull File icingDir) throws AppSearchException {
+    private AppSearchImpl(
+            @NonNull File icingDir,
+            @NonNull Context context,
+            int userId,
+            @NonNull String globalQuerierPackage)
+            throws AppSearchException {
         mReadWriteLock.writeLock().lock();
 
         try {
@@ -168,7 +194,9 @@ public final class AppSearchImpl {
                             .build();
             mIcingSearchEngineLocked = new IcingSearchEngine(options);
 
-            mVisibilityStoreLocked = new VisibilityStore(this);
+            mVisibilityStoreLocked =
+                    new VisibilityStore(
+                            this, context, userId, globalQuerierPackage);
 
             InitializeResultProto initializeResultProto = mIcingSearchEngineLocked.initialize();
             SchemaProto schemaProto;
@@ -229,15 +257,18 @@ public final class AppSearchImpl {
      * @param schemas Schemas to set for this app.
      * @param schemasNotPlatformSurfaceable Schema types that should not be surfaced on platform
      *     surfaces.
+     * @param schemasPackageAccessible Schema types that are visible to the specified packages.
      * @param forceOverride Whether to force-apply the schema even if it is incompatible. Documents
      *     which do not comply with the new schema will be deleted.
      * @throws AppSearchException on IcingSearchEngine error.
      */
-    public void setSchema(
+    @NonNull
+    public SetSchemaResult setSchema(
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull List<AppSearchSchema> schemas,
             @NonNull List<String> schemasNotPlatformSurfaceable,
+            @NonNull Map<String, List<PackageIdentifier>> schemasPackageAccessible,
             boolean forceOverride)
             throws AppSearchException {
         mReadWriteLock.writeLock().lock();
@@ -246,8 +277,9 @@ public final class AppSearchImpl {
 
             SchemaProto.Builder newSchemaBuilder = SchemaProto.newBuilder();
             for (int i = 0; i < schemas.size(); i++) {
+                AppSearchSchema schema = schemas.get(i);
                 SchemaTypeConfigProto schemaTypeProto =
-                        SchemaToProtoConverter.toSchemaTypeConfigProto(schemas.get(i));
+                        SchemaToProtoConverter.toSchemaTypeConfigProto(schema);
                 newSchemaBuilder.addTypes(schemaTypeProto);
             }
 
@@ -266,16 +298,10 @@ public final class AppSearchImpl {
             try {
                 checkSuccess(setSchemaResultProto.getStatus());
             } catch (AppSearchException e) {
-                // Improve the error message by merging in information about incompatible types.
                 if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
                         || setSchemaResultProto.getIncompatibleSchemaTypesCount() > 0) {
-                    String newMessage =
-                            e.getMessage()
-                                    + "\n  Deleted types: "
-                                    + setSchemaResultProto.getDeletedSchemaTypesList()
-                                    + "\n  Incompatible types: "
-                                    + setSchemaResultProto.getIncompatibleSchemaTypesList();
-                    throw new AppSearchException(e.getResultCode(), newMessage, e.getCause());
+                    return SetSchemaResultToProtoConverter.toSetSchemaResult(
+                            setSchemaResultProto, prefix);
                 } else {
                     throw e;
                 }
@@ -290,7 +316,18 @@ public final class AppSearchImpl {
                 prefixedSchemasNotPlatformSurfaceable.add(
                         prefix + schemasNotPlatformSurfaceable.get(i));
             }
-            mVisibilityStoreLocked.setVisibility(prefix, prefixedSchemasNotPlatformSurfaceable);
+
+            Map<String, List<PackageIdentifier>> prefixedSchemasPackageAccessible =
+                    new ArrayMap<>(schemasNotPlatformSurfaceable.size());
+            for (Map.Entry<String, List<PackageIdentifier>> entry :
+                    schemasPackageAccessible.entrySet()) {
+                prefixedSchemasPackageAccessible.put(prefix + entry.getKey(), entry.getValue());
+            }
+
+            mVisibilityStoreLocked.setVisibility(
+                    prefix,
+                    prefixedSchemasNotPlatformSurfaceable,
+                    prefixedSchemasPackageAccessible);
 
             // Determine whether to schedule an immediate optimize.
             if (setSchemaResultProto.getDeletedSchemaTypesCount() > 0
@@ -301,6 +338,7 @@ public final class AppSearchImpl {
                 // incompatible schemas.
                 checkForOptimizeLocked(/* force= */ true);
             }
+            return SetSchemaResultToProtoConverter.toSetSchemaResult(setSchemaResultProto, prefix);
         } finally {
             mReadWriteLock.writeLock().unlock();
         }
@@ -401,6 +439,8 @@ public final class AppSearchImpl {
      * @param databaseName The databaseName this document resides in.
      * @param namespace The namespace this document resides in.
      * @param uri The URI of the document to get.
+     * @param typePropertyPaths A map of schema type to a list of property paths to return in the
+     *     result.
      * @return The Document contents
      * @throws AppSearchException on IcingSearchEngine error.
      */
@@ -409,14 +449,35 @@ public final class AppSearchImpl {
             @NonNull String packageName,
             @NonNull String databaseName,
             @NonNull String namespace,
-            @NonNull String uri)
+            @NonNull String uri,
+            @NonNull Map<String, List<String>> typePropertyPaths)
             throws AppSearchException {
         GetResultProto getResultProto;
+        List<TypePropertyMask> nonPrefixedPropertyMasks =
+                TypePropertyPathToProtoConverter.toTypePropertyMaskList(typePropertyPaths);
+        List<TypePropertyMask> prefixedPropertyMasks =
+                new ArrayList<>(nonPrefixedPropertyMasks.size());
+        for (int i = 0; i < nonPrefixedPropertyMasks.size(); ++i) {
+            TypePropertyMask typePropertyMask = nonPrefixedPropertyMasks.get(i);
+            String nonPrefixedType = typePropertyMask.getSchemaType();
+            String prefixedType =
+                    nonPrefixedType.equals(GetByUriRequest.PROJECTION_SCHEMA_TYPE_WILDCARD)
+                            ? nonPrefixedType
+                            : createPrefix(packageName, databaseName) + nonPrefixedType;
+            prefixedPropertyMasks.add(
+                    typePropertyMask.toBuilder().setSchemaType(prefixedType).build());
+        }
+        GetResultSpecProto getResultSpec =
+                GetResultSpecProto.newBuilder()
+                        .addAllTypePropertyMasks(prefixedPropertyMasks)
+                        .build();
         mReadWriteLock.readLock().lock();
         try {
             getResultProto =
                     mIcingSearchEngineLocked.get(
-                            createPrefix(packageName, databaseName) + namespace, uri);
+                            createPrefix(packageName, databaseName) + namespace,
+                            uri,
+                            getResultSpec);
         } finally {
             mReadWriteLock.readLock().unlock();
         }
@@ -447,10 +508,21 @@ public final class AppSearchImpl {
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec)
             throws AppSearchException {
+        if (!searchSpec.getPackageNames().isEmpty()
+                && !searchSpec.getPackageNames().contains(packageName)) {
+            // Client wanted to query over some packages that weren't its own. This isn't
+            // allowed through local query so we can return early with no results.
+            return new SearchResultPage(Bundle.EMPTY);
+        }
+
         mReadWriteLock.readLock().lock();
         try {
+            String prefix = createPrefix(packageName, databaseName);
+            Set<String> allowedPrefixedSchemas = getAllowedPrefixSchemas(prefix, searchSpec);
+
             return doQueryLocked(
                     Collections.singleton(createPrefix(packageName, databaseName)),
+                    allowedPrefixedSchemas,
                     queryExpression,
                     searchSpec);
         } finally {
@@ -466,28 +538,72 @@ public final class AppSearchImpl {
      *
      * @param queryExpression Query String to search.
      * @param searchSpec Spec for setting filters, raw query etc.
+     * @param callerPackageName Package name of the caller, should belong to the {@code callerUid}.
+     * @param callerUid UID of the client making the globalQuery call.
      * @return The results of performing this search. It may contain an empty list of results if no
      *     documents matched the query.
      * @throws AppSearchException on IcingSearchEngine error.
      */
     @NonNull
     public SearchResultPage globalQuery(
-            @NonNull String queryExpression, @NonNull SearchSpec searchSpec)
+            @NonNull String queryExpression,
+            @NonNull SearchSpec searchSpec,
+            @NonNull String callerPackageName,
+            int callerUid)
             throws AppSearchException {
-        // TODO(b/169883602): Check if the platform is querying us at a higher level. At this
-        //  point, we should add all platform-surfaceable schemas assuming the querier has been
-        //  verified.
         mReadWriteLock.readLock().lock();
         try {
-            // We use the mNamespaceMap.keySet here because it's the smaller set of valid prefixes
-            // that could exist.
-            Set<String> prefixes = mNamespaceMapLocked.keySet();
+            Set<String> packageFilters = new ArraySet<>(searchSpec.getPackageNames());
+            Set<String> prefixFilters = new ArraySet<>();
+            Set<String> allPrefixes = mNamespaceMapLocked.keySet();
+            if (packageFilters.isEmpty()) {
+                // Client didn't restrict their search over packages. Try to query over all
+                // packages/prefixes
+                prefixFilters = allPrefixes;
+            } else {
+                // Client did restrict their search over packages. Only include the prefixes that
+                // belong to the specified packages.
+                for (String prefix : allPrefixes) {
+                    String packageName = getPackageName(prefix);
+                    if (packageFilters.contains(packageName)) {
+                        prefixFilters.add(prefix);
+                    }
+                }
+            }
 
-            // Filter out any VisibilityStore documents which are AppSearch-internal only.
-            prefixes.remove(
-                    createPrefix(VisibilityStore.PACKAGE_NAME, VisibilityStore.DATABASE_NAME));
+            // Find which schemas the client is allowed to query over.
+            Set<String> allowedPrefixedSchemas = new ArraySet<>();
+            List<String> schemaFilters = searchSpec.getSchemaTypes();
+            for (String prefix : prefixFilters) {
+                String packageName = getPackageName(prefix);
 
-            return doQueryLocked(prefixes, queryExpression, searchSpec);
+                if (!schemaFilters.isEmpty()) {
+                    for (String schema : schemaFilters) {
+                        // Client specified some schemas to search over, check each one
+                        String prefixedSchema = prefix + schema;
+                        if (packageName.equals(callerPackageName)
+                                || mVisibilityStoreLocked.isSchemaSearchableByCaller(
+                                        prefix, prefixedSchema, callerUid)) {
+                            allowedPrefixedSchemas.add(prefixedSchema);
+                        }
+                    }
+                } else {
+                    // Client didn't specify certain schemas to search over, check all schemas
+                    Set<String> prefixedSchemas = mSchemaMapLocked.get(prefix);
+                    if (prefixedSchemas != null) {
+                        for (String prefixedSchema : prefixedSchemas) {
+                            if (packageName.equals(callerPackageName)
+                                    || mVisibilityStoreLocked.isSchemaSearchableByCaller(
+                                            prefix, prefixedSchema, callerUid)) {
+                                allowedPrefixedSchemas.add(prefixedSchema);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return doQueryLocked(
+                    prefixFilters, allowedPrefixedSchemas, queryExpression, searchSpec);
         } finally {
             mReadWriteLock.readLock().unlock();
         }
@@ -496,25 +612,30 @@ public final class AppSearchImpl {
     @GuardedBy("mReadWriteLock")
     private SearchResultPage doQueryLocked(
             @NonNull Set<String> prefixes,
+            @NonNull Set<String> allowedPrefixedSchemas,
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec)
             throws AppSearchException {
-        SearchSpecProto searchSpecProto = SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
         SearchSpecProto.Builder searchSpecBuilder =
-                searchSpecProto.toBuilder().setQuery(queryExpression);
-
-        ResultSpecProto resultSpec = SearchSpecToProtoConverter.toResultSpecProto(searchSpec);
-        ScoringSpecProto scoringSpec = SearchSpecToProtoConverter.toScoringSpecProto(searchSpec);
-        SearchResultProto searchResultProto;
-
-        // rewriteSearchSpecForPrefixesLocked will return false if none of the prefixes that the
-        // client is trying to search on exist, so we can return an empty SearchResult and skip
+                SearchSpecToProtoConverter.toSearchSpecProto(searchSpec).toBuilder()
+                        .setQuery(queryExpression);
+        // rewriteSearchSpecForPrefixesLocked will return false if there is nothing to search
+        // over given their search filters, so we can return an empty SearchResult and skip
         // sending request to Icing.
-        if (!rewriteSearchSpecForPrefixesLocked(searchSpecBuilder, prefixes)) {
+        if (!rewriteSearchSpecForPrefixesLocked(
+                searchSpecBuilder, prefixes, allowedPrefixedSchemas)) {
             return new SearchResultPage(Bundle.EMPTY);
         }
-        searchResultProto =
-                mIcingSearchEngineLocked.search(searchSpecBuilder.build(), scoringSpec, resultSpec);
+
+        ResultSpecProto.Builder resultSpecBuilder =
+                SearchSpecToProtoConverter.toResultSpecProto(searchSpec).toBuilder();
+
+        rewriteResultSpecForPrefixesLocked(resultSpecBuilder, prefixes, allowedPrefixedSchemas);
+
+        ScoringSpecProto scoringSpec = SearchSpecToProtoConverter.toScoringSpecProto(searchSpec);
+        SearchResultProto searchResultProto =
+                mIcingSearchEngineLocked.search(
+                        searchSpecBuilder.build(), scoringSpec, resultSpecBuilder.build());
         checkSuccess(searchResultProto.getStatus());
 
         return rewriteSearchResultProto(searchResultProto);
@@ -557,6 +678,31 @@ public final class AppSearchImpl {
             mIcingSearchEngineLocked.invalidateNextPageToken(nextPageToken);
         } finally {
             mReadWriteLock.readLock().unlock();
+        }
+    }
+
+    /** Reports a usage of the given document at the given timestamp. */
+    public void reportUsage(
+            @NonNull String packageName,
+            @NonNull String databaseName,
+            @NonNull String namespace,
+            @NonNull String uri,
+            long usageTimestampMillis)
+            throws AppSearchException {
+        String prefixedNamespace = createPrefix(packageName, databaseName) + namespace;
+        UsageReport report =
+                UsageReport.newBuilder()
+                        .setDocumentNamespace(prefixedNamespace)
+                        .setDocumentUri(uri)
+                        .setUsageTimestampMs(usageTimestampMillis)
+                        .setUsageType(UsageReport.UsageType.USAGE_TYPE1)
+                        .build();
+        mReadWriteLock.writeLock().lock();
+        try {
+            ReportUsageResultProto result = mIcingSearchEngineLocked.reportUsage(report);
+            checkSuccess(result.getStatus());
+        } finally {
+            mReadWriteLock.writeLock().unlock();
         }
     }
 
@@ -606,18 +752,28 @@ public final class AppSearchImpl {
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec)
             throws AppSearchException {
+        if (!searchSpec.getPackageNames().isEmpty()
+                && !searchSpec.getPackageNames().contains(packageName)) {
+            // We're only removing documents within the parameter `packageName`. If we're not
+            // restricting our remove-query to this package name, then there's nothing for us to
+            // remove.
+            return;
+        }
+
         SearchSpecProto searchSpecProto = SearchSpecToProtoConverter.toSearchSpecProto(searchSpec);
         SearchSpecProto.Builder searchSpecBuilder =
                 searchSpecProto.toBuilder().setQuery(queryExpression);
-        DeleteResultProto deleteResultProto;
+        DeleteByQueryResultProto deleteResultProto;
         mReadWriteLock.writeLock().lock();
         try {
-            // Only rewrite SearchSpec for non empty prefixes.
-            // rewriteSearchSpecForPrefixesLocked will return false for empty prefixes, we
-            // should skip sending request to Icing and return in here.
+            String prefix = createPrefix(packageName, databaseName);
+            Set<String> allowedPrefixedSchemas = getAllowedPrefixSchemas(prefix, searchSpec);
+
+            // rewriteSearchSpecForPrefixesLocked will return false if there is nothing to search
+            // over given their search filters, so we can return early and skip sending request
+            // to Icing.
             if (!rewriteSearchSpecForPrefixesLocked(
-                    searchSpecBuilder,
-                    Collections.singleton(createPrefix(packageName, databaseName)))) {
+                    searchSpecBuilder, Collections.singleton(prefix), allowedPrefixedSchemas)) {
                 return;
             }
             deleteResultProto = mIcingSearchEngineLocked.deleteByQuery(searchSpecBuilder.build());
@@ -641,7 +797,7 @@ public final class AppSearchImpl {
      * process in next initialization. After that, Icing would still be able to recover all written
      * data.
      *
-     * @throws AppSearchException
+     * @throws AppSearchException on any error that AppSearch persist data to disk.
      */
     public void persistToDisk() throws AppSearchException {
         PersistToDiskResultProto persistToDiskResultProto =
@@ -797,11 +953,27 @@ public final class AppSearchImpl {
      * Removes any prefixes from types and namespaces mentioned anywhere in {@code documentBuilder}.
      *
      * @param documentBuilder The document to mutate
+     * @return Prefix name that was removed from the document.
+     * @throws AppSearchException if there are unexpected database prefixing errors.
      */
+    @NonNull
     @VisibleForTesting
-    static void removePrefixesFromDocument(@NonNull DocumentProto.Builder documentBuilder)
+    static String removePrefixesFromDocument(@NonNull DocumentProto.Builder documentBuilder)
             throws AppSearchException {
         // Rewrite the type name and namespace to remove the prefix.
+        String schemaPrefix = getPrefix(documentBuilder.getSchema());
+        String namespacePrefix = getPrefix(documentBuilder.getNamespace());
+
+        if (!schemaPrefix.equals(namespacePrefix)) {
+            throw new AppSearchException(
+                    AppSearchResult.RESULT_INTERNAL_ERROR,
+                    "Found unexpected"
+                            + " multiple prefix names in document: "
+                            + schemaPrefix
+                            + ", "
+                            + namespacePrefix);
+        }
+
         documentBuilder.setSchema(removePrefix(documentBuilder.getSchema()));
         documentBuilder.setNamespace(removePrefix(documentBuilder.getNamespace()));
 
@@ -816,28 +988,42 @@ public final class AppSearchImpl {
                 for (int documentIdx = 0; documentIdx < documentCount; documentIdx++) {
                     DocumentProto.Builder derivedDocumentBuilder =
                             propertyBuilder.getDocumentValues(documentIdx).toBuilder();
-                    removePrefixesFromDocument(derivedDocumentBuilder);
+                    String nestedPrefix = removePrefixesFromDocument(derivedDocumentBuilder);
+                    if (!nestedPrefix.equals(schemaPrefix)) {
+                        throw new AppSearchException(
+                                AppSearchResult.RESULT_INTERNAL_ERROR,
+                                "Found unexpected multiple prefix names in document: "
+                                        + schemaPrefix
+                                        + ", "
+                                        + nestedPrefix);
+                    }
                     propertyBuilder.setDocumentValues(documentIdx, derivedDocumentBuilder);
                 }
                 documentBuilder.setProperties(propertyIdx, propertyBuilder);
             }
         }
+
+        return schemaPrefix;
     }
 
     /**
-     * Rewrites the schemaTypeFilters and namespacesFilters that exist with {@code prefixes}.
-     *
-     * <p>If the searchSpec has empty filter lists, all prefixes filters will be added.
+     * Rewrites the search spec filters with {@code prefixes}.
      *
      * <p>This method should be only called in query methods and get the READ lock to keep thread
      * safety.
      *
-     * @return false if none of the requested prefixes exist.
+     * @param searchSpecBuilder Client-provided SearchSpec
+     * @param prefixes Prefixes that we should prepend to all our filters
+     * @param allowedPrefixedSchemas Prefixed schemas that the client is allowed to query over. This
+     *     supersedes the schema filters that may exist on the {@code searchSpecBuilder}.
+     * @return false if none there would be nothing to search over.
      */
     @VisibleForTesting
     @GuardedBy("mReadWriteLock")
     boolean rewriteSearchSpecForPrefixesLocked(
-            @NonNull SearchSpecProto.Builder searchSpecBuilder, @NonNull Set<String> prefixes) {
+            @NonNull SearchSpecProto.Builder searchSpecBuilder,
+            @NonNull Set<String> prefixes,
+            @NonNull Set<String> allowedPrefixedSchemas) {
         // Create a copy since retainAll() modifies the original set.
         Set<String> existingPrefixes = new ArraySet<>(mNamespaceMapLocked.keySet());
         existingPrefixes.retainAll(prefixes);
@@ -847,29 +1033,28 @@ public final class AppSearchImpl {
             return false;
         }
 
-        // Cache the schema type filters and namespaces before clearing everything.
-        List<String> schemaTypeFilters = searchSpecBuilder.getSchemaTypeFiltersList();
-        searchSpecBuilder.clearSchemaTypeFilters();
+        if (allowedPrefixedSchemas.isEmpty()) {
+            // Not allowed to search over any schemas, empty query.
+            return false;
+        }
 
+        // Clear the schema type filters since we'll be rewriting them with the
+        // allowedPrefixedSchemas.
+        searchSpecBuilder.clearSchemaTypeFilters();
+        searchSpecBuilder.addAllSchemaTypeFilters(allowedPrefixedSchemas);
+
+        // Cache the namespaces before clearing everything.
         List<String> namespaceFilters = searchSpecBuilder.getNamespaceFiltersList();
         searchSpecBuilder.clearNamespaceFilters();
 
-        // Rewrite filters to include a prefix.
+        // Rewrite non-schema filters to include a prefix.
         for (String prefix : existingPrefixes) {
-            Set<String> existingSchemaTypes = mSchemaMapLocked.get(prefix);
-            if (schemaTypeFilters.isEmpty()) {
-                // Include all schema types
-                searchSpecBuilder.addAllSchemaTypeFilters(existingSchemaTypes);
-            } else {
-                // Add the prefix to the given schema types
-                for (int i = 0; i < schemaTypeFilters.size(); i++) {
-                    String prefixedType = prefix + schemaTypeFilters.get(i);
-                    if (existingSchemaTypes.contains(prefixedType)) {
-                        searchSpecBuilder.addSchemaTypeFilters(prefixedType);
-                    }
-                }
-            }
+            // TODO(b/169883602): We currently grab every namespace for every prefix. We can
+            //  optimize this by checking if a prefix has any allowedSchemaTypes. If not, that
+            //  means we don't want to query over anything in that prefix anyways, so we don't
+            //  need to grab its namespaces either.
 
+            // Empty namespaces on the search spec means to query over all namespaces.
             Set<String> existingNamespaces = mNamespaceMapLocked.get(prefix);
             if (namespaceFilters.isEmpty()) {
                 // Include all namespaces
@@ -886,6 +1071,73 @@ public final class AppSearchImpl {
         }
 
         return true;
+    }
+
+    /**
+     * Returns the set of allowed prefixed schemas that the {@code prefix} can query while taking
+     * into account the {@code searchSpec} schema filters.
+     *
+     * <p>This only checks intersection of schema filters on the search spec with those that the
+     * prefix owns itself. This does not check global query permissions.
+     */
+    private Set<String> getAllowedPrefixSchemas(
+            @NonNull String prefix, @NonNull SearchSpec searchSpec) {
+        Set<String> allowedPrefixedSchemas = new ArraySet<>();
+
+        // Add all the schema filters the client specified.
+        List<String> schemaFilters = searchSpec.getSchemaTypes();
+        for (int i = 0; i < schemaFilters.size(); i++) {
+            allowedPrefixedSchemas.add(prefix + schemaFilters.get(i));
+        }
+
+        if (allowedPrefixedSchemas.isEmpty()) {
+            // If the client didn't specify any schema filters, search over all of their schemas
+            Set<String> prefixedSchemas = mSchemaMapLocked.get(prefix);
+            if (prefixedSchemas != null) {
+                allowedPrefixedSchemas.addAll(prefixedSchemas);
+            }
+        }
+        return allowedPrefixedSchemas;
+    }
+
+    /**
+     * Rewrites the typePropertyMasks that exist in {@code prefixes}.
+     *
+     * <p>This method should be only called in query methods and get the READ lock to keep thread
+     * safety.
+     *
+     * @param resultSpecBuilder ResultSpecs as specified by client
+     * @param prefixes Prefixes that we should prepend to all our filters
+     * @param allowedPrefixedSchemas Prefixed schemas that the client is allowed to query over.
+     */
+    @VisibleForTesting
+    @GuardedBy("mReadWriteLock")
+    void rewriteResultSpecForPrefixesLocked(
+            @NonNull ResultSpecProto.Builder resultSpecBuilder,
+            @NonNull Set<String> prefixes,
+            @NonNull Set<String> allowedPrefixedSchemas) {
+        // Create a copy since retainAll() modifies the original set.
+        Set<String> existingPrefixes = new ArraySet<>(mNamespaceMapLocked.keySet());
+        existingPrefixes.retainAll(prefixes);
+
+        List<TypePropertyMask> prefixedTypePropertyMasks = new ArrayList<>();
+        // Rewrite filters to include a database prefix.
+        for (String prefix : existingPrefixes) {
+            // Qualify the given schema types
+            for (TypePropertyMask typePropertyMask : resultSpecBuilder.getTypePropertyMasksList()) {
+                String unprefixedType = typePropertyMask.getSchemaType();
+                boolean isWildcard =
+                        unprefixedType.equals(SearchSpec.PROJECTION_SCHEMA_TYPE_WILDCARD);
+                String prefixedType = isWildcard ? unprefixedType : prefix + unprefixedType;
+                if (isWildcard || allowedPrefixedSchemas.contains(prefixedType)) {
+                    prefixedTypePropertyMasks.add(
+                            typePropertyMask.toBuilder().setSchemaType(prefixedType).build());
+                }
+            }
+        }
+        resultSpecBuilder
+                .clearTypePropertyMasks()
+                .addAllTypePropertyMasks(prefixedTypePropertyMasks);
     }
 
     @VisibleForTesting
@@ -929,6 +1181,49 @@ public final class AppSearchImpl {
         return packageName + PACKAGE_DELIMITER + databaseName + DATABASE_DELIMITER;
     }
 
+    /**
+     * Returns the package name that's contained within the {@code prefix}.
+     *
+     * @param prefix Prefix string that contains the package name inside of it. The package name
+     *     must be in the front of the string, and separated from the rest of the string by the
+     *     {@link #PACKAGE_DELIMITER}.
+     * @return Valid package name.
+     */
+    @NonNull
+    private static String getPackageName(@NonNull String prefix) {
+        int delimiterIndex = prefix.indexOf(PACKAGE_DELIMITER);
+        if (delimiterIndex == -1) {
+            // This should never happen if we construct our prefixes properly
+            Log.wtf(TAG, "Malformed prefix doesn't contain package delimiter: " + prefix);
+            return "";
+        }
+        return prefix.substring(0, delimiterIndex);
+    }
+
+    /**
+     * Returns the database name that's contained within the {@code prefix}.
+     *
+     * @param prefix Prefix string that contains the database name inside of it. The database name
+     *     must be between the {@link #PACKAGE_DELIMITER} and {@link #DATABASE_DELIMITER}
+     * @return Valid database name.
+     */
+    @NonNull
+    private static String getDatabaseName(@NonNull String prefix) {
+        int packageDelimiterIndex = prefix.indexOf(PACKAGE_DELIMITER);
+        int databaseDelimiterIndex = prefix.indexOf(DATABASE_DELIMITER);
+        if (packageDelimiterIndex == -1) {
+            // This should never happen if we construct our prefixes properly
+            Log.wtf(TAG, "Malformed prefix doesn't contain package delimiter: " + prefix);
+            return "";
+        }
+        if (databaseDelimiterIndex == -1) {
+            // This should never happen if we construct our prefixes properly
+            Log.wtf(TAG, "Malformed prefix doesn't contain database delimiter: " + prefix);
+            return "";
+        }
+        return prefix.substring(packageDelimiterIndex + 1, databaseDelimiterIndex);
+    }
+
     @NonNull
     private static String removePrefix(@NonNull String prefixedString) throws AppSearchException {
         // The prefix is made up of the package, then the database. So we only need to find the
@@ -949,7 +1244,7 @@ public final class AppSearchImpl {
         if (databaseDelimiterIndex == -1) {
             throw new AppSearchException(
                     AppSearchResult.RESULT_UNKNOWN_ERROR,
-                    "The databaseName prefixed value doesn't contains a valid database name.");
+                    "The databaseName prefixed value doesn't contain a valid database name.");
         }
 
         // Add 1 to include the char size of the DATABASE_DELIMITER
@@ -1034,20 +1329,29 @@ public final class AppSearchImpl {
     }
 
     /** Remove the rewritten schema types from any result documents. */
-    private static SearchResultPage rewriteSearchResultProto(
-            @NonNull SearchResultProto searchResultProto) throws AppSearchException {
+    @NonNull
+    @VisibleForTesting
+    static SearchResultPage rewriteSearchResultProto(@NonNull SearchResultProto searchResultProto)
+            throws AppSearchException {
+        // Parallel array of package names for each document search result.
+        List<String> packageNames = new ArrayList<>(searchResultProto.getResultsCount());
+
+        // Parallel array of database names for each document search result.
+        List<String> databaseNames = new ArrayList<>(searchResultProto.getResultsCount());
+
         SearchResultProto.Builder resultsBuilder = searchResultProto.toBuilder();
         for (int i = 0; i < searchResultProto.getResultsCount(); i++) {
-            if (searchResultProto.getResults(i).hasDocument()) {
-                SearchResultProto.ResultProto.Builder resultBuilder =
-                        searchResultProto.getResults(i).toBuilder();
-                DocumentProto.Builder documentBuilder = resultBuilder.getDocument().toBuilder();
-                removePrefixesFromDocument(documentBuilder);
-                resultBuilder.setDocument(documentBuilder);
-                resultsBuilder.setResults(i, resultBuilder);
-            }
+            SearchResultProto.ResultProto.Builder resultBuilder =
+                    searchResultProto.getResults(i).toBuilder();
+            DocumentProto.Builder documentBuilder = resultBuilder.getDocument().toBuilder();
+            String prefix = removePrefixesFromDocument(documentBuilder);
+            packageNames.add(getPackageName(prefix));
+            databaseNames.add(getDatabaseName(prefix));
+            resultBuilder.setDocument(documentBuilder);
+            resultsBuilder.setResults(i, resultBuilder);
         }
-        return SearchResultToProtoConverter.toSearchResultPage(resultsBuilder);
+        return SearchResultToProtoConverter.toSearchResultPage(
+                resultsBuilder, packageNames, databaseNames);
     }
 
     @GuardedBy("mReadWriteLock")
@@ -1057,6 +1361,7 @@ public final class AppSearchImpl {
     }
 
     @GuardedBy("mReadWriteLock")
+    @NonNull
     @VisibleForTesting
     VisibilityStore getVisibilityStoreLocked() {
         return mVisibilityStoreLocked;
@@ -1071,28 +1376,8 @@ public final class AppSearchImpl {
      * @return AppSearchException with the parallel error code.
      */
     private static AppSearchException statusProtoToAppSearchException(StatusProto statusProto) {
-        switch (statusProto.getCode()) {
-            case INVALID_ARGUMENT:
-                return new AppSearchException(
-                        AppSearchResult.RESULT_INVALID_ARGUMENT, statusProto.getMessage());
-            case NOT_FOUND:
-                return new AppSearchException(
-                        AppSearchResult.RESULT_NOT_FOUND, statusProto.getMessage());
-            case FAILED_PRECONDITION:
-                // Fallthrough
-            case ABORTED:
-                // Fallthrough
-            case INTERNAL:
-                return new AppSearchException(
-                        AppSearchResult.RESULT_INTERNAL_ERROR, statusProto.getMessage());
-            case OUT_OF_SPACE:
-                return new AppSearchException(
-                        AppSearchResult.RESULT_OUT_OF_SPACE, statusProto.getMessage());
-            default:
-                // Some unknown/unsupported error
-                return new AppSearchException(
-                        AppSearchResult.RESULT_UNKNOWN_ERROR,
-                        "Unknown IcingSearchEngine status code: " + statusProto.getCode());
-        }
+        return new AppSearchException(
+                ResultCodeToProtoConverter.toResultCode(statusProto.getCode()),
+                statusProto.getMessage());
     }
 }

@@ -27,10 +27,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.media.ApplicationMediaCapabilities;
 import android.media.ExifInterface;
+import android.media.MediaFormat;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.BatteryManager;
+import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.storage.StorageVolume;
 import android.provider.MediaStore;
@@ -52,6 +56,7 @@ import com.google.android.collect.Sets;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -752,6 +757,34 @@ public class MtpDatabase implements AutoCloseable {
         outFileLengthFormat[0] = obj.getSize();
         outFileLengthFormat[1] = obj.getFormat();
         return MtpConstants.RESPONSE_OK;
+    }
+
+    @VisibleForNative
+    private int openFilePath(String path, boolean transcode) {
+        Uri uri = MediaStore.scanFile(mContext.getContentResolver(), new File(path));
+        if (uri == null) {
+            Log.i(TAG, "Failed to obtain URI for openFile with transcode support: " + path);
+            return -1;
+        }
+
+        try {
+            Log.i(TAG, "openFile with transcode support: " + path);
+            Bundle bundle = new Bundle();
+            if (transcode) {
+                bundle.putParcelable(MediaStore.EXTRA_MEDIA_CAPABILITIES,
+                        new ApplicationMediaCapabilities.Builder().addUnsupportedVideoMimeType(
+                                MediaFormat.MIMETYPE_VIDEO_HEVC).build());
+            } else {
+                bundle.putParcelable(MediaStore.EXTRA_MEDIA_CAPABILITIES,
+                        new ApplicationMediaCapabilities.Builder().addSupportedVideoMimeType(
+                                MediaFormat.MIMETYPE_VIDEO_HEVC).build());
+            }
+            return mMediaProvider.openTypedAssetFileDescriptor(uri, "*/*", bundle)
+                    .getParcelFileDescriptor().detachFd();
+        } catch (RemoteException | FileNotFoundException e) {
+            Log.w(TAG, "Failed to openFile with transcode support: " + path, e);
+            return -1;
+        }
     }
 
     private int getObjectFormat(int handle) {

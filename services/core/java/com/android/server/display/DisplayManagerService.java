@@ -49,6 +49,7 @@ import android.database.ContentObserver;
 import android.graphics.ColorSpace;
 import android.graphics.Point;
 import android.hardware.SensorManager;
+import android.hardware.devicestate.DeviceStateManager;
 import android.hardware.display.AmbientBrightnessDayStats;
 import android.hardware.display.BrightnessChangeEvent;
 import android.hardware.display.BrightnessConfiguration;
@@ -71,6 +72,7 @@ import android.media.projection.IMediaProjectionManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
+import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
@@ -100,7 +102,6 @@ import android.util.Spline;
 import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
-import android.view.IDisplayFoldListener;
 import android.view.Surface;
 import android.view.SurfaceControl;
 
@@ -114,7 +115,6 @@ import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.UiThread;
-import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.SurfaceAnimationThread;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -360,8 +360,8 @@ public final class DisplayManagerService extends SystemService {
     // Receives notifications about changes to Settings.
     private SettingsObserver mSettingsObserver;
 
-    // Received notifications of the display-fold action
-    private DisplayFoldListener mDisplayFoldListener;
+    // Received notifications of the device-state action (such as "fold", "unfold")
+    private DeviceStateManager mDeviceStateManager;
 
     private final boolean mAllowNonNativeRefreshRateOverride;
 
@@ -504,10 +504,11 @@ public final class DisplayManagerService extends SystemService {
         synchronized (mSyncRoot) {
             mWindowManagerInternal = LocalServices.getService(WindowManagerInternal.class);
             mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
-            WindowManagerPolicy policy = LocalServices.getService(WindowManagerPolicy.class);
 
-            mDisplayFoldListener = new DisplayFoldListener();
-            policy.registerDisplayFoldListener(mDisplayFoldListener);
+            DeviceStateManager deviceStateManager =
+                    mContext.getSystemService(DeviceStateManager.class);
+            deviceStateManager.registerDeviceStateListener(new DeviceStateListener(),
+                    new HandlerExecutor(mHandler));
 
             scheduleTraversalLocked(false);
         }
@@ -2880,15 +2881,14 @@ public final class DisplayManagerService extends SystemService {
         }
     }
 
-    class DisplayFoldListener extends IDisplayFoldListener.Stub {
+    /**
+     * Listens to changes in device state and reports the state to LogicalDisplayMapper.
+     */
+    class DeviceStateListener implements DeviceStateManager.DeviceStateListener {
         @Override
-        public void onDisplayFoldChanged(int displayId, boolean folded) {
-            // TODO: multi-display - IDisplayFoldListener callback only really works for the
-            // Display.DEFAULT_DISPLAY.
-            if (displayId == Display.DEFAULT_DISPLAY) {
-                synchronized (mSyncRoot) {
-                    mLogicalDisplayMapper.setDeviceFoldedLocked(folded);
-                }
+        public void onDeviceStateChanged(int deviceState) {
+            synchronized (mSyncRoot) {
+                mLogicalDisplayMapper.setDeviceStateLocked(deviceState);
             }
         }
     };

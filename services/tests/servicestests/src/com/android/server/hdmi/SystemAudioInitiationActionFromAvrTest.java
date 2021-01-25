@@ -138,6 +138,10 @@ public class SystemAudioInitiationActionFromAvrTest {
                     }
 
                     @Override
+                    protected void writeStringSystemProperty(String key, String value) {
+                    }
+
+                    @Override
                     void wakeUp() {}
 
                     @Override

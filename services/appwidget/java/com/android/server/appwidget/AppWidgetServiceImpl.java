@@ -222,6 +222,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
     private final SparseIntArray mLoadedUserIds = new SparseIntArray();
 
+    private final Object mWidgetPackagesLock = new Object();
     private final SparseArray<ArraySet<String>> mWidgetPackages = new SparseArray<>();
 
     private BackupRestoreController mBackupRestoreController;
@@ -2941,11 +2942,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (widget.provider == null) return;
 
         int userId = widget.provider.getUserId();
-        ArraySet<String> packages = mWidgetPackages.get(userId);
-        if (packages == null) {
-            mWidgetPackages.put(userId, packages = new ArraySet<String>());
+        synchronized (mWidgetPackagesLock) {
+            ArraySet<String> packages = mWidgetPackages.get(userId);
+            if (packages == null) {
+                mWidgetPackages.put(userId, packages = new ArraySet<String>());
+            }
+            packages.add(widget.provider.info.provider.getPackageName());
         }
-        packages.add(widget.provider.info.provider.getPackageName());
 
         // If we are adding a widget it might be for a provider that
         // is currently masked, if so mask the widget.
@@ -2972,22 +2975,24 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
 
         final int userId = widget.provider.getUserId();
         final String packageName = widget.provider.info.provider.getPackageName();
-        ArraySet<String> packages = mWidgetPackages.get(userId);
-        if (packages == null) {
-            return;
-        }
-        // Check if there is any other widget with the same package name.
-        // Remove packageName if none.
-        final int N = mWidgets.size();
-        for (int i = 0; i < N; i++) {
-            Widget w = mWidgets.get(i);
-            if (w.provider == null) continue;
-            if (w.provider.getUserId() == userId
-                    && packageName.equals(w.provider.info.provider.getPackageName())) {
+        synchronized (mWidgetPackagesLock) {
+            ArraySet<String> packages = mWidgetPackages.get(userId);
+            if (packages == null) {
                 return;
             }
+            // Check if there is any other widget with the same package name.
+            // Remove packageName if none.
+            final int N = mWidgets.size();
+            for (int i = 0; i < N; i++) {
+                Widget w = mWidgets.get(i);
+                if (w.provider == null) continue;
+                if (w.provider.getUserId() == userId
+                        && packageName.equals(w.provider.info.provider.getPackageName())) {
+                    return;
+                }
+            }
+            packages.remove(packageName);
         }
-        packages.remove(packageName);
     }
 
     /**
@@ -3000,7 +3005,9 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     }
 
     private void onWidgetsClearedLocked() {
-        mWidgetPackages.clear();
+        synchronized (mWidgetPackagesLock) {
+            mWidgetPackages.clear();
+        }
     }
 
     @Override
@@ -3008,7 +3015,7 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             throw new SecurityException("Only the system process can call this");
         }
-        synchronized (mLock) {
+        synchronized (mWidgetPackagesLock) {
             final ArraySet<String> packages = mWidgetPackages.get(userId);
             if (packages != null) {
                 return packages.contains(packageName);

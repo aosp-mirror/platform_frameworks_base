@@ -2523,6 +2523,40 @@ public final class TvInputManager {
         }
 
         /**
+         * Pauses TV program recording in the current recording session.
+         *
+         * @param params A set of extra parameters which might be handled with this event.
+         */
+        void pauseRecording(@NonNull Bundle params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.pauseRecording(mToken, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Resumes TV program recording in the current recording session.
+         *
+         * @param params A set of extra parameters which might be handled with this event.
+         */
+        void resumeRecording(@NonNull Bundle params) {
+            if (mToken == null) {
+                Log.w(TAG, "The session has been already released");
+                return;
+            }
+            try {
+                mService.resumeRecording(mToken, params, mUserId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
          * Calls {@link TvInputService.Session#appPrivateCommand(String, Bundle)
          * TvInputService.Session.appPrivateCommand()} on the current TvView.
          *

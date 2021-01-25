@@ -122,7 +122,7 @@ public class WatchableImpl implements Watchable {
     /**
      * Return the sealed state.
      */
-    public boolean isFrozen() {
+    public boolean isSealed() {
         synchronized (mObservers) {
             return mSealed;
         }

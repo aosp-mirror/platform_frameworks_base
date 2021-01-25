@@ -134,6 +134,8 @@ import android.view.autofill.IAutofillWindowPresenter;
 import android.view.contentcapture.ContentCaptureContext;
 import android.view.contentcapture.ContentCaptureManager;
 import android.view.contentcapture.ContentCaptureManager.ContentCaptureClient;
+import android.view.translation.TranslationSpec;
+import android.view.translation.UiTranslationController;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -956,6 +958,8 @@ public class Activity extends ContextThemeWrapper
 
     private boolean mIsInMultiWindowMode;
     private boolean mIsInPictureInPictureMode;
+
+    private UiTranslationController mUiTranslationController;
 
     private final WindowControllerCallback mWindowControllerCallback =
             new WindowControllerCallback() {
@@ -5151,12 +5155,6 @@ public class Activity extends ContextThemeWrapper
      * #checkSelfPermission(String)}.
      * </p>
      * <p>
-     * Calling this API for permissions already granted to your app would show UI
-     * to the user to decide whether the app can still hold these permissions. This
-     * can be useful if the way your app uses data guarded by the permissions
-     * changes significantly.
-     * </p>
-     * <p>
      * You cannot request a permission if your activity sets {@link
      * android.R.styleable#AndroidManifestActivity_noHistory noHistory} to
      * <code>true</code> because in this case the activity would not receive
@@ -8639,6 +8637,18 @@ public class Activity extends ContextThemeWrapper
     @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
     public void unregisterRemoteAnimations() {
         ActivityClient.getInstance().unregisterRemoteAnimations(mToken);
+    }
+
+    /**
+     * Notify {@link UiTranslationController} the ui translation state is changed.
+     * @hide
+     */
+    public void updateUiTranslationState(int state, TranslationSpec sourceSpec,
+            TranslationSpec destSpec, List<AutofillId> viewIds) {
+        if (mUiTranslationController == null) {
+            mUiTranslationController = new UiTranslationController(this, getApplicationContext());
+        }
+        mUiTranslationController.updateUiTranslationState(state, sourceSpec, destSpec, viewIds);
     }
 
     class HostCallbacks extends FragmentHostCallback<Activity> {

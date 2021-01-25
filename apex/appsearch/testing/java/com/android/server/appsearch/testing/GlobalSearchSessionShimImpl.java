@@ -46,7 +46,7 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
     private final ExecutorService mExecutor;
 
     @NonNull
-    public static ListenableFuture<GlobalSearchSessionShimImpl> createGlobalSearchSession() {
+    public static ListenableFuture<GlobalSearchSessionShim> createGlobalSearchSession() {
         Context context = ApplicationProvider.getApplicationContext();
         AppSearchManager appSearchManager = context.getSystemService(AppSearchManager.class);
         SettableFuture<AppSearchResult<GlobalSearchSession>> future = SettableFuture.create();
@@ -62,6 +62,7 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
             @NonNull GlobalSearchSession session, @NonNull ExecutorService executor) {
         mGlobalSearchSession = Preconditions.checkNotNull(session);
         mExecutor = Preconditions.checkNotNull(executor);
+
     }
 
     @NonNull
@@ -71,5 +72,10 @@ public class GlobalSearchSessionShimImpl implements GlobalSearchSessionShim {
         SearchResults searchResults =
                 mGlobalSearchSession.query(queryExpression, searchSpec, mExecutor);
         return new SearchResultsShimImpl(searchResults, mExecutor);
+    }
+
+    @Override
+    public void close() {
+        mGlobalSearchSession.close();
     }
 }

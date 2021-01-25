@@ -24,7 +24,9 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Bundle;
 import android.telephony.AccessNetworkConstants;
+import android.telephony.NetworkRegistrationInfo;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.telephony.ims.feature.ImsFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
@@ -70,6 +72,29 @@ public interface RegistrationManager {
      */
     int REGISTRATION_STATE_REGISTERED = 2;
 
+    /**
+     * @hide
+     */
+    // Defines the underlying radio technology type that we have registered for IMS over.
+    @IntDef(prefix = "ATTR_",
+            value = {
+                    ATTR_EPDG_OVER_CELL_INTERNET,
+            },
+            flag = true)
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ImsAttributes {}
+
+    /**
+     * Attribute to specify if EPDG tunnel is setup over cellular internet.
+     * if EPDG tunnel is setup over cellular internet then this bit will be set else the same will
+     * not be set.
+     */
+    int ATTR_EPDG_OVER_CELL_INTERNET = 0x00000001;
+
+    //******************************************************************************************
+    // Next attribute value: 0x00000002
+    //******************************************************************************************
+
 
     /**@hide*/
     // Translate ImsRegistrationImplBase API to new AccessNetworkConstant because WLAN
@@ -83,7 +108,28 @@ public interface RegistrationManager {
                         AccessNetworkConstants.TRANSPORT_TYPE_WWAN);
                 put(ImsRegistrationImplBase.REGISTRATION_TECH_IWLAN,
                         AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
+                /* As the cross sim will be using ePDG tunnel over internet, it behaves
+                   like IWLAN in most cases. Hence setting the access type as IWLAN
+                 */
+                put(ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM,
+                        AccessNetworkConstants.TRANSPORT_TYPE_WLAN);
             }};
+
+    /** @hide */
+    @NonNull
+    static String registrationStateToString(
+            final @NetworkRegistrationInfo.RegistrationState int value) {
+        switch (value) {
+            case REGISTRATION_STATE_NOT_REGISTERED:
+                return "REGISTRATION_STATE_NOT_REGISTERED";
+            case REGISTRATION_STATE_REGISTERING:
+                return "REGISTRATION_STATE_REGISTERING";
+            case REGISTRATION_STATE_REGISTERED:
+                return "REGISTRATION_STATE_REGISTERED";
+            default:
+                return Integer.toString(value);
+        }
+    }
 
     /**
      * Callback class for receiving IMS network Registration callback events.
@@ -96,6 +142,7 @@ public interface RegistrationManager {
 
             private final RegistrationCallback mLocalCallback;
             private Executor mExecutor;
+            private Bundle mBundle = new Bundle();
 
             RegistrationBinder(RegistrationCallback localCallback) {
                 mLocalCallback = localCallback;
@@ -107,8 +154,18 @@ public interface RegistrationManager {
 
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
+                    mExecutor.execute(() -> {
+                        mLocalCallback.onRegistered(getAccessType(imsRadioTech));
+                    });
+                    int attributes = 0;
+                    if (imsRadioTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
+                        attributes = changeBitmask(attributes, ATTR_EPDG_OVER_CELL_INTERNET,
+                                true);
+                    }
+                    final int finalattributes = attributes;
                     mExecutor.execute(() ->
-                            mLocalCallback.onRegistered(getAccessType(imsRadioTech)));
+                            mLocalCallback.onRegistered(getAccessType(imsRadioTech),
+                                    finalattributes));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -122,6 +179,15 @@ public interface RegistrationManager {
                 try {
                     mExecutor.execute(() ->
                             mLocalCallback.onRegistering(getAccessType(imsRadioTech)));
+                    int attributes = 0;
+                    if (imsRadioTech == ImsRegistrationImplBase.REGISTRATION_TECH_CROSS_SIM) {
+                        attributes = changeBitmask(attributes, ATTR_EPDG_OVER_CELL_INTERNET,
+                                true);
+                    }
+                    final int finalattributes = attributes;
+                    mExecutor.execute(() ->
+                            mLocalCallback.onRegistering(getAccessType(imsRadioTech),
+                                    finalattributes));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -175,6 +241,22 @@ public interface RegistrationManager {
                 }
                 return RegistrationManager.IMS_REG_TO_ACCESS_TYPE_MAP.get(regType);
             }
+
+            /**
+             * Changes a attribute bit-mask to add or remove an attribute.
+             *
+             * @param bitmask The bit-mask.
+             * @param bitfield The bit-field to change.
+             * @param enabled Whether the bit-field should be set or removed.
+             * @return The bit-mask with the bit-field changed.
+             */
+            private int changeBitmask(int bitmask, int bitfield, boolean enabled) {
+                if (enabled) {
+                    return bitmask | bitfield;
+                } else {
+                    return bitmask & ~bitfield;
+                }
+            }
         }
 
         private final RegistrationBinder mBinder = new RegistrationBinder(this);
@@ -183,16 +265,46 @@ public interface RegistrationManager {
          * Notifies the framework when the IMS Provider is registered to the IMS network.
          *
          * @param imsTransportType the radio access technology.
+         * @deprecated Use {@link #onRegistered(int, int)} instead.
          */
+        @Deprecated
         public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType) {
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is registered to the IMS network
+         * with corresponding attributes
+         *
+         * @param imsTransportType the radio access technology.
+         * @param registrationAttributes IMS registration attributes as a bitmap of attributes.
+         * Possible attributes are following
+         * <ul>
+         *     <li>{@link #ATTR_EPDG_OVER_CELL_INTERNET}</li>
+         * </ul>
+         *
+         */
+        public void onRegistered(@AccessNetworkConstants.TransportType int imsTransportType,
+                @ImsAttributes int registrationAttributes) {
         }
 
         /**
          * Notifies the framework when the IMS Provider is trying to register the IMS network.
          *
          * @param imsTransportType the radio access technology.
+         * @deprecated Use {@link #onRegistering(int, int)} instead.
          */
         public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType) {
+        }
+
+        /**
+         * Notifies the framework when the IMS Provider is trying to register the IMS network.
+         *
+         * @param imsTransportType the radio access technology.
+         * @param registrationAttributes IMS registration attributes as a bitmap of attributes.
+         * Possible attributes are following
+         */
+        public void onRegistering(@AccessNetworkConstants.TransportType int imsTransportType,
+                @ImsAttributes int registrationAttributes) {
         }
 
         /**

@@ -576,6 +576,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Mobiele data uit"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Gebruik van gegevens is niet ingesteld"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Geen telefoonsignaal."</string>

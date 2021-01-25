@@ -21,6 +21,7 @@ import android.content.pm.IDataLoaderStatusListener;
 import android.os.incremental.IncrementalNewFileParams;
 import android.os.incremental.IStorageLoadingProgressListener;
 import android.os.incremental.IStorageHealthListener;
+import android.os.incremental.PerUidReadTimeouts;
 import android.os.incremental.StorageHealthCheckParams;
 
 /** @hide */
@@ -40,7 +41,8 @@ interface IIncrementalService {
     int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode,
                       in IDataLoaderStatusListener statusListener,
                       in StorageHealthCheckParams healthCheckParams,
-                      in IStorageHealthListener healthListener);
+                      in IStorageHealthListener healthListener,
+                      in PerUidReadTimeouts[] perUidReadTimeouts);
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
 
     /**
@@ -123,7 +125,7 @@ interface IIncrementalService {
     /**
      * Permanently disable readlogs reporting for a storage given its ID.
      */
-    void disableReadLogs(int storageId);
+    void disallowReadLogs(int storageId);
 
     /**
      * Setting up native library directories and extract native libs onto a storage if needed.

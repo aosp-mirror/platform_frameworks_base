@@ -129,7 +129,11 @@ public class SpellChecker implements SpellCheckerSessionListener {
             mSpellCheckerSession = mTextServicesManager.newSpellCheckerSession(
                     null /* Bundle not currently used by the textServicesManager */,
                     mCurrentLocale, this,
-                    false /* means any available languages from current spell checker */);
+                    false /* means any available languages from current spell checker */,
+                    SuggestionsInfo.RESULT_ATTR_IN_THE_DICTIONARY
+                            | SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_TYPO
+                            | SuggestionsInfo.RESULT_ATTR_LOOKS_LIKE_GRAMMAR_ERROR
+                            | SuggestionsInfo.RESULT_ATTR_DONT_SHOW_UI_FOR_SUGGESTIONS);
             mIsSentenceSpellCheckSupported = true;
         }
 

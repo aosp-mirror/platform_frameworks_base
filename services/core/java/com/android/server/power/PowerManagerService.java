@@ -5570,7 +5570,7 @@ public final class PowerManagerService extends SystemService
 
     private PowerManager.WakeData getLastWakeupInternal() {
         synchronized (mLock) {
-            return new WakeData(mLastWakeTime, mLastWakeReason);
+            return new WakeData(mLastWakeTime, mLastWakeReason, mLastWakeTime - mLastSleepTime);
         }
     }
 

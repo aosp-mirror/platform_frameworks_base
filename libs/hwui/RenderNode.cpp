@@ -70,15 +70,17 @@ RenderNode::RenderNode()
 RenderNode::~RenderNode() {
     ImmediateRemoved observer(nullptr);
     deleteDisplayList(observer);
-    delete mStagingDisplayList;
     LOG_ALWAYS_FATAL_IF(hasLayer(), "layer missed detachment!");
 }
 
-void RenderNode::setStagingDisplayList(DisplayList* displayList) {
-    mValid = (displayList != nullptr);
+void RenderNode::setStagingDisplayList(DisplayList&& newData) {
+    mValid = newData.isValid();
     mNeedsDisplayListSync = true;
-    delete mStagingDisplayList;
-    mStagingDisplayList = displayList;
+    mStagingDisplayList = std::move(newData);
+}
+
+void RenderNode::discardStagingDisplayList() {
+    setStagingDisplayList(DisplayList());
 }
 
 /**
@@ -101,32 +103,22 @@ void RenderNode::output(std::ostream& output, uint32_t level) {
 
     properties().debugOutputProperties(output, level + 1);
 
-    if (mDisplayList) {
-        mDisplayList->output(output, level);
-    }
+    mDisplayList.output(output, level);
     output << std::string(level * 2, ' ') << "/RenderNode(" << getName() << " " << this << ")";
     output << std::endl;
 }
 
 int RenderNode::getUsageSize() {
     int size = sizeof(RenderNode);
-    if (mStagingDisplayList) {
-        size += mStagingDisplayList->getUsedSize();
-    }
-    if (mDisplayList && mDisplayList != mStagingDisplayList) {
-        size += mDisplayList->getUsedSize();
-    }
+    size += mStagingDisplayList.getUsedSize();
+    size += mDisplayList.getUsedSize();
     return size;
 }
 
 int RenderNode::getAllocatedSize() {
     int size = sizeof(RenderNode);
-    if (mStagingDisplayList) {
-        size += mStagingDisplayList->getAllocatedSize();
-    }
-    if (mDisplayList && mDisplayList != mStagingDisplayList) {
-        size += mDisplayList->getAllocatedSize();
-    }
+    size += mStagingDisplayList.getAllocatedSize();
+    size += mDisplayList.getAllocatedSize();
     return size;
 }
 
@@ -242,9 +234,9 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
 
     bool willHaveFunctor = false;
     if (info.mode == TreeInfo::MODE_FULL && mStagingDisplayList) {
-        willHaveFunctor = mStagingDisplayList->hasFunctor();
+        willHaveFunctor = mStagingDisplayList.hasFunctor();
     } else if (mDisplayList) {
-        willHaveFunctor = mDisplayList->hasFunctor();
+        willHaveFunctor = mDisplayList.hasFunctor();
     }
     bool childFunctorsNeedLayer =
             mProperties.prepareForFunctorPresence(willHaveFunctor, functorsNeedLayer);
@@ -259,8 +251,8 @@ void RenderNode::prepareTreeImpl(TreeObserver& observer, TreeInfo& info, bool fu
     }
 
     if (mDisplayList) {
-        info.out.hasFunctors |= mDisplayList->hasFunctor();
-        bool isDirty = mDisplayList->prepareListAndChildren(
+        info.out.hasFunctors |= mDisplayList.hasFunctor();
+        bool isDirty = mDisplayList.prepareListAndChildren(
                 observer, info, childFunctorsNeedLayer,
                 [](RenderNode* child, TreeObserver& observer, TreeInfo& info,
                    bool functorsNeedLayer) {
@@ -314,16 +306,15 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     // Make sure we inc first so that we don't fluctuate between 0 and 1,
     // which would thrash the layer cache
     if (mStagingDisplayList) {
-        mStagingDisplayList->updateChildren([](RenderNode* child) { child->incParentRefCount(); });
+        mStagingDisplayList.updateChildren([](RenderNode* child) { child->incParentRefCount(); });
     }
     deleteDisplayList(observer, info);
-    mDisplayList = mStagingDisplayList;
-    mStagingDisplayList = nullptr;
+    mDisplayList = std::move(mStagingDisplayList);
     if (mDisplayList) {
         WebViewSyncData syncData {
             .applyForceDark = info && !info->disableForceDark
         };
-        mDisplayList->syncContents(syncData);
+        mDisplayList.syncContents(syncData);
         handleForceDark(info);
     }
 }
@@ -333,15 +324,18 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         return;
     }
     auto usage = usageHint();
-    const auto& children = mDisplayList->mChildNodes;
-    if (mDisplayList->hasText()) {
+    FatVector<RenderNode*, 6> children;
+    mDisplayList.updateChildren([&children](RenderNode* node) {
+        children.push_back(node);
+    });
+    if (mDisplayList.hasText()) {
         usage = UsageHint::Foreground;
     }
     if (usage == UsageHint::Unknown) {
         if (children.size() > 1) {
             usage = UsageHint::Background;
         } else if (children.size() == 1 &&
-                children.front().getRenderNode()->usageHint() !=
+                children.front()->usageHint() !=
                         UsageHint::Background) {
             usage = UsageHint::Background;
         }
@@ -350,7 +344,7 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
         // Crude overlap check
         SkRect drawn = SkRect::MakeEmpty();
         for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-            const auto& child = iter->getRenderNode();
+            const auto& child = *iter;
             // We use stagingProperties here because we haven't yet sync'd the children
             SkRect bounds = SkRect::MakeXYWH(child->stagingProperties().getX(), child->stagingProperties().getY(),
                     child->stagingProperties().getWidth(), child->stagingProperties().getHeight());
@@ -361,7 +355,7 @@ void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
             drawn.join(bounds);
         }
     }
-    mDisplayList->mDisplayList.applyColorTransform(
+    mDisplayList.applyColorTransform(
             usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
 }
 
@@ -378,20 +372,17 @@ void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo&
 
 void RenderNode::deleteDisplayList(TreeObserver& observer, TreeInfo* info) {
     if (mDisplayList) {
-        mDisplayList->updateChildren(
+        mDisplayList.updateChildren(
                 [&observer, info](RenderNode* child) { child->decParentRefCount(observer, info); });
-        if (!mDisplayList->reuseDisplayList(this)) {
-            delete mDisplayList;
-        }
+        mDisplayList.clear(this);
     }
-    mDisplayList = nullptr;
 }
 
 void RenderNode::destroyHardwareResources(TreeInfo* info) {
     if (hasLayer()) {
         this->setLayerSurface(nullptr);
     }
-    setStagingDisplayList(nullptr);
+    discardStagingDisplayList();
 
     ImmediateRemoved observer(info);
     deleteDisplayList(observer, info);
@@ -402,7 +393,7 @@ void RenderNode::destroyLayers() {
         this->setLayerSurface(nullptr);
     }
     if (mDisplayList) {
-        mDisplayList->updateChildren([](RenderNode* child) { child->destroyLayers(); });
+        mDisplayList.updateChildren([](RenderNode* child) { child->destroyLayers(); });
     }
 }
 

@@ -19,8 +19,9 @@
     <string name="app_label" msgid="4470785958457506021">"Metgeseltoestel-bestuurder"</string>
     <string name="chooser_title" msgid="2262294130493605839">"Kies \'n <xliff:g id="PROFILE_NAME">%1$s</xliff:g> om deur &lt;strong&gt;<xliff:g id="APP_NAME">%2$s</xliff:g>&lt;/strong&gt; bestuur te word"</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"toestel"</string>
+    <string name="profile_name_watch" msgid="576290739483672360">"horlosie"</string>
     <string name="confirmation_title" msgid="4751119145078041732">"Stel &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; om jou <xliff:g id="PROFILE_NAME">%2$s</xliff:g> te bestuur – &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;"</string>
-    <string name="profile_summary" msgid="3167701603666642104">"Jy het <xliff:g id="APP_NAME_0">%1$s</xliff:g> nodig om jou <xliff:g id="PROFILE_NAME_1">%2$s</xliff:g> te bestuur. <xliff:g id="APP_NAME2">%3$s</xliff:g> sal toegang hê tot <xliff:g id="PERMISSIONS">%4$s</xliff:g> terwyl die <xliff:g id="PROFILE_NAME2">%5$s</xliff:g> gekoppel is."</string>
+    <string name="profile_summary" msgid="2009764182871566255">"Jy het <xliff:g id="APP_NAME">%1$s</xliff:g> nodig om jou <xliff:g id="PROFILE_NAME">%2$s</xliff:g> te bestuur. <xliff:g id="PRIVILEGES_DISCPLAIMER">%3$s</xliff:g>"</string>
     <string name="consent_yes" msgid="4055438216605487056">"Ja"</string>
     <string name="consent_no" msgid="1335543792857823917">"Nee, dankie"</string>
 </resources>

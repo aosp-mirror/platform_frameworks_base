@@ -71,8 +71,8 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     }
 
     /*package*/
-    long finishRecording() {
-        return nFinishRecording(mNativeCanvasWrapper);
+    void finishRecording(RenderNode node) {
+        nFinishRecording(mNativeCanvasWrapper, node.mNativeRenderNode);
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -220,7 +220,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
             CanvasProperty<Float> progress, RuntimeShader shader) {
         nDrawRipple(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
                 radius.getNativeContainer(), paint.getNativeContainer(),
-                progress.getNativeContainer(), shader.getNativeShaderFactory());
+                progress.getNativeContainer(), shader.getNativeShaderBuilder());
     }
 
     /**
@@ -271,7 +271,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     @CriticalNative
     private static native void nEnableZ(long renderer, boolean enableZ);
     @CriticalNative
-    private static native long nFinishRecording(long renderer);
+    private static native void nFinishRecording(long renderer, long renderNode);
     @CriticalNative
     private static native void nDrawRenderNode(long renderer, long renderNode);
     @CriticalNative

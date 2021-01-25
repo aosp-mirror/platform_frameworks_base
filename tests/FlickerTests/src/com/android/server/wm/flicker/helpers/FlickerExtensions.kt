@@ -18,23 +18,29 @@ package com.android.server.wm.flicker.helpers
 
 import android.os.Bundle
 import android.os.RemoteException
-import android.os.SystemClock
 import android.platform.helpers.IAppHelper
 import android.view.Surface
 import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.startRotation
 
+/**
+ * Changes the device [rotation] and wait for the rotation animation to complete
+ *
+ * @param rotation New device rotation
+ */
 fun Flicker.setRotation(rotation: Int) {
     try {
         when (rotation) {
-            Surface.ROTATION_270 -> device.setOrientationLeft()
-            Surface.ROTATION_90 -> device.setOrientationRight()
+            Surface.ROTATION_270 -> device.setOrientationRight()
+            Surface.ROTATION_90 -> device.setOrientationLeft()
             Surface.ROTATION_0 -> device.setOrientationNatural()
             else -> device.setOrientationNatural()
         }
-        // Wait for animation to complete
-        SystemClock.sleep(1000)
+
+        wmHelper.waitForRotation(rotation)
+        wmHelper.waitForNavBarStatusBarVisible()
+        wmHelper.waitForAppTransitionIdle()
     } catch (e: RemoteException) {
         throw RuntimeException(e)
     }
@@ -63,17 +69,41 @@ fun buildTestTag(
  * Build a test tag for the test
  * @param testName Name of the transition(s) being tested
  * @param app App being launcher
- * @param rotation Screen rotation configuration for the test
+ * @param configuration Configuration for the test
  *
  * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
 </END_ROTATION></BEGIN_ROTATION></APP></NAME> */
+@JvmOverloads
+fun buildTestTag(
+    testName: String,
+    configuration: Bundle,
+    extraInfo: String = ""
+): String {
+    return buildTestTag(testName,
+        app = null,
+        beginRotation = configuration.startRotation,
+        endRotation = configuration.endRotation,
+        app2 = null,
+        extraInfo = extraInfo)
+}
+
+/**
+ * Build a test tag for the test
+ * @param testName Name of the transition(s) being tested
+ * @param app App being launcher
+ * @param configuration Configuration for the test
+ *
+ * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
+</END_ROTATION></BEGIN_ROTATION></APP></NAME> */
+@JvmOverloads
 fun buildTestTag(
     testName: String,
     app: IAppHelper?,
-    configuration: Bundle
+    configuration: Bundle,
+    extraInfo: String = ""
 ): String {
     return buildTestTag(testName, app?.launcherName ?: "", configuration.startRotation,
-        configuration.endRotation, app2 = null, extraInfo = "")
+        configuration.endRotation, app2 = null, extraInfo = extraInfo)
 }
 
 /**
@@ -89,13 +119,16 @@ fun buildTestTag(
 </EXTRA></NAME> */
 fun buildTestTag(
     testName: String,
-    app: String,
+    app: String?,
     beginRotation: Int,
     endRotation: Int,
     app2: String?,
     extraInfo: String
 ): String {
-    var testTag = "${testName}__$app"
+    var testTag = testName
+    if (app != null) {
+        testTag += "__$app"
+    }
     if (app2 != null) {
         testTag += "-$app2"
     }

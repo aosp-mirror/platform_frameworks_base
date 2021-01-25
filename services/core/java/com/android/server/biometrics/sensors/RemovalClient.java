@@ -25,13 +25,15 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
+
 import java.util.Map;
 
 /**
  * A class to keep track of the remove state for a given client.
  */
 public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier, T>
-        extends ClientMonitor<T> implements RemovalConsumer {
+        extends HalClientMonitor<T> implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
@@ -89,5 +91,10 @@ public abstract class RemovalClient<S extends BiometricAuthenticator.Identifier,
             }
             mCallback.onClientFinished(this, true /* success */);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_REMOVE;
     }
 }

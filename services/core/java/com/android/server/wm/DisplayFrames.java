@@ -39,6 +39,8 @@ import java.io.PrintWriter;
 public class DisplayFrames {
     public final int mDisplayId;
 
+    public final InsetsState mInsetsState;
+
     /**
      * The current visible size of the screen; really; (ir)regardless of whether the status bar can
      * be hidden but not extending into the overscan area.
@@ -47,9 +49,6 @@ public class DisplayFrames {
 
     /** The display cutout used for layout (after rotation) */
     @NonNull public WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
-
-    /** The cutout as supplied by display info */
-    @NonNull public WmDisplayCutout mDisplayInfoCutout = WmDisplayCutout.NO_CUTOUT;
 
     /**
      * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
@@ -61,8 +60,10 @@ public class DisplayFrames {
 
     public int mRotation;
 
-    public DisplayFrames(int displayId, DisplayInfo info, WmDisplayCutout displayCutout) {
+    public DisplayFrames(int displayId, InsetsState insetsState, DisplayInfo info,
+            WmDisplayCutout displayCutout) {
         mDisplayId = displayId;
+        mInsetsState = insetsState;
         onDisplayInfoUpdated(info, displayCutout);
     }
 
@@ -70,11 +71,9 @@ public class DisplayFrames {
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
         mRotation = info.rotation;
-        mDisplayInfoCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
-    }
+        mDisplayCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
 
-    public void onBeginLayout(InsetsState state) {
-        mDisplayCutout = mDisplayInfoCutout;
+        final InsetsState state = mInsetsState;
         final Rect unrestricted = mUnrestricted;
         final Rect safe = mDisplayCutoutSafe;
         final DisplayCutout cutout = mDisplayCutout.getDisplayCutout();

@@ -2589,6 +2589,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device is compatible with Android’s security model.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_SECURITY_MODEL_COMPATIBLE =
+            "android.hardware.security.model.compatible";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports the OpenGL ES
      * <a href="http://www.khronos.org/registry/gles/extensions/ANDROID/ANDROID_extension_pack_es31a.txt">
      * Android Extension Pack</a>.
@@ -3406,6 +3414,14 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
+     * The device supports translation of text-to-text in multiple languages via integration with
+     * the system {@link android.service.translation.TranslationService translation provider}.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TRANSLATION = "android.software.translation";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}:
      * The device implements headtracking suitable for a VR device.
      */
     @SdkConstant(SdkConstantType.FEATURE)
@@ -3505,6 +3521,17 @@ public abstract class PackageManager {
     public static final String FEATURE_TUNER = "android.hardware.tv.tuner";
 
     /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature}: The device supports a enabling/disabling sensor privacy for
+     * camera. When sensory privacy for the camera is enabled no camera data is send to clients,
+     * e.g. the view finder in a camera app would appear blank.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CAMERA_TOGGLE = "android.hardware.camera.toggle";
+
+    /**
      * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
      * the necessary changes to support app enumeration.
      *
@@ -3512,6 +3539,17 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_APP_ENUMERATION = "android.software.app_enumeration";
+
+    /**
+     * Feature for {@link android.view.WindowManager.LayoutParams.backgroundBlurRedius} and
+     * {@link android.graphics.drawable.BackgroundBlurDrawable}: the device supports cross-layer
+     * blurring.
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
 
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
@@ -4791,15 +4829,17 @@ public abstract class PackageManager {
     /**
      * Gets the package name of the component controlling runtime permissions.
      *
-     * @return The package name.
+     * @return the package name of the component controlling runtime permissions
      *
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
-    @UnsupportedAppUsage
     @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
-    public abstract String getPermissionControllerPackageName();
+    @UnsupportedAppUsage
+    public String getPermissionControllerPackageName() {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Add a new dynamic permission to the system.  For this to work, your

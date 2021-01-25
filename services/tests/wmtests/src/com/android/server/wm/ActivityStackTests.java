@@ -156,8 +156,10 @@ public class ActivityStackTests extends WindowTestsBase {
         organizer.setMoveToSecondaryOnEnter(false);
 
         // Create primary splitscreen stack.
-        final Task primarySplitScreen = mDefaultTaskDisplayArea.createRootTask(
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task primarySplitScreen = new TaskBuilder(mAtm.mTaskSupervisor)
+                .setParentTask(organizer.mPrimary)
+                .setOnTop(true)
+                .build();
 
         // Assert windowing mode.
         assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, primarySplitScreen.getWindowingMode());
@@ -205,14 +207,15 @@ public class ActivityStackTests extends WindowTestsBase {
     @Test
     public void testSplitScreenMoveToBack() {
         TestSplitOrganizer organizer = new TestSplitOrganizer(mAtm);
-        // Set up split-screen with primary on top and secondary containing the home task below
-        // another stack.
+        // Explicitly reparent task to primary split root to enter split mode, in which implies
+        // primary on top and secondary containing the home task below another stack.
         final Task primaryTask = mDefaultTaskDisplayArea.createRootTask(
-                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final Task secondaryTask = mDefaultTaskDisplayArea.createRootTask(
+                WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
         final Task homeRoot = mDefaultTaskDisplayArea.getRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
-        final Task secondaryTask = mDefaultTaskDisplayArea.createRootTask(
-                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        primaryTask.reparent(organizer.mPrimary, POSITION_TOP);
         mDefaultTaskDisplayArea.positionChildAt(POSITION_TOP, organizer.mPrimary,
                 false /* includingParents */);
 
@@ -1148,7 +1151,7 @@ public class ActivityStackTests extends WindowTestsBase {
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
         topActivity.info.flags |= FLAG_RESUME_WHILE_PAUSING;
 
-        task.startPausingLocked(false /* userLeaving */, false /* uiSleeping */, topActivity,
+        task.startPausingLocked(false /* uiSleeping */, topActivity,
                 "test");
         verify(task).completePauseLocked(anyBoolean(), eq(topActivity));
     }

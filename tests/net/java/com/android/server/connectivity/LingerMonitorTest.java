@@ -34,7 +34,9 @@ import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.INetd;
+import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkProvider;
@@ -76,6 +78,7 @@ public class LingerMonitorTest {
     @Mock Context mCtx;
     @Mock NetworkNotificationManager mNotifier;
     @Mock Resources mResources;
+    @Mock QosCallbackTracker mQosCallbackTracker;
 
     @Before
     public void setUp() {
@@ -353,9 +356,10 @@ public class LingerMonitorTest {
         NetworkCapabilities caps = new NetworkCapabilities();
         caps.addCapability(0);
         caps.addTransportType(transport);
-        NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info, null,
-                caps, 50, mCtx, null, null /* config */, mConnService, mNetd, mDnsResolver, mNMS,
-                NetworkProvider.ID_NONE, Binder.getCallingUid());
+        NetworkAgentInfo nai = new NetworkAgentInfo(null, new Network(netId), info,
+                new LinkProperties(), caps, 50, mCtx, null, new NetworkAgentConfig() /* config */,
+                mConnService, mNetd, mDnsResolver, mNMS, NetworkProvider.ID_NONE,
+                Binder.getCallingUid(), mQosCallbackTracker);
         nai.everValidated = true;
         return nai;
     }

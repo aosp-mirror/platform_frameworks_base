@@ -50,6 +50,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.util.MathUtils;
+import android.view.DisplayCutout;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -129,7 +130,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.KeyguardUserSwitcher;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
-import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
 
 import java.io.FileDescriptor;
@@ -266,8 +266,7 @@ public class NotificationPanelViewController extends PanelViewController {
                             && mAuthController.getUdfpsRegion() != null
                             && mAuthController.isUdfpsEnrolled(
                                    KeyguardUpdateMonitor.getCurrentUser())) {
-                        LayoutInflater.from(mView.getContext())
-                                .inflate(R.layout.disabled_udfps_view, mView);
+                        mLayoutInflater.inflate(R.layout.disabled_udfps_view, mView);
                         mDisabledUdfpsController = new DisabledUdfpsController(
                                 mView.findViewById(R.id.disabled_udfps_view),
                                 mStatusBarStateController,
@@ -279,7 +278,7 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
     };
 
-    private final InjectionInflationController mInjectionInflationController;
+    private final LayoutInflater mLayoutInflater;
     private final PowerManager mPowerManager;
     private final AccessibilityManager mAccessibilityManager;
     private final NotificationWakeUpCoordinator mWakeUpCoordinator;
@@ -346,6 +345,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private float mEmptyDragAmount;
     private float mDownX;
     private float mDownY;
+    private int mDisplayCutoutTopInset = 0; // in pixels
 
     private final KeyguardClockPositionAlgorithm
             mClockPositionAlgorithm =
@@ -477,6 +477,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private boolean mShowingKeyguardHeadsUp;
     private boolean mAllowExpandForSmallExpansion;
     private Runnable mExpandAfterLayoutRunnable;
+    private float mSectionPadding;
 
     /**
      * Is this a collapse that started on the panel where we should allow the panel to intercept
@@ -523,7 +524,7 @@ public class NotificationPanelViewController extends PanelViewController {
     @Inject
     public NotificationPanelViewController(NotificationPanelView view,
             @Main Resources resources,
-            InjectionInflationController injectionInflationController,
+            LayoutInflater layoutInflater,
             NotificationWakeUpCoordinator coordinator, PulseExpansionHandler pulseExpansionHandler,
             DynamicPrivacyController dynamicPrivacyController,
             KeyguardBypassController bypassController, FalsingManager falsingManager,
@@ -568,7 +569,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mQSDetailDisplayer = qsDetailDisplayer;
         mView.setWillNotDraw(!DEBUG);
-        mInjectionInflationController = injectionInflationController;
+        mLayoutInflater = layoutInflater;
         mFalsingManager = falsingManager;
         mFalsingCollector = falsingCollector;
         mPowerManager = powerManager;
@@ -774,8 +775,7 @@ public class NotificationPanelViewController extends PanelViewController {
         KeyguardStatusView keyguardStatusView = mView.findViewById(R.id.keyguard_status_view);
         int index = mView.indexOfChild(keyguardStatusView);
         mView.removeView(keyguardStatusView);
-        keyguardStatusView = (KeyguardStatusView) mInjectionInflationController.injectable(
-                LayoutInflater.from(mView.getContext())).inflate(
+        keyguardStatusView = (KeyguardStatusView) mLayoutInflater.inflate(
                 R.layout.keyguard_status_view, mView, false);
         mView.addView(keyguardStatusView, index);
 
@@ -786,8 +786,7 @@ public class NotificationPanelViewController extends PanelViewController {
         index = mView.indexOfChild(mKeyguardBottomArea);
         mView.removeView(mKeyguardBottomArea);
         KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
-        mKeyguardBottomArea = (KeyguardBottomAreaView) mInjectionInflationController.injectable(
-                LayoutInflater.from(mView.getContext())).inflate(
+        mKeyguardBottomArea = (KeyguardBottomAreaView) mLayoutInflater.inflate(
                 R.layout.keyguard_bottom_area, mView, false);
         mKeyguardBottomArea.initFrom(oldBottomArea);
         mView.addView(mKeyguardBottomArea, index);
@@ -897,9 +896,8 @@ public class NotificationPanelViewController extends PanelViewController {
             int bottomPadding = Math.max(mIndicationBottomPadding, mAmbientIndicationBottomPadding);
             int clockPreferredY = mKeyguardStatusViewController.getClockPreferredY(totalHeight);
             boolean bypassEnabled = mKeyguardBypassController.getBypassEnabled();
-            final boolean hasVisibleNotifications = !bypassEnabled
-                    && (mNotificationStackScrollLayoutController.getVisibleNotificationCount() != 0
-                    || mMediaDataManager.hasActiveMedia());
+            final boolean hasVisibleNotifications = mNotificationStackScrollLayoutController
+                    .getVisibleNotificationCount() != 0 || mMediaDataManager.hasActiveMedia();
             mKeyguardStatusViewController.setHasVisibleNotifications(hasVisibleNotifications);
             mClockPositionAlgorithm.setup(mStatusBarMinHeight, totalHeight - bottomPadding,
                     mNotificationStackScrollLayoutController.getIntrinsicContentHeight(),
@@ -913,7 +911,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding(),
                     mUpdateMonitor.shouldShowLockIcon(),
-                    getQsExpansionFraction());
+                    getQsExpansionFraction(),
+                    mDisplayCutoutTopInset);
             mClockPositionAlgorithm.run(mClockPositionResult);
             mKeyguardStatusViewController.updatePosition(
                     mClockPositionResult.clockX, mClockPositionResult.clockY,
@@ -1266,7 +1265,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private void traceQsJank(boolean startTracing, boolean wasCancelled) {
         InteractionJankMonitor monitor = InteractionJankMonitor.getInstance();
         if (startTracing) {
-            monitor.begin(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
+            monitor.begin(mView, CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
         } else {
             if (wasCancelled) {
                 monitor.cancel(CUJ_NOTIFICATION_SHADE_QS_EXPAND_COLLAPSE);
@@ -1479,7 +1478,7 @@ public class NotificationPanelViewController extends PanelViewController {
             return;
         }
         mExpectingSynthesizedDown = true;
-        InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
+        InteractionJankMonitor.getInstance().begin(mView, CUJ_NOTIFICATION_SHADE_EXPAND_COLLAPSE);
         onTrackingStarted();
         updatePanelExpanded();
     }
@@ -2412,6 +2411,21 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
+    protected void setIsShadeOpening(boolean isOpening) {
+        mNotificationStackScrollLayoutController.setIsShadeOpening(isOpening);
+    }
+
+    @Override
+    public void setSectionPadding(float padding) {
+        if (padding == mSectionPadding) {
+            return;
+        }
+        mSectionPadding = padding;
+        mQsFrame.setTranslationY(padding);
+        mNotificationStackScrollLayoutController.setSectionPadding(padding);
+    }
+
+    @Override
     protected void setOverExpansion(float overExpansion, boolean isPixels) {
         if (mConflictingQsExpansionGesture || mQsExpandImmediate) {
             return;
@@ -2498,19 +2512,6 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected boolean shouldExpandToTopOfClearAll(float targetHeight) {
-        boolean perform = super.shouldExpandToTopOfClearAll(targetHeight);
-        if (!perform) {
-            return false;
-        }
-        // Let's make sure we're not appearing but the animation will end below the appear.
-        // Otherwise quick settings would jump at the end of the animation.
-        float fraction = mNotificationStackScrollLayoutController
-                .calculateAppearFraction(targetHeight);
-        return fraction >= 1.0f;
-    }
-
-    @Override
     protected boolean shouldUseDismissingAnimation() {
         return mBarState != StatusBarState.SHADE && (mKeyguardStateController.canDismissLockScreen()
                 || !isTracking());
@@ -2526,11 +2527,6 @@ public class NotificationPanelViewController extends PanelViewController {
     @Override
     protected boolean isClearAllVisible() {
         return mNotificationStackScrollLayoutController.isFooterViewContentVisible();
-    }
-
-    @Override
-    protected int getClearAllHeightWithPadding() {
-        return mNotificationStackScrollLayoutController.getFooterViewHeightWithPadding();
     }
 
     @Override
@@ -3620,6 +3616,16 @@ public class NotificationPanelViewController extends PanelViewController {
             int oldState = mBarState;
             boolean keyguardShowing = statusBarState == KEYGUARD;
 
+            if (mDozeParameters.shouldControlUnlockedScreenOff() && isDozing() && keyguardShowing) {
+                // This means we're doing the screen off animation - position the keyguard status
+                // view where it'll be on AOD, so we can animate it in.
+                mKeyguardStatusViewController.updatePosition(
+                        mClockPositionResult.clockX,
+                        mClockPositionResult.clockYFullyDozing,
+                        mClockPositionResult.clockScale,
+                        false);
+            }
+
             mKeyguardStatusViewController.setKeyguardStatusViewVisibility(
                     statusBarState,
                     keyguardFadingAway,
@@ -3834,6 +3840,9 @@ public class NotificationPanelViewController extends PanelViewController {
 
     private class OnApplyWindowInsetsListener implements View.OnApplyWindowInsetsListener {
         public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+            final DisplayCutout displayCutout = v.getRootWindowInsets().getDisplayCutout();
+            mDisplayCutoutTopInset = displayCutout != null ? displayCutout.getSafeInsetTop() : 0;
+
             mNavigationBarBottomHeight = insets.getStableInsetBottom();
             updateMaxHeadsUpTranslation();
             return insets;

@@ -38,8 +38,10 @@
 
 using namespace std::literals;
 
-constexpr const char* kDataUsageStats = "android.permission.LOADER_USAGE_STATS";
+constexpr const char* kLoaderUsageStats = "android.permission.LOADER_USAGE_STATS";
 constexpr const char* kOpUsage = "android:loader_usage_stats";
+
+constexpr const char* kInteractAcrossUsers = "android.permission.INTERACT_ACROSS_USERS";
 
 namespace android::incremental {
 
@@ -63,6 +65,10 @@ struct Constants {
     static constexpr auto libSuffix = ".so"sv;
     static constexpr auto blockSize = 4096;
     static constexpr auto systemPackage = "android"sv;
+
+    static constexpr auto progressUpdateInterval = 1000ms;
+    static constexpr auto perUidTimeoutOffset = progressUpdateInterval * 2;
+    static constexpr auto minPerUidTimeout = progressUpdateInterval * 3;
 };
 
 static const Constants& constants() {
@@ -350,7 +356,8 @@ void IncrementalService::onDump(int fd) {
             dprintf(fd, "    storages (%d): {\n", int(mnt.storages.size()));
             for (auto&& [storageId, storage] : mnt.storages) {
                 dprintf(fd, "      [%d] -> [%s] (%d %% loaded) \n", storageId, storage.name.c_str(),
-                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()) * 100));
+                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()).getProgress() *
+                              100));
             }
             dprintf(fd, "    }\n");
 
@@ -419,12 +426,11 @@ auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
     }
 }
 
-StorageId IncrementalService::createStorage(std::string_view mountPoint,
-                                            content::pm::DataLoaderParamsParcel&& dataLoaderParams,
-                                            CreateOptions options,
-                                            const DataLoaderStatusListener& statusListener,
-                                            StorageHealthCheckParams&& healthCheckParams,
-                                            const StorageHealthListener& healthListener) {
+StorageId IncrementalService::createStorage(
+        std::string_view mountPoint, content::pm::DataLoaderParamsParcel&& dataLoaderParams,
+        CreateOptions options, const DataLoaderStatusListener& statusListener,
+        StorageHealthCheckParams&& healthCheckParams, const StorageHealthListener& healthListener,
+        const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
     LOG(INFO) << "createStorage: " << mountPoint << " | " << int(options);
     if (!path::isAbsolute(mountPoint)) {
         LOG(ERROR) << "path is not absolute: " << mountPoint;
@@ -497,7 +503,9 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         int cmd = controlParcel.cmd.release().release();
         int pendingReads = controlParcel.pendingReads.release().release();
         int logs = controlParcel.log.release().release();
-        control = mIncFs->createControl(cmd, pendingReads, logs);
+        int blocksWritten =
+                controlParcel.blocksWritten ? controlParcel.blocksWritten->release().release() : -1;
+        control = mIncFs->createControl(cmd, pendingReads, logs, blocksWritten);
     }
 
     std::unique_lock l(mLock);
@@ -553,19 +561,25 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
     if (auto err = addBindMount(*ifs, storageIt->first, storageIt->second.name,
                                 std::string(storageIt->second.name), std::move(mountNorm), bk, l);
         err < 0) {
-        LOG(ERROR) << "adding bind mount failed: " << -err;
+        LOG(ERROR) << "Adding bind mount failed: " << -err;
         return kInvalidStorageId;
     }
 
     // Done here as well, all data structures are in good state.
     secondCleanupOnFailure.release();
 
+    // DataLoader.
     auto dataLoaderStub = prepareDataLoader(*ifs, std::move(dataLoaderParams), &statusListener,
                                             std::move(healthCheckParams), &healthListener);
     CHECK(dataLoaderStub);
 
     mountIt->second = std::move(ifs);
     l.unlock();
+
+    // Per Uid timeouts.
+    if (!perUidReadTimeouts.empty()) {
+        setUidReadTimeouts(mountId, perUidReadTimeouts);
+    }
 
     if (mSystemReady.load(std::memory_order_relaxed) && !dataLoaderStub->requestCreate()) {
         // failed to create data loader
@@ -634,17 +648,17 @@ StorageId IncrementalService::findStorageId(std::string_view path) const {
     return it->second->second.storage;
 }
 
-void IncrementalService::disableReadLogs(StorageId storageId) {
+void IncrementalService::disallowReadLogs(StorageId storageId) {
     std::unique_lock l(mLock);
     const auto ifs = getIfsLocked(storageId);
     if (!ifs) {
-        LOG(ERROR) << "disableReadLogs failed, invalid storageId: " << storageId;
+        LOG(ERROR) << "disallowReadLogs failed, invalid storageId: " << storageId;
         return;
     }
-    if (!ifs->readLogsEnabled()) {
+    if (!ifs->readLogsAllowed()) {
         return;
     }
-    ifs->disableReadLogs();
+    ifs->disallowReadLogs();
     l.unlock();
 
     const auto metadata = constants().readLogsDisabledMarkerName;
@@ -669,15 +683,26 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
 
     const auto& params = ifs->dataLoaderStub->params();
     if (enableReadLogs) {
-        if (!ifs->readLogsEnabled()) {
+        if (!ifs->readLogsAllowed()) {
             LOG(ERROR) << "setStorageParams failed, readlogs disabled for storageId: " << storageId;
             return -EPERM;
         }
 
-        if (auto status = mAppOpsManager->checkPermission(kDataUsageStats, kOpUsage,
+        // Check loader usage stats permission and apop.
+        if (auto status = mAppOpsManager->checkPermission(kLoaderUsageStats, kOpUsage,
                                                           params.packageName.c_str());
             !status.isOk()) {
-            LOG(ERROR) << "checkPermission failed: " << status.toString8();
+            LOG(ERROR) << " Permission: " << kLoaderUsageStats
+                       << " check failed: " << status.toString8();
+            return fromBinderStatus(status);
+        }
+
+        // Check multiuser permission.
+        if (auto status = mAppOpsManager->checkPermission(kInteractAcrossUsers, nullptr,
+                                                          params.packageName.c_str());
+            !status.isOk()) {
+            LOG(ERROR) << " Permission: " << kInteractAcrossUsers
+                       << " check failed: " << status.toString8();
             return fromBinderStatus(status);
         }
     }
@@ -704,7 +729,12 @@ binder::Status IncrementalService::applyStorageParams(IncFsMount& ifs, bool enab
     }
 
     std::lock_guard l(mMountOperationLock);
-    return mVold->setIncFsMountOptions(control, enableReadLogs);
+    const auto status = mVold->setIncFsMountOptions(control, enableReadLogs);
+    if (status.isOk()) {
+        // Store enabled state.
+        ifs.setReadLogsEnabled(enableReadLogs);
+    }
+    return status;
 }
 
 void IncrementalService::deleteStorage(StorageId storageId) {
@@ -1052,6 +1082,74 @@ bool IncrementalService::startLoading(StorageId storage) const {
     return true;
 }
 
+void IncrementalService::setUidReadTimeouts(
+        StorageId storage, const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
+    using microseconds = std::chrono::microseconds;
+    using milliseconds = std::chrono::milliseconds;
+
+    auto maxPendingTimeUs = microseconds(0);
+    for (const auto& timeouts : perUidReadTimeouts) {
+        maxPendingTimeUs = std::max(maxPendingTimeUs, microseconds(timeouts.maxPendingTimeUs));
+    }
+    if (maxPendingTimeUs < Constants::minPerUidTimeout) {
+        return;
+    }
+
+    const auto ifs = getIfs(storage);
+    if (!ifs) {
+        return;
+    }
+
+    if (auto err = mIncFs->setUidReadTimeouts(ifs->control, perUidReadTimeouts); err < 0) {
+        LOG(ERROR) << "Setting read timeouts failed: " << -err;
+        return;
+    }
+
+    const auto timeout = std::chrono::duration_cast<milliseconds>(maxPendingTimeUs) -
+            Constants::perUidTimeoutOffset;
+    updateUidReadTimeouts(storage, Clock::now() + timeout);
+}
+
+void IncrementalService::clearUidReadTimeouts(StorageId storage) {
+    const auto ifs = getIfs(storage);
+    if (!ifs) {
+        return;
+    }
+
+    mIncFs->setUidReadTimeouts(ifs->control, {});
+}
+
+void IncrementalService::updateUidReadTimeouts(StorageId storage, Clock::time_point timeLimit) {
+    // Reached maximum timeout.
+    if (Clock::now() >= timeLimit) {
+        return clearUidReadTimeouts(storage);
+    }
+
+    // Still loading?
+    const auto progress = getLoadingProgress(storage);
+    if (progress.isError()) {
+        // Something is wrong, abort.
+        return clearUidReadTimeouts(storage);
+    }
+
+    if (progress.started() && progress.fullyLoaded()) {
+        // Fully loaded, check readLogs collection.
+        const auto ifs = getIfs(storage);
+        if (!ifs->readLogsEnabled()) {
+            return clearUidReadTimeouts(storage);
+        }
+    }
+
+    const auto timeLeft = timeLimit - Clock::now();
+    if (timeLeft < Constants::progressUpdateInterval) {
+        // Don't bother.
+        return clearUidReadTimeouts(storage);
+    }
+
+    addTimedJob(*mTimedQueue, storage, Constants::progressUpdateInterval,
+                [this, storage, timeLimit]() { updateUidReadTimeouts(storage, timeLimit); });
+}
+
 std::unordered_set<std::string_view> IncrementalService::adoptMountedInstances() {
     std::unordered_set<std::string_view> mountedRootNames;
     mIncFs->listExistingMounts([this, &mountedRootNames](auto root, auto backingDir, auto binds) {
@@ -1125,7 +1223,7 @@ std::unordered_set<std::string_view> IncrementalService::adoptMountedInstances()
 
         // Check if marker file present.
         if (checkReadLogsDisabledMarker(root)) {
-            ifs->disableReadLogs();
+            ifs->disallowReadLogs();
         }
 
         std::vector<std::pair<std::string, metadata::BindPoint>> permanentBindPoints;
@@ -1285,7 +1383,9 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
     int cmd = controlParcel.cmd.release().release();
     int pendingReads = controlParcel.pendingReads.release().release();
     int logs = controlParcel.log.release().release();
-    IncFsMount::Control control = mIncFs->createControl(cmd, pendingReads, logs);
+    int blocksWritten =
+            controlParcel.blocksWritten ? controlParcel.blocksWritten->release().release() : -1;
+    IncFsMount::Control control = mIncFs->createControl(cmd, pendingReads, logs, blocksWritten);
 
     auto ifs = std::make_shared<IncFsMount>(std::string(root), -1, std::move(control), *this);
 
@@ -1301,7 +1401,7 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
 
     // Check if marker file present.
     if (checkReadLogsDisabledMarker(mountTarget)) {
-        ifs->disableReadLogs();
+        ifs->disallowReadLogs();
     }
 
     // DataLoader params
@@ -1420,6 +1520,9 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
     fsControlParcel.incremental->cmd.reset(dup(ifs.control.cmd()));
     fsControlParcel.incremental->pendingReads.reset(dup(ifs.control.pendingReads()));
     fsControlParcel.incremental->log.reset(dup(ifs.control.logs()));
+    if (ifs.control.blocksWritten() >= 0) {
+        fsControlParcel.incremental->blocksWritten.emplace(dup(ifs.control.blocksWritten()));
+    }
     fsControlParcel.service = new IncrementalServiceConnector(*this, ifs.mountId);
 
     ifs.dataLoaderStub =
@@ -1705,7 +1808,7 @@ int IncrementalService::setFileContent(const IfsMountPtr& ifs, const incfs::File
     return 0;
 }
 
-int IncrementalService::isFileFullyLoaded(StorageId storage, const std::string& path) const {
+int IncrementalService::isFileFullyLoaded(StorageId storage, std::string_view filePath) const {
     std::unique_lock l(mLock);
     const auto ifs = getIfsLocked(storage);
     if (!ifs) {
@@ -1718,7 +1821,7 @@ int IncrementalService::isFileFullyLoaded(StorageId storage, const std::string& 
         return -EINVAL;
     }
     l.unlock();
-    return isFileFullyLoadedFromPath(*ifs, path);
+    return isFileFullyLoadedFromPath(*ifs, filePath);
 }
 
 int IncrementalService::isFileFullyLoadedFromPath(const IncFsMount& ifs,
@@ -1736,25 +1839,26 @@ int IncrementalService::isFileFullyLoadedFromPath(const IncFsMount& ifs,
     return totalBlocks - filledBlocks;
 }
 
-float IncrementalService::getLoadingProgress(StorageId storage) const {
+IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
+        StorageId storage) const {
     std::unique_lock l(mLock);
     const auto ifs = getIfsLocked(storage);
     if (!ifs) {
         LOG(ERROR) << "getLoadingProgress failed, invalid storageId: " << storage;
-        return -EINVAL;
+        return {-EINVAL, -EINVAL};
     }
     const auto storageInfo = ifs->storages.find(storage);
     if (storageInfo == ifs->storages.end()) {
         LOG(ERROR) << "getLoadingProgress failed, no storage: " << storage;
-        return -EINVAL;
+        return {-EINVAL, -EINVAL};
     }
     l.unlock();
     return getLoadingProgressFromPath(*ifs, storageInfo->second.name);
 }
 
-float IncrementalService::getLoadingProgressFromPath(const IncFsMount& ifs,
-                                                     std::string_view storagePath) const {
-    size_t totalBlocks = 0, filledBlocks = 0;
+IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPath(
+        const IncFsMount& ifs, std::string_view storagePath) const {
+    ssize_t totalBlocks = 0, filledBlocks = 0;
     const auto filePaths = mFs->listFilesRecursive(storagePath);
     for (const auto& filePath : filePaths) {
         const auto [filledBlocksCount, totalBlocksCount] =
@@ -1762,33 +1866,29 @@ float IncrementalService::getLoadingProgressFromPath(const IncFsMount& ifs,
         if (filledBlocksCount < 0) {
             LOG(ERROR) << "getLoadingProgress failed to get filled blocks count for: " << filePath
                        << " errno: " << filledBlocksCount;
-            return filledBlocksCount;
+            return {filledBlocksCount, filledBlocksCount};
         }
         totalBlocks += totalBlocksCount;
         filledBlocks += filledBlocksCount;
     }
 
-    if (totalBlocks == 0) {
-        // No file in the storage or files are empty; regarded as fully loaded
-        return 1;
-    }
-    return (float)filledBlocks / (float)totalBlocks;
+    return {filledBlocks, totalBlocks};
 }
 
 bool IncrementalService::updateLoadingProgress(
         StorageId storage, const StorageLoadingProgressListener& progressListener) {
     const auto progress = getLoadingProgress(storage);
-    if (progress < 0) {
+    if (progress.isError()) {
         // Failed to get progress from incfs, abort.
         return false;
     }
-    progressListener->onStorageLoadingProgressChanged(storage, progress);
-    if (progress > 1 - 0.001f) {
+    progressListener->onStorageLoadingProgressChanged(storage, progress.getProgress());
+    if (progress.fullyLoaded()) {
         // Stop updating progress once it is fully loaded
         return true;
     }
-    static constexpr auto kProgressUpdateInterval = 1000ms;
-    addTimedJob(*mProgressUpdateJobQueue, storage, kProgressUpdateInterval /* repeat after 1s */,
+    addTimedJob(*mProgressUpdateJobQueue, storage,
+                Constants::progressUpdateInterval /* repeat after 1s */,
                 [storage, progressListener, this]() {
                     updateLoadingProgress(storage, progressListener);
                 });

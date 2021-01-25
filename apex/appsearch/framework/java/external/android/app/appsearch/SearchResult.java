@@ -49,22 +49,16 @@ public final class SearchResult {
     /** @hide */
     public static final String MATCHES_FIELD = "matches";
 
-    @NonNull private final Bundle mBundle;
+    /** @hide */
+    public static final String PACKAGE_NAME_FIELD = "packageName";
 
-    @NonNull private final Bundle mDocumentBundle;
+    /** @hide */
+    public static final String DATABASE_NAME_FIELD = "databaseName";
+
+    @NonNull private final Bundle mBundle;
 
     /** Cache of the inflated document. Comes from inflating mDocumentBundle at first use. */
     @Nullable private GenericDocument mDocument;
-
-    /**
-     * Contains a list of MatchInfo bundles that matched the request.
-     *
-     * <p>Only populated when requested in both {@link SearchSpec.Builder#setSnippetCount} and
-     * {@link SearchSpec.Builder#setSnippetCountPerProperty}.
-     *
-     * @see #getMatches()
-     */
-    @NonNull private final List<Bundle> mMatchBundles;
 
     /** Cache of the inflated matches. Comes from inflating mMatchBundles at first use. */
     @Nullable private List<MatchInfo> mMatches;
@@ -72,8 +66,6 @@ public final class SearchResult {
     /** @hide */
     public SearchResult(@NonNull Bundle bundle) {
         mBundle = Preconditions.checkNotNull(bundle);
-        mDocumentBundle = Preconditions.checkNotNull(bundle.getBundle(DOCUMENT_FIELD));
-        mMatchBundles = Preconditions.checkNotNull(bundle.getParcelableArrayList(MATCHES_FIELD));
     }
 
     /** @hide */
@@ -90,7 +82,9 @@ public final class SearchResult {
     @NonNull
     public GenericDocument getDocument() {
         if (mDocument == null) {
-            mDocument = new GenericDocument(mDocumentBundle);
+            mDocument =
+                    new GenericDocument(
+                            Preconditions.checkNotNull(mBundle.getBundle(DOCUMENT_FIELD)));
         }
         return mDocument;
     }
@@ -106,13 +100,35 @@ public final class SearchResult {
     @NonNull
     public List<MatchInfo> getMatches() {
         if (mMatches == null) {
-            mMatches = new ArrayList<>(mMatchBundles.size());
-            for (int i = 0; i < mMatchBundles.size(); i++) {
-                MatchInfo matchInfo = new MatchInfo(getDocument(), mMatchBundles.get(i));
+            List<Bundle> matchBundles =
+                    Preconditions.checkNotNull(mBundle.getParcelableArrayList(MATCHES_FIELD));
+            mMatches = new ArrayList<>(matchBundles.size());
+            for (int i = 0; i < matchBundles.size(); i++) {
+                MatchInfo matchInfo = new MatchInfo(getDocument(), matchBundles.get(i));
                 mMatches.add(matchInfo);
             }
         }
         return mMatches;
+    }
+
+    /**
+     * Contains the package name of the app that stored the {@link GenericDocument}.
+     *
+     * @return Package name that stored the document
+     */
+    @NonNull
+    public String getPackageName() {
+        return Preconditions.checkNotNull(mBundle.getString(PACKAGE_NAME_FIELD));
+    }
+
+    /**
+     * Contains the database name that stored the {@link GenericDocument}.
+     *
+     * @return Database name that stored the document
+     */
+    @NonNull
+    public String getDatabaseName() {
+        return Preconditions.checkNotNull(mBundle.getString(DATABASE_NAME_FIELD));
     }
 
     /**

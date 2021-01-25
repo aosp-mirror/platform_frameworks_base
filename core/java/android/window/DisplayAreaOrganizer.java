@@ -92,6 +92,14 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_IME_PLACEHOLDER = FEATURE_SYSTEM_FIRST + 7;
 
     /**
+     * Display area for one handed background layer, which preventing when user
+     * turning the Dark theme on, they can not clearly identify the screen has entered
+     * one handed mode.
+     * @hide
+     */
+    public static final int FEATURE_ONE_HANDED_BACKGROUND_PANEL = FEATURE_SYSTEM_FIRST + 8;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;

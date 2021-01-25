@@ -225,8 +225,8 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Associer avec l\'appareil"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Code d\'association Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Échec de l\'association"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Vérifier que l\'appareil est connecté au même réseau."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Associer un appareil par Wi-Fi en numérisant un code QR"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Vérifiez que l\'appareil est connecté au même réseau."</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Associez l\'appareil par Wi-Fi en numérisant un code QR"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Association de l\'appareil en cours…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association de l\'appareil Soit le code QR est incorrect, soit l\'appareil n\'est pas connecté au même réseau."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresse IP et port"</string>
@@ -576,6 +576,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"Désactivées"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"Non configuré pour l\'utilisation des données cellulaires"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"Aucun signal"</string>

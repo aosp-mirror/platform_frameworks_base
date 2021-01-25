@@ -23,6 +23,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 
 import com.android.internal.view.AppearanceRegion;
 import com.android.server.notification.NotificationDelegate;
@@ -39,6 +40,9 @@ public interface StatusBarManagerInternal {
     void showRecentApps(boolean triggeredFromAltTab);
 
     void hideRecentApps(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
+
+    /** Collapses the notification shade. */
+    void collapsePanels();
 
     void dismissKeyboardShortcutsMenu();
     void toggleKeyboardShortcutsMenu(int deviceId);
@@ -81,7 +85,6 @@ public interface StatusBarManagerInternal {
 
     void startAssist(Bundle args);
     void onCameraLaunchGestureDetected(int source);
-    void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive);
     void setDisableFlags(int displayId, int flags, String cause);
     void toggleSplitScreen();
     void appTransitionFinished(int displayId);
@@ -125,9 +128,10 @@ public interface StatusBarManagerInternal {
      */
     void onRecentsAnimationStateChanged(boolean running);
 
-    /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAppearanceChanged */
-    void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme);
+    /** @see com.android.internal.statusbar.IStatusBar#onSystemBarAttributesChanged */
+    void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            @Behavior int behavior, boolean isFullscreen);
 
     /** @see com.android.internal.statusbar.IStatusBar#showTransient */
     void showTransient(int displayId, @InternalInsetsType int[] types);

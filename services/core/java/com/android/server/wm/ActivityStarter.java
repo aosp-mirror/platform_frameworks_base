@@ -110,6 +110,7 @@ import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Pools.SynchronizedPool;
 import android.util.Slog;
+import android.window.IRemoteTransition;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
@@ -118,6 +119,7 @@ import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
 import com.android.server.power.ShutdownCheckPoints;
+import com.android.server.statusbar.StatusBarManagerInternal;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
@@ -710,8 +712,12 @@ class ActivityStarter {
                 // WaitResult.
                 mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState, res,
                         mLastStartActivityRecord, originalOptions);
-                return getExternalResult(mRequest.waitResult == null ? res
-                        : waitForResult(res, mLastStartActivityRecord));
+                if (mRequest.waitResult != null) {
+                    mRequest.waitResult.result = res;
+                    res = waitResultIfNeeded(mRequest.waitResult, mLastStartActivityRecord,
+                            launchingState);
+                }
+                return getExternalResult(res);
             }
         } finally {
             onExecutionComplete();
@@ -796,48 +802,21 @@ class ActivityStarter {
     /**
      * Wait for activity launch completes.
      */
-    private int waitForResult(int res, ActivityRecord r) {
-        mRequest.waitResult.result = res;
-        switch(res) {
-            case START_SUCCESS: {
-                mSupervisor.mWaitingActivityLaunched.add(mRequest.waitResult);
-                do {
-                    try {
-                        mService.mGlobalLock.wait();
-                    } catch (InterruptedException e) {
-                    }
-                } while (mRequest.waitResult.result != START_TASK_TO_FRONT
-                        && !mRequest.waitResult.timeout && mRequest.waitResult.who == null);
-                if (mRequest.waitResult.result == START_TASK_TO_FRONT) {
-                    res = START_TASK_TO_FRONT;
-                }
-                break;
-            }
-            case START_DELIVERED_TO_TOP: {
-                mRequest.waitResult.timeout = false;
-                mRequest.waitResult.who = r.mActivityComponent;
-                mRequest.waitResult.totalTime = 0;
-                break;
-            }
-            case START_TASK_TO_FRONT: {
-                // ActivityRecord may represent a different activity, but it should not be
-                // in the resumed state.
-                if (r.nowVisible && r.isState(RESUMED)) {
-                    mRequest.waitResult.timeout = false;
-                    mRequest.waitResult.who = r.mActivityComponent;
-                    mRequest.waitResult.totalTime = 0;
-                } else {
-                    mSupervisor.waitActivityVisible(r.mActivityComponent, mRequest.waitResult);
-                    // Note: the timeout variable is not currently not ever set.
-                    do {
-                        try {
-                            mService.mGlobalLock.wait();
-                        } catch (InterruptedException e) {
-                        }
-                    } while (!mRequest.waitResult.timeout && mRequest.waitResult.who == null);
-                }
-                break;
-            }
+    private int waitResultIfNeeded(WaitResult waitResult, ActivityRecord r,
+            LaunchingState launchingState) {
+        final int res = waitResult.result;
+        if (res == START_DELIVERED_TO_TOP
+                || (res == START_TASK_TO_FRONT && r.nowVisible && r.isState(RESUMED))) {
+            // The activity should already be visible, so nothing to wait.
+            waitResult.timeout = false;
+            waitResult.who = r.mActivityComponent;
+            waitResult.totalTime = 0;
+            return res;
+        }
+        mSupervisor.waitActivityVisibleOrLaunched(waitResult, r, launchingState);
+        if (res == START_SUCCESS && waitResult.result == START_TASK_TO_FRONT) {
+            // A trampoline activity is launched and it brings another existing activity to front.
+            return START_TASK_TO_FRONT;
         }
         return res;
     }
@@ -1595,6 +1574,10 @@ class ActivityStarter {
         final Transition newTransition = (!mService.getTransitionController().isCollecting()
                 && mService.getTransitionController().getTransitionPlayer() != null)
                 ? mService.getTransitionController().createTransition(TRANSIT_OPEN) : null;
+        IRemoteTransition remoteTransition = r.takeRemoteTransition();
+        if (newTransition != null && remoteTransition != null) {
+            newTransition.setRemoteTransition(remoteTransition);
+        }
         mService.getTransitionController().collect(r);
         try {
             mService.deferWindowLayout();
@@ -1605,6 +1588,7 @@ class ActivityStarter {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityStack = handleStartResult(r, result);
             mService.continueWindowLayout();
+            mSupervisor.mUserLeaving = false;
 
             // Transition housekeeping
             if (!ActivityManager.isStartResultSuccessful(result)) {
@@ -1612,6 +1596,20 @@ class ActivityStarter {
                     newTransition.abort();
                 }
             } else {
+                if (!mAvoidMoveToFront && mDoResume
+                        && mRootWindowContainer.hasVisibleWindowAboveNotificationShade(
+                            r.launchedFromUid)) {
+                    // If the UID launching the activity has a visible window on top of the
+                    // notification shade and it's launching an activity that's going to be at the
+                    // front, we should move the shade out of the way so the user can see it.
+                    // We want to avoid the case where the activity is launched on top of a
+                    // background task which is not moved to the front.
+                    StatusBarManagerInternal statusBar = mService.getStatusBarManagerInternal();
+                    if (statusBar != null) {
+                        // This results in a async call since the interface is one-way
+                        statusBar.collapsePanels();
+                    }
+                }
                 if (result == START_SUCCESS || result == START_TASK_TO_FRONT) {
                     // The activity is started new rather than just brought forward, so record
                     // it as an existence change.
@@ -1619,7 +1617,7 @@ class ActivityStarter {
                 }
                 if (newTransition != null) {
                     mService.getTransitionController().requestStartTransition(newTransition,
-                            r.getTask());
+                            mTargetTask, remoteTransition);
                 } else {
                     // Make the collecting transition wait until this request is ready.
                     mService.getTransitionController().setReady(false);
@@ -1669,7 +1667,7 @@ class ActivityStarter {
         if (startedActivityStack != null && startedActivityStack.isAttached()
                 && !startedActivityStack.hasActivity()
                 && !startedActivityStack.isActivityTypeHome()) {
-            startedActivityStack.removeIfPossible();
+            startedActivityStack.removeIfPossible("handleStartResult");
             startedActivityStack = null;
         }
         return startedActivityStack;
@@ -1857,7 +1855,7 @@ class ActivityStarter {
                 return top.getTask();
             } else {
                 // Remove the stack if no activity in the stack.
-                stack.removeIfPossible();
+                stack.removeIfPossible("computeTargetTask");
             }
         }
         return null;
@@ -2343,6 +2341,7 @@ class ActivityStarter {
                 mDoResume = false;
                 mAvoidMoveToFront = true;
             }
+            mTargetRootTask = Task.fromWindowContainerToken(mOptions.getLaunchRootTask());
         }
 
         mNotTop = (mLaunchFlags & FLAG_ACTIVITY_PREVIOUS_IS_TOP) != 0 ? sourceRecord : null;

@@ -24,12 +24,13 @@ import android.hardware.common.NativeHandle;
 import android.hardware.keymaster.HardwareAuthToken;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Slog;
 
 /**
  * Test session that provides mostly no-ops.
  */
 public class TestSession extends ISession.Stub {
-    private static final String TAG = "TestSession";
+    private static final String TAG = "FaceTestSession";
 
     @NonNull
     private final Sensor.HalSessionCallback mHalSessionCallback;
@@ -49,7 +50,7 @@ public class TestSession extends ISession.Stub {
     }
 
     @Override
-    public ICancellationSignal enroll(int cookie, HardwareAuthToken hat,
+    public ICancellationSignal enroll(int cookie, byte enrollmentType, HardwareAuthToken hat,
             NativeHandle previewSurface) {
         return null;
     }
@@ -86,12 +87,16 @@ public class TestSession extends ISession.Stub {
 
     @Override
     public void getAuthenticatorId(int cookie) {
+        Slog.d(TAG, "getAuthenticatorId");
+        // Immediately return a value so the framework can continue with subsequent requests.
         mHalSessionCallback.onAuthenticatorIdRetrieved(0);
     }
 
     @Override
     public void invalidateAuthenticatorId(int cookie) {
-
+        Slog.d(TAG, "invalidateAuthenticatorId");
+        // Immediately return a value so the framework can continue with subsequent requests.
+        mHalSessionCallback.onAuthenticatorIdInvalidated(0);
     }
 
     @Override

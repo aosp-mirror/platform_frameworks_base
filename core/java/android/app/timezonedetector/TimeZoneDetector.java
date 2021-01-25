@@ -55,12 +55,6 @@ public interface TimeZoneDetector {
     String SHELL_COMMAND_IS_GEO_DETECTION_SUPPORTED = "is_geo_detection_supported";
 
     /**
-     * A shell command that prints the current user's "location enabled" setting.
-     * @hide
-     */
-    String SHELL_COMMAND_IS_LOCATION_ENABLED = "is_location_enabled";
-
-    /**
      * A shell command that prints the current user's "location-based time zone detection enabled"
      * setting.
      * @hide

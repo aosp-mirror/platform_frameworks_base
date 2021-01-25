@@ -344,6 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Método de Introdução"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Localização"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Localização Desativada"</string>
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Bloquear a câmara"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Desativar o som do microfone"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Dispositivo multimédia"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Apenas chamadas de emergência"</string>
@@ -353,8 +355,10 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Utilizador"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Novo utilizador"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
-    <skip />
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Seguras para aviões"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Redes disponíveis"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Redes indisponíveis"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Não Ligado"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Sem Rede"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi Desligado"</string>
@@ -412,6 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Gravação de ecrã"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Iniciar"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Parar"</string>
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Para continuar, a app &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa de acesso ao microfone do dispositivo."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Para continuar, a app &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; precisa de acesso à câmara do dispositivo."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Dispositivo"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Deslizar rapidamente para cima para mudar de app"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Arraste para a direita para mudar rapidamente de app."</string>
@@ -434,6 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Toque novamente para abrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Deslize rapidamente para cima para abrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Deslize rapidamente para cima para tentar novamente."</string>
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Desbloqueie para utilizar o NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Este dispositivo pertence à sua entidade."</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Este dispositivo pertence à entidade <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>."</string>
     <string name="phone_hint" msgid="6682125338461375925">"Deslize rapid. a partir do ícone para aceder ao telemóvel"</string>
@@ -456,11 +463,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Mostrar perfil"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Adicionar utilizador"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novo utilizador"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (2034481024623462357) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Pretende terminar a sessão de convidado?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Todas as aplicações e dados desta sessão serão eliminados."</string>
-    <!-- no translation found for guest_exit_guest_dialog_remove (8533184512885775423) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Terminar sessão"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Bem-vindo de volta, caro(a) convidado(a)!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Pretende continuar a sessão?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Recomeçar"</string>

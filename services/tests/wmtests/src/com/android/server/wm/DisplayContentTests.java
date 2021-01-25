@@ -65,7 +65,11 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
+import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -81,6 +85,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
@@ -89,6 +94,7 @@ import static org.mockito.Mockito.doCallRealMethod;
 import android.annotation.SuppressLint;
 import android.app.ActivityTaskManager;
 import android.app.WindowConfiguration;
+import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -298,22 +304,24 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(startingWin, imeTarget);
         startingWin.mHidden = false;
 
-        // Verify that an app window launching behind the starting window becomes the target
+        // Verify that the starting window still be an ime target even an app window launching
+        // behind it.
         final WindowState appWin = createWindow(null, TYPE_BASE_APPLICATION, activity, "appWin");
         appWin.setHasSurface(true);
         assertTrue(appWin.canBeImeTarget());
 
         imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
-        assertEquals(appWin, imeTarget);
+        assertEquals(startingWin, imeTarget);
         appWin.mHidden = false;
 
-        // Verify that an child window can be an ime target even behind a launching app window
+        // Verify that the starting window still be an ime target even the child window behind a
+        // launching app window
         final WindowState childWin = createWindow(appWin,
                 TYPE_APPLICATION_ATTACHED_DIALOG, "childWin");
         childWin.setHasSurface(true);
         assertTrue(childWin.canBeImeTarget());
         imeTarget = mDisplayContent.computeImeTarget(false /* updateImeTarget */);
-        assertEquals(childWin, imeTarget);
+        assertEquals(startingWin, imeTarget);
     }
 
     @UseTestDisplay(addAllCommonWindows = true)
@@ -538,6 +546,25 @@ public class DisplayContentTests extends WindowTestsBase {
         // Verify not waiting for drawn windows on display with system decorations.
         setDrawnState(WindowStateAnimator.HAS_DRAWN, windows);
         assertFalse(secondaryDisplay.shouldWaitForSystemDecorWindowsOnBoot());
+    }
+
+    @Test
+    public void testImeIsAttachedToDisplayForLetterboxedApp() {
+        final DisplayContent dc = mDisplayContent;
+        final WindowState ws = createWindow(null, TYPE_APPLICATION, dc, "app window");
+        dc.setImeLayeringTarget(ws);
+
+        // Adjust bounds so that matchesRootDisplayAreaBounds() returns false and
+        // hence isLetterboxedAppWindow() returns true.
+        ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
+        assertFalse("matchesRootDisplayAreaBounds() should return false",
+                ws.matchesRootDisplayAreaBounds());
+        assertTrue("isLetterboxedAppWindow() should return true", ws.isLetterboxedAppWindow());
+        assertTrue("IME shouldn't be attached to app",
+                dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
+                        .mActivityRecord.getSurfaceControl());
+        assertEquals("IME should be attached to display",
+                dc.getImeContainer().getParent().getSurfaceControl(), dc.computeImeParent());
     }
 
     private WindowState[] createNotDrawnWindowsOn(DisplayContent displayContent, int... types) {
@@ -870,6 +897,16 @@ public class DisplayContentTests extends WindowTestsBase {
                 newDisplay.getImeTarget(IME_TARGET_LAYERING));
         assertNull("default display Ime target: ",
                 mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+    }
+
+    @UseTestDisplay(addWindows = W_INPUT_METHOD)
+    @Test
+    public void testInputMethodSet_listenOnDisplayAreaConfigurationChanged() {
+        spyOn(mAtm);
+        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+
+        verify(mAtm).onImeWindowSetOnDisplayArea(
+                mImeWindow.mSession.mPid, mDisplayContent.getImeContainer());
     }
 
     @Test
@@ -1439,6 +1476,33 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testClearIntermediateFixedRotation() throws RemoteException {
+        final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        mDisplayContent.setFixedRotationLaunchingApp(activity,
+                (mDisplayContent.getRotation() + 1) % 4);
+        // Create a window so FixedRotationAdjustmentsItem can be sent.
+        createWindow(null, TYPE_APPLICATION_STARTING, activity, "AppWin");
+        final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
+        activity2.setVisible(false);
+        clearInvocations(mAtm.getLifecycleManager());
+        // The first activity has applied fixed rotation but the second activity becomes the top
+        // before the transition is done and it has the same rotation as display, so the dispatched
+        // rotation adjustment of first activity must be cleared.
+        mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(activity2,
+                false /* checkOpening */);
+
+        final ArgumentCaptor<FixedRotationAdjustmentsItem> adjustmentsCaptor =
+                ArgumentCaptor.forClass(FixedRotationAdjustmentsItem.class);
+        verify(mAtm.getLifecycleManager(), atLeastOnce()).scheduleTransaction(
+                eq(activity.app.getThread()), adjustmentsCaptor.capture());
+        assertFalse(activity.hasFixedRotationTransform());
+        final FixedRotationAdjustmentsItem clearAdjustments = FixedRotationAdjustmentsItem.obtain(
+                activity.token, null /* fixedRotationAdjustments */);
+        // The captor may match other items. The first one must be the item to clear adjustments.
+        assertEquals(clearAdjustments, adjustmentsCaptor.getAllValues().get(0));
+    }
+
+    @Test
     public void testRemoteRotation() {
         DisplayContent dc = createNewDisplay();
 
@@ -1584,12 +1648,11 @@ public class DisplayContentTests extends WindowTestsBase {
             // The assertion will fail if DisplayArea#ensureActivitiesVisible is called twice.
             assertFalse(called[0]);
             called[0] = true;
-            mDisplayContent.ensureActivitiesVisible(null, 0, false, false, false);
+            mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
             return null;
-        }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean(),
-                anyBoolean());
+        }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean());
 
-        mDisplayContent.ensureActivitiesVisible(null, 0, false, false, false);
+        mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
     }
 
     @Test
@@ -1674,6 +1737,63 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(mDisplayContent).computeImeTarget(true);
         assertNull(mDisplayContent.getImeTarget(IME_TARGET_INPUT));
         verify(child1, never()).needsRelativeLayeringToIme();
+    }
+
+    @UseTestDisplay(addWindows = {W_INPUT_METHOD}, addAllCommonWindows = true)
+    @Test
+    public void testAttachAndShowImeScreenshotOnTarget() {
+        // Preparation: Simulate screen state is on.
+        spyOn(mWm.mPolicy);
+        doReturn(true).when(mWm.mPolicy).isScreenOn();
+
+        // Preparation: Simulate snapshot IME surface.
+        spyOn(mWm.mTaskSnapshotController);
+        doReturn(mock(SurfaceControl.ScreenshotHardwareBuffer.class)).when(
+                mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(any());
+        final SurfaceControl imeSurface = mock(SurfaceControl.class);
+        spyOn(imeSurface);
+        doReturn(true).when(imeSurface).isValid();
+        doReturn(imeSurface).when(mDisplayContent).createImeSurface(any(), any());
+
+        // Preparation: Simulate snapshot Task.
+        ActivityRecord act1 = createActivityRecord(mDisplayContent);
+        final WindowState appWin1 = createWindow(null, TYPE_BASE_APPLICATION, act1, "appWin1");
+        spyOn(appWin1);
+        spyOn(appWin1.mWinAnimator);
+        appWin1.setHasSurface(true);
+        assertTrue(appWin1.canBeImeTarget());
+        doReturn(true).when(appWin1.mWinAnimator).getShown();
+        doReturn(true).when(appWin1.mActivityRecord).isSurfaceShowing();
+        appWin1.mWinAnimator.mLastAlpha = 1f;
+
+        // Test step 1: appWin1 is the current IME target and soft-keyboard is visible.
+        mDisplayContent.computeImeTarget(true);
+        assertEquals(appWin1, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+        spyOn(mDisplayContent.mInputMethodWindow);
+        doReturn(true).when(mDisplayContent.mInputMethodWindow).isVisible();
+        mDisplayContent.getInsetsStateController().getImeSourceProvider().setImeShowing(true);
+
+        // Test step 2: Simulate launching appWin2 and appWin1 is in app transition.
+        ActivityRecord act2 = createActivityRecord(mDisplayContent);
+        final WindowState appWin2 = createWindow(null, TYPE_BASE_APPLICATION, act2, "appWin2");
+        appWin2.setHasSurface(true);
+        assertTrue(appWin2.canBeImeTarget());
+        doReturn(true).when(appWin1).isAnimating(PARENTS | TRANSITION,
+                ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_RECENTS);
+
+        // Test step 3: Verify appWin2 will be the next IME target and the IME snapshot surface will
+        // be shown at this time.
+        final Transaction t = mDisplayContent.getPendingTransaction();
+        spyOn(t);
+        mDisplayContent.setImeInputTarget(appWin2);
+        mDisplayContent.computeImeTarget(true);
+        assertEquals(appWin2, mDisplayContent.getImeTarget(IME_TARGET_LAYERING));
+        assertTrue(mDisplayContent.isImeAttachedToApp());
+
+        verify(mDisplayContent, atLeast(1)).attachAndShowImeScreenshotOnTarget();
+        verify(mWm.mTaskSnapshotController).snapshotImeFromAttachedTask(appWin1.getTask());
+        assertNotNull(mDisplayContent.mImeScreenshot);
+        verify(t).show(mDisplayContent.mImeScreenshot);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

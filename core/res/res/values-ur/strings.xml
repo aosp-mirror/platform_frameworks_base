@@ -57,7 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"‏ان کمنگ کالر ID"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"‏آؤٹ گوئنگ کالر ID"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"‏آؤٹ گوئنگ کالر ID چھپائیں"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"‏منسلک لائن ID"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"‏منسلک لائن ID کی پابندی"</string>
     <string name="CfMmi" msgid="8390012691099787178">"کال فارورڈنگ"</string>
@@ -146,6 +146,9 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"‏Wi-Fi پر کال کریں"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"موبائل نیٹ ورک پر کال کریں"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"‏صرف Wi-Fi"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"‏<xliff:g id="SPN">%s</xliff:g> کراس sim کالنگ"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> : فارورڈ نہیں کی گئی"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> بعد از <xliff:g id="TIME_DELAY">{2}</xliff:g> سیکنڈ"</string>
@@ -200,6 +203,8 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"سینسر نوٹیفکیشن سروس"</string>
     <string name="twilight_service" msgid="8964898045693187224">"شفقی سروس"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"ٹائم زون ڈیٹیکٹر (کوئی کنیکٹوٹی نہیں ہے)"</string>
+    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"آپ کا آلہ صاف کر دیا جائے گا"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"منتظم کی ایپ استعمال نہیں کی جا سکتی۔ آپ کا آلہ اب مٹا دیا جائے گا۔\n\nاگر آپ کے سوالات ہیں تو اپنی تنظیم کے منتظم سے رابطہ کریں۔"</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> نے پرنٹنگ کو غیر فعال کر دیا ہے۔"</string>
@@ -2200,4 +2205,12 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"اب آپ اپنی تمام یا کچھ اسکرین کو بڑا کر سکتے ہیں"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ترتیبات میں آن کریں"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"برخاست کریں"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
+    <skip />
 </resources>

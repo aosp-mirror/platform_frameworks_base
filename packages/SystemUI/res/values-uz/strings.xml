@@ -344,6 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Joylashuv"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Joylashuvni aniqlash xizmati yoqilmagan"</string>
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Kamerani bloklash"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Mikrofonni oʻchirish"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Media qurilma"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Favqulodda chaqiruvlar"</string>
@@ -353,8 +355,10 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Foydalanuvchi"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Yangi foydalanuvchi"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
-    <skip />
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Samolyot uchun xavfsiz"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Tarmoqlar mavjud"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Tarmoqqa ulanish imkonsiz"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Ulanmagan"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Tarmoq mavjud emas"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi o‘chiq"</string>
@@ -412,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Ekranni yozib olish"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Boshlash"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Toʻxtatish"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Qurilma"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Ilovalarni almashtirish uchun ekranni tepaga suring"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Ilovalarni tezkor almashtirish uchun o‘ngga torting"</string>
@@ -434,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ochish uchun yana bosing"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ochish uchun tepaga suring"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Qayta urinish uchun tepaga suring"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Bu qurilma tashkilotingizga tegishli"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Bu qurilma <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tashkilotiga tegishli"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefonni ochish uchun suring"</string>

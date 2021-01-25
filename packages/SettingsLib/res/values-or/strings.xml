@@ -114,7 +114,7 @@
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="7689393730163320483">"ଶ୍ରବଣ ଯନ୍ତ୍ର ପାଇଁ ବ୍ୟବହାର କରନ୍ତୁ"</string>
     <string name="bluetooth_pairing_accept" msgid="2054232610815498004">"ପେୟାର୍‌"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="2734383073450506220">"ପେୟାର୍‌"</string>
-    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"କ୍ୟାନ୍ସଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="bluetooth_pairing_decline" msgid="6483118841204885890">"ବାତିଲ୍‌ କରନ୍ତୁ"</string>
     <string name="bluetooth_pairing_will_share_phonebook" msgid="3064334458659165176">"ପେୟାରିଂ ଫଳରେ ସଂଯୁକ୍ତ ଥିବା ବେଳେ ଆପଣଙ୍କ ସମ୍ପର୍କଗୁଡ଼ିକୁ ଏବଂ କଲ୍‌ର ଇତିବୃତିକୁ ଆକସେସ୍‌ ମଞ୍ଜୁର ହୁଏ।"</string>
     <string name="bluetooth_pairing_error_message" msgid="6626399020672335565">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> ସହ ପେୟାର୍‌ କରିହେଲା ନାହିଁ।"</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="264422127613704940">"ଏକ ଭୁଲ୍‌ PIN କିମ୍ବା ପାସକୀ କାରଣରୁ <xliff:g id="DEVICE_NAME">%1$s</xliff:g> ସହ ପେୟାର୍‌ କରିପାରିଲା ନାହିଁ।"</string>
@@ -497,7 +497,7 @@
     </plurals>
     <string name="accessibility_manual_zen_more_time" msgid="5141801092071134235">"ଅଧିକ ସମୟ।"</string>
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"କମ୍ ସମୟ।"</string>
-    <string name="cancel" msgid="5665114069455378395">"କ୍ୟାନ୍ସଲ୍"</string>
+    <string name="cancel" msgid="5665114069455378395">"ବାତିଲ୍"</string>
     <string name="okay" msgid="949938843324579502">"ଠିକ୍‌ ଅଛି"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\" ଅନ୍ କରନ୍ତୁ"</string>
@@ -553,8 +553,7 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"ନୂଆ ଉପଯୋଗକର୍ତ୍ତା ତିଆରି କରାଯାଉଛି…"</string>
     <string name="user_nickname" msgid="262624187455825083">"ଡାକନାମ"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"ଅତିଥି ଯୋଗ କରନ୍ତୁ"</string>
-    <!-- no translation found for guest_exit_guest (4754204715192830850) -->
-    <skip />
+    <string name="guest_exit_guest" msgid="4754204715192830850">"ଅତିଥି ସେସନ୍ ଶେଷ କରନ୍ତୁ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ଅତିଥି"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"ଗୋଟିଏ ଫଟୋ ଉଠାନ୍ତୁ"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"ଏକ ଛବି ବାଛନ୍ତୁ"</string>
@@ -577,6 +576,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"ମୋବାଇଲ୍‌ ଡାଟା ବନ୍ଦ ଅଛି"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"ବ୍ୟବହୃତ ଡାଟା ପାଇଁ ସେଟ୍ ହୋଇନାହିଁ"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"କୌଣସି ଫୋନ୍ ନାହିଁ।"</string>

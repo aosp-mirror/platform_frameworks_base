@@ -38,6 +38,7 @@ import android.app.ActivityOptions;
 import android.app.ExitTransitionCoordinator;
 import android.app.ExitTransitionCoordinator.ExitTransitionCallbacks;
 import android.app.Notification;
+import android.app.WindowContext;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -60,6 +61,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Display;
+import android.view.DisplayAddress;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -80,7 +82,7 @@ import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
 import com.android.systemui.util.DeviceConfigProxy;
 
 import java.util.List;
@@ -114,17 +116,17 @@ public class ScreenshotController {
      */
     static class SavedImageData {
         public Uri uri;
-        public Supplier<ShareTransition> shareTransition;
-        public Notification.Action editAction;
+        public Supplier<ActionTransition> shareTransition;
+        public Supplier<ActionTransition> editTransition;
         public Notification.Action deleteAction;
         public List<Notification.Action> smartActions;
 
         /**
-         * POD for shared element transition to share sheet.
+         * POD for shared element transition.
          */
-        static class ShareTransition {
+        static class ActionTransition {
             public Bundle bundle;
-            public Notification.Action shareAction;
+            public Notification.Action action;
             public Runnable onCancelRunnable;
         }
 
@@ -134,7 +136,7 @@ public class ScreenshotController {
         public void reset() {
             uri = null;
             shareTransition = null;
-            editAction = null;
+            editTransition = null;
             deleteAction = null;
             smartActions = null;
         }
@@ -165,7 +167,7 @@ public class ScreenshotController {
     // From WizardManagerHelper.java
     private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
-    private final Context mContext;
+    private final WindowContext mContext;
     private final ScreenshotNotificationsController mNotificationsController;
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final UiEventLogger mUiEventLogger;
@@ -175,13 +177,13 @@ public class ScreenshotController {
 
     private final WindowManager mWindowManager;
     private final WindowManager.LayoutParams mWindowLayoutParams;
-    private final DisplayMetrics mDisplayMetrics;
     private final AccessibilityManager mAccessibilityManager;
     private final MediaActionSound mCameraSound;
     private final ScrollCaptureClient mScrollCaptureClient;
     private final DeviceConfigProxy mConfigProxy;
     private final PhoneWindow mWindow;
     private final View mDecorView;
+    private final DisplayManager mDisplayManager;
 
     private final Binder mWindowToken;
     private ScreenshotView mScreenshotView;
@@ -237,10 +239,9 @@ public class ScreenshotController {
         mMainExecutor = mainExecutor;
         mBgExecutor = bgExecutor;
 
-        final DisplayManager dm = requireNonNull(context.getSystemService(DisplayManager.class));
-        final Display display = dm.getDisplay(DEFAULT_DISPLAY);
-        final Context displayContext = context.createDisplayContext(display);
-        mContext = displayContext.createWindowContext(TYPE_SCREENSHOT, null);
+        mDisplayManager = requireNonNull(context.getSystemService(DisplayManager.class));
+        final Context displayContext = context.createDisplayContext(getDefaultDisplay());
+        mContext = (WindowContext) displayContext.createWindowContext(TYPE_SCREENSHOT, null);
         mWindowManager = mContext.getSystemService(WindowManager.class);
 
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
@@ -275,9 +276,6 @@ public class ScreenshotController {
 
         reloadAssets();
 
-        mDisplayMetrics = new DisplayMetrics();
-        display.getRealMetrics(mDisplayMetrics);
-
         // Setup the Camera shutter sound
         mCameraSound = new MediaActionSound();
         mCameraSound.load(MediaActionSound.SHUTTER_CLICK);
@@ -286,9 +284,11 @@ public class ScreenshotController {
     void takeScreenshotFullscreen(Consumer<Uri> finisher, Runnable onComplete) {
         mOnCompleteRunnable = onComplete;
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getDefaultDisplay().getRealMetrics(displayMetrics);
         takeScreenshotInternal(
                 finisher,
-                new Rect(0, 0, mDisplayMetrics.widthPixels, mDisplayMetrics.heightPixels));
+                new Rect(0, 0, displayMetrics.widthPixels, displayMetrics.heightPixels));
     }
 
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
@@ -349,6 +349,17 @@ public class ScreenshotController {
         } else {
             mScreenshotView.animateDismissal();
         }
+    }
+
+    boolean isPendingSharedTransition() {
+        return mScreenshotView.isPendingSharedTransition();
+    }
+
+    /**
+     * Release the constructed window context.
+     */
+    void releaseContext() {
+        mContext.release();
     }
 
     /**
@@ -427,15 +438,27 @@ public class ScreenshotController {
         Rect screenRect = new Rect(crop);
         int width = crop.width();
         int height = crop.height();
-        final IBinder displayToken = SurfaceControl.getInternalDisplayToken();
-        final SurfaceControl.DisplayCaptureArgs captureArgs =
-                new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
-                        .setSourceCrop(crop)
-                        .setSize(width, height)
-                        .build();
-        final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
-                SurfaceControl.captureDisplay(captureArgs);
-        Bitmap screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+
+        Bitmap screenshot = null;
+        final Display display = getDefaultDisplay();
+        final DisplayAddress address = display.getAddress();
+        if (!(address instanceof DisplayAddress.Physical)) {
+            Log.e(TAG, "Skipping Screenshot - Default display does not have a physical address: "
+                    + display);
+        } else {
+            final DisplayAddress.Physical physicalAddress = (DisplayAddress.Physical) address;
+
+            final IBinder displayToken = SurfaceControl.getPhysicalDisplayToken(
+                    physicalAddress.getPhysicalDisplayId());
+            final SurfaceControl.DisplayCaptureArgs captureArgs =
+                    new SurfaceControl.DisplayCaptureArgs.Builder(displayToken)
+                            .setSourceCrop(crop)
+                            .setSize(width, height)
+                            .build();
+            final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
+                    SurfaceControl.captureDisplay(captureArgs);
+            screenshot = screenshotBuffer == null ? null : screenshotBuffer.asBitmap();
+        }
 
         if (screenshot == null) {
             Log.e(TAG, "takeScreenshotInternal: Screenshot bitmap was null");
@@ -618,7 +641,7 @@ public class ScreenshotController {
         }
 
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, mImageExporter,
-                mScreenshotSmartActions, data, getShareTransitionSupplier());
+                mScreenshotSmartActions, data, getActionTransitionSupplier());
         mSaveInBgTask.execute();
     }
 
@@ -672,7 +695,7 @@ public class ScreenshotController {
      * Supplies the necessary bits for the shared element transition to share sheet.
      * Note that once supplied, the action intent to share must be sent immediately after.
      */
-    private Supplier<ShareTransition> getShareTransitionSupplier() {
+    private Supplier<ActionTransition> getActionTransitionSupplier() {
         return () -> {
             ExitTransitionCallbacks cb = new ExitTransitionCallbacks() {
                 @Override
@@ -681,7 +704,13 @@ public class ScreenshotController {
                 }
 
                 @Override
-                public void onFinish() { }
+                public void hideSharedElements() {
+                    resetScreenshotView();
+                }
+
+                @Override
+                public void onFinish() {
+                }
             };
 
             Pair<ActivityOptions, ExitTransitionCoordinator> transition =
@@ -690,7 +719,7 @@ public class ScreenshotController {
                                     ChooserActivity.FIRST_IMAGE_PREVIEW_TRANSITION_NAME));
             transition.second.startExit();
 
-            ShareTransition supply = new ShareTransition();
+            ActionTransition supply = new ActionTransition();
             supply.bundle = transition.first.toBundle();
             supply.onCancelRunnable = () -> ActivityOptions.stopSharedElementAnimation(mWindow);
             return supply;
@@ -732,6 +761,10 @@ public class ScreenshotController {
         if (mDecorView.isAttachedToWindow()) {
             mWindowManager.updateViewLayout(mDecorView, mWindowLayoutParams);
         }
+    }
+
+    private Display getDefaultDisplay() {
+        return mDisplayManager.getDisplay(DEFAULT_DISPLAY);
     }
 
     /** Does the aspect ratio of the bitmap with insets removed match the bounds. */

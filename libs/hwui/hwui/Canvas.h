@@ -21,7 +21,6 @@
 #include <SaveFlags.h>
 
 #include <androidfw/ResourceTypes.h>
-#include "DisplayList.h"
 #include "Properties.h"
 #include "utils/Macros.h"
 
@@ -31,7 +30,7 @@
 
 class SkAnimatedImage;
 class SkCanvasState;
-class SkRuntimeEffect;
+class SkRuntimeShaderBuilder;
 class SkVertices;
 
 namespace minikin {
@@ -118,7 +117,7 @@ public:
 
     virtual void resetRecording(int width, int height,
                                 uirenderer::RenderNode* renderNode = nullptr) = 0;
-    virtual uirenderer::DisplayList* finishRecording() = 0;
+    virtual void finishRecording(uirenderer::RenderNode* destination) = 0;
     virtual void enableZ(bool enableZ) = 0;
 
     bool isHighContrastText() const { return uirenderer::Properties::enableHighContrastText; }
@@ -139,7 +138,7 @@ public:
                             uirenderer::CanvasPropertyPrimitive* radius,
                             uirenderer::CanvasPropertyPaint* paint,
                             uirenderer::CanvasPropertyPrimitive* progress,
-                            sk_sp<SkRuntimeEffect> runtimeEffect) = 0;
+                            const SkRuntimeShaderBuilder& effectBuilder) = 0;
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) = 0;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) = 0;

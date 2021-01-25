@@ -25,9 +25,11 @@ import android.app.appsearch.GenericDocument;
 import android.app.appsearch.GetByUriRequest;
 import android.app.appsearch.SearchResult;
 import android.app.appsearch.SearchResultsShim;
+import android.app.appsearch.SetSchemaResponse;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Future;
 
 public class AppSearchTestUtils {
@@ -39,6 +41,15 @@ public class AppSearchTestUtils {
                 .that(result.isSuccess())
                 .isTrue();
         return result;
+    }
+
+    // TODO(b/151178558) check setSchemaResponse.xxxtypes for the test need to verify.
+    public static void checkIsSetSchemaResponseSuccess(Future<SetSchemaResponse> future)
+            throws Exception {
+        SetSchemaResponse setSchemaResponse = future.get();
+        assertWithMessage("SetSchemaResponse not successful.")
+                .that(setSchemaResponse.isSuccess())
+                .isTrue();
     }
 
     public static List<GenericDocument> doGet(
@@ -53,6 +64,20 @@ public class AppSearchTestUtils {
         assertThat(result.getSuccesses()).hasSize(uris.length);
         assertThat(result.getFailures()).isEmpty();
         List<GenericDocument> list = new ArrayList<>(uris.length);
+        for (String uri : uris) {
+            list.add(result.getSuccesses().get(uri));
+        }
+        return list;
+    }
+
+    public static List<GenericDocument> doGet(AppSearchSessionShim session, GetByUriRequest request)
+            throws Exception {
+        AppSearchBatchResult<String, GenericDocument> result =
+                checkIsBatchResultSuccess(session.getByUri(request));
+        Set<String> uris = request.getUris();
+        assertThat(result.getSuccesses()).hasSize(uris.size());
+        assertThat(result.getFailures()).isEmpty();
+        List<GenericDocument> list = new ArrayList<>(uris.size());
         for (String uri : uris) {
             list.add(result.getSuccesses().get(uri));
         }

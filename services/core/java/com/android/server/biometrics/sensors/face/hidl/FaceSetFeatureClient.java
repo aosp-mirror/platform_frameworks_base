@@ -25,8 +25,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.util.ArrayList;
 
@@ -34,7 +35,7 @@ import java.util.ArrayList;
  * Face-specific setFeature client supporting the {@link android.hardware.biometrics.face.V1_0}
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
-public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
+public class FaceSetFeatureClient extends HalClientMonitor<IBiometricsFace> {
 
     private static final String TAG = "FaceSetFeatureClient";
 
@@ -87,5 +88,10 @@ public class FaceSetFeatureClient extends ClientMonitor<IBiometricsFace> {
             Slog.e(TAG, "Unable to set feature: " + mFeature + " to enabled: " + mEnabled, e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_SET_FEATURE;
     }
 }

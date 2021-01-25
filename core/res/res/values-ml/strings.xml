@@ -57,7 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"ഇൻകമിംഗ് വിളിച്ച നമ്പർ"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"ഔട്ട്ഗോയിംഗ് വിളിച്ച നമ്പർ"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"ഔട്ട്ഗോയിംഗ് കോളർ ഐഡി മറയ്ക്കുക"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"കണക്‌റ്റുചെയ്‌തിരിക്കുന്ന ലൈൻ ഐഡി"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"കണക്‌റ്റുചെയ്‌തിരിക്കുന്ന ലൈൻ ഐഡി നിയന്ത്രണം"</string>
     <string name="CfMmi" msgid="8390012691099787178">"കോൾ ഫോർവേഡിംഗ്"</string>
@@ -100,7 +100,7 @@
     <string name="peerTtyModeHco" msgid="5626377160840915617">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് HCO"</string>
     <string name="peerTtyModeVco" msgid="572208600818270944">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് VCO"</string>
     <string name="peerTtyModeOff" msgid="2420380956369226583">"പിയർ അഭ്യർത്ഥിച്ച TTY മോഡ് \'ഓഫ്\'"</string>
-    <string name="serviceClassVoice" msgid="2065556932043454987">"ശബ്‌ദം"</string>
+    <string name="serviceClassVoice" msgid="2065556932043454987">"Voice"</string>
     <string name="serviceClassData" msgid="4148080018967300248">"ഡാറ്റ"</string>
     <string name="serviceClassFAX" msgid="2561653371698904118">"ഫാക്സ്"</string>
     <string name="serviceClassSMS" msgid="1547664561704509004">"SMS"</string>
@@ -146,6 +146,9 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"വൈഫൈ മുഖേനയുള്ള കോൾ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"മൊബൈൽ നെറ്റ്‌വർക്ക് മുഖേനയുള്ള കോൾ"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"വൈഫൈ മാത്രം"</string>
+    <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
+    <skip />
+    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> ക്രോസ് സിം കോളിംഗ്"</string>
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: കൈമാറിയില്ല"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> നിമിഷത്തിനുശേഷം <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -200,6 +203,8 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"സെൻസർ അറിയിപ്പ് സേവനം"</string>
     <string name="twilight_service" msgid="8964898045693187224">"സന്ധ്യാസമയത്തെ സേവനം"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"സമയമേഖല കണ്ടെത്താനുള്ള സംവിധാനം (കണക്റ്റിവിറ്റി ഇല്ല)"</string>
+    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
+    <skip />
     <string name="factory_reset_warning" msgid="6858705527798047809">"നിങ്ങളുടെ ഉപകരണം മായ്‌ക്കും"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"അഡ്‌മിൻ ആപ്പ് ഉപയോഗിക്കാനാകില്ല. നിങ്ങളുടെ ഉപകരണം ഇപ്പോൾ മായ്ക്കപ്പെടും.\n\nനിങ്ങൾക്ക് ചോദ്യങ്ങൾ ഉണ്ടെങ്കിൽ, നിങ്ങളുടെ സ്ഥാപനത്തിന്റെ അഡ്‌മിനെ ബന്ധപ്പെടുക."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
@@ -2200,4 +2205,12 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"സ്ക്രീനിന്റെ ഭാഗങ്ങളോ മുഴുവനുമോ മാഗ്നിഫൈ ചെയ്യാം"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"ക്രമീകരണത്തിൽ ഓണാക്കുക"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
+    <skip />
 </resources>

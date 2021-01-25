@@ -44,6 +44,7 @@ import android.window.WindowContainerTransaction;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.common.DisplayController;
+import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,7 +54,6 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     static final int DISPLAY_WIDTH = 1000;
     static final int DISPLAY_HEIGHT = 1000;
@@ -80,9 +80,10 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     SurfaceControl mMockLeash;
     @Mock
     WindowContainerTransaction mMockWindowContainerTransaction;
-
-    Handler mSpyUpdateHandler;
-    Handler.Callback mUpdateCallback = (msg) -> false;
+    @Mock
+    OneHandedBackgroundPanelOrganizer mMockBackgroundOrganizer;
+    @Mock
+    ShellExecutor mMockShellMainExecutor;
 
     @Before
     public void setUp() throws Exception {
@@ -103,24 +104,22 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
                 mMockSurfaceTransactionHelper);
         when(mMockAnimator.isRunning()).thenReturn(true);
         when(mMockAnimator.setDuration(anyInt())).thenReturn(mFakeAnimator);
-        when(mMockAnimator.setOneHandedAnimationCallbacks(any())).thenReturn(mFakeAnimator);
+        when(mMockAnimator.addOneHandedAnimationCallback(any())).thenReturn(mFakeAnimator);
         when(mMockAnimator.setTransitionDirection(anyInt())).thenReturn(mFakeAnimator);
         when(mMockLeash.getWidth()).thenReturn(DISPLAY_WIDTH);
         when(mMockLeash.getHeight()).thenReturn(DISPLAY_HEIGHT);
 
-        mDisplayAreaOrganizer = new OneHandedDisplayAreaOrganizer(mContext,
+        mDisplayAreaOrganizer = spy(new OneHandedDisplayAreaOrganizer(mContext,
                 mMockDisplayController,
                 mMockAnimationController,
                 mTutorialHandler,
-                Runnable::run);
-        mSpyUpdateHandler = spy(new Handler(OneHandedThread.get().getLooper(), mUpdateCallback));
-        mDisplayAreaOrganizer.setUpdateHandler(mSpyUpdateHandler);
+                mMockBackgroundOrganizer,
+                mMockShellMainExecutor));
     }
 
     @Test
     public void testOnDisplayAreaAppeared() {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mTestableLooper.processAllMessages();
 
         verify(mMockAnimationController, never()).getAnimator(any(), any(), any());
     }
@@ -128,20 +127,9 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     @Test
     public void testOnDisplayAreaVanished() {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
-        mTestableLooper.processAllMessages();
         mDisplayAreaOrganizer.onDisplayAreaVanished(mDisplayAreaInfo);
 
         assertThat(mDisplayAreaOrganizer.mDisplayAreaMap).isEmpty();
-    }
-
-    @Test
-    public void testScheduleOffset() {
-        final int xOffSet = 0;
-        final int yOffSet = 100;
-        mDisplayAreaOrganizer.scheduleOffset(xOffSet, yOffSet);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
     }
 
     @Test
@@ -150,9 +138,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 0 -> 90
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -161,9 +147,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 0 -> 270
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -172,9 +156,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 180 -> 90
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -183,9 +165,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 180 -> 270
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -194,9 +174,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 90 -> 0
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -205,9 +183,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 90 -> 180
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -216,9 +192,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 270 -> 0
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -227,9 +201,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 270 -> 180
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler).sendMessage(any());
+        verify(mDisplayAreaOrganizer).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -238,9 +210,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 0 -> 0
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -249,9 +219,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 0 -> 180
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_0, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -260,9 +228,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 180 -> 180
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_180,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -271,9 +237,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 180 -> 0
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_180, Surface.ROTATION_0,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -282,9 +246,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 90 -> 90
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -293,9 +255,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 90 -> 270
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_90, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -304,9 +264,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 270 -> 270
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_270,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 
     @Test
@@ -315,8 +273,6 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         // Rotate 270 -> 90
         mDisplayAreaOrganizer.onRotateDisplay(Surface.ROTATION_270, Surface.ROTATION_90,
                 mMockWindowContainerTransaction);
-        mTestableLooper.processAllMessages();
-
-        verify(mSpyUpdateHandler, never()).sendMessage(any());
+        verify(mDisplayAreaOrganizer, never()).finishOffset(anyInt(), anyInt());
     }
 }

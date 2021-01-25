@@ -78,6 +78,7 @@
     <uses-permission android:name="android.permission.REQUEST_NETWORK_SCORES" />
     <uses-permission android:name="android.permission.CONTROL_VPN" />
     <uses-permission android:name="android.permission.PEERS_MAC_ADDRESS"/>
+    <uses-permission android:name="android.permission.READ_WIFI_CREDENTIAL"/>
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -115,6 +116,7 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.MONITOR_INPUT" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
+    <uses-permission android:name="android.permission.USE_BACKGROUND_BLUR" />
 
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />
@@ -352,14 +354,6 @@
                 android:permission="android.permission.BIND_WALLPAPER"
                 android:exported="true" />
 
-        <activity
-            android:name="com.android.wm.shell.bubbles.BubbleOverflowActivity"
-            android:theme="@style/BubbleOverflow"
-            android:excludeFromRecents="true"
-            android:documentLaunchMode="always"
-            android:resizeableActivity="true">
-        </activity>
-
         <activity android:name=".tuner.TunerActivity"
                   android:enabled="false"
                   android:icon="@drawable/tuner"
@@ -438,6 +432,15 @@
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">
         </activity>
+
+        <!-- started from SensoryPrivacyService -->
+        <activity android:name=".sensorprivacy.SensorUseStartedActivity"
+                  android:exported="true"
+                  android:permission="android.permission.MANAGE_SENSOR_PRIVACY"
+                  android:theme="@style/Theme.SystemUI.Dialog.Alert"
+                  android:finishOnCloseSystemDialogs="true">
+        </activity>
+
 
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbAccessoryUriActivity"

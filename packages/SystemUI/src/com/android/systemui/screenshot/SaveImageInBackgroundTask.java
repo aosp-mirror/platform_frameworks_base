@@ -29,6 +29,7 @@ import android.content.ClipDescription;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
@@ -47,10 +48,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
 import com.android.systemui.R;
 import com.android.systemui.SystemUIFactory;
-import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ShareTransition;
+import com.android.systemui.screenshot.ScreenshotController.SavedImageData.ActionTransition;
+
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -65,7 +67,6 @@ import java.util.function.Supplier;
 class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = logTag(SaveImageInBackgroundTask.class);
 
-    private static final String SCREENSHOT_FILE_NAME_TEMPLATE = "Screenshot_%s.png";
     private static final String SCREENSHOT_ID_TEMPLATE = "Screenshot_%s";
     private static final String SCREENSHOT_SHARE_SUBJECT_TEMPLATE = "Screenshot (%s)";
 
@@ -73,19 +74,19 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final ScreenshotSmartActions mScreenshotSmartActions;
     private final ScreenshotController.SaveImageInBackgroundData mParams;
     private final ScreenshotController.SavedImageData mImageData;
-    private final String mImageFileName;
-    private final long mImageTime;
+
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
-    private final String mScreenshotId;
+    private String mScreenshotId;
     private final boolean mSmartActionsEnabled;
     private final Random mRandom = new Random();
-    private final Supplier<ShareTransition> mSharedElementTransition;
+    private final Supplier<ActionTransition> mSharedElementTransition;
     private final ImageExporter mImageExporter;
+    private long mImageTime;
 
     SaveImageInBackgroundTask(Context context, ImageExporter exporter,
             ScreenshotSmartActions screenshotSmartActions,
             ScreenshotController.SaveImageInBackgroundData data,
-            Supplier<ShareTransition> sharedElementTransition) {
+            Supplier<ActionTransition> sharedElementTransition) {
         mContext = context;
         mScreenshotSmartActions = screenshotSmartActions;
         mImageData = new ScreenshotController.SavedImageData();
@@ -94,10 +95,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
 
         // Prepare all the output metadata
         mParams = data;
-        mImageTime = System.currentTimeMillis();
-        String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
-        mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
-        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, UUID.randomUUID());
 
         // Initialize screenshot notification smart actions provider.
         mSmartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -121,18 +118,26 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             }
             return null;
         }
+        // TODO: move to constructor / from ScreenshotRequest
+        final UUID requestId = UUID.randomUUID();
+        final UserHandle user = getUserHandleOfForegroundApplication(mContext);
+
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         Bitmap image = mParams.image;
-
+        mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, requestId);
         try {
             // Call synchronously here since already on a background thread.
-            Uri uri = mImageExporter.export(Runnable::run, image).get();
+            ListenableFuture<ImageExporter.Result> future =
+                    mImageExporter.export(Runnable::run, requestId, image);
+            ImageExporter.Result result = future.get();
+            final Uri uri = result.uri;
+            mImageTime = result.timestamp;
 
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
                     mScreenshotSmartActions.getSmartActionsFuture(
                             mScreenshotId, uri, image, mSmartActionsProvider,
-                            mSmartActionsEnabled, getUserHandle(mContext));
+                            mSmartActionsEnabled, user);
 
             List<Notification.Action> smartActions = new ArrayList<>();
             if (mSmartActionsEnabled) {
@@ -150,7 +155,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             mImageData.uri = uri;
             mImageData.smartActions = smartActions;
             mImageData.shareTransition = createShareAction(mContext, mContext.getResources(), uri);
-            mImageData.editAction = createEditAction(mContext, mContext.getResources(), uri);
+            mImageData.editTransition = createEditAction(mContext, mContext.getResources(), uri);
             mImageData.deleteAction = createDeleteAction(mContext, mContext.getResources(), uri);
 
             mParams.mActionsReadyListener.onActionsReady(mImageData);
@@ -204,9 +209,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
      * Assumes that the action intent is sent immediately after being supplied.
      */
     @VisibleForTesting
-    Supplier<ShareTransition> createShareAction(Context context, Resources r, Uri uri) {
+    Supplier<ActionTransition> createShareAction(Context context, Resources r, Uri uri) {
         return () -> {
-            ShareTransition transition = mSharedElementTransition.get();
+            ActionTransition transition = mSharedElementTransition.get();
 
             // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
             // order to do some common work like dismissing the keyguard and sending
@@ -259,52 +264,57 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                     Icon.createWithResource(r, R.drawable.ic_screenshot_share),
                     r.getString(com.android.internal.R.string.share), shareAction);
 
-            transition.shareAction = shareActionBuilder.build();
+            transition.action = shareActionBuilder.build();
             return transition;
         };
     }
 
     @VisibleForTesting
-    Notification.Action createEditAction(Context context, Resources r, Uri uri) {
-        // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
-        // order to do some common work like dismissing the keyguard and sending
-        // closeSystemWindows
+    Supplier<ActionTransition> createEditAction(Context context, Resources r, Uri uri) {
+        return () -> {
+            ActionTransition transition = mSharedElementTransition.get();
+            // Note: Both the share and edit actions are proxied through ActionProxyReceiver in
+            // order to do some common work like dismissing the keyguard and sending
+            // closeSystemWindows
 
-        // Create an edit intent, if a specific package is provided as the editor, then
-        // launch that directly
-        String editorPackage = context.getString(R.string.config_screenshotEditor);
-        Intent editIntent = new Intent(Intent.ACTION_EDIT);
-        if (!TextUtils.isEmpty(editorPackage)) {
-            editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
-        }
-        editIntent.setDataAndType(uri, "image/png");
-        editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            // Create an edit intent, if a specific package is provided as the editor, then
+            // launch that directly
+            String editorPackage = context.getString(R.string.config_screenshotEditor);
+            Intent editIntent = new Intent(Intent.ACTION_EDIT);
+            if (!TextUtils.isEmpty(editorPackage)) {
+                editIntent.setComponent(ComponentName.unflattenFromString(editorPackage));
+            }
+            editIntent.setDataAndType(uri, "image/png");
+            editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
-                editIntent, PendingIntent.FLAG_IMMUTABLE, null, UserHandle.CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
+                    context, 0, editIntent, PendingIntent.FLAG_IMMUTABLE,
+                    transition.bundle, UserHandle.CURRENT);
 
-        // Make sure pending intents for the system user are still unique across users
-        // by setting the (otherwise unused) request code to the current user id.
-        int requestCode = mContext.getUserId();
+            // Make sure pending intents for the system user are still unique across users
+            // by setting the (otherwise unused) request code to the current user id.
+            int requestCode = mContext.getUserId();
 
-        // Create a edit action
-        PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
-                new Intent(context, ActionProxyReceiver.class)
-                        .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
-                        .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
-                        .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
-                                mSmartActionsEnabled)
-                        .setAction(Intent.ACTION_EDIT)
-                        .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
-                UserHandle.SYSTEM);
-        Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
-                Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
-                r.getString(com.android.internal.R.string.screenshot_edit), editAction);
+            // Create a edit action
+            PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
+                    new Intent(context, ActionProxyReceiver.class)
+                            .putExtra(ScreenshotController.EXTRA_ACTION_INTENT, pendingIntent)
+                            .putExtra(ScreenshotController.EXTRA_ID, mScreenshotId)
+                            .putExtra(ScreenshotController.EXTRA_SMART_ACTIONS_ENABLED,
+                                    mSmartActionsEnabled)
+                            .setAction(Intent.ACTION_EDIT)
+                            .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                    PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                    UserHandle.SYSTEM);
+            Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
+                    Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
+                    r.getString(com.android.internal.R.string.screenshot_edit), editAction);
 
-        return editActionBuilder.build();
+            transition.action = editActionBuilder.build();
+            return transition;
+        };
     }
 
     @VisibleForTesting
@@ -331,22 +341,21 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         return deleteActionBuilder.build();
     }
 
-    private int getUserHandleOfForegroundApplication(Context context) {
+    private UserHandle getUserHandleOfForegroundApplication(Context context) {
+        UserManager manager = UserManager.get(context);
+        int result;
         // This logic matches
         // com.android.systemui.statusbar.phone.PhoneStatusBarPolicy#updateManagedProfile
         try {
-            return ActivityTaskManager.getService().getLastResumedActivityUserId();
+            result = ActivityTaskManager.getService().getLastResumedActivityUserId();
         } catch (RemoteException e) {
             if (DEBUG_ACTIONS) {
                 Log.d(TAG, "Failed to get UserHandle of foreground app: ", e);
             }
-            return context.getUserId();
+            result = context.getUserId();
         }
-    }
-
-    private UserHandle getUserHandle(Context context) {
-        UserManager manager = UserManager.get(context);
-        return manager.getUserInfo(getUserHandleOfForegroundApplication(context)).getUserHandle();
+        UserInfo userInfo = manager.getUserInfo(result);
+        return userInfo.getUserHandle();
     }
 
     private List<Notification.Action> buildSmartActions(

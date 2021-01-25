@@ -26,7 +26,6 @@ import static android.view.InsetsState.SIZE;
 import static android.view.View.PFLAG_DRAW_ANIMATION;
 import static android.view.View.SYSTEM_UI_FLAG_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
-import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE;
 import static android.view.View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
@@ -55,8 +54,7 @@ import static android.view.WindowCallbacks.RESIZE_MODE_FREEFORM;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
+import static android.view.WindowInsetsController.BEHAVIOR_DEFAULT;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_FULLSCREEN;
@@ -117,6 +115,7 @@ import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.RenderNode;
+import android.graphics.drawable.BackgroundBlurDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.hardware.display.DisplayManager;
@@ -188,7 +187,6 @@ import android.window.ClientWindowFrames;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.graphics.drawable.BackgroundBlurDrawable;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.SomeArgs;
@@ -670,6 +668,14 @@ public final class ViewRootImpl implements ViewParent,
 
     private final BackgroundBlurDrawable.Aggregator mBlurRegionAggregator =
             new BackgroundBlurDrawable.Aggregator(this);
+
+    /**
+     * @return {@link BackgroundBlurDrawable.Aggregator} for this instance.
+     */
+    @NonNull
+    public BackgroundBlurDrawable.Aggregator getBlurRegionAggregator() {
+        return mBlurRegionAggregator;
+    }
 
     /**
      * @return {@link ImeFocusController} for this instance.
@@ -1787,18 +1793,18 @@ public final class ViewRootImpl implements ViewParent,
 
 
     /** Register callbacks to be notified when the ViewRootImpl surface changes. */
-    interface SurfaceChangedCallback {
+    public interface SurfaceChangedCallback {
         void surfaceCreated(Transaction t);
         void surfaceReplaced(Transaction t);
         void surfaceDestroyed();
     }
 
     private final ArrayList<SurfaceChangedCallback> mSurfaceChangedCallbacks = new ArrayList<>();
-    void addSurfaceChangedCallback(SurfaceChangedCallback c) {
+    public void addSurfaceChangedCallback(SurfaceChangedCallback c) {
         mSurfaceChangedCallbacks.add(c);
     }
 
-    void removeSurfaceChangedCallback(SurfaceChangedCallback c) {
+    public void removeSurfaceChangedCallback(SurfaceChangedCallback c) {
         mSurfaceChangedCallbacks.remove(c);
     }
 
@@ -1846,20 +1852,22 @@ public final class ViewRootImpl implements ViewParent,
        return mBoundsLayer;
     }
 
-    Surface getOrCreateBLASTSurface(int width, int height) {
+    Surface getOrCreateBLASTSurface(int width, int height,
+            @Nullable WindowManager.LayoutParams params) {
         if (!mSurfaceControl.isValid()) {
             return null;
         }
 
+        int format = params == null ? PixelFormat.TRANSLUCENT : params.format;
         Surface ret = null;
         if (mBlastBufferQueue == null) {
-            mBlastBufferQueue = new BLASTBufferQueue(mTag,
-                    mSurfaceControl, width, height, mEnableTripleBuffering);
+            mBlastBufferQueue = new BLASTBufferQueue(mTag, mSurfaceControl, width, height,
+                    format, mEnableTripleBuffering);
             // We only return the Surface the first time, as otherwise
             // it hasn't changed and there is no need to update.
             ret = mBlastBufferQueue.createSurface();
         } else {
-            mBlastBufferQueue.update(mSurfaceControl, width, height);
+            mBlastBufferQueue.update(mSurfaceControl, width, height, format);
         }
 
         return ret;
@@ -2167,10 +2175,8 @@ public final class ViewRootImpl implements ViewParent,
             if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE_STICKY) != 0
                     || (flags & FLAG_FULLSCREEN) != 0) {
                 inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
-            } else if ((sysUiVis & SYSTEM_UI_FLAG_IMMERSIVE) != 0) {
-                inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
             } else {
-                inOutParams.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
+                inOutParams.insetsFlags.behavior = BEHAVIOR_DEFAULT;
             }
         }
 
@@ -3150,6 +3156,8 @@ public final class ViewRootImpl implements ViewParent,
 
         mImeFocusController.onTraversal(hasWindowFocus, mWindowAttributes);
 
+        final boolean wasReportNextDraw = mReportNextDraw;
+
         // Remember if we must report the next draw.
         if ((relayoutResult & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
             reportNextDraw();
@@ -3177,12 +3185,25 @@ public final class ViewRootImpl implements ViewParent,
             if (isViewVisible) {
                 // Try again
                 scheduleTraversals();
-            } else if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
-                for (int i = 0; i < mPendingTransitions.size(); ++i) {
-                    mPendingTransitions.get(i).endChangingAnimations();
+            } else {
+                if (mPendingTransitions != null && mPendingTransitions.size() > 0) {
+                    for (int i = 0; i < mPendingTransitions.size(); ++i) {
+                        mPendingTransitions.get(i).endChangingAnimations();
+                    }
+                    mPendingTransitions.clear();
                 }
-                mPendingTransitions.clear();
+
+                // We may never draw since it's not visible. Report back that we're finished
+                // drawing.
+                if (!wasReportNextDraw && mReportNextDraw) {
+                    mReportNextDraw = false;
+                    pendingDrawFinished();
+                }
             }
+
+            // We were unable to draw this traversal. Unset this flag since we'll block without
+            // ever being able to draw again
+            mNextDrawUseBlastSync = false;
         }
 
         if (mAttachInfo.mContentCaptureEvents != null) {
@@ -7589,8 +7610,8 @@ public final class ViewRootImpl implements ViewParent,
             if (!useBLAST()) {
                 mSurface.copyFrom(mSurfaceControl);
             } else {
-                final Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x,
-                    mSurfaceSize.y);
+                final Surface blastSurface = getOrCreateBLASTSurface(mSurfaceSize.x, mSurfaceSize.y,
+                        params);
                 // If blastSurface == null that means it hasn't changed since the last time we
                 // called. In this situation, avoid calling transferFrom as we would then
                 // inc the generation ID and cause EGL resources to be recreated.
@@ -9139,14 +9160,14 @@ public final class ViewRootImpl implements ViewParent,
      * Handles an inbound request for scroll capture from the system. If a client is not already
      * active, a search will be dispatched through the view tree to locate scrolling content.
      * <p>
-     * Either {@link IScrollCaptureCallbacks#onClientConnected(IScrollCaptureConnection, Rect,
+     * Either {@link IScrollCaptureCallbacks#onConnected(IScrollCaptureConnection, Rect,
      * Point)} or {@link IScrollCaptureCallbacks#onUnavailable()} will be returned
      * depending on the results of the search.
      *
      * @param callbacks to receive responses
      * @see ScrollCaptureTargetResolver
      */
-    private void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
+    public void handleScrollCaptureRequest(@NonNull IScrollCaptureCallbacks callbacks) {
         LinkedList<ScrollCaptureTarget> targetList = new LinkedList<>();
 
         // Window (root) level callbacks
@@ -9154,10 +9175,12 @@ public final class ViewRootImpl implements ViewParent,
 
         // Search through View-tree
         View rootView = getView();
-        Point point = new Point();
-        Rect rect = new Rect(0, 0, rootView.getWidth(), rootView.getHeight());
-        getChildVisibleRect(rootView, rect, point);
-        rootView.dispatchScrollCaptureSearch(rect, point, targetList);
+        if (rootView != null) {
+            Point point = new Point();
+            Rect rect = new Rect(0, 0, rootView.getWidth(), rootView.getHeight());
+            getChildVisibleRect(rootView, rect, point);
+            rootView.dispatchScrollCaptureSearch(rect, point, targetList);
+        }
 
         // No-op path. Scroll capture not offered for this window.
         if (targetList.isEmpty()) {
@@ -10031,13 +10054,6 @@ public final class ViewRootImpl implements ViewParent,
             transaction.deferTransactionUntil(surfaceControl, surfaceControl, frameNumber);
             transaction.apply();
         }
-    }
-
-    /**
-     * Creates a background blur drawable for the backing {@link Surface}.
-     */
-    public BackgroundBlurDrawable createBackgroundBlurDrawable() {
-        return mBlurRegionAggregator.createBackgroundBlurDrawable(mContext);
     }
 
     @Override

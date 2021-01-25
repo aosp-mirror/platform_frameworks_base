@@ -50,6 +50,10 @@
             android:key="bluetooth"
             android:title="@string/quick_settings_bluetooth_label" />
 
+        <com.android.systemui.tuner.StatusBarSwitch
+            android:key="cameratoggle"
+            android:title="@string/quick_settings_camera_label" />
+
         <!-- nfc -->
         <!-- tty -->
         <!-- speakerphone -->

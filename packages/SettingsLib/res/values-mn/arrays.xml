@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"256000"</item>
     <item msgid="7099386891713159947">"1 сая"</item>
     <item msgid="6069075827077845520">"4 сая"</item>
-    <item msgid="8243549501764402572">"16 сая"</item>
+    <item msgid="6078203297886482480">"8 сая"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Идэвхгүй"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"лог буфер бүрд 256K"</item>
     <item msgid="8539423820514360724">"лог буфер бүрд 1M"</item>
     <item msgid="1984761927103140651">"лог буфер бүрд 4M"</item>
-    <item msgid="7892098981256010498">"лог буфер бүрд 16M"</item>
+    <item msgid="2983219471251787208">"Лог буфер бүрд 8 сая"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Идэвхгүй"</item>

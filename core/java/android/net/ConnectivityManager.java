@@ -16,6 +16,10 @@
 package android.net;
 
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
+import static android.net.NetworkRequest.Type.LISTEN;
+import static android.net.NetworkRequest.Type.REQUEST;
+import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
+import static android.net.QosCallback.QosCallbackRegistrationException;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -26,7 +30,6 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -69,7 +72,6 @@ import com.android.internal.util.Protocol;
 
 import libcore.net.event.NetworkEventDispatcher;
 
-import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.lang.annotation.Retention;
@@ -1955,6 +1957,12 @@ public class ConnectivityManager {
         return k;
     }
 
+    // Construct an invalid fd.
+    private ParcelFileDescriptor createInvalidFd() {
+        final int invalidFd = -1;
+        return ParcelFileDescriptor.adoptFd(invalidFd);
+    }
+
     /**
      * Request that keepalives be started on a IPsec NAT-T socket.
      *
@@ -1985,7 +1993,7 @@ public class ConnectivityManager {
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
             // ERROR_INVALID_SOCKET.
-            dup = new ParcelFileDescriptor(new FileDescriptor());
+            dup = createInvalidFd();
         }
         return new NattSocketKeepalive(mService, network, dup, socket.getResourceId(), source,
                 destination, executor, callback);
@@ -2027,7 +2035,7 @@ public class ConnectivityManager {
         } catch (IOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
             // ERROR_INVALID_SOCKET.
-            dup = new ParcelFileDescriptor(new FileDescriptor());
+            dup = createInvalidFd();
         }
         return new NattSocketKeepalive(mService, network, dup,
                 INVALID_RESOURCE_ID /* Unused */, source, destination, executor, callback);
@@ -2064,7 +2072,7 @@ public class ConnectivityManager {
         } catch (UncheckedIOException ignored) {
             // Construct an invalid fd, so that if the user later calls start(), it will fail with
             // ERROR_INVALID_SOCKET.
-            dup = new ParcelFileDescriptor(new FileDescriptor());
+            dup = createInvalidFd();
         }
         return new TcpSocketKeepalive(mService, network, dup, executor, callback);
     }
@@ -3730,14 +3738,12 @@ public class ConnectivityManager {
     private static final HashMap<NetworkRequest, NetworkCallback> sCallbacks = new HashMap<>();
     private static CallbackHandler sCallbackHandler;
 
-    private static final int LISTEN  = 1;
-    private static final int REQUEST = 2;
-
     private NetworkRequest sendRequestForNetwork(NetworkCapabilities need, NetworkCallback callback,
-            int timeoutMs, int action, int legacyType, CallbackHandler handler) {
+            int timeoutMs, NetworkRequest.Type reqType, int legacyType, CallbackHandler handler) {
         printStackTrace();
         checkCallbackNotNull(callback);
-        Preconditions.checkArgument(action == REQUEST || need != null, "null NetworkCapabilities");
+        Preconditions.checkArgument(
+                reqType == TRACK_DEFAULT || need != null, "null NetworkCapabilities");
         final NetworkRequest request;
         final String callingPackageName = mContext.getOpPackageName();
         try {
@@ -3750,13 +3756,13 @@ public class ConnectivityManager {
                 }
                 Messenger messenger = new Messenger(handler);
                 Binder binder = new Binder();
-                if (action == LISTEN) {
+                if (reqType == LISTEN) {
                     request = mService.listenForNetwork(
                             need, messenger, binder, callingPackageName);
                 } else {
                     request = mService.requestNetwork(
-                            need, messenger, timeoutMs, binder, legacyType, callingPackageName,
-                            getAttributionTag());
+                            need, reqType.ordinal(), messenger, timeoutMs, binder, legacyType,
+                            callingPackageName, getAttributionTag());
                 }
                 if (request != null) {
                     sCallbacks.put(request, callback);
@@ -4260,7 +4266,7 @@ public class ConnectivityManager {
         // request, i.e., the system default network.
         CallbackHandler cbHandler = new CallbackHandler(handler);
         sendRequestForNetwork(null /* NetworkCapabilities need */, networkCallback, 0,
-                REQUEST, TYPE_NONE, cbHandler);
+                TRACK_DEFAULT, TYPE_NONE, cbHandler);
     }
 
     /**
@@ -4817,6 +4823,8 @@ public class ConnectivityManager {
     /**
      * Simulates a Data Stall for the specified Network.
      *
+     * <p>This method should only be used for tests.
+     *
      * <p>The caller must be the owner of the specified Network.
      *
      * @param detectionMethod The detection method used to identify the Data Stall.
@@ -4826,7 +4834,7 @@ public class ConnectivityManager {
      * @throws SecurityException if the caller is not the owner of the given network.
      * @hide
      */
-    @TestApi
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @RequiresPermission(anyOf = {android.Manifest.permission.MANAGE_TEST_NETWORKS,
             android.Manifest.permission.NETWORK_STACK})
     public void simulateDataStall(int detectionMethod, long timestampMillis,
@@ -4841,5 +4849,119 @@ public class ConnectivityManager {
     private void setOemNetworkPreference(@NonNull OemNetworkPreferences preference) {
         Log.d(TAG, "setOemNetworkPreference called with preference: "
                 + preference.toString());
+    }
+
+    @NonNull
+    private final List<QosCallbackConnection> mQosCallbackConnections = new ArrayList<>();
+
+    /**
+     * Registers a {@link QosSocketInfo} with an associated {@link QosCallback}.  The callback will
+     * receive available QoS events related to the {@link Network} and local ip + port
+     * specified within socketInfo.
+     * <p/>
+     * The same {@link QosCallback} must be unregistered before being registered a second time,
+     * otherwise {@link QosCallbackRegistrationException} is thrown.
+     * <p/>
+     * This API does not, in itself, require any permission if called with a network that is not
+     * restricted. However, the underlying implementation currently only supports the IMS network,
+     * which is always restricted. That means non-preinstalled callers can't possibly find this API
+     * useful, because they'd never be called back on networks that they would have access to.
+     *
+     * @throws SecurityException if {@link QosSocketInfo#getNetwork()} is restricted and the app is
+     * missing CONNECTIVITY_USE_RESTRICTED_NETWORKS permission.
+     * @throws QosCallback.QosCallbackRegistrationException if qosCallback is already registered.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     *
+     * Exceptions after the time of registration is passed through
+     * {@link QosCallback#onError(QosCallbackException)}.  see: {@link QosCallbackException}.
+     *
+     * @param socketInfo the socket information used to match QoS events
+     * @param callback receives qos events that satisfy socketInfo
+     * @param executor The executor on which the callback will be invoked. The provided
+     *                 {@link Executor} must run callback sequentially, otherwise the order of
+     *                 callbacks cannot be guaranteed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void registerQosCallback(@NonNull final QosSocketInfo socketInfo,
+            @NonNull final QosCallback callback,
+            @CallbackExecutor @NonNull final Executor executor) {
+        Objects.requireNonNull(socketInfo, "socketInfo must be non-null");
+        Objects.requireNonNull(callback, "callback must be non-null");
+        Objects.requireNonNull(executor, "executor must be non-null");
+
+        try {
+            synchronized (mQosCallbackConnections) {
+                if (getQosCallbackConnection(callback) == null) {
+                    final QosCallbackConnection connection =
+                            new QosCallbackConnection(this, callback, executor);
+                    mQosCallbackConnections.add(connection);
+                    mService.registerQosSocketCallback(socketInfo, connection);
+                } else {
+                    Log.e(TAG, "registerQosCallback: Callback already registered");
+                    throw new QosCallbackRegistrationException();
+                }
+            }
+        } catch (final RemoteException e) {
+            Log.e(TAG, "registerQosCallback: Error while registering ", e);
+
+            // The same unregister method method is called for consistency even though nothing
+            // will be sent to the ConnectivityService since the callback was never successfully
+            // registered.
+            unregisterQosCallback(callback);
+            e.rethrowFromSystemServer();
+        } catch (final ServiceSpecificException e) {
+            Log.e(TAG, "registerQosCallback: Error while registering ", e);
+            unregisterQosCallback(callback);
+            throw convertServiceException(e);
+        }
+    }
+
+    /**
+     * Unregisters the given {@link QosCallback}.  The {@link QosCallback} will no longer receive
+     * events once unregistered and can be registered a second time.
+     * <p/>
+     * If the {@link QosCallback} does not have an active registration, it is a no-op.
+     *
+     * @param callback the callback being unregistered
+     *
+     * @hide
+     */
+    @SystemApi
+    public void unregisterQosCallback(@NonNull final QosCallback callback) {
+        Objects.requireNonNull(callback, "The callback must be non-null");
+        try {
+            synchronized (mQosCallbackConnections) {
+                final QosCallbackConnection connection = getQosCallbackConnection(callback);
+                if (connection != null) {
+                    connection.stopReceivingMessages();
+                    mService.unregisterQosCallback(connection);
+                    mQosCallbackConnections.remove(connection);
+                } else {
+                    Log.d(TAG, "unregisterQosCallback: Callback not registered");
+                }
+            }
+        } catch (final RemoteException e) {
+            Log.e(TAG, "unregisterQosCallback: Error while unregistering ", e);
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the connection related to the callback.
+     *
+     * @param callback the callback to look up
+     * @return the related connection
+     */
+    @Nullable
+    private QosCallbackConnection getQosCallbackConnection(final QosCallback callback) {
+        for (final QosCallbackConnection connection : mQosCallbackConnections) {
+            // Checking by reference here is intentional
+            if (connection.getCallback() == callback) {
+                return connection;
+            }
+        }
+        return null;
     }
 }

@@ -271,6 +271,14 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
+    public void setIsShadeOpening(boolean isOpening) {
+        mView.setIsShadeOpening(isOpening);
+    }
+
+    public void setSectionPadding(float padding) {
+        mView.setSectionPadding(padding);
+    }
+
     private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
         @Override
         public void onMenuClicked(
@@ -1553,7 +1561,8 @@ public class NotificationStackScrollLayoutController {
             // In the intercept we only start tracing when it's not a down (otherwise that down
             // would be duplicated when intercepted).
             if (scrollWantsIt && ev.getActionMasked() != MotionEvent.ACTION_DOWN) {
-                InteractionJankMonitor.getInstance().begin(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                InteractionJankMonitor.getInstance().begin(mView,
+                        CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
             }
             return swipeWantsIt || scrollWantsIt || expandWantsIt;
         }
@@ -1619,7 +1628,7 @@ public class NotificationStackScrollLayoutController {
                 case MotionEvent.ACTION_DOWN:
                     if (scrollerWantsIt) {
                         InteractionJankMonitor.getInstance()
-                                .begin(CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
+                                .begin(mView, CUJ_NOTIFICATION_SHADE_SCROLL_FLING);
                     }
                     break;
                 case MotionEvent.ACTION_UP:

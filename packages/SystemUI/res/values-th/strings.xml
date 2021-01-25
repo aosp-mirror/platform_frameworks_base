@@ -344,6 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"วิธีป้อนข้อมูล"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"ตำแหน่ง"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"ปิดตำแหน่ง"</string>
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"บล็อกกล้องถ่ายรูป"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"ปิดเสียงไมโครโฟน"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"อุปกรณ์สื่อ"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"โทรฉุกเฉินเท่านั้น"</string>
@@ -353,8 +355,10 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"ผู้ใช้"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"ผู้ใช้ใหม่"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
-    <skip />
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"อินเทอร์เน็ต"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"ใช้บนเครื่องบินได้อย่างปลอดภัย"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"เครือข่ายที่พร้อมใช้งาน"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"ใช้งานเครือข่ายไม่ได้"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"ไม่ได้เชื่อมต่อ"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"ไม่มีเครือข่าย"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"ปิด WiFi"</string>
@@ -412,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"บันทึกหน้าจอ"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"เริ่ม"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"หยุด"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"อุปกรณ์"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"เลื่อนขึ้นเพื่อสลับแอป"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"ลากไปทางขวาเพื่อสลับแอปอย่างรวดเร็ว"</string>
@@ -434,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"แตะอีกครั้งเพื่อเปิด"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"เลื่อนขึ้นเพื่อเปิด"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"เลื่อนขึ้นเพื่อลองอีกครั้ง"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"องค์กรของคุณเป็นเจ้าของอุปกรณ์นี้"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> เป็นเจ้าของอุปกรณ์นี้"</string>
     <string name="phone_hint" msgid="6682125338461375925">"เลื่อนไอคอนโทรศัพท์"</string>
@@ -456,11 +466,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"แสดงโปรไฟล์"</string>
     <string name="user_add_user" msgid="4336657383006913022">"เพิ่มผู้ใช้"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"ผู้ใช้ใหม่"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (2034481024623462357) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"จบเซสชันผู้เยี่ยมชมใช่ไหม"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ระบบจะลบแอปและข้อมูลทั้งหมดในเซสชันนี้"</string>
-    <!-- no translation found for guest_exit_guest_dialog_remove (8533184512885775423) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"จบเซสชัน"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"ยินดีต้อนรับท่านผู้เยี่ยมชมกลับมาอีกครั้ง!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"คุณต้องการอยู่ในเซสชันต่อไปไหม"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"เริ่มต้นใหม่"</string>

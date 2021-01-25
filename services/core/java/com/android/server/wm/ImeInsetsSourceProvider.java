@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.view.InsetsState.ITYPE_IME;
 
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.DisplayContent.IME_TARGET_CONTROL;
@@ -25,6 +26,7 @@ import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IME_TARGET_FROM_IME;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.INSETS_SOURCE_PROVIDER;
 import static com.android.server.wm.ImeInsetsSourceProviderProto.IS_IME_LAYOUT_DRAWN;
+import static com.android.server.wm.WindowManagerService.H.UPDATE_MULTI_WINDOW_STACKS;
 
 import android.annotation.NonNull;
 import android.os.Trace;
@@ -49,6 +51,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
     private Runnable mShowImeRunner;
     private boolean mIsImeLayoutDrawn;
     private boolean mImeShowing;
+    private final InsetsSource mLastSource = new InsetsSource(ITYPE_IME);
 
     ImeInsetsSourceProvider(InsetsSource source,
             InsetsStateController stateController, DisplayContent displayContent) {
@@ -73,6 +76,27 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                     && snapshot != null && snapshot.hasImeSurface());
         }
         return control;
+    }
+
+    @Override
+    void updateSourceFrame() {
+        super.updateSourceFrame();
+        onSourceChanged();
+    }
+
+    @Override
+    protected void updateVisibility() {
+        super.updateVisibility();
+        onSourceChanged();
+    }
+
+    private void onSourceChanged() {
+        if (mLastSource.equals(mSource)) {
+            return;
+        }
+        mLastSource.set(mSource);
+        mDisplayContent.mWmService.mH.obtainMessage(
+                UPDATE_MULTI_WINDOW_STACKS, mDisplayContent).sendToTarget();
     }
 
     /**

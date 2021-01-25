@@ -130,7 +130,7 @@ public class ScreenPinningRequest implements View.OnClickListener,
         }
     }
 
-    private WindowManager.LayoutParams getWindowLayoutParams() {
+    protected WindowManager.LayoutParams getWindowLayoutParams() {
         final WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,

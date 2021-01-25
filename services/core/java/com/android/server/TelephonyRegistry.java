@@ -52,7 +52,6 @@ import android.telephony.CallAttributes;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
-import android.telephony.CellLocation;
 import android.telephony.CellSignalStrength;
 import android.telephony.CellSignalStrengthCdma;
 import android.telephony.CellSignalStrengthGsm;
@@ -318,6 +317,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mDataEnabledReason;
 
+    private Map<Integer, Long> mAllowedNetworkTypesList;
+
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
      * type and APN setting. This is the cache to prevent redundant callbacks to the listeners.
@@ -564,8 +565,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig(
-                    PhysicalChannelConfig.CONNECTION_UNKNOWN,0));
+            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
         }
     }
 
@@ -586,8 +586,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public TelephonyRegistry(Context context, ConfigurationProvider configurationProvider) {
-        CellLocation  location = CellLocation.getEmpty();
-
         mContext = context;
         mConfigurationProvider = configurationProvider;
         mBatteryStats = BatteryStatsService.getService();
@@ -627,6 +625,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mBarringInfo = new ArrayList<>();
         mTelephonyDisplayInfos = new TelephonyDisplayInfo[numPhones];
         mPhysicalChannelConfigs = new ArrayList<>();
+        mAllowedNetworkTypesList = new HashMap<>();
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
             mDataActivity[i] = TelephonyManager.DATA_ACTIVITY_NONE;
@@ -656,8 +655,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mPreciseDataConnectionStates.add(new ArrayMap<>());
             mBarringInfo.add(i, new BarringInfo());
             mTelephonyDisplayInfos[i] = null;
-            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig(
-                    PhysicalChannelConfig.CONNECTION_UNKNOWN,0));
+            mPhysicalChannelConfigs.add(i, new PhysicalChannelConfig.Builder().build());
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1153,6 +1151,14 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         PhoneStateListener.EVENT_DATA_ENABLED_CHANGED)) {
                     try {
                         r.callback.onDataEnabledChanged(mIsDataEnabled, mDataEnabledReason);
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        PhoneStateListener.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)) {
+                    try {
+                        r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2388,6 +2394,44 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         r.callback.onDataEnabledChanged(enabled, reason);
                     } catch (RemoteException ex) {
                         mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    /**
+     * Notify that the allowed network type has changed.
+     *
+     * @param phoneId the phone id.
+     * @param subId the subId.
+     * @param allowedNetworkTypesList Map associating all allowed network type reasons with reason's
+     *                                allowed network type values.
+     */
+    public void notifyAllowedNetworkTypesChanged(int phoneId, int subId,
+            Map allowedNetworkTypesList) {
+        if (!checkNotifyPermission("notifyAllowedNetworkTypesChanged()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                mAllowedNetworkTypesList = allowedNetworkTypesList;
+
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)
+                            && idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            if (VDBG) {
+                                log("notifyAllowedNetworkTypesChanged: AllowedNetworkTypesList= "
+                                        + mAllowedNetworkTypesList.toString());
+                            }
+                            r.callback.onAllowedNetworkTypesChanged(mAllowedNetworkTypesList);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
                     }
                 }
             }

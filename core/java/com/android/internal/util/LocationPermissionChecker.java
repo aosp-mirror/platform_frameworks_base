@@ -24,6 +24,7 @@ import android.app.AppOpsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.NetworkStack;
 import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
@@ -147,6 +148,13 @@ public class LocationPermissionChecker {
             int uid, @Nullable String message) {
         checkPackage(uid, pkgName);
 
+        // Apps with NETWORK_SETTINGS, NETWORK_SETUP_WIZARD, NETWORK_STACK & MAINLINE_NETWORK_STACK
+        // are granted a bypass.
+        if (checkNetworkSettingsPermission(uid) || checkNetworkSetupWizardPermission(uid)
+                || checkNetworkStackPermission(uid) || checkMainlineNetworkStackPermission(uid)) {
+            return SUCCEEDED;
+        }
+
         // Location mode must be enabled
         if (!isLocationModeEnabled()) {
             return ERROR_LOCATION_MODE_OFF;
@@ -259,4 +267,37 @@ public class LocationPermissionChecker {
         // We don't care about pid, pass in -1
         return mContext.checkPermission(permissionType, -1, uid);
     }
+
+    /**
+     * Returns true if the |uid| holds NETWORK_SETTINGS permission.
+     */
+    public boolean checkNetworkSettingsPermission(int uid) {
+        return getUidPermission(android.Manifest.permission.NETWORK_SETTINGS, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Returns true if the |uid| holds NETWORK_SETUP_WIZARD permission.
+     */
+    public boolean checkNetworkSetupWizardPermission(int uid) {
+        return getUidPermission(android.Manifest.permission.NETWORK_SETUP_WIZARD, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Returns true if the |uid| holds NETWORK_STACK permission.
+     */
+    public boolean checkNetworkStackPermission(int uid) {
+        return getUidPermission(android.Manifest.permission.NETWORK_STACK, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Returns true if the |uid| holds MAINLINE_NETWORK_STACK permission.
+     */
+    public boolean checkMainlineNetworkStackPermission(int uid) {
+        return getUidPermission(NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, uid)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
 }

@@ -21,6 +21,8 @@ import static android.Manifest.permission.TEST_BIOMETRIC;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.face.AuthenticationFrame;
+import android.hardware.biometrics.face.BaseFrame;
 import android.hardware.face.Face;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
@@ -180,12 +182,21 @@ public class BiometricTestSessionImpl extends ITestSession.Stub {
         mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFailed();
     }
 
+    // TODO(b/174619156): replace with notifyAuthenticationFrame and notifyEnrollmentFrame.
     @Override
-    public void notifyAcquired(int userId, int acquireInfo)  {
+    public void notifyAcquired(int userId, int acquireInfo) {
         Utils.checkPermission(mContext, TEST_BIOMETRIC);
 
-        mSensor.getSessionForUser(userId).mHalSessionCallback
-                .onAcquired((byte) acquireInfo, 0 /* vendorCode */);
+        BaseFrame data = new BaseFrame();
+        data.acquiredInfo = (byte) acquireInfo;
+
+        AuthenticationFrame authenticationFrame = new AuthenticationFrame();
+        authenticationFrame.data = data;
+
+        // TODO(b/174619156): Currently onAuthenticationFrame and onEnrollmentFrame are the same.
+        // This will need to call the correct callback once the onAcquired callback is removed.
+        mSensor.getSessionForUser(userId).mHalSessionCallback.onAuthenticationFrame(
+                authenticationFrame);
     }
 
     @Override

@@ -40,6 +40,7 @@ import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT;
+import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW;
 import static android.provider.Settings.Global.DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.provider.Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES;
@@ -795,6 +796,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES);
         private final Uri mSizeCompatFreeformUri = Settings.Global.getUriFor(
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
+        private final Uri mSupportsNonResizableMultiWindowUri = Settings.Global.getUriFor(
+                DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
         private final Uri mDisplaySettingsPathUri = Settings.Global.getUriFor(
@@ -820,6 +823,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mFreeformWindowUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mForceResizableUri, false, this, UserHandle.USER_ALL);
             resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mSupportsNonResizableMultiWindowUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
                     UserHandle.USER_ALL);
@@ -860,6 +865,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mSizeCompatFreeformUri.equals(uri)) {
                 updateSizeCompatFreeform();
+                return;
+            }
+
+            if (mSupportsNonResizableMultiWindowUri.equals(uri)) {
+                updateSupportsNonResizableMultiWindow();
                 return;
             }
 
@@ -961,6 +971,14 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
 
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
+        }
+
+        void updateSupportsNonResizableMultiWindow() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final boolean supportsNonResizableMultiWindow = Settings.Global.getInt(resolver,
+                    DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW, 0) != 0;
+
+            mAtmService.mSupportsNonResizableMultiWindow = supportsNonResizableMultiWindow;
         }
 
         void updateDisplaySettingsLocation() {
@@ -1448,7 +1466,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
         int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
                 appOp);
-        if (res != WindowManagerGlobal.ADD_OKAY) {
+        if (res != ADD_OKAY) {
             return res;
         }
 
@@ -1538,6 +1556,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean addToastWindowRequiresToken = false;
 
+            final IBinder windowContextToken = attrs.mWindowContextToken;
+
             if (token == null) {
                 if (!unprivilegedAppCanCreateTokenWith(parentWindow, callingUid, type,
                         rootType, attrs.token, attrs.packageName)) {
@@ -1546,6 +1566,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (hasParent) {
                     // Use existing parent window token for child windows.
                     token = parentWindow.mToken;
+                } else if (mWindowContextListenerController.hasListener(windowContextToken)) {
+                    // Respect the window context token if the user provided it.
+                    final IBinder binder = attrs.token != null ? attrs.token : windowContextToken;
+                    final Bundle options = mWindowContextListenerController
+                            .getOptions(windowContextToken);
+                    token = new WindowToken(this, binder, type, false /* persistOnEmpty */,
+                            displayContent, session.mCanAddInternalSystemWindow, callingUid,
+                            isRoundedCornerOverlay, true /* fromClientToken */, options);
                 } else {
                     final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
                     token = new WindowToken(this, binder, type, false, displayContent,
@@ -1614,13 +1642,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, client.asBinder(), type, false, displayContent,
-                        session.mCanAddInternalSystemWindow);
+                token = new WindowToken(this, client.asBinder(), type, false /* persistOnEmpty */,
+                        displayContent, session.mCanAddInternalSystemWindow);
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], attrs, viewVisibility, session.mUid, userId,
-                    session.mCanAddInternalSystemWindow);
+                    session.mCanAddInternalSystemWindow, session.mCanUseBackgroundBlur);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
@@ -1639,7 +1667,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.updateRequestedVisibility(requestedVisibility);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
-            if (res != WindowManagerGlobal.ADD_OKAY) {
+            if (res != ADD_OKAY) {
                 return res;
             }
 
@@ -1670,7 +1698,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // show a focusable toasts while it has focus which will be kept on
                 // the screen after the activity goes away.
                 if (addToastWindowRequiresToken
-                        || (attrs.flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0
+                        || (attrs.flags & FLAG_NOT_FOCUSABLE) == 0
                         || displayContent.mCurrentFocus == null
                         || displayContent.mCurrentFocus.mOwnerUid != callingUid) {
                     mH.sendMessageDelayed(
@@ -1679,9 +1707,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            // Switch to listen to the {@link WindowToken token}'s configuration changes when
+            // adding a window to the window context.
+            if (mWindowContextListenerController.hasListener(windowContextToken)) {
+                final int windowContextType = mWindowContextListenerController
+                        .getWindowType(windowContextToken);
+                if (type != windowContextType) {
+                    ProtoLog.w(WM_ERROR, "Window types in WindowContext and"
+                            + " LayoutParams.type should match! Type from LayoutParams is %d,"
+                            + " but type from WindowContext is %d", type, windowContextType);
+                    return WindowManagerGlobal.ADD_INVALID_TYPE;
+                }
+                final Bundle options = mWindowContextListenerController
+                        .getOptions(windowContextToken);
+                mWindowContextListenerController.registerWindowContainerListener(
+                        windowContextToken, token, callingUid, type, options);
+            }
+
             // From now on, no exceptions or errors allowed!
 
-            res = WindowManagerGlobal.ADD_OKAY;
+            res = ADD_OKAY;
 
             if (mUseBLAST) {
                 res |= WindowManagerGlobal.ADD_FLAG_USE_BLAST;
@@ -2222,15 +2267,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             "Insets types can not be changed after the window is added.");
                 }
 
-                // Odd choice but less odd than embedding in copyFrom()
-                if ((attrs.privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY)
-                        != 0) {
-                    attrs.x = win.mAttrs.x;
-                    attrs.y = win.mAttrs.y;
-                    attrs.width = win.mAttrs.width;
-                    attrs.height = win.mAttrs.height;
-                }
-
                 flagChanges = win.mAttrs.flags ^ attrs.flags;
                 privateFlagChanges = win.mAttrs.privateFlags ^ attrs.privateFlags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
@@ -2332,9 +2368,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
-            // Create surfaceControl before surface placement otherwise layout will be skipped
-            // (because WS.isGoneForLayout() is true when there is no surface.
+            // We may be deferring layout passes at the moment, but since the client is interested
+            // in the new out values right now we need to force a layout.
+            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
+
             if (shouldRelayout) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
+
+                result = win.relayoutVisibleWindow(result);
+
                 try {
                     result = createSurfaceControl(outSurfaceControl, result, win, winAnimator);
                 } catch (Exception e) {
@@ -2346,17 +2388,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     Binder.restoreCallingIdentity(origId);
                     return 0;
                 }
-            }
-
-            // We may be deferring layout passes at the moment, but since the client is interested
-            // in the new out values right now we need to force a layout.
-            mWindowPlacerLocked.performSurfacePlacement(true /* force */);
-
-            if (shouldRelayout) {
-                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "relayoutWindow: viewVisibility_1");
-
-                result = win.relayoutVisibleWindow(result, attrChanges);
-
                 if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
                     focusMayChange = true;
                 }
@@ -2759,7 +2790,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayArea da = dc.getAreaForWindowToken(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
-                        callingUid);
+                        callingUid, type, options);
                 return true;
             }
         } finally {
@@ -2775,9 +2806,18 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
+                if (!mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
                         callerCanManageAppTokens, callingUid)) {
-                    mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+                    return;
+                }
+                final WindowContainer wc = mWindowContextListenerController
+                        .getContainer(clientToken);
+
+                mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+
+                final WindowToken token = wc.asWindowToken();
+                if (token != null && token.isFromClient()) {
+                    removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
             }
         } finally {
@@ -2788,13 +2828,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isWindowToken(IBinder binder) {
         synchronized (mGlobalLock) {
-            final WindowToken windowToken = mRoot.getWindowToken(binder);
-            if (windowToken == null) {
-                return false;
-            }
-            // We don't allow activity tokens in WindowContext. TODO(window-context): rename method
-            return windowToken.asActivityRecord() == null;
+            return mRoot.getWindowToken(binder) != null;
         }
+
     }
 
     @Override
@@ -3243,6 +3279,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void closeSystemDialogs(String reason) {
+        int callingPid = Binder.getCallingPid();
+        int callingUid = Binder.getCallingUid();
+        if (!mAtmInternal.checkCanCloseSystemDialogs(callingPid, callingUid, null)) {
+            return;
+        }
         synchronized (mGlobalLock) {
             mRoot.closeSystemDialogs(reason);
         }
@@ -5248,7 +5289,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case UPDATE_MULTI_WINDOW_STACKS: {
                     synchronized (mGlobalLock) {
-                        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+                        final DisplayContent displayContent = (DisplayContent) msg.obj;
                         if (displayContent != null) {
                             displayContent.adjustForImeIfNeeded();
                         }
@@ -8411,10 +8452,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    void grantEmbeddedWindowFocus(Session session, IBinder targetInputToken, boolean grantFocus) {
+    void grantEmbeddedWindowFocus(Session session, IBinder inputToken, boolean grantFocus) {
         synchronized (mGlobalLock) {
             final EmbeddedWindowController.EmbeddedWindow embeddedWindow =
-                    mEmbeddedWindowController.get(targetInputToken);
+                    mEmbeddedWindowController.get(inputToken);
             if (embeddedWindow == null) {
                 Slog.e(TAG, "Embedded window not found");
                 return;
@@ -8426,7 +8467,7 @@ public class WindowManagerService extends IWindowManager.Stub
             SurfaceControl.Transaction t = mTransactionFactory.get();
             final int displayId = embeddedWindow.mDisplayId;
             if (grantFocus) {
-                t.setFocusedWindow(targetInputToken, displayId).apply();
+                t.setFocusedWindow(inputToken, embeddedWindow.getName(), displayId).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Focus request " + embeddedWindow.getName(),
                         "reason=grantEmbeddedWindowFocus(true)");
@@ -8441,7 +8482,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             embeddedWindow.getName());
                     return;
                 }
-                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, targetInputToken,
+                t.requestFocusTransfer(newFocusTarget.mInputChannelToken, newFocusTarget.getName(),
+                        inputToken, embeddedWindow.getName(),
                         displayId).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + newFocusTarget,
@@ -8477,13 +8519,17 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             SurfaceControl.Transaction t = mTransactionFactory.get();
             if (grantFocus) {
-                t.requestFocusTransfer(targetInputToken, hostWindow.mInputChannel.getToken(),
+                t.requestFocusTransfer(targetInputToken, embeddedWindow.getName(),
+                        hostWindow.mInputChannel.getToken(),
+                        hostWindow.getName(),
                         hostWindow.getDisplayId()).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + embeddedWindow.getName(),
                         "reason=grantEmbeddedWindowFocus(true)");
             } else {
-                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), targetInputToken,
+                t.requestFocusTransfer(hostWindow.mInputChannel.getToken(), hostWindow.getName(),
+                        targetInputToken,
+                        embeddedWindow.getName(),
                         hostWindow.getDisplayId()).apply();
                 EventLog.writeEvent(LOGTAG_INPUT_FOCUS,
                         "Transfer focus request " + hostWindow,

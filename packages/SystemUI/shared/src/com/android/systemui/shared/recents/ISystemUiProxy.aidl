@@ -27,6 +27,7 @@ import android.view.MotionEvent;
 
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.recents.model.Task;
+import com.android.systemui.shared.system.RemoteTransitionCompat;
 
 /**
  * Temporary callbacks into SystemUI.
@@ -192,4 +193,13 @@ interface ISystemUiProxy {
      * @param destinationBounds the destination bounds the PiP window lands into
      */
     void stopSwipePipToHome(in ComponentName componentName, in Rect destinationBounds) = 31;
+
+    /**
+     * Registers a RemoteTransitionCompat that will handle transitions. This parameter bundles an
+     * IRemoteTransition and a filter that must pass for it.
+     */
+    void registerRemoteTransition(in RemoteTransitionCompat remoteTransition) = 32;
+
+    /** Unegisters a RemoteTransitionCompat that will handle transitions. */
+    void unregisterRemoteTransition(in RemoteTransitionCompat remoteTransition) = 33;
 }

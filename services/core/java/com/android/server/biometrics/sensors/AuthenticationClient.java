@@ -33,6 +33,7 @@ import android.security.KeyStore;
 import android.util.EventLog;
 import android.util.Slog;
 
+import com.android.server.biometrics.BiometricsProto;
 import com.android.server.biometrics.Utils;
 
 import java.util.ArrayList;
@@ -297,5 +298,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         if (mTaskStackListener != null) {
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_AUTHENTICATE;
     }
 }

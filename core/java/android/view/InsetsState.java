@@ -106,7 +106,9 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_NAVIGATION_BAR = 1;
     public static final int ITYPE_CAPTION_BAR = 2;
 
-    public static final int ITYPE_TOP_GESTURES = 3;
+    // The always visible types are visible to all windows regardless of the z-order.
+    public static final int FIRST_ALWAYS_VISIBLE_TYPE = 3;
+    public static final int ITYPE_TOP_GESTURES = FIRST_ALWAYS_VISIBLE_TYPE;
     public static final int ITYPE_BOTTOM_GESTURES = 4;
     public static final int ITYPE_LEFT_GESTURES = 5;
     public static final int ITYPE_RIGHT_GESTURES = 6;
@@ -117,15 +119,16 @@ public class InsetsState implements Parcelable {
     public static final int ITYPE_LEFT_MANDATORY_GESTURES = 9;
     public static final int ITYPE_RIGHT_MANDATORY_GESTURES = 10;
 
-    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 11;
-    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 12;
-    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 13;
-    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 14;
+    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 11;
+    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 12;
+    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 13;
+    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 14;
+    public static final int LAST_ALWAYS_VISIBLE_TYPE = ITYPE_BOTTOM_DISPLAY_CUTOUT;
 
-    public static final int ITYPE_LEFT_DISPLAY_CUTOUT = 15;
-    public static final int ITYPE_TOP_DISPLAY_CUTOUT = 16;
-    public static final int ITYPE_RIGHT_DISPLAY_CUTOUT = 17;
-    public static final int ITYPE_BOTTOM_DISPLAY_CUTOUT = 18;
+    public static final int ITYPE_LEFT_TAPPABLE_ELEMENT = 15;
+    public static final int ITYPE_TOP_TAPPABLE_ELEMENT = 16;
+    public static final int ITYPE_RIGHT_TAPPABLE_ELEMENT = 17;
+    public static final int ITYPE_BOTTOM_TAPPABLE_ELEMENT = 18;
 
     /** Input method window. */
     public static final int ITYPE_IME = 19;
@@ -179,6 +182,18 @@ public class InsetsState implements Parcelable {
 
     public InsetsState(InsetsState copy, boolean copySources) {
         set(copy, copySources);
+    }
+
+    /**
+     * Mirror the always visible sources from the other state. They will share the same object for
+     * the always visible types.
+     *
+     * @param other the state to mirror the mirrored sources from.
+     */
+    public void mirrorAlwaysVisibleInsetsSources(InsetsState other) {
+        for (int type = FIRST_ALWAYS_VISIBLE_TYPE; type <= LAST_ALWAYS_VISIBLE_TYPE; type++) {
+            mSources[type] = other.mSources[type];
+        }
     }
 
     /**

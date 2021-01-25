@@ -36,6 +36,7 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
+import static android.view.WindowManager.LayoutParams.TYPE_NOTIFICATION_SHADE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_FLAG_APP_CRASHED;
 import static android.view.WindowManager.TRANSIT_NONE;
@@ -861,6 +862,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                         "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
             }
         }
+
+        // Send any pending task-info changes that were queued-up during a layout deferment
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         checkAppTransitionReady(surfacePlacer);
@@ -1012,9 +1016,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mWmService.enableScreenIfNeededLocked();
 
         mWmService.scheduleAnimationLocked();
-
-        // Send any pending task-info changes that were queued-up during a layout deferment
-        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingTaskInfoChanges();
 
         if (DEBUG_WINDOW_TRACE) Slog.e(TAG, "performSurfacePlacementInner exit");
     }
@@ -1544,6 +1545,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
             mWindowManager.cancelRecentsAnimation(REORDER_KEEP_IN_PLACE, "startHomeActivity");
         }
+        homeIntent.putExtra(WindowManagerPolicy.EXTRA_START_REASON, reason);
+
         // Update the reason for ANR debugging to verify if the user activity is the one that
         // actually launched.
         final String myReason = reason + ":" + userId + ":" + UserHandle.getUserId(
@@ -1793,8 +1796,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Passing null here for 'starting' param value, so that visibility of actual starting
         // activity will be properly updated.
         ensureActivitiesVisible(null /* starting */, 0 /* configChanges */,
-                false /* preserveWindows */, false /* notifyClients */,
-                mTaskSupervisor.mUserLeaving);
+                false /* preserveWindows */, false /* notifyClients */);
 
         if (displayId == INVALID_DISPLAY) {
             // The caller didn't provide a valid display id, skip updating config.
@@ -1970,15 +1972,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
-        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */,
-                mTaskSupervisor.mUserLeaving);
+        ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
 
     /**
      * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
      */
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
-            boolean preserveWindows, boolean notifyClients, boolean userLeaving) {
+            boolean preserveWindows, boolean notifyClients) {
         if (mTaskSupervisor.inActivityVisibilityUpdate()) {
             // Don't do recursive work.
             return;
@@ -1990,7 +1991,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
                 final DisplayContent display = getChildAt(displayNdx);
                 display.ensureActivitiesVisible(starting, configChanges, preserveWindows,
-                        notifyClients, userLeaving);
+                        notifyClients);
             }
         } finally {
             mTaskSupervisor.endActivityVisibilityUpdate();
@@ -2103,30 +2104,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 onTop);
     }
 
-    boolean moveTopRootTaskActivityToPinnedRootTask(int rootTaskId) {
-        final Task rootTask = getRootTask(rootTaskId);
-        if (rootTask == null) {
-            throw new IllegalArgumentException(
-                    "moveTopStackActivityToPinnedRootTask: Unknown rootTaskId=" + rootTaskId);
-        }
-
-        final ActivityRecord r = rootTask.topRunningActivity();
-        if (r == null) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedRootTask: No top running activity"
-                    + " in rootTask=" + rootTask);
-            return false;
-        }
-
-        if (!mService.mForceResizableActivities && !r.supportsPictureInPicture()) {
-            Slog.w(TAG, "moveTopStackActivityToPinnedRootTask: Picture-In-Picture not supported "
-                    + "for r=" + r);
-            return false;
-        }
-
-        moveActivityToPinnedRootTask(r, "moveTopStackActivityToPinnedRootTask");
-        return true;
-    }
-
     void moveActivityToPinnedRootTask(ActivityRecord r, String reason) {
         mService.deferWindowLayout();
 
@@ -2152,13 +2129,16 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 rootTask = task;
             } else {
                 // In the case of multiple activities, we will create a new task for it and then
-                // move the PIP activity into the task.
+                // move the PIP activity into the task. Note that we explicitly defer the task
+                // appear being sent in this case and mark this newly created task to been visible.
                 rootTask = new Task.Builder(mService)
                         .setActivityType(r.getActivityType())
                         .setOnTop(true)
                         .setActivityInfo(r.info)
                         .setParent(taskDisplayArea)
                         .setIntent(r.intent)
+                        .setDeferTaskAppear(true)
+                        .setHasBeenVisible(true)
                         .build();
                 // It's possible the task entering PIP is in freeform, so save the last
                 // non-fullscreen bounds. Then when this new PIP task exits PIP, it can restore
@@ -2166,11 +2146,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 rootTask.setLastNonFullscreenBounds(task.mLastNonFullscreenBounds);
                 rootTask.setBounds(task.getBounds());
 
+                // Move reparent bounds from original task to the new one.
+                rootTask.mLastRecentsAnimationBounds.set(task.mLastRecentsAnimationBounds);
+                task.mLastRecentsAnimationBounds.setEmpty();
+
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
                 // up-to-dated pinned stack information on this newly created stack.
                 r.reparent(rootTask, MAX_VALUE, reason);
+
+                // Ensure the leash of new task is in sync with its current bounds after reparent.
+                rootTask.maybeApplyLastRecentsAnimationBounds();
 
                 // In the case of this activity entering PIP due to it being moved to the back,
                 // the old activity would have a TRANSIT_TASK_TO_BACK transition that needs to be
@@ -2200,6 +2187,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // TODO(task-org): Figure-out more structured way to do this long term.
             r.setWindowingMode(intermediateWindowingMode);
             rootTask.setWindowingMode(WINDOWING_MODE_PINNED);
+            rootTask.setDeferTaskAppear(false);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
             // to the pinned stack
@@ -2855,6 +2843,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final WindowContainerToken daToken = options.getLaunchTaskDisplayArea();
             taskDisplayArea = daToken != null
                     ? (TaskDisplayArea) WindowContainer.fromBinder(daToken.asBinder()) : null;
+
+            final Task rootTask = Task.fromWindowContainerToken(options.getLaunchRootTask());
+            if (rootTask != null) {
+                return rootTask;
+            }
         }
 
         // First preference for stack goes to the task Id set in the activity options. Use the stack
@@ -3029,7 +3022,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final int activityType =
                     options != null && options.getLaunchActivityType() != ACTIVITY_TYPE_UNDEFINED
                             ? options.getLaunchActivityType() : r.getActivityType();
-            return taskDisplayArea.createRootTask(windowingMode, activityType, true /*onTop*/);
+            return taskDisplayArea.createRootTask(
+                    windowingMode, activityType, true /*onTop*/, options);
         }
 
         return null;
@@ -3135,6 +3129,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 r.finishIfPossible(reason, true /* oomAdj */);
             }
         });
+    }
+
+    /**
+     * Returns {@code true} if {@code uid} has a visible window that's above a window of type {@link
+     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}. If there is no window with type {@link
+     * WindowManager.LayoutParams#TYPE_NOTIFICATION_SHADE}, it returns {@code false}.
+     */
+    boolean hasVisibleWindowAboveNotificationShade(int uid) {
+        boolean[] visibleWindowFound = {false};
+        // We only return true if we found the notification shade (ie. window of type
+        // TYPE_NOTIFICATION_SHADE). Usually, it should always be there, but if for some reason
+        // it isn't, we should better be on the safe side and return false for this.
+        return forAllWindows(w -> {
+            if (w.mOwnerUid == uid && w.isVisible()) {
+                visibleWindowFound[0] = true;
+            }
+            if (w.mAttrs.type == TYPE_NOTIFICATION_SHADE) {
+                return visibleWindowFound[0];
+            }
+            return false;
+        }, true /* traverseTopToBottom */);
     }
 
     private boolean shouldCloseAssistant(ActivityRecord r, String reason) {
@@ -3572,7 +3587,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
-        pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedRootTask());
+        pw.println("topDisplayFocusedRootTask=" + getTopDisplayFocusedRootTask());
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final DisplayContent display = getChildAt(i);
             display.dump(pw, prefix, dumpAll);

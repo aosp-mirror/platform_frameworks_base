@@ -97,6 +97,7 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
     private lateinit var privacyItemController: PrivacyItemController
     private lateinit var executor: FakeExecutor
+    private lateinit var fakeClock: FakeSystemClock
     private lateinit var deviceConfigProxy: DeviceConfigProxy
 
     fun PrivacyItemController(): PrivacyItemController {
@@ -113,7 +114,8 @@ class PrivacyItemControllerTest : SysuiTestCase() {
     @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
-        executor = FakeExecutor(FakeSystemClock())
+        fakeClock = FakeSystemClock()
+        executor = FakeExecutor(fakeClock)
         deviceConfigProxy = DeviceConfigProxyFake()
 
         // Listen to everything by default
@@ -418,6 +420,104 @@ class PrivacyItemControllerTest : SysuiTestCase() {
 
         assertEquals(1, argCaptor.value.size)
         assertEquals(PrivacyType.TYPE_MICROPHONE, argCaptor.value[0].privacyType)
+    }
+
+    @Test
+    fun testPassageOfTimeDoesNotRemoveIndicators() {
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0)
+        )).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.addCallback(callback)
+
+        fakeClock.advanceTime(PrivacyItemController.TIME_TO_HOLD_INDICATORS * 10)
+        executor.runAllReady()
+
+        verify(callback, never()).onPrivacyItemsChanged(emptyList())
+        assertTrue(privacyItemController.privacyList.isNotEmpty())
+    }
+
+    @Test
+    fun testHoldingAfterEmptyBeforeTimeExpires() {
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0)
+        )).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+
+        verify(appOpsController).addCallback(any(), capture(argCaptorCallback))
+
+        `when`(appOpsController.getActiveAppOpsForUser(anyInt())).thenReturn(emptyList())
+        argCaptorCallback.value.onActiveStateChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, false)
+        executor.runAllReady()
+
+        fakeClock.advanceTime(PrivacyItemController.TIME_TO_HOLD_INDICATORS / 5)
+        executor.runAllReady()
+
+        verify(callback, never()).onPrivacyItemsChanged(emptyList())
+        assertTrue(privacyItemController.privacyList.isNotEmpty())
+    }
+
+    @Test
+    fun testAfterHoldingIndicatorsAreEmpty() {
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0)
+        )).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+
+        verify(appOpsController).addCallback(any(), capture(argCaptorCallback))
+
+        `when`(appOpsController.getActiveAppOpsForUser(anyInt())).thenReturn(emptyList())
+        argCaptorCallback.value.onActiveStateChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, false)
+        executor.runAllReady()
+
+        executor.advanceClockToLast()
+        executor.runAllReady()
+
+        verify(callback).onPrivacyItemsChanged(emptyList())
+        assertTrue(privacyItemController.privacyList.isEmpty())
+    }
+
+    @Test
+    fun testHoldingStopsIfNewIndicatorsAppear() {
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, 0)
+        )).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+
+        privacyItemController.addCallback(callback)
+        executor.runAllReady()
+
+        verify(appOpsController).addCallback(any(), capture(argCaptorCallback))
+
+        `when`(appOpsController.getActiveAppOpsForUser(anyInt())).thenReturn(emptyList())
+        argCaptorCallback.value.onActiveStateChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID, TEST_PACKAGE_NAME, false)
+        executor.runAllReady()
+
+        fakeClock.advanceTime(PrivacyItemController.TIME_TO_HOLD_INDICATORS / 2)
+        executor.runAllReady()
+
+        doReturn(listOf(
+                AppOpItem(AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, 0)
+        )).`when`(appOpsController).getActiveAppOpsForUser(anyInt())
+        argCaptorCallback.value.onActiveStateChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID, TEST_PACKAGE_NAME, true)
+        executor.runAllReady()
+
+        executor.advanceClockToLast()
+        executor.runAllReady()
+
+        verify(callback, never()).onPrivacyItemsChanged(emptyList())
+        verify(callback, atLeastOnce()).onPrivacyItemsChanged(capture(argCaptor))
+
+        val lastList = argCaptor.allValues.last()
+        assertEquals(1, lastList.size)
+        assertEquals(PrivacyType.TYPE_MICROPHONE, lastList.single().privacyType)
     }
 
     private fun changeMicCamera(value: Boolean?) = changeProperty(MIC_CAMERA, value)

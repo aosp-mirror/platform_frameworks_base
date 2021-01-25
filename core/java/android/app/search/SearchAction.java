@@ -70,20 +70,20 @@ public final class SearchAction implements Parcelable {
 
     SearchAction(Parcel in) {
         mId = in.readString();
-        mIcon = Icon.CREATOR.createFromParcel(in);
         mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
+        mIcon = in.readTypedObject(Icon.CREATOR);
         mSubtitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
         mContentDescription = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
-        mPendingIntent = PendingIntent.CREATOR.createFromParcel(in);
-        mIntent = Intent.CREATOR.createFromParcel(in);
+        mPendingIntent = in.readTypedObject(PendingIntent.CREATOR);
+        mIntent = in.readTypedObject(Intent.CREATOR);
         mUserHandle = in.readTypedObject(UserHandle.CREATOR);
-        mExtras = in.readBundle();
+        mExtras = in.readTypedObject(Bundle.CREATOR);
     }
 
     private SearchAction(
             @NonNull String id,
-            @Nullable Icon icon,
             @NonNull CharSequence title,
+            @Nullable Icon icon,
             @Nullable CharSequence subtitle,
             @Nullable CharSequence contentDescription,
             @Nullable PendingIntent pendingIntent,
@@ -91,8 +91,8 @@ public final class SearchAction implements Parcelable {
             @Nullable UserHandle userHandle,
             @Nullable Bundle extras) {
         mId = Objects.requireNonNull(id);
-        mIcon = icon;
         mTitle = Objects.requireNonNull(title);
+        mIcon = icon;
         mSubtitle = subtitle;
         mContentDescription = contentDescription;
         mPendingIntent = pendingIntent;
@@ -192,14 +192,14 @@ public final class SearchAction implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeString(mId);
-        out.writeTypedObject(mIcon, flags);
         TextUtils.writeToParcel(mTitle, out, flags);
+        out.writeTypedObject(mIcon, flags);
         TextUtils.writeToParcel(mSubtitle, out, flags);
         TextUtils.writeToParcel(mContentDescription, out, flags);
         out.writeTypedObject(mPendingIntent, flags);
         out.writeTypedObject(mIntent, flags);
         out.writeTypedObject(mUserHandle, flags);
-        out.writeBundle(mExtras);
+        out.writeTypedObject(mExtras, flags);
     }
 
     @Override
@@ -235,11 +235,11 @@ public final class SearchAction implements Parcelable {
         @NonNull
         private String mId;
 
-        @Nullable
-        private Icon mIcon;
-
         @NonNull
         private CharSequence mTitle;
+
+        @Nullable
+        private Icon mIcon;
 
         @Nullable
         private CharSequence mSubtitle;
@@ -337,7 +337,7 @@ public final class SearchAction implements Parcelable {
          */
         @NonNull
         public SearchAction build() {
-            return new SearchAction(mId, mIcon, mTitle, mSubtitle, mContentDescription,
+            return new SearchAction(mId, mTitle, mIcon, mSubtitle, mContentDescription,
                     mPendingIntent, mIntent, mUserHandle, mExtras);
         }
     }

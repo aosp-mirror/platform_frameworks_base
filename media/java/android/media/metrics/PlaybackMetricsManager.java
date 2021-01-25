@@ -48,6 +48,41 @@ public class PlaybackMetricsManager {
             throw e.rethrowFromSystemServer();
         }
     }
+    /**
+     * Reports network event.
+     * @hide
+     */
+    public void reportNetworkEvent(@NonNull String sessionId, NetworkEvent event) {
+        try {
+            mService.reportNetworkEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports playback state event.
+     * @hide
+     */
+    public void reportPlaybackStateEvent(@NonNull String sessionId, PlaybackStateEvent event) {
+        try {
+            mService.reportPlaybackStateEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports track change event.
+     * @hide
+     */
+    public void reportTrackChangeEvent(@NonNull String sessionId, TrackChangeEvent event) {
+        try {
+            mService.reportTrackChangeEvent(sessionId, event, mUserId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 
     /**
      * Creates a playback session.
@@ -57,6 +92,18 @@ public class PlaybackMetricsManager {
             String id = mService.getSessionId(mUserId);
             PlaybackSession session = new PlaybackSession(id, this);
             return session;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reports error event.
+     * @hide
+     */
+    public void reportPlaybackErrorEvent(@NonNull String sessionId, PlaybackErrorEvent event) {
+        try {
+            mService.reportPlaybackErrorEvent(sessionId, event, mUserId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

@@ -36,11 +36,12 @@ import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
+import android.window.TransitionRequestInfo;
 import android.window.WindowContainerTransaction;
 
-import com.android.wm.shell.Transitions;
 import com.android.wm.shell.common.TransactionPool;
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.ArrayList;
 
@@ -76,9 +77,11 @@ public class SplitScreenTransitions implements Transitions.TransitionHandler {
     }
 
     @Override
-    public WindowContainerTransaction handleRequest(@WindowManager.TransitionType int type,
-            @NonNull IBinder transition, @Nullable ActivityManager.RunningTaskInfo triggerTask) {
+    public WindowContainerTransaction handleRequest(@NonNull IBinder transition,
+            @Nullable TransitionRequestInfo request) {
         WindowContainerTransaction out = null;
+        final ActivityManager.RunningTaskInfo triggerTask = request.getTriggerTask();
+        final @WindowManager.TransitionType int type = request.getType();
         if (mSplitScreen.isDividerVisible()) {
             // try to handle everything while in split-screen
             out = new WindowContainerTransaction();

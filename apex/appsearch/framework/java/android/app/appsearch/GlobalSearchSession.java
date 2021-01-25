@@ -19,10 +19,12 @@ package android.app.appsearch;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.os.RemoteException;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.Closeable;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -31,21 +33,29 @@ import java.util.function.Consumer;
  * This class provides global access to the centralized AppSearch index maintained by the system.
  *
  * <p>Apps can retrieve indexed documents through the query API.
- * @hide
  */
-@SystemApi
-public class GlobalSearchSession {
+public class GlobalSearchSession implements Closeable {
 
     private final IAppSearchManager mService;
+
     @UserIdInt
     private final int mUserId;
+    private boolean mIsClosed = false;
 
+    private final String mPackageName;
+
+    /**
+     * Creates a search session for the client, defined by the {@code userId} and
+     * {@code packageName}.
+     */
     static void createGlobalSearchSession(
             @NonNull IAppSearchManager service,
             @UserIdInt int userId,
+            @NonNull String packageName,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull Consumer<AppSearchResult<GlobalSearchSession>> callback) {
-        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userId);
+        GlobalSearchSession globalSearchSession = new GlobalSearchSession(service, userId,
+                packageName);
         globalSearchSession.initialize(executor, callback);
     }
 
@@ -72,9 +82,11 @@ public class GlobalSearchSession {
         }
     }
 
-    private GlobalSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId) {
+    private GlobalSearchSession(@NonNull IAppSearchManager service, @UserIdInt int userId,
+            @NonNull String packageName) {
         mService = service;
         mUserId = userId;
+        mPackageName = packageName;
     }
 
     /**
@@ -129,7 +141,14 @@ public class GlobalSearchSession {
         Objects.requireNonNull(queryExpression);
         Objects.requireNonNull(searchSpec);
         Objects.requireNonNull(executor);
-        return new SearchResults(mService, /*databaseName=*/null, queryExpression,
+        Preconditions.checkState(!mIsClosed, "GlobalSearchSession has already been closed");
+        return new SearchResults(mService, mPackageName, /*databaseName=*/null, queryExpression,
                 searchSpec, mUserId, executor);
+    }
+
+    /** Closes the {@link GlobalSearchSession}. */
+    @Override
+    public void close() {
+        mIsClosed = true;
     }
 }

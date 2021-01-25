@@ -71,6 +71,13 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     }
 
     @Override
+    public void onError(int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+    }
+
+    @Override
     protected boolean hasReachedEnrollmentLimit() {
         return FingerprintUtils.getInstance(getSensorId())
                 .getBiometricsForUser(getContext(), getTargetUserId()).size()
@@ -94,7 +101,8 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_ENROLL,
+                mUdfpsOverlayController);
         try {
             mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken));

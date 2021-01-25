@@ -980,8 +980,15 @@ public final class MediaTranscodeManager {
                     throw new UnsupportedOperationException(
                             "Source video format hint must be set!");
                 }
-                boolean supportHevc = mClientCaps.isVideoMimeTypeSupported(
-                        MediaFormat.MIMETYPE_VIDEO_HEVC);
+
+                boolean supportHevc = false;
+                try {
+                    supportHevc = mClientCaps.isVideoMimeTypeSupported(
+                            MediaFormat.MIMETYPE_VIDEO_HEVC);
+                } catch (ApplicationMediaCapabilities.FormatNotFoundException ex) {
+                    // Set to false if application did not specify.
+                    supportHevc = false;
+                }
                 if (!supportHevc && MediaFormat.MIMETYPE_VIDEO_HEVC.equals(
                         mSrcVideoFormatHint.getString(MediaFormat.KEY_MIME))) {
                     return true;
@@ -1016,13 +1023,14 @@ public final class MediaTranscodeManager {
                             "Source Width and height must be larger than 0");
                 }
 
-                // TODO(hkuang): Remove the hardcoded frameRate after b/176940364 is fixed.
-                float frameRate = (float) 30.0;
-                /*mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE, frameRate);
-                if (frameRate <= 0) {
-                    throw new IllegalArgumentException(
-                            "frameRate must be larger than 0");
-                }*/
+                float frameRate = 30.0f; // default to 30fps.
+                if (mSrcVideoFormatHint.containsKey(MediaFormat.KEY_FRAME_RATE)) {
+                    frameRate = mSrcVideoFormatHint.getFloat(MediaFormat.KEY_FRAME_RATE);
+                    if (frameRate <= 0) {
+                        throw new IllegalArgumentException(
+                                "frameRate must be larger than 0");
+                    }
+                }
 
                 int bitrate = getAVCBitrate(width, height, frameRate);
                 videoTrackFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);

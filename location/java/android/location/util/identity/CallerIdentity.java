@@ -201,11 +201,15 @@ public final class CallerIdentity {
             return false;
         }
         CallerIdentity that = (CallerIdentity) o;
-        return mUid == that.mUid
+        return equalsIgnoringListenerId(that) && Objects.equals(mListenerId, that.mListenerId);
+    }
+
+    public boolean equalsIgnoringListenerId(CallerIdentity that) {
+        return that != null
+                && mUid == that.mUid
                 && mPid == that.mPid
                 && mPackageName.equals(that.mPackageName)
-                && Objects.equals(mAttributionTag, that.mAttributionTag)
-                && Objects.equals(mListenerId, that.mListenerId);
+                && Objects.equals(mAttributionTag, that.mAttributionTag);
     }
 
     @Override

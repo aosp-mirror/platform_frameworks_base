@@ -55,7 +55,8 @@ public class ImsRegistrationImplBase {
     @IntDef(value = {
                     REGISTRATION_TECH_NONE,
                     REGISTRATION_TECH_LTE,
-                    REGISTRATION_TECH_IWLAN
+                    REGISTRATION_TECH_IWLAN,
+                    REGISTRATION_TECH_CROSS_SIM
             })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ImsRegistrationTech {}
@@ -71,6 +72,11 @@ public class ImsRegistrationImplBase {
      * IMS is registered to IMS via IWLAN.
      */
     public static final int REGISTRATION_TECH_IWLAN = 1;
+
+    /**
+     * IMS is registered to IMS via internet over second subscription.
+     */
+    public static final int REGISTRATION_TECH_CROSS_SIM = 2;
 
     // Registration states, used to notify new ImsRegistrationImplBase#Callbacks of the current
     // state.
@@ -196,7 +202,8 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the device is connected to the IMS network.
      *
      * @param imsRadioTech the radio access technology. Valid values are defined as
-     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
+     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
+     * {@link #REGISTRATION_TECH_CROSS_SIM}.
      */
     public final void onRegistered(@ImsRegistrationTech int imsRadioTech) {
         updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERED);
@@ -214,7 +221,8 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the device is trying to connect the IMS network.
      *
      * @param imsRadioTech the radio access technology. Valid values are defined as
-     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
+     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
+     * {@link #REGISTRATION_TECH_CROSS_SIM}.
      */
     public final void onRegistering(@ImsRegistrationTech int imsRadioTech) {
         updateToState(imsRadioTech, RegistrationManager.REGISTRATION_STATE_REGISTERING);
@@ -262,7 +270,8 @@ public class ImsRegistrationImplBase {
      * Notify the framework that the handover from the current radio technology to the technology
      * defined in {@code imsRadioTech} has failed.
      * @param imsRadioTech The technology that has failed to be changed. Valid values are
-     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}.
+     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
+     * {@link #REGISTRATION_TECH_CROSS_SIM}.
      * @param info The {@link ImsReasonInfo} for the failure to change technology.
      */
     public final void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
@@ -329,7 +338,8 @@ public class ImsRegistrationImplBase {
 
     /**
      * @return the current registration connection type. Valid values are
-     * {@link #REGISTRATION_TECH_LTE} and {@link #REGISTRATION_TECH_IWLAN}
+     * {@link #REGISTRATION_TECH_LTE}, {@link #REGISTRATION_TECH_IWLAN} and
+     * {@link #REGISTRATION_TECH_CROSS_SIM}.
      * @hide
      */
     @VisibleForTesting

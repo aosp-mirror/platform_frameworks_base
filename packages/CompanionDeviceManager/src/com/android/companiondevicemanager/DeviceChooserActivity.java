@@ -17,11 +17,13 @@
 package com.android.companiondevicemanager;
 
 import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
+import static android.text.TextUtils.emptyIfNull;
 import static android.text.TextUtils.withoutPrefix;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.Nullable;
 import android.app.Activity;
 import android.companion.AssociationRequest;
 import android.companion.CompanionDeviceManager;
@@ -65,10 +67,7 @@ public class DeviceChooserActivity extends Activity {
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         String deviceProfile = getRequest().getDeviceProfile();
-        String profileName = deviceProfile == null
-                ? getString(R.string.profile_name_generic)
-                //TODO introduce PermissionController APIs to resolve UI values
-                : withoutPrefix("android.app.role.COMPANION_DEVICE_", deviceProfile).toLowerCase();
+        String profileName = getDeviceProfileName(deviceProfile);
 
         if (getRequest().isSingleDevice()) {
             setContentView(R.layout.device_confirmation);
@@ -112,15 +111,14 @@ public class DeviceChooserActivity extends Activity {
         TextView profileSummary = findViewById(R.id.profile_summary);
 
         if (deviceProfile != null) {
-            //TODO introduce PermissionController APIs to resolve UI values
-            String privileges = "Notifications, Phone, Contacts and Calendar";
+            String privacyDisclaimer = emptyIfNull(getRequest()
+                    .getDeviceProfilePrivilegesDescription())
+                    .replace("APP_NAME", getCallingAppName());
             profileSummary.setVisibility(View.VISIBLE);
             profileSummary.setText(getString(R.string.profile_summary,
                     getCallingAppName(),
                     profileName,
-                    getCallingAppName(),
-                    privileges,
-                    profileName));
+                    privacyDisclaimer));
         } else {
             profileSummary.setVisibility(View.GONE);
         }
@@ -133,6 +131,24 @@ public class DeviceChooserActivity extends Activity {
 
     private AssociationRequest getRequest() {
         return getService().mRequest;
+    }
+
+    private String getDeviceProfileName(@Nullable String deviceProfile) {
+        if (deviceProfile == null) {
+            return getString(R.string.profile_name_generic);
+        }
+        switch (deviceProfile) {
+            case AssociationRequest.DEVICE_PROFILE_WATCH: {
+                return getString(R.string.profile_name_watch);
+            }
+            default: {
+                Log.wtf(LOG_TAG,
+                        "No localized profile name found for device profile: " + deviceProfile);
+                return withoutPrefix("android.app.role.COMPANION_DEVICE_", deviceProfile)
+                        .toLowerCase()
+                        .replace('_', ' ');
+            }
+        }
     }
 
     private void cancel() {

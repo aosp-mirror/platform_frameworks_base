@@ -49,6 +49,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.notification.stack.ViewState;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -125,6 +126,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
      */
     public static final float BUSY_SCRIM_ALPHA = 1f;
 
+    /**
+     * Scrim opacity that can have text on top.
+     */
+    public static final float GAR_SCRIM_ALPHA = 0.6f;
+
     static final int TAG_KEY_ANIM = R.id.scrim;
     private static final int TAG_START_ALPHA = R.id.scrim_alpha_start;
     private static final int TAG_END_ALPHA = R.id.scrim_alpha_end;
@@ -199,10 +205,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             AlarmManager alarmManager, KeyguardStateController keyguardStateController,
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
-            BlurUtils blurUtils, ConfigurationController configurationController) {
+            BlurUtils blurUtils, ConfigurationController configurationController,
+            FeatureFlags featureFlags) {
 
         mScrimStateListener = lightBarController::setScrimState;
-        mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
+        mDefaultScrimAlpha = featureFlags.isShadeOpaque() ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA;
         mBlurUtils = blurUtils;
 
         mKeyguardStateController = keyguardStateController;
@@ -370,13 +377,15 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mKeyguardUpdateMonitor.needsSlowUnlockTransition() && mState == ScrimState.UNLOCKED) {
             mAnimationDelay = StatusBar.FADE_KEYGUARD_START_DELAY;
             scheduleUpdate();
-        } else if ((!mDozeParameters.getAlwaysOn() && oldState == ScrimState.AOD)
+        } else if ((oldState == ScrimState.AOD  // leaving doze
+                && (!mDozeParameters.getAlwaysOn() || mState == ScrimState.UNLOCKED))
                 || (mState == ScrimState.AOD && !mDozeParameters.getDisplayNeedsBlanking())) {
             // Scheduling a frame isn't enough when:
             //  • Leaving doze and we need to modify scrim color immediately
             //  • ColorFade will not kick-in and scrim cannot wait for pre-draw.
             onPreDraw();
         } else {
+            // Schedule a frame
             scheduleUpdate();
         }
 
@@ -1003,6 +1012,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     }
 
     private void updateThemeColors() {
+        if (mScrimBehind == null) return;
         int background = Utils.getColorAttr(mScrimBehind.getContext(),
                 android.R.attr.colorBackgroundFloating).getDefaultColor();
         int accent = Utils.getColorAccent(mScrimBehind.getContext()).getDefaultColor();

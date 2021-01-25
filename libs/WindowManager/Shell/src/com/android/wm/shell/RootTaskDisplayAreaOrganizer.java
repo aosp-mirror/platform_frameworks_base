@@ -111,6 +111,7 @@ public class RootTaskDisplayAreaOrganizer extends DisplayAreaOrganizer {
         }
 
         mDisplayAreasInfo.put(displayId, displayAreaInfo);
+        mLeashes.put(displayId, leash);
 
         ArrayList<RootTaskDisplayAreaListener> listeners = mListeners.get(displayId);
         if (listeners != null) {

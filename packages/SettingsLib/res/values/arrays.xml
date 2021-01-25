@@ -291,7 +291,7 @@
         <item>256K</item>
         <item>1M</item>
         <item>4M</item>
-        <item>16M</item>
+        <item>8M</item>
     </string-array>
 
     <!-- Titles for logd limit size lowram selection preference. [CHAR LIMIT=14] -->
@@ -309,7 +309,7 @@
         <item>262144</item>
         <item>1048576</item>
         <item>4194304</item>
-        <item>16777216</item>
+        <item>8388608</item>
     </string-array>
 
     <!-- Summaries for logd limit size selection preference. [CHAR LIMIT=50]-->
@@ -319,7 +319,7 @@
         <item>256K per log buffer</item>
         <item>1M per log buffer</item>
         <item>4M per log buffer</item>
-        <item>16M per log buffer</item>
+        <item>8M per log buffer</item>
     </string-array>
 
     <!-- Values for logpersist state selection preference. -->

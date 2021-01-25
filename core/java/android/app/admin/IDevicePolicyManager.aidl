@@ -25,6 +25,8 @@ import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.app.admin.PasswordMetrics;
 import android.app.admin.FactoryResetProtectionPolicy;
+import android.app.admin.ManagedProfileProvisioningParams;
+import android.app.admin.FullyManagedDeviceProvisioningParams;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -73,7 +75,7 @@ interface IDevicePolicyManager {
     void setPasswordMinimumNonLetter(in ComponentName who, int length, boolean parent);
     int getPasswordMinimumNonLetter(in ComponentName who, int userHandle, boolean parent);
 
-    PasswordMetrics getPasswordMinimumMetrics(int userHandle);
+    PasswordMetrics getPasswordMinimumMetrics(int userHandle, boolean deviceWideOnly);
 
     void setPasswordHistoryLength(in ComponentName who, int length, boolean parent);
     int getPasswordHistoryLength(in ComponentName who, int userHandle, boolean parent);
@@ -90,7 +92,7 @@ interface IDevicePolicyManager {
     int getPasswordComplexity(boolean parent);
     void setRequiredPasswordComplexity(int passwordComplexity, boolean parent);
     int getRequiredPasswordComplexity(boolean parent);
-    int getAggregatedPasswordComplexityForUser(int userId);
+    int getAggregatedPasswordComplexityForUser(int userId, boolean deviceWideOnly);
     boolean isUsingUnifiedPassword(in ComponentName admin);
     int getCurrentFailedPasswordAttempts(int userHandle, boolean parent);
     int getProfileWithMinimumFailedPasswordsForWipe(int userHandle, boolean parent);
@@ -232,10 +234,10 @@ interface IDevicePolicyManager {
     List getPermittedAccessibilityServicesForUser(int userId);
     boolean isAccessibilityServicePermittedByAdmin(in ComponentName admin, String packageName, int userId);
 
-    boolean setPermittedInputMethods(in ComponentName admin,in List packageList);
-    List getPermittedInputMethods(in ComponentName admin);
+    boolean setPermittedInputMethods(in ComponentName admin,in List packageList, boolean parent);
+    List getPermittedInputMethods(in ComponentName admin, boolean parent);
     List getPermittedInputMethodsForCurrentUser();
-    boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId);
+    boolean isInputMethodPermittedByAdmin(in ComponentName admin, String packageName, int userId, boolean parent);
 
     boolean setPermittedCrossProfileNotificationListeners(in ComponentName admin, in List<String> packageList);
     List<String> getPermittedCrossProfileNotificationListeners(in ComponentName admin);
@@ -252,6 +254,7 @@ interface IDevicePolicyManager {
     int stopUser(in ComponentName who, in UserHandle userHandle);
     int logoutUser(in ComponentName who);
     List<UserHandle> getSecondaryUsers(in ComponentName who);
+    void resetNewUserDisclaimer();
 
     void enableSystemApp(in ComponentName admin, in String callerPackage, in String packageName);
     int enableSystemAppWithIntent(in ComponentName admin, in String callerPackage, in Intent intent);
@@ -489,4 +492,10 @@ interface IDevicePolicyManager {
     boolean canProfileOwnerResetPasswordWhenLocked(int userId);
 
     void setNextOperationSafety(int operation, boolean safe);
+
+    String getEnrollmentSpecificId(String callerPackage);
+    void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);
+
+    UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams);
+    void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams);
 }

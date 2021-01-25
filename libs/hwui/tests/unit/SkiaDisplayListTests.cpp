@@ -42,7 +42,7 @@ TEST(SkiaDisplayList, reset) {
     {
         SkiaRecordingCanvas canvas{nullptr, 1, 1};
         canvas.drawColor(0, SkBlendMode::kSrc);
-        skiaDL.reset(canvas.finishRecording());
+        skiaDL = canvas.finishRecording();
     }
 
     SkCanvas dummyCanvas;

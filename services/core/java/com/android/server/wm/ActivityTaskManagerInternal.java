@@ -285,6 +285,19 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
 
     /**
+     * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
+     * SecurityException} or returns false with a logcat message depending on whether the app
+     * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.
+     */
+    public abstract boolean checkCanCloseSystemDialogs(int pid, int uid,
+            @Nullable String packageName);
+
+    /**
+     * Returns whether the app can close system dialogs or not.
+     */
+    public abstract boolean canCloseSystemDialogs(int pid, int uid);
+
+    /**
      * Called after the voice interaction service has changed.
      */
     public abstract void notifyActiveVoiceInteractionServiceChanged(ComponentName component);
@@ -371,15 +384,6 @@ public abstract class ActivityTaskManagerInternal {
             return mAppThread;
         }
     }
-
-    /**
-     * Set the corresponding display information for the process global configuration. To be called
-     * when we need to show IME on a different display.
-     *
-     * @param pid The process id associated with the IME window.
-     * @param displayId The ID of the display showing the IME.
-     */
-    public abstract void onImeWindowSetOnDisplay(int pid, int displayId);
 
     public abstract void sendActivityResult(int callingUid, IBinder activityToken,
             String resultWho, int requestCode, int resultCode, Intent data);
@@ -563,8 +567,13 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract void setDeviceOwnerUid(int uid);
 
-    /** Set all associated companion app that belongs to an userId. */
-    public abstract void setCompanionAppPackages(int userId, Set<String> companionAppPackages);
+    /**
+     * Set all associated companion app that belongs to a userId.
+     * @param userId
+     * @param companionAppUids ActivityTaskManager will take ownership of this Set, the caller
+     *                         shouldn't touch the Set after calling this interface.
+     */
+    public abstract void setCompanionAppUids(int userId, Set<Integer> companionAppUids);
 
     /**
      * @param packageName The package to check

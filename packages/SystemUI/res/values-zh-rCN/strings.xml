@@ -63,9 +63,9 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"允许"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"不允许使用 USB 调试功能"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"目前已登录此设备的用户无法开启 USB 调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许在此网络上进行无线调试吗？"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"要允许通过此网络上进行无线调试吗？"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"网络名称 (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nWLAN 地址 (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
-    <string name="wifi_debugging_always" msgid="2968383799517975155">"在此网络上始终允许"</string>
+    <string name="wifi_debugging_always" msgid="2968383799517975155">"始终允许通过此网络进行调试"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"允许"</string>
     <string name="wifi_debugging_secondary_user_title" msgid="2493201475880517725">"不允许使用无线调试功能"</string>
     <string name="wifi_debugging_secondary_user_message" msgid="4492383073970079751">"目前已登录此设备的用户无法开启无线调试功能。要使用此功能，请切换为主要用户的帐号。"</string>
@@ -344,6 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"输入法"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置信息"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"位置信息：关闭"</string>
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"停用摄像头"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"将麦克风静音"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"媒体设备"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"只能拨打紧急呼救电话"</string>
@@ -353,8 +355,10 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"用户"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"新用户"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"WLAN"</string>
-    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
-    <skip />
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"互联网"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"可在飞机上安全使用"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"有可用的网络"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"没有可用的网络"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"未连接"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"无网络"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"WLAN：关闭"</string>
@@ -412,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"屏幕录制"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"开始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"设备"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"向上滑动可切换应用"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"向右拖动可快速切换应用"</string>
@@ -434,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"再次点按即可打开"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"向上滑动即可打开"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"向上滑动即可重试"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"此设备归贵单位所有"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"此设备归<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>所有"</string>
     <string name="phone_hint" msgid="6682125338461375925">"滑动图标即可拨打电话"</string>
@@ -456,11 +466,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"显示个人资料"</string>
     <string name="user_add_user" msgid="4336657383006913022">"添加用户"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"新用户"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (2034481024623462357) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"要结束访客会话吗？"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"此会话中的所有应用和数据都将被删除。"</string>
-    <!-- no translation found for guest_exit_guest_dialog_remove (8533184512885775423) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"结束会话"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"访客，欢迎回来！"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"要继续您的会话吗？"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"重新开始"</string>

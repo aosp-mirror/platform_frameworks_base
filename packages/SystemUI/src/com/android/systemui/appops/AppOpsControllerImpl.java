@@ -18,6 +18,7 @@ package com.android.systemui.appops;
 
 import static android.media.AudioManager.ACTION_MICROPHONE_MUTE_CHANGED;
 
+import android.Manifest;
 import android.app.AppOpsManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -30,6 +31,7 @@ import android.media.AudioRecordingConfiguration;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserHandle;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -75,6 +77,8 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
     private final AppOpsManager mAppOps;
     private final AudioManager mAudioManager;
     private final LocationManager mLocationManager;
+    // TODO ntmyren: remove t
+    private final PackageManager mPackageManager;
 
     // mLocationProviderPackages are cached and updated only occasionally
     private static final long LOCATION_PROVIDER_UPDATE_FREQUENCY_MS = 30000;
@@ -127,6 +131,7 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         mAudioManager = audioManager;
         mMicMuted = audioManager.isMicrophoneMute();
         mLocationManager = context.getSystemService(LocationManager.class);
+        mPackageManager = context.getPackageManager();
         dumpManager.registerDumpable(TAG, this);
     }
 
@@ -334,6 +339,16 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
         return mLocationProviderPackages.contains(packageName);
     }
 
+    // TODO ntmyren: remove after teamfood is finished
+    private boolean shouldShowAppPredictor(String pkgName) {
+        if (!DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY, "permissions_hub_2_enabled",
+                false)) {
+            return false;
+        }
+        return mPackageManager.checkPermission(Manifest.permission.MANAGE_APP_PREDICTIONS, pkgName)
+                == PackageManager.PERMISSION_GRANTED;
+    }
+
     /**
      * Does the app-op, uid and package name, refer to an operation that should be shown to the
      * user. Only specficic ops (like {@link AppOpsManager.OP_SYSTEM_ALERT_WINDOW}) or
@@ -353,8 +368,9 @@ public class AppOpsControllerImpl extends BroadcastReceiver implements AppOpsCon
                 || appOpCode == AppOpsManager.OP_PHONE_CALL_MICROPHONE) {
             return true;
         }
-
-        if (appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName)) {
+        // TODO ntmyren: Replace this with more robust check if this moves beyond teamfood
+        if ((appOpCode == AppOpsManager.OP_CAMERA && isLocationProvider(packageName))
+                || shouldShowAppPredictor(packageName)) {
             return true;
         }
 

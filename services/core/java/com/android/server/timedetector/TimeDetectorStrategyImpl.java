@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.joining;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AlarmManager;
+import android.app.timedetector.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -113,6 +114,10 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     private final ReferenceWithHistory<GnssTimeSuggestion> mLastGnssSuggestion =
             new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
 
+    @GuardedBy("this")
+    private final ReferenceWithHistory<ExternalTimeSuggestion> mLastExternalSuggestion =
+            new ReferenceWithHistory<>(KEEP_SUGGESTION_HISTORY_SIZE);
+
     /**
      * The interface used by the strategy to interact with the surrounding service.
      *
@@ -167,6 +172,20 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
 
     TimeDetectorStrategyImpl(@NonNull Callback callback) {
         mCallback = callback;
+    }
+
+    @Override
+    public synchronized void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion) {
+        final TimestampedValue<Long> newUtcTime = timeSuggestion.getUtcTime();
+
+        if (!validateAutoSuggestionTime(newUtcTime, timeSuggestion)) {
+            return;
+        }
+
+        mLastExternalSuggestion.set(timeSuggestion);
+
+        String reason = "External time suggestion received: suggestion=" + timeSuggestion;
+        doAutoTimeDetection(reason);
     }
 
     @Override
@@ -302,6 +321,11 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         mLastGnssSuggestion.dump(ipw);
         ipw.decreaseIndent(); // level 2
 
+        ipw.println("External suggestion history:");
+        ipw.increaseIndent(); // level 2
+        mLastExternalSuggestion.dump(ipw);
+        ipw.decreaseIndent(); // level 2
+
         ipw.decreaseIndent(); // level 1
     }
 
@@ -413,6 +437,14 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
                     newUtcTime = gnssTimeSuggestion.getUtcTime();
                     cause = "Found good gnss suggestion."
                             + ", gnssTimeSuggestion=" + gnssTimeSuggestion
+                            + ", detectionReason=" + detectionReason;
+                }
+            } else if (origin == ORIGIN_EXTERNAL) {
+                ExternalTimeSuggestion externalTimeSuggestion = findLatestValidExternalSuggestion();
+                if (externalTimeSuggestion != null) {
+                    newUtcTime = externalTimeSuggestion.getUtcTime();
+                    cause = "Found good external suggestion."
+                            + ", externalTimeSuggestion=" + externalTimeSuggestion
                             + ", detectionReason=" + detectionReason;
                 }
             } else {
@@ -576,6 +608,26 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
         return gnssTimeSuggestion;
     }
 
+    /** Returns the latest, valid, external suggestion. Returns {@code null} if there isn't one. */
+    @GuardedBy("this")
+    @Nullable
+    private ExternalTimeSuggestion findLatestValidExternalSuggestion() {
+        ExternalTimeSuggestion externalTimeSuggestion = mLastExternalSuggestion.get();
+        if (externalTimeSuggestion == null) {
+            // No external suggestions received. This is normal if there's no external signal.
+            return null;
+        }
+
+        TimestampedValue<Long> utcTime = externalTimeSuggestion.getUtcTime();
+        long elapsedRealTimeMillis = mCallback.elapsedRealtimeMillis();
+        if (!validateSuggestionUtcTime(elapsedRealTimeMillis, utcTime)) {
+            // The latest suggestion is not valid, usually due to its age.
+            return null;
+        }
+
+        return externalTimeSuggestion;
+    }
+
     @GuardedBy("this")
     private boolean setSystemClockIfRequired(
             @Origin int origin, @NonNull TimestampedValue<Long> time, @NonNull String cause) {
@@ -714,6 +766,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     }
 
     /**
+     * Returns the latest valid external suggestion. Not intended for general use: it is used during
+     * tests to check strategy behavior.
+     */
+    @VisibleForTesting
+    @Nullable
+    public synchronized ExternalTimeSuggestion findLatestValidExternalSuggestionForTests() {
+        return findLatestValidExternalSuggestion();
+    }
+    /**
      * A method used to inspect state during tests. Not intended for general use.
      */
     @VisibleForTesting
@@ -738,6 +799,15 @@ public final class TimeDetectorStrategyImpl implements TimeDetectorStrategy {
     @Nullable
     public synchronized GnssTimeSuggestion getLatestGnssSuggestion() {
         return mLastGnssSuggestion.get();
+    }
+
+    /**
+     * A method used to inspect state during tests. Not intended for general use.
+     */
+    @VisibleForTesting
+    @Nullable
+    public synchronized ExternalTimeSuggestion getLatestExternalSuggestion() {
+        return mLastExternalSuggestion.get();
     }
 
     private static boolean validateSuggestionUtcTime(

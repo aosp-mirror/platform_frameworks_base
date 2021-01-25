@@ -88,11 +88,6 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     private boolean mIsFullscreen = false;
 
     /**
-     * If the navigation bar can stay hidden when the display gets tapped.
-     */
-    private boolean mIsImmersive = false;
-
-    /**
      * If the device is currently pulsing (AOD2).
      */
     private boolean mPulsing;
@@ -360,13 +355,12 @@ public class StatusBarStateControllerImpl implements SysuiStatusBarStateControll
     }
 
     @Override
-    public void setFullscreenState(boolean isFullscreen, boolean isImmersive) {
-        if (mIsFullscreen != isFullscreen || mIsImmersive != isImmersive) {
+    public void setFullscreenState(boolean isFullscreen) {
+        if (mIsFullscreen != isFullscreen) {
             mIsFullscreen = isFullscreen;
-            mIsImmersive = isImmersive;
             synchronized (mListeners) {
                 for (RankedListener rl : new ArrayList<>(mListeners)) {
-                    rl.mListener.onFullscreenStateChanged(isFullscreen, isImmersive);
+                    rl.mListener.onFullscreenStateChanged(isFullscreen, true /* isImmersive */);
                 }
             }
         }

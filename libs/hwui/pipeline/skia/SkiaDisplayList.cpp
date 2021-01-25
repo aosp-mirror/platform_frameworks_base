@@ -102,12 +102,12 @@ bool SkiaDisplayList::prepareListAndChildren(
     bool hasBackwardProjectedNodesSubtree = false;
 
     for (auto& child : mChildNodes) {
-        hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
         RenderNode* childNode = child.getRenderNode();
         Matrix4 mat4(child.getRecordedMatrix());
         info.damageAccumulator->pushTransform(&mat4);
         info.hasBackwardProjectedNodes = false;
         childFn(childNode, observer, info, functorsNeedLayer);
+        hasBackwardProjectedNodesHere |= child.getNodeProperties().getProjectBackwards();
         hasBackwardProjectedNodesSubtree |= info.hasBackwardProjectedNodes;
         info.damageAccumulator->popTransform();
     }
@@ -172,7 +172,7 @@ void SkiaDisplayList::reset() {
     new (&allocator) LinearAllocator();
 }
 
-void SkiaDisplayList::output(std::ostream& output, uint32_t level) {
+void SkiaDisplayList::output(std::ostream& output, uint32_t level) const {
     DumpOpsCanvas canvas(output, level, *this);
     mDisplayList.draw(&canvas);
 }

@@ -273,17 +273,6 @@ public final class HdmiControlServiceWrapper {
         }
 
         @Override
-        public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
-            HdmiControlServiceWrapper.this.setHdmiCecVolumeControlEnabled(
-                    isHdmiCecVolumeControlEnabled);
-        }
-
-        @Override
-        public boolean isHdmiCecVolumeControlEnabled() {
-            return HdmiControlServiceWrapper.this.isHdmiCecVolumeControlEnabled();
-        }
-
-        @Override
         public void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute) {
             HdmiControlServiceWrapper.this.reportAudioStatus(deviceType, volume, maxVolume, isMute);
         }
@@ -303,6 +292,18 @@ public final class HdmiControlServiceWrapper {
         public void removeHdmiCecVolumeControlFeatureListener(
                 IHdmiCecVolumeControlFeatureListener listener) {
             HdmiControlServiceWrapper.this.removeHdmiCecVolumeControlFeatureListener(listener);
+        }
+
+        @Override
+        public void addCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+            HdmiControlServiceWrapper.this.addCecSettingChangeListener(name, listener);
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+            HdmiControlServiceWrapper.this.removeCecSettingChangeListener(name, listener);
         }
 
         @Override
@@ -520,6 +521,14 @@ public final class HdmiControlServiceWrapper {
     /** @hide */
     public void removeHdmiCecVolumeControlFeatureListener(
             IHdmiCecVolumeControlFeatureListener listener) {}
+
+    /** @hide */
+    public void addCecSettingChangeListener(String name,
+            IHdmiCecSettingChangeListener listener) {}
+
+    /** @hide */
+    public void removeCecSettingChangeListener(String name,
+            IHdmiCecSettingChangeListener listener) {}
 
     /** @hide */
     public List<String> getUserCecSettings() {

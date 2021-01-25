@@ -19,12 +19,15 @@ package com.android.systemui.dagger;
 import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
+import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -72,6 +75,9 @@ public interface WMComponent {
     Optional<LegacySplitScreen> getLegacySplitScreen();
 
     @WMSingleton
+    Optional<SplitScreen> getSplitScreen();
+
+    @WMSingleton
     Optional<AppPairs> getAppPairs();
 
     @WMSingleton
@@ -79,4 +85,11 @@ public interface WMComponent {
 
     @WMSingleton
     Optional<HideDisplayCutout> getHideDisplayCutout();
+
+    @WMSingleton
+    Optional<TaskViewFactory> getTaskViewFactory();
+
+    /** Gets transitions */
+    @WMSingleton
+    Transitions getTransitions();
 }

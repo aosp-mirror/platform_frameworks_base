@@ -41,7 +41,7 @@ import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/location/context_hub.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/server/powerstatsservice.proto";
-import "frameworks/base/core/proto/android/server/rolemanagerservice.proto";
+import "frameworks/base/apex/permission/service/proto/com/android/role/roleservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
@@ -362,7 +362,7 @@ message IncidentProto {
         (section).userdebug_and_eng_only = true
     ];
 
-    optional com.android.server.role.RoleManagerServiceDumpProto role = 3024 [
+    optional com.android.role.RoleServiceDumpProto role = 3024 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "role --proto"
     ];
@@ -519,6 +519,11 @@ message IncidentProto {
     optional com.android.server.powerstats.PowerStatsServiceModelProto powerstats_model = 3055 [
         (section).type = SECTION_DUMPSYS,
         (section).args = "power_stats --proto model"
+    ];
+
+    optional com.android.server.powerstats.PowerStatsServiceResidencyProto powerstats_residency = 3056 [
+        (section).type = SECTION_DUMPSYS,
+        (section).args = "power_stats --proto residency"
     ];
 
     // Dumps in text format (on userdebug and eng builds only): 4000 ~ 4999

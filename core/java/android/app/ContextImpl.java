@@ -1469,6 +1469,45 @@ class ContextImpl extends Context {
         }
     }
 
+    /**
+     * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
+     * Intent you are sending stays around after the broadcast is complete,
+     * so that others can quickly retrieve that data through the return
+     * value of {@link #registerReceiver(BroadcastReceiver, IntentFilter)}.  In
+     * all other ways, this behaves the same as
+     * {@link #sendBroadcast(Intent)}.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     * Intent will receive the broadcast, and the Intent will be held to
+     * be re-broadcast to future receivers.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see #sendBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    @Override
+    @Deprecated
+    public void sendStickyBroadcast(@NonNull Intent intent, @Nullable Bundle options) {
+        warnIfCallingFromSystemProcess();
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.prepareToLeaveProcess(this);
+            ActivityManager.getService().broadcastIntentWithFeature(
+                    mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
+                    null, Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, options,
+                    false, true, getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     @Deprecated
     public void sendStickyOrderedBroadcast(Intent intent,
@@ -1670,7 +1709,9 @@ class ContextImpl extends Context {
                     flags);
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
-                intent.prepareToEnterProcess();
+                // TODO: determine at registration time if caller is
+                // protecting themselves with signature permission
+                intent.prepareToEnterProcess(ActivityThread.isProtectedBroadcast(intent));
             }
             return intent;
         } catch (RemoteException e) {
@@ -1795,7 +1836,6 @@ class ContextImpl extends Context {
     @Override
     public boolean bindService(
             Intent service, int flags, Executor executor, ServiceConnection conn) {
-        warnIfCallingFromSystemProcess();
         return bindServiceCommon(service, conn, flags, null, null, executor, getUser());
     }
 
@@ -1996,8 +2036,7 @@ class ContextImpl extends Context {
     }
 
     private static boolean isUiComponent(String name) {
-        return WINDOW_SERVICE.equals(name) || LAYOUT_INFLATER_SERVICE.equals(name)
-                || WALLPAPER_SERVICE.equals(name);
+        return WINDOW_SERVICE.equals(name) || LAYOUT_INFLATER_SERVICE.equals(name);
     }
 
     @Override

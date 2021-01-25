@@ -42,6 +42,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorPropertiesInternal;
@@ -60,6 +61,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.security.KeyStore;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -78,6 +80,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * System service that arbitrates the modality for BiometricPrompt to use.
@@ -239,6 +242,93 @@ public class BiometricService extends SystemService {
             }
         }
     };
+
+    /**
+     * Tracks authenticatorId invalidation. For more details, see
+     * {@link com.android.server.biometrics.sensors.InvalidationRequesterClient}.
+     */
+    @VisibleForTesting
+    static class InvalidationTracker {
+        @NonNull private final IInvalidationCallback mClientCallback;
+        @NonNull private final Set<Integer> mSensorsPendingInvalidation;
+
+        public static InvalidationTracker start(@NonNull Context context,
+                @NonNull ArrayList<BiometricSensor> sensors,
+                int userId, int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
+            return new InvalidationTracker(context, sensors, userId, fromSensorId, clientCallback);
+        }
+
+        private InvalidationTracker(@NonNull Context context,
+                @NonNull ArrayList<BiometricSensor> sensors, int userId,
+                int fromSensorId, @NonNull IInvalidationCallback clientCallback) {
+            mClientCallback = clientCallback;
+            mSensorsPendingInvalidation = new ArraySet<>();
+
+            for (BiometricSensor sensor : sensors) {
+                if (sensor.id == fromSensorId) {
+                    continue;
+                }
+
+                if (!Utils.isAtLeastStrength(sensor.oemStrength, Authenticators.BIOMETRIC_STRONG)) {
+                    continue;
+                }
+
+                try {
+                    if (!sensor.impl.hasEnrolledTemplates(userId, context.getOpPackageName())) {
+                        continue;
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Remote Exception", e);
+                }
+
+                Slog.d(TAG, "Requesting authenticatorId invalidation for sensor: " + sensor.id);
+
+                synchronized (this) {
+                    mSensorsPendingInvalidation.add(sensor.id);
+                }
+
+                try {
+                    sensor.impl.invalidateAuthenticatorId(userId, new IInvalidationCallback.Stub() {
+                        @Override
+                        public void onCompleted() {
+                            onInvalidated(sensor.id);
+                        }
+                    });
+                } catch (RemoteException e) {
+                    Slog.d(TAG, "RemoteException", e);
+                }
+            }
+
+            synchronized (this) {
+                if (mSensorsPendingInvalidation.isEmpty()) {
+                    try {
+                        Slog.d(TAG, "No sensors require invalidation");
+                        mClientCallback.onCompleted();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Remote Exception", e);
+                    }
+                }
+            }
+        }
+
+        @VisibleForTesting
+        void onInvalidated(int sensorId) {
+            synchronized (this) {
+                mSensorsPendingInvalidation.remove(sensorId);
+
+                Slog.d(TAG, "Sensor " + sensorId + " invalidated, remaining size: "
+                        + mSensorsPendingInvalidation.size());
+
+                if (mSensorsPendingInvalidation.isEmpty()) {
+                    try {
+                        mClientCallback.onCompleted();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Remote Exception", e);
+                    }
+                }
+            }
+        }
+    }
 
     @VisibleForTesting
     public static class SettingObserver extends ContentObserver {
@@ -668,6 +758,14 @@ public class BiometricService extends SystemService {
             }
         }
 
+        @Override
+        public void invalidateAuthenticatorIds(int userId, int fromSensorId,
+                IInvalidationCallback callback) {
+            checkInternalPermission();
+
+            InvalidationTracker.start(getContext(), mSensors, userId, fromSensorId, callback);
+        }
+
         @Override // Binder call
         public long[] getAuthenticatorIds(int callingUserId) {
             checkInternalPermission();
@@ -717,12 +815,16 @@ public class BiometricService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 if (args.length > 0 && "--proto".equals(args[0])) {
+                    final boolean clearSchedulerBuffer = args.length > 1
+                            && "--clear-scheduler-buffer".equals(args[1]);
+                    Slog.d(TAG, "ClearSchedulerBuffer: " + clearSchedulerBuffer);
                     final ProtoOutputStream proto = new ProtoOutputStream(fd);
                     proto.write(BiometricServiceStateProto.AUTH_SESSION_STATE,
                             mCurrentAuthSession != null ? mCurrentAuthSession.getState()
                                     : STATE_AUTH_IDLE);
                     for (BiometricSensor sensor : mSensors) {
-                        byte[] serviceState = sensor.impl.dumpSensorServiceStateProto();
+                        byte[] serviceState = sensor.impl
+                                .dumpSensorServiceStateProto(clearSchedulerBuffer);
                         proto.write(BiometricServiceStateProto.SENSOR_SERVICE_STATES, serviceState);
                     }
                     proto.flush();

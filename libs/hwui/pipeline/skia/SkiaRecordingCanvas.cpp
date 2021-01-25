@@ -55,11 +55,15 @@ void SkiaRecordingCanvas::initDisplayList(uirenderer::RenderNode* renderNode, in
     SkiaCanvas::reset(&mRecorder);
 }
 
-uirenderer::DisplayList* SkiaRecordingCanvas::finishRecording() {
+std::unique_ptr<SkiaDisplayList> SkiaRecordingCanvas::finishRecording() {
     // close any existing chunks if necessary
     enableZ(false);
     mRecorder.restoreToCount(1);
-    return mDisplayList.release();
+    return std::move(mDisplayList);
+}
+
+void SkiaRecordingCanvas::finishRecording(uirenderer::RenderNode* destination) {
+    destination->setStagingDisplayList(uirenderer::DisplayList(finishRecording()));
 }
 
 // ----------------------------------------------------------------------------
@@ -90,9 +94,9 @@ void SkiaRecordingCanvas::drawRipple(uirenderer::CanvasPropertyPrimitive* x,
                                      uirenderer::CanvasPropertyPrimitive* radius,
                                      uirenderer::CanvasPropertyPaint* paint,
                                      uirenderer::CanvasPropertyPrimitive* progress,
-                                     sk_sp<SkRuntimeEffect> runtimeEffect) {
+                                     const SkRuntimeShaderBuilder& effectBuilder) {
     drawDrawable(mDisplayList->allocateDrawable<AnimatedRipple>(x, y, radius, paint, progress,
-                                                                runtimeEffect));
+                                                                effectBuilder));
 }
 
 void SkiaRecordingCanvas::enableZ(bool enableZ) {
@@ -304,10 +308,13 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     sk_sp<SkImage> image = bitmap.makeImage();
 
+    // HWUI always draws 9-patches with linear filtering, regardless of the Paint.
+    const SkFilterMode filter = SkFilterMode::kLinear;
+
     applyLooper(get_looper(paint), filterBitmap(paint), [&](SkScalar x, SkScalar y,
                 const SkPaint* p) {
-        mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), Paint_to_filter(p),
-                                   p, bitmap.palette());
+        mRecorder.drawImageLattice(image, lattice, dst.makeOffset(x, y), filter, p,
+                                   bitmap.palette());
     });
 
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {

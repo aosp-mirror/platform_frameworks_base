@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"256 КБ"</item>
     <item msgid="7099386891713159947">"1 МБ"</item>
     <item msgid="6069075827077845520">"4 МБ"</item>
-    <item msgid="8243549501764402572">"16 МБ"</item>
+    <item msgid="6078203297886482480">"8 MБ"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Вимкнено"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"Буфер журналу: 256 КБ"</item>
     <item msgid="8539423820514360724">"Буфер журналу: 1 МБ"</item>
     <item msgid="1984761927103140651">"Буфер журналу: 4 МБ"</item>
-    <item msgid="7892098981256010498">"Буфер журналу: 16 МБ"</item>
+    <item msgid="2983219471251787208">"Буфер: 8 МБ на журнал"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Вимкнено"</item>

@@ -94,6 +94,10 @@ public abstract class LocationProviderBase {
      */
     public static final String FUSED_PROVIDER = LocationManager.FUSED_PROVIDER;
 
+    private static final String EXTRA_KEY_COARSE_LOCATION = "coarseLocation";
+    private static final String EXTRA_KEY_NO_GPS_LOCATION = "noGPSLocation";
+    private static final String EXTRA_KEY_INDOOR_PROB = "indoorProbability";
+
     final String mTag;
     @Nullable final String mPackageName;
     @Nullable final String mAttributionTag;
@@ -260,21 +264,7 @@ public abstract class LocationProviderBase {
     public void reportLocation(LocationResult locationResult) {
         ILocationProviderManager manager = mManager;
         if (manager != null) {
-            locationResult = locationResult.map(location -> {
-                // remove deprecated extras to save on serialization costs
-                Bundle extras = location.getExtras();
-                if (extras != null && (extras.containsKey("noGPSLocation")
-                        || extras.containsKey("coarseLocation"))) {
-                    location = new Location(location);
-                    extras = location.getExtras();
-                    extras.remove("noGPSLocation");
-                    extras.remove("coarseLocation");
-                    if (extras.isEmpty()) {
-                        location.setExtras(null);
-                    }
-                }
-                return location;
-            });
+            locationResult = locationResult.map(this::cleanUpExtras);
 
             try {
                 manager.onReportLocation(locationResult);
@@ -284,6 +274,33 @@ public abstract class LocationProviderBase {
                 Log.w(mTag, e);
             }
         }
+    }
+
+    /**
+     * Remove deprecated/unnecessary extras to save on serialization costs.
+     *
+     * {@link #EXTRA_KEY_NO_GPS_LOCATION} and {@link #EXTRA_KEY_COARSE_LOCATION} are deprecated.
+     *
+     * {@link #EXTRA_KEY_INDOOR_PROB} should only be used in the framework.
+     */
+    private Location cleanUpExtras(Location location) {
+        Bundle extras = location.getExtras();
+        if (extras == null) {
+            return location;
+        }
+        if (extras.containsKey(EXTRA_KEY_NO_GPS_LOCATION)
+                || extras.containsKey(EXTRA_KEY_COARSE_LOCATION)
+                || extras.containsKey(EXTRA_KEY_INDOOR_PROB)) {
+            location = new Location(location);
+            extras = location.getExtras();
+            extras.remove(EXTRA_KEY_NO_GPS_LOCATION);
+            extras.remove(EXTRA_KEY_COARSE_LOCATION);
+            extras.remove(EXTRA_KEY_INDOOR_PROB);
+            if (extras.isEmpty()) {
+                location.setExtras(null);
+            }
+        }
+        return location;
     }
 
     protected void onInit() {

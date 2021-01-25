@@ -33,7 +33,6 @@ import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.window.TaskSnapshot;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -54,6 +53,7 @@ import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type;
+import android.window.TaskSnapshot;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
@@ -146,6 +146,9 @@ public class RecentsAnimationController implements DeathRecipient {
     private boolean mCancelOnNextTransitionStart;
     // Whether to take a screenshot when handling a deferred cancel
     private boolean mCancelDeferredWithScreenshot;
+
+    @VisibleForTesting
+    boolean mShouldAttachNavBarToAppDuringTransition;
 
     /**
      * Animates the screenshot of task that used to be controlled by RecentsAnimation.
@@ -279,6 +282,25 @@ public class RecentsAnimationController implements DeathRecipient {
                             task.setCanAffectSystemUiFlags(behindSystemBars);
                         }
                     }
+                    if (!behindSystemBars) {
+                        // Make sure to update the correct IME parent in case that the IME parent
+                        // may be computed as display layer when re-layout window happens during
+                        // rotation but there is intermediate state that the bounds of task and
+                        // the IME target's activity is not the same during rotating.
+                        mDisplayContent.updateImeParent();
+
+                        // Hiding IME if IME window is not attached to app.
+                        // Since some windowing mode is not proper to snapshot Task with IME window
+                        // while the app transitioning to the next task (e.g. split-screen mode)
+                        if (!mDisplayContent.isImeAttachedToApp()) {
+                            final InputMethodManagerInternal inputMethodManagerInternal =
+                                    LocalServices.getService(InputMethodManagerInternal.class);
+                            if (inputMethodManagerInternal != null) {
+                                inputMethodManagerInternal.hideCurrentInputMethod(
+                                        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                            }
+                        }
+                    }
                     mService.mWindowPlacerLocked.requestTraversal();
                 }
             } finally {
@@ -296,7 +318,6 @@ public class RecentsAnimationController implements DeathRecipient {
                     if (mCanceled) {
                         return;
                     }
-
                     mInputConsumerEnabled = enabled;
                     final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
                     inputMonitor.updateInputWindowsLw(true /*force*/);
@@ -307,34 +328,9 @@ public class RecentsAnimationController implements DeathRecipient {
             }
         }
 
+        // TODO(b/166736352): Remove this method without the need to expose to launcher.
         @Override
-        public void hideCurrentInputMethod() {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                synchronized (mService.getWindowManagerLock()) {
-                    // Make sure to update the correct IME parent in case that the IME parent may
-                    // be computed as display layer when re-layout window happens during rotation
-                    // but there is intermediate state that the bounds of task and the IME
-                    // target's activity is not the same during rotating.
-                    mDisplayContent.updateImeParent();
-
-                    // Ignore hiding IME if IME window is attached to app.
-                    // Since we would like to snapshot Task with IME window while transitioning
-                    // to recents.
-                    if (mDisplayContent.isImeAttachedToApp()) {
-                        return;
-                    }
-                }
-                final InputMethodManagerInternal inputMethodManagerInternal =
-                        LocalServices.getService(InputMethodManagerInternal.class);
-                if (inputMethodManagerInternal != null) {
-                    inputMethodManagerInternal.hideCurrentInputMethod(
-                            SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
+        public void hideCurrentInputMethod() { }
 
         @Override
         public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
@@ -390,6 +386,8 @@ public class RecentsAnimationController implements DeathRecipient {
         mDisplayId = displayId;
         mStatusBar = LocalServices.getService(StatusBarManagerInternal.class);
         mDisplayContent = service.mRoot.getDisplayContent(displayId);
+        mShouldAttachNavBarToAppDuringTransition =
+                mDisplayContent.getDisplayPolicy().shouldAttachNavBarToAppDuringTransition();
     }
 
     /**
@@ -437,6 +435,10 @@ public class RecentsAnimationController implements DeathRecipient {
         } catch (RemoteException e) {
             cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "initialize-failedToLinkToDeath");
             return;
+        }
+
+        if (mShouldAttachNavBarToAppDuringTransition) {
+            attachNavBarToApp();
         }
 
         // Adjust the wallpaper visibility for the showing target activity
@@ -569,6 +571,63 @@ public class RecentsAnimationController implements DeathRecipient {
             reasons.put(mTargetActivityRecord, APP_TRANSITION_RECENTS_ANIM);
             mService.mAtmService.mTaskSupervisor.getActivityMetricsLogger()
                     .notifyTransitionStarting(reasons);
+        }
+    }
+
+    @VisibleForTesting
+    WindowToken getNavigationBarWindowToken() {
+        WindowState navBar = mDisplayContent.getDisplayPolicy().getNavigationBar();
+        if (navBar != null) {
+            return navBar.mToken;
+        }
+        return null;
+    }
+
+    private void attachNavBarToApp() {
+        ActivityRecord topActivity = null;
+        for (int i = mPendingAnimations.size() - 1; i >= 0; i--) {
+            final TaskAnimationAdapter adapter = mPendingAnimations.get(i);
+            final Task task = adapter.mTask;
+            if (!task.isHomeOrRecentsRootTask()) {
+                topActivity = task.getTopVisibleActivity();
+                break;
+            }
+        }
+        final WindowToken navToken = getNavigationBarWindowToken();
+        if (topActivity == null || navToken == null) {
+            return;
+        }
+
+        final SurfaceControl.Transaction t = navToken.getPendingTransaction();
+        final SurfaceControl navSurfaceControl = navToken.getSurfaceControl();
+        t.reparent(navSurfaceControl, topActivity.getSurfaceControl());
+        t.show(navSurfaceControl);
+
+        final WindowContainer imeContainer = mDisplayContent.getImeContainer();
+        if (imeContainer.isVisible()) {
+            t.setRelativeLayer(navSurfaceControl, imeContainer.getSurfaceControl(), 1);
+        } else {
+            // Place the nav bar on top of anything else in the top activity.
+            t.setLayer(navSurfaceControl, Integer.MAX_VALUE);
+        }
+    }
+
+    private void restoreNavBarFromApp(boolean animate) {
+        // Reparent the SurfaceControl of nav bar token back.
+        final WindowToken navToken = getNavigationBarWindowToken();
+        final SurfaceControl.Transaction t = mDisplayContent.getPendingTransaction();
+        if (navToken != null) {
+            final WindowContainer parent = navToken.getParent();
+            t.reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
+        }
+
+        if (animate) {
+            // Run fade-in animation to show navigation bar back to bottom of the display.
+            final NavBarFadeAnimationController controller =
+                    mDisplayContent.getDisplayPolicy().getNavBarFadeAnimationController();
+            if (controller != null) {
+                controller.fadeWindowToken(true);
+            }
         }
     }
 
@@ -788,6 +847,10 @@ public class RecentsAnimationController implements DeathRecipient {
         for (int i = mPendingWallpaperAnimations.size() - 1; i >= 0; i--) {
             final WallpaperAnimationAdapter wallpaperAdapter = mPendingWallpaperAnimations.get(i);
             removeWallpaperAnimation(wallpaperAdapter);
+        }
+
+        if (mShouldAttachNavBarToAppDuringTransition) {
+            restoreNavBarFromApp(reorderMode == REORDER_MOVE_TO_TOP);
         }
 
         // Clear any pending failsafe runnables
@@ -1014,6 +1077,7 @@ public class RecentsAnimationController implements DeathRecipient {
                         .setPosition(taskSurface, mFinishBounds.left, mFinishBounds.top)
                         .setWindowCrop(taskSurface, mFinishBounds.width(), mFinishBounds.height())
                         .apply();
+                mTask.mLastRecentsAnimationBounds.set(mFinishBounds);
                 mFinishBounds.setEmpty();
             } else if (!mTask.isAttached()) {
                 // Apply the task's pending transaction in case it is detached and its transaction

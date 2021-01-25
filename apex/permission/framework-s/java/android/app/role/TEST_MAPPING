@@ -1,0 +1,12 @@
+{
+    "presubmit": [
+        {
+            "name": "CtsRoleTestCases",
+            "options": [
+                {
+                    "include-filter": "android.app.role.cts.RoleManagerTest"
+                }
+            ]
+        }
+    ]
+}

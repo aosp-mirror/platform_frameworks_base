@@ -36,6 +36,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.IFingerprint;
 import android.hardware.biometrics.fingerprint.SensorProps;
@@ -115,13 +116,13 @@ public class FingerprintService extends SystemService implements BiometricServic
         }
 
         @Override
-        public byte[] dumpSensorServiceStateProto(int sensorId) {
+        public byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ProtoOutputStream proto = new ProtoOutputStream();
             final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider != null) {
-                provider.dumpProtoState(sensorId, proto);
+                provider.dumpProtoState(sensorId, proto, clearSchedulerBuffer);
             }
             proto.flush();
             return proto.getBytes();
@@ -418,7 +419,7 @@ public class FingerprintService extends SystemService implements BiometricServic
                     for (ServiceProvider provider : mServiceProviders) {
                         for (FingerprintSensorPropertiesInternal props
                                 : provider.getSensorProperties()) {
-                            provider.dumpProtoState(props.sensorId, proto);
+                            provider.dumpProtoState(props.sensorId, proto, false);
                         }
                     }
                     proto.flush();
@@ -569,6 +570,19 @@ public class FingerprintService extends SystemService implements BiometricServic
                 return LockoutTracker.LOCKOUT_NONE;
             }
             return provider.getLockoutModeForUser(sensorId, userId);
+        }
+
+        @Override
+        public void invalidateAuthenticatorId(int sensorId, int userId,
+                IInvalidationCallback callback) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for invalidateAuthenticatorId");
+                return;
+            }
+            provider.scheduleInvalidateAuthenticatorId(sensorId, userId, callback);
         }
 
         @Override // Binder call

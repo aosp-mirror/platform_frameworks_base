@@ -344,6 +344,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Метод на внес"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Локација"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Исклучи локација"</string>
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Блокирај камера"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Исклучи звук на микрофонот"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Медиумски уред"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Само итни повици"</string>
@@ -353,8 +355,10 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Корисник"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Нов корисник"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
-    <skip />
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Интернет"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Безбедно за во авион"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Мрежите се достапни"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Мрежите се недостапни"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Не е поврзано"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Нема мрежа"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi е исклучено"</string>
@@ -412,6 +416,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Снимање екран"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Започни"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Сопри"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Уред"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Повлечете нагоре за да се префрлите од една на друга апликација"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Повлечете надесно за брзо префрлање меѓу апликациите"</string>
@@ -434,6 +442,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Допрете повторно за да се отвори"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Повлечете за да отворите"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Повлечете нагоре за да се обидете повторно"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Уредов е во сопственост на организацијата"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Уредов е во сопственост на <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Повлечете од иконата за телефонот"</string>
@@ -456,11 +466,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Прикажи го профилот"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Додај корисник"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Нов корисник"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (2034481024623462357) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Да се заврши гостинската сесија?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
-    <!-- no translation found for guest_exit_guest_dialog_remove (8533184512885775423) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Заврши ја сесијата"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни одново"</string>

@@ -117,8 +117,8 @@ public final class Completable {
         }
 
         /**
-         * @return {@link true} if {@link #onComplete()} gets called and {@link #mState} is
-         *         {@link CompletionState#COMPLETED_WITH_VALUE} .
+         * @return {@code true} if {@link #onComplete()} gets called and {@link #mState} is
+         *         {@link CompletionState#COMPLETED_WITH_VALUE}.
          */
         @AnyThread
         public boolean hasValue() {
@@ -232,13 +232,25 @@ public final class Completable {
         }
 
         /**
-         * Blocks the calling thread until this object becomes ready to return the value.
+         * Blocks the calling thread until this object becomes ready to return the value, even if
+         * {@link InterruptedException} is thrown.
          */
         @AnyThread
         public void await() {
-            try {
-                mLatch.await();
-            } catch (InterruptedException ignored) { }
+            boolean interrupted = false;
+            while (true) {
+                try {
+                    mLatch.await();
+                    break;
+                } catch (InterruptedException ignored) {
+                    interrupted = true;
+                }
+            }
+
+            if (interrupted) {
+                // Try to preserve the interrupt bit on this thread.
+                Thread.currentThread().interrupt();
+            }
         }
     }
 
@@ -487,7 +499,7 @@ public final class Completable {
     /**
      * Await the result by the {@link Completable.Values}.
      *
-     * @return the result once {@link ValueBase#onComplete()}
+     * @return the result once {@link ValueBase#onComplete()}.
      */
     @AnyThread
     @Nullable
@@ -499,7 +511,7 @@ public final class Completable {
     /**
      * Await the int result by the {@link Completable.Int}.
      *
-     * @return the result once {@link ValueBase#onComplete()}
+     * @return the result once {@link ValueBase#onComplete()}.
      */
     @AnyThread
     public static int getIntResult(@NonNull Completable.Int value) {

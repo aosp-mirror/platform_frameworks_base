@@ -121,8 +121,12 @@ int AImageDecoder_createFromAAsset(AAsset* asset, AImageDecoder** outDecoder) {
     }
     *outDecoder = nullptr;
 
+#ifdef __ANDROID__
     auto stream = std::make_unique<AAssetStreamAdaptor>(asset);
     return createFromStream(std::move(stream), outDecoder);
+#else
+    return ANDROID_IMAGE_DECODER_INTERNAL_ERROR;
+#endif
 }
 
 static bool isSeekable(int descriptor) {
@@ -349,7 +353,7 @@ int AImageDecoder_computeSampledSize(const AImageDecoder* decoder, int sampleSiz
         return ANDROID_IMAGE_DECODER_BAD_PARAMETER;
     }
 
-    SkISize size = toDecoder(decoder)->mCodec->getSampledDimensions(sampleSize);
+    SkISize size = toDecoder(decoder)->getSampledDimensions(sampleSize);
     *width = size.width();
     *height = size.height();
     return ANDROID_IMAGE_DECODER_SUCCESS;
@@ -533,5 +537,11 @@ int32_t AImageDecoderFrameInfo_getBlendOp(const AImageDecoderFrameInfo* info) {
             return ANDROID_IMAGE_DECODER_BLEND_OP_SRC;
         case SkCodecAnimation::Blend::kSrcOver:
             return ANDROID_IMAGE_DECODER_BLEND_OP_SRC_OVER;
+    }
+}
+
+void AImageDecoder_setInternallyHandleDisposePrevious(AImageDecoder* decoder, bool handle) {
+    if (decoder) {
+        toDecoder(decoder)->setHandleRestorePrevious(handle);
     }
 }

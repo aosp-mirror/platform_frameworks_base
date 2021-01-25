@@ -25,6 +25,8 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
 import android.os.UserHandle;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseIntArray;
@@ -237,8 +239,19 @@ class RollbackStore {
         targetDir.mkdirs();
         File targetFile = new File(targetDir, sourceFile.getName());
 
-        // TODO: Copy by hard link instead to save on cpu and storage space?
-        Files.copy(sourceFile.toPath(), targetFile.toPath());
+        try {
+            // Create a hard link to avoid copy
+            // TODO(b/168562373)
+            // Linking between non-encrypted and encrypted is not supported and we have
+            // encrypted /data/rollback and non-encrypted /data/apex/active. For now this works
+            // because we happen to store encrypted files under /data/apex/active which is no
+            // longer the case when compressed apex rolls out. We have to handle this case in
+            // order not to fall back to copy.
+            Os.link(sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
+        } catch (ErrnoException ignore) {
+            // Fall back to copy if hardlink can't be created
+            Files.copy(sourceFile.toPath(), targetFile.toPath());
+        }
     }
 
     /**

@@ -21,9 +21,9 @@ import android.content.Intent;
 import android.telephony.SubscriptionInfo;
 
 import com.android.settingslib.net.DataUsageController;
-import com.android.settingslib.wifi.AccessPoint;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
+import com.android.wifitrackerlib.WifiEntry;
 
 import java.util.List;
 
@@ -83,6 +83,22 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         default void setIsAirplaneMode(IconState icon) {}
 
         default void setMobileDataEnabled(boolean enabled) {}
+
+        /**
+         * Callback for listeners to be able to update the connectivity status
+         * @param noDefaultNetwork whether there is any default network.
+         * @param noValidatedNetwork whether there is any validated network.
+         * @param noNetworksAvailable whether there is any WiFi networks available.
+         */
+        default void setConnectivityStatus(boolean noDefaultNetwork, boolean noValidatedNetwork,
+                boolean noNetworksAvailable) {}
+
+        /**
+         * Callback for listeners to be able to update the no calling & SMS status
+         * @param noCalling whether the calling and SMS is not working.
+         * @param subId subscription ID for which to update the UI
+         */
+        default void setNoCallingStatus(boolean noCalling, int subId) {}
     }
 
     public interface EmergencyListener {
@@ -123,12 +139,12 @@ public interface NetworkController extends CallbackController<SignalCallback>, D
         void addAccessPointCallback(AccessPointCallback callback);
         void removeAccessPointCallback(AccessPointCallback callback);
         void scanForAccessPoints();
-        int getIcon(AccessPoint ap);
-        boolean connect(AccessPoint ap);
+        int getIcon(WifiEntry ap);
+        boolean connect(WifiEntry ap);
         boolean canConfigWifi();
 
         public interface AccessPointCallback {
-            void onAccessPointsChanged(List<AccessPoint> accessPoints);
+            void onAccessPointsChanged(List<WifiEntry> accessPoints);
             void onSettingsActivityTriggered(Intent settingsIntent);
         }
     }

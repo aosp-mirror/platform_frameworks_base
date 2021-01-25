@@ -6,9 +6,11 @@ package android.media {
     method public int describeContents();
     method @NonNull public java.util.List<java.lang.String> getSupportedHdrTypes();
     method @NonNull public java.util.List<java.lang.String> getSupportedVideoMimeTypes();
-    method public boolean isHdrTypeSupported(@NonNull String);
+    method @NonNull public java.util.List<java.lang.String> getUnsupportedHdrTypes();
+    method @NonNull public java.util.List<java.lang.String> getUnsupportedVideoMimeTypes();
+    method public boolean isHdrTypeSupported(@NonNull String) throws android.media.ApplicationMediaCapabilities.FormatNotFoundException;
     method public boolean isSlowMotionSupported();
-    method public boolean isVideoMimeTypeSupported(@NonNull String);
+    method public boolean isVideoMimeTypeSupported(@NonNull String) throws android.media.ApplicationMediaCapabilities.FormatNotFoundException;
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.media.ApplicationMediaCapabilities> CREATOR;
   }
@@ -17,8 +19,13 @@ package android.media {
     ctor public ApplicationMediaCapabilities.Builder();
     method @NonNull public android.media.ApplicationMediaCapabilities.Builder addSupportedHdrType(@NonNull String);
     method @NonNull public android.media.ApplicationMediaCapabilities.Builder addSupportedVideoMimeType(@NonNull String);
+    method @NonNull public android.media.ApplicationMediaCapabilities.Builder addUnsupportedHdrType(@NonNull String);
+    method @NonNull public android.media.ApplicationMediaCapabilities.Builder addUnsupportedVideoMimeType(@NonNull String);
     method @NonNull public android.media.ApplicationMediaCapabilities build();
-    method @NonNull public android.media.ApplicationMediaCapabilities.Builder setSlowMotionSupported(boolean);
+  }
+
+  public static class ApplicationMediaCapabilities.FormatNotFoundException extends android.util.AndroidException {
+    ctor public ApplicationMediaCapabilities.FormatNotFoundException(@NonNull String);
   }
 
   public class MediaController2 implements java.lang.AutoCloseable {

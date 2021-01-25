@@ -18,6 +18,7 @@ package android.hardware.biometrics;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceServiceReceiver;
@@ -37,7 +38,7 @@ interface IBiometricAuthenticator {
     SensorPropertiesInternal getSensorProperties(String opPackageName);
 
     // Requests a proto dump of the sensor. See biometrics.proto
-    byte[] dumpSensorServiceStateProto();
+    byte[] dumpSensorServiceStateProto(boolean clearSchedulerBuffer);
 
     // This method prepares the service to start authenticating, but doesn't start authentication.
     // This is protected by the MANAGE_BIOMETRIC signature permission. This method should only be
@@ -62,6 +63,9 @@ interface IBiometricAuthenticator {
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int userId);
+
+    // Request the authenticatorId to be invalidated for the specified user
+    void invalidateAuthenticatorId(int userId, IInvalidationCallback callback);
 
     // Gets the authenticator ID representing the current set of enrolled templates
     long getAuthenticatorId(int callingUserId);

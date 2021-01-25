@@ -2313,7 +2313,8 @@ public final class Settings implements Watchable, Snappable {
     }
 
     void readInstallPermissionsLPr(TypedXmlPullParser parser,
-            LegacyPermissionState permissionsState) throws IOException, XmlPullParserException {
+            LegacyPermissionState permissionsState, List<UserInfo> users)
+            throws IOException, XmlPullParserException {
         int outerDepth = parser.getDepth();
         int type;
         while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -2328,33 +2329,16 @@ public final class Settings implements Watchable, Snappable {
                 String name = parser.getAttributeValue(null, ATTR_NAME);
                 final boolean granted = parser.getAttributeBoolean(null, ATTR_GRANTED, true);
                 final int flags = parser.getAttributeIntHex(null, ATTR_FLAGS, 0);
-                permissionsState.putInstallPermissionState(new PermissionState(name, granted,
-                        flags));
+                for (final UserInfo user : users) {
+                    permissionsState.putPermissionState(new PermissionState(name, false, granted,
+                            flags), user.id);
+                }
             } else {
                 Slog.w(PackageManagerService.TAG, "Unknown element under <permissions>: "
                         + parser.getName());
                 XmlUtils.skipCurrentTag(parser);
             }
         }
-    }
-
-    void writePermissionsLPr(TypedXmlSerializer serializer, Collection<PermissionState> permissionStates)
-            throws IOException {
-        if (permissionStates.isEmpty()) {
-            return;
-        }
-
-        serializer.startTag(null, TAG_PERMISSIONS);
-
-        for (PermissionState permissionState : permissionStates) {
-            serializer.startTag(null, TAG_ITEM);
-            serializer.attributeInterned(null, ATTR_NAME, permissionState.getName());
-            serializer.attributeBoolean(null, ATTR_GRANTED, permissionState.isGranted());
-            serializer.attributeIntHex(null, ATTR_FLAGS, permissionState.getFlags());
-            serializer.endTag(null, TAG_ITEM);
-        }
-
-        serializer.endTag(null, TAG_PERMISSIONS);
     }
 
     void readUsesStaticLibLPw(TypedXmlPullParser parser, PackageSetting outPs)
@@ -2572,8 +2556,6 @@ public final class Settings implements Watchable, Snappable {
                 serializer.attribute(null, ATTR_NAME, usr.name);
                 serializer.attributeInt(null, "userId", usr.userId);
                 usr.signatures.writeXml(serializer, "sigs", mPastSignatures);
-                writePermissionsLPr(serializer, usr.getLegacyPermissionState()
-                        .getInstallPermissionStates());
                 serializer.endTag(null, "shared-user");
             }
 
@@ -2898,12 +2880,6 @@ public final class Settings implements Watchable, Snappable {
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
-        // If this is a shared user, the permissions will be written there.
-        if (pkg.sharedUser == null) {
-            writePermissionsLPr(serializer, pkg.getLegacyPermissionState()
-                    .getInstallPermissionStates());
-        }
-
         serializer.endTag(null, "updated-package");
     }
 
@@ -2990,9 +2966,6 @@ public final class Settings implements Watchable, Snappable {
             installSource.initiatingPackageSignatures.writeXml(
                     serializer, "install-initiator-sigs", mPastSignatures);
         }
-
-        writePermissionsLPr(serializer,
-                pkg.getLegacyPermissionState().getInstallPermissionStates());
 
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
@@ -3097,13 +3070,13 @@ public final class Settings implements Watchable, Snappable {
 
                 String tagName = parser.getName();
                 if (tagName.equals("package")) {
-                    readPackageLPw(parser);
+                    readPackageLPw(parser, users);
                 } else if (tagName.equals("permissions")) {
                     mPermissions.readPermissions(parser);
                 } else if (tagName.equals("permission-trees")) {
                     mPermissions.readPermissionTrees(parser);
                 } else if (tagName.equals("shared-user")) {
-                    readSharedUserLPw(parser);
+                    readSharedUserLPw(parser, users);
                 } else if (tagName.equals("preferred-packages")) {
                     // no longer used.
                 } else if (tagName.equals("preferred-activities")) {
@@ -3121,7 +3094,7 @@ public final class Settings implements Watchable, Snappable {
                 } else if (tagName.equals(TAG_DEFAULT_BROWSER)) {
                     readDefaultAppsLPw(parser, 0);
                 } else if (tagName.equals("updated-package")) {
-                    readDisabledSysPackageLPw(parser);
+                    readDisabledSysPackageLPw(parser, users);
                 } else if (tagName.equals("renamed-package")) {
                     String nname = parser.getAttributeValue(null, "new");
                     String oname = parser.getAttributeValue(null, "old");
@@ -3627,7 +3600,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void readDisabledSysPackageLPw(TypedXmlPullParser parser)
+    private void readDisabledSysPackageLPw(TypedXmlPullParser parser, List<UserInfo> users)
             throws XmlPullParserException, IOException {
         String name = parser.getAttributeValue(null, ATTR_NAME);
         String realName = parser.getAttributeValue(null, "realName");
@@ -3676,7 +3649,7 @@ public final class Settings implements Watchable, Snappable {
             }
 
             if (parser.getName().equals(TAG_PERMISSIONS)) {
-                readInstallPermissionsLPr(parser, ps.getLegacyPermissionState());
+                readInstallPermissionsLPr(parser, ps.getLegacyPermissionState(), users);
             } else if (parser.getName().equals(TAG_USES_STATIC_LIB)) {
                 readUsesStaticLibLPw(parser, ps);
             } else {
@@ -3693,7 +3666,7 @@ public final class Settings implements Watchable, Snappable {
     private static int PRE_M_APP_INFO_FLAG_CANT_SAVE_STATE = 1<<28;
     private static int PRE_M_APP_INFO_FLAG_PRIVILEGED = 1<<30;
 
-    private void readPackageLPw(TypedXmlPullParser parser)
+    private void readPackageLPw(TypedXmlPullParser parser, List<UserInfo> users)
             throws XmlPullParserException, IOException {
         String name = null;
         String realName = null;
@@ -3935,7 +3908,7 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.signatures.readXml(parser, mPastSignatures);
                 } else if (tagName.equals(TAG_PERMISSIONS)) {
                     readInstallPermissionsLPr(parser,
-                            packageSetting.getLegacyPermissionState());
+                            packageSetting.getLegacyPermissionState(), users);
                     packageSetting.installPermissionsFixed = true;
                 } else if (tagName.equals("proper-signing-keyset")) {
                     long id = parser.getAttributeLong(null, "identifier");
@@ -4112,7 +4085,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void readSharedUserLPw(TypedXmlPullParser parser)
+    private void readSharedUserLPw(TypedXmlPullParser parser, List<UserInfo> users)
             throws XmlPullParserException, IOException {
         String name = null;
         int pkgFlags = 0;
@@ -4156,7 +4129,7 @@ public final class Settings implements Watchable, Snappable {
                 if (tagName.equals("sigs")) {
                     su.signatures.readXml(parser, mPastSignatures);
                 } else if (tagName.equals("perms")) {
-                    readInstallPermissionsLPr(parser, su.getLegacyPermissionState());
+                    readInstallPermissionsLPr(parser, su.getLegacyPermissionState(), users);
                 } else {
                     PackageManagerService.reportSettingsProblem(Log.WARN,
                             "Unknown element under <shared-user>: " + parser.getName());
@@ -4979,7 +4952,7 @@ public final class Settings implements Watchable, Snappable {
                 dumpGidsLPr(pw, prefix + "    ", mPermissionDataProvider.getGidsForUid(
                         UserHandle.getUid(user.id, ps.appId)));
                 dumpRuntimePermissionsLPr(pw, prefix + "    ", permissionNames, permissionsState
-                        .getRuntimePermissionStates(user.id), dumpAll);
+                        .getPermissionStates(user.id), dumpAll);
             }
 
             String harmfulAppWarning = ps.getHarmfulAppWarning(user.id);
@@ -5154,7 +5127,7 @@ public final class Settings implements Watchable, Snappable {
                     final int[] gids = mPermissionDataProvider.getGidsForUid(UserHandle.getUid(
                             userId, su.userId));
                     final Collection<PermissionState> permissions =
-                            permissionsState.getRuntimePermissionStates(userId);
+                            permissionsState.getPermissionStates(userId);
                     if (!ArrayUtils.isEmpty(gids) || !permissions.isEmpty()) {
                         pw.print(prefix); pw.print("User "); pw.print(userId); pw.println(": ");
                         dumpGidsLPr(pw, prefix + "  ", gids);
@@ -5215,9 +5188,19 @@ public final class Settings implements Watchable, Snappable {
 
     void dumpRuntimePermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
             Collection<PermissionState> permissionStates, boolean dumpAll) {
-        if (!permissionStates.isEmpty() || dumpAll) {
+        boolean hasRuntimePermissions = false;
+        for (PermissionState permissionState : permissionStates) {
+            if (permissionState.isRuntime()) {
+                hasRuntimePermissions = true;
+                break;
+            }
+        }
+        if (hasRuntimePermissions || dumpAll) {
             pw.print(prefix); pw.println("runtime permissions:");
             for (PermissionState permissionState : permissionStates) {
+                if (!permissionState.isRuntime()) {
+                    continue;
+                }
                 if (permissionNames != null
                         && !permissionNames.contains(permissionState.getName())) {
                     continue;
@@ -5256,11 +5239,21 @@ public final class Settings implements Watchable, Snappable {
 
     void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
             LegacyPermissionState permissionsState) {
-        Collection<PermissionState> permissionStates =
-                permissionsState.getInstallPermissionStates();
-        if (!permissionStates.isEmpty()) {
+        Collection<PermissionState> permissionStates = permissionsState.getPermissionStates(
+                UserHandle.USER_SYSTEM);
+        boolean hasInstallPermissions = false;
+        for (PermissionState permissionState : permissionStates) {
+            if (!permissionState.isRuntime()) {
+                hasInstallPermissions = true;
+                break;
+            }
+        }
+        if (hasInstallPermissions) {
             pw.print(prefix); pw.println("install permissions:");
             for (PermissionState permissionState : permissionStates) {
+                if (permissionState.isRuntime()) {
+                    continue;
+                }
                 if (permissionNames != null
                         && !permissionNames.contains(permissionState.getName())) {
                     continue;
@@ -5295,7 +5288,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    public void writeRuntimePermissionsForUserLPr(int userId, boolean sync) {
+    public void writePermissionStateForUserLPr(int userId, boolean sync) {
         if (sync) {
             mRuntimePermissionsPersistence.writeStateForUserSyncLPr(userId);
         } else {
@@ -5530,7 +5523,7 @@ public final class Settings implements Watchable, Snappable {
         private List<RuntimePermissionsState.PermissionState> getPermissionsFromPermissionsState(
                 @NonNull LegacyPermissionState permissionsState, @UserIdInt int userId) {
             Collection<PermissionState> permissionStates =
-                    permissionsState.getRuntimePermissionStates(userId);
+                    permissionsState.getPermissionStates(userId);
             List<RuntimePermissionsState.PermissionState> permissions = new ArrayList<>();
             for (PermissionState permissionState : permissionStates) {
                 RuntimePermissionsState.PermissionState permission =
@@ -5590,6 +5583,7 @@ public final class Settings implements Watchable, Snappable {
                 if (permissions != null) {
                     readPermissionsStateLpr(permissions, packageSetting.getLegacyPermissionState(),
                             userId);
+                    packageSetting.installPermissionsFixed = true;
                 } else if (packageSetting.sharedUser == null && !isUpgradeToR) {
                     Slog.w(TAG, "Missing permission state for package: " + packageName);
                     packageSetting.getLegacyPermissionState().setMissing(true, userId);
@@ -5624,7 +5618,7 @@ public final class Settings implements Watchable, Snappable {
                 String name = permission.getName();
                 boolean granted = permission.isGranted();
                 int flags = permission.getFlags();
-                permissionsState.putRuntimePermissionState(new PermissionState(name, granted,
+                permissionsState.putPermissionState(new PermissionState(name, true, granted,
                         flags), userId);
             }
         }
@@ -5646,7 +5640,7 @@ public final class Settings implements Watchable, Snappable {
 
             try {
                 final TypedXmlPullParser parser = Xml.resolvePullParser(in);
-                parseRuntimePermissionsLPr(parser, userId);
+                parseLegacyRuntimePermissionsLPr(parser, userId);
 
             } catch (XmlPullParserException | IOException e) {
                 throw new IllegalStateException("Failed parsing permissions file: "
@@ -5659,7 +5653,7 @@ public final class Settings implements Watchable, Snappable {
         // Private internals
 
         @GuardedBy("Settings.this.mLock")
-        private void parseRuntimePermissionsLPr(TypedXmlPullParser parser, int userId)
+        private void parseLegacyRuntimePermissionsLPr(TypedXmlPullParser parser, int userId)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
             int type;
@@ -5687,7 +5681,7 @@ public final class Settings implements Watchable, Snappable {
                             XmlUtils.skipCurrentTag(parser);
                             continue;
                         }
-                        parsePermissionsLPr(parser, ps.getLegacyPermissionState(), userId);
+                        parseLegacyPermissionsLPr(parser, ps.getLegacyPermissionState(), userId);
                     } break;
 
                     case TAG_SHARED_USER: {
@@ -5698,13 +5692,13 @@ public final class Settings implements Watchable, Snappable {
                             XmlUtils.skipCurrentTag(parser);
                             continue;
                         }
-                        parsePermissionsLPr(parser, sus.getLegacyPermissionState(), userId);
+                        parseLegacyPermissionsLPr(parser, sus.getLegacyPermissionState(), userId);
                     } break;
                 }
             }
         }
 
-        private void parsePermissionsLPr(TypedXmlPullParser parser,
+        private void parseLegacyPermissionsLPr(TypedXmlPullParser parser,
                 LegacyPermissionState permissionsState, int userId)
                 throws IOException, XmlPullParserException {
             final int outerDepth = parser.getDepth();
@@ -5722,7 +5716,7 @@ public final class Settings implements Watchable, Snappable {
                                 parser.getAttributeBoolean(null, ATTR_GRANTED, true);
                         final int flags =
                                 parser.getAttributeIntHex(null, ATTR_FLAGS, 0);
-                        permissionsState.putRuntimePermissionState(new PermissionState(name,
+                        permissionsState.putPermissionState(new PermissionState(name, true,
                                 granted, flags), userId);
                     }
                     break;

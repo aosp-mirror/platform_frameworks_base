@@ -20,7 +20,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
-import android.app.appsearch.exceptions.AppSearchException;
 import android.app.appsearch.util.BundleUtil;
 import android.os.Bundle;
 import android.util.Log;
@@ -81,9 +80,9 @@ public class GenericDocument {
     /**
      * The maximum number of indexed properties a document can have.
      *
-     * <p>Indexed properties are properties where the {@link
-     * AppSearchSchema.PropertyConfig#getIndexingType()} constant is anything other than {@link
-     * AppSearchSchema.PropertyConfig.IndexingType#INDEXING_TYPE_NONE}.
+     * <p>Indexed properties are properties which are strings where the {@link
+     * AppSearchSchema.StringPropertyConfig#getIndexingType} value is anything other than {@link
+     * AppSearchSchema.StringPropertyConfig.IndexingType#INDEXING_TYPE_NONE}.
      */
     public static int getMaxIndexedProperties() {
         return MAX_INDEXED_PROPERTIES;
@@ -92,9 +91,7 @@ public class GenericDocument {
     /** Contains {@link GenericDocument} basic information (uri, schemaType etc). */
     @NonNull final Bundle mBundle;
 
-    /**
-     * Contains all properties in {@link GenericDocument} to support getting properties via keys.
-     */
+    /** Contains all properties in {@link GenericDocument} to support getting properties via keys */
     @NonNull private final Bundle mProperties;
 
     @NonNull private final String mUri;
@@ -199,6 +196,24 @@ public class GenericDocument {
     @NonNull
     public Set<String> getPropertyNames() {
         return Collections.unmodifiableSet(mProperties.keySet());
+    }
+
+    /**
+     * Retrieves the property value with the given key as {@link Object}.
+     *
+     * @param key The key to look for.
+     * @return The entry with the given key as an object or {@code null} if there is no such key.
+     */
+    @Nullable
+    public Object getProperty(@NonNull String key) {
+        Preconditions.checkNotNull(key);
+        Object property = mProperties.get(key);
+        if (property instanceof ArrayList) {
+            return getPropertyBytesArray(key);
+        } else if (property instanceof Bundle[]) {
+            return getPropertyDocumentArray(key);
+        }
+        return property;
     }
 
     /**

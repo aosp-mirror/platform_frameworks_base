@@ -90,14 +90,26 @@ public class QuickQSPanelController extends QSPanelControllerBase<QuickQSPanel> 
 
     @Override
     public void setTiles() {
-        List<QSTile> tiles = new ArrayList();
+        List<QSTile> tiles = new ArrayList<>();
         for (QSTile tile : mHost.getTiles()) {
             tiles.add(tile);
             if (tiles.size() == mView.getNumQuickTiles()) {
                 break;
             }
         }
-        super.setTiles(tiles, true);
+        if (mView.useSideLabels()) {
+            List<QSTile> newTiles = new ArrayList<>();
+            for (int i = 0; i < tiles.size(); i += 2) {
+                newTiles.add(tiles.get(i));
+            }
+            for (int i = 1; i < tiles.size(); i += 2) {
+                newTiles.add(tiles.get(i));
+            }
+            super.setTiles(newTiles, true);
+
+        } else {
+            super.setTiles(tiles, true);
+        }
     }
 
     /** */

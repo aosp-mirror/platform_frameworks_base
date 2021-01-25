@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"۲۵۶ هزار"</item>
     <item msgid="7099386891713159947">"۱ میلیون"</item>
     <item msgid="6069075827077845520">"۴ میلیون"</item>
-    <item msgid="8243549501764402572">"۱۶ میلیون"</item>
+    <item msgid="6078203297886482480">"۸ مگابایت"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"خاموش"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"۲۵۶ هزار در هر بافر گزارش"</item>
     <item msgid="8539423820514360724">"۱ میلیون در هر بافر گزارش"</item>
     <item msgid="1984761927103140651">"۴ میلیون در هر بافر گزارش"</item>
-    <item msgid="7892098981256010498">"۱۶ میلیون در هر بافر گزارش"</item>
+    <item msgid="2983219471251787208">"۸ مگابایت در هر میان‌گیری گزارش"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"خاموش"</item>

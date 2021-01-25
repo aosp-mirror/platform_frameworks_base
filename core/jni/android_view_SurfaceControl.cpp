@@ -26,11 +26,11 @@
 
 #include <android-base/chrono_utils.h>
 #include <android/graphics/region.h>
+#include <android/gui/BnScreenCaptureListener.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
 #include <android_runtime/android_view_SurfaceSession.h>
-#include <gui/IScreenCaptureListener.h>
 #include <gui/ISurfaceComposer.h>
 #include <gui/Surface.h>
 #include <gui/SurfaceComposerClient.h>
@@ -51,8 +51,8 @@
 #include <ui/HdrCapabilities.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
-#include <utils/Log.h>
 #include <utils/LightRefBase.h>
+#include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
 
@@ -247,7 +247,7 @@ constexpr ui::Dataspace pickDataspaceFromColorMode(const ui::ColorMode colorMode
     }
 }
 
-class ScreenCaptureListenerWrapper : public BnScreenCaptureListener {
+class ScreenCaptureListenerWrapper : public gui::BnScreenCaptureListener {
 public:
     explicit ScreenCaptureListenerWrapper(JNIEnv* env, jobject jobject) {
         env->GetJavaVM(&mVm);
@@ -262,12 +262,13 @@ public:
         }
     }
 
-    status_t onScreenCaptureComplete(const ScreenCaptureResults& captureResults) override {
+    binder::Status onScreenCaptureComplete(
+            const gui::ScreenCaptureResults& captureResults) override {
         JNIEnv* env = getenv();
         if (captureResults.result != NO_ERROR || captureResults.buffer == nullptr) {
             env->CallVoidMethod(screenCaptureListenerObject,
                                 gScreenCaptureListenerClassInfo.onScreenCaptureComplete, nullptr);
-            return NO_ERROR;
+            return binder::Status::ok();
         }
         jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
                 env, captureResults.buffer->toAHardwareBuffer());
@@ -283,7 +284,7 @@ public:
                             screenshotHardwareBuffer);
         env->DeleteLocalRef(jhardwareBuffer);
         env->DeleteLocalRef(screenshotHardwareBuffer);
-        return NO_ERROR;
+        return binder::Status::ok();
     }
 
 private:
@@ -1592,7 +1593,9 @@ static jlong nativeGetHandle(JNIEnv* env, jclass clazz, jlong nativeObject) {
 }
 
 static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionObj,
-                                   jobject toTokenObj, jobject focusedTokenObj, jint displayId) {
+                                   jobject toTokenObj, jstring windowNameJstr,
+                                   jobject focusedTokenObj, jstring focusedWindowNameJstr,
+                                   jint displayId) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
     if (toTokenObj == NULL) return;
 
@@ -1601,8 +1604,22 @@ static void nativeSetFocusedWindow(JNIEnv* env, jclass clazz, jlong transactionO
     if (focusedTokenObj != NULL) {
         focusedToken = ibinderForJavaObject(env, focusedTokenObj);
     }
-    transaction->setFocusedWindow(toToken, focusedToken, systemTime(SYSTEM_TIME_MONOTONIC),
-                                  displayId);
+
+    FocusRequest request;
+    request.token = toToken;
+    if (windowNameJstr != NULL) {
+        ScopedUtfChars windowName(env, windowNameJstr);
+        request.windowName = windowName.c_str();
+    }
+
+    request.focusedToken = focusedToken;
+    if (focusedWindowNameJstr != NULL) {
+        ScopedUtfChars focusedWindowName(env, focusedWindowNameJstr);
+        request.focusedWindowName = focusedWindowName.c_str();
+    }
+    request.timestamp = systemTime(SYSTEM_TIME_MONOTONIC);
+    request.displayId = displayId;
+    transaction->setFocusedWindow(request);
 }
 
 static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transactionObj,
@@ -1662,21 +1679,22 @@ static void nativeAddJankDataListener(JNIEnv* env, jclass clazz,
     if (surface == nullptr) {
         return;
     }
-    JankDataListenerWrapper* wrapper =
+    sp<JankDataListenerWrapper> wrapper =
             reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
     TransactionCompletedListener::getInstance()->addJankListener(wrapper, surface);
 }
 
 static void nativeRemoveJankDataListener(JNIEnv* env, jclass clazz,
                                           jlong jankDataCallbackListenerPtr) {
-    JankDataListenerWrapper* wrapper =
+    sp<JankDataListenerWrapper> wrapper =
             reinterpret_cast<JankDataListenerWrapper*>(jankDataCallbackListenerPtr);
     TransactionCompletedListener::getInstance()->removeJankListener(wrapper);
 }
 
 static jlong nativeCreateJankDataListenerWrapper(JNIEnv* env, jclass clazz,
                                                  jobject jankDataListenerObject) {
-    return reinterpret_cast<jlong>(new JankDataListenerWrapper(env, jankDataListenerObject));
+    return reinterpret_cast<jlong>(
+            new JankDataListenerWrapper(env, jankDataListenerObject));
 }
 
 static jint nativeGetGPUContextPriority(JNIEnv* env, jclass clazz) {
@@ -1863,7 +1881,7 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeGetHandle },
     {"nativeSetFixedTransformHint", "(JJI)V",
             (void*)nativeSetFixedTransformHint},
-    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Landroid/os/IBinder;I)V",
+    {"nativeSetFocusedWindow", "(JLandroid/os/IBinder;Ljava/lang/String;Landroid/os/IBinder;Ljava/lang/String;I)V",
             (void*)nativeSetFocusedWindow},
     {"nativeSetFrameTimelineVsync", "(JJ)V",
             (void*)nativeSetFrameTimelineVsync },

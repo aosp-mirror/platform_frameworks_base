@@ -1,0 +1,11 @@
+// Signature format: 2.0
+package android.app.role {
+
+  public final class RoleManager {
+    method @Nullable public String getBrowserRoleHolder(int);
+    method @Nullable public String getSmsRoleHolder(int);
+    method @Nullable @RequiresPermission(android.Manifest.permission.SET_PREFERRED_APPLICATIONS) public boolean setBrowserRoleHolder(@Nullable String, int);
+  }
+
+}
+

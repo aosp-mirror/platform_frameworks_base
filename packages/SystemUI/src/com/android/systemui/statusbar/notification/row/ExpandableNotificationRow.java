@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY;
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
@@ -1781,6 +1782,27 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         MenuItem menuItem = null;
         if (provider != null) {
             menuItem = provider.getLongpressMenuItem(mContext);
+        }
+        doLongClickCallback(x, y, menuItem);
+    }
+
+    /**
+     * Perform a smart action which triggers a longpress (expose guts).
+     * Based on the semanticAction passed, may update the state of the guts view.
+     * @param semanticAction associated with this smart action click
+     */
+    public void doSmartActionClick(int x, int y, int semanticAction) {
+        createMenu();
+        NotificationMenuRowPlugin provider = getProvider();
+        MenuItem menuItem = null;
+        if (provider != null) {
+            menuItem = provider.getLongpressMenuItem(mContext);
+        }
+        if (SEMANTIC_ACTION_MARK_CONVERSATION_AS_PRIORITY == semanticAction
+                && menuItem.getGutsView() instanceof NotificationConversationInfo) {
+            NotificationConversationInfo info =
+                    (NotificationConversationInfo) menuItem.getGutsView();
+            info.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
         }
         doLongClickCallback(x, y, menuItem);
     }

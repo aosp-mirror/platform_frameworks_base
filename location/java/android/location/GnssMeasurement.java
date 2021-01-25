@@ -30,12 +30,17 @@ import static android.hardware.gnss.V2_1.IGnssMeasurementCallback.GnssMeasuremen
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A class representing a GNSS satellite measurement, containing raw and computed information.
@@ -67,12 +72,16 @@ public final class GnssMeasurement implements Parcelable {
     private double mFullInterSignalBiasUncertaintyNanos;
     private double mSatelliteInterSignalBiasNanos;
     private double mSatelliteInterSignalBiasUncertaintyNanos;
+    @Nullable private SatellitePvt mSatellitePvt;
+    @Nullable private Collection<CorrelationVector> mReadOnlyCorrelationVectors;
 
     // The following enumerations must be in sync with the values declared in GNSS HAL.
 
     private static final int HAS_NO_FLAGS = 0;
     private static final int HAS_CODE_TYPE = (1 << 14);
     private static final int HAS_BASEBAND_CN0 = (1 << 15);
+    private static final int HAS_SATELLITE_PVT = (1 << 20);
+    private static final int HAS_CORRELATION_VECTOR = (1 << 21);
 
     /**
      * The status of the multipath indicator.
@@ -169,8 +178,8 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @IntDef(flag = true, prefix = { "ADR_STATE_" }, value = {
-            ADR_STATE_VALID, ADR_STATE_RESET, ADR_STATE_CYCLE_SLIP, ADR_STATE_HALF_CYCLE_RESOLVED,
-            ADR_STATE_HALF_CYCLE_REPORTED
+            ADR_STATE_UNKNOWN, ADR_STATE_VALID, ADR_STATE_RESET, ADR_STATE_CYCLE_SLIP,
+            ADR_STATE_HALF_CYCLE_RESOLVED, ADR_STATE_HALF_CYCLE_REPORTED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface AdrState {}
@@ -274,6 +283,8 @@ public final class GnssMeasurement implements Parcelable {
         mSatelliteInterSignalBiasNanos = measurement.mSatelliteInterSignalBiasNanos;
         mSatelliteInterSignalBiasUncertaintyNanos =
                 measurement.mSatelliteInterSignalBiasUncertaintyNanos;
+        mSatellitePvt = measurement.mSatellitePvt;
+        mReadOnlyCorrelationVectors = measurement.mReadOnlyCorrelationVectors;
     }
 
     /**
@@ -1691,6 +1702,108 @@ public final class GnssMeasurement implements Parcelable {
         resetFlag(HAS_SATELLITE_ISB_UNCERTAINTY);
     }
 
+    /**
+     * Returns {@code true} if {@link #getSatellitePvt()} is available,
+     * {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasSatellitePvt() {
+        return isFlagSet(HAS_SATELLITE_PVT);
+    }
+
+    /**
+     * Gets the Satellite PVT data.
+     *
+     * <p>The value is only available if {@link #hasSatellitePvt()} is
+     * {@code true}.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public SatellitePvt getSatellitePvt() {
+        return mSatellitePvt;
+    }
+
+    /**
+     * Sets the Satellite PVT.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setSatellitePvt(@Nullable SatellitePvt satellitePvt) {
+        if (satellitePvt == null) {
+            resetSatellitePvt();
+        } else {
+            setFlag(HAS_SATELLITE_PVT);
+            mSatellitePvt = satellitePvt;
+        }
+    }
+
+    /**
+     * Resets the Satellite PVT.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetSatellitePvt() {
+        resetFlag(HAS_SATELLITE_PVT);
+    }
+
+    /**
+     * Returns {@code true} if {@link #getCorrelationVectors()} is available,
+     * {@code false} otherwise.
+     *
+     * @hide
+     */
+    @SystemApi
+    public boolean hasCorrelationVectors() {
+        return isFlagSet(HAS_CORRELATION_VECTOR);
+    }
+
+    /**
+     * Gets read-only collection of CorrelationVector with each CorrelationVector corresponding to a
+     * frequency offset.
+     *
+     * <p>To represent correlation values over a 2D spaces (delay and frequency), a
+     * CorrelationVector is required per frequency offset, and each CorrelationVector contains
+     * correlation values at equally spaced spatial offsets.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public Collection<CorrelationVector> getCorrelationVectors() {
+        return mReadOnlyCorrelationVectors;
+    }
+
+    /**
+     * Sets the CorrelationVectors.
+     *
+     * @hide
+     */
+    @TestApi
+    public void setCorrelationVectors(@Nullable Collection<CorrelationVector> correlationVectors) {
+        if (correlationVectors == null || correlationVectors.isEmpty()) {
+            resetCorrelationVectors();
+        } else {
+            setFlag(HAS_CORRELATION_VECTOR);
+            mReadOnlyCorrelationVectors = Collections.unmodifiableCollection(correlationVectors);
+        }
+    }
+
+    /**
+     * Resets the CorrelationVectors.
+     *
+     * @hide
+     */
+    @TestApi
+    public void resetCorrelationVectors() {
+        resetFlag(HAS_CORRELATION_VECTOR);
+        mReadOnlyCorrelationVectors = null;
+    }
 
     public static final @NonNull Creator<GnssMeasurement> CREATOR = new Creator<GnssMeasurement>() {
         @Override
@@ -1723,7 +1836,19 @@ public final class GnssMeasurement implements Parcelable {
             gnssMeasurement.mFullInterSignalBiasUncertaintyNanos = parcel.readDouble();
             gnssMeasurement.mSatelliteInterSignalBiasNanos = parcel.readDouble();
             gnssMeasurement.mSatelliteInterSignalBiasUncertaintyNanos = parcel.readDouble();
-
+            if (gnssMeasurement.hasSatellitePvt()) {
+                ClassLoader classLoader = getClass().getClassLoader();
+                gnssMeasurement.mSatellitePvt = parcel.readParcelable(classLoader);
+            }
+            if (gnssMeasurement.hasCorrelationVectors()) {
+                CorrelationVector[] correlationVectorsArray =
+                        new CorrelationVector[parcel.readInt()];
+                parcel.readTypedArray(correlationVectorsArray, CorrelationVector.CREATOR);
+                Collection<CorrelationVector> corrVecCollection =
+                        Arrays.asList(correlationVectorsArray);
+                gnssMeasurement.mReadOnlyCorrelationVectors =
+                        Collections.unmodifiableCollection(corrVecCollection);
+            }
             return gnssMeasurement;
         }
 
@@ -1761,6 +1886,16 @@ public final class GnssMeasurement implements Parcelable {
         parcel.writeDouble(mFullInterSignalBiasUncertaintyNanos);
         parcel.writeDouble(mSatelliteInterSignalBiasNanos);
         parcel.writeDouble(mSatelliteInterSignalBiasUncertaintyNanos);
+        if (hasSatellitePvt()) {
+            parcel.writeParcelable(mSatellitePvt, flags);
+        }
+        if (hasCorrelationVectors()) {
+            int correlationVectorCount = mReadOnlyCorrelationVectors.size();
+            CorrelationVector[] correlationVectorArray =
+                mReadOnlyCorrelationVectors.toArray(new CorrelationVector[correlationVectorCount]);
+            parcel.writeInt(correlationVectorArray.length);
+            parcel.writeTypedArray(correlationVectorArray, flags);
+        }
     }
 
     @Override
@@ -1864,6 +1999,17 @@ public final class GnssMeasurement implements Parcelable {
                             : null));
         }
 
+        if (hasSatellitePvt()) {
+            builder.append(mSatellitePvt.toString());
+        }
+
+        if (hasCorrelationVectors()) {
+            for (CorrelationVector correlationVector : mReadOnlyCorrelationVectors) {
+                builder.append(correlationVector.toString());
+                builder.append("\n");
+            }
+        }
+
         return builder.toString();
     }
 
@@ -1893,6 +2039,8 @@ public final class GnssMeasurement implements Parcelable {
         resetFullInterSignalBiasUncertaintyNanos();
         resetSatelliteInterSignalBiasNanos();
         resetSatelliteInterSignalBiasUncertaintyNanos();
+        resetSatellitePvt();
+        resetCorrelationVectors();
     }
 
     private void setFlag(int flag) {

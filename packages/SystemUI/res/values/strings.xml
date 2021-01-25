@@ -821,6 +821,10 @@
     <string name="quick_settings_location_label">Location</string>
     <!-- QuickSettings: Location (Off) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_location_off_label">Location Off</string>
+    <!-- QuickSettings: Camera [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_camera_label">Block Camera</string>
+    <!-- QuickSettings: Microphone [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_mic_label">Mute Microphone</string>
     <!-- QuickSettings: Media device [CHAR LIMIT=NONE] -->
     <string name="quick_settings_media_device_label">Media device</string>
     <!-- QuickSettings: RSSI [CHAR LIMIT=NONE] -->
@@ -841,6 +845,12 @@
     <string name="quick_settings_wifi_label">Wi-Fi</string>
     <!-- QuickSettings: Internet [CHAR LIMIT=NONE] -->
     <string name="quick_settings_internet_label">Internet</string>
+    <!-- QuickSettings: Airplane-safe [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_airplane_safe_label">Airplane-safe</string>
+    <!-- QuickSettings: networks available [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_networks_available">Networks available</string>
+    <!-- QuickSettings: networks unavailable [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_networks_unavailable">Networks unavailable</string>
     <!-- QuickSettings: Wifi (Not connected) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_wifi_not_connected">Not Connected</string>
     <!-- QuickSettings: Wifi (No network) [CHAR LIMIT=NONE] -->
@@ -964,6 +974,11 @@
     <!-- QuickSettings: Text to prompt the user to stop an ongoing recording [CHAR LIMIT=20] -->
     <string name="quick_settings_screen_record_stop">Stop</string>
 
+    <!--- Content of dialog triggered if the microphone is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_mic_dialog_content">To continue, &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device microphone.</string>
+    <!--- Content of dialog triggered if the camera is disabled but an app tried to access it. [CHAR LIMIT=NONE] -->
+    <string name="sensor_privacy_start_use_camera_dialog_content">To continue, &lt;b&gt;<xliff:g id="app" example="Gmail">%s</xliff:g>&lt;/b&gt; needs access to your device’s camera.</string>
+
     <!-- Default name for the media device shown in the output switcher when the name is not available [CHAR LIMIT=30] -->
     <string name="media_seamless_remote_device">Device</string>
 
@@ -1028,6 +1043,9 @@
 
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
+
+    <!-- Message shown when notifying user to unlock in order to use NFC. [CHAR LIMIT=60] -->
+    <string name="require_unlock_for_nfc">Unlock to use NFC</string>
 
     <!-- Text on keyguard screen and in Quick Settings footer indicating that the user's device belongs to their organization. [CHAR LIMIT=60] -->
     <string name="do_disclosure_generic">This device belongs to your organization</string>

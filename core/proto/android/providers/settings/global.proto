@@ -283,6 +283,7 @@ message GlobalSettingsProto {
         optional SettingProto emulate_display_cutout = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto force_desktop_mode_on_external_displays = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto enable_sizecompat_freeform = 7 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto enable_non_resizable_multi_window = 8 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Development development = 39;
 

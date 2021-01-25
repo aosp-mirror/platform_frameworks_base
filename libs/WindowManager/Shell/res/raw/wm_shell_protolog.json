@@ -1,29 +1,23 @@
 {
   "version": "1.0.0",
   "messages": {
+    "-2076257741": {
+      "message": "Transition requested: %s %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
+    },
     "-1683614271": {
       "message": "Existing task: id=%d component=%s",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/ShellTaskOrganizer.java"
     },
-    "-1534364071": {
-      "message": "onTransitionReady %s: %s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TRANSITIONS",
-      "at": "com\/android\/wm\/shell\/Transitions.java"
-    },
     "-1501874464": {
       "message": "Fullscreen Task Appeared: #%d",
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/FullscreenTaskListener.java"
-    },
-    "-1480787369": {
-      "message": "Transition requested: type=%d %s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TRANSITIONS",
-      "at": "com\/android\/wm\/shell\/Transitions.java"
     },
     "-1382704050": {
       "message": "Display removed: %d",
@@ -97,12 +91,6 @@
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/apppairs\/AppPairsController.java"
     },
-    "-191422040": {
-      "message": "Transition animations finished, notifying core %s",
-      "level": "VERBOSE",
-      "group": "WM_SHELL_TRANSITIONS",
-      "at": "com\/android\/wm\/shell\/Transitions.java"
-    },
     "157713005": {
       "message": "Task info changed taskId=%d",
       "level": "VERBOSE",
@@ -114,6 +102,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_DRAG_AND_DROP",
       "at": "com\/android\/wm\/shell\/draganddrop\/DropOutlineDrawable.java"
+    },
+    "325110414": {
+      "message": "Transition animations finished, notifying core %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
     },
     "375908576": {
       "message": "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s",
@@ -168,6 +162,12 @@
       "level": "VERBOSE",
       "group": "WM_SHELL_TASK_ORG",
       "at": "com\/android\/wm\/shell\/legacysplitscreen\/LegacySplitScreenTaskListener.java"
+    },
+    "1070270131": {
+      "message": "onTransitionReady %s: %s",
+      "level": "VERBOSE",
+      "group": "WM_SHELL_TRANSITIONS",
+      "at": "com\/android\/wm\/shell\/transition\/Transitions.java"
     },
     "1079041527": {
       "message": "incrementPool size=%d",

@@ -144,8 +144,9 @@ public:
         }
     }
     Control openMount(std::string_view path) const final { return incfs::open(path); }
-    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const final {
-        return incfs::createControl(cmd, pendingReads, logs);
+    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
+                          IncFsFd blocksWritten) const final {
+        return incfs::createControl(cmd, pendingReads, logs, blocksWritten);
     }
     ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                        incfs::NewFileParams params) const final {
@@ -205,6 +206,11 @@ public:
     WaitResult waitForPendingReads(const Control& control, std::chrono::milliseconds timeout,
                                    std::vector<incfs::ReadInfo>* pendingReadsBuffer) const final {
         return incfs::waitForPendingReads(control, timeout, pendingReadsBuffer);
+    }
+    ErrorCode setUidReadTimeouts(const Control& control,
+                                 const std::vector<android::os::incremental::PerUidReadTimeouts>&
+                                         perUidReadTimeouts) const final {
+        return -ENOTSUP;
     }
 };
 

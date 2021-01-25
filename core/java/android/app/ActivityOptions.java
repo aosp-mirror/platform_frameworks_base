@@ -54,6 +54,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.window.IRemoteTransition;
 import android.window.WindowContainerToken;
 
 import java.lang.annotation.Retention;
@@ -198,6 +199,14 @@ public class ActivityOptions {
             "android.activity.launchTaskDisplayAreaToken";
 
     /**
+     * The root task token the activity should be launched into.
+     * @see #setLaunchRootTask(WindowContainerToken)
+     * @hide
+     */
+    public static final String KEY_LAUNCH_ROOT_TASK_TOKEN =
+            "android.activity.launchRootTaskToken";
+
+    /**
      * The windowing mode the activity should be launched into.
      * @hide
      */
@@ -298,12 +307,14 @@ public class ActivityOptions {
     private static final String KEY_SPECS_FUTURE = "android:activity.specsFuture";
     private static final String KEY_REMOTE_ANIMATION_ADAPTER
             = "android:activity.remoteAnimationAdapter";
+    private static final String KEY_REMOTE_TRANSITION =
+            "android:activity.remoteTransition";
 
     /**
      * @see #setLaunchCookie
      * @hide
      */
-    private static final String KEY_LAUNCH_COOKIE = "android.activity.launchCookie";
+    public static final String KEY_LAUNCH_COOKIE = "android.activity.launchCookie";
 
     /** @hide */
     public static final int ANIM_UNDEFINED = -1;
@@ -359,6 +370,7 @@ public class ActivityOptions {
     private int mLaunchDisplayId = INVALID_DISPLAY;
     private int mCallerDisplayId = INVALID_DISPLAY;
     private WindowContainerToken mLaunchTaskDisplayArea;
+    private WindowContainerToken mLaunchRootTask;
     @WindowConfiguration.WindowingMode
     private int mLaunchWindowingMode = WINDOWING_MODE_UNDEFINED;
     @WindowConfiguration.ActivityType
@@ -380,6 +392,7 @@ public class ActivityOptions {
     private IAppTransitionAnimationSpecsFuture mSpecsFuture;
     private RemoteAnimationAdapter mRemoteAnimationAdapter;
     private IBinder mLaunchCookie;
+    private IRemoteTransition mRemoteTransition;
 
     /**
      * Create an ActivityOptions specifying a custom animation to run when
@@ -959,6 +972,21 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Create an {@link ActivityOptions} instance that lets the application control the entire
+     * animation using a {@link RemoteAnimationAdapter}.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public static ActivityOptions makeRemoteAnimation(RemoteAnimationAdapter remoteAnimationAdapter,
+            IRemoteTransition remoteTransition) {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mRemoteAnimationAdapter = remoteAnimationAdapter;
+        opts.mAnimationType = ANIM_REMOTE_ANIMATION;
+        opts.mRemoteTransition = remoteTransition;
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;
@@ -1031,6 +1059,7 @@ public class ActivityOptions {
         mLaunchDisplayId = opts.getInt(KEY_LAUNCH_DISPLAY_ID, INVALID_DISPLAY);
         mCallerDisplayId = opts.getInt(KEY_CALLER_DISPLAY_ID, INVALID_DISPLAY);
         mLaunchTaskDisplayArea = opts.getParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN);
+        mLaunchRootTask = opts.getParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN);
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
@@ -1064,6 +1093,8 @@ public class ActivityOptions {
         }
         mRemoteAnimationAdapter = opts.getParcelable(KEY_REMOTE_ANIMATION_ADAPTER);
         mLaunchCookie = opts.getBinder(KEY_LAUNCH_COOKIE);
+        mRemoteTransition = IRemoteTransition.Stub.asInterface(opts.getBinder(
+                KEY_REMOTE_TRANSITION));
     }
 
     /**
@@ -1223,6 +1254,11 @@ public class ActivityOptions {
     }
 
     /** @hide */
+    public IRemoteTransition getRemoteTransition() {
+        return mRemoteTransition;
+    }
+
+    /** @hide */
     public static ActivityOptions fromBundle(Bundle bOptions) {
         return bOptions != null ? new ActivityOptions(bOptions) : null;
     }
@@ -1312,6 +1348,17 @@ public class ActivityOptions {
     public ActivityOptions setLaunchTaskDisplayArea(
             WindowContainerToken windowContainerToken) {
         mLaunchTaskDisplayArea = windowContainerToken;
+        return this;
+    }
+
+    /** @hide */
+    public WindowContainerToken getLaunchRootTask() {
+        return mLaunchRootTask;
+    }
+
+    /** @hide */
+    public ActivityOptions setLaunchRootTask(WindowContainerToken windowContainerToken) {
+        mLaunchRootTask = windowContainerToken;
         return this;
     }
 
@@ -1666,6 +1713,9 @@ public class ActivityOptions {
         if (mLaunchTaskDisplayArea != null) {
             b.putParcelable(KEY_LAUNCH_TASK_DISPLAY_AREA_TOKEN, mLaunchTaskDisplayArea);
         }
+        if (mLaunchRootTask != null) {
+            b.putParcelable(KEY_LAUNCH_ROOT_TASK_TOKEN, mLaunchRootTask);
+        }
         if (mLaunchWindowingMode != WINDOWING_MODE_UNDEFINED) {
             b.putInt(KEY_LAUNCH_WINDOWING_MODE, mLaunchWindowingMode);
         }
@@ -1723,6 +1773,9 @@ public class ActivityOptions {
         }
         if (mLaunchCookie != null) {
             b.putBinder(KEY_LAUNCH_COOKIE, mLaunchCookie);
+        }
+        if (mRemoteTransition != null) {
+            b.putBinder(KEY_REMOTE_TRANSITION, mRemoteTransition.asBinder());
         }
         return b;
     }

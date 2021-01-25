@@ -64,6 +64,9 @@ public final class SearchSpecToProtoConverter {
                                 .setNumToSnippet(spec.getSnippetCount())
                                 .setNumMatchesPerProperty(spec.getSnippetCountPerProperty())
                                 .setMaxWindowBytes(spec.getMaxSnippetSize()))
+                .addAllTypePropertyMasks(
+                        TypePropertyPathToProtoConverter.toTypePropertyMaskList(
+                                spec.getProjections()))
                 .build();
     }
 
@@ -79,17 +82,31 @@ public final class SearchSpecToProtoConverter {
         if (orderCodeProto == null) {
             throw new IllegalArgumentException("Invalid result ranking order: " + orderCode);
         }
-        protoBuilder.setOrderBy(orderCodeProto);
-
-        @SearchSpec.RankingStrategy int rankingStrategyCode = spec.getRankingStrategy();
-        ScoringSpecProto.RankingStrategy.Code rankingStrategyCodeProto =
-                ScoringSpecProto.RankingStrategy.Code.forNumber(rankingStrategyCode);
-        if (rankingStrategyCodeProto == null) {
-            throw new IllegalArgumentException(
-                    "Invalid result ranking strategy: " + rankingStrategyCode);
-        }
-        protoBuilder.setRankBy(rankingStrategyCodeProto);
+        protoBuilder
+                .setOrderBy(orderCodeProto)
+                .setRankBy(toProtoRankingStrategy(spec.getRankingStrategy()));
 
         return protoBuilder.build();
+    }
+
+    private static ScoringSpecProto.RankingStrategy.Code toProtoRankingStrategy(
+            @SearchSpec.RankingStrategy int rankingStrategyCode) {
+        switch (rankingStrategyCode) {
+            case SearchSpec.RANKING_STRATEGY_NONE:
+                return ScoringSpecProto.RankingStrategy.Code.NONE;
+            case SearchSpec.RANKING_STRATEGY_DOCUMENT_SCORE:
+                return ScoringSpecProto.RankingStrategy.Code.DOCUMENT_SCORE;
+            case SearchSpec.RANKING_STRATEGY_CREATION_TIMESTAMP:
+                return ScoringSpecProto.RankingStrategy.Code.CREATION_TIMESTAMP;
+            case SearchSpec.RANKING_STRATEGY_RELEVANCE_SCORE:
+                return ScoringSpecProto.RankingStrategy.Code.RELEVANCE_SCORE;
+            case SearchSpec.RANKING_STRATEGY_USAGE_COUNT:
+                return ScoringSpecProto.RankingStrategy.Code.USAGE_TYPE1_COUNT;
+            case SearchSpec.RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP:
+                return ScoringSpecProto.RankingStrategy.Code.USAGE_TYPE1_LAST_USED_TIMESTAMP;
+            default:
+                throw new IllegalArgumentException(
+                        "Invalid result ranking strategy: " + rankingStrategyCode);
+        }
     }
 }

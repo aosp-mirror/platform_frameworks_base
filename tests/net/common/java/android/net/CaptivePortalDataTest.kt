@@ -18,12 +18,15 @@ package android.net
 
 import android.os.Build
 import androidx.test.filters.SmallTest
+import com.android.modules.utils.build.SdkLevel
 import com.android.testutils.assertParcelSane
 import com.android.testutils.assertParcelingIsLossless
+import com.android.testutils.DevSdkIgnoreRule
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo
 import com.android.testutils.DevSdkIgnoreRunner
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import kotlin.test.assertEquals
@@ -33,6 +36,9 @@ import kotlin.test.assertNotEquals
 @RunWith(DevSdkIgnoreRunner::class)
 @IgnoreUpTo(Build.VERSION_CODES.Q)
 class CaptivePortalDataTest {
+    @Rule @JvmField
+    val ignoreRule = DevSdkIgnoreRule()
+
     private val data = CaptivePortalData.Builder()
             .setRefreshTime(123L)
             .setUserPortalUrl(Uri.parse("https://portal.example.com/test"))
@@ -41,13 +47,19 @@ class CaptivePortalDataTest {
             .setBytesRemaining(456L)
             .setExpiryTime(789L)
             .setCaptive(true)
+            .apply {
+                if (SdkLevel.isAtLeastS()) {
+                    setVenueFriendlyName("venue friendly name")
+                }
+            }
             .build()
 
     private fun makeBuilder() = CaptivePortalData.Builder(data)
 
     @Test
     fun testParcelUnparcel() {
-        assertParcelSane(data, fieldCount = 7)
+        val fieldCount = if (SdkLevel.isAtLeastS()) 8 else 7
+        assertParcelSane(data, fieldCount)
 
         assertParcelingIsLossless(makeBuilder().setUserPortalUrl(null).build())
         assertParcelingIsLossless(makeBuilder().setVenueInfoUrl(null).build())
@@ -66,6 +78,11 @@ class CaptivePortalDataTest {
         assertNotEqualsAfterChange { it.setBytesRemaining(789L) }
         assertNotEqualsAfterChange { it.setExpiryTime(12L) }
         assertNotEqualsAfterChange { it.setCaptive(false) }
+
+        if (SdkLevel.isAtLeastS()) {
+            assertNotEqualsAfterChange { it.setVenueFriendlyName("another friendly name") }
+            assertNotEqualsAfterChange { it.setVenueFriendlyName(null) }
+        }
     }
 
     @Test
@@ -106,6 +123,11 @@ class CaptivePortalDataTest {
     fun testIsCaptive() {
         assertTrue(data.isCaptive)
         assertFalse(makeBuilder().setCaptive(false).build().isCaptive)
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.R)
+    fun testVenueFriendlyName() {
+        assertEquals("venue friendly name", data.venueFriendlyName)
     }
 
     private fun CaptivePortalData.mutate(mutator: (CaptivePortalData.Builder) -> Unit) =

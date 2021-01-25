@@ -58,6 +58,7 @@
         <item><xliff:g id="id">@string/status_bar_hotspot</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mobile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_no_calling</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
     </string-array>
@@ -94,6 +95,7 @@
     <string translatable="false" name="status_bar_microphone">microphone</string>
     <string translatable="false" name="status_bar_camera">camera</string>
     <string translatable="false" name="status_bar_airplane">airplane</string>
+    <string translatable="false" name="status_bar_no_calling">no_calling</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
 
@@ -449,6 +451,10 @@
         <item>eth3;12,13,14,15;ip=192.168.0.12/24;1</item>
         -->
     </string-array>
+
+    <!-- Whether the internal vehicle network should remain active even when no
+         apps requested it. -->
+    <bool name="config_vehicleInternalNetworkAlwaysRequested">false</bool>
 
     <!-- Configuration of network interfaces that support WakeOnLAN -->
     <string-array translatable="false" name="config_wakeonlan_supported_interfaces">
@@ -986,6 +992,11 @@
 
     <!-- Time to wait while a button is pressed before triggering a very long press. -->
     <integer name="config_veryLongPressTimeout">3500</integer>
+
+    <!-- Time to wait before sending a HOME intent when waking up from power/home button.
+         (0 - do not send HOME intent on wakeup)
+    -->
+    <integer name="config_wakeUpToLastStateTimeoutMillis">0</integer>
 
     <!-- Package name for default keyguard appwidget [DO NOT TRANSLATE] -->
     <string name="widget_default_package_name" translatable="false"></string>
@@ -1565,6 +1576,10 @@
         <item>telephony</item>
         <item>network</item>
     </string-array>
+
+    <!-- Enables the GnssTimeUpdate service. This is the global switch for enabling Gnss time based
+         suggestions to TimeDetector service. See also config_autoTimeSourcesPriority. -->
+    <bool name="config_enableGnssTimeUpdateService">false</bool>
 
     <!-- Enables the TimeZoneRuleManager service. This is the global switch for the updateable time
          zone update mechanism. -->
@@ -2637,6 +2652,11 @@
          in. -->
     <string name="config_usbResolverActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbResolverActivity</string>
+
+    <!-- Component name of the activity used to inform a user about a sensory being blocked because
+     of privacy settings. -->
+    <string name="config_sensorUseStartedActivity" translatable="false"
+            >com.android.systemui/com.android.systemui.sensorprivacy.SensorUseStartedActivity</string>
 
     <!-- Name of the dialog that is used to request the user's consent for a Platform VPN -->
     <string name="config_platformVpnConfirmDialogComponent" translatable="false"
@@ -3724,6 +3744,14 @@
     -->
     <string name="config_defaultAugmentedAutofillService" translatable="false"></string>
 
+    <!-- The package name for the system's translation service.
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, translation wil be
+     disabled.
+     Example: "com.android.translation/.TranslationService"
+-->
+    <string name="config_defaultTranslationService" translatable="false"></string>
+
     <!-- The package name for the system's app prediction service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          Example: "com.android.intelligence/.AppPredictionService"
@@ -3982,13 +4010,13 @@
     <string name="config_misprovisionedBrandValue" translatable="false"></string>
 
     <!-- Pre-scale volume at volume step 1 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index1">50%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index1">60%</fraction>
 
     <!-- Pre-scale volume at volume step 2 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index2">70%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index2">80%</fraction>
 
     <!-- Pre-scale volume at volume step 3 for Absolute Volume -->
-    <fraction name="config_prescaleAbsoluteVolume_index3">85%</fraction>
+    <fraction name="config_prescaleAbsoluteVolume_index3">90%</fraction>
 
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
@@ -4588,4 +4616,19 @@
 
     <!-- If true, attach the navigation bar to the app during app transition -->
     <bool name="config_attachNavBarToAppDuringTransition">false</bool>
+
+    <!-- Flag indicating that the media framework should play a back sound when a back-transition
+         happens that doesn't result in bringing the home task to the front.
+         This is currently only used on TV. -->
+    <bool name="config_enableBackSound">false</bool>
+
+    <!-- Chooser image editing activity.  Must handle ACTION_EDIT image/png intents.
+         If omitted, image editing will not be offered via Chooser.
+         This name is in the ComponentName flattened format (package/class) [DO NOT TRANSLATE]  -->
+    <string name="config_systemImageEditor" translatable="false"></string>
+
+    <!-- Whether to force WindowOrientationListener to keep listening to its sensor, even when
+         dreaming. This allows the AoD to rotate on devices without a wake device_orientation
+         sensor. Note that this flag should only be enabled for development/testing use. -->
+    <bool name="config_forceOrientationListenerEnabledWhileDreaming">false</bool>
 </resources>

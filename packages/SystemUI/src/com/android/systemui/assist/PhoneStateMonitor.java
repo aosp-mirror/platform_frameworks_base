@@ -112,7 +112,7 @@ public final class PhoneStateMonitor {
         } else if (mLauncherShowing) {
             phoneState = getPhoneLauncherState();
         } else {
-            phoneState = getPhoneAppState();
+            phoneState = PHONE_STATE_APP_IMMERSIVE;
         }
         return phoneState;
     }
@@ -161,16 +161,6 @@ public final class PhoneStateMonitor {
         }
     }
 
-    private int getPhoneAppState() {
-        if (isAppImmersive()) {
-            return PHONE_STATE_APP_IMMERSIVE;
-        } else if (isAppFullscreen()) {
-            return PHONE_STATE_APP_FULLSCREEN;
-        } else {
-            return PHONE_STATE_APP_DEFAULT;
-        }
-    }
-
     private boolean isShadeFullscreen() {
         int statusBarState = mStatusBarStateController.getState();
         return statusBarState == StatusBarState.KEYGUARD
@@ -187,14 +177,6 @@ public final class PhoneStateMonitor {
         } else {
             return runningTaskInfo.topActivity.equals(mDefaultHome);
         }
-    }
-
-    private boolean isAppImmersive() {
-        return mStatusBarOptionalLazy.get().get().inImmersiveMode();
-    }
-
-    private boolean isAppFullscreen() {
-        return mStatusBarOptionalLazy.get().get().inFullscreenMode();
     }
 
     private boolean isBouncerShowing() {

@@ -79,8 +79,16 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     }
 
     @Override
+    public void onError(int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+    }
+
+    @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+                mUdfpsOverlayController);
         try {
             mCancellationSignal = getFreshDaemon().authenticate(mSequentialId, mOperationId);
         } catch (RemoteException e) {
@@ -109,6 +117,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     public void onPointerDown(int x, int y, float minor, float major) {
         try {
             getFreshDaemon().onPointerDown(0 /* pointerId */, x, y, minor, major);
+            if (getListener() != null) {
+                getListener().onUdfpsPointerDown(getSensorId(), getCookie());
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }
@@ -118,6 +129,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<ISession> imp
     public void onPointerUp() {
         try {
             getFreshDaemon().onPointerUp(0 /* pointerId */);
+            if (getListener() != null) {
+                getListener().onUdfpsPointerUp(getSensorId(), getCookie());
+            }
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception", e);
         }

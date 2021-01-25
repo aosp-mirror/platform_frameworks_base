@@ -214,7 +214,7 @@
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"使用二维码配对设备"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"使用二维码扫描器配对新设备"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"使用配对码配对设备"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位数验证码配对新设备"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"使用六位数的配对码配对新设备"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"已配对的设备"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"当前已连接"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"设备详细信息"</string>
@@ -553,8 +553,7 @@
     <string name="creating_new_user_dialog_message" msgid="7232880257538970375">"正在创建新用户…"</string>
     <string name="user_nickname" msgid="262624187455825083">"昵称"</string>
     <string name="guest_new_guest" msgid="3482026122932643557">"添加访客"</string>
-    <!-- no translation found for guest_exit_guest (4754204715192830850) -->
-    <skip />
+    <string name="guest_exit_guest" msgid="4754204715192830850">"结束访客会话"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"访客"</string>
     <string name="user_image_take_photo" msgid="467512954561638530">"拍摄照片"</string>
     <string name="user_image_choose_photo" msgid="1363820919146782908">"选择图片"</string>
@@ -577,6 +576,7 @@
     <string name="data_connection_4g_plus" msgid="5194902328408751020">"4G+"</string>
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
+    <string name="data_connection_carrier_wifi" msgid="2250268321065848954">"CWF"</string>
     <string name="cell_data_off_content_description" msgid="2280700839891636498">"移动数据网络已关闭"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"未设置为使用移动数据"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"没有手机信号。"</string>

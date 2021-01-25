@@ -18,6 +18,7 @@ package android {
     field public static final String MANAGE_CRATES = "android.permission.MANAGE_CRATES";
     field public static final String MANAGE_NOTIFICATION_LISTENERS = "android.permission.MANAGE_NOTIFICATION_LISTENERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
+    field public static final String MANAGE_TOAST_RATE_LIMITING = "android.permission.MANAGE_TOAST_RATE_LIMITING";
     field public static final String MODIFY_REFRESH_RATE_SWITCHING_TYPE = "android.permission.MODIFY_REFRESH_RATE_SWITCHING_TYPE";
     field public static final String NETWORK_SETTINGS = "android.permission.NETWORK_SETTINGS";
     field public static final String NETWORK_STACK = "android.permission.NETWORK_STACK";
@@ -138,7 +139,6 @@ package android.app {
     method public static boolean currentUiModeSupportsErrorDialogs(@NonNull android.content.Context);
     method public static int getMaxNumPictureInPictureActions(@NonNull android.content.Context);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void moveTaskToRootTask(int, int, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public boolean moveTopActivityToPinnedRootTask(int, @NonNull android.graphics.Rect);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksInWindowingModes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void removeRootTasksWithActivityTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void resizePrimarySplitScreen(@NonNull android.graphics.Rect, @NonNull android.graphics.Rect);
@@ -254,6 +254,7 @@ package android.app {
     method public boolean isImportanceLockedByOEM();
     method public void lockFields(int);
     method public void setDeleted(boolean);
+    method public void setDeletedTimeMs(long);
     method public void setDemoted(boolean);
     method public void setFgServiceShown(boolean);
     method public void setImportanceLockedByCriticalDeviceFunction(boolean);
@@ -275,6 +276,7 @@ package android.app {
     method public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String);
     method public boolean matchesCallFilter(android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS) public void setNotificationListenerAccessGranted(@NonNull android.content.ComponentName, boolean, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING) public void setToastRateLimitingEnabled(boolean);
     method public void updateNotificationChannel(@NonNull String, int, @NonNull android.app.NotificationChannel);
   }
 
@@ -290,6 +292,7 @@ package android.app {
   }
 
   public class StatusBarManager {
+    method public void clickNotification(@Nullable String, int, int, boolean);
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void collapsePanels();
     method public void expandNotificationsPanel();
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
@@ -374,6 +377,8 @@ package android.app {
 package android.app.admin {
 
   public class DevicePolicyManager {
+    method public int checkProvisioningPreCondition(@Nullable String, @NonNull String);
+    method @Nullable public android.os.UserHandle createAndProvisionManagedProfile(@NonNull android.app.admin.ManagedProfileProvisioningParams) throws android.app.admin.ProvisioningException;
     method public void forceUpdateUserSetupComplete();
     method public long getLastBugReportRequestTime();
     method public long getLastNetworkLogRetrievalTime();
@@ -382,20 +387,56 @@ package android.app.admin {
     method public boolean isCurrentInputMethodSetByOwner();
     method public boolean isFactoryResetProtectionPolicySupported();
     method @NonNull public static String operationToString(int);
+    method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, boolean);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
+    field public static final String ACTION_MANAGED_PROFILE_CREATED = "android.app.action.MANAGED_PROFILE_CREATED";
+    field public static final String ACTION_PROVISIONED_MANAGED_DEVICE = "android.app.action.PROVISIONED_MANAGED_DEVICE";
+    field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
+    field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
+    field public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd
+    field public static final int CODE_HAS_DEVICE_OWNER = 1; // 0x1
+    field public static final int CODE_HAS_PAIRED = 8; // 0x8
+    field public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
+    field public static final int CODE_NONSYSTEM_USER_EXISTS = 5; // 0x5
+    field public static final int CODE_NOT_SYSTEM_USER = 7; // 0x7
+    field public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12; // 0xc
+    field public static final int CODE_OK = 0; // 0x0
+    field public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15; // 0xf
+    field public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
+    field public static final int CODE_SYSTEM_USER = 10; // 0xa
+    field public static final int CODE_USER_HAS_PROFILE_OWNER = 2; // 0x2
+    field public static final int CODE_USER_NOT_RUNNING = 3; // 0x3
+    field public static final int CODE_USER_SETUP_COMPLETED = 4; // 0x4
+    field public static final int OPERATION_CLEAR_APPLICATION_USER_DATA = 23; // 0x17
     field public static final int OPERATION_CREATE_AND_MANAGE_USER = 5; // 0x5
+    field public static final int OPERATION_INSTALL_CA_CERT = 24; // 0x18
+    field public static final int OPERATION_INSTALL_KEY_PAIR = 25; // 0x19
+    field public static final int OPERATION_INSTALL_SYSTEM_UPDATE = 26; // 0x1a
     field public static final int OPERATION_LOCK_NOW = 1; // 0x1
     field public static final int OPERATION_LOGOUT_USER = 9; // 0x9
     field public static final int OPERATION_REBOOT = 7; // 0x7
+    field public static final int OPERATION_REMOVE_ACTIVE_ADMIN = 27; // 0x1b
+    field public static final int OPERATION_REMOVE_KEY_PAIR = 28; // 0x1c
     field public static final int OPERATION_REMOVE_USER = 6; // 0x6
+    field public static final int OPERATION_REQUEST_BUGREPORT = 29; // 0x1d
+    field public static final int OPERATION_SET_ALWAYS_ON_VPN_PACKAGE = 30; // 0x1e
     field public static final int OPERATION_SET_APPLICATION_HIDDEN = 15; // 0xf
     field public static final int OPERATION_SET_APPLICATION_RESTRICTIONS = 16; // 0x10
+    field public static final int OPERATION_SET_CAMERA_DISABLED = 31; // 0x1f
+    field public static final int OPERATION_SET_FACTORY_RESET_PROTECTION_POLICY = 32; // 0x20
+    field public static final int OPERATION_SET_GLOBAL_PRIVATE_DNS = 33; // 0x21
     field public static final int OPERATION_SET_KEEP_UNINSTALLED_PACKAGES = 17; // 0x11
     field public static final int OPERATION_SET_KEYGUARD_DISABLED = 12; // 0xc
     field public static final int OPERATION_SET_LOCK_TASK_FEATURES = 18; // 0x12
     field public static final int OPERATION_SET_LOCK_TASK_PACKAGES = 19; // 0x13
+    field public static final int OPERATION_SET_LOGOUT_ENABLED = 34; // 0x22
+    field public static final int OPERATION_SET_MASTER_VOLUME_MUTED = 35; // 0x23
+    field public static final int OPERATION_SET_OVERRIDE_APNS_ENABLED = 36; // 0x24
     field public static final int OPERATION_SET_PACKAGES_SUSPENDED = 20; // 0x14
+    field public static final int OPERATION_SET_PERMISSION_GRANT_STATE = 37; // 0x25
+    field public static final int OPERATION_SET_PERMISSION_POLICY = 38; // 0x26
+    field public static final int OPERATION_SET_RESTRICTIONS_PROVIDER = 39; // 0x27
     field public static final int OPERATION_SET_STATUS_BAR_DISABLED = 13; // 0xd
     field public static final int OPERATION_SET_SYSTEM_SETTING = 11; // 0xb
     field public static final int OPERATION_SET_SYSTEM_UPDATE_POLICY = 14; // 0xe
@@ -405,7 +446,64 @@ package android.app.admin {
     field public static final int OPERATION_START_USER_IN_BACKGROUND = 3; // 0x3
     field public static final int OPERATION_STOP_USER = 4; // 0x4
     field public static final int OPERATION_SWITCH_USER = 2; // 0x2
+    field public static final int OPERATION_UNINSTALL_CA_CERT = 40; // 0x28
     field public static final int OPERATION_WIPE_DATA = 8; // 0x8
+    field public static final int PROVISIONING_RESULT_ADMIN_PACKAGE_INSTALLATION_FAILED = 3; // 0x3
+    field public static final int PROVISIONING_RESULT_PRE_CONDITION_FAILED = 1; // 0x1
+    field public static final int PROVISIONING_RESULT_PROFILE_CREATION_FAILED = 2; // 0x2
+    field public static final int PROVISIONING_RESULT_REMOVE_NON_REQUIRED_APPS_FAILED = 6; // 0x6
+    field public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
+    field public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7; // 0x7
+    field public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5; // 0x5
+  }
+
+  public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.content.ComponentName getDeviceAdminComponentName();
+    method public long getLocalTime();
+    method @Nullable public java.util.Locale getLocale();
+    method @NonNull public String getOwnerName();
+    method @Nullable public String getTimeZone();
+    method public boolean isLeaveAllSystemAppsEnabled();
+    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.FullyManagedDeviceProvisioningParams> CREATOR;
+  }
+
+  public static final class FullyManagedDeviceProvisioningParams.Builder {
+    ctor public FullyManagedDeviceProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams build();
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocalTime(long);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setLocale(@Nullable java.util.Locale);
+    method @NonNull public android.app.admin.FullyManagedDeviceProvisioningParams.Builder setTimeZone(@Nullable String);
+  }
+
+  public final class ManagedProfileProvisioningParams implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.accounts.Account getAccountToMigrate();
+    method @NonNull public String getOwnerName();
+    method @NonNull public android.content.ComponentName getProfileAdminComponentName();
+    method @Nullable public String getProfileName();
+    method public boolean isKeepAccountMigrated();
+    method public boolean isLeaveAllSystemAppsEnabled();
+    method public boolean isOrganizationOwnedProvisioning();
+    method public void writeToParcel(@NonNull android.os.Parcel, @Nullable int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.ManagedProfileProvisioningParams> CREATOR;
+  }
+
+  public static final class ManagedProfileProvisioningParams.Builder {
+    ctor public ManagedProfileProvisioningParams.Builder(@NonNull android.content.ComponentName, @NonNull String);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams build();
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setAccountToMigrate(@Nullable android.accounts.Account);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setKeepAccountMigrated(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setLeaveAllSystemAppsEnabled(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setOrganizationOwnedProvisioning(boolean);
+    method @NonNull public android.app.admin.ManagedProfileProvisioningParams.Builder setProfileName(@Nullable String);
+  }
+
+  public class ProvisioningException extends android.util.AndroidException {
+    ctor public ProvisioningException(@NonNull Exception, int);
+    method public int getProvisioningResult();
   }
 
   public static final class SecurityLog.SecurityEvent implements android.os.Parcelable {
@@ -442,14 +540,6 @@ package android.app.prediction {
 
   public final class AppPredictor {
     method public android.app.prediction.AppPredictionSessionId getSessionId();
-  }
-
-}
-
-package android.app.role {
-
-  public final class RoleManager {
-    method @Nullable public String getSmsRoleHolder(int);
   }
 
 }
@@ -530,7 +620,7 @@ package android.content {
   public abstract class Context {
     method @NonNull public java.io.File getCrateDir(@NonNull String);
     method public abstract int getDisplayId();
-    method public android.os.UserHandle getUser();
+    method @NonNull public android.os.UserHandle getUser();
     method public int getUserId();
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
@@ -585,7 +675,7 @@ package android.content.pm {
     method public abstract int getInstallReason(@NonNull String, @NonNull android.os.UserHandle);
     method @NonNull public abstract java.util.List<android.content.pm.ApplicationInfo> getInstalledApplicationsAsUser(int, int);
     method @Nullable public abstract String[] getNamesForUids(int[]);
-    method @NonNull public abstract String getPermissionControllerPackageName();
+    method @NonNull public String getPermissionControllerPackageName();
     method @NonNull public abstract String getServicesSystemSharedLibraryPackageName();
     method @NonNull public abstract String getSharedSystemSharedLibraryPackageName();
     method @Nullable public String getSystemTextClassifierPackageName();
@@ -705,6 +795,11 @@ package android.graphics {
     method @AnyThread @NonNull public static android.graphics.ImageDecoder.Source createSource(android.content.res.Resources, java.io.InputStream, int);
   }
 
+  public final class Rect implements android.os.Parcelable {
+    method public void splitHorizontally(@NonNull android.graphics.Rect...);
+    method public void splitVertically(@NonNull android.graphics.Rect...);
+  }
+
 }
 
 package android.graphics.drawable {
@@ -720,6 +815,18 @@ package android.graphics.drawable {
 
   public class ShapeDrawable extends android.graphics.drawable.Drawable {
     method public void setXfermode(@Nullable android.graphics.Xfermode);
+  }
+
+}
+
+package android.hardware {
+
+  public final class SensorPrivacyManager {
+    method public boolean isIndividualSensorPrivacyEnabled(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setIndividualSensorPrivacy(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_SENSOR_PRIVACY) public void setIndividualSensorPrivacyForProfileGroup(int, boolean);
+    field public static final int INDIVIDUAL_SENSOR_CAMERA = 2; // 0x2
+    field public static final int INDIVIDUAL_SENSOR_MICROPHONE = 1; // 0x1
   }
 
 }
@@ -923,10 +1030,12 @@ package android.location {
     method @Deprecated public void resetCarrierPhase();
     method @Deprecated public void resetCarrierPhaseUncertainty();
     method public void resetCodeType();
+    method public void resetCorrelationVectors();
     method public void resetFullInterSignalBiasNanos();
     method public void resetFullInterSignalBiasUncertaintyNanos();
     method public void resetSatelliteInterSignalBiasNanos();
     method public void resetSatelliteInterSignalBiasUncertaintyNanos();
+    method public void resetSatellitePvt();
     method public void resetSnrInDb();
     method public void set(android.location.GnssMeasurement);
     method public void setAccumulatedDeltaRangeMeters(double);
@@ -941,6 +1050,7 @@ package android.location {
     method public void setCn0DbHz(double);
     method public void setCodeType(@NonNull String);
     method public void setConstellationType(int);
+    method public void setCorrelationVectors(@Nullable java.util.Collection<android.location.CorrelationVector>);
     method public void setFullInterSignalBiasNanos(double);
     method public void setFullInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
     method public void setMultipathIndicator(int);
@@ -950,6 +1060,7 @@ package android.location {
     method public void setReceivedSvTimeUncertaintyNanos(long);
     method public void setSatelliteInterSignalBiasNanos(double);
     method public void setSatelliteInterSignalBiasUncertaintyNanos(@FloatRange(from=0.0) double);
+    method public void setSatellitePvt(@Nullable android.location.SatellitePvt);
     method public void setSnrInDb(double);
     method public void setState(int);
     method public void setSvid(int);
@@ -1051,12 +1162,21 @@ package android.media {
     method public void forceResourceLost();
   }
 
+  public final class MediaCodec implements android.media.metrics.PlaybackComponent {
+    method public String getPlaybackId();
+    method public void setPlaybackId(@NonNull String);
+  }
+
   public static final class MediaCodecInfo.VideoCapabilities.PerformancePoint {
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(int, int, int, int, @NonNull android.util.Size);
     ctor public MediaCodecInfo.VideoCapabilities.PerformancePoint(@NonNull android.media.MediaCodecInfo.VideoCapabilities.PerformancePoint, @NonNull android.util.Size);
     method public int getMaxFrameRate();
     method public long getMaxMacroBlockRate();
     method public int getMaxMacroBlocks();
+  }
+
+  public final class MediaDrm implements java.lang.AutoCloseable {
+    method @Nullable public android.media.metrics.PlaybackComponent getPlaybackComponent(@NonNull byte[]);
   }
 
   public final class MediaRoute2Info implements android.os.Parcelable {
@@ -1121,6 +1241,15 @@ package android.media.audiopolicy {
 
 }
 
+package android.media.metrics {
+
+  public interface PlaybackComponent {
+    method @NonNull public String getPlaybackId();
+    method public void setPlaybackId(@NonNull String);
+  }
+
+}
+
 package android.media.tv {
 
   public final class TvInputManager {
@@ -1143,10 +1272,6 @@ package android.media.tv.tuner {
 
 package android.net {
 
-  public class ConnectivityManager {
-    method @RequiresPermission(anyOf={"android.permission.MANAGE_TEST_NETWORKS", android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
-  }
-
   public class EthernetManager {
     method public void setIncludeTestInterfaces(boolean);
   }
@@ -1155,29 +1280,8 @@ package android.net {
     field public static final int INVALID_SECURITY_PARAMETER_INDEX = 0; // 0x0
   }
 
-  public final class NetworkCapabilities implements android.os.Parcelable {
-    method public int[] getCapabilities();
-    field public static final int TRANSPORT_TEST = 7; // 0x7
-  }
-
   public class NetworkStack {
     method public static void setServiceForTest(@Nullable android.os.IBinder);
-  }
-
-  public final class TestNetworkInterface implements android.os.Parcelable {
-    ctor public TestNetworkInterface(android.os.ParcelFileDescriptor, String);
-    method public int describeContents();
-    method public android.os.ParcelFileDescriptor getFileDescriptor();
-    method public String getInterfaceName();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
-  }
-
-  public class TestNetworkManager {
-    method public android.net.TestNetworkInterface createTapInterface();
-    method public android.net.TestNetworkInterface createTunInterface(@NonNull android.net.LinkAddress[]);
-    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
-    method public void teardownTestNetwork(@NonNull android.net.Network);
   }
 
   public class TrafficStats {
@@ -1329,11 +1433,10 @@ package android.os {
 
   public static class VibrationEffect.Prebaked extends android.os.VibrationEffect implements android.os.Parcelable {
     ctor public VibrationEffect.Prebaked(android.os.Parcel);
-    ctor public VibrationEffect.Prebaked(int, boolean);
+    ctor public VibrationEffect.Prebaked(int, boolean, int);
     method public long getDuration();
     method public int getEffectStrength();
     method public int getId();
-    method public void setEffectStrength(int);
     method public boolean shouldFallback();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;
@@ -1445,6 +1548,11 @@ package android.os.storage {
     field @NonNull public static final android.os.Parcelable.Creator<android.os.storage.CrateInfo> CREATOR;
   }
 
+  public class StorageManager {
+    method @NonNull public static java.util.UUID convert(@NonNull String);
+    method @NonNull public static String convert(@NonNull java.util.UUID);
+  }
+
   public final class StorageVolume implements android.os.Parcelable {
     method public String getPath();
   }
@@ -1535,6 +1643,7 @@ package android.provider {
     field public static final String APP_OPS_CONSTANTS = "app_ops_constants";
     field public static final String AUTOMATIC_POWER_SAVE_MODE = "automatic_power_save_mode";
     field public static final String BATTERY_SAVER_CONSTANTS = "battery_saver_constants";
+    field public static final String DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW = "enable_non_resizable_multi_window";
     field public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
     field public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
@@ -1586,6 +1695,11 @@ package android.provider {
 }
 
 package android.security {
+
+  public final class KeyChain {
+    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean removeCredentialManagementApp(@NonNull android.content.Context);
+    method @RequiresPermission("android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP") public static boolean setCredentialManagementApp(@NonNull android.content.Context, @NonNull String, @NonNull android.security.AppUriAuthenticationPolicy);
+  }
 
   public class KeyStoreException extends java.lang.Exception {
     ctor public KeyStoreException(int, String);
@@ -1933,7 +2047,6 @@ package android.util {
     method public static java.util.Map<java.lang.String,java.lang.String> getAllFeatureFlags();
     method public static boolean isEnabled(android.content.Context, String);
     method public static void setEnabled(android.content.Context, String, boolean);
-    field public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     field public static final String FFLAG_OVERRIDE_PREFIX = "sys.fflag.override.";
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
@@ -2355,10 +2468,6 @@ package android.view.textservice {
     field public static final int SUBTYPE_ID_NONE = 0; // 0x0
   }
 
-  public final class TextServicesManager {
-    method public boolean isSpellCheckerEnabled();
-  }
-
 }
 
 package android.widget {
@@ -2506,7 +2615,6 @@ package android.window {
     method @CallSuper @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public java.util.List<android.window.TaskAppearedInfo> registerOrganizer();
     method @BinderThread public void removeStartingWindow(int);
     method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setInterceptBackPressedOnTaskRoot(@NonNull android.window.WindowContainerToken, boolean);
-    method @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void setLaunchRoot(int, @NonNull android.window.WindowContainerToken);
     method @CallSuper @RequiresPermission(android.Manifest.permission.MANAGE_ACTIVITY_TASKS) public void unregisterOrganizer();
   }
 
@@ -2521,13 +2629,16 @@ package android.window {
     method public int describeContents();
     method @NonNull public android.window.WindowContainerTransaction reorder(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction reparent(@NonNull android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction reparentTasks(@Nullable android.window.WindowContainerToken, @Nullable android.window.WindowContainerToken, @Nullable int[], @Nullable int[], boolean);
     method @NonNull public android.window.WindowContainerTransaction scheduleFinishEnterPip(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setActivityWindowingMode(@NonNull android.window.WindowContainerToken, int);
+    method @NonNull public android.window.WindowContainerTransaction setAdjacentRoots(@NonNull android.window.WindowContainerToken, @NonNull android.window.WindowContainerToken);
     method @NonNull public android.window.WindowContainerTransaction setAppBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBounds(@NonNull android.window.WindowContainerToken, @NonNull android.graphics.Rect);
     method @NonNull public android.window.WindowContainerTransaction setBoundsChangeTransaction(@NonNull android.window.WindowContainerToken, @NonNull android.view.SurfaceControl.Transaction);
     method @NonNull public android.window.WindowContainerTransaction setFocusable(@NonNull android.window.WindowContainerToken, boolean);
     method @NonNull public android.window.WindowContainerTransaction setHidden(@NonNull android.window.WindowContainerToken, boolean);
+    method @NonNull public android.window.WindowContainerTransaction setLaunchRoot(@NonNull android.window.WindowContainerToken, @Nullable int[], @Nullable int[]);
     method @NonNull public android.window.WindowContainerTransaction setScreenSizeDp(@NonNull android.window.WindowContainerToken, int, int);
     method @NonNull public android.window.WindowContainerTransaction setSmallestScreenWidthDp(@NonNull android.window.WindowContainerToken, int);
     method @NonNull public android.window.WindowContainerTransaction setWindowingMode(@NonNull android.window.WindowContainerToken, int);

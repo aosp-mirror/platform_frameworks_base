@@ -317,7 +317,7 @@ public abstract class VibrationEffect implements Parcelable {
      */
     @TestApi
     public static VibrationEffect get(int effectId, boolean fallback) {
-        VibrationEffect effect = new Prebaked(effectId, fallback);
+        VibrationEffect effect = new Prebaked(effectId, fallback, EffectStrength.MEDIUM);
         effect.validate();
         return effect;
     }
@@ -792,22 +792,30 @@ public abstract class VibrationEffect implements Parcelable {
     public static class Prebaked extends VibrationEffect implements Parcelable {
         private final int mEffectId;
         private final boolean mFallback;
-
-        private int mEffectStrength;
+        private final int mEffectStrength;
+        @Nullable
+        private final VibrationEffect mFallbackEffect;
 
         public Prebaked(Parcel in) {
-            this(in.readInt(), in.readByte() != 0, in.readInt());
+            mEffectId = in.readInt();
+            mFallback = in.readByte() != 0;
+            mEffectStrength = in.readInt();
+            mFallbackEffect = in.readParcelable(VibrationEffect.class.getClassLoader());
         }
 
-        public Prebaked(int effectId, boolean fallback) {
-            this(effectId, fallback, EffectStrength.MEDIUM);
-        }
-
-        /** @hide */
         public Prebaked(int effectId, boolean fallback, int effectStrength) {
             mEffectId = effectId;
             mFallback = fallback;
             mEffectStrength = effectStrength;
+            mFallbackEffect = null;
+        }
+
+        /** @hide */
+        public Prebaked(int effectId, int effectStrength, @NonNull VibrationEffect fallbackEffect) {
+            mEffectId = effectId;
+            mFallback = true;
+            mEffectStrength = effectStrength;
+            mFallbackEffect = fallbackEffect;
         }
 
         public int getId() {
@@ -829,26 +837,27 @@ public abstract class VibrationEffect implements Parcelable {
 
         /** @hide */
         @Override
-        public VibrationEffect resolve(int defaultAmplitude) {
-            // Prebaked effects already have default amplitude set, so ignore this.
+        public Prebaked resolve(int defaultAmplitude) {
+            if (mFallbackEffect != null) {
+                VibrationEffect resolvedFallback = mFallbackEffect.resolve(defaultAmplitude);
+                if (!mFallbackEffect.equals(resolvedFallback)) {
+                    return new Prebaked(mEffectId, mEffectStrength, resolvedFallback);
+                }
+            }
             return this;
         }
 
         /** @hide */
         @Override
         public Prebaked scale(float scaleFactor) {
-            // Prebaked effects cannot be scaled, so ignore this.
-            return this;
-        }
-
-        /**
-         * Set the effect strength of the prebaked effect.
-         */
-        public void setEffectStrength(int strength) {
-            if (!isValidEffectStrength(strength)) {
-                throw new IllegalArgumentException("Invalid effect strength: " + strength);
+            if (mFallbackEffect != null) {
+                VibrationEffect scaledFallback = mFallbackEffect.scale(scaleFactor);
+                if (!mFallbackEffect.equals(scaledFallback)) {
+                    return new Prebaked(mEffectId, mEffectStrength, scaledFallback);
+                }
             }
-            mEffectStrength = strength;
+            // Prebaked effect strength cannot be scaled with this method.
+            return this;
         }
 
         /**
@@ -856,6 +865,16 @@ public abstract class VibrationEffect implements Parcelable {
          */
         public int getEffectStrength() {
             return mEffectStrength;
+        }
+
+        /**
+         * Return the fallback effect, if set.
+         *
+         * @hide
+         */
+        @Nullable
+        public VibrationEffect getFallbackEffect() {
+            return mFallbackEffect;
         }
 
         private static boolean isValidEffectStrength(int strength) {
@@ -901,15 +920,13 @@ public abstract class VibrationEffect implements Parcelable {
             VibrationEffect.Prebaked other = (VibrationEffect.Prebaked) o;
             return mEffectId == other.mEffectId
                 && mFallback == other.mFallback
-                && mEffectStrength == other.mEffectStrength;
+                && mEffectStrength == other.mEffectStrength
+                && Objects.equals(mFallbackEffect, other.mFallbackEffect);
         }
 
         @Override
         public int hashCode() {
-            int result = 17;
-            result += 37 * mEffectId;
-            result += 37 * mEffectStrength;
-            return result;
+            return Objects.hash(mEffectId, mFallback, mEffectStrength, mFallbackEffect);
         }
 
         @Override
@@ -917,6 +934,7 @@ public abstract class VibrationEffect implements Parcelable {
             return "Prebaked{mEffectId=" + mEffectId
                 + ", mEffectStrength=" + mEffectStrength
                 + ", mFallback=" + mFallback
+                + ", mFallbackEffect=" + mFallbackEffect
                 + "}";
         }
 
@@ -927,6 +945,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mEffectId);
             out.writeByte((byte) (mFallback ? 1 : 0));
             out.writeInt(mEffectStrength);
+            out.writeParcelable(mFallbackEffect, flags);
         }
 
         public static final @NonNull Parcelable.Creator<Prebaked> CREATOR =
@@ -990,8 +1009,10 @@ public abstract class VibrationEffect implements Parcelable {
                 // Just return this if there's no scaling to be done.
                 return this;
             }
+            final int primitiveCount = mPrimitiveEffects.size();
             List<Composition.PrimitiveEffect> scaledPrimitives = new ArrayList<>();
-            for (Composition.PrimitiveEffect primitive : mPrimitiveEffects) {
+            for (int i = 0; i < primitiveCount; i++) {
+                Composition.PrimitiveEffect primitive = mPrimitiveEffects.get(i);
                 scaledPrimitives.add(new Composition.PrimitiveEffect(
                         primitive.id, scale(primitive.scale, scaleFactor), primitive.delay));
             }
@@ -1001,11 +1022,12 @@ public abstract class VibrationEffect implements Parcelable {
         /** @hide */
         @Override
         public void validate() {
-            for (Composition.PrimitiveEffect effect : mPrimitiveEffects) {
-                Composition.checkPrimitive(effect.id);
-                Preconditions.checkArgumentInRange(
-                        effect.scale, 0.0f, 1.0f, "scale");
-                Preconditions.checkArgumentNonNegative(effect.delay,
+            final int primitiveCount = mPrimitiveEffects.size();
+            for (int i = 0; i < primitiveCount; i++) {
+                Composition.PrimitiveEffect primitive = mPrimitiveEffects.get(i);
+                Composition.checkPrimitive(primitive.id);
+                Preconditions.checkArgumentInRange(primitive.scale, 0.0f, 1.0f, "scale");
+                Preconditions.checkArgumentNonNegative(primitive.delay,
                         "Primitive delay must be zero or positive");
             }
         }
@@ -1071,6 +1093,7 @@ public abstract class VibrationEffect implements Parcelable {
                 PRIMITIVE_SLOW_RISE,
                 PRIMITIVE_QUICK_FALL,
                 PRIMITIVE_TICK,
+                PRIMITIVE_LOW_TICK,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface Primitive {}
@@ -1116,6 +1139,12 @@ public abstract class VibrationEffect implements Parcelable {
          */
         // Internally this maps to the HAL constant CompositePrimitive::LIGHT_TICK
         public static final int PRIMITIVE_TICK = 7;
+        /**
+         * This very short low frequency effect should produce a light crisp sensation
+         * intended to be used repetitively for dynamic feedback.
+         */
+        // Internally this maps to the HAL constant CompositePrimitive::LOW_TICK
+        public static final int PRIMITIVE_LOW_TICK = 8;
 
 
         private ArrayList<PrimitiveEffect> mEffects = new ArrayList<>();
@@ -1194,7 +1223,7 @@ public abstract class VibrationEffect implements Parcelable {
          *
          */
         static int checkPrimitive(int primitiveId) {
-            Preconditions.checkArgumentInRange(primitiveId, PRIMITIVE_NOOP, PRIMITIVE_TICK,
+            Preconditions.checkArgumentInRange(primitiveId, PRIMITIVE_NOOP, PRIMITIVE_LOW_TICK,
                     "primitiveId");
             return primitiveId;
         }
@@ -1223,6 +1252,8 @@ public abstract class VibrationEffect implements Parcelable {
                     return "PRIMITIVE_QUICK_FALL";
                 case PRIMITIVE_TICK:
                     return "PRIMITIVE_TICK";
+                case PRIMITIVE_LOW_TICK:
+                    return "PRIMITIVE_LOW_TICK";
                 default:
                     return Integer.toString(id);
             }

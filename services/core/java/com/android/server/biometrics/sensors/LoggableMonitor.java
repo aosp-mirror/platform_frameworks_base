@@ -67,10 +67,23 @@ public abstract class LoggableMonitor {
         return mStatsClient;
     }
 
-    private boolean isAnyFieldUnknown() {
-        return mStatsModality == BiometricsProtoEnums.MODALITY_UNKNOWN
-                || mStatsAction == BiometricsProtoEnums.ACTION_UNKNOWN
-                || mStatsClient == BiometricsProtoEnums.CLIENT_UNKNOWN;
+    private boolean shouldSkipLogging() {
+        boolean shouldSkipLogging = (mStatsModality == BiometricsProtoEnums.MODALITY_UNKNOWN
+                || mStatsAction == BiometricsProtoEnums.ACTION_UNKNOWN);
+
+        if (mStatsModality == BiometricsProtoEnums.MODALITY_UNKNOWN) {
+            Slog.w(TAG, "Unknown field detected: MODALITY_UNKNOWN, will not report metric");
+        }
+
+        if (mStatsAction == BiometricsProtoEnums.ACTION_UNKNOWN) {
+            Slog.w(TAG, "Unknown field detected: ACTION_UNKNOWN, will not report metric");
+        }
+
+        if (mStatsClient == BiometricsProtoEnums.CLIENT_UNKNOWN) {
+            Slog.w(TAG, "Unknown field detected: CLIENT_UNKNOWN");
+        }
+
+        return shouldSkipLogging;
     }
 
     protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
@@ -101,7 +114,7 @@ public abstract class LoggableMonitor {
                     + ", VendorCode: " + vendorCode);
         }
 
-        if (isAnyFieldUnknown()) {
+        if (shouldSkipLogging()) {
             return;
         }
 
@@ -138,7 +151,7 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Error latency: " + latency);
         }
 
-        if (isAnyFieldUnknown()) {
+        if (shouldSkipLogging()) {
             return;
         }
 
@@ -189,7 +202,7 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Authentication latency: " + latency);
         }
 
-        if (isAnyFieldUnknown()) {
+        if (shouldSkipLogging()) {
             return;
         }
 
@@ -219,7 +232,7 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Enroll latency: " + latency);
         }
 
-        if (isAnyFieldUnknown()) {
+        if (shouldSkipLogging()) {
             return;
         }
 

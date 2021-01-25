@@ -52,6 +52,7 @@ import android.os.strictmode.ResourceMismatchViolation;
 import android.os.strictmode.ServiceConnectionLeakedViolation;
 import android.os.strictmode.SqliteObjectLeakedViolation;
 import android.os.strictmode.UnbufferedIoViolation;
+import android.os.strictmode.UnsafeIntentLaunchViolation;
 import android.os.strictmode.UntaggedSocketViolation;
 import android.os.strictmode.Violation;
 import android.os.strictmode.WebViewMethodCalledOnWrongThreadViolation;
@@ -256,6 +257,7 @@ public final class StrictMode {
             DETECT_VM_NON_SDK_API_USAGE,
             DETECT_VM_IMPLICIT_DIRECT_BOOT,
             DETECT_VM_INCORRECT_CONTEXT_USE,
+            DETECT_VM_UNSAFE_INTENT_LAUNCH,
             PENALTY_GATHER,
             PENALTY_LOG,
             PENALTY_DIALOG,
@@ -297,6 +299,8 @@ public final class StrictMode {
     private static final int DETECT_VM_CREDENTIAL_PROTECTED_WHILE_LOCKED = 1 << 11;
     /** @hide */
     private static final int DETECT_VM_INCORRECT_CONTEXT_USE = 1 << 12;
+    /** @hide */
+    private static final int DETECT_VM_UNSAFE_INTENT_LAUNCH = 1 << 13;
 
     /** @hide */
     private static final int DETECT_VM_ALL = 0x0000ffff;
@@ -854,6 +858,7 @@ public final class StrictMode {
              * <p>In the Honeycomb release this includes leaks of SQLite cursors, Activities, and
              * other closable objects but will likely expand in future releases.
              */
+            @SuppressWarnings("AndroidFrameworkCompatChange")
             public @NonNull Builder detectAll() {
                 detectLeakedSqlLiteObjects();
 
@@ -884,6 +889,9 @@ public final class StrictMode {
                 }
                 if (targetSdk >= Build.VERSION_CODES.R) {
                     detectIncorrectContextUse();
+                }
+                if (targetSdk >= Build.VERSION_CODES.S) {
+                    detectUnsafeIntentLaunch();
                 }
 
                 // TODO: Decide whether to detect non SDK API usage beyond a certain API level.
@@ -1064,6 +1072,59 @@ public final class StrictMode {
             @TestApi
             public @NonNull Builder permitIncorrectContextUse() {
                 return disable(DETECT_VM_INCORRECT_CONTEXT_USE);
+            }
+
+            /**
+             * Detect when your app launches an {@link Intent} which originated
+             * from outside your app.
+             * <p>
+             * Violations may indicate security vulnerabilities in the design of
+             * your app, where a malicious app could trick you into granting
+             * {@link Uri} permissions or launching unexported components. Here
+             * are some typical design patterns that can be used to safely
+             * resolve these violations:
+             * <ul>
+             * <li>The ideal approach is to migrate to using a
+             * {@link android.app.PendingIntent}, which ensures that your launch is
+             * performed using the identity of the original creator, completely
+             * avoiding the security issues described above.
+             * <li>If using a {@link android.app.PendingIntent} isn't feasible, an
+             * alternative approach is to create a brand new {@link Intent} and
+             * carefully copy only specific values from the original
+             * {@link Intent} after careful validation.
+             * </ul>
+             * <p>
+             * Note that this <em>may</em> detect false-positives if your app
+             * sends itself an {@link Intent} which is first routed through the
+             * OS, such as using {@link Intent#createChooser}. In these cases,
+             * careful inspection is required to determine if the return point
+             * into your app is appropriately protected with a signature
+             * permission or marked as unexported. If the return point is not
+             * protected, your app is likely vulnerable to malicious apps.
+             *
+             * @see Context#startActivity(Intent)
+             * @see Context#startService(Intent)
+             * @see Context#bindService(Intent, ServiceConnection, int)
+             * @see Context#sendBroadcast(Intent)
+             * @see android.app.Activity#setResult(int, Intent)
+             */
+            public @NonNull Builder detectUnsafeIntentLaunch() {
+                return enable(DETECT_VM_UNSAFE_INTENT_LAUNCH);
+            }
+
+            /**
+             * Permit your app to launch any {@link Intent} which originated
+             * from outside your app.
+             * <p>
+             * Disabling this check is <em>strongly discouraged</em>, as
+             * violations may indicate security vulnerabilities in the design of
+             * your app, where a malicious app could trick you into granting
+             * {@link Uri} permissions or launching unexported components.
+             *
+             * @see #detectUnsafeIntentLaunch()
+             */
+            public @NonNull Builder permitUnsafeIntentLaunch() {
+                return disable(DETECT_VM_UNSAFE_INTENT_LAUNCH);
             }
 
             /**
@@ -2115,6 +2176,11 @@ public final class StrictMode {
     }
 
     /** @hide */
+    public static boolean vmUnsafeIntentLaunchEnabled() {
+        return (sVmPolicy.mask & DETECT_VM_UNSAFE_INTENT_LAUNCH) != 0;
+    }
+
+    /** @hide */
     public static void onSqliteObjectLeaked(String message, Throwable originStack) {
         onVmPolicyViolation(new SqliteObjectLeakedViolation(message, originStack));
     }
@@ -2192,6 +2258,38 @@ public final class StrictMode {
     /** @hide */
     public static void onIncorrectContextUsed(String message, Throwable originStack) {
         onVmPolicyViolation(new IncorrectContextUseViolation(message, originStack));
+    }
+
+    /**
+     * A helper method to verify if the {@code context} is a UI context and throw
+     * {@link IncorrectContextUseViolation} if the {@code context} is not a UI context.
+     *
+     * @param context The context to verify if it is a UI context
+     * @param methodName The asserted method name
+     *
+     * @see Context#isUiContext()
+     * @see IncorrectContextUseViolation
+     *
+     * @hide
+     */
+    public static void assertUiContext(@NonNull Context context, @NonNull String methodName) {
+        if (vmIncorrectContextUseEnabled() && !context.isUiContext()) {
+            final String errorMessage = "Tried to access UI related API" + methodName
+                    + " from a non-UI Context:" + context;
+            final String message = "UI-related services, such as WindowManager, WallpaperService "
+                    + "or LayoutInflater should be accessed from Activity or other UI "
+                    + "Contexts. Use an Activity or a Context created with "
+                    + "Context#createWindowContext(int, Bundle), which are adjusted to "
+                    + "the configuration and visual bounds of an area on screen.";
+            final Exception exception = new IllegalAccessException(errorMessage);
+            StrictMode.onIncorrectContextUsed(message, exception);
+            Log.e(TAG, errorMessage + " " + message, exception);
+        }
+    }
+
+    /** @hide */
+    public static void onUnsafeIntentLaunch(Intent intent) {
+        onVmPolicyViolation(new UnsafeIntentLaunchViolation(intent));
     }
 
     /** Assume locked until we hear otherwise */

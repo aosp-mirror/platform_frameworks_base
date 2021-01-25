@@ -16,14 +16,13 @@
 
 package com.android.server.am;
 
-import android.annotation.Nullable;
 import android.bluetooth.BluetoothActivityEnergyInfo;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.hardware.power.stats.EnergyConsumerId;
-import android.hardware.power.stats.EnergyConsumerResult;
+import android.net.INetworkManagementEventObserver;
+import android.net.NetworkCapabilities;
 import android.os.BatteryStats;
 import android.os.BatteryStatsInternal;
 import android.os.BatteryUsageStats;
@@ -32,6 +31,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.INetworkManagementService;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFormatException;
@@ -39,6 +39,7 @@ import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.Process;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -57,6 +58,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BatteryStatsImpl;
@@ -65,17 +67,14 @@ import com.android.internal.os.BinderCallsStats;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.os.RailStats;
 import com.android.internal.os.RpmStats;
-import com.android.internal.power.MeasuredEnergyArray;
-import com.android.internal.power.MeasuredEnergyArray.MeasuredEnergySubsystem;
-import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.ParseUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
+import com.android.server.net.BaseNetworkObserver;
 import com.android.server.pm.UserManagerInternal;
-import com.android.server.powerstats.PowerStatsHALWrapper;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -126,11 +125,43 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
     private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
 
-    private final PowerStatsHALWrapper.IPowerStatsHALWrapper mPowerStatsHALWrapper;
-
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
     private final Object mLock = new Object();
+
+    @GuardedBy("mStats")
+    private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+    @GuardedBy("mStats")
+    private int mLastPowerStateFromWifi = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+    private final INetworkManagementEventObserver mActivityChangeObserver =
+            new BaseNetworkObserver() {
+                @Override
+                public void interfaceClassDataActivityChanged(int transportType, boolean active,
+                        long tsNanos, int uid) {
+                    final int powerState = active
+                            ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
+                            : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
+                    final long timestampNanos;
+                    if (tsNanos <= 0) {
+                        timestampNanos = SystemClock.elapsedRealtimeNanos();
+                    } else {
+                        timestampNanos = tsNanos;
+                    }
+
+                    switch (transportType) {
+                        case NetworkCapabilities.TRANSPORT_CELLULAR:
+                            noteMobileRadioPowerState(powerState, timestampNanos, uid);
+                            break;
+                        case NetworkCapabilities.TRANSPORT_WIFI:
+                            noteWifiRadioPowerState(powerState, timestampNanos, uid);
+                            break;
+                        default:
+                            Slog.d(TAG, "Received unexpected transport in "
+                                    + "interfaceClassDataActivityChanged unexpected type: "
+                                    + transportType);
+                    }
+                }
+            };
 
     /**
      * Replaces the information in the given rpmStats with up-to-date information.
@@ -199,43 +230,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    @Override
-    public @Nullable MeasuredEnergyArray getEnergyConsumptionData() {
-        final EnergyConsumerResult[] results = mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
-        if (results == null) return null;
-        final int size = results.length;
-        final int[] subsystems = new int[size];
-        final long[] energyUJ = new long[size];
-
-        for (int i = 0; i < size; i++) {
-            final EnergyConsumerResult consumer = results[i];
-            final int subsystem;
-            switch (consumer.energyConsumerId) {
-                case EnergyConsumerId.DISPLAY:
-                    subsystem = MeasuredEnergyArray.SUBSYSTEM_DISPLAY;
-                    break;
-                default:
-                    continue;
-            }
-            subsystems[i] = subsystem;
-            energyUJ[i] = consumer.energyUWs;
-        }
-        return new MeasuredEnergyArray() {
-            @Override
-            public int getSubsystem(int index) {
-                return subsystems[index];
-            }
-            @Override
-            public long getEnergy(int index) {
-                return energyUJ[index];
-            }
-            @Override
-            public int size() {
-                return size;
-            }
-        };
-    }
-
     BatteryStatsService(Context context, File systemDir, Handler handler) {
         // BatteryStatsImpl expects the ActivityManagerService handler, so pass that one through.
         mContext = context;
@@ -253,43 +247,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
 
-        // TODO(b/173077356): Replace directly calling the HAL with PowerStatsService queries
-        mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
-
-        final MeasuredEnergyArray initialEnergies = getEnergyConsumptionData();
-        final boolean[] supportedBuckets = getSupportedEnergyBuckets(initialEnergies);
         mStats = new BatteryStatsImpl(systemDir, handler, this,
-                this, supportedBuckets, mUserManagerUserInfoProvider);
-        mWorker = new BatteryExternalStatsWorker(context, mStats, initialEnergies);
+                this, mUserManagerUserInfoProvider);
+        mWorker = new BatteryExternalStatsWorker(context, mStats);
         mStats.setExternalStatsSyncLocked(mWorker);
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.setPowerProfileLocked(new PowerProfile(context));
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats);
-    }
-
-    /**
-     * Map the {@link MeasuredEnergySubsystem}s in the given energyArray to their corresponding
-     * {@link MeasuredEnergyStats.EnergyBucket}s.
-     *
-     * @return array with true for index i if energy bucket i is supported.
-     */
-    private static @Nullable boolean[] getSupportedEnergyBuckets(MeasuredEnergyArray energyArray) {
-        if (energyArray == null) {
-            return null;
-        }
-        final boolean[] buckets = new boolean[MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS];
-        final int size = energyArray.size();
-        for (int energyIdx = 0; energyIdx < size; energyIdx++) {
-            switch (energyArray.getSubsystem(energyIdx)) {
-                case MeasuredEnergyArray.SUBSYSTEM_DISPLAY:
-                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON] = true;
-                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE] = true;
-                    buckets[MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_OTHER] = true;
-                    break;
-            }
-        }
-        return buckets;
     }
 
     public void publish() {
@@ -299,6 +264,14 @@ public final class BatteryStatsService extends IBatteryStats.Stub
 
     public void systemServicesReady() {
         mStats.systemServicesReady(mContext);
+        mWorker.systemServicesReady();
+        final INetworkManagementService nms = INetworkManagementService.Stub.asInterface(
+                ServiceManager.getService(Context.NETWORKMANAGEMENT_SERVICE));
+        try {
+            nms.registerObserver(mActivityChangeObserver);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
+        }
         Watchdog.getInstance().addMonitor(this);
     }
 
@@ -1114,6 +1087,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             mHandler.post(() -> {
                 final boolean update;
                 synchronized (mStats) {
+                    // Ignore if no power state change.
+                    if (mLastPowerStateFromRadio == powerState) return;
+
+                    mLastPowerStateFromRadio = powerState;
                     update = mStats.noteMobileRadioPowerStateLocked(powerState, timestampNs, uid,
                             elapsedRealtime, uptime);
                 }
@@ -1417,6 +1394,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 // There was a change in WiFi power state.
                 // Collect data now for the past activity.
                 synchronized (mStats) {
+                    // Ignore if no power state change.
+                    if (mLastPowerStateFromWifi == powerState) return;
+
+                    mLastPowerStateFromWifi = powerState;
                     if (mStats.isOnBattery()) {
                         final String type =
                                 (powerState == DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
@@ -1872,7 +1853,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
             final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
-                mStats.updateMobileRadioState(info, elapsedRealtime, uptime);
+                mStats.noteModemControllerActivity(info, elapsedRealtime, uptime);
             });
         }
     }
@@ -2270,7 +2251,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
                                         null, mStats.mHandler, null, null,
-                                        null /* energy buckets not currently in checkin anyway */,
                                         mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
@@ -2311,7 +2291,6 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                                 in.setDataPosition(0);
                                 BatteryStatsImpl checkinStats = new BatteryStatsImpl(
                                         null, mStats.mHandler, null, null,
-                                        null /* energy buckets not currently in checkin anyway */,
                                         mUserManagerUserInfoProvider);
                                 checkinStats.readSummaryFromParcel(in);
                                 in.recycle();
@@ -2574,44 +2553,56 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         }
     }
 
-    void noteServiceStartRunning(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStartRunning(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.startRunningLocked(uptime);
                 }
             });
         }
     }
 
-    void noteServiceStopRunning(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStopRunning(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.stopRunningLocked(uptime);
                 }
             });
         }
     }
 
-    void noteServiceStartLaunch(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStartLaunch(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.startLaunchedLocked(uptime);
                 }
             });
         }
     }
 
-    void noteServiceStopLaunch(final BatteryStatsImpl.Uid.Pkg.Serv stats) {
+    void noteServiceStopLaunch(int uid, String pkg, String name) {
         synchronized (mLock) {
+            final long elapsedRealtime = SystemClock.elapsedRealtime();
             final long uptime = SystemClock.uptimeMillis();
             mHandler.post(() -> {
                 synchronized (mStats) {
+                    final BatteryStatsImpl.Uid.Pkg.Serv stats = mStats.getServiceStatsLocked(uid,
+                            pkg, name, elapsedRealtime, uptime);
                     stats.stopLaunchedLocked(uptime);
                 }
             });

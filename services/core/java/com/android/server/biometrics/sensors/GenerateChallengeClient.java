@@ -23,7 +23,9 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
+import com.android.server.biometrics.BiometricsProto;
+
+public abstract class GenerateChallengeClient<T> extends HalClientMonitor<T> {
 
     private static final String TAG = "GenerateChallengeClient";
 
@@ -49,5 +51,10 @@ public abstract class GenerateChallengeClient<T> extends ClientMonitor<T> {
         super.start(callback);
 
         startHalOperation();
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_GENERATE_CHALLENGE;
     }
 }

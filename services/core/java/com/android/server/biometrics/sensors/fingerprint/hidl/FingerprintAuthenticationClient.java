@@ -101,6 +101,13 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         }
     }
 
+    @Override
+    public void onError(int errorCode, int vendorCode) {
+        super.onError(errorCode, vendorCode);
+
+        UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+    }
+
     private void resetFailedAttempts(int userId) {
         mLockoutFrameworkImpl.resetFailedAttemptsForUser(true /* clearAttemptCounter */, userId);
     }
@@ -113,7 +120,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+                mUdfpsOverlayController);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
             getFreshDaemon().authenticate(mOperationId, getTargetUserId());
@@ -142,11 +150,25 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
     @Override
     public void onPointerDown(int x, int y, float minor, float major) {
         UdfpsHelper.onFingerDown(getFreshDaemon(), x, y, minor, major);
+        if (getListener() != null) {
+            try {
+                getListener().onUdfpsPointerDown(getSensorId(), getCookie());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            }
+        }
     }
 
     @Override
     public void onPointerUp() {
         UdfpsHelper.onFingerUp(getFreshDaemon());
+        if (getListener() != null) {
+            try {
+                getListener().onUdfpsPointerUp(getSensorId(), getCookie());
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Remote exception", e);
+            }
+        }
     }
 
     public boolean isKeyguard() {

@@ -25,12 +25,15 @@ import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.InjectionInflationController;
 import com.android.wm.shell.ShellCommandHandler;
+import com.android.wm.shell.TaskViewFactory;
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.bubbles.Bubbles;
 import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -62,6 +65,9 @@ public interface SysUIComponent {
         Builder setLegacySplitScreen(Optional<LegacySplitScreen> s);
 
         @BindsInstance
+        Builder setSplitScreen(Optional<SplitScreen> s);
+
+        @BindsInstance
         Builder setAppPairs(Optional<AppPairs> s);
 
         @BindsInstance
@@ -71,10 +77,16 @@ public interface SysUIComponent {
         Builder setBubbles(Optional<Bubbles> b);
 
         @BindsInstance
+        Builder setTaskViewFactory(Optional<TaskViewFactory> t);
+
+        @BindsInstance
         Builder setHideDisplayCutout(Optional<HideDisplayCutout> h);
 
         @BindsInstance
         Builder setShellCommandHandler(Optional<ShellCommandHandler> shellDump);
+
+        @BindsInstance
+        Builder setTransitions(Transitions t);
 
         SysUIComponent build();
     }

@@ -366,15 +366,6 @@ public class HdmiAudioSystemClientTest {
         }
 
         @Override
-        public void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
-        }
-
-        @Override
-        public boolean isHdmiCecVolumeControlEnabled() {
-            return true;
-        }
-
-        @Override
         public void addHdmiCecVolumeControlFeatureListener(
                 IHdmiCecVolumeControlFeatureListener listener) {
         }
@@ -392,6 +383,16 @@ public class HdmiAudioSystemClientTest {
         @Override
         public List<String> getAllowedCecSettingStringValues(String name) {
             return new ArrayList<>();
+        }
+
+        @Override
+        public void addCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
+        }
+
+        @Override
+        public void removeCecSettingChangeListener(String name,
+                IHdmiCecSettingChangeListener listener) {
         }
 
         @Override

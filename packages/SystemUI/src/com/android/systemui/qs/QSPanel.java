@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.Gravity;
@@ -112,6 +113,7 @@ public class QSPanel extends LinearLayout implements Tunable {
     private int mMediaTotalBottomMargin;
     private int mFooterMarginStartHorizontal;
     private Consumer<Boolean> mMediaVisibilityChangedListener;
+    private final boolean mSideLabels;
 
     public QSPanel(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -119,6 +121,8 @@ public class QSPanel extends LinearLayout implements Tunable {
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mContext = context;
+        mSideLabels = Settings.Secure.getInt(
+                mContext.getContentResolver(), "sysui_side_labels", 0) != 0;
 
         setOrientation(VERTICAL);
 
@@ -174,8 +178,9 @@ public class QSPanel extends LinearLayout implements Tunable {
     /** */
     public QSTileLayout createRegularTileLayout() {
         if (mRegularTileLayout == null) {
-            mRegularTileLayout = (QSTileLayout) LayoutInflater.from(mContext).inflate(
-                    R.layout.qs_paged_tile_layout, this, false);
+            mRegularTileLayout = (QSTileLayout) LayoutInflater.from(mContext)
+                    .inflate(mSideLabels ? R.layout.qs_paged_tile_layout_side_labels
+                            : R.layout.qs_paged_tile_layout, this, false);
         }
         return mRegularTileLayout;
     }
@@ -681,11 +686,12 @@ public class QSPanel extends LinearLayout implements Tunable {
      */
     protected void updateMediaHostContentMargins(ViewGroup mediaHostView) {
         if (mUsingMediaPlayer) {
-            int marginStart = mContentMarginStart;
+            int marginStart = 0;
+            int marginEnd = 0;
             if (mUsingHorizontalLayout) {
-                marginStart = 0;
+                marginEnd = mContentMarginEnd;
             }
-            updateMargins(mediaHostView, marginStart, mContentMarginEnd);
+            updateMargins(mediaHostView, marginStart, marginEnd);
         }
     }
 
@@ -748,7 +754,13 @@ public class QSPanel extends LinearLayout implements Tunable {
             if (needsDynamicRowsAndColumns()) {
                 newLayout.setMinRows(horizontal ? 2 : 1);
                 // Let's use 3 columns to match the current layout
-                newLayout.setMaxColumns(horizontal ? 3 : TileLayout.NO_MAX_COLUMNS);
+                int columns;
+                if (mSideLabels) {
+                    columns = horizontal ? 1 : 2;
+                } else {
+                    columns = horizontal ? 3 : TileLayout.NO_MAX_COLUMNS;
+                }
+                newLayout.setMaxColumns(columns);
             }
             updateMargins(mediaHostView);
         }
@@ -761,6 +773,10 @@ public class QSPanel extends LinearLayout implements Tunable {
         updateMediaHostContentMargins(mediaHostView);
         updateHorizontalLinearLayoutMargins();
         updatePadding();
+    }
+
+    boolean useSideLabels() {
+        return mSideLabels;
     }
 
     private class H extends Handler {

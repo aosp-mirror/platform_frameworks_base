@@ -26,7 +26,8 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.util.Slog;
 
-import com.android.server.biometrics.sensors.ClientMonitor;
+import com.android.server.biometrics.BiometricsProto;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 
 import java.io.File;
 import java.util.Map;
@@ -34,7 +35,7 @@ import java.util.Map;
 /**
  * Sets the HAL's current active user, and updates the framework's authenticatorId cache.
  */
-public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometricsFingerprint> {
+public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometricsFingerprint> {
 
     private static final String TAG = "FingerprintUpdateActiveUserClient";
     private static final String FP_DATA_DIR = "fpdata";
@@ -120,5 +121,10 @@ public class FingerprintUpdateActiveUserClient extends ClientMonitor<IBiometrics
             Slog.e(TAG, "Failed to setActiveGroup: " + e);
             mCallback.onClientFinished(this, false /* success */);
         }
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_UPDATE_ACTIVE_USER;
     }
 }

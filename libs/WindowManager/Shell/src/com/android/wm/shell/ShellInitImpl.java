@@ -24,9 +24,10 @@ import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.draganddrop.DragAndDropController;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The entry point implementation into the shell for initializing shell internal state.
@@ -38,9 +39,11 @@ public class ShellInitImpl {
     private final DragAndDropController mDragAndDropController;
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Optional<SplitScreen> mSplitScreenOptional;
     private final Optional<AppPairs> mAppPairsOptional;
     private final FullscreenTaskListener mFullscreenTaskListener;
     private final ShellExecutor mMainExecutor;
+    private final Transitions mTransitions;
 
     private final InitImpl mImpl = new InitImpl();
 
@@ -48,15 +51,19 @@ public class ShellInitImpl {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         return new ShellInitImpl(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
+                splitScreenOptional,
                 appPairsOptional,
                 fullscreenTaskListener,
+                transitions,
                 mainExecutor).mImpl;
     }
 
@@ -64,15 +71,19 @@ public class ShellInitImpl {
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<SplitScreen> splitScreenOptional,
             Optional<AppPairs> appPairsOptional,
             FullscreenTaskListener fullscreenTaskListener,
+            Transitions transitions,
             ShellExecutor mainExecutor) {
         mDisplayImeController = displayImeController;
         mDragAndDropController = dragAndDropController;
         mShellTaskOrganizer = shellTaskOrganizer;
         mLegacySplitScreenOptional = legacySplitScreenOptional;
+        mSplitScreenOptional = splitScreenOptional;
         mAppPairsOptional = appPairsOptional;
         mFullscreenTaskListener = fullscreenTaskListener;
+        mTransitions = transitions;
         mMainExecutor = mainExecutor;
     }
 
@@ -86,9 +97,14 @@ public class ShellInitImpl {
         mShellTaskOrganizer.registerOrganizer();
 
         mAppPairsOptional.ifPresent(AppPairs::onOrganizerRegistered);
+        mSplitScreenOptional.ifPresent(SplitScreen::onOrganizerRegistered);
 
         // Bind the splitscreen impl to the drag drop controller
-        mDragAndDropController.initialize(mLegacySplitScreenOptional);
+        mDragAndDropController.initialize(mSplitScreenOptional);
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mTransitions.register(mShellTaskOrganizer);
+        }
     }
 
     @ExternalThread

@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.AppOpsManager.OP_NONE;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -338,7 +340,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         final WindowState w = new WindowState(service, session, iWindow, token, parent,
                 OP_NONE, attrs, VISIBLE, ownerId, userId,
-                ownerCanAddInternalSystemWindow,
+                ownerCanAddInternalSystemWindow, false /* ownerCanUseBackgroundBlur */,
                 powerManagerWrapper);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
@@ -1107,6 +1109,17 @@ class WindowTestsBase extends SystemServiceTestsBase {
         // moves everything to secondary. Most tests expect this since sysui usually does it.
         boolean mMoveToSecondaryOnEnter = true;
         int mDisplayId;
+        private static final int[] CONTROLLED_ACTIVITY_TYPES = {
+                ACTIVITY_TYPE_STANDARD,
+                ACTIVITY_TYPE_HOME,
+                ACTIVITY_TYPE_RECENTS,
+                ACTIVITY_TYPE_UNDEFINED
+        };
+        private static final int[] CONTROLLED_WINDOWING_MODES = {
+                WINDOWING_MODE_FULLSCREEN,
+                WINDOWING_MODE_SPLIT_SCREEN_SECONDARY,
+                WINDOWING_MODE_UNDEFINED
+        };
         TestSplitOrganizer(ActivityTaskManagerService service, DisplayContent display) {
             mService = service;
             mDisplayId = display.mDisplayId;
@@ -1151,9 +1164,9 @@ class WindowTestsBase extends SystemServiceTestsBase {
             if (!mMoveToSecondaryOnEnter) {
                 return;
             }
-            mService.mTaskOrganizerController.setLaunchRoot(mDisplayId,
-                    mSecondary.mRemoteToken.toWindowContainerToken());
             DisplayContent dc = mService.mRootWindowContainer.getDisplayContent(mDisplayId);
+            dc.getDefaultTaskDisplayArea().setLaunchRootTask(
+                    mSecondary, CONTROLLED_WINDOWING_MODES, CONTROLLED_ACTIVITY_TYPES);
             dc.forAllRootTasks(rootTask -> {
                 if (!WindowConfiguration.isSplitScreenWindowingMode(rootTask.getWindowingMode())) {
                     rootTask.reparent(mSecondary, POSITION_BOTTOM);
@@ -1200,7 +1213,8 @@ class WindowTestsBase extends SystemServiceTestsBase {
         TestWindowState(WindowManagerService service, Session session, IWindow window,
                 WindowManager.LayoutParams attrs, WindowToken token) {
             super(service, session, window, token, null, OP_NONE, attrs, 0, 0, 0,
-                    false /* ownerCanAddInternalSystemWindow */);
+                    false /* ownerCanAddInternalSystemWindow */,
+                    false /* ownerCanUseBackgroundBlur */);
         }
 
         @Override

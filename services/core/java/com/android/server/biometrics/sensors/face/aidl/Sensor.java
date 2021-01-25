@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.ITestSession;
+import android.hardware.biometrics.face.AuthenticationFrame;
+import android.hardware.biometrics.face.EnrollmentFrame;
 import android.hardware.biometrics.face.Error;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
@@ -45,9 +47,10 @@ import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
+import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
-import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.EnumerateConsumer;
+import com.android.server.biometrics.sensors.HalClientMonitor;
 import com.android.server.biometrics.sensors.Interruptable;
 import com.android.server.biometrics.sensors.LockoutCache;
 import com.android.server.biometrics.sensors.LockoutConsumer;
@@ -73,7 +76,7 @@ public class Sensor implements IBinder.DeathRecipient {
     @NonNull private final BiometricScheduler mScheduler;
     @NonNull private final LockoutCache mLockoutCache;
     @NonNull private final Map<Integer, Long> mAuthenticatorIds;
-    @NonNull private final ClientMonitor.LazyDaemon<ISession> mLazySession;
+    @NonNull private final HalClientMonitor.LazyDaemon<ISession> mLazySession;
     @Nullable private Session mCurrentSession;
 
     static class Session {
@@ -136,7 +139,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onChallengeGenerated(long challenge) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceGenerateChallengeClient)) {
                     Slog.e(mTag, "onChallengeGenerated for wrong client: "
                             + Utils.getClientName(client));
@@ -152,7 +155,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onChallengeRevoked(long challenge) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceRevokeChallengeClient)) {
                     Slog.e(mTag, "onChallengeRevoked for wrong client: "
                             + Utils.getClientName(client));
@@ -166,9 +169,10 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onAcquired(byte info, int vendorCode) {
+        public void onAuthenticationFrame(AuthenticationFrame frame) {
+            // TODO(b/174619156): propagate the frame to an AuthenticationClient
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof AcquisitionClient)) {
                     Slog.e(mTag, "onAcquired for non-acquisition client: "
                             + Utils.getClientName(client));
@@ -176,14 +180,30 @@ public class Sensor implements IBinder.DeathRecipient {
                 }
 
                 final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(info, vendorCode);
+                acquisitionClient.onAcquired(frame.data.acquiredInfo, frame.data.vendorCode);
+            });
+        }
+
+        @Override
+        public void onEnrollmentFrame(EnrollmentFrame frame) {
+            // TODO(b/174619156): propagate the frame to an EnrollmentClient
+            mHandler.post(() -> {
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
+                if (!(client instanceof AcquisitionClient)) {
+                    Slog.e(mTag, "onAcquired for non-acquisition client: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+
+                final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
+                acquisitionClient.onAcquired(frame.data.acquiredInfo, frame.data.vendorCode);
             });
         }
 
         @Override
         public void onError(byte error, int vendorCode) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 Slog.d(mTag, "onError"
                         + ", client: " + Utils.getClientName(client)
                         + ", error: " + error
@@ -206,7 +226,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onEnrollmentProgress(int enrollmentId, int remaining) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceEnrollClient)) {
                     Slog.e(mTag, "onEnrollmentProgress for non-enroll client: "
                             + Utils.getClientName(client));
@@ -226,7 +246,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onAuthenticationSucceeded(int enrollmentId, HardwareAuthToken hat) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof AuthenticationConsumer)) {
                     Slog.e(mTag, "onAuthenticationSucceeded for non-authentication consumer: "
                             + Utils.getClientName(client));
@@ -248,7 +268,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onAuthenticationFailed() {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof AuthenticationConsumer)) {
                     Slog.e(mTag, "onAuthenticationFailed for non-authentication consumer: "
                             + Utils.getClientName(client));
@@ -266,7 +286,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onLockoutTimed(long durationMillis) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof LockoutConsumer)) {
                     Slog.e(mTag, "onLockoutTimed for non-lockout consumer: "
                             + Utils.getClientName(client));
@@ -281,7 +301,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onLockoutPermanent() {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof LockoutConsumer)) {
                     Slog.e(mTag, "onLockoutPermanent for non-lockout consumer: "
                             + Utils.getClientName(client));
@@ -296,7 +316,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onLockoutCleared() {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceResetLockoutClient)) {
                     Slog.e(mTag, "onLockoutCleared for non-resetLockout client: "
                             + Utils.getClientName(client));
@@ -316,7 +336,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onEnrollmentsEnumerated(int[] enrollmentIds) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof EnumerateConsumer)) {
                     Slog.e(mTag, "onEnrollmentsEnumerated for non-enumerate consumer: "
                             + Utils.getClientName(client));
@@ -339,7 +359,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onEnrollmentsRemoved(int[] enrollmentIds) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof RemovalConsumer)) {
                     Slog.e(mTag, "onRemoved for non-removal consumer: "
                             + Utils.getClientName(client));
@@ -361,7 +381,7 @@ public class Sensor implements IBinder.DeathRecipient {
         @Override
         public void onAuthenticatorIdRetrieved(long authenticatorId) {
             mHandler.post(() -> {
-                final ClientMonitor<?> client = mScheduler.getCurrentClient();
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
                 if (!(client instanceof FaceGetAuthenticatorIdClient)) {
                     Slog.e(mTag, "onAuthenticatorIdRetrieved for wrong consumer: "
                             + Utils.getClientName(client));
@@ -375,8 +395,18 @@ public class Sensor implements IBinder.DeathRecipient {
         }
 
         @Override
-        public void onAuthenticatorIdInvalidated() {
-            // TODO(b/159667191)
+        public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
+            mHandler.post(() -> {
+                final BaseClientMonitor client = mScheduler.getCurrentClient();
+                if (!(client instanceof FaceInvalidationClient)) {
+                    Slog.e(mTag, "onAuthenticatorIdInvalidated for wrong consumer: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+
+                final FaceInvalidationClient invalidationClient = (FaceInvalidationClient) client;
+                invalidationClient.onAuthenticatorIdInvalidated(newAuthenticatorId);
+            });
         }
 
     }
@@ -400,7 +430,7 @@ public class Sensor implements IBinder.DeathRecipient {
         };
     }
 
-    @NonNull ClientMonitor.LazyDaemon<ISession> getLazySession() {
+    @NonNull HalClientMonitor.LazyDaemon<ISession> getLazySession() {
         return mLazySession;
     }
 
@@ -456,11 +486,13 @@ public class Sensor implements IBinder.DeathRecipient {
         mTestHalEnabled = enabled;
     }
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto) {
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
+            boolean clearSchedulerBuffer) {
         final long sensorToken = proto.start(SensorServiceStateProto.SENSOR_STATES);
 
         proto.write(SensorStateProto.SENSOR_ID, mSensorProperties.sensorId);
-        proto.write(SensorStateProto.IS_BUSY, mScheduler.getCurrentClient() != null);
+        proto.write(SensorStateProto.MODALITY, SensorStateProto.FACE);
+        proto.write(SensorStateProto.SCHEDULER, mScheduler.dumpProtoState(clearSchedulerBuffer));
 
         for (UserInfo user : UserManager.get(mContext).getUsers()) {
             final int userId = user.getUserHandle().getIdentifier();
@@ -480,7 +512,7 @@ public class Sensor implements IBinder.DeathRecipient {
     public void binderDied() {
         Slog.e(mTag, "Binder died");
         mHandler.post(() -> {
-            final ClientMonitor<?> client = mScheduler.getCurrentClient();
+            final BaseClientMonitor client = mScheduler.getCurrentClient();
             if (client instanceof Interruptable) {
                 Slog.e(mTag, "Sending ERROR_HW_UNAVAILABLE for client: " + client);
                 final Interruptable interruptable = (Interruptable) client;

@@ -22,8 +22,6 @@ import static android.view.Surface.ROTATION_0;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_SWIPE;
-import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
@@ -32,13 +30,11 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_DRAW_BAR_BACKGROUNDS;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_BOTTOM;
 import static com.android.server.policy.WindowManagerPolicy.NAV_BAR_RIGHT;
 
@@ -47,7 +43,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
@@ -293,46 +288,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
         return win;
     }
 
-    @UseTestDisplay(
-            addWindows = { W_ACTIVITY, W_STATUS_BAR, W_NAVIGATION_BAR, W_NOTIFICATION_SHADE })
-    @Test
-    public void testUpdateHideNavInputEventReceiver() {
-        final InsetsPolicy insetsPolicy = mDisplayContent.getInsetsPolicy();
-        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
-        displayPolicy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
-        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
-        displayPolicy.addWindowLw(mNotificationShadeWindow, mNotificationShadeWindow.mAttrs);
-        spyOn(displayPolicy);
-        doReturn(true).when(displayPolicy).hasNavigationBar();
-
-        // App doesn't request to hide navigation bar.
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNull(displayPolicy.mInputConsumer);
-
-        // App requests to hide navigation bar.
-        final InsetsState requestedState = new InsetsState();
-        requestedState.getSource(ITYPE_NAVIGATION_BAR).setVisible(false);
-        mAppWindow.updateRequestedVisibility(requestedState);
-        insetsPolicy.onInsetsModified(mAppWindow);
-        assertNotNull(displayPolicy.mInputConsumer);
-
-        // App still requests to hide navigation bar, but without BEHAVIOR_SHOW_BARS_BY_TOUCH.
-        mAppWindow.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_SWIPE;
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNull(displayPolicy.mInputConsumer);
-
-        // App still requests to hide navigation bar, but with BEHAVIOR_SHOW_BARS_BY_TOUCH.
-        mAppWindow.mAttrs.insetsFlags.behavior = BEHAVIOR_SHOW_BARS_BY_TOUCH;
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNotNull(displayPolicy.mInputConsumer);
-
-        // App still requests to hide navigation bar with BEHAVIOR_SHOW_BARS_BY_TOUCH,
-        // but notification shade forcibly shows navigation bar
-        mNotificationShadeWindow.mAttrs.privateFlags |= PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
-        insetsPolicy.updateBarControlTarget(mAppWindow);
-        assertNull(displayPolicy.mInputConsumer);
-    }
-
     @UseTestDisplay(addWindows = { W_NAVIGATION_BAR, W_INPUT_METHOD })
     @Test
     public void testImeMinimalSourceFrame() {
@@ -341,21 +296,22 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayInfo.logicalWidth = 1000;
         displayInfo.logicalHeight = 2000;
         displayInfo.rotation = ROTATION_0;
-        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
-                displayInfo, null /* displayCutout */);
 
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        mImeWindow.mAboveInsetsState = state;
+        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
+                state, displayInfo, null /* displayCutout */);
 
         mDisplayContent.setInputMethodWindowLocked(mImeWindow);
         mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
         mImeWindow.mGivenContentInsets.set(0, displayInfo.logicalHeight, 0, 0);
         mImeWindow.getControllableInsetProvider().setServerVisible(true);
 
-        displayPolicy.beginLayoutLw(mDisplayContent.mDisplayFrames, 0 /* UI mode */);
+        displayPolicy.layoutWindowLw(mNavBarWindow, null, mDisplayContent.mDisplayFrames);
         displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
 
-        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         final InsetsSource imeSource = state.peekSource(ITYPE_IME);
         final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
 

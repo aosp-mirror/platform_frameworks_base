@@ -40,6 +40,7 @@ import android.app.ActivityManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
+import android.app.people.PeopleManager;
 import android.app.time.TimeManager;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.ApplicationInfo;
@@ -2624,6 +2625,36 @@ public abstract class Context {
     public abstract void sendStickyBroadcast(@RequiresPermission Intent intent);
 
     /**
+     * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
+     * Intent you are sending stays around after the broadcast is complete,
+     * so that others can quickly retrieve that data through the return
+     * value of {@link #registerReceiver(BroadcastReceiver, IntentFilter)}.  In
+     * all other ways, this behaves the same as
+     * {@link #sendBroadcast(Intent)}.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     * Intent will receive the broadcast, and the Intent will be held to
+     * be re-broadcast to future receivers.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see #sendBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    @Deprecated
+    @RequiresPermission(android.Manifest.permission.BROADCAST_STICKY)
+    public void sendStickyBroadcast(@RequiresPermission @NonNull Intent intent,
+            @Nullable Bundle options) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
+
+    /**
      * <p>Version of {@link #sendStickyBroadcast} that allows you to
      * receive data back from the broadcast.  This is accomplished by
      * supplying your own BroadcastReceiver when calling, which will be
@@ -4508,6 +4539,26 @@ public abstract class Context {
     public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
 
     /**
+     * Official published name of the translation service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    // TODO(b/176208267): change it back to translation before S release.
+    @SystemApi
+    @SuppressLint("ServiceName")
+    public static final String TRANSLATION_MANAGER_SERVICE = "transformer";
+
+    /**
+     * Official published name of the translation service which supports ui translation function.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String UI_TRANSLATION_SERVICE = "ui_translation";
+
+    /**
      * Used for getting content selections and classifications for task snapshots.
      *
      * @hide
@@ -5074,9 +5125,7 @@ public abstract class Context {
      * Service to capture a bugreport.
      * @see #getSystemService(String)
      * @see android.os.BugreportManager
-     * @hide
      */
-    @SystemApi
     public static final String BUGREPORT_SERVICE = "bugreport";
 
     /**
@@ -5301,10 +5350,10 @@ public abstract class Context {
     public static final String SMS_SERVICE = "sms";
 
     /**
-     * Use with {@link #getSystemService(String)} to access people service.
+     * Use with {@link #getSystemService(String)} to access a {@link PeopleManager} to interact
+     * with your published conversations.
      *
      * @see #getSystemService(String)
-     * @hide
      */
     public static final String PEOPLE_SERVICE = "people";
 
@@ -5870,9 +5919,14 @@ public abstract class Context {
             throws PackageManager.NameNotFoundException;
 
     /**
-     * Get the user associated with this context
+     * Get the user associated with this context.
+     *
+     * @return the user associated with this context
+     *
      * @hide
      */
+    @NonNull
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
     @TestApi
     public UserHandle getUser() {
         return android.os.Process.myUserHandle();

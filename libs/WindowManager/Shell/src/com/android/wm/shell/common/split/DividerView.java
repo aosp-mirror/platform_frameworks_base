@@ -21,6 +21,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.SurfaceControlViewHost;
 import android.view.VelocityTracker;
@@ -54,6 +55,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
     private VelocityTracker mVelocityTracker;
     private boolean mMoving;
     private int mStartPos;
+    private GestureDetector mDoubleTapDetector;
 
     public DividerView(@NonNull Context context) {
         super(context);
@@ -88,6 +90,7 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
         mBackground = findViewById(R.id.docked_divider_background);
         mTouchElevation = getResources().getDimensionPixelSize(
                 R.dimen.docked_stack_divider_lift_elevation);
+        mDoubleTapDetector = new GestureDetector(getContext(), new DoubleTapListener());
         setOnTouchListener(this);
     }
 
@@ -132,10 +135,12 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
 
                 final int position = mSplitLayout.getDividePosition() + touchPos - mStartPos;
                 final DividerSnapAlgorithm.SnapTarget snapTarget =
-                        mSplitLayout.findSnapTarget(position, velocity);
+                        mSplitLayout.findSnapTarget(position, velocity, false /* hardDismiss */);
                 mSplitLayout.snapToTarget(position, snapTarget);
                 break;
         }
+
+        mDoubleTapDetector.onTouchEvent(event);
         return true;
     }
 
@@ -199,5 +204,15 @@ public class DividerView extends FrameLayout implements View.OnTouchListener {
 
     private boolean isLandscape() {
         return getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE;
+    }
+
+    private class DoubleTapListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDoubleTap(MotionEvent e) {
+            if (mSplitLayout != null) {
+                mSplitLayout.onDoubleTappedDivider();
+            }
+            return false;
+        }
     }
 }

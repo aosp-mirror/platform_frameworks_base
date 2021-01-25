@@ -34,6 +34,7 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkScoreManager;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -49,6 +50,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.FeatureFlagUtils;
 import android.util.Log;
 import android.util.MathUtils;
 import android.util.SparseArray;
@@ -110,6 +112,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private final BroadcastDispatcher mBroadcastDispatcher;
     private final DemoModeController mDemoModeController;
     private final Object mLock = new Object();
+    private final boolean mProviderModel;
     private Config mConfig;
 
     private PhoneStateListener mPhoneStateListener;
@@ -140,6 +143,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     // States that don't belong to a subcontroller.
     private boolean mAirplaneMode = false;
     private boolean mHasNoSubs;
+    private boolean mNoDefaultNetwork = false;
+    private boolean mNoNetworksAvailable = true;
     private Locale mLocale = null;
     // This list holds our ordering.
     private List<SubscriptionInfo> mCurrentSubscriptions = new ArrayList<>();
@@ -187,6 +192,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
             TelephonyManager telephonyManager,
             @Nullable WifiManager wifiManager,
             NetworkScoreManager networkScoreManager,
+            AccessPointControllerImpl accessPointController,
             DemoModeController demoModeController) {
         this(context, connectivityManager,
                 telephonyManager,
@@ -194,7 +200,7 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 networkScoreManager,
                 SubscriptionManager.from(context), Config.readConfig(context), bgLooper,
                 new CallbackHandler(),
-                new AccessPointControllerImpl(context),
+                accessPointController,
                 new DataUsageController(context),
                 new SubscriptionDefaults(),
                 deviceProvisionedController,
@@ -269,9 +275,39 @@ public class NetworkControllerImpl extends BroadcastReceiver
             }
         });
 
+        WifiManager.ScanResultsCallback scanResultsCallback =
+                new WifiManager.ScanResultsCallback() {
+            @Override
+            public void onScanResultsAvailable() {
+                mNoNetworksAvailable = true;
+                for (ScanResult scanResult : mWifiManager.getScanResults()) {
+                    if (!scanResult.SSID.equals(mWifiSignalController.getState().ssid)) {
+                        mNoNetworksAvailable = false;
+                        break;
+                    }
+                }
+                // Only update the network availability if there is no default network.
+                if (mNoDefaultNetwork) {
+                    mCallbackHandler.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition,
+                            mNoNetworksAvailable);
+                }
+            }
+        };
+
+        if (mWifiManager != null) {
+            mWifiManager.registerScanResultsCallback(mReceiverHandler::post, scanResultsCallback);
+        }
+
         ConnectivityManager.NetworkCallback callback = new ConnectivityManager.NetworkCallback(){
             private Network mLastNetwork;
             private NetworkCapabilities mLastNetworkCapabilities;
+
+            @Override
+            public void onLost(Network network) {
+                mLastNetwork = null;
+                mLastNetworkCapabilities = null;
+                updateConnectivity();
+            }
 
             @Override
             public void onCapabilitiesChanged(
@@ -321,6 +357,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         };
 
         mDemoModeController.addCallback(this);
+        mProviderModel = FeatureFlagUtils.isEnabled(
+                mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL);
     }
 
     private final Runnable mClearForceValidated = () -> {
@@ -440,14 +478,18 @@ public class NetworkControllerImpl extends BroadcastReceiver
 
     private MobileSignalController getDataController() {
         int dataSubId = mSubDefaults.getActiveDataSubId();
-        if (!SubscriptionManager.isValidSubscriptionId(dataSubId)) {
+        return getControllerWithSubId(dataSubId);
+    }
+
+    private MobileSignalController getControllerWithSubId(int subId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) {
             if (DEBUG) Log.e(TAG, "No data sim selected");
             return mDefaultSignalController;
         }
-        if (mMobileSignalControllers.indexOfKey(dataSubId) >= 0) {
-            return mMobileSignalControllers.get(dataSubId);
+        if (mMobileSignalControllers.indexOfKey(subId) >= 0) {
+            return mMobileSignalControllers.get(subId);
         }
-        if (DEBUG) Log.e(TAG, "Cannot find controller for data sub: " + dataSubId);
+        if (DEBUG) Log.e(TAG, "Cannot find controller for data sub: " + subId);
         return mDefaultSignalController;
     }
 
@@ -475,6 +517,15 @@ public class NetworkControllerImpl extends BroadcastReceiver
         }
 
         return dataController.isDataDisabled();
+    }
+
+    boolean isCarrierMergedWifi(int subId) {
+        return mWifiSignalController.isCarrierMergedWifi(subId);
+    }
+
+    String getNonDefaultMobileDataNetworkName(int subId) {
+        MobileSignalController controller = getControllerWithSubId(subId);
+        return controller != null ? controller.getNonDefaultCarrierName() : "";
     }
 
     private void notifyControllersMobileDataChanged() {
@@ -538,6 +589,9 @@ public class NetworkControllerImpl extends BroadcastReceiver
         cb.setIsAirplaneMode(new IconState(mAirplaneMode,
                 TelephonyIcons.FLIGHT_MODE_ICON, R.string.accessibility_airplane_mode, mContext));
         cb.setNoSims(mHasNoSubs, mSimDetected);
+        if (mProviderModel) {
+            cb.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition, mNoNetworksAvailable);
+        }
         mWifiSignalController.notifyListeners(cb);
         mEthernetSignalController.notifyListeners(cb);
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
@@ -882,6 +936,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mInetCondition = !mValidatedTransports.isEmpty();
 
         pushConnectivityToSignals();
+        if (mProviderModel) {
+            mNoDefaultNetwork = mConnectedTransports.isEmpty();
+            mCallbackHandler.setConnectivityStatus(mNoDefaultNetwork, !mInetCondition,
+                    mNoNetworksAvailable);
+            notifyAllListeners();
+        }
     }
 
     /**

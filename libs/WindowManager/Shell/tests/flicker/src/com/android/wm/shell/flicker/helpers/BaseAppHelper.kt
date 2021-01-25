@@ -17,34 +17,27 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
-import android.content.Context
-import android.content.Intent
+import android.content.ComponentName
 import android.content.pm.PackageManager.FEATURE_LEANBACK
 import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
-import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.StandardAppHelper
-import com.android.wm.shell.flicker.testapp.Components
+import com.android.server.wm.traces.parser.toWindowName
 
 abstract class BaseAppHelper(
     instrumentation: Instrumentation,
     launcherName: String,
-    private val componentsInfo: Components.ComponentsInfo
+    component: ComponentName
 ) : StandardAppHelper(
-        instrumentation,
-        Components.PACKAGE_NAME,
-        launcherName,
-        LauncherStrategyFactory.getInstance(instrumentation).launcherStrategy
+    instrumentation,
+    launcherName,
+    component,
+    LauncherStrategyFactory.getInstance(instrumentation).launcherStrategy
 ) {
-    protected val uiDevice: UiDevice = UiDevice.getInstance(instrumentation)
-
-    protected val context: Context
-        get() = mInstrumentation.context
-
-    private val appSelector = By.pkg(packageName).depth(0)
+    private val appSelector = By.pkg(component.packageName).depth(0)
 
     protected val isTelevision: Boolean
         get() = context.packageManager.run {
@@ -52,40 +45,16 @@ abstract class BaseAppHelper(
         }
 
     val defaultWindowName: String
-        get() = componentsInfo.activityName
-
-    val label: String
-        get() = context.packageManager.run {
-            getApplicationLabel(getApplicationInfo(packageName, 0)).toString()
-        }
+        get() = component.toWindowName()
 
     val ui: UiObject2?
         get() = uiDevice.findObject(appSelector)
-
-    fun launchViaIntent(action: String? = null, stringExtras: Map<String, String> = mapOf()) {
-        val intent = openAppIntent
-        intent.action = action
-        stringExtras.forEach() {
-            intent.putExtra(it.key, it.value)
-        }
-        context.startActivity(intent)
-
-        uiDevice.wait(Until.hasObject(appSelector), APP_LAUNCH_WAIT_TIME_MS)
-    }
 
     fun waitUntilClosed(): Boolean {
         return uiDevice.wait(Until.gone(appSelector), APP_CLOSE_WAIT_TIME_MS)
     }
 
-    override fun getOpenAppIntent(): Intent {
-        val intent = Intent()
-        intent.component = componentsInfo.componentName
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return intent
-    }
-
     companion object {
-        private const val APP_LAUNCH_WAIT_TIME_MS = 10_000L
         private const val APP_CLOSE_WAIT_TIME_MS = 3_000L
     }
 }

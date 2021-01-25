@@ -19,6 +19,7 @@ package android.app.appsearch;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.appsearch.AppSearchSchema.PropertyConfig;
+import android.app.appsearch.AppSearchSchema.StringPropertyConfig;
 
 /**
  * Encapsulates a {@link GenericDocument} that represent an email.
@@ -41,46 +42,40 @@ public class AppSearchEmail extends GenericDocument {
     public static final AppSearchSchema SCHEMA =
             new AppSearchSchema.Builder(SCHEMA_TYPE)
                     .addProperty(
-                            new PropertyConfig.Builder(KEY_FROM)
-                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                            new StringPropertyConfig.Builder(KEY_FROM)
                                     .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .setTokenizerType(StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                                     .build())
                     .addProperty(
-                            new PropertyConfig.Builder(KEY_TO)
-                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                            new StringPropertyConfig.Builder(KEY_TO)
                                     .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
-                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .setTokenizerType(StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                                     .build())
                     .addProperty(
-                            new PropertyConfig.Builder(KEY_CC)
-                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                            new StringPropertyConfig.Builder(KEY_CC)
                                     .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
-                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .setTokenizerType(StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                                     .build())
                     .addProperty(
-                            new PropertyConfig.Builder(KEY_BCC)
-                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                            new StringPropertyConfig.Builder(KEY_BCC)
                                     .setCardinality(PropertyConfig.CARDINALITY_REPEATED)
-                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .setTokenizerType(StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                                     .build())
                     .addProperty(
-                            new PropertyConfig.Builder(KEY_SUBJECT)
-                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                            new StringPropertyConfig.Builder(KEY_SUBJECT)
                                     .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .setTokenizerType(StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                                     .build())
                     .addProperty(
-                            new PropertyConfig.Builder(KEY_BODY)
-                                    .setDataType(PropertyConfig.DATA_TYPE_STRING)
+                            new StringPropertyConfig.Builder(KEY_BODY)
                                     .setCardinality(PropertyConfig.CARDINALITY_OPTIONAL)
-                                    .setTokenizerType(PropertyConfig.TOKENIZER_TYPE_PLAIN)
-                                    .setIndexingType(PropertyConfig.INDEXING_TYPE_PREFIXES)
+                                    .setTokenizerType(StringPropertyConfig.TOKENIZER_TYPE_PLAIN)
+                                    .setIndexingType(StringPropertyConfig.INDEXING_TYPE_PREFIXES)
                                     .build())
                     .build();
 

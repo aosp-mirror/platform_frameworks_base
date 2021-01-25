@@ -22,11 +22,11 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -41,12 +41,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 
-/**
- * Class that provides a privileged API to capture and consume bugreports.
- *
- * @hide
- */
-@SystemApi
+/** Class that provides a privileged API to capture and consume bugreports. */
 @SystemService(Context.BUGREPORT_SERVICE)
 public final class BugreportManager {
 
@@ -61,28 +56,30 @@ public final class BugreportManager {
         mBinder = binder;
     }
 
-    /**
-     * An interface describing the callback for bugreport progress and status.
-     */
+    /** An interface describing the callback for bugreport progress and status. */
     public abstract static class BugreportCallback {
-        /** @hide */
+        /**
+         * Possible error codes taking a bugreport can encounter.
+         *
+         * @hide
+         */
         @Retention(RetentionPolicy.SOURCE)
-        @IntDef(prefix = { "BUGREPORT_ERROR_" }, value = {
-                BUGREPORT_ERROR_INVALID_INPUT,
-                BUGREPORT_ERROR_RUNTIME,
-                BUGREPORT_ERROR_USER_DENIED_CONSENT,
-                BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT,
-                BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS
-        })
-
-        /** Possible error codes taking a bugreport can encounter */
+        @IntDef(
+                prefix = {"BUGREPORT_ERROR_"},
+                value = {
+                    BUGREPORT_ERROR_INVALID_INPUT,
+                    BUGREPORT_ERROR_RUNTIME,
+                    BUGREPORT_ERROR_USER_DENIED_CONSENT,
+                    BUGREPORT_ERROR_USER_CONSENT_TIMED_OUT,
+                    BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS
+                })
         public @interface BugreportErrorCode {}
 
         /** The input options were invalid */
         public static final int BUGREPORT_ERROR_INVALID_INPUT =
                 IDumpstateListener.BUGREPORT_ERROR_INVALID_INPUT;
 
-        /** A runtime error occured */
+        /** A runtime error occurred */
         public static final int BUGREPORT_ERROR_RUNTIME =
                 IDumpstateListener.BUGREPORT_ERROR_RUNTIME_ERROR;
 
@@ -100,6 +97,7 @@ public final class BugreportManager {
 
         /**
          * Called when there is a progress update.
+         *
          * @param progress the progress in [0.0, 100.0]
          */
         public void onProgress(@FloatRange(from = 0f, to = 100f) float progress) {}
@@ -114,14 +112,12 @@ public final class BugreportManager {
          * out, but the bugreport could be available in the internal directory of dumpstate for
          * manual retrieval.
          *
-         * <p> If {@code BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS} is passed, then the
-         * caller should try later, as only one bugreport can be in progress at a time.
+         * <p>If {@code BUGREPORT_ERROR_ANOTHER_REPORT_IN_PROGRESS} is passed, then the caller
+         * should try later, as only one bugreport can be in progress at a time.
          */
         public void onError(@BugreportErrorCode int errorCode) {}
 
-        /**
-         * Called when taking bugreport finishes successfully.
-         */
+        /** Called when taking bugreport finishes successfully. */
         public void onFinished() {}
 
         /**
@@ -138,20 +134,23 @@ public final class BugreportManager {
      * seconds to return in the worst case. {@code callback} will receive progress and status
      * updates.
      *
-     * <p>The bugreport artifacts will be copied over to the given file descriptors only if the
-     * user consents to sharing with the calling app.
+     * <p>The bugreport artifacts will be copied over to the given file descriptors only if the user
+     * consents to sharing with the calling app.
      *
      * <p>{@link BugreportManager} takes ownership of {@code bugreportFd} and {@code screenshotFd}.
      *
-     * @param bugreportFd file to write the bugreport. This should be opened in write-only,
-     *     append mode.
-     * @param screenshotFd file to write the screenshot, if necessary. This should be opened
-     *     in write-only, append mode.
+     * @param bugreportFd file to write the bugreport. This should be opened in write-only, append
+     *     mode.
+     * @param screenshotFd file to write the screenshot, if necessary. This should be opened in
+     *     write-only, append mode.
      * @param params options that specify what kind of a bugreport should be taken
      * @param callback callback for progress and status updates
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.DUMP)
-    public void startBugreport(@NonNull ParcelFileDescriptor bugreportFd,
+    public void startBugreport(
+            @NonNull ParcelFileDescriptor bugreportFd,
             @Nullable ParcelFileDescriptor screenshotFd,
             @NonNull BugreportParams params,
             @NonNull @CallbackExecutor Executor executor,
@@ -165,17 +164,21 @@ public final class BugreportManager {
             boolean isScreenshotRequested = screenshotFd != null;
             if (screenshotFd == null) {
                 // Binder needs a valid File Descriptor to be passed
-                screenshotFd = ParcelFileDescriptor.open(new File("/dev/null"),
-                        ParcelFileDescriptor.MODE_READ_ONLY);
+                screenshotFd =
+                        ParcelFileDescriptor.open(
+                                new File("/dev/null"), ParcelFileDescriptor.MODE_READ_ONLY);
             }
-            DumpstateListener dsListener = new DumpstateListener(executor, callback,
-                    isScreenshotRequested);
+            DumpstateListener dsListener =
+                    new DumpstateListener(executor, callback, isScreenshotRequested);
             // Note: mBinder can get callingUid from the binder transaction.
-            mBinder.startBugreport(-1 /* callingUid */,
+            mBinder.startBugreport(
+                    -1 /* callingUid */,
                     mContext.getOpPackageName(),
                     bugreportFd.getFileDescriptor(),
                     screenshotFd.getFileDescriptor(),
-                    params.getMode(), dsListener, isScreenshotRequested);
+                    params.getMode(),
+                    dsListener,
+                    isScreenshotRequested);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         } catch (FileNotFoundException e) {
@@ -189,13 +192,64 @@ public final class BugreportManager {
         }
     }
 
-    /*
-     * Cancels a currently running bugreport.
+    /**
+     * Starts a connectivity bugreport.
+     *
+     * <p>The connectivity bugreport is a specialized version of bugreport that only includes
+     * information specifically for debugging connectivity-related issues (e.g. telephony, wi-fi,
+     * and IP networking issues). It is intended primarily for use by OEMs and network providers
+     * such as mobile network operators. In addition to generally excluding information that isn't
+     * targeted to connectivity debugging, this type of bugreport excludes PII and sensitive
+     * information that isn't strictly necessary for connectivity debugging.
+     *
+     * <p>The calling app MUST have a context-specific reason for requesting a connectivity
+     * bugreport, such as detecting a connectivity-related issue. This API SHALL NOT be used to
+     * perform random sampling from a fleet of public end-user devices.
+     *
+     * <p>Calling this API will cause the system to ask the user for consent every single time. The
+     * bugreport artifacts will be copied over to the given file descriptors only if the user
+     * consents to sharing with the calling app.
+     *
+     * <p>This starts a bugreport in the background. However the call itself can take several
+     * seconds to return in the worst case. {@code callback} will receive progress and status
+     * updates.
+     *
+     * <p>Requires that the calling app has carrier privileges (see {@link
+     * android.telephony.TelephonyManager#hasCarrierPrivileges}) on any active subscription.
+     *
+     * @param bugreportFd file to write the bugreport. This should be opened in write-only, append
+     *     mode.
+     * @param callback callback for progress and status updates.
      */
-    @RequiresPermission(android.Manifest.permission.DUMP)
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
+    public void startConnectivityBugreport(
+            @NonNull ParcelFileDescriptor bugreportFd,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BugreportCallback callback) {
+        startBugreport(
+                bugreportFd,
+                null /* screenshotFd */,
+                new BugreportParams(BugreportParams.BUGREPORT_MODE_TELEPHONY),
+                executor,
+                callback);
+    }
+
+    /**
+     * Cancels the currently running bugreport.
+     *
+     * <p>Apps are only able to cancel their own bugreports. App A cannot cancel a bugreport started
+     * by app B.
+     *
+     * <p>Requires permission: {@link android.Manifest.permission#DUMP} or that the calling app has
+     * carrier privileges (see {@link android.telephony.TelephonyManager#hasCarrierPrivileges}) on
+     * any active subscription.
+     *
+     * @throws SecurityException if trying to cancel another app's bugreport in progress
+     */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     public void cancelBugreport() {
         try {
-            mBinder.cancelBugreport();
+            mBinder.cancelBugreport(-1 /* callingUid */, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -205,23 +259,26 @@ public final class BugreportManager {
      * Requests a bugreport.
      *
      * <p>This requests the platform/system to take a bugreport and makes the final bugreport
-     * available to the user. The user may choose to share it with another app, but the bugreport
-     * is never given back directly to the app that requested it.
+     * available to the user. The user may choose to share it with another app, but the bugreport is
+     * never given back directly to the app that requested it.
      *
-     * @param params           {@link BugreportParams} that specify what kind of a bugreport should
-     *                         be taken, please note that not all kinds of bugreport allow for a
-     *                         progress notification
-     * @param shareTitle       title on the final share notification
+     * @param params {@link BugreportParams} that specify what kind of a bugreport should be taken,
+     *     please note that not all kinds of bugreport allow for a progress notification
+     * @param shareTitle title on the final share notification
      * @param shareDescription description on the final share notification
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.DUMP)
-    public void requestBugreport(@NonNull BugreportParams params, @Nullable CharSequence shareTitle,
+    public void requestBugreport(
+            @NonNull BugreportParams params,
+            @Nullable CharSequence shareTitle,
             @Nullable CharSequence shareDescription) {
         try {
             String title = shareTitle == null ? null : shareTitle.toString();
             String description = shareDescription == null ? null : shareDescription.toString();
-            ActivityManager.getService().requestBugReportWithDescription(title, description,
-                    params.getMode());
+            ActivityManager.getService()
+                    .requestBugReportWithDescription(title, description, params.getMode());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -232,8 +289,8 @@ public final class BugreportManager {
         private final BugreportCallback mCallback;
         private final boolean mIsScreenshotRequested;
 
-        DumpstateListener(Executor executor, BugreportCallback callback,
-                boolean isScreenshotRequested) {
+        DumpstateListener(
+                Executor executor, BugreportCallback callback, boolean isScreenshotRequested) {
             mExecutor = executor;
             mCallback = callback;
             mIsScreenshotRequested = isScreenshotRequested;
@@ -243,9 +300,7 @@ public final class BugreportManager {
         public void onProgress(int progress) throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> {
-                    mCallback.onProgress(progress);
-                });
+                mExecutor.execute(() -> mCallback.onProgress(progress));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -255,9 +310,7 @@ public final class BugreportManager {
         public void onError(int errorCode) throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> {
-                    mCallback.onError(errorCode);
-                });
+                mExecutor.execute(() -> mCallback.onError(errorCode));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -267,9 +320,7 @@ public final class BugreportManager {
         public void onFinished() throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> {
-                    mCallback.onFinished();
-                });
+                mExecutor.execute(() -> mCallback.onFinished());
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -284,20 +335,19 @@ public final class BugreportManager {
             Handler mainThreadHandler = new Handler(Looper.getMainLooper());
             mainThreadHandler.post(
                     () -> {
-                        int message = success ? R.string.bugreport_screenshot_success_toast
-                                : R.string.bugreport_screenshot_failure_toast;
+                        int message =
+                                success
+                                        ? R.string.bugreport_screenshot_success_toast
+                                        : R.string.bugreport_screenshot_failure_toast;
                         Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
                     });
         }
 
         @Override
-        public void onUiIntensiveBugreportDumpsFinished()
-                throws RemoteException {
+        public void onUiIntensiveBugreportDumpsFinished() throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
-                mExecutor.execute(() -> {
-                    mCallback.onEarlyReportFinished();
-                });
+                mExecutor.execute(() -> mCallback.onEarlyReportFinished());
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

@@ -242,7 +242,7 @@ public class ResumeMediaBrowser {
     public PendingIntent getAppIntent() {
         PackageManager pm = mContext.getPackageManager();
         Intent launchIntent = pm.getLaunchIntentForPackage(mComponentName.getPackageName());
-        return PendingIntent.getActivity(mContext, 0, launchIntent, 0);
+        return PendingIntent.getActivity(mContext, 0, launchIntent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
     }
 
     /**

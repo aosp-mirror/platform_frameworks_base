@@ -20,27 +20,44 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.IInvalidationCallback;
+import android.os.RemoteException;
+import android.util.Slog;
+
+import com.android.server.biometrics.BiometricsProto;
+
+import java.util.Map;
 
 /**
  * ClientMonitor subclass for requesting authenticatorId invalidation. See
  * {@link InvalidationRequesterClient} for more info.
  */
 public abstract class InvalidationClient<S extends BiometricAuthenticator.Identifier, T>
-        extends ClientMonitor<T> {
+        extends HalClientMonitor<T> {
 
-    private final BiometricUtils<S> mUtils;
+    private static final String TAG = "InvalidationClient";
+
+    @NonNull private final Map<Integer, Long> mAuthenticatorIds;
+    @NonNull private final IInvalidationCallback mInvalidationCallback;
 
     public InvalidationClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
-            int userId, int sensorId, @NonNull BiometricUtils<S> utils) {
+            int userId, int sensorId, @NonNull Map<Integer, Long> authenticatorIds,
+            @NonNull IInvalidationCallback callback) {
         super(context, lazyDaemon, null /* token */, null /* listener */, userId,
                 context.getOpPackageName(), 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
-        mUtils = utils;
+        mAuthenticatorIds = authenticatorIds;
+        mInvalidationCallback = callback;
     }
 
     public void onAuthenticatorIdInvalidated(long newAuthenticatorId) {
-        // TODO: Update framework w/ newAuthenticatorId
+        mAuthenticatorIds.put(getTargetUserId(), newAuthenticatorId);
+        try {
+            mInvalidationCallback.onCompleted();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception", e);
+        }
         mCallback.onClientFinished(this, true /* success */);
     }
 
@@ -54,5 +71,10 @@ public abstract class InvalidationClient<S extends BiometricAuthenticator.Identi
     @Override
     public void unableToStart() {
 
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_INVALIDATE;
     }
 }

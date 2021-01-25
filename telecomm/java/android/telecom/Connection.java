@@ -18,6 +18,7 @@ package android.telecom;
 
 import static android.Manifest.permission.MODIFY_PHONE_STATE;
 
+import android.Manifest;
 import android.annotation.ElapsedRealtimeLong;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -108,6 +109,20 @@ import java.util.concurrent.ConcurrentHashMap;
  * {@link Call#removeExtras(String...)} methods.
  */
 public abstract class Connection extends Conferenceable {
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STATE_", value = {
+            STATE_INITIALIZING,
+            STATE_NEW,
+            STATE_RINGING,
+            STATE_DIALING,
+            STATE_ACTIVE,
+            STATE_HOLDING,
+            STATE_DISCONNECTED,
+            STATE_PULLING_CALL
+    })
+    public @interface ConnectionState {}
 
     /**
      * The connection is initializing. This is generally the first state for a {@code Connection}
@@ -527,9 +542,17 @@ public abstract class Connection extends Conferenceable {
      */
     public static final int PROPERTY_IS_ADHOC_CONFERENCE = 1 << 12;
 
+    /**
+     * Connection is using cross sim technology.
+     * <p>
+     * Indicates that the {@link Connection} is using a cross sim technology which would
+     * register IMS over internet APN of default data subscription.
+     * <p>
+     */
+    public static final int PROPERTY_CROSS_SIM = 1 << 13;
 
     //**********************************************************************************************
-    // Next PROPERTY value: 1<<13
+    // Next PROPERTY value: 1<<14
     //**********************************************************************************************
 
     /**
@@ -2991,6 +3014,26 @@ public abstract class Connection extends Conferenceable {
     public void onCallAudioStateChanged(CallAudioState state) {}
 
     /**
+     * Inform this Connection when it will or will not be tracked by an {@link InCallService} which
+     * can provide an InCall UI.
+     * This is primarily intended for use by Connections reported by self-managed
+     * {@link ConnectionService} which typically maintain their own UI.
+     *
+     * @param isUsingAlternativeUi Indicates whether an InCallService that can provide InCall UI is
+     *                             currently tracking the self-managed call.
+     */
+    public void onUsingAlternativeUi(boolean isUsingAlternativeUi) {}
+
+    /**
+     * Inform this Conenection when it will or will not be tracked by an non-UI
+     * {@link InCallService}.
+     *
+     * @param isTracked Indicates whether an non-UI InCallService is currently tracking the
+     *                 self-managed call.
+     */
+    public void onTrackedByNonUiService(boolean isTracked) {}
+
+    /**
      * Notifies this Connection of an internal state change. This method is called after the
      * state is changed.
      *
@@ -3277,7 +3320,7 @@ public abstract class Connection extends Conferenceable {
      *     Intent intent = new Intent(Intent.ACTION_MAIN, null);
      *     intent.setFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION | Intent.FLAG_ACTIVITY_NEW_TASK);
      *     intent.setClass(context, YourIncomingCallActivity.class);
-     *     PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, 0);
+     *     PendingIntent pendingIntent = PendingIntent.getActivity(context, 1, intent, PendingIntent.FLAG_MUTABLE_UNAUDITED);
      *
      *     // Build the notification as an ongoing high priority item; this ensures it will show as
      *     // a heads up notification which slides down over top of the current content.
@@ -3334,6 +3377,24 @@ public abstract class Connection extends Conferenceable {
      *                      the in-call app.
      */
     public void handleRttUpgradeResponse(@Nullable RttTextStream rttTextStream) {}
+
+    /**
+     * Indicates that call filtering in Telecom is complete
+     *
+     * This method is called for a connection created via
+     * {@link ConnectionService#onCreateIncomingConnection} when call filtering completes in
+     * Telecom, including checking the blocked number db, per-contact settings, and custom call
+     * filtering apps.
+     *
+     * @param isBlocked {@code true} if the call was blocked, {@code false} otherwise. If this is
+     *                  {@code true}, {@link #onDisconnect()} will be called soon after
+     *                  this is called.
+     * @param isInContacts Indicates whether the caller is in the user's contacts list.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_CONTACTS)
+    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts) { }
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

@@ -64,12 +64,14 @@ import android.content.IIntentReceiver;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ProviderInfoList;
 import android.content.pm.ServiceInfo;
@@ -173,6 +175,8 @@ import android.view.ViewRootImpl;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.autofill.AutofillId;
+import android.view.translation.TranslationSpec;
 import android.webkit.WebView;
 
 import com.android.internal.annotations.GuardedBy;
@@ -346,6 +350,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private int mPendingProcessState = PROCESS_STATE_UNKNOWN;
     ArrayList<WeakReference<AssistStructure>> mLastAssistStructures = new ArrayList<>();
     private int mLastSessionId;
+    final ArrayMap<IBinder, CreateServiceData> mServicesData = new ArrayMap<>();
     @UnsupportedAppUsage
     final ArrayMap<IBinder, Service> mServices = new ArrayMap<>();
     @UnsupportedAppUsage
@@ -1805,6 +1810,18 @@ public final class ActivityThread extends ClientTransactionHandler {
             data.appInfo = targetInfo;
             sendMessage(H.INSTRUMENT_WITHOUT_RESTART, data);
         }
+
+        @Override
+        public void updateUiTranslationState(IBinder activityToken, int state,
+                TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = activityToken;
+            args.arg2 = state;
+            args.arg3 = sourceSpec;
+            args.arg4 = destSpec;
+            args.arg5 = viewIds;
+            sendMessage(H.UPDATE_UI_TRANSLATION_STATE, args);
+        }
     }
 
     private @NonNull SafeCancellationTransport createSafeCancellationTransport(
@@ -1909,6 +1926,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         public static final int RELAUNCH_ACTIVITY = 160;
         public static final int PURGE_RESOURCES = 161;
         public static final int ATTACH_STARTUP_AGENTS = 162;
+        public static final int UPDATE_UI_TRANSLATION_STATE = 163;
 
         public static final int INSTRUMENT_WITHOUT_RESTART = 170;
         public static final int FINISH_INSTRUMENTATION_WITHOUT_RESTART = 171;
@@ -1955,6 +1973,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     case RELAUNCH_ACTIVITY: return "RELAUNCH_ACTIVITY";
                     case PURGE_RESOURCES: return "PURGE_RESOURCES";
                     case ATTACH_STARTUP_AGENTS: return "ATTACH_STARTUP_AGENTS";
+                    case UPDATE_UI_TRANSLATION_STATE: return "UPDATE_UI_TRANSLATION_STATE";
                     case INSTRUMENT_WITHOUT_RESTART: return "INSTRUMENT_WITHOUT_RESTART";
                     case FINISH_INSTRUMENTATION_WITHOUT_RESTART:
                         return "FINISH_INSTRUMENTATION_WITHOUT_RESTART";
@@ -2138,6 +2157,12 @@ public final class ActivityThread extends ClientTransactionHandler {
                     break;
                 case ATTACH_STARTUP_AGENTS:
                     handleAttachStartupAgents((String) msg.obj);
+                    break;
+                case UPDATE_UI_TRANSLATION_STATE:
+                    final SomeArgs args = (SomeArgs) msg.obj;
+                    updateUiTranslationState((IBinder) args.arg1, (int) args.arg2,
+                            (TranslationSpec) args.arg3, (TranslationSpec) args.arg4,
+                            (List<AutofillId>) args.arg5);
                     break;
                 case INSTRUMENT_WITHOUT_RESTART:
                     handleInstrumentWithoutRestart((AppBindData) msg.obj);
@@ -2328,7 +2353,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         return null;
     }
 
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     public final LoadedApk getPackageInfo(ApplicationInfo ai, CompatibilityInfo compatInfo,
             int flags) {
         boolean includeCode = (flags&Context.CONTEXT_INCLUDE_CODE) != 0;
@@ -3412,7 +3437,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     cl, component.getClassName(), r.intent);
             StrictMode.incrementExpectedActivityCount(activity.getClass());
             r.intent.setExtrasClassLoader(cl);
-            r.intent.prepareToEnterProcess();
+            r.intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo));
             if (r.state != null) {
                 r.state.setClassLoader(cl);
             }
@@ -3717,7 +3742,7 @@ public final class ActivityThread extends ClientTransactionHandler {
         for (int i=0; i<N; i++) {
             ReferrerIntent intent = intents.get(i);
             intent.setExtrasClassLoader(r.activity.getClassLoader());
-            intent.prepareToEnterProcess();
+            intent.prepareToEnterProcess(isProtectedComponent(r.activityInfo));
             r.activity.mFragments.noteStateNotSaved();
             mInstrumentation.callActivityOnNewIntent(r.activity, intent);
         }
@@ -4017,6 +4042,16 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    private void updateUiTranslationState(IBinder activityToken, int state,
+            TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds) {
+        final ActivityClientRecord r = mActivities.get(activityToken);
+        if (r == null) {
+            Log.w(TAG, "updateUiTranslationState(): no activity for " + activityToken);
+            return;
+        }
+        r.activity.updateUiTranslationState(state, sourceSpec, destSpec, viewIds);
+    }
+
     private static final ThreadLocal<Intent> sCurrentBroadcastIntent = new ThreadLocal<Intent>();
 
     /**
@@ -4052,7 +4087,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
             java.lang.ClassLoader cl = context.getClassLoader();
             data.intent.setExtrasClassLoader(cl);
-            data.intent.prepareToEnterProcess();
+            data.intent.prepareToEnterProcess(
+                    isProtectedComponent(data.info) || isProtectedBroadcast(data.intent));
             data.setExtrasClassLoader(cl);
             receiver = packageInfo.getAppFactory()
                     .instantiateReceiver(cl, data.info.name, data.intent);
@@ -4249,6 +4285,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             service.attach(context, this, data.info.name, data.token, app,
                     ActivityManager.getService());
             service.onCreate();
+            mServicesData.put(data.token, data);
             mServices.put(data.token, service);
             try {
                 ActivityManager.getService().serviceDoneExecuting(
@@ -4266,13 +4303,14 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void handleBindService(BindServiceData data) {
+        CreateServiceData createData = mServicesData.get(data.token);
         Service s = mServices.get(data.token);
         if (DEBUG_SERVICE)
             Slog.v(TAG, "handleBindService s=" + s + " rebind=" + data.rebind);
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
-                data.intent.prepareToEnterProcess();
+                data.intent.prepareToEnterProcess(isProtectedComponent(createData.info));
                 try {
                     if (!data.rebind) {
                         IBinder binder = s.onBind(data.intent);
@@ -4297,11 +4335,12 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void handleUnbindService(BindServiceData data) {
+        CreateServiceData createData = mServicesData.get(data.token);
         Service s = mServices.get(data.token);
         if (s != null) {
             try {
                 data.intent.setExtrasClassLoader(s.getClassLoader());
-                data.intent.prepareToEnterProcess();
+                data.intent.prepareToEnterProcess(isProtectedComponent(createData.info));
                 boolean doRebind = s.onUnbind(data.intent);
                 try {
                     if (doRebind) {
@@ -4373,12 +4412,13 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void handleServiceArgs(ServiceArgsData data) {
+        CreateServiceData createData = mServicesData.get(data.token);
         Service s = mServices.get(data.token);
         if (s != null) {
             try {
                 if (data.args != null) {
                     data.args.setExtrasClassLoader(s.getClassLoader());
-                    data.args.prepareToEnterProcess();
+                    data.args.prepareToEnterProcess(isProtectedComponent(createData.info));
                 }
                 int res;
                 if (!data.taskRemoved) {
@@ -4407,6 +4447,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     private void handleStopService(IBinder token) {
+        mServicesData.remove(token);
         Service s = mServices.remove(token);
         if (s != null) {
             try {
@@ -5026,7 +5067,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             try {
                 if (ri.mData != null) {
                     ri.mData.setExtrasClassLoader(r.activity.getClassLoader());
-                    ri.mData.prepareToEnterProcess();
+                    ri.mData.prepareToEnterProcess(isProtectedComponent(r.activityInfo));
                 }
                 if (DEBUG_RESULTS) Slog.v(TAG,
                         "Delivering result to activity " + r + " : " + ri);
@@ -7737,6 +7778,66 @@ public final class ActivityThread extends ClientTransactionHandler {
         Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "purgePendingResources");
         nPurgePendingResources();
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+    }
+
+    /**
+     * Returns whether the provided {@link ActivityInfo} {@code ai} is a protected component.
+     *
+     * @see #isProtectedComponent(ComponentInfo, String)
+     */
+    public static boolean isProtectedComponent(@NonNull ActivityInfo ai) {
+        return isProtectedComponent(ai, ai.permission);
+    }
+
+    /**
+     * Returns whether the provided {@link ServiceInfo} {@code si} is a protected component.
+     *
+     * @see #isProtectedComponent(ComponentInfo, String)
+     */
+    public static boolean isProtectedComponent(@NonNull ServiceInfo si) {
+        return isProtectedComponent(si, si.permission);
+    }
+
+    /**
+     * Returns whether the provided {@link ComponentInfo} {@code ci} with the specified {@code
+     * permission} is a protected component.
+     *
+     * <p>A component is protected if it is not exported, or if the specified {@code permission} is
+     * a signature permission.
+     */
+    private static boolean isProtectedComponent(@NonNull ComponentInfo ci,
+            @Nullable String permission) {
+        // Bail early when this process isn't looking for violations
+        if (!StrictMode.vmUnsafeIntentLaunchEnabled()) return false;
+
+        // TODO: consider optimizing by having AMS pre-calculate this value
+        if (!ci.exported) {
+            return true;
+        }
+        if (permission != null) {
+            try {
+                PermissionInfo pi = getPermissionManager().getPermissionInfo(permission,
+                        currentOpPackageName(), 0);
+                return (pi != null) && pi.getProtection() == PermissionInfo.PROTECTION_SIGNATURE;
+            } catch (RemoteException ignored) {
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns whether the action within the provided {@code intent} is a protected broadcast.
+     */
+    public static boolean isProtectedBroadcast(@NonNull Intent intent) {
+        // Bail early when this process isn't looking for violations
+        if (!StrictMode.vmUnsafeIntentLaunchEnabled()) return false;
+
+        // TODO: consider optimizing by having AMS pre-calculate this value
+        try {
+            return getPackageManager().isProtectedBroadcast(intent.getAction());
+        } catch (RemoteException ignored) {
+        }
+        return false;
     }
 
     // ------------------ Regular JNI ------------------------

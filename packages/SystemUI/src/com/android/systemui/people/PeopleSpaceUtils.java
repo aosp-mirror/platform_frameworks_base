@@ -23,12 +23,12 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
-import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutInfo;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.graphics.Bitmap;
@@ -72,6 +72,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -129,25 +130,36 @@ public class PeopleSpaceUtils {
             throws Exception {
         boolean showOnlyPriority = Settings.Global.getInt(context.getContentResolver(),
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 1;
-        List<ConversationChannelWrapper> conversations = notificationManager.getConversations(
-                true).getList();
-        List<PeopleSpaceTile> tiles = getSortedTiles(peopleManager,
-                conversations.stream().filter(c -> c.getShortcutInfo() != null).map(
-                        c -> new PeopleSpaceTile.Builder(c.getShortcutInfo(),
-                                launcherApps).build()));
+        List<ConversationChannelWrapper> conversations =
+                notificationManager.getConversations(
+                        false).getList();
+
+        // Add priority conversations to tiles list.
+        Stream<ShortcutInfo> priorityConversations = conversations.stream()
+                .filter(c -> c.getNotificationChannel() != null
+                        && c.getNotificationChannel().isImportantConversation())
+                .map(c -> c.getShortcutInfo());
+        List<PeopleSpaceTile> tiles = getSortedTiles(peopleManager, launcherApps,
+                priorityConversations);
+
+        // Sort and then add recent and non priority conversations to tiles list.
         if (!showOnlyPriority) {
             if (DEBUG) Log.d(TAG, "Add recent conversations");
-            List<ConversationChannel> recentConversations =
+            Stream<ShortcutInfo> nonPriorityConversations = conversations.stream()
+                    .filter(c -> c.getNotificationChannel() == null
+                            || !c.getNotificationChannel().isImportantConversation())
+                    .map(c -> c.getShortcutInfo());
+
+            List<ConversationChannel> recentConversationsList =
                     peopleManager.getRecentConversations().getList();
+            Stream<ShortcutInfo> recentConversations = recentConversationsList
+                    .stream()
+                    .map(c -> c.getShortcutInfo());
+
+            Stream<ShortcutInfo> mergedStream = Stream.concat(nonPriorityConversations,
+                    recentConversations);
             List<PeopleSpaceTile> recentTiles =
-                    getSortedTiles(peopleManager,
-                            recentConversations
-                                    .stream()
-                                    .filter(
-                                            c -> c.getShortcutInfo() != null)
-                                    .map(
-                                            c -> new PeopleSpaceTile.Builder(c.getShortcutInfo(),
-                                                    launcherApps).build()));
+                    getSortedTiles(peopleManager, launcherApps, mergedStream);
             tiles.addAll(recentTiles);
         }
         return tiles;
@@ -282,6 +294,7 @@ public class PeopleSpaceUtils {
                     )
             );
             views.setImageViewIcon(R.id.person_icon, tile.getUserIcon());
+            views.setBoolean(R.id.content_background, "setClipToOutline", true);
 
             Intent activityIntent = new Intent(context, LaunchConversationActivity.class);
             activityIntent.addFlags(
@@ -417,8 +430,11 @@ public class PeopleSpaceUtils {
 
     /** Returns a list sorted by ascending last interaction time from {@code stream}. */
     private static List<PeopleSpaceTile> getSortedTiles(IPeopleManager peopleManager,
-            Stream<PeopleSpaceTile> stream) {
+            LauncherApps launcherApps,
+            Stream<ShortcutInfo> stream) {
         return stream
+                .filter(Objects::nonNull)
+                .map(c -> new PeopleSpaceTile.Builder(c, launcherApps).build())
                 .filter(c -> shouldKeepConversation(c))
                 .map(c -> c.toBuilder().setLastInteractionTimestamp(
                         getLastInteraction(peopleManager, c)).build())
@@ -654,4 +670,3 @@ public class PeopleSpaceUtils {
         return lookupKeysWithBirthdaysToday;
     }
 }
-

@@ -17,6 +17,7 @@ package android.hardware.fingerprint;
 
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -35,7 +36,7 @@ interface IFingerprintService {
     ITestSession createTestSession(int sensorId, String opPackageName);
 
     // Requests a proto dump of the specified sensor
-    byte[] dumpSensorServiceStateProto(int sensorId);
+    byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer);
 
     // Retrieve static sensor properties for all fingerprint sensors
     List<FingerprintSensorPropertiesInternal> getSensorPropertiesInternal(String opPackageName);
@@ -115,6 +116,9 @@ interface IFingerprintService {
 
     // Return the LockoutTracker status for the specified user
     int getLockoutModeForUser(int sensorId, int userId);
+
+    // Requests for the specified sensor+userId's authenticatorId to be invalidated
+    void invalidateAuthenticatorId(int sensorId, int userId, IInvalidationCallback callback);
 
     // Gets the authenticator ID for fingerprint
     long getAuthenticatorId(int sensorId, int callingUserId);

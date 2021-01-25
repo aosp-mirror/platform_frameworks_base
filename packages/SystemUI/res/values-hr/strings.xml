@@ -345,6 +345,8 @@
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Način unosa"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Lokacija"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Lokacija je isključena"</string>
+    <string name="quick_settings_camera_label" msgid="1367149596242401934">"Blokiraj kameru"</string>
+    <string name="quick_settings_mic_label" msgid="8245831073612564953">"Isključi mikrofon"</string>
     <string name="quick_settings_media_device_label" msgid="8034019242363789941">"Medijski uređaj"</string>
     <string name="quick_settings_rssi_label" msgid="3397615415140356701">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="7499207215265078598">"Samo hitni pozivi"</string>
@@ -354,8 +356,10 @@
     <string name="quick_settings_user_title" msgid="8673045967216204537">"Korisnik"</string>
     <string name="quick_settings_user_new_user" msgid="3347905871336069666">"Novi korisnik"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
-    <!-- no translation found for quick_settings_internet_label (6603068555872455463) -->
-    <skip />
+    <string name="quick_settings_internet_label" msgid="6603068555872455463">"Internet"</string>
+    <string name="quick_settings_airplane_safe_label" msgid="2665758539772645899">"Sigurno za rad u zrakoplovu"</string>
+    <string name="quick_settings_networks_available" msgid="1875138606855420438">"Mreže su dostupne"</string>
+    <string name="quick_settings_networks_unavailable" msgid="1167847013337940082">"Mreže nisu dostupne"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"Nije povezano"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"Nema mreže"</string>
     <string name="quick_settings_wifi_off_label" msgid="4003379736176547594">"Wi-Fi isključen"</string>
@@ -414,6 +418,10 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snimač zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Početak"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavi"</string>
+    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
+    <skip />
+    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
+    <skip />
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Prijeđite prstom prema gore da biste promijenili aplikaciju"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Povucite udesno da biste brzo promijenili aplikaciju"</string>
@@ -436,6 +444,8 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite opet za otvaranje"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore da biste otvorili"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prijeđite prstom prema gore za ponovni pokušaj"</string>
+    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
+    <skip />
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada vašoj organizaciji"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Prijeđite prstom od ikone za telefon"</string>
@@ -458,11 +468,9 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"Prikaz profila"</string>
     <string name="user_add_user" msgid="4336657383006913022">"Dodavanje korisnika"</string>
     <string name="user_new_user_name" msgid="2019166282704195789">"Novi korisnik"</string>
-    <!-- no translation found for guest_exit_guest_dialog_title (2034481024623462357) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_title" msgid="2034481024623462357">"Završiti gostujuću sesiju?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Sve aplikacije i podaci u ovoj sesiji bit će izbrisani."</string>
-    <!-- no translation found for guest_exit_guest_dialog_remove (8533184512885775423) -->
-    <skip />
+    <string name="guest_exit_guest_dialog_remove" msgid="8533184512885775423">"Završi sesiju"</string>
     <string name="guest_wipe_session_title" msgid="7147965814683990944">"Dobro došli natrag, gostu!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Želite li nastaviti sesiju?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Počni ispočetka"</string>

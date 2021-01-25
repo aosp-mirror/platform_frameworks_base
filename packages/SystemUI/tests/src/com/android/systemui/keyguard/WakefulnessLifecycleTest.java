@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
+import android.os.PowerManager;
 import android.testing.AndroidTestingRunner;
 
 import androidx.test.filters.SmallTest;
@@ -58,7 +59,7 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchStartedWakingUp() throws Exception {
-        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_WAKING, mWakefulness.getWakefulness());
 
@@ -67,7 +68,7 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchFinishedWakingUp() throws Exception {
-        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulness.dispatchFinishedWakingUp();
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_AWAKE, mWakefulness.getWakefulness());
@@ -77,9 +78,9 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchStartedGoingToSleep() throws Exception {
-        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulness.dispatchFinishedWakingUp();
-        mWakefulness.dispatchStartedGoingToSleep();
+        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_GOING_TO_SLEEP,
                 mWakefulness.getWakefulness());
@@ -89,9 +90,9 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void dispatchFinishedGoingToSleep() throws Exception {
-        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulness.dispatchFinishedWakingUp();
-        mWakefulness.dispatchStartedGoingToSleep();
+        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
         mWakefulness.dispatchFinishedGoingToSleep();
 
         assertEquals(WakefulnessLifecycle.WAKEFULNESS_ASLEEP,
@@ -102,12 +103,12 @@ public class WakefulnessLifecycleTest extends SysuiTestCase {
 
     @Test
     public void doesNotDispatchTwice() throws Exception {
-        mWakefulness.dispatchStartedWakingUp();
-        mWakefulness.dispatchStartedWakingUp();
+        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
+        mWakefulness.dispatchStartedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         mWakefulness.dispatchFinishedWakingUp();
         mWakefulness.dispatchFinishedWakingUp();
-        mWakefulness.dispatchStartedGoingToSleep();
-        mWakefulness.dispatchStartedGoingToSleep();
+        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
+        mWakefulness.dispatchStartedGoingToSleep(PowerManager.GO_TO_SLEEP_REASON_MIN);
         mWakefulness.dispatchFinishedGoingToSleep();
         mWakefulness.dispatchFinishedGoingToSleep();
 

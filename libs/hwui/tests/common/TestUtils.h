@@ -50,12 +50,12 @@ namespace uirenderer {
         ADD_FAILURE() << "ClipState not a rect";                                     \
     }
 
-#define INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, functionCall) \
-    TEST(test_case_name, test_name##_##pipeline) {                             \
-        RenderPipelineType oldType = Properties::getRenderPipelineType();      \
-        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline);  \
-        functionCall;                                                          \
-        Properties::overrideRenderPipelineType(oldType);                       \
+#define INNER_PIPELINE_TEST(test_case_name, test_name, pipeline, functionCall)      \
+    TEST(test_case_name, test_name##_##pipeline) {                                  \
+        RenderPipelineType oldType = Properties::getRenderPipelineType();           \
+        Properties::overrideRenderPipelineType(RenderPipelineType::pipeline, true); \
+        functionCall;                                                               \
+        Properties::overrideRenderPipelineType(oldType, true);                      \
     };
 
 #define INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, pipeline) \
@@ -67,29 +67,27 @@ namespace uirenderer {
  * Like gtest's TEST, but runs on the RenderThread, and 'renderThread' is passed, in top level scope
  * (for e.g. accessing its RenderState)
  */
-#define RENDERTHREAD_TEST(test_case_name, test_name)                                        \
-    class test_case_name##_##test_name##_RenderThreadTest {                                 \
-    public:                                                                                 \
-        static void doTheThing(renderthread::RenderThread& renderThread);                   \
-    };                                                                                      \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);                    \
-    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
-    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */          \
-    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(                       \
+#define RENDERTHREAD_TEST(test_case_name, test_name)                         \
+    class test_case_name##_##test_name##_RenderThreadTest {                  \
+    public:                                                                  \
+        static void doTheThing(renderthread::RenderThread& renderThread);    \
+    };                                                                       \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);     \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(        \
             renderthread::RenderThread& renderThread)
 
 /**
  * Like RENDERTHREAD_TEST, but only runs with the Skia RenderPipelineTypes
  */
-#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name)                          \
-    class test_case_name##_##test_name##_RenderThreadTest {                                 \
-    public:                                                                                 \
-        static void doTheThing(renderthread::RenderThread& renderThread);                   \
-    };                                                                                      \
-    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);                    \
-    /* Temporarily disabling Vulkan until we can figure out a way to stub out the driver */ \
-    /* INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); */          \
-    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(                       \
+#define RENDERTHREAD_SKIA_PIPELINE_TEST(test_case_name, test_name)           \
+    class test_case_name##_##test_name##_RenderThreadTest {                  \
+    public:                                                                  \
+        static void doTheThing(renderthread::RenderThread& renderThread);    \
+    };                                                                       \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaGL);     \
+    INNER_PIPELINE_RENDERTHREAD_TEST(test_case_name, test_name, SkiaVulkan); \
+    void test_case_name##_##test_name##_RenderThreadTest::doTheThing(        \
             renderthread::RenderThread& renderThread)
 
 /**
@@ -161,14 +159,6 @@ public:
             renderthread::RenderThread& renderThread, uint32_t width, uint32_t height,
             const SkMatrix& transform);
 
-    template <class CanvasType>
-    static std::unique_ptr<DisplayList> createDisplayList(
-            int width, int height, std::function<void(CanvasType& canvas)> canvasCallback) {
-        CanvasType canvas(width, height);
-        canvasCallback(canvas);
-        return std::unique_ptr<DisplayList>(canvas.finishRecording());
-    }
-
     static sp<RenderNode> createNode(
             int left, int top, int right, int bottom,
             std::function<void(RenderProperties& props, Canvas& canvas)> setup) {
@@ -179,7 +169,7 @@ public:
             std::unique_ptr<Canvas> canvas(
                     Canvas::create_recording_canvas(props.getWidth(), props.getHeight()));
             setup(props, *canvas.get());
-            node->setStagingDisplayList(canvas->finishRecording());
+            canvas->finishRecording(node.get());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         return node;
@@ -205,14 +195,15 @@ public:
         std::unique_ptr<Canvas> canvas(Canvas::create_recording_canvas(
                 node.stagingProperties().getWidth(), node.stagingProperties().getHeight(), &node));
         contentCallback(*canvas.get());
-        node.setStagingDisplayList(canvas->finishRecording());
+        canvas->finishRecording(&node);
     }
 
     static sp<RenderNode> createSkiaNode(
             int left, int top, int right, int bottom,
             std::function<void(RenderProperties& props, skiapipeline::SkiaRecordingCanvas& canvas)>
                     setup,
-            const char* name = nullptr, skiapipeline::SkiaDisplayList* displayList = nullptr) {
+            const char* name = nullptr,
+            std::unique_ptr<skiapipeline::SkiaDisplayList> displayList = nullptr) {
         sp<RenderNode> node = new RenderNode();
         if (name) {
             node->setName(name);
@@ -220,14 +211,14 @@ public:
         RenderProperties& props = node->mutateStagingProperties();
         props.setLeftTopRightBottom(left, top, right, bottom);
         if (displayList) {
-            node->setStagingDisplayList(displayList);
+            node->setStagingDisplayList(DisplayList(std::move(displayList)));
         }
         if (setup) {
             std::unique_ptr<skiapipeline::SkiaRecordingCanvas> canvas(
                     new skiapipeline::SkiaRecordingCanvas(nullptr, props.getWidth(),
                                                           props.getHeight()));
             setup(props, *canvas.get());
-            node->setStagingDisplayList(canvas->finishRecording());
+            canvas->finishRecording(node.get());
         }
         node->setPropertyFieldsDirty(0xFFFFFFFF);
         TestUtils::syncHierarchyPropertiesAndDisplayList(node);
@@ -348,13 +339,11 @@ private:
             node->mNeedsDisplayListSync = false;
             node->syncDisplayList(observer, nullptr);
         }
-        auto displayList = node->getDisplayList();
+        auto& displayList = node->getDisplayList();
         if (displayList) {
-            for (auto&& childDr :
-                 static_cast<skiapipeline::SkiaDisplayList*>(const_cast<DisplayList*>(displayList))
-                         ->mChildNodes) {
-                syncHierarchyPropertiesAndDisplayListImpl(childDr.getRenderNode());
-            }
+            displayList.updateChildren([](RenderNode* child) {
+                syncHierarchyPropertiesAndDisplayListImpl(child);
+            });
         }
     }
 

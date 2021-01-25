@@ -24,6 +24,7 @@ import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.BiometricsProto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.Map;
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
 public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Identifier, T>
-        extends ClientMonitor<T> implements EnumerateConsumer, RemovalConsumer {
+        extends HalClientMonitor<T> implements EnumerateConsumer, RemovalConsumer {
 
     private static final String TAG = "Biometrics/InternalCleanupClient";
 
@@ -60,11 +61,11 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
     private final BiometricUtils<S> mBiometricUtils;
     private final Map<Integer, Long> mAuthenticatorIds;
     private final List<S> mEnrolledList;
-    private ClientMonitor<T> mCurrentTask;
+    private BaseClientMonitor mCurrentTask;
 
     private final Callback mEnumerateCallback = new Callback() {
         @Override
-        public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             final List<BiometricAuthenticator.Identifier> unknownHALTemplates =
                     ((InternalEnumerateClient<T>) mCurrentTask).getUnknownHALTemplates();
 
@@ -88,7 +89,7 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
 
     private final Callback mRemoveCallback = new Callback() {
         @Override
-        public void onClientFinished(@NonNull ClientMonitor<?> clientMonitor, boolean success) {
+        public void onClientFinished(@NonNull BaseClientMonitor clientMonitor, boolean success) {
             mCallback.onClientFinished(InternalCleanupClient.this, success);
         }
     };
@@ -165,5 +166,10 @@ public abstract class InternalCleanupClient<S extends BiometricAuthenticator.Ide
             return;
         }
         ((EnumerateConsumer) mCurrentTask).onEnumerationResult(identifier, remaining);
+    }
+
+    @Override
+    public int getProtoEnum() {
+        return BiometricsProto.CM_INTERNAL_CLEANUP;
     }
 }

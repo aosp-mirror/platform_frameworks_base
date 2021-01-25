@@ -62,11 +62,13 @@ public class BatteryUsageStatsProvider {
                 }
                 mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new BluetoothPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new SensorPowerCalculator(mPowerProfile,
+                mPowerCalculators.add(new SensorPowerCalculator(
                         mContext.getSystemService(SensorManager.class)));
+                mPowerCalculators.add(new GnssPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new CameraPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new FlashlightPowerCalculator(mPowerProfile));
-                mPowerCalculators.add(new MediaPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new AudioPowerCalculator(mPowerProfile));
+                mPowerCalculators.add(new VideoPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new PhonePowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new ScreenPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new AmbientDisplayPowerCalculator(mPowerProfile));

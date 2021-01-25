@@ -662,7 +662,9 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         pw.println(getName()
                 + " type=" + activityTypeToString(getActivityType())
                 + " mode=" + windowingModeToString(getWindowingMode())
-                + " override-mode=" + windowingModeToString(getRequestedOverrideWindowingMode()));
+                + " override-mode=" + windowingModeToString(getRequestedOverrideWindowingMode())
+                + " requested-bounds=" + getRequestedOverrideBounds().toShortString()
+                + " bounds=" + getBounds().toShortString());
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final E cc = getChildAt(i);
             pw.print(childPrefix + "#" + i + " ");

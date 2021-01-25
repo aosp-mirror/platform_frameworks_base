@@ -246,11 +246,6 @@ public class Nat464Xlat extends BaseNetworkObserver {
             return;
         }
 
-        if (mNetwork.linkProperties == null) {
-            Log.e(TAG, "startClat: Can't start clat with null LinkProperties");
-            return;
-        }
-
         String baseIface = mNetwork.linkProperties.getInterfaceName();
         if (baseIface == null) {
             Log.e(TAG, "startClat: Can't start clat on null interface");

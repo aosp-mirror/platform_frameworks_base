@@ -32,8 +32,9 @@ import android.content.pm.Signature;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
+import android.telephony.Annotation;
 import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
@@ -160,7 +161,7 @@ public class NetworkPolicyManager {
 
     /** @hide */
     public static final int FOREGROUND_THRESHOLD_STATE =
-            ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+            ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
 
     /**
      * {@link Intent} extra that indicates which {@link NetworkTemplate} rule it
@@ -377,6 +378,8 @@ public class NetworkPolicyManager {
      * @param overrideMask the bitmask that specifies which of the overrides is being
      *            set or cleared.
      * @param overrideValue the override values to set or clear.
+     * @param networkTypes the network types this override applies to.
+     *            {@see TelephonyManager#getAllNetworkTypes()}
      * @param timeoutMillis the timeout after which the requested override will
      *            be automatically cleared, or {@code 0} to leave in the
      *            requested state until explicitly cleared, or the next reboot,
@@ -385,11 +388,12 @@ public class NetworkPolicyManager {
      * @hide
      */
     public void setSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
-            @SubscriptionOverrideMask int overrideValue, long timeoutMillis,
-                    @NonNull String callingPackage) {
+            @SubscriptionOverrideMask int overrideValue,
+            @NonNull @Annotation.NetworkType int[] networkTypes, long timeoutMillis,
+            @NonNull String callingPackage) {
         try {
-            mService.setSubscriptionOverride(subId, overrideMask, overrideValue, timeoutMillis,
-                    callingPackage);
+            mService.setSubscriptionOverride(subId, overrideMask, overrideValue, networkTypes,
+                    timeoutMillis, callingPackage);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -442,6 +446,40 @@ public class NetworkPolicyManager {
     }
 
     /**
+     * Check that networking is blocked for the given uid.
+     *
+     * @param uid The target uid.
+     * @param meteredNetwork True if the network is metered.
+     * @return true if networking is blocked for the given uid according to current networking
+     *         policies.
+     *
+     * @hide
+     */
+    public boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork) {
+        try {
+            return mService.isUidNetworkingBlocked(uid, meteredNetwork);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check that the given uid is restricted from doing networking on metered networks.
+     *
+     * @param uid The target uid.
+     * @return true if the given uid is restricted from doing networking on metered networks.
+     *
+     * @hide
+     */
+    public boolean isUidRestrictedOnMeteredNetworks(int uid) {
+        try {
+            return mService.isUidRestrictedOnMeteredNetworks(uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Get multipath preference for the given network.
      */
     public int getMultipathPreference(Network network) {
@@ -482,7 +520,7 @@ public class NetworkPolicyManager {
     @Deprecated
     public static boolean isUidValidForPolicy(Context context, int uid) {
         // first, quick-reject non-applications
-        if (!UserHandle.isApp(uid)) {
+        if (!Process.isApplicationUid(uid)) {
             return false;
         }
 
@@ -579,9 +617,10 @@ public class NetworkPolicyManager {
          * @param subId the subscriber this override applies to.
          * @param overrideMask a bitmask that specifies which of the overrides is set.
          * @param overrideValue a bitmask that specifies the override values.
+         * @param networkTypes the network types this override applies to.
          */
         public void onSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
-                @SubscriptionOverrideMask int overrideValue) {}
+                @SubscriptionOverrideMask int overrideValue, int[] networkTypes) {}
 
         /**
          * Notify of subscription plans change about a given subscription.
@@ -605,8 +644,8 @@ public class NetworkPolicyManager {
 
         @Override
         public void onSubscriptionOverride(int subId, @SubscriptionOverrideMask int overrideMask,
-                @SubscriptionOverrideMask int overrideValue) {
-            mCallback.onSubscriptionOverride(subId, overrideMask, overrideValue);
+                @SubscriptionOverrideMask int overrideValue, int[] networkTypes) {
+            mCallback.onSubscriptionOverride(subId, overrideMask, overrideValue, networkTypes);
         }
 
         @Override
@@ -622,7 +661,7 @@ public class NetworkPolicyManager {
         @Override public void onRestrictBackgroundChanged(boolean restrictBackground) { }
         @Override public void onUidPoliciesChanged(int uid, int uidPolicies) { }
         @Override public void onSubscriptionOverride(int subId, int overrideMask,
-                int overrideValue) { }
+                int overrideValue, int[] networkTypes) { }
         @Override public void onSubscriptionPlansChanged(int subId, SubscriptionPlan[] plans) { }
     }
 }

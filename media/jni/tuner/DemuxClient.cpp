@@ -23,20 +23,22 @@
 
 using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
 
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::Result;
 
 namespace android {
 
 /////////////// DemuxClient ///////////////////////
 
-// TODO: pending aidl interface
-DemuxClient::DemuxClient() {
-    //mTunerDemux = tunerDemux;
+DemuxClient::DemuxClient(shared_ptr<ITunerDemux> tunerDemux) {
+    mTunerDemux = tunerDemux;
+    mId = -1;
 }
 
 DemuxClient::~DemuxClient() {
-    //mTunerDemux = NULL;
+    mTunerDemux = NULL;
     mDemux = NULL;
+    mId = -1;
 }
 
 // TODO: remove after migration to Tuner Service is done.
@@ -45,12 +47,10 @@ void DemuxClient::setHidlDemux(sp<IDemux> demux) {
 }
 
 Result DemuxClient::setFrontendDataSource(sp<FrontendClient> frontendClient) {
-    // TODO: pending aidl interface
-    /*if (mTunerDemux != NULL) {
-        // TODO: handle error message
-        mTunerDemux->setFrontendDataSource(frontendClient->getAidlFrontend());
-        return (int) Result::SUCCESS;
-    }*/
+    if (mTunerDemux != NULL) {
+        Status s = mTunerDemux->setFrontendDataSource(frontendClient->getAidlFrontend());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDemux != NULL) {
         Result res = mDemux->setFrontendDataSource(frontendClient->getId());
@@ -62,15 +62,40 @@ Result DemuxClient::setFrontendDataSource(sp<FrontendClient> frontendClient) {
 
 sp<FilterClient> DemuxClient::openFilter(DemuxFilterType type, int bufferSize,
         sp<FilterClientCallback> cb) {
-    // TODO: pending aidl interface
+    if (mTunerDemux != NULL) {
+        shared_ptr<ITunerFilter> tunerFilter;
+        shared_ptr<TunerFilterCallback> callback =
+                ::ndk::SharedRefBase::make<TunerFilterCallback>(cb);
+        Status s = mTunerDemux->openFilter((int)type.mainType, getSubType(type),
+                    bufferSize, callback, &tunerFilter);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        return new FilterClient(type, tunerFilter);
+    }
 
     if (mDemux != NULL) {
         sp<HidlFilterCallback> callback = new HidlFilterCallback(cb);
         sp<IFilter> hidlFilter = openHidlFilter(type, bufferSize, callback);
         if (hidlFilter != NULL) {
-            sp<FilterClient> filterClient = new FilterClient(type);
+            sp<FilterClient> filterClient = new FilterClient(type, NULL);
             filterClient->setHidlFilter(hidlFilter);
             return filterClient;
+        }
+    }
+
+    return NULL;
+}
+
+sp<TimeFilterClient> DemuxClient::openTimeFilter() {
+    // TODO: pending aidl interface
+
+    if (mDemux != NULL) {
+        sp<ITimeFilter> hidlTimeFilter = openHidlTimeFilter();
+        if (hidlTimeFilter != NULL) {
+            sp<TimeFilterClient> timeFilterClient = new TimeFilterClient();
+            timeFilterClient->setHidlTimeFilter(hidlTimeFilter);
+            return timeFilterClient;
         }
     }
 
@@ -188,6 +213,26 @@ sp<IFilter> DemuxClient::openHidlFilter(DemuxFilterType type, int bufferSize,
     return hidlFilter;
 }
 
+sp<ITimeFilter> DemuxClient::openHidlTimeFilter() {
+    if (mDemux == NULL) {
+        return NULL;
+    }
+
+    sp<ITimeFilter> timeFilter;
+    Result res;
+    mDemux->openTimeFilter(
+            [&](Result r, const sp<ITimeFilter>& timeFilterSp) {
+                timeFilter = timeFilterSp;
+                res = r;
+            });
+
+    if (res != Result::SUCCESS || timeFilter == NULL) {
+        return NULL;
+    }
+
+    return timeFilter;
+}
+
 sp<IDvr> DemuxClient::openHidlDvr(DvrType dvrType, int bufferSize,
         sp<HidlDvrCallback> callback) {
     if (mDemux == NULL) {
@@ -206,5 +251,22 @@ sp<IDvr> DemuxClient::openHidlDvr(DvrType dvrType, int bufferSize,
     }
 
     return hidlDvr;
+}
+
+int DemuxClient::getSubType(DemuxFilterType filterType) {
+    switch (filterType.mainType) {
+        case DemuxFilterMainType::TS:
+            return (int)filterType.subType.tsFilterType();
+        case DemuxFilterMainType::MMTP:
+            return (int)filterType.subType.mmtpFilterType();
+        case DemuxFilterMainType::IP:
+            return (int)filterType.subType.ipFilterType();
+        case DemuxFilterMainType::TLV:
+            return (int)filterType.subType.tlvFilterType();
+        case DemuxFilterMainType::ALP:
+            return (int)filterType.subType.alpFilterType();
+        default:
+            return -1;
+    }
 }
 }  // namespace android

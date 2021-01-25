@@ -1,4 +1,12 @@
 // Signature format: 2.0
+package android {
+
+  public static final class Manifest.permission {
+    field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
+  }
+
+}
+
 package android.app {
 
   public class ActivityManager {
@@ -26,16 +34,28 @@ package android.app {
     field public static final String ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED = "android.app.action.NOTIFICATION_LISTENER_ENABLED_CHANGED";
   }
 
+  public final class PendingIntent implements android.os.Parcelable {
+    method @Nullable @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
+  }
+
   public class StatusBarManager {
     method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 
 }
 
-package android.app.role {
+package android.content {
 
-  public final class RoleManager {
-    method @Nullable public String getSmsRoleHolder(int);
+  public abstract class Context {
+    method @NonNull public android.os.UserHandle getUser();
+  }
+
+}
+
+package android.content.pm {
+
+  public abstract class PackageManager {
+    method @NonNull public String getPermissionControllerPackageName();
   }
 
 }
@@ -108,7 +128,7 @@ package android.media.session {
   }
 
   public final class MediaSessionManager {
-    method public void addOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, @Nullable android.content.ComponentName, int, @Nullable android.os.Handler);
+    method public void addOnActiveSessionsChangedListener(@NonNull android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, @Nullable android.content.ComponentName, @NonNull android.os.UserHandle, @Nullable android.os.Handler);
     method public void dispatchMediaKeyEvent(@NonNull android.view.KeyEvent);
     method public void dispatchMediaKeyEvent(@NonNull android.view.KeyEvent, boolean);
     method public void dispatchMediaKeyEventAsSystemService(@NonNull android.view.KeyEvent);
@@ -116,7 +136,7 @@ package android.media.session {
     method public void dispatchVolumeKeyEvent(@NonNull android.view.KeyEvent, int, boolean);
     method public void dispatchVolumeKeyEventAsSystemService(@NonNull android.view.KeyEvent, int);
     method public void dispatchVolumeKeyEventToSessionAsSystemService(@NonNull android.view.KeyEvent, @NonNull android.media.session.MediaSession.Token);
-    method @NonNull public java.util.List<android.media.session.MediaController> getActiveSessionsForUser(@Nullable android.content.ComponentName, int);
+    method @NonNull public java.util.List<android.media.session.MediaController> getActiveSessionsForUser(@Nullable android.content.ComponentName, @NonNull android.os.UserHandle);
     method public void registerRemoteSessionCallback(@NonNull java.util.concurrent.Executor, @NonNull android.media.session.MediaSessionManager.RemoteSessionCallback);
     method public void unregisterRemoteSessionCallback(@NonNull android.media.session.MediaSessionManager.RemoteSessionCallback);
     field public static final int RESULT_MEDIA_KEY_HANDLED = 1; // 0x1
@@ -136,6 +156,14 @@ package android.media.session {
 
 package android.net {
 
+  public class ConnectivityManager {
+    method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
+  }
+
+  public final class NetworkCapabilities implements android.os.Parcelable {
+    field public static final int TRANSPORT_TEST = 7; // 0x7
+  }
+
   public final class TcpRepairWindow {
     ctor public TcpRepairWindow(int, int, int, int, int, int);
     field public final int maxWindow;
@@ -146,12 +174,32 @@ package android.net {
     field public final int sndWnd;
   }
 
+  public final class TestNetworkInterface implements android.os.Parcelable {
+    ctor public TestNetworkInterface(@NonNull android.os.ParcelFileDescriptor, @NonNull String);
+    method public int describeContents();
+    method @NonNull public android.os.ParcelFileDescriptor getFileDescriptor();
+    method @NonNull public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.TestNetworkInterface> CREATOR;
+  }
+
+  public class TestNetworkManager {
+    method @NonNull public android.net.TestNetworkInterface createTapInterface();
+    method @NonNull public android.net.TestNetworkInterface createTunInterface(@NonNull java.util.Collection<android.net.LinkAddress>);
+    method public void setupTestNetwork(@NonNull String, @NonNull android.os.IBinder);
+    method public void teardownTestNetwork(@NonNull android.net.Network);
+  }
+
 }
 
 package android.os {
 
   public class Binder implements android.os.IBinder {
     method public final void markVintfStability();
+  }
+
+  public static class Build.VERSION {
+    field public static final int FIRST_SDK_INT;
   }
 
   public interface Parcelable {

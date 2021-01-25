@@ -43,6 +43,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -115,6 +116,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -165,6 +167,9 @@ public class StorageManager {
     public static final String UUID_PRIMARY_PHYSICAL = "primary_physical";
     /** {@hide} */
     public static final String UUID_SYSTEM = "system";
+
+    // NOTE: See comments around #convert for more details.
+    private static final String FAT_UUID_PREFIX = "fafafafa-fafa-5afa-8afa-fafa";
 
     // NOTE: UUID constants below are namespaced
     // uuid -v5 ad99aa3d-308e-4191-a200-ebcab371c0ad default
@@ -2620,21 +2625,44 @@ public class StorageManager {
         return isCacheBehavior(path, XATTR_CACHE_TOMBSTONE);
     }
 
+    /**
+     * Returns true if {@code uuid} is a FAT volume identifier. FAT Volume identifiers
+     * are 32 randomly generated bits that are represented in string form as AAAA-AAAA.
+     */
+    private static boolean isFatVolumeIdentifier(String uuid) {
+        return uuid.length() == 9 && uuid.charAt(4) == '-';
+    }
+
     /** {@hide} */
-    public static UUID convert(String uuid) {
+    @TestApi
+    public static @NonNull UUID convert(@NonNull String uuid) {
         if (Objects.equals(uuid, UUID_PRIVATE_INTERNAL)) {
             return UUID_DEFAULT;
         } else if (Objects.equals(uuid, UUID_PRIMARY_PHYSICAL)) {
             return UUID_PRIMARY_PHYSICAL_;
         } else if (Objects.equals(uuid, UUID_SYSTEM)) {
             return UUID_SYSTEM_;
+        } else if (isFatVolumeIdentifier(uuid)) {
+            // FAT volume identifiers are not UUIDs but we need to coerce them into
+            // UUIDs in order to satisfy apis that take java.util.UUID arguments.
+            //
+            // We coerce a 32 bit fat volume identifier of the form XXXX-YYYY into
+            // a UUID of form "fafafafa-fafa-5afa-8afa-fafaXXXXYYYY". This is an
+            // RFC-422 UUID with Version 5, which is a namespaced UUID. The UUIDs we
+            // coerce into are not true namespace UUIDs; although FAT storage volume
+            // identifiers are unique names within a fixed namespace, this UUID is not
+            // based on an SHA-1 hash of the name. We avoid the SHA-1 hash because
+            // (a) we need this transform to be reversible (b) it's pointless to generate
+            // a 128 bit hash from a 32 bit value.
+            return UUID.fromString(FAT_UUID_PREFIX + uuid.replace("-", ""));
         } else {
             return UUID.fromString(uuid);
         }
     }
 
     /** {@hide} */
-    public static String convert(UUID storageUuid) {
+    @TestApi
+    public static @NonNull String convert(@NonNull UUID storageUuid) {
         if (UUID_DEFAULT.equals(storageUuid)) {
             return UUID_PRIVATE_INTERNAL;
         } else if (UUID_PRIMARY_PHYSICAL_.equals(storageUuid)) {
@@ -2642,6 +2670,17 @@ public class StorageManager {
         } else if (UUID_SYSTEM_.equals(storageUuid)) {
             return UUID_SYSTEM;
         } else {
+            String uuidString = storageUuid.toString();
+            // This prefix match will exclude fsUuids from private volumes because
+            // (a) linux fsUuids are generally Version 4 (random) UUIDs so the prefix
+            // will contain 4xxx instead of 5xxx and (b) we've already matched against
+            // known namespace (Version 5) UUIDs above.
+            if (uuidString.startsWith(FAT_UUID_PREFIX)) {
+                String fatStr = uuidString.substring(FAT_UUID_PREFIX.length())
+                        .toUpperCase(Locale.US);
+                return fatStr.substring(0, 4) + "-" + fatStr.substring(4);
+            }
+
             return storageUuid.toString();
         }
     }

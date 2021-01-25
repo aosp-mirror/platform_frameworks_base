@@ -807,22 +807,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public LocationTime getGnssTimeMillis() {
-        synchronized (mLock) {
-            LocationProviderManager gpsManager = getLocationProviderManager(GPS_PROVIDER);
-            if (gpsManager == null) {
-                return null;
-            }
-
-            Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
-                    PERMISSION_FINE, false, Long.MAX_VALUE);
-            if (location == null) {
-                return null;
-            }
-
-            long currentNanos = SystemClock.elapsedRealtimeNanos();
-            long deltaMs = NANOSECONDS.toMillis(location.getElapsedRealtimeAgeNanos(currentNanos));
-            return new LocationTime(location.getTime() + deltaMs, currentNanos);
-        }
+        return mLocalService.getGnssTimeMillis();
     }
 
     @Override
@@ -964,7 +949,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public boolean isProviderPackage(String provider, String packageName) {
+    public boolean isProviderPackage(@Nullable String provider, String packageName,
+            @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
 
         for (LocationProviderManager manager : mProviderManagers) {
@@ -975,7 +961,8 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (identity == null) {
                 continue;
             }
-            if (identity.getPackageName().equals(packageName)) {
+            if (identity.getPackageName().equals(packageName) && (attributionTag == null
+                    || Objects.equals(identity.getAttributionTag(), attributionTag))) {
                 return true;
             }
         }
@@ -1179,7 +1166,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     public int handleShellCommand(ParcelFileDescriptor in, ParcelFileDescriptor out,
             ParcelFileDescriptor err, String[] args) {
-        return new LocationShellCommand(this).exec(
+        return new LocationShellCommand(mContext, this).exec(
                 this, in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(),
                 args);
     }
@@ -1277,13 +1264,17 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
 
         @Override
-        public boolean isProvider(String provider, CallerIdentity identity) {
-            LocationProviderManager manager = getLocationProviderManager(provider);
-            if (manager == null) {
-                return false;
-            } else {
-                return identity.equals(manager.getIdentity());
+        public boolean isProvider(@Nullable String provider, CallerIdentity identity) {
+            for (LocationProviderManager manager : mProviderManagers) {
+                if (provider != null && !provider.equals(manager.getName())) {
+                    continue;
+                }
+                if (identity.equalsIgnoringListenerId(manager.getIdentity())) {
+                    return true;
+                }
             }
+
+            return false;
         }
 
         @Override
@@ -1291,6 +1282,25 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (mGnssManagerService != null) {
                 mGnssManagerService.sendNiResponse(notifId, userResponse);
             }
+        }
+
+        @Override
+        public @Nullable LocationTime getGnssTimeMillis() {
+            LocationProviderManager gpsManager = getLocationProviderManager(GPS_PROVIDER);
+            if (gpsManager == null) {
+                return null;
+            }
+
+            Location location = gpsManager.getLastLocationUnsafe(UserHandle.USER_ALL,
+                    PERMISSION_FINE, false, Long.MAX_VALUE);
+            if (location == null) {
+                return null;
+            }
+
+            long currentNanos = SystemClock.elapsedRealtimeNanos();
+            long deltaMs = NANOSECONDS.toMillis(
+                    location.getElapsedRealtimeAgeNanos(currentNanos));
+            return new LocationTime(location.getTime() + deltaMs, currentNanos);
         }
     }
 

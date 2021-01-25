@@ -30,6 +30,7 @@ import com.android.systemui.dagger.SysUIComponent;
 import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.navigationbar.gestural.BackGestureTfClassifierProvider;
 import com.android.systemui.screenshot.ScreenshotNotificationSmartActionsProvider;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -107,22 +108,28 @@ public class SystemUIFactory {
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
                     .setPip(mWMComponent.getPip())
                     .setLegacySplitScreen(mWMComponent.getLegacySplitScreen())
+                    .setSplitScreen(mWMComponent.getSplitScreen())
                     .setOneHanded(mWMComponent.getOneHanded())
                     .setBubbles(mWMComponent.getBubbles())
                     .setHideDisplayCutout(mWMComponent.getHideDisplayCutout())
                     .setShellCommandHandler(mWMComponent.getShellCommandHandler())
-                    .setAppPairs(mWMComponent.getAppPairs());
+                    .setAppPairs(mWMComponent.getAppPairs())
+                    .setTaskViewFactory(mWMComponent.getTaskViewFactory())
+                    .setTransitions(mWMComponent.getTransitions());
         } else {
             // TODO: Call on prepareSysUIComponentBuilder but not with real components. Other option
             // is separating this logic into newly creating SystemUITestsFactory.
             builder = prepareSysUIComponentBuilder(builder, mWMComponent)
                     .setPip(Optional.ofNullable(null))
                     .setLegacySplitScreen(Optional.ofNullable(null))
+                    .setSplitScreen(Optional.ofNullable(null))
                     .setOneHanded(Optional.ofNullable(null))
                     .setBubbles(Optional.ofNullable(null))
                     .setHideDisplayCutout(Optional.ofNullable(null))
                     .setShellCommandHandler(Optional.ofNullable(null))
-                    .setAppPairs(Optional.ofNullable(null));
+                    .setAppPairs(Optional.ofNullable(null))
+                    .setTaskViewFactory(Optional.ofNullable(null))
+                    .setTransitions(Transitions.createEmptyForTesting());
         }
         mSysUIComponent = builder.build();
         if (initializeComponents) {

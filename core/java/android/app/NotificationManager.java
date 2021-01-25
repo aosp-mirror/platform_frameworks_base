@@ -1730,6 +1730,23 @@ public class NotificationManager {
     }
 
     /**
+     * Controls whether toast rate limiting is enabled for the calling uid.
+     *
+     * @param enable true to enable toast rate limiting, false to disable it
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING)
+    public void setToastRateLimitingEnabled(boolean enable) {
+        INotificationManager service = getService();
+        try {
+            service.setToastRateLimitingEnabled(enable);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Notification policy configuration.  Represents user-preferences for notification
      * filtering.
      */

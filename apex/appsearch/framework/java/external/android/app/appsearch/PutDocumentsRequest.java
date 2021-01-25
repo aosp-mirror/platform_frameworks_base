@@ -18,7 +18,6 @@ package android.app.appsearch;
 
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
-import android.app.appsearch.exceptions.AppSearchException;
 
 import com.android.internal.util.Preconditions;
 
@@ -31,7 +30,7 @@ import java.util.List;
 /**
  * Encapsulates a request to index a document into an {@link AppSearchSession} database.
  *
- * @see AppSearchSession#putDocuments
+ * <p>@see AppSearchSession#putDocuments
  */
 public final class PutDocumentsRequest {
     private final List<GenericDocument> mDocuments;
@@ -46,12 +45,16 @@ public final class PutDocumentsRequest {
         return Collections.unmodifiableList(mDocuments);
     }
 
-    /** Builder for {@link PutDocumentsRequest} objects. */
+    /**
+     * Builder for {@link PutDocumentsRequest} objects.
+     *
+     * <p>Once {@link #build} is called, the instance can no longer be used.
+     */
     public static final class Builder {
         private final List<GenericDocument> mDocuments = new ArrayList<>();
         private boolean mBuilt = false;
 
-        /** Adds one or more documents to the request. */
+        /** Adds one or more {@link GenericDocument} objects to the request. */
         @SuppressLint("MissingGetterMatchingBuilder") // Merged list available from getDocuments()
         @NonNull
         public Builder addGenericDocument(@NonNull GenericDocument... documents) {
@@ -59,17 +62,18 @@ public final class PutDocumentsRequest {
             return addGenericDocument(Arrays.asList(documents));
         }
 
-        /** Adds one or more documents to the request. */
+        /** Adds a collection of {@link GenericDocument} objects to the request. */
         @SuppressLint("MissingGetterMatchingBuilder") // Merged list available from getDocuments()
         @NonNull
-        public Builder addGenericDocument(@NonNull Collection<GenericDocument> documents) {
+        public Builder addGenericDocument(
+                @NonNull Collection<? extends GenericDocument> documents) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkNotNull(documents);
             mDocuments.addAll(documents);
             return this;
         }
 
-        /** Builds a new {@link PutDocumentsRequest}. */
+        /** Creates a new {@link PutDocumentsRequest} object. */
         @NonNull
         public PutDocumentsRequest build() {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

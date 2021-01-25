@@ -16,10 +16,12 @@ android_test {
         "frameworks-base-testutils",
         "framework-protos",
         "mockito-target-minus-junit4",
+        "net-tests-utils",
         "platform-test-annotations",
         "services.core",
     ],
     libs: [
+        "android.net.ipsec.ike.stubs.module_lib",
         "android.test.runner",
         "android.test.base",
         "android.test.mock",

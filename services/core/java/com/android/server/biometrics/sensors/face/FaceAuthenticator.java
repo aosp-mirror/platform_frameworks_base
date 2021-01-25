@@ -19,13 +19,13 @@ package com.android.server.biometrics.sensors.face;
 import android.annotation.NonNull;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.hardware.face.IFaceService;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.server.biometrics.SensorConfig;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
@@ -52,8 +52,8 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public byte[] dumpSensorServiceStateProto() throws RemoteException {
-        return mFaceService.dumpSensorServiceStateProto(mSensorId);
+    public byte[] dumpSensorServiceStateProto(boolean clearSchedulerBuffer) throws RemoteException {
+        return mFaceService.dumpSensorServiceStateProto(mSensorId, clearSchedulerBuffer);
     }
 
     @Override
@@ -84,6 +84,12 @@ public final class FaceAuthenticator extends IBiometricAuthenticator.Stub {
     @Override
     public boolean hasEnrolledTemplates(int userId, String opPackageName) throws RemoteException {
         return mFaceService.hasEnrolledFaces(mSensorId, userId, opPackageName);
+    }
+
+    @Override
+    public void invalidateAuthenticatorId(int userId, IInvalidationCallback callback)
+            throws RemoteException {
+        mFaceService.invalidateAuthenticatorId(mSensorId, userId, callback);
     }
 
     @Override

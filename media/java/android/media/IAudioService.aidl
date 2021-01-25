@@ -348,4 +348,18 @@ interface IAudioService {
 
     oneway void unregisterCommunicationDeviceDispatcher(
             ICommunicationDeviceDispatcher dispatcher);
+
+    boolean areFastScrollSoundEffectsEnabled();
+
+    oneway void setFastScrollSoundEffectsEnabled(boolean enabled);
+
+    boolean isHomeSoundEffectEnabled();
+
+    oneway void setHomeSoundEffectEnabled(boolean enabled);
+
+    boolean setAdditionalOutputDeviceDelay(in AudioDeviceAttributes device, long delayMillis);
+
+    long getAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
+
+    long getMaxAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
 }

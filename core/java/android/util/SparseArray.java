@@ -241,6 +241,14 @@ public class SparseArray<E> implements Cloneable {
     }
 
     /**
+     * Alias for {@link #put(int, Object)} to support Kotlin [index]= operator.
+     * @see #put(int, Object)
+     */
+    public void set(int key, E value) {
+        put(key, value);
+    }
+
+    /**
      * Adds a mapping from the specified key to the specified value,
      * replacing the previous mapping from the specified key if there
      * was one.

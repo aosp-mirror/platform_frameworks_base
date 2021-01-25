@@ -138,10 +138,10 @@ import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.BatterySipper;
 import com.android.internal.os.BatteryStatsHelper;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
-import com.android.internal.os.KernelCpuSpeedReader;
 import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelCpuThreadReaderDiff;
 import com.android.internal.os.KernelCpuThreadReaderSettingsObserver;
+import com.android.internal.os.KernelCpuTotalBpfMapReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
@@ -154,14 +154,15 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.role.RoleManagerLocal;
 import com.android.server.BatteryService;
 import com.android.server.BinderCallsStatsService;
+import com.android.server.LocalManagerRegistry;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.notification.NotificationManagerService;
-import com.android.server.role.RoleManagerInternal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
@@ -301,8 +302,6 @@ public class StatsPullAtomService extends SystemService {
     @GuardedBy("mDiskIoLock")
     private StoragedUidIoStatsReader mStoragedUidIoStatsReader;
 
-    @GuardedBy("mCpuTimePerFreqLock")
-    private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
     // Disables throttler on CPU time readers.
     @GuardedBy("mCpuTimePerUidLock")
     private KernelCpuUidUserSysTimeReader mCpuUidUserSysTimeReader;
@@ -353,7 +352,7 @@ public class StatsPullAtomService extends SystemService {
     private final Object mDataBytesTransferLock = new Object();
     private final Object mBluetoothBytesTransferLock = new Object();
     private final Object mKernelWakelockLock = new Object();
-    private final Object mCpuTimePerFreqLock = new Object();
+    private final Object mCpuTimePerClusterFreqLock = new Object();
     private final Object mCpuTimePerUidLock = new Object();
     private final Object mCpuTimePerUidFreqLock = new Object();
     private final Object mCpuActiveTimeLock = new Object();
@@ -442,9 +441,9 @@ public class StatsPullAtomService extends SystemService {
                         synchronized (mKernelWakelockLock) {
                             return pullKernelWakelockLocked(atomTag, data);
                         }
-                    case FrameworkStatsLog.CPU_TIME_PER_FREQ:
-                        synchronized (mCpuTimePerFreqLock) {
-                            return pullCpuTimePerFreqLocked(atomTag, data);
+                    case FrameworkStatsLog.CPU_TIME_PER_CLUSTER_FREQ:
+                        synchronized (mCpuTimePerClusterFreqLock) {
+                            return pullCpuTimePerClusterFreqLocked(atomTag, data);
                         }
                     case FrameworkStatsLog.CPU_TIME_PER_UID:
                         synchronized (mCpuTimePerUidLock) {
@@ -722,18 +721,6 @@ public class StatsPullAtomService extends SystemService {
         mKernelWakelockReader = new KernelWakelockReader();
         mTmpWakelockStats = new KernelWakelockStats();
 
-        // Initialize state for CPU_TIME_PER_FREQ atom
-        PowerProfile powerProfile = new PowerProfile(mContext);
-        final int numClusters = powerProfile.getNumCpuClusters();
-        mKernelCpuSpeedReaders = new KernelCpuSpeedReader[numClusters];
-        int firstCpuOfCluster = 0;
-        for (int i = 0; i < numClusters; i++) {
-            final int numSpeedSteps = powerProfile.getNumSpeedStepsInCpuCluster(i);
-            mKernelCpuSpeedReaders[i] = new KernelCpuSpeedReader(firstCpuOfCluster,
-                    numSpeedSteps);
-            firstCpuOfCluster += powerProfile.getNumCoresInCpuCluster(i);
-        }
-
         // Used for CPU_TIME_PER_THREAD_FREQ
         mKernelCpuThreadReader =
                 KernelCpuThreadReaderSettingsObserver.getSettingsModifiedReader(mContext);
@@ -793,7 +780,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsCallbackImpl = new StatsPullAtomCallbackImpl();
         registerBluetoothBytesTransfer();
         registerKernelWakelock();
-        registerCpuTimePerFreq();
+        registerCpuTimePerClusterFreq();
         registerCpuTimePerUid();
         registerCpuCyclesPerUidCluster();
         registerCpuTimePerUidFreq();
@@ -1465,28 +1452,27 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private void registerCpuTimePerFreq() {
-        int tagId = FrameworkStatsLog.CPU_TIME_PER_FREQ;
-        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setAdditiveFields(new int[] {3})
-                .build();
-        mStatsManager.setPullAtomCallback(
-                tagId,
-                metadata,
-                DIRECT_EXECUTOR,
-                mStatsCallbackImpl
-        );
+    private void registerCpuTimePerClusterFreq() {
+        if (KernelCpuTotalBpfMapReader.isSupported()) {
+            int tagId = FrameworkStatsLog.CPU_TIME_PER_CLUSTER_FREQ;
+            PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                    .setAdditiveFields(new int[] {3})
+                    .build();
+            mStatsManager.setPullAtomCallback(
+                    tagId,
+                    metadata,
+                    DIRECT_EXECUTOR,
+                    mStatsCallbackImpl
+            );
+        }
     }
 
-    int pullCpuTimePerFreqLocked(int atomTag, List<StatsEvent> pulledData) {
-        for (int cluster = 0; cluster < mKernelCpuSpeedReaders.length; cluster++) {
-            long[] clusterTimeMs = mKernelCpuSpeedReaders[cluster].readAbsolute();
-            if (clusterTimeMs != null) {
-                for (int speed = clusterTimeMs.length - 1; speed >= 0; --speed) {
-                    pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                            atomTag, cluster, speed, clusterTimeMs[speed]));
-                }
-            }
+    int pullCpuTimePerClusterFreqLocked(int atomTag, List<StatsEvent> pulledData) {
+        boolean success = KernelCpuTotalBpfMapReader.read((cluster, freq, timeMs) -> {
+            pulledData.add(FrameworkStatsLog.buildStatsEvent(atomTag, cluster, freq, timeMs));
+        });
+        if (!success) {
+            return StatsManager.PULL_SKIP;
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -2078,7 +2064,8 @@ public class StatsPullAtomService extends SystemService {
                         metrics.pageTablesKb,
                         metrics.kernelStackKb,
                         metrics.totalIonKb,
-                        metrics.unaccountedKb));
+                        metrics.unaccountedKb,
+                        metrics.gpuTotalUsageKb));
         return StatsManager.PULL_SUCCESS;
     }
 
@@ -2930,7 +2917,8 @@ public class StatsPullAtomService extends SystemService {
         final long callingToken = Binder.clearCallingIdentity();
         try {
             PackageManager pm = mContext.getPackageManager();
-            RoleManagerInternal rmi = LocalServices.getService(RoleManagerInternal.class);
+            RoleManagerLocal roleManagerLocal = LocalManagerRegistry.getManager(
+                    RoleManagerLocal.class);
 
             List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
 
@@ -2938,27 +2926,23 @@ public class StatsPullAtomService extends SystemService {
             for (int userNum = 0; userNum < numUsers; userNum++) {
                 int userId = users.get(userNum).getUserHandle().getIdentifier();
 
-                ArrayMap<String, ArraySet<String>> roles = rmi.getRolesAndHolders(userId);
+                Map<String, Set<String>> roles = roleManagerLocal.getRolesAndHolders(userId);
 
-                int numRoles = roles.size();
-                for (int roleNum = 0; roleNum < numRoles; roleNum++) {
-                    String roleName = roles.keyAt(roleNum);
-                    ArraySet<String> holders = roles.valueAt(roleNum);
+                for (Map.Entry<String, Set<String>> roleEntry : roles.entrySet()) {
+                    String roleName = roleEntry.getKey();
+                    Set<String> packageNames = roleEntry.getValue();
 
-                    int numHolders = holders.size();
-                    for (int holderNum = 0; holderNum < numHolders; holderNum++) {
-                        String holderName = holders.valueAt(holderNum);
-
+                    for (String packageName : packageNames) {
                         PackageInfo pkg;
                         try {
-                            pkg = pm.getPackageInfoAsUser(holderName, 0, userId);
+                            pkg = pm.getPackageInfoAsUser(packageName, 0, userId);
                         } catch (PackageManager.NameNotFoundException e) {
-                            Slog.w(TAG, "Role holder " + holderName + " not found");
+                            Slog.w(TAG, "Role holder " + packageName + " not found");
                             return StatsManager.PULL_SKIP;
                         }
 
                         pulledData.add(FrameworkStatsLog.buildStatsEvent(
-                                atomTag, pkg.applicationInfo.uid, holderName, roleName));
+                                atomTag, pkg.applicationInfo.uid, packageName, roleName));
                     }
                 }
             }

@@ -3843,7 +3843,6 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public boolean removeUser(@UserIdInt int userId) {
-        Slog.i(LOG_TAG, "removeUser u" + userId, new Exception());
         checkManageOrCreateUsersPermission("Only the system can remove users");
 
         final String restriction = getUserRemovalRestriction(userId);
@@ -3968,13 +3967,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     @Override
-    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
-        Slog.i(LOG_TAG, "removeUserOrSetEphemeral u" + userId);
+    public @UserManager.RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
+            boolean evenWhenDisallowed) {
         checkManageOrCreateUsersPermission("Only the system can remove users");
-        final String restriction = getUserRemovalRestriction(userId);
-        if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
-            Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
-            return UserManager.REMOVE_RESULT_ERROR;
+
+        if (!evenWhenDisallowed) {
+            final String restriction = getUserRemovalRestriction(userId);
+            if (getUserRestrictions(UserHandle.getCallingUserId()).getBoolean(restriction, false)) {
+                Slog.w(LOG_TAG, "Cannot remove user. " + restriction + " is enabled.");
+                return UserManager.REMOVE_RESULT_ERROR;
+            }
         }
         if (userId == UserHandle.USER_SYSTEM) {
             Slog.e(LOG_TAG, "System user cannot be removed.");
@@ -4003,7 +4005,7 @@ public class UserManagerService extends IUserManager.Stub {
                 final int currentUser = ActivityManager.getCurrentUser();
                 if (currentUser != userId) {
                     // Attempt to remove the user. This will fail if the user is the current user
-                    if (removeUser(userId)) {
+                    if (removeUserUnchecked(userId)) {
                         return UserManager.REMOVE_RESULT_REMOVED;
                     }
                 }
@@ -4762,13 +4764,32 @@ public class UserManagerService extends IUserManager.Stub {
                 final boolean hasParent = user.profileGroupId != user.id
                         && user.profileGroupId != UserInfo.NO_PROFILE_GROUP_ID;
                 if (verbose) {
-                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s\n", i, user.id, user.name,
+                    final DevicePolicyManagerInternal dpm = getDevicePolicyManagerInternal();
+                    String deviceOwner = "";
+                    String profileOwner = "";
+                    if (dpm != null) {
+                        final long ident = Binder.clearCallingIdentity();
+                        // NOTE: dpm methods below CANNOT be called while holding the mUsersLock
+                        try {
+                            if (dpm.getDeviceOwnerUserId() == user.id) {
+                                deviceOwner = " (device-owner)";
+                            }
+                            if (dpm.getProfileOwnerAsUser(user.id) != null) {
+                                profileOwner = " (profile-owner)";
+                            }
+                        } finally {
+                            Binder.restoreCallingIdentity(ident);
+                        }
+                    }
+                    pw.printf("%d: id=%d, name=%s, flags=%s%s%s%s%s%s%s%s%s\n", i, user.id,
+                            user.name,
                             UserInfo.flagsToString(user.flags),
                             hasParent ? " (parentId=" + user.profileGroupId + ")" : "",
                             running ? " (running)" : "",
                             user.partial ? " (partial)" : "",
                             user.preCreated ? " (pre-created)" : "",
                             user.convertedFromPreCreated ? " (converted)" : "",
+                            deviceOwner, profileOwner,
                             current ? " (current)" : "");
                 } else {
                     // NOTE: the standard "list users" command is used by integration tests and

@@ -223,6 +223,9 @@ filegroup {
         "media/java/**/*.java",
         "media/java/**/*.aidl",
     ],
+    exclude_srcs: [
+        ":framework-media-tv-tunerresourcemanager-sources-aidl",
+    ],
     path: "media/java",
 }
 
@@ -397,6 +400,7 @@ filegroup {
         ":framework-graphics-srcs",
         ":framework-mediaprovider-sources",
         ":framework-permission-sources",
+        ":framework-permission-s-sources",
         ":framework-sdkextensions-sources",
         ":framework-statsd-sources",
         ":framework-tethering-srcs",
@@ -414,6 +418,7 @@ java_library {
         "framework-media.stubs.module_lib",
         "framework-mediaprovider.stubs.module_lib",
         "framework-permission.stubs.module_lib",
+        "framework-permission-s.stubs.module_lib",
         "framework-sdkextensions.stubs.module_lib",
         "framework-statsd.stubs.module_lib",
         "framework-tethering.stubs.module_lib",
@@ -432,6 +437,7 @@ java_library {
         "framework-graphics.impl",
         "framework-mediaprovider.impl",
         "framework-permission.impl",
+        "framework-permission-s.impl",
         "framework-sdkextensions.impl",
         "framework-statsd.impl",
         "framework-tethering.impl",
@@ -529,6 +535,7 @@ java_library {
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
         "android.security.apc-java",
+        "android.security.authorization-java",
         "android.system.keystore2-java",
         "android.system.suspend.control.internal-java",
         "cameraprotosnano",
@@ -630,6 +637,7 @@ java_defaults {
         // in favor of an API stubs dependency in java_library "framework" below.
         "mimemap",
         "av-types-aidl-java",
+        "tv_tuner_resource_manager_aidl_interface-java",
         "soundtrigger_middleware-aidl-java",
         "modules-utils-os",
     ],
@@ -753,6 +761,7 @@ gensrcs {
         ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
+        ":service-permission-protos",
     ],
     output_extension: "srcjar",
 }
@@ -780,6 +789,7 @@ gensrcs {
         ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
+        ":service-permission-protos",
     ],
 
     output_extension: "proto.h",
@@ -788,6 +798,9 @@ gensrcs {
 filegroup {
     name: "framework-annotations",
     srcs: [
+        "core/java/android/annotation/AnyThread.java",
+        "core/java/android/annotation/AppIdInt.java",
+        "core/java/android/annotation/CallSuper.java",
         "core/java/android/annotation/CallbackExecutor.java",
         "core/java/android/annotation/CheckResult.java",
         "core/java/android/annotation/CurrentTimeMillisLong.java",
@@ -795,6 +808,7 @@ filegroup {
         "core/java/android/annotation/IntDef.java",
         "core/java/android/annotation/IntRange.java",
         "core/java/android/annotation/LongDef.java",
+        "core/java/android/annotation/MainThread.java",
         "core/java/android/annotation/NonNull.java",
         "core/java/android/annotation/Nullable.java",
         "core/java/android/annotation/RequiresPermission.java",
@@ -804,6 +818,7 @@ filegroup {
         "core/java/android/annotation/SystemApi.java",
         "core/java/android/annotation/SystemService.java",
         "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/UserIdInt.java",
         "core/java/android/annotation/WorkerThread.java",
         "core/java/com/android/internal/annotations/GuardedBy.java",
         "core/java/com/android/internal/annotations/VisibleForTesting.java",
@@ -898,6 +913,30 @@ filegroup {
     ],
 }
 
+// Keep these files in sync with the apex/permission/jarjar-rules.txt for the permission module.
+filegroup {
+    name: "framework-permission-s-shared-srcs",
+    srcs: [
+        "core/java/com/android/internal/infra/AndroidFuture.java",
+        "core/java/com/android/internal/infra/ServiceConnector.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+        "core/java/com/android/internal/infra/AndroidFuture.aidl",
+        "core/java/com/android/internal/infra/IAndroidFuture.aidl",
+        "core/java/android/os/HandlerExecutor.java",
+    ],
+    path: "core/java",
+}
+
+// Keep these files in sync with the apex/permission/jarjar-rules.txt for the permission module.
+filegroup {
+    name: "service-permission-shared-srcs",
+    srcs: [
+        "core/java/android/util/IndentingPrintWriter.java",
+        "core/java/com/android/internal/util/dump/DualDumpOutputStream.java",
+    ],
+    path: "core/java",
+}
+
 // Build ext.jar
 // ============================================================
 java_library {
@@ -924,6 +963,7 @@ java_library_host {
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
+        ":service-permission-protos",
     ],
     proto: {
         include_dirs: [
@@ -957,6 +997,7 @@ java_library {
         ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
+        ":service-permission-protos",
     ],
 }
 
@@ -973,6 +1014,7 @@ java_library {
         ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
+        ":service-permission-protos",
     ],
     exclude_srcs: [
         "core/proto/android/privacy.proto",
@@ -1007,6 +1049,7 @@ cc_defaults {
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
         "core/proto/**/*.proto",
+        ":service-permission-protos",
     ],
 }
 
@@ -1115,6 +1158,7 @@ filegroup {
         "core/java/android/os/incremental/IStorageLoadingProgressListener.aidl",
         "core/java/android/os/incremental/IncrementalNewFileParams.aidl",
         "core/java/android/os/incremental/IStorageHealthListener.aidl",
+        "core/java/android/os/incremental/PerUidReadTimeouts.aidl",
         "core/java/android/os/incremental/StorageHealthCheckParams.aidl",
     ],
     path: "core/java",

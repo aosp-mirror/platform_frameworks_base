@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
+import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardLiftController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -82,7 +83,9 @@ public class KeyguardModule {
             @UiBackground Executor uiBgExecutor,
             DeviceConfigProxy deviceConfig,
             NavigationModeController navigationModeController,
-            KeyguardDisplayManager keyguardDisplayManager) {
+            KeyguardDisplayManager keyguardDisplayManager,
+            DozeParameters dozeParameters,
+            StatusBarStateController statusBarStateController) {
         return new KeyguardViewMediator(
                 context,
                 falsingCollector,
@@ -97,7 +100,9 @@ public class KeyguardModule {
                 trustManager,
                 deviceConfig,
                 navigationModeController,
-                keyguardDisplayManager
+                keyguardDisplayManager,
+                dozeParameters,
+                statusBarStateController
         );
     }
 

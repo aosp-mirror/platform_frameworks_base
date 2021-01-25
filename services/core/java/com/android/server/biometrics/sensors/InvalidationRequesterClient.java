@@ -18,8 +18,12 @@ package com.android.server.biometrics.sensors;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.IInvalidationCallback;
+
+import com.android.server.biometrics.BiometricsProto;
 
 /**
  * ClientMonitor subclass responsible for coordination of authenticatorId invalidation of other
@@ -53,34 +57,43 @@ import android.hardware.biometrics.BiometricsProtoEnums;
  * switches, the framework can check if any sensor has the "invalidationInProgress" flag set. If so,
  * the framework should re-start the invalidation process described above.
  */
-public abstract class InvalidationRequesterClient<T> extends ClientMonitor<T> {
+public class InvalidationRequesterClient<S extends BiometricAuthenticator.Identifier>
+        extends BaseClientMonitor {
 
     private final BiometricManager mBiometricManager;
+    @NonNull private final BiometricUtils<S> mUtils;
 
-    public InvalidationRequesterClient(@NonNull Context context, @NonNull LazyDaemon<T> lazyDaemon,
-            int userId, int sensorId) {
-        super(context, lazyDaemon, null /* token */, null /* listener */, userId,
+    @NonNull private final IInvalidationCallback mInvalidationCallback =
+            new IInvalidationCallback.Stub() {
+        @Override
+        public void onCompleted() {
+            mUtils.setInvalidationInProgress(getContext(), getTargetUserId(),
+                    false /* inProgress */);
+            mCallback.onClientFinished(InvalidationRequesterClient.this, true /* success */);
+        }
+    };
+
+    public InvalidationRequesterClient(@NonNull Context context, int userId, int sensorId,
+            @NonNull BiometricUtils<S> utils) {
+        super(context, null /* token */, null /* listener */, userId,
                 context.getOpPackageName(), 0 /* cookie */, sensorId,
                 BiometricsProtoEnums.MODALITY_UNKNOWN, BiometricsProtoEnums.ACTION_UNKNOWN,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricManager = context.getSystemService(BiometricManager.class);
+        mUtils = utils;
     }
 
     @Override
     public void start(@NonNull Callback callback) {
         super.start(callback);
 
-        // TODO(b/159667191): Request BiometricManager/BiometricService to invalidate
-        //  authenticatorIds. Be sure to invoke BiometricUtils#setInvalidationInProgress(true)
+        mUtils.setInvalidationInProgress(getContext(), getTargetUserId(), true /* inProgress */);
+        mBiometricManager.invalidateAuthenticatorIds(getTargetUserId(), getSensorId(),
+                mInvalidationCallback);
     }
 
     @Override
-    public void unableToStart() {
-
-    }
-
-    @Override
-    protected void startHalOperation() {
-        // No HAL operations necessary
+    public int getProtoEnum() {
+        return BiometricsProto.CM_INVALIDATION_REQUESTER;
     }
 }

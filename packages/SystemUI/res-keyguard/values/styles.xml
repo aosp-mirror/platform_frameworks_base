@@ -30,7 +30,13 @@
         <item name="android:paddingLeft">12dp</item>
         <item name="android:paddingRight">12dp</item>
     </style>
-    <style name="Widget.TextView.NumPadKey" parent="@android:style/Widget.DeviceDefault.TextView">
+    <style name="NumPadKey" parent="Theme.SystemUI">
+      <item name="android:colorControlNormal">?android:attr/colorBackground</item>
+      <item name="android:colorControlHighlight">?android:attr/colorAccent</item>
+      <item name="android:background">@drawable/num_pad_key_background</item>
+    </style>
+    <style name="Widget.TextView.NumPadKey.Digit"
+           parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:singleLine">true</item>
         <item name="android:gravity">center_horizontal|center_vertical</item>
         <item name="android:background">@null</item>
@@ -38,26 +44,25 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:paddingBottom">-16dp</item>
-        <item name="android:colorControlHighlight">?android:attr/textColorPrimary</item>
     </style>
     <style name="Widget.TextView.Password" parent="@android:style/Widget.TextView">
         <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
         <item name="android:gravity">center</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
-    <style name="Keyguard.ImageButton.NumPadDelete" parent="@android:style/Widget.DeviceDefault.ImageButton">
+    <style name="NumPadKey.Delete">
         <item name="android:src">@drawable/ic_backspace_black_24dp</item>
-        <item name="android:paddingBottom">11sp</item>
         <item name="android:tint">?android:attr/textColorSecondary</item>
         <item name="android:tintMode">src_in</item>
-        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
     </style>
-    <style name="Keyguard.ImageButton.NumPadEnter" parent="@android:style/Widget.DeviceDefault.ImageButton">
-        <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
-        <item name="android:paddingBottom">11sp</item>
+    <style name="NumPadKey.Enter">
+      <item name="android:colorControlNormal">?android:attr/textColorSecondary</item>
+      <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
     </style>
-    <style name="Widget.TextView.NumPadKey.Klondike">
+    <style name="Widget.TextView.NumPadKey.Klondike"
+           parent="@android:style/Widget.DeviceDefault.TextView">
         <item name="android:textSize">12sp</item>
+        <item name="android:background">@null</item>
         <item name="android:fontFamily">@*android:string/config_bodyFontFamily</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>
         <item name="android:paddingBottom">0dp</item>

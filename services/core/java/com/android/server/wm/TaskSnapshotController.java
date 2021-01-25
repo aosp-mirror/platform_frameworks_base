@@ -35,6 +35,7 @@ import android.hardware.HardwareBuffer;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.util.Slog;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
@@ -275,39 +276,12 @@ class TaskSnapshotController {
      */
     @VisibleForTesting
     boolean prepareTaskSnapshot(Task task, int pixelFormat, TaskSnapshot.Builder builder) {
-        if (!mService.mPolicy.isScreenOn()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
-            }
+        final Pair<ActivityRecord, WindowState> result = checkIfReadyToSnapshot(task);
+        if (result == null) {
             return false;
         }
-        final ActivityRecord activity = findAppTokenForSnapshot(task);
-        if (activity == null) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
-            }
-            return false;
-        }
-        if (activity.hasCommittedReparentToAnimationLeash()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
-            }
-            return false;
-        }
-
-        final WindowState mainWindow = activity.findMainWindow();
-        if (mainWindow == null) {
-            Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
-            return false;
-        }
-        if (activity.hasFixedRotationTransform()) {
-            if (DEBUG_SCREENSHOT) {
-                Slog.i(TAG_WM, "Skip taking screenshot. App has fixed rotation " + activity);
-            }
-            // The activity is in a temporal state that it has different rotation than the task.
-            return false;
-        }
-
+        final ActivityRecord activity = result.first;
+        final WindowState mainWindow = result.second;
         final Rect contentInsets = getSystemBarInsets(task.getBounds(),
                 mainWindow.getInsetsStateWithVisibilityOverride());
         InsetUtils.addInsets(contentInsets, activity.getLetterboxInsets());
@@ -339,6 +313,50 @@ class TaskSnapshotController {
         return true;
     }
 
+    /**
+     * Check if the state of the Task is appropriate to capture a snapshot, such like the task
+     * snapshot or the associated IME surface snapshot.
+     *
+     * @param task the target task to capture the snapshot
+     * @return Pair of (the top activity of the task, the main window of the task) if passed the
+     * state checking. Returns {@code null} if the task state isn't ready to snapshot.
+     */
+    Pair<ActivityRecord, WindowState> checkIfReadyToSnapshot(Task task) {
+        if (!mService.mPolicy.isScreenOn()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Attempted to take screenshot while display was off.");
+            }
+            return null;
+        }
+        final ActivityRecord activity = findAppTokenForSnapshot(task);
+        if (activity == null) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. No visible windows for " + task);
+            }
+            return null;
+        }
+        if (activity.hasCommittedReparentToAnimationLeash()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. App is animating " + activity);
+            }
+            return null;
+        }
+
+        final WindowState mainWindow = activity.findMainWindow();
+        if (mainWindow == null) {
+            Slog.w(TAG_WM, "Failed to take screenshot. No main window for " + task);
+            return null;
+        }
+        if (activity.hasFixedRotationTransform()) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.i(TAG_WM, "Skip taking screenshot. App has fixed rotation " + activity);
+            }
+            // The activity is in a temporal state that it has different rotation than the task.
+            return null;
+        }
+        return new Pair<>(activity, mainWindow);
+    }
+
     @Nullable
     SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
             TaskSnapshot.Builder builder) {
@@ -356,6 +374,43 @@ class TaskSnapshotController {
     }
 
     @Nullable
+    private SurfaceControl.ScreenshotHardwareBuffer createImeSnapshot(@NonNull Task task,
+            int pixelFormat) {
+        if (task.getSurfaceControl() == null) {
+            if (DEBUG_SCREENSHOT) {
+                Slog.w(TAG_WM, "Failed to take screenshot. No surface control for " + task);
+            }
+            return null;
+        }
+        final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
+        SurfaceControl.ScreenshotHardwareBuffer imeBuffer = null;
+        if (imeWindow != null && imeWindow.isWinVisibleLw()) {
+            final Rect bounds = imeWindow.getContainingFrame();
+            bounds.offsetTo(0, 0);
+            imeBuffer = SurfaceControl.captureLayersExcluding(imeWindow.getSurfaceControl(),
+                    bounds, 1.0f, pixelFormat, null);
+        }
+        return imeBuffer;
+    }
+
+    /**
+     * Create the snapshot of the IME surface on the task which used for placing on the closing
+     * task to keep IME visibility while app transitioning.
+     */
+    @Nullable
+    SurfaceControl.ScreenshotHardwareBuffer snapshotImeFromAttachedTask(@NonNull Task task) {
+        // Check if the IME targets task ready to take the corresponding IME snapshot, if not,
+        // means the task is not yet visible for some reasons and no need to snapshot IME surface.
+        if (checkIfReadyToSnapshot(task) == null) {
+            return null;
+        }
+        final int pixelFormat = mPersister.use16BitFormat()
+                    ? PixelFormat.RGB_565
+                    : PixelFormat.RGBA_8888;
+        return createImeSnapshot(task, pixelFormat);
+    }
+
+    @Nullable
     SurfaceControl.ScreenshotHardwareBuffer createTaskSnapshot(@NonNull Task task,
             float scaleFraction, int pixelFormat, Point outTaskSize, TaskSnapshot.Builder builder) {
         if (task.getSurfaceControl() == null) {
@@ -370,14 +425,26 @@ class TaskSnapshotController {
         SurfaceControl[] excludeLayers;
         final WindowState imeWindow = task.getDisplayContent().mInputMethodWindow;
         // Exclude IME window snapshot when IME isn't proper to attach to app.
-        if (imeWindow != null && imeWindow.getSurfaceControl() != null
-                && !task.getDisplayContent().isImeAttachedToApp()) {
-            excludeLayers = new SurfaceControl[1];
+        final boolean excludeIme = imeWindow != null && imeWindow.getSurfaceControl() != null
+                && !task.getDisplayContent().isImeAttachedToApp();
+        final WindowState navWindow =
+                task.getDisplayContent().getDisplayPolicy().getNavigationBar();
+        // If config_attachNavBarToAppDuringTransition is true, the nav bar will be reparent to the
+        // the swiped app when entering recent app, therefore the task will contain the navigation
+        // bar and we should exclude it from snapshot.
+        final boolean excludeNavBar = navWindow != null;
+        if (excludeIme && excludeNavBar) {
+            excludeLayers = new SurfaceControl[2];
             excludeLayers[0] = imeWindow.getSurfaceControl();
+            excludeLayers[1] = navWindow.getSurfaceControl();
+        } else if (excludeIme || excludeNavBar) {
+            excludeLayers = new SurfaceControl[1];
+            excludeLayers[0] =
+                    excludeIme ? imeWindow.getSurfaceControl() : navWindow.getSurfaceControl();
         } else {
             excludeLayers = new SurfaceControl[0];
-            builder.setHasImeSurface(imeWindow != null && imeWindow.isDrawn());
         }
+        builder.setHasImeSurface(!excludeIme && imeWindow != null && imeWindow.isDrawn());
         final SurfaceControl.ScreenshotHardwareBuffer screenshotBuffer =
                 SurfaceControl.captureLayersExcluding(
                         task.getSurfaceControl(), mTmpRect, scaleFraction,

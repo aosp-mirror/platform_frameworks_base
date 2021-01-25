@@ -19,6 +19,8 @@ package com.android.internal.os;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
+import static com.android.internal.power.MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -103,7 +105,6 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidActiveTimeRead
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
-import com.android.internal.power.MeasuredEnergyArray;
 import com.android.internal.power.MeasuredEnergyStats;
 import com.android.internal.power.MeasuredEnergyStats.EnergyBucket;
 import com.android.internal.util.ArrayUtils;
@@ -370,14 +371,6 @@ public class BatteryStatsImpl extends BatteryStats {
          * @param railStats
          */
         void fillRailDataStats(RailStats railStats);
-        /**
-         * Function to get energy consumption data
-         *
-         * @return an array of measured energy (in microjoules) since boot, will be null if
-         * measured energy data is unavailable
-         */
-        @Nullable
-        MeasuredEnergyArray getEnergyConsumptionData();
     }
 
     public static abstract class UserInfoProvider {
@@ -867,13 +860,12 @@ public class BatteryStatsImpl extends BatteryStats {
 
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     protected int mScreenState = Display.STATE_UNKNOWN;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected StopwatchTimer mScreenOnTimer;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected StopwatchTimer mScreenDozeTimer;
+    StopwatchTimer mScreenOnTimer;
+    StopwatchTimer mScreenDozeTimer;
 
     int mScreenBrightnessBin = -1;
-    final StopwatchTimer[] mScreenBrightnessTimer = new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
+    final StopwatchTimer[] mScreenBrightnessTimer =
+            new StopwatchTimer[NUM_SCREEN_BRIGHTNESS_BINS];
 
     boolean mPretendScreenOff;
 
@@ -917,8 +909,7 @@ public class BatteryStatsImpl extends BatteryStats {
     int mUsbDataState = USB_DATA_UNKNOWN;
 
     int mGpsSignalQualityBin = -1;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected final StopwatchTimer[] mGpsSignalQualityTimer =
+    final StopwatchTimer[] mGpsSignalQualityTimer =
         new StopwatchTimer[GnssSignalQuality.NUM_GNSS_SIGNAL_QUALITY_LEVELS];
 
     int mPhoneSignalStrengthBin = -1;
@@ -934,6 +925,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
     final LongSamplingCounter[] mNetworkByteActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
+
     final LongSamplingCounter[] mNetworkPacketActivityCounters =
             new LongSamplingCounter[NUM_NETWORK_ACTIVITY_TYPES];
 
@@ -953,8 +945,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * The Bluetooth controller activity (time in tx, rx, idle, and power consumed) for the device.
      */
-    @VisibleForTesting
-    protected ControllerActivityCounterImpl mBluetoothActivity;
+    ControllerActivityCounterImpl mBluetoothActivity;
 
     /**
      * The Modem controller activity (time in tx, rx, idle, and power consumed) for the device.
@@ -998,8 +989,7 @@ public class BatteryStatsImpl extends BatteryStats {
     StopwatchTimer mWifiActiveTimer;
 
     int mBluetoothScanNesting;
-    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
-    protected StopwatchTimer mBluetoothScanTimer;
+    StopwatchTimer mBluetoothScanTimer;
 
     int mMobileRadioPowerState = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
     long mMobileRadioActiveStartTimeMs;
@@ -10702,15 +10692,13 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     public BatteryStatsImpl(File systemDir, Handler handler, PlatformIdleStateCallback cb,
-            MeasuredEnergyRetriever energyStatsCb, boolean[] supportedEnergyBuckets,
-            UserInfoProvider userInfoProvider) {
-        this(new SystemClocks(), systemDir, handler, cb, energyStatsCb, supportedEnergyBuckets,
-                userInfoProvider);
+            MeasuredEnergyRetriever energyStatsCb, UserInfoProvider userInfoProvider) {
+        this(new SystemClocks(), systemDir, handler, cb, energyStatsCb, userInfoProvider);
     }
 
     private BatteryStatsImpl(Clocks clocks, File systemDir, Handler handler,
             PlatformIdleStateCallback cb, MeasuredEnergyRetriever energyStatsCb,
-            boolean[] supportedEnergyBuckets, UserInfoProvider userInfoProvider) {
+            UserInfoProvider userInfoProvider) {
         init(clocks);
 
         if (systemDir == null) {
@@ -10725,6 +10713,31 @@ public class BatteryStatsImpl extends BatteryStats {
         mHandler = new MyHandler(handler.getLooper());
         mConstants = new Constants(mHandler);
         mStartCount++;
+        initTimersAndCounters();
+        mOnBattery = mOnBatteryInternal = false;
+        long uptimeUs = mClocks.uptimeMillis() * 1000;
+        long realtimeUs = mClocks.elapsedRealtime() * 1000;
+        initTimes(uptimeUs, realtimeUs);
+        mStartPlatformVersion = mEndPlatformVersion = Build.ID;
+        mDischargeStartLevel = 0;
+        mDischargeUnplugLevel = 0;
+        mDischargePlugLevel = -1;
+        mDischargeCurrentLevel = 0;
+        mCurrentBatteryLevel = 0;
+        initDischarge(realtimeUs);
+        clearHistoryLocked();
+        updateDailyDeadlineLocked();
+        mPlatformIdleStateCallback = cb;
+        mMeasuredEnergyRetriever = energyStatsCb;
+        mUserInfoProvider = userInfoProvider;
+
+        // Notify statsd that the system is initially not in doze.
+        mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
+        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
+    }
+
+    @VisibleForTesting
+    protected void initTimersAndCounters() {
         mScreenOnTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
         mScreenDozeTimer = new StopwatchTimer(mClocks, null, -1, null, mOnBatteryTimeBase);
         for (int i=0; i<NUM_SCREEN_BRIGHTNESS_BINS; i++) {
@@ -10796,30 +10809,6 @@ public class BatteryStatsImpl extends BatteryStats {
         mDischargeLightDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeDeepDozeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
         mDischargeCounter = new LongSamplingCounter(mOnBatteryTimeBase);
-        mOnBattery = mOnBatteryInternal = false;
-        long uptimeUs = mClocks.uptimeMillis() * 1000;
-        long realtimeUs = mClocks.elapsedRealtime() * 1000;
-        initTimes(uptimeUs, realtimeUs);
-        mStartPlatformVersion = mEndPlatformVersion = Build.ID;
-        mDischargeStartLevel = 0;
-        mDischargeUnplugLevel = 0;
-        mDischargePlugLevel = -1;
-        mDischargeCurrentLevel = 0;
-        mCurrentBatteryLevel = 0;
-        initDischarge(realtimeUs);
-        clearHistoryLocked();
-        updateDailyDeadlineLocked();
-        mPlatformIdleStateCallback = cb;
-        mMeasuredEnergyRetriever = energyStatsCb;
-        mUserInfoProvider = userInfoProvider;
-
-        // Notify statsd that the system is initially not in doze.
-        mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
-        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
-
-        mGlobalMeasuredEnergyStats = supportedEnergyBuckets == null ? null :
-                new MeasuredEnergyStats(supportedEnergyBuckets);
-        mScreenStateAtLastEnergyMeasurement = mScreenState;
     }
 
     @UnsupportedAppUsage
@@ -11634,7 +11623,8 @@ public class BatteryStatsImpl extends BatteryStats {
     @GuardedBy("mModemNetworkLock")
     private NetworkStats mLastModemNetworkStats = new NetworkStats(0, -1);
 
-    private NetworkStats readNetworkStatsLocked(String[] ifaces) {
+    @VisibleForTesting
+    protected NetworkStats readNetworkStatsLocked(String[] ifaces) {
         try {
             if (!ArrayUtils.isEmpty(ifaces)) {
                 INetworkStatsService statsService = INetworkStatsService.Stub.asInterface(
@@ -11933,7 +11923,7 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Distribute Cell radio energy info and network traffic to apps.
      */
-    public void updateMobileRadioState(@Nullable final ModemActivityInfo activityInfo,
+    public void noteModemControllerActivity(@Nullable final ModemActivityInfo activityInfo,
             long elapsedRealtimeMs, long uptimeMs) {
         if (DEBUG_ENERGY) {
             Slog.d(TAG, "Updating mobile radio stats with " + activityInfo);
@@ -12498,21 +12488,6 @@ public class BatteryStatsImpl extends BatteryStats {
             // Any data from the pre-reset era is flushed, so we can henceforth process future data.
             mIgnoreNextExternalStats = false;
         }
-    }
-
-    /**
-     * Get energy consumed (in microjoules) by a set of subsystems from the {@link
-     * MeasuredEnergyRetriever}, if available.
-     *
-     * @return a SparseLongArray that maps consumer id to energy consumed. Returns null if data is
-     * unavailable.
-     */
-    @Nullable
-    public MeasuredEnergyArray getEnergyConsumptionDataLocked() {
-        if (mMeasuredEnergyRetriever == null) {
-            return null;
-        }
-        return mMeasuredEnergyRetriever.getEnergyConsumptionData();
     }
 
     /**
@@ -14238,6 +14213,40 @@ public class BatteryStatsImpl extends BatteryStats {
         mConstants.startObserving(context.getContentResolver());
         registerUsbStateReceiver(context);
     }
+    /**
+     * Initialize the measured energy stats data structures.
+     *
+     * @param supportedEnergyBuckets boolean array indicating which buckets are currently supported
+     */
+    @GuardedBy("this")
+    public void initMeasuredEnergyStatsLocked(boolean[] supportedEnergyBuckets) {
+        boolean supportedBucketMismatch = false;
+        mScreenStateAtLastEnergyMeasurement = mScreenState;
+
+        if (supportedEnergyBuckets == null) {
+            if (mGlobalMeasuredEnergyStats != null) {
+                // Measured energy buckets no longer supported, wipe out the existing data.
+                supportedBucketMismatch = true;
+            }
+        } else if (mGlobalMeasuredEnergyStats == null) {
+            mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(supportedEnergyBuckets);
+            return;
+        } else {
+            for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
+                if (mGlobalMeasuredEnergyStats.isEnergyBucketSupported(i)
+                        != supportedEnergyBuckets[i]) {
+                    supportedBucketMismatch = true;
+                    break;
+                }
+            }
+        }
+
+        if (supportedBucketMismatch) {
+            // Supported energy buckets changed since last boot.
+            // Existing data is no longer reliable.
+            resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());
+        }
+    }
 
     @VisibleForTesting
     public final class Constants extends ContentObserver {
@@ -14917,7 +14926,11 @@ public class BatteryStatsImpl extends BatteryStats {
         mNextMaxDailyDeadlineMs = in.readLong();
         mBatteryTimeToFullSeconds = in.readLong();
 
-        MeasuredEnergyStats.readSummaryFromParcel(mGlobalMeasuredEnergyStats, in);
+        /**
+         * WARNING: Supported buckets may have changed across boots. Bucket mismatch is handled
+         *          later when {@link #initMeasuredEnergyStatsLocked} is called.
+         */
+        mGlobalMeasuredEnergyStats = MeasuredEnergyStats.createAndReadSummaryFromParcel(in);
 
         mStartCount++;
 
@@ -15415,7 +15428,7 @@ public class BatteryStatsImpl extends BatteryStats {
         out.writeLong(mNextMaxDailyDeadlineMs);
         out.writeLong(mBatteryTimeToFullSeconds);
 
-        MeasuredEnergyStats.writeSummaryToParcel(mGlobalMeasuredEnergyStats, out);
+        MeasuredEnergyStats.writeSummaryToParcel(mGlobalMeasuredEnergyStats, out, false);
 
         mScreenOnTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
         mScreenDozeTimer.writeSummaryFromParcelLocked(out, NOWREAL_SYS);
@@ -15740,7 +15753,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 out.writeInt(0);
             }
 
-            MeasuredEnergyStats.writeSummaryToParcel(u.mUidMeasuredEnergyStats, out);
+            MeasuredEnergyStats.writeSummaryToParcel(u.mUidMeasuredEnergyStats, out, true);
 
             final ArrayMap<String, Uid.Wakelock> wakeStats = u.mWakelockStats.getMap();
             int NW = wakeStats.size();

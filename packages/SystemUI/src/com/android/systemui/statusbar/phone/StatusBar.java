@@ -112,6 +112,7 @@ import android.view.ThreadedRenderer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsetsController.Appearance;
+import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
@@ -192,6 +193,7 @@ import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.NotificationShelfController;
 import com.android.systemui.statusbar.NotificationViewHierarchyManager;
+import com.android.systemui.statusbar.PowerButtonReveal;
 import com.android.systemui.statusbar.PulseExpansionHandler;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.StatusBarState;
@@ -371,6 +373,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mWakeUpComingFromTouch;
     private PointF mWakeUpTouchLocation;
     private LightRevealScrim mLightRevealScrim;
+    private PowerButtonReveal mPowerButtonReveal;
 
     private final Object mQueueLock = new Object();
 
@@ -443,9 +446,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private @Appearance int mAppearance;
 
     private boolean mTransientShown;
-
-    private boolean mAppFullscreen;
-    private boolean mAppImmersive;
 
     private final DisplayMetrics mDisplayMetrics;
 
@@ -574,6 +574,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NotificationEntry mDraggedDownEntry;
     private boolean mLaunchCameraWhenFinishedWaking;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
+    private boolean mLaunchEmergencyActionWhenFinishedWaking;
+    private boolean mLaunchEmergencyActionOnFinishedGoingToSleep;
     private int mLastCameraLaunchSource;
     protected PowerManager.WakeLock mGestureWakeLock;
     private Vibrator mVibrator;
@@ -921,10 +923,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (containsType(result.mTransientBarTypes, ITYPE_STATUS_BAR)) {
             showTransientUnchecked();
         }
-        onSystemBarAppearanceChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
-                result.mNavbarColorManagedByIme);
-        mAppFullscreen = result.mAppFullscreen;
-        mAppImmersive = result.mAppImmersive;
+        onSystemBarAttributesChanged(mDisplayId, result.mAppearance, result.mAppearanceRegions,
+                result.mNavbarColorManagedByIme, result.mBehavior, result.mAppFullscreen);
 
         // StatusBarManagerService has a back up of IME token and it's restored here.
         setImeWindowStatus(mDisplayId, result.mImeToken, result.mImeWindowVis,
@@ -1384,7 +1384,7 @@ public class StatusBar extends SystemUI implements DemoMode,
      * @param why the reason for the wake up
      */
     public void wakeUpIfDozing(long time, View where, String why) {
-        if (mDozing) {
+        if (mDozing && !mKeyguardViewMediator.isAnimatingScreenOff()) {
             mPowerManager.wakeUp(
                     time, PowerManager.WAKE_REASON_GESTURE, "com.android.systemui:" + why);
             mWakeUpComingFromTouch = true;
@@ -1730,7 +1730,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         if ((diff2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
             updateQsExpansionEnabled();
-            if ((state1 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
+            if ((state2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0) {
                 mShadeController.animateCollapsePanels();
             }
         }
@@ -2345,8 +2345,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void onSystemBarAppearanceChanged(int displayId, @Appearance int appearance,
-            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme) {
+    public void onSystemBarAttributesChanged(int displayId, @Appearance int appearance,
+            AppearanceRegion[] appearanceRegions, boolean navbarColorManagedByIme,
+            @Behavior int behavior, boolean isFullscreen) {
         if (displayId != mDisplayId) {
             return;
         }
@@ -2359,6 +2360,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mStatusBarMode, navbarColorManagedByIme);
 
         updateBubblesVisibility();
+        mStatusBarStateController.setFullscreenState(isFullscreen);
     }
 
     @Override
@@ -2429,16 +2431,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else {
             return MODE_TRANSPARENT;
         }
-    }
-
-    @Override
-    public void topAppWindowChanged(int displayId, boolean isFullscreen, boolean isImmersive) {
-        if (displayId != mDisplayId) {
-            return;
-        }
-        mAppFullscreen = isFullscreen;
-        mAppImmersive = isImmersive;
-        mStatusBarStateController.setFullscreenState(isFullscreen, isImmersive);
     }
 
     @Override
@@ -2549,16 +2541,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mVolumeComponent != null) {
             mVolumeComponent.dismissNow();
         }
-    }
-
-    /** Returns whether the top activity is in fullscreen mode. */
-    public boolean inFullscreenMode() {
-        return mAppFullscreen;
-    }
-
-    /** Returns whether the top activity is in immersive mode. */
-    public boolean inImmersiveMode() {
-        return mAppImmersive;
     }
 
     public static String viewInfo(View v) {
@@ -2965,6 +2947,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.updateResources();
         }
+
+        mPowerButtonReveal = new PowerButtonReveal(mContext.getResources().getDimensionPixelSize(
+                R.dimen.global_actions_top_padding));
     }
 
     // Visibility reporting
@@ -3672,6 +3657,16 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setDozing(mDozing);
 
+        final boolean usePowerButtonEffect =
+                (isDozing && mWakefulnessLifecycle.getLastSleepReason()
+                        == PowerManager.GO_TO_SLEEP_REASON_POWER_BUTTON)
+                        || (!isDozing && mWakefulnessLifecycle.getLastWakeReason()
+                        == PowerManager.WAKE_REASON_POWER_BUTTON);
+
+        mLightRevealScrim.setRevealEffect(usePowerButtonEffect
+                ? mPowerButtonReveal
+                : LiftReveal.INSTANCE);
+
         mNotificationsController.requestNotificationUpdate("onDozingChanged");
         updateDozingState();
         mDozeServiceHost.updateDozing();
@@ -3844,6 +3839,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                 // is correct.
                 mHandler.post(() -> onCameraLaunchGestureDetected(mLastCameraLaunchSource));
             }
+
+            if (mLaunchEmergencyActionOnFinishedGoingToSleep) {
+                mLaunchEmergencyActionOnFinishedGoingToSleep = false;
+
+                // This gets executed before we will show Keyguard, so post it in order that the
+                // state is correct.
+                mHandler.post(() -> onEmergencyActionLaunchGestureDetected());
+            }
             updateIsKeyguard();
         }
 
@@ -3889,6 +3892,13 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mNotificationPanelViewController.launchCamera(
                         false /* animate */, mLastCameraLaunchSource);
                 mLaunchCameraWhenFinishedWaking = false;
+            }
+            if (mLaunchEmergencyActionWhenFinishedWaking) {
+                mLaunchEmergencyActionWhenFinishedWaking = false;
+                Intent emergencyIntent = getEmergencyActionIntent();
+                if (emergencyIntent != null) {
+                    mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
+                }
             }
             updateScrimController();
         }
@@ -4027,20 +4037,65 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void onEmergencyActionLaunchGestureDetected() {
-        // TODO (b/169793384) Polish the panic gesture to be just like its older brother, camera.
+        Intent emergencyIntent = getEmergencyActionIntent();
+
+        if (emergencyIntent == null) {
+            Log.wtf(TAG, "Couldn't find an app to process the emergency intent.");
+            return;
+        }
+
+        if (isGoingToSleep()) {
+            mLaunchEmergencyActionOnFinishedGoingToSleep = true;
+            return;
+        }
+
+        if (!mDeviceInteractive) {
+            mPowerManager.wakeUp(SystemClock.uptimeMillis(),
+                    PowerManager.WAKE_REASON_GESTURE,
+                    "com.android.systemui:EMERGENCY_GESTURE");
+        }
+        // TODO(b/169087248) Possibly add haptics here for emergency action. Currently disabled for
+        // app-side haptic experimentation.
+
+        if (!mStatusBarKeyguardViewManager.isShowing()) {
+            startActivityDismissingKeyguard(emergencyIntent,
+                    false /* onlyProvisioned */, true /* dismissShade */,
+                    true /* disallowEnterPictureInPictureWhileLaunching */, null /* callback */, 0);
+            return;
+        }
+
+        if (!mDeviceInteractive) {
+            // Avoid flickering of the scrim when we instant launch the camera and the bouncer
+            // comes on.
+            mGestureWakeLock.acquire(LAUNCH_TRANSITION_TIMEOUT_MS + 1000L);
+        }
+
+        if (isWakingUpOrAwake()) {
+            if (mStatusBarKeyguardViewManager.isBouncerShowing()) {
+                mStatusBarKeyguardViewManager.reset(true /* hide */);
+            }
+            mContext.startActivityAsUser(emergencyIntent, UserHandle.CURRENT);
+            return;
+        }
+        // We need to defer the emergency action launch until the screen comes on, since otherwise
+        // we will dismiss us too early since we are waiting on an activity to be drawn and
+        // incorrectly get notified because of the screen on event (which resumes and pauses
+        // some activities)
+        mLaunchEmergencyActionWhenFinishedWaking = true;
+    }
+
+    private @Nullable Intent getEmergencyActionIntent() {
         Intent emergencyIntent = new Intent(EmergencyGesture.ACTION_LAUNCH_EMERGENCY);
         PackageManager pm = mContext.getPackageManager();
         ResolveInfo resolveInfo = pm.resolveActivity(emergencyIntent, /*flags=*/0);
         if (resolveInfo == null) {
-            // TODO(b/171084088) Upgrade log to wtf when we have default app in main branch.
-            Log.d(TAG, "Couldn't find an app to process the emergency intent.");
-            return;
+            Log.wtf(TAG, "Couldn't find an app to process the emergency intent.");
+            return null;
         }
-
         emergencyIntent.setComponent(new ComponentName(resolveInfo.activityInfo.packageName,
                 resolveInfo.activityInfo.name));
         emergencyIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(emergencyIntent, /*dismissShade=*/true);
+        return emergencyIntent;
     }
 
     boolean isCameraAllowedByAdmin() {
@@ -4100,8 +4155,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
             mScrimController.transitionTo(state);
-        } else if (isInLaunchTransition() || mLaunchCameraWhenFinishedWaking
+        } else if (isInLaunchTransition()
+                || mLaunchCameraWhenFinishedWaking
                 || launchingAffordanceWithPreview) {
+            // TODO(b/170133395) Investigate whether Emergency Gesture flag should be included here.
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);

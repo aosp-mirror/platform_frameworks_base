@@ -19,14 +19,19 @@ package com.android.server.powerstats;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.PowerEntityInfo;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.UserHandle;
+import android.power.PowerStatsInternal;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
 import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
@@ -36,6 +41,7 @@ import com.android.server.powerstats.ProtoStreamUtils.PowerEntityInfoUtils;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * This class provides a system service that estimates system power usage
@@ -49,11 +55,12 @@ public class PowerStatsService extends SystemService {
     private static final int DATA_STORAGE_VERSION = 0;
     private static final String METER_FILENAME = "log.powerstats.meter." + DATA_STORAGE_VERSION;
     private static final String MODEL_FILENAME = "log.powerstats.model." + DATA_STORAGE_VERSION;
+    private static final String RESIDENCY_FILENAME =
+            "log.powerstats.residency." + DATA_STORAGE_VERSION;
 
     private final Injector mInjector;
 
     private Context mContext;
-    private IPowerStatsHALWrapper mPowerStatsHALWrapper;
     @Nullable
     private PowerStatsLogger mPowerStatsLogger;
     @Nullable
@@ -63,6 +70,8 @@ public class PowerStatsService extends SystemService {
 
     @VisibleForTesting
     static class Injector {
+        private IPowerStatsHALWrapper mPowerStatsHALWrapper;
+
         File createDataStoragePath() {
             return new File(Environment.getDataSystemDeDirectory(UserHandle.USER_SYSTEM),
                 DATA_STORAGE_SUBDIR);
@@ -76,15 +85,26 @@ public class PowerStatsService extends SystemService {
             return MODEL_FILENAME;
         }
 
+        String createResidencyFilename() {
+            return RESIDENCY_FILENAME;
+        }
+
         IPowerStatsHALWrapper createPowerStatsHALWrapperImpl() {
             return PowerStatsHALWrapper.getPowerStatsHalImpl();
         }
 
+        IPowerStatsHALWrapper getPowerStatsHALWrapperImpl() {
+            if (mPowerStatsHALWrapper == null) {
+                mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
+            }
+            return mPowerStatsHALWrapper;
+        }
+
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
-                String meterFilename, String modelFilename,
+                String meterFilename, String modelFilename, String residencyFilename,
                 IPowerStatsHALWrapper powerStatsHALWrapper) {
             return new PowerStatsLogger(context, dataStoragePath, meterFilename,
-                modelFilename, powerStatsHALWrapper);
+                modelFilename, residencyFilename, powerStatsHALWrapper);
         }
 
         BatteryTrigger createBatteryTrigger(Context context, PowerStatsLogger powerStatsLogger) {
@@ -109,18 +129,20 @@ public class PowerStatsService extends SystemService {
                         mPowerStatsLogger.writeModelDataToFile(fd);
                     } else if ("meter".equals(args[1])) {
                         mPowerStatsLogger.writeMeterDataToFile(fd);
+                    } else if ("residency".equals(args[1])) {
+                        mPowerStatsLogger.writeResidencyDataToFile(fd);
                     }
                 } else if (args.length == 0) {
                     pw.println("PowerStatsService dumpsys: available PowerEntityInfos");
-                    PowerEntityInfo[] powerEntityInfo = mPowerStatsHALWrapper.getPowerEntityInfo();
+                    PowerEntityInfo[] powerEntityInfo = getPowerStatsHal().getPowerEntityInfo();
                     PowerEntityInfoUtils.dumpsys(powerEntityInfo, pw);
 
                     pw.println("PowerStatsService dumpsys: available ChannelInfos");
-                    ChannelInfo[] channelInfo = mPowerStatsHALWrapper.getEnergyMeterInfo();
+                    ChannelInfo[] channelInfo = getPowerStatsHal().getEnergyMeterInfo();
                     ChannelInfoUtils.dumpsys(channelInfo, pw);
 
                     pw.println("PowerStatsService dumpsys: available EnergyConsumerIds");
-                    int[] energyConsumerId = mPowerStatsHALWrapper.getEnergyConsumerInfo();
+                    int[] energyConsumerId = getPowerStatsHal().getEnergyConsumerInfo();
                     EnergyConsumerIdUtils.dumpsys(energyConsumerId, pw);
                 }
             }
@@ -136,24 +158,31 @@ public class PowerStatsService extends SystemService {
 
     @Override
     public void onStart() {
+        if (getPowerStatsHal().isInitialized()) {
+            // Only create internal service if PowerStatsHal is available.
+            publishLocalService(PowerStatsInternal.class, new LocalService());
+        }
         publishBinderService(Context.POWER_STATS_SERVICE, new BinderService());
     }
 
     private void onSystemServiceReady() {
-        mPowerStatsHALWrapper = mInjector.createPowerStatsHALWrapperImpl();
-
-        if (mPowerStatsHALWrapper.isInitialized()) {
-            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService");
+        if (getPowerStatsHal().isInitialized()) {
+            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService loggers");
 
             // Only start logger and triggers if initialization is successful.
             mPowerStatsLogger = mInjector.createPowerStatsLogger(mContext,
                 mInjector.createDataStoragePath(), mInjector.createMeterFilename(),
-                mInjector.createModelFilename(), mPowerStatsHALWrapper);
+                mInjector.createModelFilename(), mInjector.createResidencyFilename(),
+                getPowerStatsHal());
             mBatteryTrigger = mInjector.createBatteryTrigger(mContext, mPowerStatsLogger);
             mTimerTrigger = mInjector.createTimerTrigger(mContext, mPowerStatsLogger);
         } else {
-            Slog.e(TAG, "Initialization of PowerStatsHAL wrapper failed");
+            Slog.e(TAG, "Failed to start PowerStatsService loggers");
         }
+    }
+
+    private IPowerStatsHALWrapper getPowerStatsHal() {
+        return mInjector.getPowerStatsHALWrapperImpl();
     }
 
     public PowerStatsService(Context context) {
@@ -165,5 +194,30 @@ public class PowerStatsService extends SystemService {
         super(context);
         mContext = context;
         mInjector = injector;
+    }
+
+    private final class LocalService extends PowerStatsInternal {
+        private final Handler mHandler;
+
+        LocalService() {
+            HandlerThread thread = new HandlerThread(TAG);
+            thread.start();
+            mHandler = new Handler(thread.getLooper());
+        }
+
+        @Override
+        public CompletableFuture<EnergyConsumerResult[]> getEnergyConsumedAsync(
+                int[] energyConsumerIds) {
+            final CompletableFuture<EnergyConsumerResult[]> future = new CompletableFuture<>();
+            mHandler.sendMessage(
+                    PooledLambda.obtainMessage(PowerStatsService.this::getEnergyConsumedAsync,
+                            future, energyConsumerIds));
+            return future;
+        }
+    }
+
+    private void getEnergyConsumedAsync(CompletableFuture<EnergyConsumerResult[]> future,
+            int[] energyConsumerIds) {
+        future.complete(getPowerStatsHal().getEnergyConsumed(energyConsumerIds));
     }
 }

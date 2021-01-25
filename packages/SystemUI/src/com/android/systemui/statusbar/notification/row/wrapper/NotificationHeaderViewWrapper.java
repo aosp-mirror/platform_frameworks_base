@@ -134,12 +134,14 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     /** Shows or hides feedback indicator */
     @Override
     public void showFeedbackIcon(boolean show, Pair<Integer, Integer> resIds) {
-        mFeedbackIcon.setVisibility(show ? View.VISIBLE : View.GONE);
-        if (show) {
-            if (mFeedbackIcon instanceof ImageButton) {
-                ((ImageButton) mFeedbackIcon).setImageResource(resIds.first);
+        if (mFeedbackIcon != null) {
+            mFeedbackIcon.setVisibility(show ? View.VISIBLE : View.GONE);
+            if (show) {
+                if (mFeedbackIcon instanceof ImageButton) {
+                    ((ImageButton) mFeedbackIcon).setImageResource(resIds.first);
+                }
+                mFeedbackIcon.setContentDescription(mView.getContext().getString(resIds.second));
             }
-            mFeedbackIcon.setContentDescription(mView.getContext().getString(resIds.second));
         }
     }
 
@@ -263,7 +265,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_ICON, mIcon);
         mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_EXPANDER,
                 mExpandButton);
-        mTransformationHelper.addViewTransformingToSimilar(mWorkProfileImage);
+        if (mWorkProfileImage != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mWorkProfileImage);
+        }
         if (mIsLowPriority && mHeaderText != null) {
             mTransformationHelper.addTransformedView(TransformableView.TRANSFORMING_VIEW_TITLE,
                     mHeaderText);

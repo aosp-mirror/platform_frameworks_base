@@ -18,7 +18,6 @@ package com.android.server.location.provider;
 
 import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.location.LocationManager.DELIVER_HISTORICAL_LOCATIONS;
-import static android.location.LocationManager.FUSED_PROVIDER;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.KEY_FLUSH_COMPLETE;
 import static android.location.LocationManager.KEY_LOCATION_CHANGED;
@@ -43,6 +42,7 @@ import static java.lang.Math.min;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.AlarmManager.OnAlarmListener;
+import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -86,7 +86,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationPermissions.PermissionLevel;
 import com.android.server.location.fudger.LocationFudger;
@@ -130,6 +129,9 @@ public class LocationProviderManager extends
 
     private static final String WAKELOCK_TAG = "*location*";
     private static final long WAKELOCK_TIMEOUT_MS = 30 * 1000;
+
+    // duration PI location clients are put on the allowlist to start a fg service
+    private static final long TEMPORARY_APP_ALLOWLIST_DURATION_MS = 10 * 1000;
 
     // fastest interval at which clients may receive coarse locations
     private static final long MIN_COARSE_INTERVAL_MS = 10 * 60 * 1000;
@@ -215,6 +217,11 @@ public class LocationProviderManager extends
         public void deliverOnLocationChanged(LocationResult locationResult,
                 @Nullable Runnable onCompleteCallback)
                 throws PendingIntent.CanceledException {
+            BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setDontSendToRestrictedApps(true);
+            // allows apps to start a fg service in response to a location PI
+            options.setTemporaryAppWhitelistDuration(TEMPORARY_APP_ALLOWLIST_DURATION_MS);
+
             mPendingIntent.send(
                     mContext,
                     0,
@@ -225,22 +232,26 @@ public class LocationProviderManager extends
                             : null,
                     null,
                     null,
-                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                    options.toBundle());
         }
 
         @Override
         public void deliverOnFlushComplete(int requestCode) throws PendingIntent.CanceledException {
+            BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setDontSendToRestrictedApps(true);
+
             mPendingIntent.send(mContext, 0, new Intent().putExtra(KEY_FLUSH_COMPLETE, requestCode),
-                    null, null, null,
-                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                    null, null, null, options.toBundle());
         }
 
         @Override
         public void deliverOnProviderEnabledChanged(String provider, boolean enabled)
                 throws PendingIntent.CanceledException {
+            BroadcastOptions options = BroadcastOptions.makeBasic();
+            options.setDontSendToRestrictedApps(true);
+
             mPendingIntent.send(mContext, 0, new Intent().putExtra(KEY_PROVIDER_ENABLED, enabled),
-                    null, null, null,
-                    PendingIntentUtils.createDontSendToRestrictedAppsBundle(null));
+                    null, null, null, options.toBundle());
         }
     }
 
@@ -1322,9 +1333,6 @@ public class LocationProviderManager extends
                 Binder.restoreCallingIdentity(identity);
             }
 
-            setRealProvider(null);
-            setMockProvider(null);
-
             mUserHelper.removeListener(mUserChangedListener);
             mSettingsHelper.removeOnLocationEnabledChangedListener(mLocationEnabledChangedListener);
 
@@ -2332,8 +2340,8 @@ public class LocationProviderManager extends
 
         // do not send change notifications if we just saw this user for the first time
         if (wasEnabled != null) {
-            // fused and passive provider never get public updates for legacy reasons
-            if (!FUSED_PROVIDER.equals(mName) && !PASSIVE_PROVIDER.equals(mName)) {
+            // passive provider never get public updates for legacy reasons
+            if (!PASSIVE_PROVIDER.equals(mName)) {
                 Intent intent = new Intent(LocationManager.PROVIDERS_CHANGED_ACTION)
                         .putExtra(LocationManager.EXTRA_PROVIDER_NAME, mName)
                         .putExtra(LocationManager.EXTRA_PROVIDER_ENABLED, enabled)

@@ -72,6 +72,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
@@ -1840,17 +1841,13 @@ public class LocationManager {
      * otherwise.
      *
      * @hide
-     * @deprecated Prefer {@link #isProviderPackage(String, String)} instead.
+     * @deprecated Prefer {@link #isProviderPackage(String, String, String)} instead.
      */
     @Deprecated
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     public boolean isProviderPackage(@NonNull String packageName) {
-        try {
-            return mService.isProviderPackage(null, packageName);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return isProviderPackage(null, packageName, null);
     }
 
     /**
@@ -1861,13 +1858,37 @@ public class LocationManager {
      * @param provider a provider listed by {@link #getAllProviders()} or null
      * @param packageName the package name to test if it is a provider
      * @return true if the given arguments correspond to a provider
+     *
+     * @deprecated Use {@link #isProviderPackage(String, String, String)} instead.
+     *
+     * @hide
+     */
+    @Deprecated
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
+    public boolean isProviderPackage(@Nullable String provider, @NonNull String packageName) {
+        return isProviderPackage(provider, packageName, null);
+    }
+
+    /**
+     * Returns true if the given provider corresponds to the given package name. If the given
+     * provider is null, this will return true if any provider corresponds to the given package
+     * name and/or attribution tag. If attribution tag is non-null, the provider identity must match
+     * both the given package name and attribution tag.
+     *
+     * @param provider a provider listed by {@link #getAllProviders()} or null
+     * @param packageName the package name to test if it is a provider
+     * @param attributionTag an optional attribution tag within the given package
+     * @return true if the given arguments correspond to a provider
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
-    public boolean isProviderPackage(@Nullable String provider, @NonNull String packageName) {
+    public boolean isProviderPackage(@Nullable String provider, @NonNull String packageName,
+            @Nullable String attributionTag) {
         try {
-            return mService.isProviderPackage(provider, packageName);
+            return mService.isProviderPackage(provider, Objects.requireNonNull(packageName),
+                    attributionTag);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1878,7 +1899,7 @@ public class LocationManager {
      * and an empty list if no package is associated with the provider.
      *
      * @hide
-     * @deprecated Prefer {@link #isProviderPackage(String, String)} instead.
+     * @deprecated Prefer {@link #isProviderPackage(String, String, String)} instead.
      */
     @TestApi
     @Deprecated
@@ -3171,7 +3192,9 @@ public class LocationManager {
             for (GnssMeasurementRequest request : requests) {
                 if (request.isFullTracking()) {
                     builder.setFullTracking(true);
-                    break;
+                }
+                if (request.isCorrelationVectorOutputsEnabled()) {
+                    builder.setCorrelationVectorOutputsEnabled(true);
                 }
             }
 

@@ -45,6 +45,7 @@ import static org.mockito.Mockito.verify;
 
 import android.app.StatusBarManager;
 import android.platform.test.annotations.Presubmit;
+import android.view.InsetsSource;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 
@@ -272,7 +273,6 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final WindowState navBar = addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar");
         navBar.setHasSurface(true);
         navBar.getControllableInsetProvider().setServerVisible(true);
-
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
         doNothing().when(policy).startAnimation(anyBoolean(), any());
 
@@ -337,11 +337,14 @@ public class InsetsPolicyTest extends WindowTestsBase {
     @UseTestDisplay(addWindows = W_ACTIVITY)
     @Test
     public void testAbortTransientBars_bothCanBeAborted_appGetsBothRealControls() {
-        addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-        addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
-                .getControllableInsetProvider().getSource().setVisible(false);
-
+        final InsetsSource statusBarSource = addNonFocusableWindow(TYPE_STATUS_BAR, "statusBar")
+                .getControllableInsetProvider().getSource();
+        final InsetsSource navBarSource = addNonFocusableWindow(TYPE_NAVIGATION_BAR, "navBar")
+                .getControllableInsetProvider().getSource();
+        statusBarSource.setVisible(false);
+        navBarSource.setVisible(false);
+        mAppWindow.mAboveInsetsState.addSource(navBarSource);
+        mAppWindow.mAboveInsetsState.addSource(statusBarSource);
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
         doNothing().when(policy).startAnimation(anyBoolean(), any());
         policy.updateBarControlTarget(mAppWindow);

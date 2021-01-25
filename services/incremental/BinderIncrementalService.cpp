@@ -122,13 +122,14 @@ binder::Status BinderIncrementalService::createStorage(
         const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& statusListener,
         const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
         const ::android::sp<::android::os::incremental::IStorageHealthListener>& healthListener,
+        const ::std::vector<::android::os::incremental::PerUidReadTimeouts>& perUidReadTimeouts,
         int32_t* _aidl_return) {
     *_aidl_return =
             mImpl.createStorage(path, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
                                 android::incremental::IncrementalService::CreateOptions(createMode),
                                 statusListener,
                                 const_cast<StorageHealthCheckParams&&>(healthCheckParams),
-                                healthListener);
+                                healthListener, perUidReadTimeouts);
     return ok();
 }
 
@@ -164,8 +165,8 @@ binder::Status BinderIncrementalService::deleteStorage(int32_t storageId) {
     return ok();
 }
 
-binder::Status BinderIncrementalService::disableReadLogs(int32_t storageId) {
-    mImpl.disableReadLogs(storageId);
+binder::Status BinderIncrementalService::disallowReadLogs(int32_t storageId) {
+    mImpl.disallowReadLogs(storageId);
     return ok();
 }
 
@@ -254,7 +255,7 @@ binder::Status BinderIncrementalService::isFileFullyLoaded(int32_t storageId,
 
 binder::Status BinderIncrementalService::getLoadingProgress(int32_t storageId,
                                                             float* _aidl_return) {
-    *_aidl_return = mImpl.getLoadingProgress(storageId);
+    *_aidl_return = mImpl.getLoadingProgress(storageId).getProgress();
     return ok();
 }
 

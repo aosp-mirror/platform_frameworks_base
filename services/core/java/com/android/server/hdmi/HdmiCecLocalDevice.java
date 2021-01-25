@@ -619,7 +619,9 @@ abstract class HdmiCecLocalDevice {
         } else if (mService.isPowerStandbyOrTransient() && isPowerOnOrToggleCommand(message)) {
             mService.wakeUp();
             return true;
-        } else if (!mService.isHdmiCecVolumeControlEnabled() && isVolumeOrMuteCommand(message)) {
+        } else if (mService.getHdmiCecVolumeControl()
+                == HdmiControlManager.VOLUME_CONTROL_DISABLED && isVolumeOrMuteCommand(
+                message)) {
             return false;
         }
 
@@ -752,8 +754,8 @@ abstract class HdmiCecLocalDevice {
                 message.getParams(),
                 false)) {
             // Vendor command listener may not have been registered yet. Respond with
-            // <Feature Abort> [NOT_IN_CORRECT_MODE] so that the sender can try again later.
-            mService.maySendFeatureAbortCommand(message, Constants.ABORT_NOT_IN_CORRECT_MODE);
+            // <Feature Abort> [Refused] so that the sender can try again later.
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
         }
         return true;
     }
@@ -764,7 +766,7 @@ abstract class HdmiCecLocalDevice {
         if (vendorId == mService.getVendorId()) {
             if (!mService.invokeVendorCommandListenersOnReceived(
                     mDeviceType, message.getSource(), message.getDestination(), params, true)) {
-                mService.maySendFeatureAbortCommand(message, Constants.ABORT_NOT_IN_CORRECT_MODE);
+                mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             }
         } else if (message.getDestination() != Constants.ADDR_BROADCAST
                 && message.getSource() != Constants.ADDR_UNREGISTERED) {
@@ -1142,7 +1144,8 @@ abstract class HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected void sendVolumeKeyEvent(int keyCode, boolean isPressed) {
         assertRunOnServiceThread();
-        if (!mService.isHdmiCecVolumeControlEnabled()) {
+        if (mService.getHdmiCecVolumeControl()
+                == HdmiControlManager.VOLUME_CONTROL_DISABLED) {
             return;
         }
         if (!HdmiCecKeycode.isVolumeKeycode(keyCode)) {

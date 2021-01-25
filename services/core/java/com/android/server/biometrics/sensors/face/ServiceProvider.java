@@ -18,6 +18,7 @@ package com.android.server.biometrics.sensors.face;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.face.Face;
 import android.hardware.face.FaceManager;
@@ -71,6 +72,16 @@ public interface ServiceProvider {
     @LockoutTracker.LockoutMode
     int getLockoutModeForUser(int sensorId, int userId);
 
+    /**
+     * Requests for the authenticatorId (whose source of truth is in the TEE or equivalent) to
+     * be invalidated. See {@link com.android.server.biometrics.sensors.InvalidationRequesterClient}
+     */
+    default void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
+            @NonNull IInvalidationCallback callback) {
+        throw new IllegalStateException("Providers that support invalidation must override"
+                + " this method");
+    }
+
     long getAuthenticatorId(int sensorId, int userId);
 
     boolean isHardwareDetected(int sensorId);
@@ -110,7 +121,8 @@ public interface ServiceProvider {
 
     void scheduleInternalCleanup(int sensorId, int userId);
 
-    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto);
+    void dumpProtoState(int sensorId, @NonNull ProtoOutputStream proto,
+            boolean clearSchedulerBuffer);
 
     void dumpProtoMetrics(int sensorId, @NonNull FileDescriptor fd);
 

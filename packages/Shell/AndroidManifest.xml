@@ -119,6 +119,7 @@
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
     <uses-permission android:name="android.permission.CREATE_USERS" />
+    <uses-permission android:name="android.permission.MANAGE_CREDENTIAL_MANAGEMENT_APP" />
     <uses-permission android:name="android.permission.MANAGE_DEVICE_ADMINS" />
     <uses-permission android:name="android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS" />
     <uses-permission android:name="android.permission.ACCESS_LOWPAN_STATE"/>
@@ -157,6 +158,7 @@
     <uses-permission android:name="android.permission.MANAGE_CONTENT_SUGGESTIONS" />
     <uses-permission android:name="android.permission.MANAGE_APP_PREDICTIONS" />
     <uses-permission android:name="android.permission.MANAGE_SEARCH_UI" />
+    <uses-permission android:name="android.permission.MANAGE_SMARTSPACE" />
     <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.SET_TIME" />
@@ -369,8 +371,9 @@
     <!-- Permissions required for CTS tests to close system dialogs -->
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
 
-    <!-- Permission required for CTS test - HideOverlayWindowsTest -->
+    <!-- Permissions required for CTS test - HideOverlayWindowsTest -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_APPLICATION_OVERLAY"/>
 
     <!-- Permission required for CTS test - CtsHdmiCecHostTestCases -->
     <uses-permission android:name="android.permission.HDMI_CEC" />
@@ -378,6 +381,15 @@
     <!-- Permission needed for CTS test - WifiManagerTest -->
     <uses-permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
     <uses-permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
+
+    <!-- Permission required for CTS tests to enable/disable rate limiting toasts. -->
+    <uses-permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING" />
+
+    <!-- Permission required for CTS to test sensor privacy behavior -->
+    <uses-permission android:name="android.permission.MANAGE_SENSOR_PRIVACY" />
+
+    <!-- Permission needed for CTS test - CallLogTest -->
+    <uses-permission android:name="com.android.voicemail.permission.READ_VOICEMAIL" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"

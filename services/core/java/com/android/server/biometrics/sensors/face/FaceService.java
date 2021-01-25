@@ -29,6 +29,7 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.SensorProps;
@@ -54,10 +55,10 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.biometrics.Utils;
+import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutResetDispatcher;
 import com.android.server.biometrics.sensors.LockoutTracker;
-import com.android.server.biometrics.sensors.BiometricServiceCallback;
 import com.android.server.biometrics.sensors.face.aidl.FaceProvider;
 import com.android.server.biometrics.sensors.face.hidl.Face10;
 
@@ -146,13 +147,13 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         }
 
         @Override
-        public byte[] dumpSensorServiceStateProto(int sensorId) {
+        public byte[] dumpSensorServiceStateProto(int sensorId, boolean clearSchedulerBuffer) {
             Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
 
             final ProtoOutputStream proto = new ProtoOutputStream();
             final ServiceProvider provider = getProviderForSensor(sensorId);
             if (provider != null) {
-                provider.dumpProtoState(sensorId, proto);
+                provider.dumpProtoState(sensorId, proto, clearSchedulerBuffer);
             }
             proto.flush();
             return proto.getBytes();
@@ -404,7 +405,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
                     final ProtoOutputStream proto = new ProtoOutputStream(fd);
                     for (ServiceProvider provider : mServiceProviders) {
                         for (FaceSensorPropertiesInternal props : provider.getSensorProperties()) {
-                            provider.dumpProtoState(props.sensorId, proto);
+                            provider.dumpProtoState(props.sensorId, proto, false);
                         }
                     }
                     proto.flush();
@@ -501,6 +502,19 @@ public class FaceService extends SystemService implements BiometricServiceCallba
             }
 
             return provider.getLockoutModeForUser(sensorId, userId);
+        }
+
+        @Override
+        public void invalidateAuthenticatorId(int sensorId, int userId,
+                IInvalidationCallback callback) {
+            Utils.checkPermission(getContext(), USE_BIOMETRIC_INTERNAL);
+
+            final ServiceProvider provider = getProviderForSensor(sensorId);
+            if (provider == null) {
+                Slog.w(TAG, "Null provider for invalidateAuthenticatorId");
+                return;
+            }
+            provider.scheduleInvalidateAuthenticatorId(sensorId, userId, callback);
         }
 
         @Override // Binder call

@@ -31,14 +31,26 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_W
 
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.Attribution;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.icu.text.ListFormatter;
 import android.location.LocationManager;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
+import android.speech.RecognitionService;
+import android.speech.RecognizerIntent;
 import android.util.ArrayMap;
-import android.util.Pair;
+import android.util.ArraySet;
+import android.view.inputmethod.InputMethodInfo;
+import android.view.inputmethod.InputMethodManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -68,6 +80,9 @@ public class PermissionUsageHelper {
 
     /** How long after an access to show it as "running" */
     private static final String RUNNING_ACCESS_TIME_MS = "running_acccess_time_ms";
+
+    /** The name of the expected voice IME subtype */
+    private static final String VOICE_IME_SUBTYPE = "voice";
 
     private static final long DEFAULT_RUNNING_TIME_MS = 5000L;
     private static final long DEFAULT_RECENT_TIME_MS = 30000L;
@@ -168,13 +183,25 @@ public class PermissionUsageHelper {
         }
 
         Map<String, List<OpUsage>> rawUsages = getOpUsages(ops);
+        Set<List<PackageAttribution>> proxyChains = getProxyChains(rawUsages.get(MICROPHONE));
         Map<PackageAttribution, CharSequence> packagesWithAttributionLabels =
-                getTrustedAttributions(rawUsages.get(MICROPHONE));
+                getTrustedAttributions(rawUsages.get(MICROPHONE), proxyChains);
 
         List<String> usedPermGroups = new ArrayList<>(rawUsages.keySet());
         for (int permGroupNum = 0; permGroupNum < usedPermGroups.size(); permGroupNum++) {
             boolean isPhone = false;
             String permGroup = usedPermGroups.get(permGroupNum);
+
+            Map<PackageAttribution, CharSequence> pkgAttrLabels = packagesWithAttributionLabels;
+            Set<List<PackageAttribution>> proxies = proxyChains;
+            if (!MICROPHONE.equals(permGroup)) {
+                pkgAttrLabels = new ArrayMap<>();
+                proxies = new ArraySet<>();
+            }
+
+            List<OpUsage> permUsages = removeDuplicatesAndProxies(rawUsages.get(permGroup),
+                    pkgAttrLabels.keySet(), proxies);
+
             if (permGroup.equals(OPSTR_PHONE_CALL_MICROPHONE)) {
                 isPhone = true;
                 permGroup = MICROPHONE;
@@ -183,11 +210,10 @@ public class PermissionUsageHelper {
                 permGroup = CAMERA;
             }
 
-            int numUsages = rawUsages.get(permGroup).size();
-            for (int usageNum = 0; usageNum < numUsages; usageNum++) {
-                OpUsage usage = rawUsages.get(permGroup).get(usageNum);
+            for (int usageNum = 0; usageNum < permUsages.size(); usageNum++) {
+                OpUsage usage = permUsages.get(usageNum);
                 usages.add(new PermGroupUsage(usage.packageName, usage.uid, permGroup,
-                        usage.isRunning, isPhone,
+                        usage.lastAccessTime, usage.isRunning, isPhone,
                         packagesWithAttributionLabels.get(usage.toPackageAttr())));
             }
         }
@@ -256,7 +282,7 @@ public class PermissionUsageHelper {
                     AppOpsManager.OpEventProxyInfo proxy = attrOpEntry.getLastProxyInfo(opFlags);
                     if (proxy != null && proxy.getPackageName() != null) {
                         proxyUsage = new OpUsage(proxy.getPackageName(), proxy.getAttributionTag(),
-                                uid, lastAccessTime, isRunning, null);
+                                proxy.getUid(), lastAccessTime, isRunning, null);
                     }
 
                     String permGroupName = getGroupForOp(op);
@@ -291,77 +317,379 @@ public class PermissionUsageHelper {
         return flattenedUsages;
     }
 
-    // TODO ntmyren: create JavaDoc and copy merging of proxy chains and trusted labels from
-    //  "usages" livedata in ReviewOngoingUsageLiveData
-    private Map<PackageAttribution, CharSequence> getTrustedAttributions(List<OpUsage> usages) {
+    /**
+     * Take the list of all usages, figure out any proxy chains, get all possible special
+     * attribution labels, and figure out which usages need to show a special label, if any.
+     *
+     * @param usages The raw permission usages
+     *
+     * @return A map of package + attribution (in the form of a PackageAttribution object) to
+     * trusted attribution label, if there is one
+     */
+    private ArrayMap<PackageAttribution, CharSequence> getTrustedAttributions(
+            List<OpUsage> usages, Set<List<PackageAttribution>> proxyChains) {
         ArrayMap<PackageAttribution, CharSequence> attributions = new ArrayMap<>();
         if (usages == null) {
             return attributions;
         }
-        Set<List<OpUsage>> proxyChains = getProxyChains(usages);
-        Map<Pair<String, UserHandle>, CharSequence> trustedLabels = getTrustedAttributionLabels();
 
+        Map<PackageAttribution, CharSequence> trustedLabels =
+                getTrustedAttributionLabels(usages);
+
+        for (List<PackageAttribution> chain : proxyChains) {
+            // If this chain is empty, or has only one link, then do not show any special labels
+            if (chain.size() <= 1) {
+                continue;
+            }
+
+            // If the last link in the chain is not user sensitive, do not show it.
+            boolean lastLinkIsUserSensitive = false;
+            for (int i = 0; i < usages.size(); i++) {
+                PackageAttribution lastLink = chain.get(chain.size() - 1);
+                if (lastLink.equals(usages.get(i).toPackageAttr())) {
+                    lastLinkIsUserSensitive = true;
+                    break;
+                }
+            }
+            if (!lastLinkIsUserSensitive) {
+                continue;
+            }
+
+            List<CharSequence> labels = new ArrayList<>();
+            for (int i = 0; i < chain.size(); i++) {
+                // If this is the last link in the proxy chain, assign it the series of labels
+                // Else, if it has a special label, add that label
+                // Else, if there are no other apps in the remaining part of the chain which
+                // have the same package name, add the app label
+                // If it is not the last link in the chain, remove its attribution
+                PackageAttribution attr = chain.get(i);
+                CharSequence trustedLabel = trustedLabels.get(attr);
+                if (i == chain.size() - 1) {
+                    attributions.put(attr, formatLabelList(labels));
+                } else if (trustedLabel != null && !labels.contains(trustedLabel)) {
+                    labels.add(trustedLabel);
+                    trustedLabels.remove(attr);
+                } else {
+                    boolean remainingChainHasPackage = false;
+                    for (int attrNum = i + 1; attrNum < chain.size() - 1; attrNum++) {
+                        if (chain.get(i).packageName.equals(attr.packageName)) {
+                            remainingChainHasPackage = true;
+                            break;
+                        }
+                    }
+                    if (!remainingChainHasPackage) {
+                        try {
+                            ApplicationInfo appInfo = mPkgManager.getApplicationInfoAsUser(
+                                    attr.packageName, 0, attr.getUser());
+                            CharSequence appLabel = appInfo.loadLabel(
+                                    getUserContext(attr.getUser()).getPackageManager());
+                            labels.add(appLabel);
+                        } catch (PackageManager.NameNotFoundException e) {
+                            // Do nothing
+                        }
+                    }
+                }
+            }
+        }
+
+        for (PackageAttribution attr : trustedLabels.keySet()) {
+            attributions.put(attr, trustedLabels.get(attr));
+        }
 
         return attributions;
     }
 
-    // TODO ntmyren: create JavaDoc and copy proxyChainsLiveData from ReviewOngoingUsageLiveData
-    private Set<List<OpUsage>> getProxyChains(List<OpUsage> usages) {
-        Map<PackageAttribution, List<OpUsage>> inProgressChains = new ArrayMap<>();
-        List<OpUsage> remainingUsages = new ArrayList<>(usages);
-        // find all one-link chains (that is, all proxied apps whose proxy is not included in
-        // the usage list)
-        for (int usageNum = 0; usageNum < usages.size(); usageNum++) {
-            OpUsage usage = usages.get(usageNum);
-            PackageAttribution usageAttr = usage.toPackageAttr();
-            if (usage.proxy == null) {
-                continue;
-            }
-            PackageAttribution proxyAttr = usage.proxy.toPackageAttr();
-            boolean proxyExists = false;
-            for (int otherUsageNum = 0; otherUsageNum < usages.size(); otherUsageNum++) {
-                if (usages.get(otherUsageNum).toPackageAttr().equals(proxyAttr)) {
-                    proxyExists = true;
-                    break;
-                }
-            }
-
-            if (!proxyExists) {
-                inProgressChains.put(usageAttr, List.of(usage));
-                remainingUsages.remove(usage);
-            }
-        }
-
-        // find all possible starting points for chains
-        for (int i = 0; i < usages.size(); i++) {
-            OpUsage usage = usages.get(i);
-        }
-
-            /*
-            // find all possible starting points for chains
-            for (usage in remainingProxyChainUsages.toList()) {
-                // if this usage has no proxy, but proxies another usage, it is the start of a chain
-                val usageAttr = getPackageAttr(usage)
-                if (usage.proxyAccess == null && remainingProxyChainUsages.any {
-                    it.proxyAccess != null && getPackageAttr(it.proxyAccess) == usageAttr
-                }) {
-                    inProgressChains[usageAttr] = mutableListOf(usage)
-                }
-
-                // if this usage is a chain start, or no usage have this usage as a proxy, remove it
-                if (usage.proxyAccess == null) {
-                    remainingProxyChainUsages.remove(usage)
-                }
-            }
-
-             */
-
-        return null;
+    private CharSequence formatLabelList(List<CharSequence> labels) {
+        return ListFormatter.getInstance().format(labels);
     }
 
-    // TODO ntmyren: create JavaDoc and copy trustedAttrsLiveData from ReviewOngoingUsageLiveData
-    private Map<Pair<String, UserHandle>, CharSequence> getTrustedAttributionLabels() {
-        return new ArrayMap<>();
+    /**
+     * Get all chains of proxy usages. A proxy chain is defined as one usage at the root, then
+     * further proxy usages, where the app and attribution tag of the proxy in the proxy usage
+     * matches the previous usage in the chain.
+     *
+     * @param usages The permission usages
+     *
+     * @return A set of lists of package attributions. One list represents a chain of proxy usages,
+     * with the start of the chain (the usage without a proxy) at position 0, and each usage down
+     * the chain has the previous one listed as a proxy usage.
+     */
+    private Set<List<PackageAttribution>> getProxyChains(List<OpUsage> usages) {
+        if (usages == null) {
+            return new ArraySet<>();
+        }
+
+        ArrayMap<PackageAttribution, ArrayList<PackageAttribution>> proxyChains = new ArrayMap<>();
+        // map of usages that still need to be removed, or added to a chain
+        ArrayMap<PackageAttribution, OpUsage> remainingUsages = new ArrayMap<>();
+        // map of usage.proxy -> usage, telling us if a usage is a proxy
+        ArrayMap<PackageAttribution, PackageAttribution> proxies = new ArrayMap<>();
+        for (int i = 0; i < usages.size(); i++) {
+            OpUsage usage = usages.get(i);
+            remainingUsages.put(usage.toPackageAttr(), usage);
+            if (usage.proxy != null) {
+                proxies.put(usage.proxy.toPackageAttr(), usage.toPackageAttr());
+            }
+        }
+
+        // find all possible end points for chains
+        List<PackageAttribution> keys = new ArrayList<>(remainingUsages.keySet());
+        for (int usageNum = 0; usageNum < remainingUsages.size(); usageNum++) {
+            OpUsage usage = remainingUsages.get(keys.get(usageNum));
+            if (usage == null) {
+                continue;
+            }
+            PackageAttribution usageAttr = usage.toPackageAttr();
+            // If this usage has a proxy, but is not a proxy, it is the end of a chain.
+            // If it has no proxy, and isn't a proxy, remove it.
+            if (!proxies.containsKey(usageAttr) && usage.proxy != null) {
+                ArrayList<PackageAttribution> proxyList = new ArrayList<>();
+                proxyList.add(usageAttr);
+                proxyChains.put(usageAttr, proxyList);
+            } else if (!proxies.containsKey(usageAttr) && usage.proxy == null) {
+                remainingUsages.remove(keys.get(usageNum));
+            }
+        }
+
+        // assemble the chains in reverse order, then invert them
+        for (int numStart = 0; numStart < proxyChains.size(); numStart++) {
+            PackageAttribution currPackageAttr = proxyChains.keyAt(numStart);
+            ArrayList<PackageAttribution> proxyChain = proxyChains.get(currPackageAttr);
+            OpUsage currentUsage = remainingUsages.get(currPackageAttr);
+            if (currentUsage == null || proxyChain == null) {
+                continue;
+            }
+            while (currentUsage.proxy != null) {
+                currPackageAttr = currentUsage.proxy.toPackageAttr();
+                currentUsage = remainingUsages.get(currPackageAttr);
+
+                boolean invalidState = false;
+                for (int chainNum = 0; chainNum < proxyChain.size(); chainNum++) {
+                    if (currentUsage == null || proxyChain.get(chainNum).equals(currPackageAttr)) {
+                        // either our current value is not in the usage list, or we have a cycle
+                        invalidState = true;
+                        break;
+                    }
+                }
+
+                if (invalidState) {
+                    break;
+                }
+
+                proxyChain.add(currPackageAttr);
+            }
+            // invert the lists, so the element without a proxy is first on the list
+            Collections.reverse(proxyChain);
+        }
+
+        return new ArraySet<>(proxyChains.values());
+    }
+
+    /**
+     * Gets all trusted proxied voice IME and voice recognition microphone uses, and get the
+     * label needed to display with it, as well as information about the proxy whose label is being
+     * shown, if applicable.
+     *
+     * @param usages The permission usages
+     *
+     * @return A map of package attribution -> the attribution label for that package attribution,
+     * if applicable
+     */
+    private Map<PackageAttribution, CharSequence> getTrustedAttributionLabels(
+            List<OpUsage> usages) {
+        List<UserHandle> users = new ArrayList<>();
+        for (int i = 0; i < usages.size(); i++) {
+            UserHandle user = UserHandle.getUserHandleForUid(usages.get(i).uid);
+            if (!users.contains(user)) {
+                users.add(user);
+            }
+        }
+
+        Map<PackageAttribution, CharSequence> trustedLabels = new ArrayMap<>();
+        for (int userNum = 0; userNum < users.size(); userNum++) {
+            UserHandle user = users.get(userNum);
+            Context userContext = mContext.createContextAsUser(user, 0);
+
+            // Get all voice IME labels
+            Map<String, CharSequence> voiceInputs = new ArrayMap<>();
+            List<InputMethodInfo> inputs = userContext.getSystemService(InputMethodManager.class)
+                    .getEnabledInputMethodList();
+            for (int inputNum = 0; inputNum < inputs.size(); inputNum++) {
+                InputMethodInfo input = inputs.get(inputNum);
+                for (int subtypeNum = 0; subtypeNum < input.getSubtypeCount(); subtypeNum++) {
+                    if (VOICE_IME_SUBTYPE.equals(input.getSubtypeAt(subtypeNum).getMode())) {
+                        voiceInputs.put(input.getPackageName(), input.getServiceInfo()
+                                .loadUnsafeLabel(userContext.getPackageManager()));
+                        break;
+                    }
+                }
+            }
+
+            // Get the currently selected recognizer from the secure setting
+            String recognitionPackageName = Settings.Secure.getString(
+                    userContext.getContentResolver(), Settings.Secure.VOICE_RECOGNITION_SERVICE);
+            if (recognitionPackageName == null) {
+                continue;
+            }
+            recognitionPackageName =
+                    ComponentName.unflattenFromString(recognitionPackageName).getPackageName();
+            Map<String, CharSequence> recognizers = new ArrayMap<>();
+            List<ResolveInfo> availableRecognizers = mPkgManager.queryIntentServicesAsUser(
+                    new Intent(RecognitionService.SERVICE_INTERFACE), PackageManager.GET_META_DATA,
+                    user.getIdentifier());
+            for (int recogNum = 0; recogNum < availableRecognizers.size(); recogNum++) {
+                ResolveInfo info = availableRecognizers.get(recogNum);
+                if (recognitionPackageName.equals(info.serviceInfo.packageName)) {
+                    recognizers.put(recognitionPackageName, info.serviceInfo.loadUnsafeLabel(
+                            userContext.getPackageManager()));
+                }
+            }
+
+            Map<String, CharSequence> recognizerIntents = new ArrayMap<>();
+            List<ResolveInfo> availableRecognizerIntents = mPkgManager.queryIntentActivitiesAsUser(
+                    new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH),
+                    PackageManager.GET_META_DATA, user);
+            for (int recogNum = 0; recogNum < availableRecognizerIntents.size(); recogNum++) {
+                ResolveInfo info = availableRecognizerIntents.get(recogNum);
+                if (info.activityInfo == null) {
+                    continue;
+                }
+                String pkgName = info.activityInfo.packageName;
+                if (recognitionPackageName.equals(pkgName) && recognizers.containsKey(pkgName)) {
+                    recognizerIntents.put(pkgName, recognizers.get(pkgName));
+                }
+            }
+            for (int usageNum = 0; usageNum < usages.size(); usageNum++) {
+                setTrustedAttrsForAccess(usages.get(usageNum), user, false, voiceInputs,
+                        trustedLabels);
+                setTrustedAttrsForAccess(usages.get(usageNum), user, false, recognizerIntents,
+                        trustedLabels);
+                setTrustedAttrsForAccess(usages.get(usageNum), user, true, recognizers,
+                        trustedLabels);
+            }
+        }
+
+        return trustedLabels;
+    }
+
+    private void setTrustedAttrsForAccess(OpUsage opUsage, UserHandle currUser, boolean getProxy,
+            Map<String, CharSequence> trustedMap, Map<PackageAttribution, CharSequence> toSetMap) {
+        OpUsage usage = opUsage;
+        if (getProxy) {
+            usage = opUsage.proxy;
+        }
+
+        if (usage == null || !usage.getUser().equals(currUser)
+                || !trustedMap.containsKey(usage.packageName)) {
+            return;
+        }
+
+        CharSequence label = getAttributionLabel(usage);
+        if (trustedMap.get(usage.packageName).equals(label)) {
+            toSetMap.put(opUsage.toPackageAttr(), label);
+        }
+    }
+
+    private CharSequence getAttributionLabel(OpUsage usage) {
+        if (usage.attributionTag == null) {
+            return null;
+        }
+
+        PackageInfo pkgInfo;
+        try {
+            pkgInfo = mPkgManager.getPackageInfoAsUser(usage.packageName,
+                    PackageManager.GET_ATTRIBUTIONS, usage.getUser().getIdentifier());
+            if (pkgInfo.attributions == null || pkgInfo.attributions.length == 0) {
+                return null;
+            }
+            for (int attrNum = 0; attrNum < pkgInfo.attributions.length; attrNum++) {
+                Attribution attr = pkgInfo.attributions[attrNum];
+                if (usage.attributionTag.equals(attr.getTag())) {
+                    return mContext.createPackageContextAsUser(usage.packageName, 0,
+                            usage.getUser()).getString(attr.getLabel());
+                }
+            }
+            return null;
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+    }
+
+    /**
+     * If we have multiple usages of a
+     * @param rawUsages The list of all usages that we wish to
+     * @param specialAttributions A set of all usages that have a special label
+     * @param proxies A list of proxy chains- all links but the last on the chain should be removed,
+     *                if the last link has a special label
+     * @return A list of usages without duplicates or proxy usages.
+     */
+    private List<OpUsage> removeDuplicatesAndProxies(List<OpUsage> rawUsages,
+            Set<PackageAttribution> specialAttributions,
+            Set<List<PackageAttribution>> proxies) {
+        List<OpUsage> deDuped = new ArrayList<>();
+        if (rawUsages == null) {
+            return deDuped;
+        }
+
+        List<PackageAttribution> toRemoveProxies = new ArrayList<>();
+        for (List<PackageAttribution> proxyList: proxies) {
+            PackageAttribution lastLink = proxyList.get(proxyList.size() - 1);
+            if (!specialAttributions.contains(lastLink)) {
+                continue;
+            }
+            for (int proxyNum = 0; proxyNum < proxyList.size(); proxyNum++) {
+                if (!proxyList.get(proxyNum).equals(lastLink)) {
+                    toRemoveProxies.add(proxyList.get(proxyNum));
+                }
+            }
+        }
+
+        for (int usageNum = 0; usageNum < rawUsages.size(); usageNum++) {
+            OpUsage usage = rawUsages.get(usageNum);
+
+            // If this attribution has a special attribution, do not remove it
+            if (specialAttributions.contains(usage.toPackageAttr())) {
+                deDuped.add(usage);
+            }
+
+            // If this attribution is a proxy, remove it
+            if (toRemoveProxies.contains(usage.toPackageAttr())) {
+                continue;
+            }
+
+
+            // Search the rest of the list for usages with the same UID. If this is the most recent
+            // usage for that uid, keep it. Otherwise, remove it
+            boolean isMostRecentForUid = true;
+            for (int otherUsageNum = 0; otherUsageNum < rawUsages.size(); otherUsageNum++) {
+                // Do not compare this usage to itself
+                if (otherUsageNum == usageNum) {
+                    continue;
+                }
+
+                OpUsage otherUsage = rawUsages.get(otherUsageNum);
+                if (otherUsage.uid == usage.uid) {
+                    if (otherUsage.isRunning && !usage.isRunning) {
+                        isMostRecentForUid = false;
+                    } else if (usage.isRunning
+                            && otherUsage.lastAccessTime >= usage.lastAccessTime) {
+                        isMostRecentForUid = false;
+                    } else if (otherUsage.lastAccessTime >= usage.lastAccessTime) {
+                        isMostRecentForUid = false;
+                    }
+
+                    if (!isMostRecentForUid) {
+                        break;
+                    }
+                }
+            }
+
+            if (isMostRecentForUid) {
+                deDuped.add(usage);
+            }
+        }
+
+        return deDuped;
     }
 
     private boolean isUserSensitive(String packageName, UserHandle user, String op) {
@@ -407,6 +735,10 @@ public class PermissionUsageHelper {
         public PackageAttribution toPackageAttr() {
             return new PackageAttribution(packageName, attributionTag, uid);
         }
+
+        public UserHandle getUser() {
+            return UserHandle.getUserHandleForUid(uid);
+        }
     }
 
     /**
@@ -437,6 +769,10 @@ public class PermissionUsageHelper {
         @Override
         public int hashCode() {
             return Objects.hash(packageName, attributionTag, uid);
+        }
+
+        public UserHandle getUser() {
+            return UserHandle.getUserHandleForUid(uid);
         }
     }
 }

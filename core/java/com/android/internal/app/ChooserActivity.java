@@ -182,7 +182,7 @@ public class ChooserActivity extends ResolverActivity implements
      * To be used for shared element transition into this activity.
      * @hide
      */
-    public static final String FIRST_IMAGE_PREVIEW_TRANSITION_NAME = "chooser_preview_image_1";
+    public static final String FIRST_IMAGE_PREVIEW_TRANSITION_NAME = "screenshot_preview_image";
 
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 
@@ -218,6 +218,7 @@ public class ChooserActivity extends ResolverActivity implements
     public static final int SELECTION_TYPE_STANDARD = 3;
     public static final int SELECTION_TYPE_COPY = 4;
     public static final int SELECTION_TYPE_NEARBY = 5;
+    public static final int SELECTION_TYPE_EDIT = 6;
 
     private static final int SCROLL_STATUS_IDLE = 0;
     private static final int SCROLL_STATUS_SCROLLING_VERTICAL = 1;
@@ -431,19 +432,22 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         private void maybeHideContentPreview() {
-            if (!mAtLeastOneLoaded && mHideParentOnFail) {
-                Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
-                        + " within " + mImageLoadTimeoutMillis + "ms.");
-                collapseParentView();
-                if (shouldShowTabs()) {
-                    hideStickyContentPreview();
-                } else if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
-                    mChooserMultiProfilePagerAdapter.getCurrentRootAdapter().hideContentPreview();
+            if (!mAtLeastOneLoaded) {
+                if (mHideParentOnFail) {
+                    Log.i(TAG, "Hiding image preview area. Timed out waiting for preview to load"
+                            + " within " + mImageLoadTimeoutMillis + "ms.");
+                    collapseParentView();
+                    if (shouldShowTabs()) {
+                        hideStickyContentPreview();
+                    } else if (mChooserMultiProfilePagerAdapter.getCurrentRootAdapter() != null) {
+                        mChooserMultiProfilePagerAdapter.getCurrentRootAdapter()
+                                .hideContentPreview();
+                    }
+                    mHideParentOnFail = false;
                 }
-                mHideParentOnFail = false;
+                mRemoveSharedElements = true;
+                startPostponedEnterTransition();
             }
-            mRemoveSharedElements = true;
-            startPostponedEnterTransition();
         }
 
         private void collapseParentView() {
@@ -1194,6 +1198,37 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     @VisibleForTesting
+    protected @Nullable ComponentName getEditSharingComponent() {
+        String editorPackage = getApplicationContext().getString(R.string.config_systemImageEditor);
+        if (editorPackage == null || TextUtils.isEmpty(editorPackage)) {
+            return null;
+        }
+        return ComponentName.unflattenFromString(editorPackage);
+    }
+
+    @VisibleForTesting
+    protected TargetInfo getEditSharingTarget(Intent originalIntent) {
+        final ComponentName cn = getEditSharingComponent();
+
+        final Intent resolveIntent = new Intent(originalIntent);
+        resolveIntent.setComponent(cn);
+        resolveIntent.setAction(Intent.ACTION_EDIT);
+        final ResolveInfo ri = getPackageManager().resolveActivity(
+                resolveIntent, PackageManager.GET_META_DATA);
+        if (ri == null || ri.activityInfo == null) {
+            Log.e(TAG, "Device-specified image edit component (" + cn
+                    + ") not available");
+            return null;
+        }
+
+        final DisplayResolveInfo dri = new DisplayResolveInfo(
+                originalIntent, ri, getString(R.string.screenshot_edit), "", resolveIntent, null);
+        dri.setDisplayIcon(getDrawable(R.drawable.ic_menu_edit));
+        return dri;
+    }
+
+
+    @VisibleForTesting
     protected TargetInfo getNearbySharingTarget(Intent originalIntent) {
         final ComponentName cn = getNearbySharingComponent();
         if (cn == null) return null;
@@ -1276,6 +1311,27 @@ public class ChooserActivity extends ResolverActivity implements
                 }
         );
         b.setId(R.id.chooser_nearby_button);
+        return b;
+    }
+
+    private @Nullable Button createEditButton(Intent originalIntent) {
+        final TargetInfo ti = getEditSharingTarget(originalIntent);
+        if (ti == null) return null;
+
+        final Button b = createActionButton(
+                ti.getDisplayIcon(this),
+                ti.getDisplayLabel(),
+                (View unused) -> {
+                    // Log share completion via edit
+                    getChooserActivityLogger().logShareTargetSelected(
+                            SELECTION_TYPE_EDIT,
+                            "",
+                            -1);
+                    safelyStartActivity(ti);
+                    finish();
+                }
+        );
+        b.setId(R.id.chooser_edit_button);
         return b;
     }
 
@@ -1375,6 +1431,7 @@ public class ChooserActivity extends ResolverActivity implements
                 (ViewGroup) contentPreviewLayout.findViewById(R.id.chooser_action_row);
         //TODO: addActionButton(actionRow, createCopyButton());
         addActionButton(actionRow, createNearbyButton(targetIntent));
+        addActionButton(actionRow, createEditButton(targetIntent));
 
         mPreviewCoord = new ContentPreviewCoordinator(contentPreviewLayout, false);
 

@@ -76,9 +76,10 @@ interface INetworkPolicyManager {
     SubscriptionPlan[] getSubscriptionPlans(int subId, String callingPackage);
     void setSubscriptionPlans(int subId, in SubscriptionPlan[] plans, String callingPackage);
     String getSubscriptionPlansOwner(int subId);
-    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, long timeoutMillis, String callingPackage);
+    void setSubscriptionOverride(int subId, int overrideMask, int overrideValue, in int[] networkTypes, long timeoutMillis, String callingPackage);
 
     void factoryReset(String subscriber);
 
     boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork);
+    boolean isUidRestrictedOnMeteredNetworks(int uid);
 }

@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.settingslib.animation.AppearAnimationUtils;
 import com.android.settingslib.animation.DisappearAnimationUtils;
 import com.android.systemui.R;
@@ -116,7 +117,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         setAlpha(1f);
         setTranslationY(mAppearAnimationUtils.getStartTranslation());
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 500 /* duration */,
-                0, mAppearAnimationUtils.getInterpolator());
+                0, mAppearAnimationUtils.getInterpolator(),
+                getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_APPEAR));
         mAppearAnimationUtils.startAnimation2d(mViews,
                 new Runnable() {
                     @Override
@@ -132,7 +134,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         enableClipping(false);
         setTranslationY(0);
         AppearAnimationUtils.startTranslationYAnimation(this, 0 /* delay */, 280 /* duration */,
-                mDisappearYTranslation, mDisappearAnimationUtils.getInterpolator());
+                mDisappearYTranslation, mDisappearAnimationUtils.getInterpolator(),
+                getAnimationListener(InteractionJankMonitor.CUJ_LOCKSCREEN_PIN_DISAPPEAR));
         DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
                         ? mDisappearAnimationUtilsLocked
                         : mDisappearAnimationUtils;

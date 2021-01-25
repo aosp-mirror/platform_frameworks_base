@@ -2040,13 +2040,16 @@ public class UserManager {
     }
 
     /**
-     * Checks if specified user can have restricted profile.
+     * Checks if the calling context user can have a restricted profile.
+     * @return whether the context user can have a restricted profile.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public boolean canHaveRestrictedProfile(@UserIdInt int userId) {
+    @UserHandleAware
+    public boolean canHaveRestrictedProfile() {
         try {
-            return mService.canHaveRestrictedProfile(userId);
+            return mService.canHaveRestrictedProfile(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2065,6 +2068,25 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Get the parent of a restricted profile.
+     *
+     * @return the parent of the user or {@code null} if the user is not restricted profile
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    @UserHandleAware
+    public @Nullable UserHandle getRestrictedProfileParent() {
+        final UserInfo info = getUserInfo(mUserId);
+        if (info == null) return null;
+        if (!info.isRestricted()) return null;
+        final int parent = info.restrictedProfileParentId;
+        if (parent == UserHandle.USER_NULL) return null;
+        return UserHandle.of(parent);
     }
 
     /**
@@ -4036,14 +4058,18 @@ public class UserManager {
      * the current user, then set the user as ephemeral so that it will be removed when it is
      * stopped.
      *
+     * @param evenWhenDisallowed when {@code true}, user is removed even if the caller user has the
+     * {@link #DISALLOW_REMOVE_USER} or {@link #DISALLOW_REMOVE_MANAGED_PROFILE} restriction
+     *
      * @return the {@link RemoveResult} code
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId) {
+    public @RemoveResult int removeUserOrSetEphemeral(@UserIdInt int userId,
+            boolean evenWhenDisallowed) {
         try {
-            return mService.removeUserOrSetEphemeral(userId);
+            return mService.removeUserOrSetEphemeral(userId, evenWhenDisallowed);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

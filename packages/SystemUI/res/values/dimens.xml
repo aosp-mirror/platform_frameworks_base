@@ -519,6 +519,7 @@
          Scaled @dimen/qs_page_indicator-width by .4f.
     -->
     <dimen name="qs_page_indicator_dot_width">6.4dp</dimen>
+    <dimen name="qs_tile_side_label_padding">6dp</dimen>
     <dimen name="qs_tile_icon_size">24dp</dimen>
     <dimen name="qs_tile_text_size">12sp</dimen>
     <dimen name="qs_tile_divider_height">1dp</dimen>
@@ -618,7 +619,7 @@
     <dimen name="z_distance_between_notifications">0.5dp</dimen>
 
     <!-- The height of the divider between the individual notifications. -->
-    <dimen name="notification_divider_height">4dp</dimen>
+    <dimen name="notification_divider_height">2dp</dimen>
 
     <!-- The corner radius of the shadow behind the notification. -->
     <dimen name="notification_shadow_radius">0dp</dimen>
@@ -1041,6 +1042,13 @@
          burn-in on AOD. -->
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
+    <!-- The maximum offset in either direction that elements are moved vertically to prevent
+         burn-in on AOD. -->
+    <dimen name="burn_in_prevention_offset_y_large_clock">42dp</dimen>
+
+    <!-- Large clock maximum font size (dp is intentional, to prevent any further scaling) -->
+    <dimen name="large_clock_text_size">150dp</dimen>
+
     <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
     <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
@@ -1172,10 +1180,9 @@
     <dimen name="new_qs_vertical_margin">8dp</dimen>
 
     <!-- Size of media cards in the QSPanel carousel -->
-    <dimen name="qs_media_width">350dp</dimen>
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
-    <dimen name="qs_media_album_size">52dp</dimen>
+    <dimen name="qs_media_album_size">120dp</dimen>
     <dimen name="qs_media_icon_size">16dp</dimen>
     <dimen name="qs_center_guideline_padding">10dp</dimen>
     <dimen name="qs_seamless_icon_size">@dimen/qs_media_icon_size</dimen>

@@ -35,6 +35,8 @@ import android.util.Log;
 import androidx.concurrent.futures.CallbackToFutureAdapter;
 import androidx.exifinterface.media.ExifInterface;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import com.google.common.util.concurrent.ListenableFuture;
 
 import java.io.File;
@@ -45,6 +47,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -72,7 +75,7 @@ class ImageExporter {
     private static final String EXIF_WRITE_EXCEPTION =
             "ExifInterface threw an exception writing to the file descriptor.";
     private static final String RESOLVER_UPDATE_ZERO_ROWS =
-            "Failed to publishEntry. ContentResolver#update reported no rows updated.";
+            "Failed to publish entry. ContentResolver#update reported no rows updated.";
     private static final String IMAGE_COMPRESS_RETURNED_FALSE =
             "Bitmap.compress returned false. (Failure unknown)";
 
@@ -114,8 +117,8 @@ class ImageExporter {
      *
      * @return a listenable future result
      */
-    ListenableFuture<Uri> export(Executor executor, Bitmap bitmap) {
-        return export(executor, bitmap, ZonedDateTime.now());
+    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap) {
+        return export(executor, requestId, bitmap, ZonedDateTime.now());
     }
 
     /**
@@ -126,8 +129,10 @@ class ImageExporter {
      *
      * @return a listenable future result
      */
-    ListenableFuture<Uri> export(Executor executor, Bitmap bitmap, ZonedDateTime captureTime) {
-        final Task task = new Task(mResolver, bitmap, captureTime, mCompressFormat, mQuality);
+    ListenableFuture<Result> export(Executor executor, UUID requestId, Bitmap bitmap,
+            ZonedDateTime captureTime) {
+        final Task task =
+                new Task(mResolver, requestId, bitmap, captureTime, mCompressFormat, mQuality);
         return CallbackToFutureAdapter.getFuture(
                 (completer) -> {
                     executor.execute(() -> {
@@ -142,41 +147,61 @@ class ImageExporter {
         );
     }
 
+    static class Result {
+        UUID requestId;
+        String fileName;
+        long timestamp;
+        Uri uri;
+        CompressFormat format;
+    }
+
     private static class Task {
         private final ContentResolver mResolver;
+        private final UUID mRequestId;
+        private final Bitmap mBitmap;
         private final ZonedDateTime mCaptureTime;
         private final CompressFormat mFormat;
         private final int mQuality;
-        private final Bitmap mBitmap;
+        private final String mFileName;
 
-        Task(ContentResolver resolver, Bitmap bitmap, ZonedDateTime captureTime,
+        Task(ContentResolver resolver, UUID requestId, Bitmap bitmap, ZonedDateTime captureTime,
                 CompressFormat format, int quality) {
             mResolver = resolver;
+            mRequestId = requestId;
             mBitmap = bitmap;
             mCaptureTime = captureTime;
             mFormat = format;
             mQuality = quality;
+            mFileName = createFilename(mCaptureTime, mFormat);
         }
 
-        public Uri execute() throws ImageExportException, InterruptedException {
+        public Result execute() throws ImageExportException, InterruptedException {
             Trace.beginSection("ImageExporter_execute");
             Uri uri = null;
             Instant start = null;
+            Result result = new Result();
             try {
                 if (LogConfig.DEBUG_STORAGE) {
                     Log.d(TAG, "image export started");
                     start = Instant.now();
                 }
-                uri = createEntry(mFormat, mCaptureTime);
+
+                uri = createEntry(mFormat, mCaptureTime, mFileName);
                 throwIfInterrupted();
 
                 writeImage(mBitmap, mFormat, mQuality, uri);
                 throwIfInterrupted();
 
-                writeExif(uri, mBitmap.getWidth(), mBitmap.getHeight(), mCaptureTime);
+                writeExif(uri, mRequestId, mBitmap.getWidth(), mBitmap.getHeight(), mCaptureTime);
                 throwIfInterrupted();
 
                 publishEntry(uri);
+
+                result.timestamp = mCaptureTime.toInstant().toEpochMilli();
+                result.requestId = mRequestId;
+                result.uri = uri;
+                result.fileName = mFileName;
+                result.format = mFormat;
 
                 if (LogConfig.DEBUG_STORAGE) {
                     Log.d(TAG, "image export completed: "
@@ -190,13 +215,15 @@ class ImageExporter {
             } finally {
                 Trace.endSection();
             }
-            return uri;
+            return result;
         }
 
-        Uri createEntry(CompressFormat format, ZonedDateTime time) throws ImageExportException {
+        Uri createEntry(CompressFormat format, ZonedDateTime time, String fileName)
+                throws ImageExportException {
             Trace.beginSection("ImageExporter_createEntry");
             try {
-                final ContentValues values = createMetadata(time, format);
+                final ContentValues values = createMetadata(time, format, fileName);
+
                 Uri uri = mResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
                 if (uri == null) {
                     throw new ImageExportException(RESOLVER_INSERT_RETURNED_NULL);
@@ -225,7 +252,7 @@ class ImageExporter {
             }
         }
 
-        void writeExif(Uri uri, int width, int height, ZonedDateTime captureTime)
+        void writeExif(Uri uri, UUID requestId, int width, int height, ZonedDateTime captureTime)
                 throws ImageExportException {
             Trace.beginSection("ImageExporter_writeExif");
             ParcelFileDescriptor pfd = null;
@@ -241,7 +268,7 @@ class ImageExporter {
                     throw new ImageExportException(EXIF_READ_EXCEPTION, e);
                 }
 
-                updateExifAttributes(exif, width, height, captureTime);
+                updateExifAttributes(exif, requestId, width, height, captureTime);
                 try {
                     exif.saveAttributes();
                 } catch (IOException e) {
@@ -276,14 +303,16 @@ class ImageExporter {
         }
     }
 
+    @VisibleForTesting
     static String createFilename(ZonedDateTime time, CompressFormat format) {
         return String.format(FILENAME_PATTERN, time, fileExtension(format));
     }
 
-    static ContentValues createMetadata(ZonedDateTime captureTime, CompressFormat format) {
+    static ContentValues createMetadata(ZonedDateTime captureTime, CompressFormat format,
+            String fileName) {
         ContentValues values = new ContentValues();
         values.put(MediaStore.MediaColumns.RELATIVE_PATH, SCREENSHOTS_PATH);
-        values.put(MediaStore.MediaColumns.DISPLAY_NAME, createFilename(captureTime, format));
+        values.put(MediaStore.MediaColumns.DISPLAY_NAME, fileName);
         values.put(MediaStore.MediaColumns.MIME_TYPE, getMimeType(format));
         values.put(MediaStore.MediaColumns.DATE_ADDED, captureTime.toEpochSecond());
         values.put(MediaStore.MediaColumns.DATE_MODIFIED, captureTime.toEpochSecond());
@@ -293,8 +322,10 @@ class ImageExporter {
         return values;
     }
 
-    static void updateExifAttributes(ExifInterface exif, int width, int height,
+    static void updateExifAttributes(ExifInterface exif, UUID uniqueId, int width, int height,
             ZonedDateTime captureTime) {
+        exif.setAttribute(ExifInterface.TAG_IMAGE_UNIQUE_ID, uniqueId.toString());
+
         exif.setAttribute(ExifInterface.TAG_SOFTWARE, "Android " + Build.DISPLAY);
         exif.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, Integer.toString(width));
         exif.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, Integer.toString(height));

@@ -43,15 +43,11 @@ import static com.android.server.wm.testing.Assert.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Rect;
@@ -60,7 +56,6 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.WindowManager;
-import android.window.IDisplayAreaOrganizer;
 
 import com.google.android.collect.Lists;
 
@@ -503,42 +498,6 @@ public class DisplayAreaTest extends WindowTestsBase {
         assertThat(mDisplayContent.getOrientationRequestingTaskDisplayArea()).isEqualTo(tda);
     }
 
-    @Test
-    public void onParentChanged_onDisplayAreaAppeared() {
-        final DisplayArea<WindowContainer> displayArea = new DisplayArea<>(
-                mWm, BELOW_TASKS, "NewArea", FEATURE_DEFAULT_TASK_CONTAINER);
-
-        final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
-        spyOn(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController);
-        when(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController
-                .getOrganizerByFeature(FEATURE_DEFAULT_TASK_CONTAINER))
-                .thenReturn(mockDisplayAreaOrganizer);
-
-        mDisplayContent.addChild(displayArea, 0);
-        assertEquals(mockDisplayAreaOrganizer, displayArea.mOrganizer);
-        verify(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController)
-                .onDisplayAreaAppeared(
-                        eq(mockDisplayAreaOrganizer),
-                        argThat(it -> it == displayArea && it.getSurfaceControl() != null));
-    }
-
-    @Test
-    public void onParentChanged_onDisplayAreaVanished() {
-        final DisplayArea<WindowContainer> displayArea = new DisplayArea<>(
-                mWm, BELOW_TASKS, "NewArea", FEATURE_DEFAULT_TASK_CONTAINER);
-
-        final IDisplayAreaOrganizer mockDisplayAreaOrganizer = mock(IDisplayAreaOrganizer.class);
-        displayArea.mOrganizer = mockDisplayAreaOrganizer;
-        spyOn(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController);
-
-        mDisplayContent.addChild(displayArea, 0);
-        displayArea.removeImmediately();
-
-        assertNull(displayArea.mOrganizer);
-        verify(mWm.mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController)
-                .onDisplayAreaVanished(mockDisplayAreaOrganizer, displayArea);
-    }
-
     private static class TestDisplayArea<T extends WindowContainer> extends DisplayArea<T> {
         private TestDisplayArea(WindowManagerService wms, Rect bounds) {
             super(wms, ANY, "half display area");
@@ -555,7 +514,7 @@ public class DisplayAreaTest extends WindowTestsBase {
         return new WindowState(mWm, mock(Session.class), new TestIWindow(), token,
                 null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
                 View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
-                false /* ownerCanAddInternalSystemWindow */);
+                false /* ownerCanAddInternalSystemWindow */, false /* ownerCanUseBackgroundBlur */);
     }
 
     private WindowToken createWindowToken(int type) {

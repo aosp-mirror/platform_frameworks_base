@@ -17,10 +17,13 @@
 package android.net.metrics;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.net.ConnectivityMetricsEvent;
 import android.net.IIpConnectivityMetrics;
+import android.net.LinkProperties;
 import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -32,7 +35,11 @@ import com.android.internal.util.BitUtils;
 /**
  * Class for logging IpConnectvity events with IpConnectivityMetrics
  * {@hide}
+ * @deprecated The event may not be sent in Android S and above. The events
+ * are logged by a single caller in the system using signature permissions
+ * and that caller is migrating to statsd.
  */
+@Deprecated
 @SystemApi
 public class IpConnectivityLog {
     private static final String TAG = IpConnectivityLog.class.getSimpleName();
@@ -66,6 +73,9 @@ public class IpConnectivityLog {
         final IIpConnectivityMetrics service =
                 IIpConnectivityMetrics.Stub.asInterface(ServiceManager.getService(SERVICE_NAME));
         if (service == null) {
+            if (DBG) {
+                Log.d(TAG, SERVICE_NAME + " service was not ready");
+            }
             return false;
         }
         // Two threads racing here will write the same pointer because getService
@@ -83,9 +93,6 @@ public class IpConnectivityLog {
      */
     public boolean log(@NonNull ConnectivityMetricsEvent ev) {
         if (!checkLoggerService()) {
-            if (DBG) {
-                Log.d(TAG, SERVICE_NAME + " service was not ready");
-            }
             return false;
         }
         if (ev.timestamp == 0) {
@@ -134,7 +141,7 @@ public class IpConnectivityLog {
      * @return true if the event was successfully logged.
      */
     public boolean log(@NonNull Network network, @NonNull int[] transports, @NonNull Event data) {
-        return log(network.netId, transports, data);
+        return log(network.getNetId(), transports, data);
     }
 
     /**
@@ -159,6 +166,56 @@ public class IpConnectivityLog {
      */
     public boolean log(@NonNull Event data) {
         return log(makeEv(data));
+    }
+
+    /**
+     * Logs the validation status of the default network.
+     * @param valid whether the current default network was validated (i.e., whether it had
+     *              {@link NetworkCapabilities.NET_CAPABILITY_VALIDATED}
+     * @return true if the event was successfully logged.
+     * @hide
+     */
+    public boolean logDefaultNetworkValidity(boolean valid) {
+        if (!checkLoggerService()) {
+            return false;
+        }
+        try {
+            mService.logDefaultNetworkValidity(valid);
+        } catch (RemoteException ignored) {
+            // Only called within the system server.
+        }
+        return true;
+    }
+
+    /**
+     * Logs a change in the default network.
+     *
+     * @param defaultNetwork the current default network
+     * @param score the current score of {@code defaultNetwork}
+     * @param lp the {@link LinkProperties} of {@code defaultNetwork}
+     * @param nc the {@link NetworkCapabilities} of the {@code defaultNetwork}
+     * @param validated whether {@code defaultNetwork} network is validated
+     * @param previousDefaultNetwork the previous default network
+     * @param previousScore the score of {@code previousDefaultNetwork}
+     * @param previousLp the {@link LinkProperties} of {@code previousDefaultNetwork}
+     * @param previousNc the {@link NetworkCapabilities} of {@code previousDefaultNetwork}
+     * @return true if the event was successfully logged.
+     * @hide
+     */
+    public boolean logDefaultNetworkEvent(@Nullable Network defaultNetwork, int score,
+            boolean validated, @Nullable LinkProperties lp, @Nullable NetworkCapabilities nc,
+            @Nullable Network previousDefaultNetwork, int previousScore,
+            @Nullable LinkProperties previousLp, @Nullable NetworkCapabilities previousNc) {
+        if (!checkLoggerService()) {
+            return false;
+        }
+        try {
+            mService.logDefaultNetworkEvent(defaultNetwork, score, validated, lp, nc,
+                    previousDefaultNetwork, previousScore, previousLp, previousNc);
+        } catch (RemoteException ignored) {
+            // Only called within the system server.
+        }
+        return true;
     }
 
     private static ConnectivityMetricsEvent makeEv(Event data) {

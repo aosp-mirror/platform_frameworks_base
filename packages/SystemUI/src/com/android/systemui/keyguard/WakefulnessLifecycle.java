@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard;
 
 import android.annotation.IntDef;
+import android.os.PowerManager;
 import android.os.Trace;
 
 import com.android.systemui.Dumpable;
@@ -51,6 +52,9 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
     public static final int WAKEFULNESS_GOING_TO_SLEEP = 3;
 
     private int mWakefulness = WAKEFULNESS_ASLEEP;
+    private @PowerManager.WakeReason int mLastWakeReason = PowerManager.WAKE_REASON_UNKNOWN;
+    private @PowerManager.GoToSleepReason int mLastSleepReason =
+            PowerManager.GO_TO_SLEEP_REASON_MIN;
 
     @Inject
     public WakefulnessLifecycle() {
@@ -60,11 +64,27 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         return mWakefulness;
     }
 
-    public void dispatchStartedWakingUp() {
+    /**
+     * Returns the most recent reason the device woke up. This is one of PowerManager.WAKE_REASON_*.
+     */
+    public @PowerManager.WakeReason int getLastWakeReason() {
+        return mLastWakeReason;
+    }
+
+    /**
+     * Returns the most recent reason the device went to sleep up. This is one of
+     * PowerManager.GO_TO_SLEEP_REASON_*.
+     */
+    public @PowerManager.GoToSleepReason int getLastSleepReason() {
+        return mLastSleepReason;
+    }
+
+    public void dispatchStartedWakingUp(@PowerManager.WakeReason int pmWakeReason) {
         if (getWakefulness() == WAKEFULNESS_WAKING) {
             return;
         }
         setWakefulness(WAKEFULNESS_WAKING);
+        mLastWakeReason = pmWakeReason;
         dispatch(Observer::onStartedWakingUp);
     }
 
@@ -76,11 +96,12 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
         dispatch(Observer::onFinishedWakingUp);
     }
 
-    public void dispatchStartedGoingToSleep() {
+    public void dispatchStartedGoingToSleep(@PowerManager.GoToSleepReason int pmSleepReason) {
         if (getWakefulness() == WAKEFULNESS_GOING_TO_SLEEP) {
             return;
         }
         setWakefulness(WAKEFULNESS_GOING_TO_SLEEP);
+        mLastSleepReason = pmSleepReason;
         dispatch(Observer::onStartedGoingToSleep);
     }
 
