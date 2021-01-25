@@ -38,6 +38,7 @@ import android.net.metrics.IpConnectivityLog
 import android.os.ConditionVariable
 import android.os.IBinder
 import android.os.INetworkManagementService
+import android.os.UserHandle
 import android.testing.TestableContext
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -55,10 +56,13 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.AdditionalAnswers
 import org.mockito.Mock
 import org.mockito.Mockito.any
+import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import org.mockito.MockitoAnnotations
@@ -143,7 +147,10 @@ class ConnectivityServiceIntegrationTest {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        doNothing().`when`(context).sendStickyBroadcastAsUser(any(), any(), any())
+        val asUserCtx = mock(Context::class.java, AdditionalAnswers.delegatesTo<Context>(context))
+        doReturn(UserHandle.ALL).`when`(asUserCtx).user
+        doReturn(asUserCtx).`when`(context).createContextAsUser(eq(UserHandle.ALL), anyInt())
+        doNothing().`when`(context).sendStickyBroadcast(any(), any())
 
         networkStackClient = TestNetworkStackClient(realContext)
         networkStackClient.init()
