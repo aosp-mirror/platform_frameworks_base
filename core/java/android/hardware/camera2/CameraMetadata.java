@@ -112,6 +112,15 @@ public abstract class CameraMetadata<TKey> {
     }
 
     /**
+     * Retrieves the CameraMetadataNative instance.
+     *
+     * @hide
+     */
+    public CameraMetadataNative getNativeMetadata() {
+        return mNativeInstance;
+    }
+
+    /**
      * @hide
      */
     protected abstract Class<TKey> getKeyClass();

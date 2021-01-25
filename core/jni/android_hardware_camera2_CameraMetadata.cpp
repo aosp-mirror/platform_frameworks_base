@@ -249,6 +249,32 @@ static jint CameraMetadata_getEntryCount(JNIEnv *env, jclass thiz, jlong ptr) {
     return metadata->entryCount();
 }
 
+static void CameraMetadata_update(JNIEnv *env, jclass thiz, jlong dst, jlong src) {
+    ALOGV("%s", __FUNCTION__);
+
+    CameraMetadata* metadataDst = CameraMetadata_getPointerThrow(env, dst);
+    CameraMetadata* metadataSrc = CameraMetadata_getPointerThrow(env, src);
+
+    if (((metadataDst == NULL) || (metadataDst->isEmpty())) ||
+            ((metadataSrc == NULL) || metadataSrc->isEmpty())) {
+        return;
+    }
+
+    auto metaBuffer = metadataSrc->getAndLock();
+    camera_metadata_ro_entry_t entry;
+    auto entryCount = get_camera_metadata_entry_count(metaBuffer);
+    for (size_t i = 0; i < entryCount; i++) {
+        auto stat = get_camera_metadata_ro_entry(metaBuffer, i, &entry);
+        if (stat != NO_ERROR) {
+            ALOGE("%s: Failed to retrieve source metadata!", __func__);
+            metadataSrc->unlock(metaBuffer);
+            return;
+        }
+        metadataDst->update(entry.tag, entry.data.u8, entry.count);
+    }
+    metadataSrc->unlock(metaBuffer);
+}
+
 static jlong CameraMetadata_getBufferSize(JNIEnv *env, jclass thiz, jlong ptr) {
     ALOGV("%s", __FUNCTION__);
 
@@ -565,6 +591,9 @@ static const JNINativeMethod gCameraMetadataMethods[] = {
   { "nativeAllocateCopy",
     "(J)J",
     (void *)CameraMetadata_allocateCopy },
+  { "nativeUpdate",
+    "(JJ)V",
+    (void*)CameraMetadata_update },
   { "nativeIsEmpty",
     "(J)Z",
     (void*)CameraMetadata_isEmpty },

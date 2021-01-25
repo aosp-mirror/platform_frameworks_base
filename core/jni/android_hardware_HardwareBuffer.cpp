@@ -31,7 +31,6 @@
 #include <binder/Parcel.h>
 
 #include <private/gui/ComposerService.h>
-#include <ui/GraphicBuffer.h>
 #include <ui/PixelFormat.h>
 
 #include <hardware/gralloc1.h>
@@ -219,6 +218,16 @@ AHardwareBuffer* android_hardware_HardwareBuffer_getNativeHardwareBuffer(
                 env->GetLongField(hardwareBufferObj, gHardwareBufferClassInfo.mNativeObject));
         return AHardwareBuffer_from_GraphicBuffer(buffer);
 
+    } else {
+        return nullptr;
+    }
+}
+
+GraphicBuffer* android_hardware_HardwareBuffer_getNativeGraphicBuffer(
+        JNIEnv* env, jobject hardwareBufferObj) {
+    if (env->IsInstanceOf(hardwareBufferObj, gHardwareBufferClassInfo.clazz)) {
+        return GraphicBufferWrapper_to_GraphicBuffer(
+                env->GetLongField(hardwareBufferObj, gHardwareBufferClassInfo.mNativeObject));
     } else {
         return nullptr;
     }
