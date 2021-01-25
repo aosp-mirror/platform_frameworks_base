@@ -61,6 +61,7 @@ import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUtils;
 
 import java.io.PrintWriter;
@@ -69,7 +70,7 @@ import java.util.function.Consumer;
 /**
  * Manages the picture-in-picture (PIP) UI and states for Phones.
  */
-public class PipController implements PipTaskOrganizer.PipTransitionCallback {
+public class PipController implements PipTransitionController.PipTransitionCallback {
     private static final String TAG = "PipController";
 
     private Context mContext;
@@ -82,6 +83,7 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
     private PipBoundsAlgorithm mPipBoundsAlgorithm;
     private PipBoundsState mPipBoundsState;
     private PipTouchHandler mTouchHandler;
+    private PipTransitionController mPipTransitionController;
     protected final PipImpl mImpl = new PipImpl();
 
     private final Rect mTmpInsetBounds = new Rect();
@@ -214,7 +216,6 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         }
     }
 
-
     /**
      * Instantiates {@link PipController}, returns {@code null} if the feature not supported.
      */
@@ -223,7 +224,8 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
-            PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
+            PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
+            WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener, ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             Slog.w(TAG, "Device doesn't support Pip feature");
@@ -232,7 +234,8 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
 
         return new PipController(context, displayController, pipAppOpsListener, pipBoundsAlgorithm,
                 pipBoundsState, pipMediaController, phonePipMenuController, pipTaskOrganizer,
-                pipTouchHandler, windowManagerShellWrapper, taskStackListener, mainExecutor)
+                pipTouchHandler, pipTransitionController, windowManagerShellWrapper,
+                taskStackListener, mainExecutor)
                 .mImpl;
     }
 
@@ -245,6 +248,7 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
             PhonePipMenuController phonePipMenuController,
             PipTaskOrganizer pipTaskOrganizer,
             PipTouchHandler pipTouchHandler,
+            PipTransitionController pipTransitionController,
             WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             ShellExecutor mainExecutor
@@ -266,9 +270,10 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         mMenuController = phonePipMenuController;
         mTouchHandler = pipTouchHandler;
         mAppOpsListener = pipAppOpsListener;
+        mPipTransitionController = pipTransitionController;
         mPipInputConsumer = new PipInputConsumer(WindowManagerGlobal.getWindowManagerService(),
                 INPUT_CONSUMER_PIP, mainExecutor);
-        mPipTaskOrganizer.registerPipTransitionCallback(this);
+        mPipTransitionController.registerPipTransitionCallback(this);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
             mPipBoundsState.setDisplayId(displayId);
             onDisplayChanged(displayController.getDisplayLayout(displayId),
@@ -489,7 +494,7 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
     }
 
     @Override
-    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
+    public void onPipTransitionStarted(int direction, Rect pipBounds) {
         if (isOutPipDirection(direction)) {
             // Exiting PIP, save the reentry state to restore to when re-entering.
             saveReentryState(pipBounds);
@@ -514,12 +519,12 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
     }
 
     @Override
-    public void onPipTransitionFinished(ComponentName activity, int direction) {
+    public void onPipTransitionFinished(int direction) {
         onPipTransitionFinishedOrCanceled(direction);
     }
 
     @Override
-    public void onPipTransitionCanceled(ComponentName activity, int direction) {
+    public void onPipTransitionCanceled(int direction) {
         onPipTransitionFinishedOrCanceled(direction);
     }
 
