@@ -282,6 +282,25 @@ public class RecentsAnimationController implements DeathRecipient {
                             task.setCanAffectSystemUiFlags(behindSystemBars);
                         }
                     }
+                    if (!behindSystemBars) {
+                        // Make sure to update the correct IME parent in case that the IME parent
+                        // may be computed as display layer when re-layout window happens during
+                        // rotation but there is intermediate state that the bounds of task and
+                        // the IME target's activity is not the same during rotating.
+                        mDisplayContent.updateImeParent();
+
+                        // Hiding IME if IME window is not attached to app.
+                        // Since some windowing mode is not proper to snapshot Task with IME window
+                        // while the app transitioning to the next task (e.g. split-screen mode)
+                        if (!mDisplayContent.isImeAttachedToApp()) {
+                            final InputMethodManagerInternal inputMethodManagerInternal =
+                                    LocalServices.getService(InputMethodManagerInternal.class);
+                            if (inputMethodManagerInternal != null) {
+                                inputMethodManagerInternal.hideCurrentInputMethod(
+                                        SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
+                            }
+                        }
+                    }
                     mService.mWindowPlacerLocked.requestTraversal();
                 }
             } finally {
@@ -299,7 +318,6 @@ public class RecentsAnimationController implements DeathRecipient {
                     if (mCanceled) {
                         return;
                     }
-
                     mInputConsumerEnabled = enabled;
                     final InputMonitor inputMonitor = mDisplayContent.getInputMonitor();
                     inputMonitor.updateInputWindowsLw(true /*force*/);
@@ -310,34 +328,9 @@ public class RecentsAnimationController implements DeathRecipient {
             }
         }
 
+        // TODO(b/166736352): Remove this method without the need to expose to launcher.
         @Override
-        public void hideCurrentInputMethod() {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                synchronized (mService.getWindowManagerLock()) {
-                    // Make sure to update the correct IME parent in case that the IME parent may
-                    // be computed as display layer when re-layout window happens during rotation
-                    // but there is intermediate state that the bounds of task and the IME
-                    // target's activity is not the same during rotating.
-                    mDisplayContent.updateImeParent();
-
-                    // Ignore hiding IME if IME window is attached to app.
-                    // Since we would like to snapshot Task with IME window while transitioning
-                    // to recents.
-                    if (mDisplayContent.isImeAttachedToApp()) {
-                        return;
-                    }
-                }
-                final InputMethodManagerInternal inputMethodManagerInternal =
-                        LocalServices.getService(InputMethodManagerInternal.class);
-                if (inputMethodManagerInternal != null) {
-                    inputMethodManagerInternal.hideCurrentInputMethod(
-                            SoftInputShowHideReason.HIDE_RECENTS_ANIMATION);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
+        public void hideCurrentInputMethod() { }
 
         @Override
         public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {

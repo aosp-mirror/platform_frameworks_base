@@ -154,18 +154,21 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     private void updateDisplayFrames() {
-        mFrames = createDisplayFrames();
+        mFrames = createDisplayFrames(
+                mDisplayContent.getInsetsStateController().getRawInsetsState());
         mDisplayBounds.set(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight);
         mDisplayContent.mDisplayFrames = mFrames;
         mDisplayContent.setBounds(mDisplayBounds);
-        mDisplayContent.getInsetsStateController().getRawInsetsState().setDisplayFrame(
-                mDisplayBounds);
+        mDisplayPolicy.layoutWindowLw(mNavBarWindow, null, mFrames);
+        mDisplayPolicy.layoutWindowLw(mStatusBarWindow, null, mFrames);
     }
 
-    private DisplayFrames createDisplayFrames() {
+    private DisplayFrames createDisplayFrames(InsetsState insetsState) {
         final Pair<DisplayInfo, WmDisplayCutout> info = displayInfoAndCutoutForRotation(mRotation,
                 mHasDisplayCutout, mIsLongEdgeDisplayCutout);
-        return new DisplayFrames(mDisplayContent.getDisplayId(), info.first, info.second);
+        return new DisplayFrames(mDisplayContent.getDisplayId(),
+                insetsState,
+                info.first, info.second);
     }
 
     @Test
@@ -280,7 +283,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(Type.statusBars());
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, 0);
@@ -292,7 +294,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(Type.navigationBars());
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, NAV_BAR_HEIGHT);
@@ -304,7 +305,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsSides(Side.all());
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
@@ -316,7 +316,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsSides(Side.TOP);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, 0);
@@ -332,7 +331,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(true);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
@@ -348,7 +346,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(false);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), 0, 0);
@@ -365,7 +362,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT);
@@ -380,7 +376,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getDisplayFrame(), DISPLAY_CUTOUT_HEIGHT, 0);
@@ -396,7 +391,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
@@ -413,7 +407,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
@@ -430,7 +423,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
@@ -447,7 +439,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
@@ -461,11 +452,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mWindow.mAttrs.setFitInsetsTypes(
-                mWindow.mAttrs.getFitInsetsTypes() & ~Type.statusBars());
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
@@ -486,7 +474,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.updateRequestedVisibility(requestedState);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), STATUS_BAR_HEIGHT, 0);
@@ -508,7 +495,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, 0);
@@ -525,7 +511,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
@@ -542,7 +527,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, DISPLAY_CUTOUT_HEIGHT, 0);
@@ -557,11 +541,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mWindow.mAttrs.setFitInsetsTypes(
-                mWindow.mAttrs.getFitInsetsTypes() & ~Type.statusBars());
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
@@ -578,7 +559,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.height = DISPLAY_HEIGHT;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetByTopBottom(mWindow.getParentFrame(), 0, NAV_BAR_HEIGHT);
@@ -593,12 +573,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mWindow.mAttrs.setFitInsetsTypes(
-                mWindow.mAttrs.getFitInsetsTypes() & ~Type.statusBars());
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
@@ -613,7 +590,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
@@ -630,7 +606,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
@@ -647,7 +622,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), DISPLAY_CUTOUT_HEIGHT, 0, 0, 0);
@@ -664,7 +638,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
         addWindowWithRawInsetsState(mWindow);
 
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
@@ -681,7 +654,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         final int forwardedInsetBottom = 50;
         mDisplayPolicy.setForwardedInsets(Insets.of(0, 0, 0, forwardedInsetBottom));
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
         assertInsetBy(mWindow.getParentFrame(), 0, 0, 0, 0);
@@ -691,9 +663,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutHint_appWindow() {
         mWindow.mAttrs.setFitInsetsTypes(0);
-
-        // Initialize DisplayFrames
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
         final Rect outFrame = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
@@ -714,9 +683,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutHint_appWindowInTask() {
         mWindow.mAttrs.setFitInsetsTypes(0);
-
-        // Initialize DisplayFrames
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
         final Rect taskBounds = new Rect(100, 100, 200, 200);
         final Task task = mWindow.getTask();
@@ -742,9 +708,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutHint_appWindowInTask_outsideContentFrame() {
         mWindow.mAttrs.setFitInsetsTypes(0);
-
-        // Initialize DisplayFrames
-        mDisplayPolicy.beginLayoutLw(mFrames, 0 /* UI mode */);
 
         final InsetsState state =
                 mDisplayContent.getInsetsStateController().getRawInsetsState();
@@ -781,7 +744,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     /**
      * Verify that {@link DisplayPolicy#simulateLayoutDisplay} outputs the same display frames as
-     * {@link DisplayPolicy#beginLayoutLw}.
+     * the real one.
      */
     @Test
     public void testSimulateLayoutDisplay() {
@@ -795,12 +758,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private void assertSimulateLayoutSameDisplayFrames() {
         final String prefix = "";
         final InsetsState simulatedInsetsState = new InsetsState();
-        final DisplayFrames simulatedDisplayFrames = createDisplayFrames();
-        mDisplayPolicy.beginLayoutLw(mFrames, mDisplayContent.getConfiguration().uiMode);
+        final DisplayFrames simulatedDisplayFrames = createDisplayFrames(simulatedInsetsState);
         // Force the display bounds because it is not synced with display frames in policy test.
         mDisplayContent.getWindowConfiguration().setBounds(mFrames.mUnrestricted);
         mDisplayContent.getInsetsStateController().onPostLayout();
-        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames, simulatedInsetsState,
+        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames,
                 new SparseArray<>() /* barContentFrames */);
 
         final StringWriter realFramesDump = new StringWriter();
@@ -824,7 +786,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void testFixedRotationInsetsSourceFrame() {
-        mDisplayPolicy.beginLayoutLw(mFrames, mDisplayContent.getConfiguration().uiMode);
         doReturn((mDisplayContent.getRotation() + 1) % 4).when(mDisplayContent)
                 .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
         mWindow.mAboveInsetsState.addSource(mDisplayContent.getInsetsStateController()

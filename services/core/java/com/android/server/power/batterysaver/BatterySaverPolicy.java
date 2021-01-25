@@ -72,7 +72,7 @@ public class BatterySaverPolicy extends ContentObserver implements
     @VisibleForTesting
     static final String KEY_DISABLE_ANIMATION = "disable_animation";
     @VisibleForTesting
-    static final String KEY_DISABLE_SOUNDTRIGGER = "disable_soundtrigger";
+    static final String KEY_SOUNDTRIGGER_MODE = "soundtrigger_mode";
 
     /**
      * Turn on the network firewall when Battery Saver is turned on.
@@ -144,7 +144,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             false, /* disableAod */
             false, /* disableLaunchBoost */
             false, /* disableOptionalSensors */
-            false, /* disableSoundTrigger */
             false, /* disableVibration */
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
@@ -155,7 +154,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             new ArrayMap<>(), /* filesForNoninteractive */
             false, /* forceAllAppsStandby */
             false, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_NO_CHANGE /* locationMode */
+            PowerManager.LOCATION_MODE_NO_CHANGE, /* locationMode */
+            PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED /* soundTriggerMode */
     );
 
     private static final Policy DEFAULT_ADAPTIVE_POLICY = OFF_POLICY;
@@ -169,7 +169,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             true,  /* disableAod */
             true,  /* disableLaunchBoost */
             true,  /* disableOptionalSensors */
-            true,  /* disableSoundTrigger */
             true,  /* disableVibration */
             false, /* enableAdjustBrightness */
             false, /* enableDataSaver */
@@ -180,7 +179,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
-            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF /* locationMode */
+            PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF, /* locationMode */
+            PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY /* soundTriggerMode */
     );
 
     private final Object mLock;
@@ -494,7 +494,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                 rawPolicy.disableAod,
                 rawPolicy.disableLaunchBoost,
                 rawPolicy.disableOptionalSensors,
-                rawPolicy.disableSoundTrigger,
                 // Don't disable vibration when accessibility is on.
                 rawPolicy.disableVibration && !mAccessibilityEnabled.get(),
                 rawPolicy.enableAdjustBrightness,
@@ -507,7 +506,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                 rawPolicy.filesForNoninteractive,
                 rawPolicy.forceAllAppsStandby,
                 rawPolicy.forceBackgroundCheck,
-                locationMode
+                locationMode,
+                rawPolicy.soundTriggerMode
         );
 
 
@@ -518,7 +518,9 @@ public class BatterySaverPolicy extends ContentObserver implements
 
         if (mEffectivePolicyRaw.disableVibration) sb.append("v");
         if (mEffectivePolicyRaw.disableAnimation) sb.append("a");
-        if (mEffectivePolicyRaw.disableSoundTrigger) sb.append("s");
+
+        sb.append(mEffectivePolicyRaw.soundTriggerMode);
+
         if (mEffectivePolicyRaw.deferFullBackup) sb.append("F");
         if (mEffectivePolicyRaw.deferKeyValueBackup) sb.append("K");
         if (mEffectivePolicyRaw.enableFirewall) sb.append("f");
@@ -599,9 +601,9 @@ public class BatterySaverPolicy extends ContentObserver implements
          * in battery saver mode.
          *
          * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-         * @see #KEY_DISABLE_SOUNDTRIGGER
+         * @see #KEY_SOUNDTRIGGER_MODE
          */
-        public final boolean disableSoundTrigger;
+        public final int soundTriggerMode;
 
         /**
          * {@code true} if vibration is disabled in battery saver mode.
@@ -692,7 +694,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                 boolean disableAod,
                 boolean disableLaunchBoost,
                 boolean disableOptionalSensors,
-                boolean disableSoundTrigger,
                 boolean disableVibration,
                 boolean enableAdjustBrightness,
                 boolean enableDataSaver,
@@ -703,7 +704,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                 ArrayMap<String, String> filesForNoninteractive,
                 boolean forceAllAppsStandby,
                 boolean forceBackgroundCheck,
-                int locationMode) {
+                int locationMode,
+                int soundTriggerMode) {
 
             this.adjustBrightnessFactor = Math.min(1, Math.max(0, adjustBrightnessFactor));
             this.advertiseIsEnabled = advertiseIsEnabled;
@@ -713,7 +715,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             this.disableAod = disableAod;
             this.disableLaunchBoost = disableLaunchBoost;
             this.disableOptionalSensors = disableOptionalSensors;
-            this.disableSoundTrigger = disableSoundTrigger;
             this.disableVibration = disableVibration;
             this.enableAdjustBrightness = enableAdjustBrightness;
             this.enableDataSaver = enableDataSaver;
@@ -733,6 +734,14 @@ public class BatterySaverPolicy extends ContentObserver implements
                 this.locationMode = locationMode;
             }
 
+            if (soundTriggerMode < PowerManager.MIN_SOUND_TRIGGER_MODE
+                    || soundTriggerMode > PowerManager.MAX_SOUND_TRIGGER_MODE) {
+                Slog.e(TAG, "Invalid SoundTrigger mode: " + soundTriggerMode);
+                this.soundTriggerMode = PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
+            } else {
+                this.soundTriggerMode = soundTriggerMode;
+            }
+
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
@@ -742,7 +751,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                     disableAod,
                     disableLaunchBoost,
                     disableOptionalSensors,
-                    disableSoundTrigger,
                     disableVibration,
                     enableAdjustBrightness,
                     enableDataSaver,
@@ -753,7 +761,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                     filesForNoninteractive,
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    locationMode);
+                    locationMode,
+                    soundTriggerMode);
         }
 
         static Policy fromConfig(BatterySaverPolicyConfig config) {
@@ -778,7 +787,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                     config.getDisableAod(),
                     config.getDisableLaunchBoost(),
                     config.getDisableOptionalSensors(),
-                    config.getDisableSoundTrigger(),
                     config.getDisableVibration(),
                     config.getEnableAdjustBrightness(),
                     config.getEnableDataSaver(),
@@ -791,7 +799,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     config.getForceAllAppsStandby(),
                     config.getForceBackgroundCheck(),
-                    config.getLocationMode()
+                    config.getLocationMode(),
+                    config.getSoundTriggerMode()
             );
         }
 
@@ -851,9 +860,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             final boolean disableOptionalSensors = parser.getBoolean(KEY_DISABLE_OPTIONAL_SENSORS,
                     properties.getBoolean(KEY_DISABLE_OPTIONAL_SENSORS + configSuffix,
                             defaultPolicy.disableOptionalSensors));
-            final boolean disableSoundTrigger = parser.getBoolean(KEY_DISABLE_SOUNDTRIGGER,
-                    properties.getBoolean(KEY_DISABLE_SOUNDTRIGGER + configSuffix,
-                            defaultPolicy.disableSoundTrigger));
             final boolean disableVibrationConfig = parser.getBoolean(KEY_DISABLE_VIBRATION,
                     properties.getBoolean(KEY_DISABLE_VIBRATION + configSuffix,
                             defaultPolicy.disableVibration));
@@ -882,7 +888,9 @@ public class BatterySaverPolicy extends ContentObserver implements
             final int locationMode = parser.getInt(KEY_LOCATION_MODE,
                     properties.getInt(KEY_LOCATION_MODE + configSuffix,
                             defaultPolicy.locationMode));
-
+            final int soundTriggerMode = parser.getInt(KEY_SOUNDTRIGGER_MODE,
+                    properties.getInt(KEY_SOUNDTRIGGER_MODE + configSuffix,
+                            defaultPolicy.soundTriggerMode));
             return new Policy(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
@@ -892,7 +900,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                     disableAod,
                     disableLaunchBoost,
                     disableOptionalSensors,
-                    disableSoundTrigger,
                     /* disableVibration */
                     disableVibrationConfig,
                     enableBrightnessAdjustment,
@@ -906,7 +913,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                     (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     forceAllAppsStandby,
                     forceBackgroundCheck,
-                    locationMode
+                    locationMode,
+                    soundTriggerMode
             );
         }
 
@@ -923,7 +931,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                     && disableAod == other.disableAod
                     && disableLaunchBoost == other.disableLaunchBoost
                     && disableOptionalSensors == other.disableOptionalSensors
-                    && disableSoundTrigger == other.disableSoundTrigger
                     && disableVibration == other.disableVibration
                     && enableAdjustBrightness == other.enableAdjustBrightness
                     && enableDataSaver == other.enableDataSaver
@@ -933,6 +940,7 @@ public class BatterySaverPolicy extends ContentObserver implements
                     && forceAllAppsStandby == other.forceAllAppsStandby
                     && forceBackgroundCheck == other.forceBackgroundCheck
                     && locationMode == other.locationMode
+                    && soundTriggerMode == other.soundTriggerMode
                     && filesForInteractive.equals(other.filesForInteractive)
                     && filesForNoninteractive.equals(other.filesForNoninteractive);
         }
@@ -983,7 +991,11 @@ public class BatterySaverPolicy extends ContentObserver implements
                     return builder.setBatterySaverEnabled(currPolicy.enableDataSaver)
                             .build();
                 case ServiceType.SOUND:
-                    return builder.setBatterySaverEnabled(currPolicy.disableSoundTrigger)
+                    boolean soundTriggerBatterySaverEnabled = currPolicy.advertiseIsEnabled
+                            || currPolicy.soundTriggerMode
+                            != PowerManager.SOUND_TRIGGER_MODE_ALL_ENABLED;
+                    return builder.setBatterySaverEnabled(soundTriggerBatterySaverEnabled)
+                            .setSoundTriggerMode(currPolicy.soundTriggerMode)
                             .build();
                 case ServiceType.VIBRATION:
                     return builder.setBatterySaverEnabled(currPolicy.disableVibration)
@@ -1172,7 +1184,7 @@ public class BatterySaverPolicy extends ContentObserver implements
         pw.println(KEY_FORCE_BACKGROUND_CHECK + "=" + p.forceBackgroundCheck);
         pw.println(KEY_DISABLE_OPTIONAL_SENSORS + "=" + p.disableOptionalSensors);
         pw.println(KEY_DISABLE_AOD + "=" + p.disableAod);
-        pw.println(KEY_DISABLE_SOUNDTRIGGER + "=" + p.disableSoundTrigger);
+        pw.println(KEY_SOUNDTRIGGER_MODE + "=" + p.soundTriggerMode);
         pw.println(KEY_ENABLE_QUICK_DOZE + "=" + p.enableQuickDoze);
         pw.println(KEY_ENABLE_NIGHT_MODE + "=" + p.enableNightMode);
 

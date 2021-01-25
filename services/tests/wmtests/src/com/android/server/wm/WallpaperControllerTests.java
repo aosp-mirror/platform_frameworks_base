@@ -46,6 +46,7 @@ import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.InsetsState;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -144,7 +145,8 @@ public class WallpaperControllerTests extends WindowTestsBase {
         Configuration config = new Configuration();
         final DisplayInfo info = dc.computeScreenConfiguration(config, Surface.ROTATION_0);
         final WmDisplayCutout cutout = dc.calculateDisplayCutoutForRotation(Surface.ROTATION_0);
-        final DisplayFrames displayFrames = new DisplayFrames(dc.getDisplayId(), info, cutout);
+        final DisplayFrames displayFrames = new DisplayFrames(dc.getDisplayId(), new InsetsState(),
+                info, cutout);
         wallpaperWindowToken.applyFixedRotationTransform(info, displayFrames, config);
 
         // Check that the wallpaper has the same frame in landscape than in portrait

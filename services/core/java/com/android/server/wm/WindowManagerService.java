@@ -2240,15 +2240,6 @@ public class WindowManagerService extends IWindowManager.Stub
                             "Insets types can not be changed after the window is added.");
                 }
 
-                // Odd choice but less odd than embedding in copyFrom()
-                if ((attrs.privateFlags & WindowManager.LayoutParams.PRIVATE_FLAG_PRESERVE_GEOMETRY)
-                        != 0) {
-                    attrs.x = win.mAttrs.x;
-                    attrs.y = win.mAttrs.y;
-                    attrs.width = win.mAttrs.width;
-                    attrs.height = win.mAttrs.height;
-                }
-
                 flagChanges = win.mAttrs.flags ^ attrs.flags;
                 privateFlagChanges = win.mAttrs.privateFlags ^ attrs.privateFlags;
                 attrChanges = win.mAttrs.copyFrom(attrs);
@@ -5266,7 +5257,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 case UPDATE_MULTI_WINDOW_STACKS: {
                     synchronized (mGlobalLock) {
-                        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+                        final DisplayContent displayContent = (DisplayContent) msg.obj;
                         if (displayContent != null) {
                             displayContent.adjustForImeIfNeeded();
                         }

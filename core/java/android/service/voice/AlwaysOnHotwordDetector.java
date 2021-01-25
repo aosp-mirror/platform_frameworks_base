@@ -125,6 +125,7 @@ public class AlwaysOnHotwordDetector {
             RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS,
             RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION,
             RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION,
+            RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER,
     })
     public @interface RecognitionFlags {}
 
@@ -170,6 +171,14 @@ public class AlwaysOnHotwordDetector {
      * audio capability supported, there will be no audio effect applied.
      */
     public static final int RECOGNITION_FLAG_ENABLE_AUDIO_NOISE_SUPPRESSION = 0x8;
+
+    /**
+     * Recognition flag for {@link #startRecognition(int)} that indicates whether the recognition
+     * should continue after battery saver mode is enabled.
+     * When this flag is specified, the caller will be checked for
+     * {@link android.Manifest.permission#SOUND_TRIGGER_RUN_IN_BATTERY_SAVER} permission granted.
+     */
+    public static final int RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER = 0x10;
 
     //---- Recognition mode flags. Return codes for getSupportedRecognitionModes() ----//
     // Must be kept in sync with the related attribute defined as searchKeyphraseRecognitionFlags.
@@ -860,6 +869,7 @@ public class AlwaysOnHotwordDetector {
                 (recognitionFlags&RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO) != 0;
         boolean allowMultipleTriggers =
                 (recognitionFlags&RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS) != 0;
+        boolean runInBatterySaver = (recognitionFlags&RECOGNITION_FLAG_RUN_IN_BATTERY_SAVER) != 0;
 
         int audioCapabilities = 0;
         if ((recognitionFlags & RECOGNITION_FLAG_ENABLE_AUDIO_ECHO_CANCELLATION) != 0) {
@@ -874,7 +884,8 @@ public class AlwaysOnHotwordDetector {
             code = mSoundTriggerSession.startRecognition(
                     mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
-                            recognitionExtra, null /* additional data */, audioCapabilities));
+                            recognitionExtra, null /* additional data */, audioCapabilities),
+                    runInBatterySaver);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
