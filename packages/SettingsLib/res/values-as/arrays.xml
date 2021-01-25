@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", সক্ৰিয় (মিডিয়া)"</item>
     <item msgid="5001852592115448348">", সক্ৰিয় (ফ\'ন)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"অফ কৰক"</item>
+    <item msgid="7839165897132179888">"৬৪কে."</item>
+    <item msgid="2715700596495505626">"২৫৬কে."</item>
+    <item msgid="7099386891713159947">"১মি."</item>
+    <item msgid="6069075827077845520">"4M"</item>
+    <item msgid="6078203297886482480">"৮ এমবি"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"অফ কৰক"</item>
     <item msgid="4064786181089783077">"৬৪কে."</item>
     <item msgid="3052710745383602630">"২৫৬কে."</item>
     <item msgid="3691785423374588514">"১মি."</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"অফ কৰক"</item>
+    <item msgid="4195153527464162486">"প্ৰতিটো লগ বাফাৰত ৬৪কে."</item>
+    <item msgid="7464037639415220106">"প্ৰতি লগ বাফাৰত 256K"</item>
+    <item msgid="8539423820514360724">"প্ৰতিটো লগ বাফাৰত ১মি."</item>
+    <item msgid="1984761927103140651">"প্ৰতিটো লগ বাফাৰত ৪মি."</item>
+    <item msgid="2983219471251787208">"প্ৰতিটো লগ বাফাৰত ৮ এমবি"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"অফ অৱস্থাত আছে"</item>
     <item msgid="6014837961827347618">"সকলো"</item>
