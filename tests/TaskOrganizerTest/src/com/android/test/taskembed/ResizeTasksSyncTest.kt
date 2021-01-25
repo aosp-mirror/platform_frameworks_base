@@ -78,7 +78,7 @@ class ResizeTasksSyncTest {
         }
 
         // find the frame which match resized buffer size.
-        val frame = trace.entries.flatMap { it.flattenedLayers }
+        val frame = trace.entries.flatMap { it.flattenedLayers.toList() }
                 .firstOrNull { layer ->
                     !layer.isActiveBufferEmpty &&
                         layer.activeBuffer?.width == firstBounds.width() &&
@@ -90,13 +90,13 @@ class ResizeTasksSyncTest {
         secondBounds.offsetTo(0, 0)
 
         // verify buffer size should be changed to expected values.
-        assertThat(trace).layer(FIRST_ACTIVITY, frame).also {
+        assertThat(trace).layer(FIRST_ACTIVITY, frame.toLong()).also {
             val firstTaskSize = Point(firstBounds.width(), firstBounds.height())
             it.hasLayerSize(firstTaskSize)
             it.hasBufferSize(firstTaskSize)
         }
 
-        assertThat(trace).layer(SECOND_ACTIVITY, frame).also {
+        assertThat(trace).layer(SECOND_ACTIVITY, frame.toLong()).also {
             val secondTaskSize = Point(secondBounds.width(), secondBounds.height())
             it.hasLayerSize(secondTaskSize)
             it.hasBufferSize(secondTaskSize)

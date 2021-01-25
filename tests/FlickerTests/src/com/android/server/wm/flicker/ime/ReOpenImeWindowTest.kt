@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -35,7 +34,6 @@ import com.android.server.wm.flicker.wallpaperWindowBecomesInvisible
 import com.android.server.wm.flicker.appLayerReplacesWallpaperLayer
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
-import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
@@ -56,47 +54,45 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 175027130)
 class ReOpenImeWindowTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testAppComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
-
-            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 1)
                     .buildTest { configuration ->
                         val testApp = ImeAppAutoFocusHelper(instrumentation,
                             configuration.startRotation)
-                        withTestName { buildTestTag("reOpenImeAutoFocus", testApp, configuration) }
+                        withTestName { buildTestTag("reOpenImeAutoFocus", configuration) }
                         repeat { configuration.repetitions }
                         setup {
                             test {
                                 device.wakeUpAndGoToHomeScreen()
+                                testApp.launchViaIntent(wmHelper)
+                                testApp.openIME(device, wmHelper)
                             }
                             eachRun {
-                                testApp.open()
-                                testApp.openIME(device)
-                                device.pressHome()
                                 device.pressRecentApps()
+                                wmHelper.waitImeWindowGone()
+                                wmHelper.waitForAppTransitionIdle()
                                 this.setRotation(configuration.startRotation)
                             }
                         }
                         transitions {
                             device.reopenAppFromOverview()
-                            WindowManagerStateHelper().waitForFullScreenApp(testAppComponentName)
+                            wmHelper.waitImeWindowShown()
+                            // wmHelper.waitForFullScreenApp(testAppComponentName)
                         }
                         teardown {
-                            eachRun {
-                                testApp.closeIME(device)
-                                testApp.exit()
-                            }
                             test {
                                 this.setRotation(Surface.ROTATION_0)
+                                testApp.exit()
                             }
                         }
                         assertions {
@@ -111,18 +107,14 @@ class ReOpenImeWindowTest(
                             }
 
                             layersTrace {
-                                noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation,
-                                        bugId = 141361128)
+                                noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation)
                                 navBarLayerRotatesAndScales(Surface.ROTATION_0,
                                         configuration.endRotation)
                                 statusBarLayerRotatesScales(Surface.ROTATION_0,
                                         configuration.endRotation)
-                                statusBarLayerIsAlwaysVisible(
-                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
-                                navBarLayerIsAlwaysVisible(
-                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
-                                visibleLayersShownMoreThanOneConsecutiveEntry(
-                                        enabled = Surface.ROTATION_0 == configuration.endRotation)
+                                statusBarLayerIsAlwaysVisible()
+                                navBarLayerIsAlwaysVisible()
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
 
                                 imeLayerBecomesVisible()
                                 appLayerReplacesWallpaperLayer(testAppComponentName.className)

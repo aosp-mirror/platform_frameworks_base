@@ -18,59 +18,37 @@ package com.android.wm.shell.flicker
 
 import android.graphics.Region
 import android.view.Surface
-import com.android.server.wm.flicker.dsl.EventLogAssertion
-import com.android.server.wm.flicker.dsl.LayersAssertion
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
+import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 import com.android.wm.shell.flicker.FlickerTestBase.Companion.DOCKED_STACK_DIVIDER
 
 @JvmOverloads
-fun LayersAssertion.appPairsDividerIsVisible(
+fun LayersAssertionBuilder.appPairsDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+        this.isVisible(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
 @JvmOverloads
-fun LayersAssertion.appPairsDividerIsInvisible(
+fun LayersAssertionBuilder.appPairsDividerIsInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("appPairsDividerIsInVisible", bugId, enabled) {
-        this.hasNotLayer(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+        this.notExists(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
     }
 }
 
 @JvmOverloads
-fun LayersAssertion.appPairsDividerBecomesVisible(
+fun LayersAssertionBuilder.appPairsDividerBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("dividerLayerBecomesVisible") {
-        this.hidesLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
-                .then()
-                .showsLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.dockedStackDividerIsVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    end("dockedStackDividerIsVisible", bugId, enabled) {
-        this.showsLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
-    }
-}
-
-@JvmOverloads
-fun LayersAssertion.dockedStackDividerBecomesVisible(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all("dividerLayerBecomesVisible") {
+    all("dividerLayerBecomesVisible", bugId, enabled) {
         this.hidesLayer(DOCKED_STACK_DIVIDER)
                 .then()
                 .showsLayer(DOCKED_STACK_DIVIDER)
@@ -78,11 +56,33 @@ fun LayersAssertion.dockedStackDividerBecomesVisible(
 }
 
 @JvmOverloads
-fun LayersAssertion.dockedStackDividerBecomesInvisible(
+fun LayersAssertionBuilder.dockedStackDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
-    all("dividerLayerBecomesInvisible") {
+    end("dockedStackDividerIsVisible", bugId, enabled) {
+        this.isVisible(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackDividerBecomesVisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("dividerLayerBecomesVisible", bugId, enabled) {
+        this.hidesLayer(DOCKED_STACK_DIVIDER)
+                .then()
+                .showsLayer(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackDividerBecomesInvisible(
+    bugId: Int = 0,
+    enabled: Boolean = bugId == 0
+) {
+    all("dividerLayerBecomesInvisible", bugId, enabled) {
         this.showsLayer(DOCKED_STACK_DIVIDER)
                 .then()
                 .hidesLayer(DOCKED_STACK_DIVIDER)
@@ -90,71 +90,63 @@ fun LayersAssertion.dockedStackDividerBecomesInvisible(
 }
 
 @JvmOverloads
-fun LayersAssertion.dockedStackDividerIsInvisible(
+fun LayersAssertionBuilder.dockedStackDividerIsInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("dockedStackDividerIsInvisible", bugId, enabled) {
-        this.hasNotLayer(FlickerTestBase.DOCKED_STACK_DIVIDER)
+        this.notExists(DOCKED_STACK_DIVIDER)
     }
 }
 
 @JvmOverloads
-fun LayersAssertion.appPairsPrimaryBoundsIsVisible(
+fun LayersAssertionBuilder.appPairsPrimaryBoundsIsVisible(
     rotation: Int,
     primaryLayerName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("PrimaryAppBounds", bugId, enabled) {
-        val entry = this.trace.entries.firstOrNull()
-                ?: throw IllegalStateException("Trace is empty")
         val dividerRegion = entry.getVisibleBounds(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
 @JvmOverloads
-fun LayersAssertion.appPairsSecondaryBoundsIsVisible(
+fun LayersAssertionBuilder.appPairsSecondaryBoundsIsVisible(
     rotation: Int,
     secondaryLayerName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("SecondaryAppBounds", bugId, enabled) {
-        val entry = this.trace.entries.firstOrNull()
-                ?: throw IllegalStateException("Trace is empty")
         val dividerRegion = entry.getVisibleBounds(FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
         this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
     }
 }
 
 @JvmOverloads
-fun LayersAssertion.dockedStackPrimaryBoundsIsVisible(
+fun LayersAssertionBuilder.dockedStackPrimaryBoundsIsVisible(
     rotation: Int,
     primaryLayerName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("PrimaryAppBounds", bugId, enabled) {
-        val entry = this.trace.entries.firstOrNull()
-                ?: throw IllegalStateException("Trace is empty")
-        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.DOCKED_STACK_DIVIDER)
+        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
         this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
     }
 }
 
 @JvmOverloads
-fun LayersAssertion.dockedStackSecondaryBoundsIsVisible(
+fun LayersAssertionBuilder.dockedStackSecondaryBoundsIsVisible(
     rotation: Int,
     secondaryLayerName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
     end("SecondaryAppBounds", bugId, enabled) {
-        val entry = this.trace.entries.firstOrNull()
-                ?: throw IllegalStateException("Trace is empty")
-        val dividerRegion = entry.getVisibleBounds(FlickerTestBase.DOCKED_STACK_DIVIDER)
+        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
         this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
     }
 }
@@ -162,11 +154,11 @@ fun LayersAssertion.dockedStackSecondaryBoundsIsVisible(
 fun getPrimaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
-        Region(0, 0, displayBounds.getBounds().right,
-                dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+        Region(0, 0, displayBounds.bounds.right,
+                dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset)
     } else {
-        Region(0, 0, dividerRegion.getBounds().left,
-                dividerRegion.getBounds().right - WindowUtils.dockedStackDividerInset)
+        Region(0, 0, dividerRegion.bounds.left,
+                dividerRegion.bounds.right - WindowUtils.dockedStackDividerInset)
     }
 }
 
@@ -174,31 +166,12 @@ fun getSecondaryRegion(dividerRegion: Region, rotation: Int): Region {
     val displayBounds = WindowUtils.getDisplayBounds(rotation)
     return if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180) {
         Region(0,
-                dividerRegion.getBounds().bottom - WindowUtils.dockedStackDividerInset,
-                displayBounds.getBounds().right,
-                displayBounds.getBounds().bottom - WindowUtils.dockedStackDividerInset)
+                dividerRegion.bounds.bottom - WindowUtils.dockedStackDividerInset,
+                displayBounds.bounds.right,
+                displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
     } else {
-        Region(dividerRegion.getBounds().right, 0,
-                displayBounds.getBounds().right,
-                displayBounds.getBounds().bottom - WindowUtils.dockedStackDividerInset)
-    }
-}
-
-fun EventLogAssertion.focusChanges(
-    vararg windows: String,
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all(enabled = enabled, bugId = bugId) {
-        this.focusChanges(windows)
-    }
-}
-
-fun EventLogAssertion.focusDoesNotChange(
-    bugId: Int = 0,
-    enabled: Boolean = bugId == 0
-) {
-    all(enabled = enabled, bugId = bugId) {
-        this.focusDoesNotChange()
+        Region(dividerRegion.bounds.right, 0,
+                displayBounds.bounds.right,
+                displayBounds.bounds.bottom - WindowUtils.dockedStackDividerInset)
     }
 }

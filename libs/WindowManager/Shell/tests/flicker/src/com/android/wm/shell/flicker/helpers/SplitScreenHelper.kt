@@ -17,18 +17,15 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.os.SystemClock
 import com.android.wm.shell.flicker.testapp.Components
 
 class SplitScreenHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: Components.ComponentsInfo
-) : BaseAppHelper(
-        instrumentation,
-        activityLabel,
-        componentsInfo
-) {
+    componentsInfo: ComponentName
+) : BaseAppHelper(instrumentation, activityLabel, componentsInfo) {
 
     /**
      * Reopens the first device window from the list of recent apps (overview)
@@ -44,5 +41,20 @@ class SplitScreenHelper(
     companion object {
         const val TEST_REPETITIONS = 1
         const val TIMEOUT_MS = 3_000L
+
+        fun getPrimary(instrumentation: Instrumentation): SplitScreenHelper =
+            SplitScreenHelper(instrumentation,
+                Components.SplitScreenActivity.LABEL,
+                Components.SplitScreenActivity.COMPONENT)
+
+        fun getSecondary(instrumentation: Instrumentation): SplitScreenHelper =
+            SplitScreenHelper(instrumentation,
+                Components.SplitScreenSecondaryActivity.LABEL,
+                Components.SplitScreenSecondaryActivity.COMPONENT)
+
+        fun getNonResizeable(instrumentation: Instrumentation): SplitScreenHelper =
+            SplitScreenHelper(instrumentation,
+                Components.NonResizeableActivity.LABEL,
+                Components.NonResizeableActivity.COMPONENT)
     }
 }

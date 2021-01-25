@@ -19,33 +19,35 @@ package com.android.wm.shell.flicker.testapp;
 import android.content.ComponentName;
 
 public class Components {
-    public abstract static class ComponentsInfo {
-        public ComponentName getComponentName() {
-            return ComponentName.createRelative(PACKAGE_NAME, "." + getActivityName());
-        }
-        public abstract String getActivityName();
-    }
-
     public static final String PACKAGE_NAME = "com.android.wm.shell.flicker.testapp";
 
-    public static class FixedActivity extends ComponentsInfo {
-        // Sets the fixed orientation (can be one of {@link ActivityInfo.ScreenOrientation}
+    public static class SimpleActivity {
+        public static final String LABEL = "SimpleApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".SimpleActivity");
+    }
+
+    public static class FixedActivity {
         public static final String EXTRA_FIXED_ORIENTATION = "fixed_orientation";
-
-        @Override
-        public String getActivityName() {
-            return FixedActivity.class.getSimpleName();
-        }
+        public static final String LABEL = "FixedApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".FixedActivity");
     }
 
-    public static class NonResizeableActivity extends ComponentsInfo {
-        @Override
-        public String getActivityName() {
-            return NonResizeableActivity.class.getSimpleName();
-        }
+    public static class NonResizeableActivity {
+        public static final String LABEL = "NonResizeableApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".NonResizeableActivity");
     }
 
-    public static class PipActivity extends ComponentsInfo {
+    public static class PipActivity {
+        // Test App > Pip Activity
+        public static final String LABEL = "PipApp";
+        public static final String MENU_ACTION_NO_OP = "No-Op";
+        public static final String MENU_ACTION_ON = "On";
+        public static final String MENU_ACTION_OFF = "Off";
+        public static final String MENU_ACTION_CLEAR = "Clear";
+
         // Intent action that this activity dynamically registers to enter picture-in-picture
         public static final String ACTION_ENTER_PIP = PACKAGE_NAME + ".PipActivity.ENTER_PIP";
         // Intent action that this activity dynamically registers to set requested orientation.
@@ -60,30 +62,29 @@ public class Components {
         // Adds a click listener to finish this activity when it is clicked
         public static final String EXTRA_TAP_TO_FINISH = "tap_to_finish";
 
-        @Override
-        public String getActivityName() {
-            return PipActivity.class.getSimpleName();
-        }
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".PipActivity");
     }
 
-    public static class ImeActivity extends ComponentsInfo {
-        @Override
-        public String getActivityName() {
-            return ImeActivity.class.getSimpleName();
-        }
+    public static class ImeActivity {
+        public static final String LABEL = "ImeApp";
+        public static final String ACTION_CLOSE_IME =
+                PACKAGE_NAME + ".action.CLOSE_IME";
+        public static final String ACTION_OPEN_IME =
+                PACKAGE_NAME + ".action.OPEN_IME";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".ImeActivity");
     }
 
-    public static class SplitScreenActivity extends ComponentsInfo {
-        @Override
-        public String getActivityName() {
-            return SplitScreenActivity.class.getSimpleName();
-        }
+    public static class SplitScreenActivity {
+        public static final String LABEL = "SplitScreenPrimaryApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".SplitScreenActivity");
     }
 
-    public static class SplitScreenSecondaryActivity extends ComponentsInfo {
-        @Override
-        public String getActivityName() {
-            return SplitScreenSecondaryActivity.class.getSimpleName();
-        }
+    public static class SplitScreenSecondaryActivity {
+        public static final String LABEL = "SplitScreenSecondaryApp";
+        public static final ComponentName COMPONENT = new ComponentName(PACKAGE_NAME,
+                PACKAGE_NAME + ".SplitScreenSecondaryActivity");
     }
 }

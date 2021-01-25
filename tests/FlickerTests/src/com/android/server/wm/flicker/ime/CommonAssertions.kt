@@ -17,13 +17,13 @@
 package com.android.server.wm.flicker.ime
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.LayersAssertion
-import com.android.server.wm.flicker.dsl.WmAssertion
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
+import com.android.server.wm.flicker.dsl.WmAssertionBuilder
 
 const val IME_WINDOW_TITLE = "InputMethod"
 
 @JvmOverloads
-fun LayersAssertion.imeLayerBecomesVisible(
+fun LayersAssertionBuilder.imeLayerBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -34,7 +34,7 @@ fun LayersAssertion.imeLayerBecomesVisible(
     }
 }
 
-fun LayersAssertion.imeLayerBecomesInvisible(
+fun LayersAssertionBuilder.imeLayerBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -45,7 +45,7 @@ fun LayersAssertion.imeLayerBecomesInvisible(
     }
 }
 
-fun LayersAssertion.imeAppLayerIsAlwaysVisible(
+fun LayersAssertionBuilder.imeAppLayerIsAlwaysVisible(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -55,7 +55,7 @@ fun LayersAssertion.imeAppLayerIsAlwaysVisible(
     }
 }
 
-fun WmAssertion.imeAppWindowIsAlwaysVisible(
+fun WmAssertionBuilder.imeAppWindowIsAlwaysVisible(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -65,7 +65,7 @@ fun WmAssertion.imeAppWindowIsAlwaysVisible(
     }
 }
 
-fun WmAssertion.imeWindowBecomesVisible(
+fun WmAssertionBuilder.imeWindowBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -76,7 +76,7 @@ fun WmAssertion.imeWindowBecomesVisible(
     }
 }
 
-fun WmAssertion.imeWindowBecomesInvisible(
+fun WmAssertionBuilder.imeWindowBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -87,7 +87,7 @@ fun WmAssertion.imeWindowBecomesInvisible(
     }
 }
 
-fun WmAssertion.imeAppWindowBecomesVisible(
+fun WmAssertionBuilder.imeAppWindowBecomesVisible(
     windowName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -99,7 +99,7 @@ fun WmAssertion.imeAppWindowBecomesVisible(
     }
 }
 
-fun WmAssertion.imeAppWindowBecomesInvisible(
+fun WmAssertionBuilder.imeAppWindowBecomesInvisible(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -111,7 +111,7 @@ fun WmAssertion.imeAppWindowBecomesInvisible(
     }
 }
 
-fun LayersAssertion.imeAppLayerBecomesInvisible(
+fun LayersAssertionBuilder.imeAppLayerBecomesInvisible(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0

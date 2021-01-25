@@ -26,8 +26,7 @@ import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.openQuickstep
-import com.android.server.wm.flicker.helpers.reopenAppFromOverview
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
@@ -56,39 +55,38 @@ import org.junit.runners.Parameterized
 @FlakyTest(bugId = 178015460)
 class CloseImeWindowToHomeTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
-
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = ImeAppHelper(instrumentation)
-            return FlickerTestRunnerFactory(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                 .buildTest { configuration ->
-                    withTestName { buildTestTag("imeToHome", testApp, configuration) }
+                    withTestName { buildTestTag("imeToHome", configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
                             device.wakeUpAndGoToHomeScreen()
-                            this.setRotation(configuration.startRotation)
-                            testApp.open()
                         }
                         eachRun {
-                            device.openQuickstep()
-                            device.reopenAppFromOverview()
+                            testApp.launchViaIntent(wmHelper)
                             this.setRotation(configuration.startRotation)
-                            testApp.openIME(device)
+                            testApp.openIME(device, wmHelper)
                         }
                     }
                     transitions {
                         device.pressHome()
-                        device.waitForIdle()
+                        wmHelper.waitForHomeActivityVisible()
+                        wmHelper.waitImeWindowGone()
                     }
                     teardown {
                         eachRun {
                             device.pressHome()
+                            wmHelper.waitForHomeActivityVisible()
                         }
                         test {
                             testApp.exit()
@@ -107,18 +105,18 @@ class CloseImeWindowToHomeTest(
 
                         layersTrace {
                             noUncoveredRegions(configuration.startRotation,
-                                Surface.ROTATION_0, allStates = false)
-                            navBarLayerRotatesAndScales(configuration.startRotation,
-                                Surface.ROTATION_0, bugId = 140855415)
-                            statusBarLayerRotatesScales(configuration.startRotation,
                                 Surface.ROTATION_0)
-                            navBarLayerIsAlwaysVisible(
-                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
-                            statusBarLayerIsAlwaysVisible(
-                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                Surface.ROTATION_0,
+                                enabled = !configuration.startRotation.isRotated())
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                Surface.ROTATION_0,
+                                enabled = !configuration.startRotation.isRotated())
+                            navBarLayerIsAlwaysVisible()
+                            statusBarLayerIsAlwaysVisible()
                             visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
 
-                            imeLayerBecomesInvisible(bugId = 153739621)
+                            imeLayerBecomesInvisible()
                             imeAppLayerBecomesInvisible(testApp)
                         }
                     }
