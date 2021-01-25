@@ -2166,6 +2166,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         final DisplayContent dc = getDisplayContent();
         if (isImeLayeringTarget()) {
+            // Remove the IME screenshot surface if the layering target is not animating.
+            dc.removeImeScreenshotIfPossible();
             // Make sure to set mImeLayeringTarget as null when the removed window is the
             // IME target, in case computeImeTarget may use the outdated target.
             dc.setImeLayeringTarget(null);
@@ -4151,20 +4153,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " " + mLastTitle + (mAnimatingExit ? " EXITING}" : "}");
         }
         return mStringNameCache;
-    }
-
-    void transformClipRectFromScreenToSurfaceSpace(Rect clipRect) {
-        if (mHScale == 1 && mVScale == 1) {
-            return;
-        }
-        if (mHScale >= 0) {
-            clipRect.left = (int) (clipRect.left / mHScale);
-            clipRect.right = (int) Math.ceil(clipRect.right / mHScale);
-        }
-        if (mVScale >= 0) {
-            clipRect.top = (int) (clipRect.top / mVScale);
-            clipRect.bottom = (int) Math.ceil(clipRect.bottom / mVScale);
-        }
     }
 
     private void applyGravityAndUpdateFrame(WindowFrames windowFrames, Rect containingFrame,

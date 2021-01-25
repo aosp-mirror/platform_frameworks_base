@@ -30,7 +30,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStarter.Request;
@@ -490,12 +489,6 @@ public class LaunchParamsControllerTests extends WindowTestsBase {
     }
 
     private TestDisplayContent createNewDisplayContent() {
-        final TestDisplayContent display = addNewDisplayContentAt(DisplayContent.POSITION_TOP);
-        spyOn(display.mDisplayContent.mDisplayFrames);
-
-        // We didn't set up the overall environment for this test, so we need to mute the side
-        // effect of layout passes that loosen the stable frame.
-        doNothing().when(display.mDisplayContent.mDisplayFrames).onBeginLayout(any());
-        return display;
+        return addNewDisplayContentAt(DisplayContent.POSITION_TOP);
     }
 }

@@ -101,11 +101,11 @@ static jlong nativeReadFromParcel(JNIEnv *env, jobject clazz, jobject parcelObj)
 static void nativeWriteToParcel(JNIEnv* env, jobject clazz, jlong ptr, jobject parcelObj) {
     NativeKeyCharacterMap* map = reinterpret_cast<NativeKeyCharacterMap*>(ptr);
     Parcel* parcel = parcelForJavaObject(env, parcelObj);
-    if (!parcel) {
+    if (!parcel || !map) {
         return;
     }
     parcel->writeInt32(map->getDeviceId());
-    if (!map || !map->getMap()) {
+    if (!map->getMap()) {
         parcel->writeBool(false);
         return;
     }

@@ -2203,15 +2203,6 @@ public interface WindowManager extends ViewManager {
         public static final int PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR = 0x00001000;
 
         /**
-         * Flag indicating that the x, y, width, and height members should be
-         * ignored (and thus their previous value preserved). For example
-         * because they are being managed externally through repositionChild.
-         *
-         * {@hide}
-         */
-        public static final int PRIVATE_FLAG_PRESERVE_GEOMETRY = 0x00002000;
-
-        /**
          * Flag that will make window ignore app visibility and instead depend purely on the decor
          * view visibility for determining window visibility. This is used by recents to keep
          * drawing after it launches an app.
@@ -2367,7 +2358,6 @@ public interface WindowManager extends ViewManager {
                 PRIVATE_FLAG_SYSTEM_ERROR,
                 PRIVATE_FLAG_DISABLE_WALLPAPER_TOUCH_EVENTS,
                 PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
-                PRIVATE_FLAG_PRESERVE_GEOMETRY,
                 PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                 PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH,
                 PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME,
@@ -2430,10 +2420,6 @@ public interface WindowManager extends ViewManager {
                         mask = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         equals = PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR,
                         name = "FORCE_STATUS_BAR_VISIBLE"),
-                @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_PRESERVE_GEOMETRY,
-                        equals = PRIVATE_FLAG_PRESERVE_GEOMETRY,
-                        name = "PRESERVE_GEOMETRY"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
                         equals = PRIVATE_FLAG_FORCE_DECOR_VIEW_VISIBILITY,
