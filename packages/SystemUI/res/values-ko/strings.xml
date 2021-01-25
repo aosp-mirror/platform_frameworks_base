@@ -373,7 +373,7 @@
     <string name="quick_settings_time_label" msgid="3352680970557509303">"시간"</string>
     <string name="quick_settings_user_label" msgid="1253515509432672496">"나"</string>
     <string name="quick_settings_user_title" msgid="8673045967216204537">"사용자"</string>
-    <string name="quick_settings_user_new_user" msgid="3347905871336069666">"새 사용자"</string>
+    <string name="quick_settings_user_new_user" msgid="3347905871336069666">"신규 사용자"</string>
     <string name="quick_settings_wifi_label" msgid="2879507532983487244">"Wi-Fi"</string>
     <string name="quick_settings_wifi_not_connected" msgid="4071097522427039160">"연결되어 있지 않음"</string>
     <string name="quick_settings_wifi_no_network" msgid="6003178398713839313">"네트워크가 연결되지 않음"</string>
@@ -475,7 +475,7 @@
     <string name="accessibility_multi_user_switch_inactive" msgid="383168614528618402">"현재 사용자: <xliff:g id="CURRENT_USER_NAME">%s</xliff:g>"</string>
     <string name="accessibility_multi_user_switch_quick_contact" msgid="4504508915324898576">"프로필 표시"</string>
     <string name="user_add_user" msgid="4336657383006913022">"사용자 추가"</string>
-    <string name="user_new_user_name" msgid="2019166282704195789">"새 사용자"</string>
+    <string name="user_new_user_name" msgid="2019166282704195789">"신규 사용자"</string>
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"게스트를 삭제하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"삭제"</string>
@@ -502,10 +502,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"절전 모드 사용 중"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"성능 및 백그라운드 데이터를 줄입니다."</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"절전 모드 사용 중지"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>이(가) 녹화 또는 전송 중에 화면에 표시되거나 기기에서 재생되는 모든 정보에 액세스할 수 있습니다. 여기에는 비밀번호, 결제 세부정보, 사진, 메시지, 재생하는 오디오 같은 정보가 포함됩니다."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>이 녹화 또는 전송 중에 화면에 표시되거나 기기에서 재생되는 모든 정보에 액세스할 수 있습니다. 여기에는 비밀번호, 결제 세부정보, 사진, 메시지, 재생하는 오디오 같은 정보가 포함됩니다."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"이 기능을 제공하는 서비스는 녹화 또는 전송 중에 화면에 표시되거나 기기에서 재생되는 모든 정보에 액세스할 수 있습니다. 여기에는 비밀번호, 결제 세부정보, 사진, 메시지, 재생하는 오디오 같은 정보가 포함됩니다."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"녹화 또는 전송을 시작하시겠습니까?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>(으)로 녹화 또는 전송을 시작하시겠습니까?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>으로 녹화 또는 전송을 시작하시겠습니까?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"다시 표시 안함"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"모두 지우기"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"관리"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"휴대전화 설정에 따라 벨소리나 진동이 울릴 수 있음"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"휴대전화 설정에 따라 벨소리나 진동이 울릴 수 있습니다. 기본적으로 <xliff:g id="APP_NAME">%1$s</xliff:g>의 대화는 대화창으로 표시됩니다."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"이 콘텐츠로 연결되는 플로팅 바로가기로 사용자의 주의를 끕니다."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 그리고 잠금 화면에 프로필 사진이 표시됩니다."</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단에 표시, 플로팅 대화창으로 표시, 그리고 잠금 화면에 프로필 사진이 표시됨"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> 앱은 대화 기능을 지원하지 않습니다."</string>

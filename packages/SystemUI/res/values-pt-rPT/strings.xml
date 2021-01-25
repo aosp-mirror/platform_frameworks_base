@@ -565,9 +565,9 @@
     <string name="monitoring_description_vpn_settings" msgid="5264167033247632071">"Abrir as definições de VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="7107390013344435439">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="8329781950135541003">"Abrir credenciais fidedignas"</string>
-    <string name="monitoring_description_network_logging" msgid="577305979174002252">"O seu gestor ativou os registos de rede, que monitorizam o tráfego no seu dispositivo.\n\nPara obter mais informações, contacte o gestor."</string>
+    <string name="monitoring_description_network_logging" msgid="577305979174002252">"O seu gestor ativou os registos de rede, que monitorizam o tráfego no seu dispositivo.\n\nPara mais informações, contacte o gestor."</string>
     <string name="monitoring_description_vpn" msgid="1685428000684586870">"Concedeu autorização a uma app para configurar uma ligação VPN.\n\nEsta app pode monitorizar a atividade do dispositivo e da rede, incluindo emails, aplicações e Sites."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"O seu perfil de trabalho é gerido por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO seu gestor tem a capacidade de monitorizar a sua atividade da rede, incluindo emails, aplicações e Sites.\n\nPara obter mais informações, contacte o gestor.\n\nAlém disso, está ligado a uma VPN, que pode monitorizar a sua atividade da rede."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="4964237035412372751">"O seu perfil de trabalho é gerido por <xliff:g id="ORGANIZATION">%1$s</xliff:g>.\n\nO seu gestor tem a capacidade de monitorizar a sua atividade da rede, incluindo emails, aplicações e Sites.\n\nPara mais informações, contacte o gestor.\n\nAlém disso, está ligado a uma VPN, que pode monitorizar a sua atividade da rede."</string>
     <string name="legacy_vpn_name" msgid="4174223520162559145">"VPN"</string>
     <string name="monitoring_description_app" msgid="376868879287922929">"Está associado à app <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>
     <string name="monitoring_description_app_personal" msgid="1970094872688265987">"Está ligado a <xliff:g id="APPLICATION">%1$s</xliff:g>, que pode monitorizar a atividade da rede pessoal, incluindo emails, aplicações e Sites."</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode tocar ou vibrar com base nas definições do telemóvel."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode tocar ou vibrar com base nas definições do telemóvel. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém a sua atenção com um atalho flutuante para este conteúdo."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece na parte superior da secção de conversas, surge como um balão flutuante e apresenta a imagem do perfil no ecrã de bloqueio."</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece no topo da secção de conversas, surge como balão flutuante e apresenta a imagem do perfil no ecrã de bloqueio."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Definições"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> não suporta funcionalidades de conversa."</string>
@@ -855,7 +855,7 @@
     <string name="right_keycode" msgid="2480715509844798438">"Código de tecla direito"</string>
     <string name="left_icon" msgid="5036278531966897006">"Ícone esquerdo"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ícone direito"</string>
-    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Toque sem soltar e arraste para adicionar mosaicos."</string>
+    <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tocar sem soltar e arrastar para adicionar mosaicos"</string>
     <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tocar sem soltar e arrastar para reorganizar os mosaicos"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Arrastar para aqui para remover"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Necessita de, pelo menos, <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> cartões"</string>

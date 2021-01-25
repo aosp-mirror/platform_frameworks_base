@@ -63,7 +63,7 @@
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Consenti"</string>
     <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Debug USB non consentito"</string>
     <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"L\'utente che ha eseguito l\'accesso a questo dispositivo non può attivare il debug USB. Per utilizzare questa funzione, passa all\'utente principale."</string>
-    <string name="wifi_debugging_title" msgid="7300007687492186076">"Consentire debug wireless su questa rete?"</string>
+    <string name="wifi_debugging_title" msgid="7300007687492186076">"Consentire il debug wireless su questa rete?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Nome della rete (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nIndirizzo Wi‑Fi (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Consenti sempre su questa rete"</string>
     <string name="wifi_debugging_allow" msgid="4573224609684957886">"Consenti"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Può suonare o vibrare in base alle impostazioni del telefono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Viene mostrata in cima alla sezione delle conversazioni, appare sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Appare in cima alla sezione delle conversazioni e sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le funzionalità delle conversazioni"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Il Risparmio energetico verrà attivato automaticamente quando la carica della batteria sarà inferiore a <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Impostazioni"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Esegui dump heap SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump heap SysUI"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensori disattivati"</string>
     <string name="device_services" msgid="1549944177856658705">"Servizi del dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Senza titolo"</string>

@@ -248,7 +248,7 @@
     <string name="accessibility_remove_notification" msgid="1641455251495815527">"Eliminar notificación"</string>
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS habilitado"</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"Adquisición de GPS"</string>
-    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"TeleTypewriter habilitado"</string>
+    <string name="accessibility_tty_enabled" msgid="1123180388823381118">"Teletipo habilitado"</string>
     <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"Timbre en vibración"</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"Timbre en silencio"</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
@@ -708,17 +708,17 @@
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Seguir recibiendo alertas"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desactivar notificaciones"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"¿Quieres seguir viendo las notificaciones de esta app?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Silencio"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Silenciada"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminada"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Cuadro"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"No suena ni vibra, y aparece en una parte inferior de la sección de conversaciones"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Puede sonar o vibrar en función de la configuración del teléfono"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"No suena ni vibra, y aparece en la parte inferior de la sección de conversaciones."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Puede sonar o vibrar en función de la configuración del teléfono."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Puede sonar o vibrar en función de la configuración del teléfono. Conversaciones de la burbuja de <xliff:g id="APP_NAME">%1$s</xliff:g> de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Retiene tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece en la parte superior de la sección de conversaciones, en forma de burbuja flotante, y muestra la foto de perfil en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece en la parte superior de la sección de conversaciones, en forma de burbuja flotante, y muestra la foto de perfil en la pantalla de bloqueo."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaria"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las que se descartaron aparecerán aquí"</string>

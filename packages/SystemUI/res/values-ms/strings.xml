@@ -405,7 +405,7 @@
       <item quantity="one">%d peranti</item>
     </plurals>
     <string name="quick_settings_notifications_label" msgid="3379631363952582758">"Pemberitahuan"</string>
-    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu suluh"</string>
+    <string name="quick_settings_flashlight_label" msgid="4904634272006284185">"Lampu Suluh"</string>
     <string name="quick_settings_flashlight_camera_in_use" msgid="4820591564526512571">"Kamera sedang digunakan"</string>
     <string name="quick_settings_cellular_detail_title" msgid="792977203299358893">"Data mudah alih"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="6105969068871138427">"Penggunaan data"</string>
@@ -987,7 +987,7 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"Penjimat Bateri akan dihidupkan secara automatik setelah kuasa bateri kurang daripada <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Tetapan"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Longgok Tmbunn SysUI"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"DumpSys"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Penderia dimatikan"</string>
     <string name="device_services" msgid="1549944177856658705">"Perkhidmatan Peranti"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Tiada tajuk"</string>

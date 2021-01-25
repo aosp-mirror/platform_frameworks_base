@@ -73,7 +73,7 @@
     <string name="usb_contaminant_message" msgid="7730476585174719805">"መሣሪያዎን ከፈሳሽ ወይም ፍርስራሽ ለመጠበቅ ሲባል የዩኤስቢ ወደቡ ተሰናክሏል፣ እና ማናቸውም ተቀጥላዎችን አያገኝም።\n\nየዩኤስቢ ወደቡን እንደገና መጠቀም ችግር በማይኖረው ጊዜ ማሳወቂያ ይደርሰዎታል።"</string>
     <string name="usb_port_enabled" msgid="531823867664717018">"ኃይል መሙያዎችን እና ተጨማሪ መሣሪያዎችን ፈልጎ ለማግኘት የነቃ የዩኤስቢ ወደብ"</string>
     <string name="usb_disable_contaminant_detection" msgid="3827082183595978641">"ዩኤስቢ አንቃ"</string>
-    <string name="learn_more" msgid="4690632085667273811">"የበለጠ መረዳት"</string>
+    <string name="learn_more" msgid="4690632085667273811">"የበለጠ ለመረዳት"</string>
     <string name="compat_mode_on" msgid="4963711187149440884">"ማያ እንዲሞላ አጉላ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ማያ ለመሙለት ሳብ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ቅጽበታዊ ገጽ እይታ"</string>

@@ -24,7 +24,7 @@
     <string name="status_bar_no_notifications_title" msgid="7812479124981107507">"Hakuna arifa"</string>
     <string name="status_bar_ongoing_events_title" msgid="3986169317496615446">"Inaendelea"</string>
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Arifa"</string>
-    <string name="battery_low_title" msgid="6891106956328275225">"Huenda chaji itaisha hivi karibuni"</string>
+    <string name="battery_low_title" msgid="6891106956328275225">"Chaji inaweza kuisha hivi karibuni"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"Imebakisha <xliff:g id="PERCENTAGE">%s</xliff:g>"</string>
     <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Imesalia <xliff:g id="PERCENTAGE">%1$s</xliff:g>, itadumu takribani <xliff:g id="TIME">%2$s</xliff:g> kulingana na jinsi unavyotumia"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"Imesalia <xliff:g id="PERCENTAGE">%1$s</xliff:g>, itadumu takribani <xliff:g id="TIME">%2$s</xliff:g>"</string>

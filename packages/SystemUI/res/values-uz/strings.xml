@@ -26,7 +26,7 @@
     <string name="status_bar_latest_events_title" msgid="202755896454005436">"Eslatmalar"</string>
     <string name="battery_low_title" msgid="6891106956328275225">"Batareya tez orada tugaydi"</string>
     <string name="battery_low_percent_format" msgid="4276661262843170964">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi"</string>
-    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> (joriy holatda taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi)"</string>
+    <string name="battery_low_percent_format_hybrid" msgid="3985614339605686167">"Batareya qivvati – <xliff:g id="PERCENTAGE">%1$s</xliff:g>, tugashiga taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi"</string>
     <string name="battery_low_percent_format_hybrid_short" msgid="5917433188456218857">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> (taxminan <xliff:g id="TIME">%2$s</xliff:g> qoldi)"</string>
     <string name="battery_low_percent_format_saver_started" msgid="4968468824040940688">"<xliff:g id="PERCENTAGE">%s</xliff:g> qoldi. Quvvat tejash rejimi yoniq."</string>
     <string name="invalid_charger" msgid="4370074072117767416">"USB orqali quvvatlash imkonsiz. Qurilmangiz bilan kelgan quvvatlash moslamasidan foydalaning."</string>
@@ -227,7 +227,7 @@
     <string name="data_connection_roaming" msgid="375650836665414797">"Rouming"</string>
     <string name="data_connection_edge" msgid="6316755666481405762">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="4422160347472742434">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM karta solinmagan."</string>
+    <string name="accessibility_no_sim" msgid="1140839832913084973">"SIM kartasiz."</string>
     <string name="accessibility_cell_data" msgid="172950885786007392">"Mobil internet"</string>
     <string name="accessibility_cell_data_on" msgid="691666434519443162">"Mobil internet yoniq"</string>
     <string name="cell_data_off_content_description" msgid="9165555931499878044">"Mobil internet yoqilmagan"</string>
@@ -362,7 +362,7 @@
     <string name="accessibility_quick_settings_rotation_value" msgid="2916484894750819251">"<xliff:g id="ID_1">%s</xliff:g> rejimi"</string>
     <string name="quick_settings_rotation_locked_label" msgid="4420863550666310319">"Aylanmaydigan qilingan"</string>
     <string name="quick_settings_rotation_locked_portrait_label" msgid="1194988975270484482">"Tik holat"</string>
-    <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Eniga"</string>
+    <string name="quick_settings_rotation_locked_landscape_label" msgid="2000295772687238645">"Yotiq"</string>
     <string name="quick_settings_ime_label" msgid="3351174938144332051">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Joylashuv"</string>
     <string name="quick_settings_location_off_label" msgid="7923929131443915919">"Joylashuvni aniqlash xizmati yoqilmagan"</string>
@@ -505,7 +505,7 @@
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"Bu funksiyani taʼminlovchi xizmat ekranda chiqqan yoki yozib olish va translatsiya vaqtida ijro etilgan barcha axborotlarga ruxsat oladi. Bu axborotlar parollar, toʻlov tafsilotlari, rasmlar, xabarlar va ijro etilgan audiolardan iborat boʻlishi mumkin."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Yozib olish yoki translatsiya boshlansinmi?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> bilan yozib olinsin yoki translatsiya qilinsinmi?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> orqali yozib olish yoki translatsiya boshlansinmi?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"Boshqa ko‘rsatilmasin"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Hammasini tozalash"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Boshqarish"</string>
@@ -515,7 +515,7 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Bildirishnomalar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Suhbatlar"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Barcha sokin bildirishnomalarni tozalash"</string>
-    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilingan"</string>
+    <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilinadi"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Boshlash"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Bildirishnomalar yo‘q"</string>
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil kuzatilishi mumkin"</string>
@@ -702,13 +702,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Bloklash"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Ha"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Kichraytirish"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Tovushsiz"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Sokin"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Ovozsiz qolsin"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Ogohlantirish"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Signal berishda davom etilsin"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Bildirishnoma kelmasin"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Tovushsiz"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Sokin"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Standart"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Pufaklar"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Tovush yoki tebranishsiz"</string>
@@ -720,8 +720,8 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat funksiyalari ishlamaydi"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bu yerda oxirgi va yopilgan bulutcha shaklidagi bildirishnomalar chiqadi"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hech qanday bulutcha topilmadi"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Eng oxirgi va yopilgan bulutchali chatlar shu yerda chiqadi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Ishonchli bildirishnoma"</string>
@@ -768,7 +768,7 @@
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"Batareya sarfi"</string>
     <string name="battery_detail_charging_summary" msgid="8821202155297559706">"Quvvat tejash rejimidan quvvatlash vaqtida foydalanib bo‘lmaydi"</string>
-    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Quvvat tejash rejimi"</string>
+    <string name="battery_detail_switch_title" msgid="6940976502957380405">"Quvvat tejash"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"Unumdorlik pasayadi va fonda internetdan foydalanish cheklanadi"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"<xliff:g id="NAME">%1$s</xliff:g> tugmasi"</string>
     <string name="keyboard_key_home" msgid="3734400625170020657">"Bosh ekran"</string>

@@ -651,9 +651,9 @@
     <string name="quick_settings" msgid="6211774484997470203">"Brze postavke"</string>
     <string name="status_bar" msgid="4357390266055077437">"Statusna traka"</string>
     <string name="overview" msgid="3522318590458536816">"Pregled"</string>
-    <string name="demo_mode" msgid="263484519766901593">"Način demonstracije Sistemskog UI-a"</string>
-    <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način demonstracije"</string>
-    <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način demonstracije"</string>
+    <string name="demo_mode" msgid="263484519766901593">"Način rada za demonstraciju Sistemskog UI-a"</string>
+    <string name="enable_demo_mode" msgid="3180345364745966431">"Omogući način rada za demonstraciju"</string>
+    <string name="show_demo_mode" msgid="3677956462273059726">"Prikaži način rada za demonstraciju"</string>
     <string name="status_bar_ethernet" msgid="5690979758988647484">"Ethernet"</string>
     <string name="status_bar_alarm" msgid="87160847643623352">"Alarm"</string>
     <string name="status_bar_work" msgid="5238641949837091056">"Profil za posao"</string>
@@ -726,7 +726,7 @@
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nedavni i odbačeni oblačići će se pojaviti ovdje"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ta obavještenja se ne mogu izmijeniti."</string>
-    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovdje nije moguće konfigurirati ovu grupu obavještenja"</string>
+    <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ovu grupu obavještenja nije moguće konfigurirati ovdje"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Obavještenje preko proksi servera"</string>
     <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Sva obavještenja aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Prikaži više"</string>
