@@ -808,7 +808,7 @@
     <string name="relationTypeReferredBy" msgid="5285082289602849400">"Kusikiselwe ngu-"</string>
     <string name="relationTypeRelative" msgid="3396498519818009134">"Isihlobo"</string>
     <string name="relationTypeSister" msgid="3721676005094140671">"Usisi"</string>
-    <string name="relationTypeSpouse" msgid="6916682664436031703">"Umlingane"</string>
+    <string name="relationTypeSpouse" msgid="6916682664436031703">"Umlingani"</string>
     <string name="sipAddressTypeCustom" msgid="6283889809842649336">"Ngokwezifiso"</string>
     <string name="sipAddressTypeHome" msgid="5918441930656878367">"Ekhaya"</string>
     <string name="sipAddressTypeWork" msgid="7873967986701216770">"Umsebenzi"</string>

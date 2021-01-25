@@ -162,7 +162,7 @@
     <string name="httpErrorAuth" msgid="469553140922938968">"Nepodarilo sa overiť totožnosť."</string>
     <string name="httpErrorProxyAuth" msgid="7229662162030113406">"Overenie pomocou servera proxy bolo neúspešné."</string>
     <string name="httpErrorConnect" msgid="3295081579893205617">"K serveru sa nepodarilo pripojiť."</string>
-    <string name="httpErrorIO" msgid="3860318696166314490">"Nepodarilo sa nadviazať komunikáciu so serverom. Skúste to znova neskôr."</string>
+    <string name="httpErrorIO" msgid="3860318696166314490">"Nepodarilo sa nadviazať komunikáciu so serverom. Skúste to neskôr."</string>
     <string name="httpErrorTimeout" msgid="7446272815190334204">"Časový limit pripojenia na server vypršal."</string>
     <string name="httpErrorRedirectLoop" msgid="8455757777509512098">"Stránka obsahuje príliš veľa presmerovaní servera."</string>
     <string name="httpErrorUnsupportedScheme" msgid="2664108769858966374">"Protokol nie je podporovaný."</string>
@@ -563,7 +563,7 @@
     <string name="fingerprint_error_timeout" msgid="2946635815726054226">"Časový limit rozpoznania odtlačku prsta vypršal. Skúste to znova."</string>
     <string name="fingerprint_error_canceled" msgid="540026881380070750">"Operácia týkajúca sa odtlačku prsta bola zrušená"</string>
     <string name="fingerprint_error_user_canceled" msgid="7685676229281231614">"Overenie odtlačku prsta zrušil používateľ."</string>
-    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Príliš veľa pokusov. Skúste to znova neskôr."</string>
+    <string name="fingerprint_error_lockout" msgid="7853461265604738671">"Príliš veľa pokusov. Skúste to neskôr."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="3895478283943513746">"Príliš veľa pokusov. Senzor odtlačkov prstov bol deaktivovaný."</string>
     <string name="fingerprint_error_unable_to_process" msgid="1148553603490048742">"Skúste to znova"</string>
     <string name="fingerprint_error_no_fingerprints" msgid="8671811719699072411">"Neregistrovali ste žiadne odtlačky prstov."</string>
@@ -607,7 +607,7 @@
     <string name="face_error_no_space" msgid="5649264057026021723">"Nové údaje o tvári sa nedajú uložiť. Najprv odstráňte jeden zo starých záznamov."</string>
     <string name="face_error_canceled" msgid="2164434737103802131">"Operácia týkajúca sa tváre bola zrušená"</string>
     <string name="face_error_user_canceled" msgid="8553045452825849843">"Odomknutie tvárou zrušil používateľ."</string>
-    <string name="face_error_lockout" msgid="7864408714994529437">"Príliš veľa pokusov. Skúste to znova neskôr."</string>
+    <string name="face_error_lockout" msgid="7864408714994529437">"Príliš veľa pokusov. Skúste to neskôr."</string>
     <string name="face_error_lockout_permanent" msgid="8277853602168960343">"Príliš veľa pokusov. Odomknutie tvárou bolo zakázané."</string>
     <string name="face_error_unable_to_process" msgid="5723292697366130070">"Nedá sa overiť tvár. Skúste to znova."</string>
     <string name="face_error_not_enrolled" msgid="7369928733504691611">"Nenastavili ste odomknutie tvárou."</string>
@@ -1816,7 +1816,7 @@
       <item quantity="other">Skúste to znova o <xliff:g id="COUNT">%d</xliff:g> sekúnd</item>
       <item quantity="one">Skúste to znova o 1 sekundu</item>
     </plurals>
-    <string name="restr_pin_try_later" msgid="5897719962541636727">"Skúste to znova neskôr"</string>
+    <string name="restr_pin_try_later" msgid="5897719962541636727">"Skúste to neskôr"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Zobrazenie na celú obrazovku"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Ukončíte potiahnutím zhora nadol."</string>
     <string name="immersive_cling_positive" msgid="7047498036346489883">"Dobre"</string>
