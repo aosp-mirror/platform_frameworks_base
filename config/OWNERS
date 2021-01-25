@@ -4,5 +4,11 @@ include /ZYGOTE_OWNERS
 
 per-file hiddenapi-* = andreionea@google.com, mathewi@google.com, satayev@google.com
 
+# art-team@ manages the boot image profiles
+per-file boot-* = calin@google.com, mathieuc@google.com, ngeoffray@google.com
+per-file dirty-image-objects = calin@google.com, mathieuc@google.com, ngeoffray@google.com
+per-file generate-preloaded-classes.sh = calin@google.com, mathieuc@google.com, ngeoffray@google.com
+per-file preloaded-classes* = calin@google.com, mathieuc@google.com, ngeoffray@google.com
+
 # Escalations:
 per-file hiddenapi-* = bdc@google.com, narayan@google.com
