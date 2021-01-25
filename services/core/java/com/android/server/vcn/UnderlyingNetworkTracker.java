@@ -24,6 +24,9 @@ import android.net.NetworkCapabilities;
 import android.os.Handler;
 import android.os.ParcelUuid;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
+
 import java.util.Objects;
 
 /**
@@ -72,7 +75,8 @@ public class UnderlyingNetworkTracker extends Handler {
         @NonNull public final LinkProperties linkProperties;
         public final boolean blocked;
 
-        private UnderlyingNetworkRecord(
+        @VisibleForTesting(visibility = Visibility.PRIVATE)
+        UnderlyingNetworkRecord(
                 @NonNull Network network,
                 @NonNull NetworkCapabilities networkCapabilities,
                 @NonNull LinkProperties linkProperties,
