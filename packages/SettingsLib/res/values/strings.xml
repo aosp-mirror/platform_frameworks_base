@@ -110,6 +110,9 @@
     <string name="wifi_no_internet">No internet access</string>
     <!-- Summary for saved networks -->
     <string name="saved_network">Saved by <xliff:g id="name">%1$s</xliff:g></string>
+    <!-- Summary for connect to metered access point [CHAR LIMIT=NONE] -->
+    <string name="connected_to_metered_access_point">Connected to metered network</string>
+
 
     <!-- Status message of Wi-Fi when it is automatically connected by a network recommendation provider. [CHAR LIMIT=NONE] -->
     <string name="connected_via_network_scorer">Automatically connected via %1$s</string>
