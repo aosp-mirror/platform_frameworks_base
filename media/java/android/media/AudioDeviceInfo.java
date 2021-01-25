@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.TreeSet;
 
 /**
- * Class to provide information about the audio devices.
+ * Provides information about an audio device.
  */
 public final class AudioDeviceInfo {
 
