@@ -6001,18 +6001,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 abiOverride, zygotePolicyFlags);
     }
 
-    @GuardedBy("this")
-    final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            boolean disableHiddenApiChecks, String abiOverride, int zygotePolicyFlags) {
-        return addAppLocked(info, customProcess, isolated, disableHiddenApiChecks,
-                false /* disableTestApiChecks */, abiOverride, zygotePolicyFlags);
-    }
-
     // TODO: Move to ProcessList?
     @GuardedBy("this")
     final ProcessRecord addAppLocked(ApplicationInfo info, String customProcess, boolean isolated,
-            boolean disableHiddenApiChecks, boolean disableTestApiChecks,
-            String abiOverride, int zygotePolicyFlags) {
+            boolean disableHiddenApiChecks, String abiOverride, int zygotePolicyFlags) {
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(customProcess != null ? customProcess : info.processName,
@@ -6047,7 +6039,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             mPersistentStartingProcesses.add(app);
             mProcessList.startProcessLocked(app, new HostingRecord("added application",
                     customProcess != null ? customProcess : app.processName),
-                    zygotePolicyFlags, disableHiddenApiChecks, disableTestApiChecks, abiOverride);
+                    zygotePolicyFlags, disableHiddenApiChecks, abiOverride);
         }
 
         return app;
@@ -14364,10 +14356,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mUsageStatsService.reportEvent(ii.targetPackage, userId,
                             UsageEvents.Event.SYSTEM_INTERACTION);
                 }
-                app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks,
-                        disableTestApiChecks, abiOverride, ZYGOTE_POLICY_FLAG_EMPTY);
+                app = addAppLocked(ai, defProcess, false, disableHiddenApiChecks, abiOverride,
+                        ZYGOTE_POLICY_FLAG_EMPTY);
             }
-
 
             app.setActiveInstrumentation(activeInstr);
             activeInstr.mFinished = false;
