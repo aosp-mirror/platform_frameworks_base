@@ -16,9 +16,13 @@
 
 package android.app;
 
+import android.Manifest.permission;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
+import android.annotation.SystemApi.Client;
 import android.annotation.TestApi;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
@@ -29,6 +33,8 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager.ResolveInfoFlags;
+import android.content.pm.ResolveInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -47,6 +53,7 @@ import com.android.internal.os.IResultReceiver;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * A description of an Intent and target action to perform with it.  Instances
@@ -1181,10 +1188,9 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * @hide
-     * Check whether this PendingIntent will launch an Activity.
+     * @return TRUE if this {@link PendingIntent} was created with
+     * {@link #getActivity} or {@link #getActivities}.
      */
-    @UnsupportedAppUsage
     public boolean isActivity() {
         try {
             return ActivityManager.getService()
@@ -1195,8 +1201,7 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * @hide
-     * Check whether this PendingIntent will launch a foreground service
+     * @return TRUE if this {@link PendingIntent} was created with {@link #getForegroundService}.
      */
     public boolean isForegroundService() {
         try {
@@ -1208,8 +1213,19 @@ public final class PendingIntent implements Parcelable {
     }
 
     /**
-     * @hide
-     * Check whether this PendingIntent will launch an Activity.
+     * @return TRUE if this {@link PendingIntent} was created with {@link #getService}.
+     */
+    public boolean isService() {
+        try {
+            return ActivityManager.getService()
+                    .isIntentSenderAService(mTarget);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @return TRUE if this {@link PendingIntent} was created with {@link #getBroadcast}.
      */
     public boolean isBroadcast() {
         try {
@@ -1243,6 +1259,28 @@ public final class PendingIntent implements Parcelable {
         try {
             return ActivityManager.getService()
                 .getTagForIntentSender(mTarget, prefix);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Resolve the intent set in this {@link PendingIntent}. Note if the pending intent is
+     * generated for another user, the resulting component may not exist on the calling user.
+     * Use {@link android.content.pm.ApplicationInfo#uid} of the resulting
+     * {@link android.content.pm.ComponentInfo} with
+     * {@link android.os.UserHandle#getUserHandleForUid(int)} to see which user will receive
+     * the intent.
+     *
+     * @param flags MATCH_* flags from {@link android.content.pm.PackageManager}.
+     * @hide
+     */
+    @RequiresPermission(permission.GET_INTENT_SENDER_INTENT)
+    @SystemApi(client = Client.MODULE_LIBRARIES)
+    public @Nullable List<ResolveInfo> queryIntentComponents(@ResolveInfoFlags int flags) {
+        try {
+            return ActivityManager.getService()
+                    .queryIntentComponentsForIntentSender(mTarget, flags);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
