@@ -10347,6 +10347,7 @@ public final class Settings {
          * or moving onto external storage. (0 = false, 1 = true)
          * @hide
          */
+         @Readable
         public static final String FORCE_ALLOW_ON_EXTERNAL = "force_allow_on_external";
 
         /**
