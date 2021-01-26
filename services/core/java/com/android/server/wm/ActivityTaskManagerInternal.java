@@ -162,8 +162,8 @@ public abstract class ActivityTaskManagerInternal {
             IVoiceInteractor mInteractor);
 
     /**
-     * Returns the top activity from each of the currently visible stacks. The first entry will be
-     * the focused activity.
+     * Returns the top activity from each of the currently visible root tasks. The first entry
+     * will be the focused activity.
      */
     public abstract List<IBinder> getTopVisibleActivities();
 
@@ -487,8 +487,8 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Dump the current activities state. */
     public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
-            String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
-            boolean dumpFocusedStackOnly);
+            String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
+            boolean dumpFocusedRootTaskOnly);
 
     /** Dump the current state for inclusion in oom dump. */
     public abstract void dumpForOom(PrintWriter pw);

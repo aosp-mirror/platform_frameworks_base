@@ -85,23 +85,23 @@ class WindowStateAnimator {
     static final int PRESERVED_SURFACE_LAYER = 1;
 
     /**
-     * Mode how the window gets clipped by the stack bounds during an animation: The clipping should
-     * be applied after applying the animation transformation, i.e. the stack bounds don't move
-     * during the animation.
+     * Mode how the window gets clipped by the root task bounds during an animation: The clipping
+     * should be applied after applying the animation transformation, i.e. the root task bounds
+     * don't move during the animation.
      */
-    static final int STACK_CLIP_AFTER_ANIM = 0;
+    static final int ROOT_TASK_CLIP_AFTER_ANIM = 0;
 
     /**
-     * Mode how the window gets clipped by the stack bounds: The clipping should be applied before
-     * applying the animation transformation, i.e. the stack bounds move with the window.
+     * Mode how the window gets clipped by the root task bounds: The clipping should be applied
+     * before applying the animation transformation, i.e. the root task bounds move with the window.
      */
-    static final int STACK_CLIP_BEFORE_ANIM = 1;
+    static final int ROOT_TASK_CLIP_BEFORE_ANIM = 1;
 
     /**
-     * Mode how window gets clipped by the stack bounds during an animation: Don't clip the window
-     * by the stack bounds.
+     * Mode how window gets clipped by the root task bounds during an animation: Don't clip the
+     * window by the root task bounds.
      */
-    static final int STACK_CLIP_NONE = 2;
+    static final int ROOT_TASK_CLIP_NONE = 2;
 
     // Unchanging local convenience fields.
     final WindowManagerService mService;

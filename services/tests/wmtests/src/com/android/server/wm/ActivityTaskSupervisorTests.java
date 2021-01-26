@@ -184,7 +184,7 @@ public class ActivityTaskSupervisorTests extends WindowTestsBase {
         // For the resizable activity, it is no need to force resizing or dismiss the docked stack.
         verify(taskChangeNotifier, never()).notifyActivityForcedResizable(anyInt() /* taskId */,
                 anyInt() /* reason */, anyString() /* packageName */);
-        verify(taskChangeNotifier, never()).notifyActivityDismissingDockedStack();
+        verify(taskChangeNotifier, never()).notifyActivityDismissingDockedRootTask();
     }
 
     /**

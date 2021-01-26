@@ -268,7 +268,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         InsetsControlTarget {
     static final String TAG = TAG_WITH_CLASS_NAME ? "WindowState" : TAG_WM;
 
-    // The minimal size of a window within the usable area of the freeform stack.
+    // The minimal size of a window within the usable area of the freeform root task.
     // TODO(multi-window): fix the min sizes when we have minimum width/height support,
     //                     use hard-coded min sizes for now.
     static final int MINIMUM_VISIBLE_WIDTH_IN_DP = 48;
@@ -1173,7 +1173,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         > windowFrames.mParentFrame.bottom) {
                     // But in docked we want to behave like fullscreen and behave as if the task
                     // were given smaller bounds for the purposes of layout. Skip adjustments for
-                    // the pinned stack, they are handled separately in the PinnedStackController.
+                    // the root pinned task, they are handled separately in the
+                    // PinnedStackController.
                     windowFrames.mContainingFrame.bottom = windowFrames.mParentFrame.bottom;
                 }
             }
@@ -1543,7 +1544,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return task.getRootTask();
         }
         // Some system windows (e.g. "Power off" dialog) don't have a task, but we would still
-        // associate them with some stack to enable dimming.
+        // associate them with some root task to enable dimming.
         final DisplayContent dc = getDisplayContent();
         return mAttrs.type >= FIRST_SYSTEM_WINDOW
                 && dc != null ? dc.getDefaultTaskDisplayArea().getRootHomeTask() : null;
@@ -1578,18 +1579,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     void getVisibleBounds(Rect bounds) {
         final Task task = getTask();
-        boolean intersectWithStackBounds = task != null && task.cropWindowsToRootTaskBounds();
+        boolean intersectWithRootTaskBounds = task != null && task.cropWindowsToRootTaskBounds();
         bounds.setEmpty();
         mTmpRect.setEmpty();
-        if (intersectWithStackBounds) {
-            final Task stack = task.getRootTask();
-            if (stack != null) {
-                stack.getDimBounds(mTmpRect);
+        if (intersectWithRootTaskBounds) {
+            final Task rootTask = task.getRootTask();
+            if (rootTask != null) {
+                rootTask.getDimBounds(mTmpRect);
             } else {
-                intersectWithStackBounds = false;
+                intersectWithRootTaskBounds = false;
             }
             if (inSplitScreenPrimaryWindowingMode()) {
-                // If this is in the primary split and the home stack is the top visible task in
+                // If this is in the primary split and the root home task is the top visible task in
                 // the secondary split, it means this is "minimized" and thus must prevent
                 // overlapping with home.
                 // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
@@ -1607,7 +1608,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         bounds.set(mWindowFrames.mFrame);
         bounds.inset(getInsetsStateWithVisibilityOverride().calculateVisibleInsets(
                 bounds, mAttrs.softInputMode));
-        if (intersectWithStackBounds) {
+        if (intersectWithRootTaskBounds) {
             bounds.intersect(mTmpRect);
         }
     }
@@ -2132,9 +2133,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void onWindowReplacementTimeout() {
         if (mWillReplaceWindow) {
             // Since the window already timed out, remove it immediately now.
-            // Use WindowState#removeImmediately() instead of WindowState#removeIfPossible(), as the latter
-            // delays removal on certain conditions, which will leave the stale window in the
-            // stack and marked mWillReplaceWindow=false, so the window will never be removed.
+            // Use WindowState#removeImmediately() instead of WindowState#removeIfPossible(), as
+            // the latter delays removal on certain conditions, which will leave the stale window
+            // in the root task and marked mWillReplaceWindow=false, so the window will never be
+            // removed.
             //
             // Also removes child windows.
             removeImmediately();
@@ -2400,10 +2402,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
-        final Task stack = getRootTask();
-        if (stack != null && !stack.isFocusable()) {
-            // Ignore when the stack shouldn't receive input event.
-            // (i.e. the minimized stack in split screen mode.)
+        final Task rootTask = getRootTask();
+        if (rootTask != null && !rootTask.isFocusable()) {
+            // Ignore when the root task shouldn't receive input event.
+            // (i.e. the minimized root task in split screen mode.)
             return false;
         }
 
@@ -2570,7 +2572,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (modal) {
             flags |= FLAG_NOT_TOUCH_MODAL;
             if (mActivityRecord != null) {
-                // Limit the outer touch to the activity stack region.
+                // Limit the outer touch to the activity root task region.
                 updateRegionForModalActivityWindow(region);
             } else {
                 // Give it a large touchable region at first because it was touch modal. The window
@@ -2624,7 +2626,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     /**
      * Updates the region for a window in an Activity that was a touch modal. This will limit
-     * the outer touch to the activity stack region.
+     * the outer touch to the activity root task region.
      * @param outRegion The region to update.
      */
     private void updateRegionForModalActivityWindow(Region outRegion) {
@@ -2643,7 +2645,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 // If this is a modal window we need to dismiss it if it's not full screen
                 // and the touch happens outside of the frame that displays the content. This
                 // means we need to intercept touches outside of that window. The dim layer
-                // user associated with the window (task or stack) will give us the good
+                // user associated with the window (task or root task) will give us the good
                 // bounds, as they would be used to display the dim layer.
                 final Task task = getTask();
                 if (task != null) {
@@ -2655,7 +2657,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         adjustRegionInFreefromWindowMode(mTmpRect);
         outRegion.set(mTmpRect);
-        cropRegionToStackBoundsIfNeeded(outRegion);
+        cropRegionToRootTaskBoundsIfNeeded(outRegion);
     }
 
     void checkPolicyVisibilityChange() {
@@ -3462,7 +3464,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 break;
             }
         }
-        cropRegionToStackBoundsIfNeeded(outRegion);
+        cropRegionToRootTaskBoundsIfNeeded(outRegion);
         subtractTouchExcludeRegionIfNeeded(outRegion);
     }
 
@@ -3478,25 +3480,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (modal && dc != null) {
             outRegion.set(dc.getBounds());
-            cropRegionToStackBoundsIfNeeded(outRegion);
+            cropRegionToRootTaskBoundsIfNeeded(outRegion);
             subtractTouchExcludeRegionIfNeeded(outRegion);
         } else {
             getTouchableRegion(outRegion);
         }
     }
 
-    private void cropRegionToStackBoundsIfNeeded(Region region) {
+    private void cropRegionToRootTaskBoundsIfNeeded(Region region) {
         final Task task = getTask();
         if (task == null || !task.cropWindowsToRootTaskBounds()) {
             return;
         }
 
-        final Task stack = task.getRootTask();
-        if (stack == null || stack.mCreatedByOrganizer) {
+        final Task rootTask = task.getRootTask();
+        if (rootTask == null || rootTask.mCreatedByOrganizer) {
             return;
         }
 
-        stack.getDimBounds(mTmpRect);
+        rootTask.getDimBounds(mTmpRect);
         adjustRegionInFreefromWindowMode(mTmpRect);
         region.op(mTmpRect, Region.Op.INTERSECT);
     }
@@ -3742,11 +3744,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private int getRootTaskId() {
-        final Task stack = getRootTask();
-        if (stack == null) {
+        final Task rootTask = getRootTask();
+        if (rootTask == null) {
             return INVALID_TASK_ID;
         }
-        return stack.mTaskId;
+        return rootTask.mTaskId;
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
@@ -5333,14 +5335,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 
-        Task stack = getRootTask();
+        Task rootTask = getRootTask();
 
-        // If we have stack outsets, that means the top-left
+        // If we have root task outsets, that means the top-left
         // will be outset, and we need to inset ourselves
         // to account for it. If we actually have shadows we will
         // then un-inset ourselves by the surfaceInsets.
-        if (stack != null) {
-            final int outset = stack.getTaskOutset();
+        if (rootTask != null) {
+            final int outset = rootTask.getTaskOutset();
             outPoint.offset(outset, outset);
         }
 
@@ -5652,7 +5654,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             //    represent the frames in display space coordinates.
             outFrame.set(getTask().getBounds());
         } else if (isDockedResizing()) {
-            // If we are animating while docked resizing, then use the stack bounds as the
+            // If we are animating while docked resizing, then use the root task bounds as the
             // animation target (which will be different than the task bounds)
             outFrame.set(getTask().getParent().getBounds());
         } else {

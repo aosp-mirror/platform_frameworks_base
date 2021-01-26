@@ -78,9 +78,9 @@ import static com.android.server.wm.Task.TASK_VISIBILITY_INVISIBLE;
 import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE;
 import static com.android.server.wm.Task.TASK_VISIBILITY_VISIBLE_BEHIND_TRANSLUCENT;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_BEFORE_ANIM;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -830,15 +830,15 @@ public class ActivityRecordTests extends WindowTestsBase {
         topActivity.nowVisible = true;
         topActivity.setState(RESUMED, "test");
 
-        assertEquals("Activity outside of task/stack cannot be finished", FINISH_RESULT_REMOVED,
+        assertEquals("Activity outside of task/rootTask cannot be finished", FINISH_RESULT_REMOVED,
                 activity.finishIfPossible("test", false /* oomAdj */));
         assertTrue(activity.finishing);
         assertFalse(activity.isInRootTaskLocked());
     }
 
     /**
-     * Verify that when finishing the top focused activity on top display, the stack order will be
-     * changed by adjusting focus.
+     * Verify that when finishing the top focused activity on top display, the root task order
+     * will be changed by adjusting focus.
      */
     @Test
     public void testFinishActivityIfPossible_adjustStackOrder() {
@@ -2490,12 +2490,12 @@ public class ActivityRecordTests extends WindowTestsBase {
 
         // Check that anim bounds for freeform window match task bounds
         task.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
-        assertEquals(task.getBounds(), activity.getAnimationBounds(STACK_CLIP_NONE));
+        assertEquals(task.getBounds(), activity.getAnimationBounds(ROOT_TASK_CLIP_NONE));
 
-        // STACK_CLIP_AFTER_ANIM should use task bounds since they will be clipped by
+        // ROOT_TASK_CLIP_AFTER_ANIM should use task bounds since they will be clipped by
         // bounds animation layer.
         task.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
-        assertEquals(task.getBounds(), activity.getAnimationBounds(STACK_CLIP_AFTER_ANIM));
+        assertEquals(task.getBounds(), activity.getAnimationBounds(ROOT_TASK_CLIP_AFTER_ANIM));
 
         // Even the activity is smaller than task and it is not aligned to the top-left corner of
         // task, the animation bounds the same as task and position should be zero because in real
@@ -2506,12 +2506,12 @@ public class ActivityRecordTests extends WindowTestsBase {
         final Point animationPosition = new Point();
         activity.getAnimationPosition(animationPosition);
 
-        assertEquals(taskBounds, activity.getAnimationBounds(STACK_CLIP_AFTER_ANIM));
+        assertEquals(taskBounds, activity.getAnimationBounds(ROOT_TASK_CLIP_AFTER_ANIM));
         assertEquals(new Point(0, 0), animationPosition);
 
-        // STACK_CLIP_BEFORE_ANIM should use stack bounds since it won't be clipped later.
+        // ROOT_TASK_CLIP_BEFORE_ANIM should use stack bounds since it won't be clipped later.
         task.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        assertEquals(rootTask.getBounds(), activity.getAnimationBounds(STACK_CLIP_BEFORE_ANIM));
+        assertEquals(rootTask.getBounds(), activity.getAnimationBounds(ROOT_TASK_CLIP_BEFORE_ANIM));
     }
 
     @Test

@@ -22,9 +22,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 
-import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskSupervisor.ON_TOP;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -53,9 +53,9 @@ import com.android.internal.util.ArrayUtils;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.uri.NeededUriGrants;
-import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 import com.android.server.wm.ActivityStarter.DefaultFactory;
 import com.android.server.wm.ActivityStarter.Factory;
+import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -164,12 +164,12 @@ public class ActivityStartController {
      * last starter for an arbitrary task record. Re-evaluate whether we can remove.
      */
     void postStartActivityProcessingForLastStarter(ActivityRecord r, int result,
-            Task targetStack) {
+            Task targetRootTask) {
         if (mLastStarter == null) {
             return;
         }
 
-        mLastStarter.postStartActivityProcessing(r, result, targetStack);
+        mLastStarter.postStartActivityProcessing(r, result, targetRootTask);
     }
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason,
@@ -177,9 +177,9 @@ public class ActivityStartController {
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
         if (!ActivityRecord.isResolverActivity(aInfo.name)) {
-            // The resolver activity shouldn't be put in home stack because when the foreground is
-            // standard type activity, the resolver activity should be put on the top of current
-            // foreground instead of bring home stack to front.
+            // The resolver activity shouldn't be put in root home task because when the
+            // foreground is standard type activity, the resolver activity should be put on the
+            // top of current foreground instead of bring root home task to front.
             options.setLaunchActivityType(ACTIVITY_TYPE_HOME);
         }
         final int displayId = taskDisplayArea.getDisplayId();
@@ -187,13 +187,13 @@ public class ActivityStartController {
         options.setLaunchTaskDisplayArea(taskDisplayArea.mRemoteToken
                 .toWindowContainerToken());
 
-        // The home activity will be started later, defer resuming to avoid unneccerary operations
-        // (e.g. start home recursively) when creating home stack.
+        // The home activity will be started later, defer resuming to avoid unnecessary operations
+        // (e.g. start home recursively) when creating root home task.
         mSupervisor.beginDeferResume();
-        final Task homeStack;
+        final Task rootHomeTask;
         try {
-            // Make sure home stack exists on display area.
-            homeStack = taskDisplayArea.getOrCreateRootHomeTask(ON_TOP);
+            // Make sure root home task exists on display area.
+            rootHomeTask = taskDisplayArea.getOrCreateRootHomeTask(ON_TOP);
         } finally {
             mSupervisor.endDeferResume();
         }
@@ -205,7 +205,7 @@ public class ActivityStartController {
                 .setActivityOptions(options.toBundle())
                 .execute();
         mLastHomeActivityStartRecord = tmpOutRecord[0];
-        if (homeStack.mInResumeTopActivity) {
+        if (rootHomeTask.mInResumeTopActivity) {
             // If we are in resume section already, home activity will be initialized, but not
             // resumed (to avoid recursive resume) and will stay that way until something pokes it
             // again. We need to schedule another resume.
