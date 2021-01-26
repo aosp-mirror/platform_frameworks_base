@@ -114,7 +114,7 @@ class ReOpenImeWindowTest(
                                         configuration.endRotation)
                                 statusBarLayerIsAlwaysVisible()
                                 navBarLayerIsAlwaysVisible()
-                                visibleLayersShownMoreThanOneConsecutiveEntry()
+                                visibleLayersShownMoreThanOneConsecutiveEntry(enabled = false)
 
                                 imeLayerBecomesVisible()
                                 appLayerReplacesWallpaperLayer(testAppComponentName.className)
