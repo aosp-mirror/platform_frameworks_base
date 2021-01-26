@@ -79,7 +79,7 @@ class EnterExitPipTest(
                     }
                     all("Initially shows both app windows then pipApp hides testApp") {
                         showsAppWindow(testApp.defaultWindowName)
-                                .and().showsAppWindowOnTop(pipApp.defaultWindowName)
+                                .showsAppWindowOnTop(pipApp.defaultWindowName)
                                 .then()
                                 .hidesAppWindow(testApp.defaultWindowName)
                     }
@@ -89,7 +89,7 @@ class EnterExitPipTest(
                 layersTrace {
                     all("Initially shows both app layers then pipApp hides testApp") {
                         showsLayer(testApp.defaultWindowName)
-                                .and().showsLayer(pipApp.defaultWindowName)
+                                .showsLayer(pipApp.defaultWindowName)
                                 .then()
                                 .hidesLayer(testApp.defaultWindowName)
                     }

@@ -85,6 +85,7 @@ import android.security.keystore.StrongBoxUnavailableException;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
@@ -5349,29 +5350,23 @@ public class DevicePolicyManager {
         InetSocketAddress sa = (InetSocketAddress) proxySpec.address();
         String hostName = sa.getHostName();
         int port = sa.getPort();
-        StringBuilder hostBuilder = new StringBuilder();
-        final String hostSpec = hostBuilder.append(hostName)
-                .append(":").append(Integer.toString(port)).toString();
-        final String exclSpec;
+        final List<String> trimmedExclList;
         if (exclusionList == null) {
-            exclSpec = "";
+            trimmedExclList = Collections.emptyList();
         } else {
-            StringBuilder listBuilder = new StringBuilder();
-            boolean firstDomain = true;
+            trimmedExclList = new ArrayList<>(exclusionList.size());
             for (String exclDomain : exclusionList) {
-                if (!firstDomain) {
-                    listBuilder = listBuilder.append(",");
-                } else {
-                    firstDomain = false;
-                }
-                listBuilder = listBuilder.append(exclDomain.trim());
+                trimmedExclList.add(exclDomain.trim());
             }
-            exclSpec = listBuilder.toString();
         }
-        if (android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec)
-                != android.net.Proxy.PROXY_VALID) throw new IllegalArgumentException();
+        final ProxyInfo info = ProxyInfo.buildDirectProxy(hostName, port, trimmedExclList);
+        // The hostSpec is built assuming that there is a specified port and hostname,
+        // but ProxyInfo.isValid() accepts 0 / empty as unspecified: also reject them.
+        if (port == 0 || TextUtils.isEmpty(hostName) || !info.isValid()) {
+            throw new IllegalArgumentException();
+        }
 
-        return new Pair<>(hostSpec, exclSpec);
+        return new Pair<>(hostName + ":" + port, TextUtils.join(",", trimmedExclList));
     }
 
     /**

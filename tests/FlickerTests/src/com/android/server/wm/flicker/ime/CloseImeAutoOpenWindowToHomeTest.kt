@@ -25,6 +25,7 @@ import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEntry
@@ -53,21 +54,21 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CloseImeAutoOpenWindowToHomeTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-
-            return FlickerTestRunnerFactory(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                 .buildTest { configuration ->
                     val testApp = ImeAppAutoFocusHelper(instrumentation,
                         configuration.startRotation)
                     withTestName {
-                        buildTestTag("imeToHomeAutoOpen", testApp, configuration)
+                        buildTestTag("imeToHomeAutoOpen", configuration)
                     }
                     repeat { configuration.repetitions }
                     setup {
@@ -75,20 +76,21 @@ class CloseImeAutoOpenWindowToHomeTest(
                             device.wakeUpAndGoToHomeScreen()
                         }
                         eachRun {
+                            testApp.launchViaIntent(wmHelper)
+                            testApp.openIME(device, wmHelper)
                             this.setRotation(configuration.startRotation)
-                            testApp.open()
-                            testApp.openIME(device)
                         }
                     }
                     teardown {
-                        eachRun {
+                        test {
                             testApp.exit()
                             this.setRotation(Surface.ROTATION_0)
                         }
                     }
                     transitions {
                         device.pressHome()
-                        device.waitForIdle()
+                        wmHelper.waitForHomeActivityVisible()
+                        wmHelper.waitImeWindowGone()
                     }
                     assertions {
                         windowManagerTrace {
@@ -96,24 +98,25 @@ class CloseImeAutoOpenWindowToHomeTest(
                             statusBarWindowIsAlwaysVisible()
                             visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
 
-                            imeWindowBecomesInvisible(bugId = 141458352)
-                            imeAppWindowBecomesInvisible(testApp, bugId = 157449248)
+                            imeWindowBecomesInvisible()
+                            imeAppWindowBecomesInvisible(testApp)
                         }
 
                         layersTrace {
-                            noUncoveredRegions(configuration.startRotation, Surface.ROTATION_0,
-                                allStates = false)
+                            noUncoveredRegions(configuration.startRotation, Surface.ROTATION_0)
                             navBarLayerRotatesAndScales(configuration.startRotation,
-                                Surface.ROTATION_0, bugId = 140855415)
+                                Surface.ROTATION_0,
+                                enabled = !configuration.startRotation.isRotated())
                             statusBarLayerRotatesScales(configuration.startRotation,
-                                Surface.ROTATION_0)
+                                Surface.ROTATION_0,
+                                enabled = !configuration.startRotation.isRotated())
                             navBarLayerIsAlwaysVisible(
-                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                                enabled = !configuration.startRotation.isRotated())
                             statusBarLayerIsAlwaysVisible(
-                                    enabled = Surface.ROTATION_0 == configuration.startRotation)
+                                enabled = !configuration.startRotation.isRotated())
                             visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
 
-                            imeLayerBecomesInvisible(bugId = 141458352)
+                            imeLayerBecomesInvisible()
                             imeAppLayerBecomesInvisible(testApp)
                         }
                     }

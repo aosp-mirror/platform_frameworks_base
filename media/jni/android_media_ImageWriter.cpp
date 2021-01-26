@@ -29,6 +29,7 @@
 #include <ui/PublicFormat.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_view_Surface.h>
+#include <android_runtime/android_graphics_GraphicBuffer.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <private/android/AHardwareBufferHelpers.h>
 #include <jni.h>
@@ -673,36 +674,12 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
     Image_setNativeContext(env, image, NULL, -1);
 }
 
-static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
-        jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint left, jint top,
+static status_t attachAndQeueuGraphicBuffer(JNIEnv* env, JNIImageWriterContext *ctx,
+        sp<Surface> surface, sp<GraphicBuffer> gb, jlong timestampNs, jint left, jint top,
         jint right, jint bottom, jint transform, jint scalingMode) {
-    ALOGV("%s", __FUNCTION__);
-    JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
-    if (ctx == NULL || thiz == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "ImageWriterContext is not initialized");
-        return -1;
-    }
-
-    sp<Surface> surface = ctx->getProducer();
     status_t res = OK;
-    if (isFormatOpaque(imageFormat) != isFormatOpaque(ctx->getBufferFormat())) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "Trying to attach an opaque image into a non-opaque ImageWriter, or vice versa");
-        return -1;
-    }
-
-    // Image is guaranteed to be from ImageReader at this point, so it is safe to
-    // cast to BufferItem pointer.
-    BufferItem* buffer = reinterpret_cast<BufferItem*>(nativeBuffer);
-    if (buffer == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                "Image is not initialized or already closed");
-        return -1;
-    }
-
     // Step 1. Attach Image
-    res = surface->attachBuffer(buffer->mGraphicBuffer.get());
+    res = surface->attachBuffer(gb.get());
     if (res != OK) {
         ALOGE("Attach image failed: %s (%d)", strerror(-res), res);
         switch (res) {
@@ -756,7 +733,7 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     // queue the "attached" flag before calling queueBuffer. In case
     // queueBuffer() fails, remove it from the queue.
     ctx->queueAttachedFlag(true);
-    res = anw->queueBuffer(anw.get(), buffer->mGraphicBuffer.get(), /*fenceFd*/
+    res = anw->queueBuffer(anw.get(), gb.get(), /*fenceFd*/
             -1);
     if (res != OK) {
         ALOGE("%s: Queue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
@@ -777,6 +754,67 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     // of the image that is from ImageReader, the subsequent image close will run into issues.
 
     return res;
+}
+
+static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nativeCtx,
+        jlong nativeBuffer, jint imageFormat, jlong timestampNs, jint left, jint top,
+        jint right, jint bottom, jint transform, jint scalingMode) {
+    ALOGV("%s", __FUNCTION__);
+    JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
+    if (ctx == NULL || thiz == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "ImageWriterContext is not initialized");
+        return -1;
+    }
+
+    sp<Surface> surface = ctx->getProducer();
+    if (isFormatOpaque(imageFormat) != isFormatOpaque(ctx->getBufferFormat())) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Trying to attach an opaque image into a non-opaque ImageWriter, or vice versa");
+        return -1;
+    }
+
+    // Image is guaranteed to be from ImageReader at this point, so it is safe to
+    // cast to BufferItem pointer.
+    BufferItem* buffer = reinterpret_cast<BufferItem*>(nativeBuffer);
+    if (buffer == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Image is not initialized or already closed");
+        return -1;
+    }
+
+    return attachAndQeueuGraphicBuffer(env, ctx, surface, buffer->mGraphicBuffer, timestampNs, left,
+            top, right, bottom, transform, scalingMode);
+}
+
+static jint ImageWriter_attachAndQueueGraphicBuffer(JNIEnv* env, jobject thiz, jlong nativeCtx,
+        jobject buffer, jint format, jlong timestampNs, jint left, jint top,
+        jint right, jint bottom, jint transform, jint scalingMode) {
+    ALOGV("%s", __FUNCTION__);
+    JNIImageWriterContext* const ctx = reinterpret_cast<JNIImageWriterContext *>(nativeCtx);
+    if (ctx == NULL || thiz == NULL) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "ImageWriterContext is not initialized");
+        return -1;
+    }
+
+    sp<Surface> surface = ctx->getProducer();
+    if (isFormatOpaque(format) != isFormatOpaque(ctx->getBufferFormat())) {
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Trying to attach an opaque image into a non-opaque ImageWriter, or vice versa");
+        return -1;
+    }
+
+    sp<GraphicBuffer> graphicBuffer = android_graphics_GraphicBuffer_getNativeGraphicsBuffer(env,
+            buffer);
+    if (graphicBuffer.get() == NULL) {
+        jniThrowException(env, "java/lang/IllegalArgumentException",
+                "Trying to attach an invalid graphic buffer");
+        return -1;
+    }
+
+    return attachAndQeueuGraphicBuffer(env, ctx, surface, graphicBuffer, timestampNs, left,
+            top, right, bottom, transform, scalingMode);
 }
 
 // --------------------------Image methods---------------------------------------
@@ -1011,6 +1049,9 @@ static JNINativeMethod gImageWriterMethods[] = {
                                                               (void*)ImageWriter_init },
     {"nativeClose",              "(J)V",                      (void*)ImageWriter_close },
     {"nativeAttachAndQueueImage", "(JJIJIIIIII)I",          (void*)ImageWriter_attachAndQueueImage },
+    {"nativeAttachAndQueueGraphicBuffer",
+        "(JLandroid/graphics/GraphicBuffer;IJIIIIII)I",
+        (void*)ImageWriter_attachAndQueueGraphicBuffer },
     {"nativeDequeueInputImage", "(JLandroid/media/Image;)V",  (void*)ImageWriter_dequeueImage },
     {"nativeQueueInputImage",   "(JLandroid/media/Image;JIIIIII)V",  (void*)ImageWriter_queueImage },
     {"cancelImage",             "(JLandroid/media/Image;)V",   (void*)ImageWriter_cancelImage },

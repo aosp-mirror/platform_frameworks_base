@@ -2843,10 +2843,6 @@ RethrowRemoteException: android.telephony.mbms.vendor.MbmsStreamingServiceBase#s
 
 SamShouldBeLast: android.app.ActivityManager#addOnUidImportanceListener(android.app.ActivityManager.OnUidImportanceListener, int):
     
-SamShouldBeLast: android.app.role.RoleManager#addOnRoleHoldersChangedListenerAsUser(java.util.concurrent.Executor, android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle):
-    
-SamShouldBeLast: android.app.role.RoleManager#removeOnRoleHoldersChangedListenerAsUser(android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle):
-    
 SamShouldBeLast: android.database.sqlite.SQLiteDebug#dump(android.util.Printer, String[]):
     
 SamShouldBeLast: android.database.sqlite.SQLiteDirectCursorDriver#query(android.database.sqlite.SQLiteDatabase.CursorFactory, String[]):
@@ -2972,18 +2968,6 @@ UseParcelFileDescriptor: android.util.proto.ProtoOutputStream#ProtoOutputStream(
 UserHandle: android.app.ActivityManager#switchUser(android.os.UserHandle):
     
 UserHandle: android.app.admin.DevicePolicyManager#getOwnerInstalledCaCerts(android.os.UserHandle):
-    
-UserHandle: android.app.role.RoleManager#addOnRoleHoldersChangedListenerAsUser(java.util.concurrent.Executor, android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle):
-    
-UserHandle: android.app.role.RoleManager#addRoleHolderAsUser(String, String, int, android.os.UserHandle, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Boolean>):
-    
-UserHandle: android.app.role.RoleManager#clearRoleHoldersAsUser(String, int, android.os.UserHandle, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Boolean>):
-    
-UserHandle: android.app.role.RoleManager#getRoleHoldersAsUser(String, android.os.UserHandle):
-    
-UserHandle: android.app.role.RoleManager#removeOnRoleHoldersChangedListenerAsUser(android.app.role.OnRoleHoldersChangedListener, android.os.UserHandle):
-    
-UserHandle: android.app.role.RoleManager#removeRoleHolderAsUser(String, String, int, android.os.UserHandle, java.util.concurrent.Executor, java.util.function.Consumer<java.lang.Boolean>):
     
 UserHandle: android.app.usage.StorageStatsManager#queryCratesForPackage(java.util.UUID, String, android.os.UserHandle):
     

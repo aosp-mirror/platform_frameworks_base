@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.app.timedetector.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -42,7 +43,8 @@ import java.lang.annotation.RetentionPolicy;
  */
 public interface TimeDetectorStrategy extends Dumpable {
 
-    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK, ORIGIN_GNSS })
+    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK, ORIGIN_GNSS,
+        ORIGIN_EXTERNAL })
     @Retention(RetentionPolicy.SOURCE)
     @interface Origin {}
 
@@ -62,6 +64,10 @@ public interface TimeDetectorStrategy extends Dumpable {
     @Origin
     int ORIGIN_GNSS = 4;
 
+    /** Used when a time value originated from an externally specified signal. */
+    @Origin
+    int ORIGIN_EXTERNAL = 5;
+
     /** Processes the suggested time from telephony sources. */
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
@@ -78,6 +84,9 @@ public interface TimeDetectorStrategy extends Dumpable {
 
     /** Processes the suggested time from gnss sources. */
     void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion);
+
+    /** Processes the suggested time from external sources. */
+    void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSuggestion);
 
     /**
      * Handles the auto-time configuration changing For example, when the auto-time setting is
@@ -110,6 +119,8 @@ public interface TimeDetectorStrategy extends Dumpable {
                 return "telephony";
             case ORIGIN_GNSS:
                 return "gnss";
+            case ORIGIN_EXTERNAL:
+                return "external";
             default:
                 throw new IllegalArgumentException("origin=" + origin);
         }
@@ -129,6 +140,8 @@ public interface TimeDetectorStrategy extends Dumpable {
                 return ORIGIN_TELEPHONY;
             case "gnss":
                 return ORIGIN_GNSS;
+            case "external":
+                return ORIGIN_EXTERNAL;
             default:
                 throw new IllegalArgumentException("originString=" + originString);
         }

@@ -42,3 +42,8 @@ android_app_certificate {
     name: "com.android.permission.certificate",
     certificate: "com.android.permission",
 }
+
+filegroup {
+    name: "permission-jarjar-rules",
+    srcs: ["jarjar-rules.txt"],
+}

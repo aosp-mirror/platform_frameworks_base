@@ -93,9 +93,9 @@ class PipLegacySplitScreenTest(
                         coversAtMostRegion(pipApp.defaultWindowName, displayBounds)
                     }
                     end("Both app windows should be visible") {
-                        showsAppWindow(testApp.defaultWindowName)
-                        showsAppWindow(imeApp.defaultWindowName)
-                        noWindowsOverlap(testApp.defaultWindowName, imeApp.defaultWindowName)
+                        isVisible(testApp.defaultWindowName)
+                        isVisible(imeApp.defaultWindowName)
+                        noWindowsOverlap(setOf(testApp.defaultWindowName, imeApp.defaultWindowName))
                     }
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()

@@ -13326,6 +13326,7 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkgSetting.getInstantApp(userId)) {
             mInstantAppRegistry.addInstantAppLPw(userId, pkgSetting.appId);
         }
+        pkgSetting.setStatesOnCommit();
 
         return pkg;
     }
@@ -19165,7 +19166,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 mDexManager.notifyPackageUpdated(pkg.getPackageName(),
                         pkg.getBaseApkPath(), pkg.getSplitCodePaths());
             }
-            reconciledPkg.pkgSetting.setStatesOnCommit();
 
             // Prepare the application profiles for the new code paths.
             // This needs to be done before invoking dexopt so that any install-time profile

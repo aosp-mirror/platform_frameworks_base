@@ -44,6 +44,8 @@ import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.RemoteCallback;
 import android.os.SharedMemory;
+import android.view.autofill.AutofillId;
+import android.view.translation.TranslationSpec;
 
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.ReferrerIntent;
@@ -157,4 +159,6 @@ oneway interface IApplicationThread {
             IInstrumentationWatcher instrumentationWatcher,
             IUiAutomationConnection instrumentationUiConnection,
             in ApplicationInfo targetInfo);
+    void updateUiTranslationState(IBinder activityToken, int state, in TranslationSpec sourceSpec,
+            in TranslationSpec destSpec, in List<AutofillId> viewIds);
 }

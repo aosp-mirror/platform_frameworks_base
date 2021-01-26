@@ -16,6 +16,7 @@
   -->
 <resources>
     <style name="PreferenceTheme" parent="@style/PreferenceThemeOverlay">
+        <item name="footerPreferenceStyle">@style/Preference.Material</item>
         <item name="preferenceCategoryStyle">@style/SettingsCategoryPreference</item>
         <!-- For preference category color -->
         <item name="preferenceCategoryTitleTextAppearance">@style/TextAppearance.CategoryTitle

@@ -19,8 +19,6 @@ package com.android.wm.shell.flicker.pip.tv
 import android.app.ActivityManager
 import android.app.IActivityManager
 import android.app.IProcessObserver
-import android.content.pm.PackageManager.FEATURE_LEANBACK
-import android.content.pm.PackageManager.FEATURE_LEANBACK_ONLY
 import android.os.SystemClock
 import android.view.Surface.ROTATION_0
 import android.view.Surface.rotationToString
@@ -34,14 +32,11 @@ import org.junit.Before
 
 abstract class TvPipTestBase : PipTestBase(rotationToString(ROTATION_0), ROTATION_0) {
 
-    private val isTelevision: Boolean
-        get() = packageManager.run {
-            hasSystemFeature(FEATURE_LEANBACK) || hasSystemFeature(FEATURE_LEANBACK_ONLY)
-        }
     private val systemUiProcessObserver = SystemUiProcessObserver()
 
     @Before
-    open fun setUp() {
+    final override fun televisionSetUp() {
+        // Should run only on TVs.
         Assume.assumeTrue(isTelevision)
 
         systemUiProcessObserver.start()

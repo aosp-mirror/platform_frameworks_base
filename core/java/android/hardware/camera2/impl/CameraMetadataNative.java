@@ -382,6 +382,19 @@ public class CameraMetadataNative implements Parcelable {
         return newObject;
     }
 
+    /**
+     * Set all metadata values in the destination argument by using the corresponding
+     * values from the source. Metadata tags present in the destination and absent
+     * from the source will remain unmodified.
+     *
+     * @param dst Destination metadata
+     * @param src Source metadata
+     * @hide
+     */
+    public static void update(CameraMetadataNative dst, CameraMetadataNative src) {
+        nativeUpdate(dst.mMetadataPtr, src.mMetadataPtr);
+    }
+
     public static final @android.annotation.NonNull Parcelable.Creator<CameraMetadataNative> CREATOR =
             new Parcelable.Creator<CameraMetadataNative>() {
         @Override
@@ -1719,6 +1732,9 @@ public class CameraMetadataNative implements Parcelable {
     private static native long nativeAllocateCopy(long ptr)
             throws NullPointerException;
 
+
+    @FastNative
+    private static native void nativeUpdate(long dst, long src);
     private static synchronized native void nativeWriteToParcel(Parcel dest, long ptr);
     private static synchronized native void nativeReadFromParcel(Parcel source, long ptr);
     private static synchronized native void nativeSwap(long ptr, long otherPtr)

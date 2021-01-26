@@ -86,4 +86,16 @@ public final class TimeDetectorImpl implements TimeDetector {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    @Override
+    public void suggestExternalTime(ExternalTimeSuggestion timeSuggestion) {
+        if (DEBUG) {
+            Log.d(TAG, "suggestExternalTime called: " + timeSuggestion);
+        }
+        try {
+            mITimeDetectorService.suggestExternalTime(timeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

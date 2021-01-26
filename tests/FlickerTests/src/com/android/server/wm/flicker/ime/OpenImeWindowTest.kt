@@ -35,6 +35,7 @@ import com.android.server.wm.flicker.visibleWindowsShownMoreThanOneConsecutiveEn
 import com.android.server.wm.flicker.visibleLayersShownMoreThanOneConsecutiveEntry
 import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.appWindowAlwaysVisibleOnTop
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
@@ -57,32 +58,32 @@ import org.junit.runners.Parameterized
 @FlakyTest(bugId = 178015460)
 class OpenImeWindowTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = ImeAppHelper(instrumentation)
-
-            return FlickerTestRunnerFactory(instrumentation)
+            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
                 .buildTest { configuration ->
-                    withTestName { buildTestTag("openIme", testApp, configuration) }
+                    withTestName { buildTestTag("openIme", configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
                             device.wakeUpAndGoToHomeScreen()
+                            testApp.launchViaIntent(wmHelper)
                             this.setRotation(configuration.startRotation)
-                            testApp.open()
                         }
                     }
                     transitions {
-                        testApp.openIME(device)
+                        testApp.openIME(device, wmHelper)
                     }
                     teardown {
                         eachRun {
-                            testApp.closeIME(device)
+                            testApp.closeIME(device, wmHelper)
                         }
                         test {
                             testApp.exit()
@@ -103,8 +104,10 @@ class OpenImeWindowTest(
                             navBarLayerIsAlwaysVisible()
                             statusBarLayerIsAlwaysVisible()
                             noUncoveredRegions(configuration.startRotation)
-                            navBarLayerRotatesAndScales(configuration.startRotation)
-                            statusBarLayerRotatesScales(configuration.startRotation)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                enabled = !configuration.startRotation.isRotated())
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                enabled = !configuration.startRotation.isRotated())
                             visibleLayersShownMoreThanOneConsecutiveEntry()
 
                             imeLayerBecomesVisible()

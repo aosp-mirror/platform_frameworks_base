@@ -89,6 +89,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private final Rect mTmpStableBounds = new Rect();
     private final int[] mTmpDirections = new int[2];
 
+    private TaskDisplayArea mTmpDisplayArea;
+
     private StringBuilder mLogBuilder;
 
     TaskLaunchParamsModifier(ActivityTaskSupervisor supervisor) {
@@ -127,15 +129,15 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_SKIP;
         }
 
-        // STEP 1: Determine the display area to launch the activity/task.
-        final TaskDisplayArea taskDisplayArea = getPreferredLaunchTaskDisplayArea(task,
+        // STEP 1: Determine the suggested display area to launch the activity/task.
+        final TaskDisplayArea suggestedDisplayArea = getPreferredLaunchTaskDisplayArea(task,
                 options, source, currentParams, activity, request);
-        outParams.mPreferredTaskDisplayArea = taskDisplayArea;
-        // TODO(b/152116619): Update the usages of display to use taskDisplayArea below.
-        final DisplayContent display = taskDisplayArea.mDisplayContent;
+        outParams.mPreferredTaskDisplayArea = suggestedDisplayArea;
+        final DisplayContent display = suggestedDisplayArea.mDisplayContent;
         if (DEBUG) {
-            appendLog("task-display-area=" + outParams.mPreferredTaskDisplayArea
-                    + " display-area-windowing-mode=" + taskDisplayArea.getWindowingMode());
+            appendLog("display-id=" + display.getDisplayId()
+                    + " display-windowing-mode=" + display.getWindowingMode()
+                    + " suggested-display-area=" + suggestedDisplayArea);
         }
 
         if (phase == PHASE_DISPLAY) {
@@ -204,9 +206,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         // We inherit launch params from previous modifiers or LaunchParamsController if options,
         // layout and display conditions are not contradictory to their suggestions. It's important
         // to carry over their values because LaunchParamsController doesn't automatically do that.
+        // We only check if display matches because display area can be changed later.
         if (!currentParams.isEmpty() && !hasInitialBounds
                 && (currentParams.mPreferredTaskDisplayArea == null
-                    || currentParams.mPreferredTaskDisplayArea == taskDisplayArea)) {
+                    || currentParams.mPreferredTaskDisplayArea.getDisplayId()
+                        == display.getDisplayId())) {
             // Only set windowing mode if display is in freeform. If the display is in fullscreen
             // mode we should only launch a task in fullscreen mode.
             if (currentParams.hasWindowingMode() && display.inFreeformWindowingMode()) {
@@ -255,14 +259,48 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             return RESULT_CONTINUE;
         }
 
-        // STEP 3: Determine final launch bounds based on resolved windowing mode and activity
+        // STEP 3: Finalize the display area. Here we allow WM shell route all launches that match
+        // certain criteria to specific task display areas.
+        final int resolvedMode = (launchMode != WINDOWING_MODE_UNDEFINED) ? launchMode
+                : display.getWindowingMode();
+        TaskDisplayArea taskDisplayArea = suggestedDisplayArea;
+        // If launch task display area is set in options we should just use it. We assume the
+        // suggestedDisplayArea has the right one in this case.
+        if (options == null || options.getLaunchTaskDisplayArea() == null) {
+            final int activityType =
+                    mSupervisor.mRootWindowContainer.resolveActivityType(root, options, task);
+            display.forAllTaskDisplayAreas(displayArea -> {
+                final Task launchRoot = displayArea.getLaunchRootTask(
+                        resolvedMode, activityType, null /* ActivityOptions */);
+                if (launchRoot == null) {
+                    return false;
+                }
+                mTmpDisplayArea = displayArea;
+                return true;
+            });
+            if (mTmpDisplayArea != null) {
+                taskDisplayArea = mTmpDisplayArea;
+                mTmpDisplayArea = null;
+                appendLog("overridden-display-area=["
+                        + WindowConfiguration.activityTypeToString(activityType) + ", "
+                        + WindowConfiguration.windowingModeToString(resolvedMode) + ", "
+                        + taskDisplayArea + "]");
+            }
+        }
+        appendLog("display-area=" + taskDisplayArea);
+        outParams.mPreferredTaskDisplayArea = taskDisplayArea;
+
+        if (phase == PHASE_DISPLAY_AREA) {
+            return RESULT_CONTINUE;
+        }
+        // TODO(b/152116619): Update the usages of display to use taskDisplayArea below.
+
+        // STEP 4: Determine final launch bounds based on resolved windowing mode and activity
         // requested orientation. We set bounds to empty for fullscreen mode and keep bounds as is
         // for all other windowing modes that's not freeform mode. One can read comments in
         // relevant methods to further understand this step.
         //
         // We skip making adjustments if the params are fully resolved from previous results.
-        final int resolvedMode = (launchMode != WINDOWING_MODE_UNDEFINED) ? launchMode
-                : display.getWindowingMode();
         if (fullyResolvedCurrentParam) {
             if (resolvedMode == WINDOWING_MODE_FREEFORM) {
                 // Make sure bounds are in the display if it's possibly in a different display/area.

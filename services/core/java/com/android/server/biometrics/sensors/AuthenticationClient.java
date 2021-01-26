@@ -53,6 +53,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
     @Nullable private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
     private final boolean mIsRestricted;
+    private final boolean mIsKeyguard;
 
     protected final long mOperationId;
 
@@ -65,7 +66,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
             int targetUserId, long operationId, boolean restricted, @NonNull String owner,
             int cookie, boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
             int statsModality, int statsClient, @Nullable TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker) {
+            @NonNull LockoutTracker lockoutTracker, boolean isKeyguard) {
         super(context, lazyDaemon, token, listener, targetUserId, owner, cookie, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
@@ -75,6 +76,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
         mIsRestricted = restricted;
+        mIsKeyguard = isKeyguard;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -112,6 +114,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
 
     public boolean isRestricted() {
         return mIsRestricted;
+    }
+
+    public boolean isKeyguard() {
+        return mIsKeyguard;
     }
 
     @Override

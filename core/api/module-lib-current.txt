@@ -1,4 +1,12 @@
 // Signature format: 2.0
+package android {
+
+  public static final class Manifest.permission {
+    field public static final String GET_INTENT_SENDER_INTENT = "android.permission.GET_INTENT_SENDER_INTENT";
+  }
+
+}
+
 package android.app {
 
   public class ActivityManager {
@@ -26,16 +34,12 @@ package android.app {
     field public static final String ACTION_NOTIFICATION_LISTENER_ENABLED_CHANGED = "android.app.action.NOTIFICATION_LISTENER_ENABLED_CHANGED";
   }
 
-  public class StatusBarManager {
-    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
+  public final class PendingIntent implements android.os.Parcelable {
+    method @Nullable @RequiresPermission(android.Manifest.permission.GET_INTENT_SENDER_INTENT) public java.util.List<android.content.pm.ResolveInfo> queryIntentComponents(int);
   }
 
-}
-
-package android.app.role {
-
-  public final class RoleManager {
-    method @Nullable public String getSmsRoleHolder(int);
+  public class StatusBarManager {
+    method @RequiresPermission(android.Manifest.permission.STATUS_BAR) public void setExpansionDisabledForSimNetworkLock(boolean);
   }
 
 }
