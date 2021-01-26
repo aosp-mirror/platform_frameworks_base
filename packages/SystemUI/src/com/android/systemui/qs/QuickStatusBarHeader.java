@@ -107,6 +107,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     private int mCutOutPaddingRight;
     private float mExpandedHeaderAlpha = 1.0f;
     private float mKeyguardExpansionFraction;
+    private int mTextColorPrimary = Color.TRANSPARENT;
 
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -132,14 +133,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         mRingerModeTextView = findViewById(R.id.ringer_mode_text);
         mRingerContainer = findViewById(R.id.ringer_container);
         mPrivacyChip = findViewById(R.id.privacy_chip);
+        mClockView = findViewById(R.id.clock);
+        mSpace = findViewById(R.id.space);
+        // Tint for the battery icons are handled in setupHost()
+        mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
 
         updateResources();
 
-        mClockView = findViewById(R.id.clock);
-        mSpace = findViewById(R.id.space);
-
-        // Tint for the battery icons are handled in setupHost()
-        mBatteryRemainingIcon = findViewById(R.id.batteryRemainingIcon);
         // Don't need to worry about tuner settings for this icon
         mBatteryRemainingIcon.setIgnoreTunerUpdates(true);
         // QS will always show the estimate, and BatteryMeterView handles the case where
@@ -147,19 +147,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
         mBatteryRemainingIcon.setPercentShowMode(BatteryMeterView.MODE_ESTIMATE);
         mRingerModeTextView.setSelected(true);
         mNextAlarmTextView.setSelected(true);
-
-        int colorForeground = Utils.getColorAttrDefaultColor(getContext(),
-                android.R.attr.colorForeground);
-        float intensity = getColorIntensity(colorForeground);
-        int fillColor = mDualToneHandler.getSingleColor(intensity);
-
-        Rect tintArea = new Rect(0, 0, 0, 0);
-        mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
-
-        // The quick settings status bar clock depends on the color of the background scrim and
-        // can be different from the status bar clock color.
-        mClockView.setTextColor(
-                Utils.getColorAttrDefaultColor(mContext, R.attr.wallpaperTextColor));
     }
 
     void onAttach(TintedIconManager iconManager) {
@@ -236,11 +223,6 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         updateResources();
-
-        // Update color schemes in landscape to use wallpaperTextColor
-        boolean shouldUseWallpaperTextColor =
-                newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
-        mClockView.useWallpaperTextColor(shouldUseWallpaperTextColor);
     }
 
     @Override
@@ -287,6 +269,18 @@ public class QuickStatusBarHeader extends RelativeLayout implements LifecycleOwn
             lp.height = WRAP_CONTENT;
         }
         setLayoutParams(lp);
+
+        int textColor = Utils.getColorAttrDefaultColor(mContext, android.R.attr.textColorPrimary);
+        if (textColor != mTextColorPrimary) {
+            mTextColorPrimary = textColor;
+            mClockView.setTextColor(textColor);
+
+            float intensity = getColorIntensity(textColor);
+            int fillColor = mDualToneHandler.getSingleColor(intensity);
+
+            Rect tintArea = new Rect(0, 0, 0, 0);
+            mBatteryRemainingIcon.onDarkChanged(tintArea, intensity, fillColor);
+        }
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
