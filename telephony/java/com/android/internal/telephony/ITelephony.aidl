@@ -44,6 +44,7 @@ import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
 import android.telephony.NeighboringCellInfo;
 import android.telephony.NetworkScanRequest;
+import android.telephony.PhoneCapability;
 import android.telephony.PhoneNumberRange;
 import android.telephony.RadioAccessFamily;
 import android.telephony.RadioAccessSpecifier;
@@ -2361,4 +2362,9 @@ interface ITelephony {
      */
     void clearSignalStrengthUpdateRequest(int subId, in SignalStrengthUpdateRequest request,
             String callingPackage);
+
+    /**
+     * Gets the current phone capability.
+     */
+    PhoneCapability getPhoneCapability();
 }

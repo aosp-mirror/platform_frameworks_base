@@ -41215,12 +41215,6 @@ package android.telephony {
     field public static final int SCAN_TYPE_PERIODIC = 1; // 0x1
   }
 
-  public final class PhoneCapability implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
-  }
-
   public class PhoneNumberFormattingTextWatcher implements android.text.TextWatcher {
     ctor public PhoneNumberFormattingTextWatcher();
     ctor public PhoneNumberFormattingTextWatcher(String);
@@ -41395,10 +41389,6 @@ package android.telephony {
 
   public static interface PhoneStateListener.MessageWaitingIndicatorChangedListener {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onMessageWaitingIndicatorChanged(boolean);
-  }
-
-  public static interface PhoneStateListener.PhoneCapabilityChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
   }
 
   public static interface PhoneStateListener.PreciseDataConnectionStateChangedListener {

@@ -4160,4 +4160,7 @@
   <java-symbol type="string" name="sensor_privacy_start_use_camera_notification_content" />
   <java-symbol type="string" name="sensor_privacy_start_use_dialog_turn_on_button" />
   <java-symbol type="string" name="sensor_privacy_notification_channel_label" />
+
+  <java-symbol type="bool" name="config_telephony5gStandalone" />
+  <java-symbol type="bool" name="config_telephony5gNonStandalone" />
 </resources>
