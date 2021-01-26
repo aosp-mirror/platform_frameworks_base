@@ -9726,6 +9726,12 @@ public final class Settings {
                 "accessibility_magnification_mode";
 
         /**
+         * Magnification mode value that is a default value for the magnification logging feature.
+         * @hide
+         */
+        public static final int ACCESSIBILITY_MAGNIFICATION_MODE_NONE = 0x0;
+
+        /**
          * Magnification mode value that magnifies whole display.
          * @hide
          */
