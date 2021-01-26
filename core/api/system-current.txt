@@ -1411,6 +1411,15 @@ package android.app.usage {
 
 }
 
+package android.apphibernation {
+
+  public final class AppHibernationManager {
+    method public boolean isHibernating(@NonNull String);
+    method public void setHibernating(@NonNull String, boolean);
+  }
+
+}
+
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
@@ -1707,6 +1716,7 @@ package android.content {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
+    field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final String BACKUP_SERVICE = "backup";
