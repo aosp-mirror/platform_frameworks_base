@@ -16,9 +16,10 @@
 
 package com.android.internal.app;
 
-import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.hardware.soundtrigger.ModelParams;
 import android.hardware.soundtrigger.SoundTrigger;
+
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
 
 /**
  * This interface allows performing sound-trigger related operations with the actual sound trigger
@@ -40,7 +41,7 @@ interface IVoiceInteractionSoundTriggerSession {
      * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
      */
     int startRecognition(int keyphraseId, in String bcp47Locale,
-            in IRecognitionStatusCallback callback,
+            in IHotwordRecognitionStatusCallback callback,
             in SoundTrigger.RecognitionConfig recognitionConfig,
             boolean runInBatterySaver);
     /**
@@ -48,7 +49,7 @@ interface IVoiceInteractionSoundTriggerSession {
      * Caller must be the active voice interaction service via
      * {@link Settings.Secure.VOICE_INTERACTION_SERVICE}.
      */
-    int stopRecognition(int keyphraseId, in IRecognitionStatusCallback callback);
+    int stopRecognition(int keyphraseId, in IHotwordRecognitionStatusCallback callback);
     /**
      * Set a model specific ModelParams with the given value. This
      * parameter will keep its value for the duration the model is loaded regardless of starting and
