@@ -898,6 +898,21 @@
         -->
     </integer-array>
 
+    <!-- Mapping for default ColorDisplayManager.COLOR_MODE_xxx to other color modes, if
+         if applicable. By default, all map to the same value. -->
+    <integer-array name="config_mappedColorModes">
+        <item>0</item> <!-- COLOR_MODE_NATURAL -->
+        <item>1</item> <!-- COLOR_MODE_BOOSTED -->
+        <item>2</item> <!-- COLOR_MODE_SATURATED -->
+        <item>3</item> <!-- COLOR_MODE_AUTOMATIC -->
+    </integer-array>
+
+    <!-- Hint to decide whether restored vendor color modes are compatible with the new device. If
+         unset or a match is not made, only the standard color modes will be restored. If set, it
+         should be a unique identifier for the kinds of vendor modes this device supports, such as a
+         manufacturer name. -->
+    <string name="config_vendorColorModesRestoreHint" translatable="false"></string>
+
     <!-- Color mode to use when accessibility transforms are enabled. This color mode must be
          supported by the device, but not necessarily appear in config_availableColorModes. The
          regularly selected color mode will be used if this value is negative. -->

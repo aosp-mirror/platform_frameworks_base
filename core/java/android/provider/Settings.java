@@ -3986,6 +3986,14 @@ public final class Settings {
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
         /**
+         * Hint to decide whether restored vendor color modes are compatible with the new device. If
+         * unset or a match is not made, only the standard color modes will be restored.
+         * @hide
+         */
+        public static final String DISPLAY_COLOR_MODE_VENDOR_HINT =
+                "display_color_mode_vendor_hint";
+
+        /**
          * The user selected min refresh rate in frames per second.
          *
          * If this isn't set, 0 will be used.
@@ -4943,6 +4951,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
+            PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE_VENDOR_HINT);
         }
 
         /**

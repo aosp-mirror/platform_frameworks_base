@@ -917,13 +917,18 @@ public final class ColorDisplayService extends SystemService {
         // This happens when a color mode is no longer available (e.g., after system update or B&R)
         // or the device does not support any color mode.
         if (!isColorModeAvailable(colorMode)) {
-            if (colorMode == COLOR_MODE_BOOSTED && isColorModeAvailable(COLOR_MODE_NATURAL)) {
+            final int[] mappedColorModes = getContext().getResources().getIntArray(
+                    R.array.config_mappedColorModes);
+            if (colorMode == COLOR_MODE_BOOSTED && mappedColorModes.length > COLOR_MODE_NATURAL
+                    && isColorModeAvailable(mappedColorModes[COLOR_MODE_NATURAL])) {
                 colorMode = COLOR_MODE_NATURAL;
             } else if (colorMode == COLOR_MODE_SATURATED
-                    && isColorModeAvailable(COLOR_MODE_AUTOMATIC)) {
+                    && mappedColorModes.length > COLOR_MODE_AUTOMATIC
+                    && isColorModeAvailable(mappedColorModes[COLOR_MODE_AUTOMATIC])) {
                 colorMode = COLOR_MODE_AUTOMATIC;
             } else if (colorMode == COLOR_MODE_AUTOMATIC
-                    && isColorModeAvailable(COLOR_MODE_SATURATED)) {
+                    && mappedColorModes.length > COLOR_MODE_SATURATED
+                    && isColorModeAvailable(mappedColorModes[COLOR_MODE_SATURATED])) {
                 colorMode = COLOR_MODE_SATURATED;
             } else {
                 colorMode = -1;
