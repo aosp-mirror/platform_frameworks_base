@@ -53,13 +53,13 @@
 
     <timezone code="aq">Antarctica/McMurdo</timezone>
 
+    <!-- ANTARCTICA, 11:00 -->
+
+    <timezone code="aq">Antarctica/Casey</timezone>
+
     <!-- ANTARCTICA, 10:00 -->
 
     <timezone code="aq">Antarctica/DumontDUrville</timezone>
-
-    <!-- ANTARCTICA, 8:00 -->
-
-    <timezone code="aq">Antarctica/Casey</timezone>
 
     <!-- ANTARCTICA, 7:00 -->
 
@@ -118,7 +118,6 @@
     <timezone code="au">Australia/Melbourne</timezone>
     <timezone code="au">Australia/Brisbane</timezone>
     <timezone code="au">Australia/Hobart</timezone>
-    <timezone code="au">Australia/Currie</timezone>
     <timezone code="au">Australia/Lindeman</timezone>
 
     <!-- AUSTRALIA, 11:00 -->
@@ -258,13 +257,20 @@
 
     <timezone code="bz">America/Belize</timezone>
 
-    <!-- CANADA, -3:30 -->
+    <!-- CANADA, The following zones are in rough population order to
+         support telephony time zone detection. -->
 
+    <timezone code="ca">America/Toronto</timezone>
+    <timezone code="ca">America/Vancouver</timezone>
+    <timezone code="ca">America/Edmonton</timezone>
+    <timezone code="ca">America/Winnipeg</timezone>
+    <timezone code="ca">America/Halifax</timezone>
     <timezone code="ca">America/St_Johns</timezone>
+
+    <!-- Other zones are in offset (in July) order. -->
 
     <!-- CANADA, -4:00 -->
 
-    <timezone code="ca">America/Halifax</timezone>
     <timezone code="ca">America/Glace_Bay</timezone>
     <timezone code="ca">America/Moncton</timezone>
     <timezone code="ca">America/Goose_Bay</timezone>
@@ -272,7 +278,6 @@
 
     <!-- CANADA, -5:00 -->
 
-    <timezone code="ca">America/Toronto</timezone>
     <timezone code="ca">America/Nipigon</timezone>
     <timezone code="ca">America/Thunder_Bay</timezone>
     <timezone code="ca">America/Iqaluit</timezone>
@@ -281,7 +286,6 @@
 
     <!-- CANADA, -6:00 -->
 
-    <timezone code="ca">America/Winnipeg</timezone>
     <timezone code="ca">America/Regina</timezone>
     <timezone code="ca">America/Rankin_Inlet</timezone>
     <timezone code="ca">America/Rainy_River</timezone>
@@ -290,7 +294,6 @@
 
     <!-- CANADA, -7:00 -->
 
-    <timezone code="ca">America/Edmonton</timezone>
     <timezone code="ca">America/Cambridge_Bay</timezone>
     <timezone code="ca">America/Yellowknife</timezone>
     <timezone code="ca">America/Inuvik</timezone>
@@ -301,7 +304,6 @@
 
     <!-- CANADA, -8:00 -->
 
-    <timezone code="ca">America/Vancouver</timezone>
     <timezone code="ca">America/Dawson</timezone>
 
     <!-- COCOS (KEELING) ISLANDS, 6:30 -->
@@ -1077,11 +1079,11 @@
     <timezone code="ru">Europe/Astrakhan</timezone>
     <timezone code="ru">Europe/Ulyanovsk</timezone>
     <timezone code="ru">Europe/Saratov</timezone>
-    <timezone code="ru">Europe/Volgograd</timezone>
 
     <!-- RUSSIAN FEDERATION, 3:00 -->
 
     <timezone code="ru">Europe/Moscow</timezone>
+    <timezone code="ru">Europe/Volgograd</timezone>
     <timezone code="ru">Europe/Kirov</timezone>
 
     <!-- RUSSIAN FEDERATION, 2:00 -->
