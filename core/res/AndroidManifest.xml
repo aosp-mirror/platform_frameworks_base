@@ -5298,7 +5298,8 @@
                 android:protectionLevel="signature" />
 
     <!-- Allows financial apps to read filtered sms messages.
-         Protection level: signature|appop  -->
+         Protection level: signature|appop
+         @deprecated The API that used this permission is no longer functional.  -->
     <permission android:name="android.permission.SMS_FINANCIAL_TRANSACTIONS"
         android:protectionLevel="signature|appop" />
 
