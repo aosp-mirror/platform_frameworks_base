@@ -60,9 +60,8 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports network event.
-     * @hide
      */
-    public void reportNetworkEvent(NetworkEvent event) {
+    public void reportNetworkEvent(@NonNull NetworkEvent event) {
         mManager.reportNetworkEvent(mId, event);
     }
 

@@ -121,8 +121,8 @@ public final class MediaMetricsManagerService extends SystemService {
             StatsEvent statsEvent = StatsEvent.newBuilder()
                     .setAtomId(321)
                     .writeString(sessionId)
-                    .writeInt(event.getType())
-                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .writeInt(event.getNetworkType())
+                    .writeLong(event.getTimeSinceCreatedMillis())
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);

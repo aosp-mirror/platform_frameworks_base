@@ -24085,6 +24085,29 @@ package android.media.metrics {
     field public static final long INVALID_TIMESTAMP = -1L; // 0xffffffffffffffffL
   }
 
+  public final class NetworkEvent extends android.media.metrics.Event implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getNetworkType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.NetworkEvent> CREATOR;
+    field public static final int NETWORK_TYPE_2G = 4; // 0x4
+    field public static final int NETWORK_TYPE_3G = 5; // 0x5
+    field public static final int NETWORK_TYPE_4G = 6; // 0x6
+    field public static final int NETWORK_TYPE_5G_NSA = 7; // 0x7
+    field public static final int NETWORK_TYPE_5G_SA = 8; // 0x8
+    field public static final int NETWORK_TYPE_ETHERNET = 3; // 0x3
+    field public static final int NETWORK_TYPE_NONE = 0; // 0x0
+    field public static final int NETWORK_TYPE_OTHER = 1; // 0x1
+    field public static final int NETWORK_TYPE_WIFI = 2; // 0x2
+  }
+
+  public static final class NetworkEvent.Builder {
+    ctor public NetworkEvent.Builder();
+    method @NonNull public android.media.metrics.NetworkEvent build();
+    method @NonNull public android.media.metrics.NetworkEvent.Builder setNetworkType(int);
+    method @NonNull public android.media.metrics.NetworkEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
+  }
+
   public final class PlaybackErrorEvent extends android.media.metrics.Event implements android.os.Parcelable {
     method public int describeContents();
     method public int getErrorCode();
@@ -24108,6 +24131,7 @@ package android.media.metrics {
   public final class PlaybackSession implements java.lang.AutoCloseable {
     method public void close();
     method @NonNull public String getId();
+    method public void reportNetworkEvent(@NonNull android.media.metrics.NetworkEvent);
     method public void reportPlaybackErrorEvent(@NonNull android.media.metrics.PlaybackErrorEvent);
     method public void reportPlaybackStateEvent(@NonNull android.media.metrics.PlaybackStateEvent);
     method public void reportTrackChangeEvent(@NonNull android.media.metrics.TrackChangeEvent);
