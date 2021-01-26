@@ -133,6 +133,17 @@ public final class AccessibilityStatsLogUtils {
                 duration);
     }
 
+    /**
+     * Logs the activated mode of the magnification when the IME window is shown on the screen.
+     * Calls this when the magnification is enabled and the IME window is shown on the screen.
+     *
+     * @param mode The activated magnification mode.
+     */
+    public static void logMagnificationModeWithImeOn(int mode) {
+        FrameworkStatsLog.write(FrameworkStatsLog.MAGNIFICATION_MODE_WITH_IME_ON_REPORTED,
+                convertToLoggingMagnificationMode(mode));
+    }
+
     private static int convertToLoggingShortcutType(@ShortcutType int shortcutType) {
         switch (shortcutType) {
             case ACCESSIBILITY_BUTTON:
