@@ -1371,4 +1371,15 @@ public class HdmiCecLocalDevicePlaybackTest {
                 HdmiControlManager.POWER_CONTROL_MODE_TV);
         assertThat(mHdmiControlService.shouldHandleTvPowerKey()).isTrue();
     }
+
+    @Test
+    public void getRcFeatures() {
+        ArrayList<Integer> features = new ArrayList<>(mHdmiCecLocalDevicePlayback.getRcFeatures());
+        assertThat(features.contains(Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU)).isTrue();
+        assertThat(features.contains(Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU)).isTrue();
+        assertThat(features.contains(Constants.RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU)).isFalse();
+        assertThat(features.contains(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU)).isFalse();
+        assertThat(features.contains(
+                Constants.RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU)).isFalse();
+    }
 }
