@@ -323,6 +323,13 @@ public final class InputDevice implements Parcelable {
     public static final int SOURCE_HDMI = 0x02000000 | SOURCE_CLASS_BUTTON;
 
     /**
+     * The input source is a sensor associated with the input device.
+     *
+     * @see #SOURCE_CLASS_NONE
+     */
+    public static final int SOURCE_SENSOR = 0x04000000 | SOURCE_CLASS_NONE;
+
+    /**
      * A special input source constant that is used when filtering input devices
      * to match devices that provide any type of input source.
      */
