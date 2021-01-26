@@ -18,6 +18,9 @@ package android.media;
 
 import android.annotation.NonNull;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 /**
  * An AudioProfile is specific to an audio format and lists supported sampling rates and
  * channel masks for that format.  An {@link AudioDeviceInfo} has a list of supported AudioProfiles.
@@ -62,5 +65,30 @@ public class AudioProfile {
      */
     public @NonNull int[] getSampleRates() {
         return mSamplingRates;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{");
+        sb.append(AudioFormat.toLogFriendlyEncoding(mFormat));
+        if (mSamplingRates != null && mSamplingRates.length > 0) {
+            sb.append(", sampling rates=").append(Arrays.toString(mSamplingRates));
+        }
+        if (mChannelMasks != null && mChannelMasks.length > 0) {
+            sb.append(", channel masks=").append(toHexString(mChannelMasks));
+        }
+        if (mChannelIndexMasks != null && mChannelIndexMasks.length > 0) {
+            sb.append(", channel index masks=").append(Arrays.toString(mChannelIndexMasks));
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    private static String toHexString(int[] ints) {
+        if (ints == null || ints.length == 0) {
+            return "";
+        }
+        return Arrays.stream(ints).mapToObj(anInt -> String.format("0x%02X, ", anInt))
+                .collect(Collectors.joining());
     }
 }
