@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.UserHandle;
 import android.os.image.DynamicSystemClient;
-import android.os.image.DynamicSystemManager;
 
 
 /**
@@ -38,15 +37,6 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         String action = intent.getAction();
 
         if (!Intent.ACTION_BOOT_COMPLETED.equals(action)) {
-            return;
-        }
-
-        DynamicSystemManager dynSystem =
-                (DynamicSystemManager) context.getSystemService(Context.DYNAMIC_SYSTEM_SERVICE);
-
-        boolean isInUse = (dynSystem != null) && dynSystem.isInUse();
-
-        if (!isInUse) {
             return;
         }
 
