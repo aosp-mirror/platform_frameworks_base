@@ -115,6 +115,18 @@ static jlong createChainEffect(
     return reinterpret_cast<jlong>(composeFilter.release());
 }
 
+static jlong createShaderEffect(
+    JNIEnv* env,
+    jobject,
+    jlong shaderHandle
+) {
+    auto* shader = reinterpret_cast<const SkShader*>(shaderHandle);
+    sk_sp<SkImageFilter> shaderFilter = SkImageFilters::Shader(
+          sk_ref_sp(shader), nullptr
+    );
+    return reinterpret_cast<jlong>(shaderFilter.release());
+}
+
 static void RenderEffect_safeUnref(SkImageFilter* filter) {
     SkSafeUnref(filter);
 }
@@ -130,7 +142,8 @@ static const JNINativeMethod gRenderEffectMethods[] = {
     {"nativeCreateBitmapEffect", "(JFFFFFFFF)J", (void*)createBitmapEffect},
     {"nativeCreateColorFilterEffect", "(JJ)J", (void*)createColorFilterEffect},
     {"nativeCreateBlendModeEffect", "(JJI)J", (void*)createBlendModeEffect},
-    {"nativeCreateChainEffect", "(JJ)J", (void*)createChainEffect}
+    {"nativeCreateChainEffect", "(JJ)J", (void*)createChainEffect},
+    {"nativeCreateShaderEffect", "(J)J", (void*)createShaderEffect}
 };
 
 int register_android_graphics_RenderEffect(JNIEnv* env) {
