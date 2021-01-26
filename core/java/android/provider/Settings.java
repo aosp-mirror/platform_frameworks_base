@@ -14629,15 +14629,6 @@ public final class Settings {
                 "people_space_conversation_type";
 
         /**
-         * Whether to show new lockscreen & AOD UI.
-         * Values are:
-         * 0: Disabled (default)
-         * 1: Enabled
-         * @hide
-         */
-        public static final String SHOW_NEW_LOCKSCREEN = "show_new_lockscreen";
-
-        /**
          * Whether to show new notification dismissal.
          * Values are:
          * 0: Disabled

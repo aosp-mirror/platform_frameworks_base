@@ -104,6 +104,7 @@ import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.TaskStackChangeListeners;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.Assert;
@@ -282,7 +283,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final ArrayList<WeakReference<KeyguardUpdateMonitorCallback>>
             mCallbacks = Lists.newArrayList();
     private ContentObserver mDeviceProvisionedObserver;
-    private ContentObserver mLockScreenModeObserver;
     private ContentObserver mTimeFormatChangeObserver;
 
     private boolean mSwitchingUser;
@@ -1612,7 +1612,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             @Background Executor backgroundExecutor,
             StatusBarStateController statusBarStateController,
             LockPatternUtils lockPatternUtils,
-            AuthController authController) {
+            AuthController authController,
+            FeatureFlags featureFlags) {
         mContext = context;
         mSubscriptionManager = SubscriptionManager.from(context);
         mDeviceProvisioned = isDeviceProvisionedInSettingsDb();
@@ -1878,16 +1879,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             }
         }
 
-        updateLockScreenMode();
-        mLockScreenModeObserver = new ContentObserver(mHandler) {
-            @Override
-            public void onChange(boolean selfChange) {
-                updateLockScreenMode();
-            }
-        };
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(Settings.Global.SHOW_NEW_LOCKSCREEN),
-                false, mLockScreenModeObserver);
+        updateLockScreenMode(featureFlags.isKeyguardLayoutEnabled());
 
         mTimeFormatChangeObserver = new ContentObserver(mHandler) {
             @Override
@@ -1904,9 +1896,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 false, mTimeFormatChangeObserver, UserHandle.USER_ALL);
     }
 
-    private void updateLockScreenMode() {
-        final int newMode = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_LOCKSCREEN, LOCK_SCREEN_MODE_LAYOUT_1);
+    private void updateLockScreenMode(boolean isEnabled) {
+        final int newMode = isEnabled ? LOCK_SCREEN_MODE_LAYOUT_1 : LOCK_SCREEN_MODE_NORMAL;
         if (newMode != mLockScreenMode) {
             mLockScreenMode = newMode;
             mHandler.sendEmptyMessage(MSG_LOCK_SCREEN_MODE);
@@ -3127,10 +3118,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
 
         if (mDeviceProvisionedObserver != null) {
             mContext.getContentResolver().unregisterContentObserver(mDeviceProvisionedObserver);
-        }
-
-        if (mLockScreenModeObserver != null) {
-            mContext.getContentResolver().unregisterContentObserver(mLockScreenModeObserver);
         }
 
         if (mTimeFormatChangeObserver != null) {

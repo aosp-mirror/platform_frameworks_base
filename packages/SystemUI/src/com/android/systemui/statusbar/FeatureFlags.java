@@ -57,4 +57,8 @@ public class FeatureFlags {
     public boolean isQSLabelsEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_qs_labels);
     }
+
+    public boolean isKeyguardLayoutEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
+    }
 }
