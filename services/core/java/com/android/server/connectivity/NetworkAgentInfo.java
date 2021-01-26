@@ -325,7 +325,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private final Handler mHandler;
 
     public NetworkAgentInfo(INetworkAgent na, Network net, NetworkInfo info,
-            @NonNull LinkProperties lp, @NonNull NetworkCapabilities nc, int score, Context context,
+            LinkProperties lp, NetworkCapabilities nc, int score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
             int creatorUid) {
