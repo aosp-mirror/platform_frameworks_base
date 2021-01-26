@@ -16220,12 +16220,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         final long identity = Binder.clearCallingIdentity();
         try {
-            int result = checkProvisioningPreConditionSkipPermission(
-                    ACTION_PROVISION_MANAGED_DEVICE, deviceAdmin.getPackageName());
-            if (result != CODE_OK) {
-                throw new ServiceSpecificException(
-                        PROVISIONING_RESULT_PRE_CONDITION_FAILED,
-                        "Provisioning preconditions failed with result: " + result);
+            // TODO(b/178187130): This check fails silent provisioning, uncomment once silent
+            //  provisioning is no longer used.
+            if (false) {
+                int result = checkProvisioningPreConditionSkipPermission(
+                        ACTION_PROVISION_MANAGED_DEVICE, deviceAdmin.getPackageName());
+                if (result != CODE_OK) {
+                    throw new ServiceSpecificException(
+                            PROVISIONING_RESULT_PRE_CONDITION_FAILED,
+                            "Provisioning preconditions failed with result: " + result);
+                }
             }
 
             setTimeAndTimezone(provisioningParams.getTimeZone(), provisioningParams.getLocalTime());
@@ -16333,6 +16337,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean setActiveAdminAndDeviceOwner(
             @UserIdInt int userId, ComponentName adminComponent, String name) {
         enableAndSetActiveAdmin(userId, userId, adminComponent);
-        return setDeviceOwner(adminComponent, name, userId);
+        // TODO(b/178187130): Directly set DO and remove the check once silent provisioning is no
+        //  longer used.
+        if (getDeviceOwnerComponent(/* callingUserOnly= */ true) == null) {
+            return setDeviceOwner(adminComponent, name, userId);
+        }
+        return true;
     }
 }
