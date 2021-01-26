@@ -131,6 +131,10 @@ class PlatformCompatCommandNotInstalledTest {
         assertThat(platformCompat.isChangeEnabled(TEST_CHANGE_ID, appInfo)).isEqualTo(params.result)
     }
 
-    private fun command(command: String) =
-            FileReader(uiAutomation.executeShellCommand(command).fileDescriptor).readText()
+    private fun command(command: String): String {
+        val fileDescriptor = uiAutomation.executeShellCommand(command)
+        return String(ParcelFileDescriptor.AutoCloseInputStream(fileDescriptor).use {
+            inputStream -> inputStream.readBytes()
+        })
+    }
 }
