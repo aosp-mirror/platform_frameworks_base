@@ -7866,6 +7866,7 @@ package android.os {
 
   public static final class BatterySaverPolicyConfig.Builder {
     ctor public BatterySaverPolicyConfig.Builder();
+    ctor public BatterySaverPolicyConfig.Builder(@NonNull android.os.BatterySaverPolicyConfig);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder addDeviceSpecificSetting(@NonNull String, @NonNull String);
     method @NonNull public android.os.BatterySaverPolicyConfig build();
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setAdjustBrightnessFactor(float);
@@ -8233,6 +8234,7 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
+    method @NonNull public android.os.BatterySaverPolicyConfig getFullPowerSavePolicy();
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public int getPowerSaveModeTrigger();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplayAvailable();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplaySuppressed();
@@ -8241,6 +8243,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setBatteryDischargePrediction(@NonNull java.time.Duration, boolean);
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setDynamicPowerSaveHint(boolean, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setFullPowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveModeEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void suppressAmbientDisplay(@NonNull String, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
