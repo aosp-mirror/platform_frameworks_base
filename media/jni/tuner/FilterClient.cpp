@@ -269,6 +269,11 @@ Status TunerFilterCallback::onFilterStatus(int status) {
     return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
 }
 
+Status TunerFilterCallback::onFilterEvent(vector<TunerFilterEvent>* /*filterEvent*/) {
+    // TODO: complete onFilterEvent
+    return Status::ok();
+}
+
 /////////////// FilterClient Helper Methods ///////////////////////
 
 Result FilterClient::getFilterMq() {
