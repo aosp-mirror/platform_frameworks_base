@@ -3203,18 +3203,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
 
-        if (!clientVisible) {
-            // Once we are notifying the client that it's visibility has changed, we need to prevent
-            // it from destroying child surfaces until the animation has finished. We do this by
-            // detaching any surface control the client added from the client.
-            for (int i = mChildren.size() - 1; i >= 0; --i) {
-                final WindowState c = mChildren.get(i);
-                c.mWinAnimator.detachChildren(getGlobalTransaction());
-            }
-
-            mWinAnimator.detachChildren(getGlobalTransaction());
-        }
-
         try {
             if (DEBUG_VISIBILITY) Slog.v(TAG,
                     "Setting visibility of " + this + ": " + clientVisible);
