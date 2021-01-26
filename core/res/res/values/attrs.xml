@@ -7997,6 +7997,8 @@
                    the provided configuration activity. -->
            <flag name="configuration_optional" value="0x3" />
         </attr>
+        <!-- A resource identifier for a string containing a short description of the widget. -->
+        <attr name="description" />
     </declare-styleable>
 
     <!-- =============================== -->
