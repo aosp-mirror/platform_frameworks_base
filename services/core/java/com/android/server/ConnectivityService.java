@@ -70,6 +70,7 @@ import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
+import android.app.usage.NetworkStatsManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -95,7 +96,6 @@ import android.net.INetworkActivityListener;
 import android.net.INetworkMonitor;
 import android.net.INetworkMonitorCallbacks;
 import android.net.INetworkPolicyListener;
-import android.net.INetworkStatsService;
 import android.net.IOnSetOemNetworkPreferenceListener;
 import android.net.IQosCallback;
 import android.net.ISocketKeepaliveCallback;
@@ -331,7 +331,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     protected IDnsResolver mDnsResolver;
     @VisibleForTesting
     protected INetd mNetd;
-    private INetworkStatsService mStatsService;
+    private NetworkStatsManager mStatsManager;
     private NetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
     private final NetdCallback mNetdCallback;
@@ -1042,15 +1042,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    public ConnectivityService(Context context, INetworkStatsService statsService) {
-        this(context, statsService, getDnsResolver(context), new IpConnectivityLog(),
+    public ConnectivityService(Context context) {
+        this(context, getDnsResolver(context), new IpConnectivityLog(),
                 NetdService.getInstance(), new Dependencies());
     }
 
     @VisibleForTesting
-    protected ConnectivityService(Context context, INetworkStatsService statsService,
-            IDnsResolver dnsresolver, IpConnectivityLog logger,
-            INetd netd, Dependencies deps) {
+    protected ConnectivityService(Context context, IDnsResolver dnsresolver,
+            IpConnectivityLog logger, INetd netd, Dependencies deps) {
         if (DBG) log("ConnectivityService starting up");
 
         mDeps = Objects.requireNonNull(deps, "missing Dependencies");
@@ -1096,7 +1095,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // TODO: Consider making the timer customizable.
         mNascentDelayMs = DEFAULT_NASCENT_DELAY_MS;
 
-        mStatsService = Objects.requireNonNull(statsService, "missing INetworkStatsService");
+        mStatsManager = mContext.getSystemService(NetworkStatsManager.class);
         mPolicyManager = mContext.getSystemService(NetworkPolicyManager.class);
         mPolicyManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(NetworkPolicyManagerInternal.class),
@@ -7913,7 +7912,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *
      * Must be called on the handler thread.
      */
-    private Network[] getDefaultNetworks() {
+    @NonNull
+    private ArrayList<Network> getDefaultNetworks() {
         ensureRunningOnConnectivityServiceThread();
         final ArrayList<Network> defaultNetworks = new ArrayList<>();
         final Set<Integer> activeNetIds = new ArraySet<>();
@@ -7927,7 +7927,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 defaultNetworks.add(nai.network);
             }
         }
-        return defaultNetworks.toArray(new Network[0]);
+        return defaultNetworks;
     }
 
     /**
@@ -7952,8 +7952,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
                         state.legacyNetworkType);
                 snapshots.add(snapshot);
             }
-            mStatsService.forceUpdateIfaces(getDefaultNetworks(), snapshots.toArray(
-                    new NetworkStateSnapshot[0]), activeIface, underlyingNetworkInfos);
+            mStatsManager.notifyNetworkStatus(getDefaultNetworks(),
+                    snapshots, activeIface, Arrays.asList(underlyingNetworkInfos));
         } catch (Exception ignored) {
         }
     }
