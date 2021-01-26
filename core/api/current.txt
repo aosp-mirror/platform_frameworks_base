@@ -12214,7 +12214,7 @@ package android.content.pm {
     field @Deprecated public static final int GET_DISABLED_UNTIL_USED_COMPONENTS = 32768; // 0x8000
     field public static final int GET_GIDS = 256; // 0x100
     field public static final int GET_INSTRUMENTATION = 16; // 0x10
-    field public static final int GET_INTENT_FILTERS = 32; // 0x20
+    field @Deprecated public static final int GET_INTENT_FILTERS = 32; // 0x20
     field public static final int GET_META_DATA = 128; // 0x80
     field public static final int GET_PERMISSIONS = 4096; // 0x1000
     field public static final int GET_PROVIDERS = 8; // 0x8
