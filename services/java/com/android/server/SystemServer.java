@@ -457,7 +457,7 @@ public final class SystemServer {
                 }
 
                 try {
-                    Thread.sleep(checkInterval);
+                    Thread.sleep(checkInterval * 1000);
                 } catch (InterruptedException ex) {
                     continue;
                 }
