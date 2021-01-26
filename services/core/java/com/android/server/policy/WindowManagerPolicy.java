@@ -303,9 +303,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         /**
          * Notifies the window manager that screen is being turned off.
          *
+         * @param displayId the ID of the display which is turning off
          * @param listener callback to call when display can be turned off
          */
-        void screenTurningOff(ScreenOffListener listener);
+        void screenTurningOff(int displayId, ScreenOffListener listener);
 
         /**
          * Convert the lid state to a human readable format.
