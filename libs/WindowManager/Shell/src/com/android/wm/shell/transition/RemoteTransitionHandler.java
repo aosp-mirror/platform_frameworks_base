@@ -23,9 +23,9 @@ import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
-import android.view.IRemoteAnimationFinishedCallback;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
+import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionFilter;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
@@ -54,7 +54,7 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
     }
 
     void addFiltered(TransitionFilter filter, IRemoteTransition remote) {
-        mFilters.add(new Pair<TransitionFilter, IRemoteTransition>(filter, remote));
+        mFilters.add(new Pair<>(filter, remote));
     }
 
     void removeFiltered(IRemoteTransition remote) {
@@ -67,7 +67,8 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull Runnable finishCallback) {
+            @NonNull SurfaceControl.Transaction t,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
         IRemoteTransition pendingRemote = mPendingRemotes.remove(transition);
         if (pendingRemote == null) {
             // If no explicit remote, search filters until one matches
@@ -84,15 +85,17 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
         final IRemoteTransition remote = pendingRemote;
         final IBinder.DeathRecipient remoteDied = () -> {
             Log.e(Transitions.TAG, "Remote transition died, finishing");
-            mMainExecutor.execute(finishCallback);
+            mMainExecutor.execute(
+                    () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
         };
-        IRemoteAnimationFinishedCallback cb = new IRemoteAnimationFinishedCallback.Stub() {
+        IRemoteTransitionFinishedCallback cb = new IRemoteTransitionFinishedCallback.Stub() {
             @Override
-            public void onAnimationFinished() throws RemoteException {
+            public void onTransitionFinished(WindowContainerTransaction wct) {
                 if (remote.asBinder() != null) {
                     remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
                 }
-                mMainExecutor.execute(finishCallback);
+                mMainExecutor.execute(
+                        () -> finishCallback.onTransitionFinished(wct, null /* wctCB */));
             }
         };
         try {
@@ -101,8 +104,12 @@ public class RemoteTransitionHandler implements Transitions.TransitionHandler {
             }
             remote.startAnimation(info, t, cb);
         } catch (RemoteException e) {
+            if (remote.asBinder() != null) {
+                remote.asBinder().unlinkToDeath(remoteDied, 0 /* flags */);
+            }
             Log.e(Transitions.TAG, "Error running remote transition.", e);
-            mMainExecutor.execute(finishCallback);
+            mMainExecutor.execute(
+                    () -> finishCallback.onTransitionFinished(null /* wct */, null /* wctCB */));
         }
         return true;
     }

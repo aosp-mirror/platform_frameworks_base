@@ -34,6 +34,7 @@ public class RemoteAnimationTargetCompat {
 
     public static final int MODE_OPENING = RemoteAnimationTarget.MODE_OPENING;
     public static final int MODE_CLOSING = RemoteAnimationTarget.MODE_CLOSING;
+    public static final int MODE_CHANGING = RemoteAnimationTarget.MODE_CHANGING;
     public final int mode;
 
     public static final int ACTIVITY_TYPE_UNDEFINED = WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
