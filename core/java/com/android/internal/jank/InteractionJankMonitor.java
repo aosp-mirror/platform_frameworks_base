@@ -59,6 +59,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.FrameTracker.FrameMetricsWrapper;
 import com.android.internal.jank.FrameTracker.ThreadedRendererWrapper;
 import com.android.internal.jank.FrameTracker.ViewRootWrapper;
+import com.android.internal.util.PerfettoTrigger;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
