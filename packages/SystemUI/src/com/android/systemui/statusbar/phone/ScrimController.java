@@ -116,11 +116,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     public static final float WAKE_SENSOR_SCRIM_ALPHA = 0.6f;
 
     /**
-     * Scrim opacity when bubbles are expanded.
-     */
-    public static final float BUBBLE_SCRIM_ALPHA = 0.6f;
-
-    /**
      * The default scrim under the shade and dialogs.
      * This should not be lower than 0.54, otherwise we won't pass GAR.
      */
@@ -210,6 +205,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
         mScrimStateListener = lightBarController::setScrimState;
         mDefaultScrimAlpha = featureFlags.isShadeOpaque() ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA;
+        ScrimState.BUBBLE_EXPANDED.setBubbleAlpha(featureFlags.isShadeOpaque()
+                ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA);
         mBlurUtils = blurUtils;
 
         mKeyguardStateController = keyguardStateController;
