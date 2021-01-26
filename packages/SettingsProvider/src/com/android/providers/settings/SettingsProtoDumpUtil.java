@@ -1969,6 +1969,12 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.BLUETOOTH_ON_WHILE_DRIVING,
                 SecureSettingsProto.BLUETOOTH_ON_WHILE_DRIVING);
 
+        final long smartAutoRotateToken = p.start(SecureSettingsProto.CAMERA_AUTOROTATE);
+        dumpSetting(s, p,
+                Settings.Secure.CAMERA_AUTOROTATE,
+                SecureSettingsProto.CameraAutorotate.ENABLED);
+        p.end(smartAutoRotateToken);
+
         final long cameraToken = p.start(SecureSettingsProto.CAMERA);
         dumpSetting(s, p,
                 Settings.Secure.CAMERA_GESTURE_DISABLED,
