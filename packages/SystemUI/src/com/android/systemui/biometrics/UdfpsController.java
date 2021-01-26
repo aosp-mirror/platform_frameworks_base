@@ -131,6 +131,16 @@ class UdfpsController implements DozeReceiver {
         }
 
         @Override
+        public void onEnrollmentProgress(int sensorId, int remaining) {
+            mView.onEnrollmentProgress(remaining);
+        }
+
+        @Override
+        public void onEnrollmentHelp(int sensorId) {
+            mView.onEnrollmentHelp();
+        }
+
+        @Override
         public void setDebugMessage(int sensorId, String message) {
             mView.setDebugMessage(message);
         }

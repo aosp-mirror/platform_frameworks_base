@@ -55,7 +55,6 @@ public class UdfpsView extends View implements DozeReceiver {
     @NonNull private final Paint mSensorPaint;
     private final float mSensorTouchAreaCoefficient;
 
-
     // Stores rounded up values from mSensorRect. Necessary for APIs that only take Rect (not RecF).
     @NonNull private final Rect mTouchableRegion;
     // mInsetsListener is used to set the touchable region for our window. Our window covers the
@@ -280,5 +279,17 @@ public class UdfpsView extends View implements DozeReceiver {
     void hideScrimAndDot() {
         mShowScrimAndDot = false;
         invalidate();
+    }
+
+    void onEnrollmentProgress(int remaining) {
+        if (mUdfpsAnimation instanceof UdfpsAnimationEnroll) {
+            ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentProgress(remaining);
+        }
+    }
+
+    void onEnrollmentHelp() {
+        if (mUdfpsAnimation instanceof UdfpsAnimationEnroll) {
+            ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentHelp();
+        }
     }
 }
