@@ -19,6 +19,7 @@ package com.android.systemui.qs.customize;
 import static com.android.systemui.qs.customize.QSCustomizer.EXTRA_QS_CUSTOMIZING;
 import static com.android.systemui.qs.customize.QSCustomizer.MENU_REMOVE_LABELS;
 import static com.android.systemui.qs.customize.QSCustomizer.MENU_RESET;
+import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /** {@link ViewController} for {@link QSCustomizer}. */
 @QSScope
@@ -66,6 +68,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
     private final UiEventLogger mUiEventLogger;
     private final Toolbar mToolbar;
     private final TunerService mTunerService;
+    private final boolean mQsLabelsFlag;
 
     private final OnMenuItemClickListener mOnMenuItemClickListener = new OnMenuItemClickListener() {
         @Override
@@ -115,7 +118,7 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
             QSTileHost qsTileHost, TileAdapter tileAdapter, ScreenLifecycle screenLifecycle,
             KeyguardStateController keyguardStateController, LightBarController lightBarController,
             ConfigurationController configurationController, UiEventLogger uiEventLogger,
-            TunerService tunerService) {
+            TunerService tunerService, @Named(QS_LABELS_FLAG) boolean qsLabelsFlag) {
         super(view);
         mTileQueryHelper = tileQueryHelper;
         mQsTileHost = qsTileHost;
@@ -127,8 +130,15 @@ public class QSCustomizerController extends ViewController<QSCustomizer> {
         mUiEventLogger = uiEventLogger;
 
         mToolbar = mView.findViewById(com.android.internal.R.id.action_bar);
+        mQsLabelsFlag = qsLabelsFlag;
 
         mTunerService = tunerService;
+    }
+
+    @Override
+    protected void onInit() {
+        super.onInit();
+        mView.getRemoveItem().setVisible(mQsLabelsFlag);
     }
 
     @Override

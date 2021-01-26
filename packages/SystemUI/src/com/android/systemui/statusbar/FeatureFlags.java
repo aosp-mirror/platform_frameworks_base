@@ -52,4 +52,9 @@ public class FeatureFlags {
     public boolean isTwoColumnNotificationShadeEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_notification_twocolumn);
     }
+
+    // Does not support runtime changes
+    public boolean isQSLabelsEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_qs_labels);
+    }
 }
