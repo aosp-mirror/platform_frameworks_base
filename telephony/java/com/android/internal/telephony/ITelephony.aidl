@@ -2367,6 +2367,11 @@ interface ITelephony {
     boolean setCarrierSingleRegistrationEnabledOverride(int subId, String enabled);
 
     /**
+     * Sends a device to device message; only for use through shell.
+     */
+    void sendDeviceToDeviceMessage(int message, int value);
+
+    /**
      * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
      */
     boolean getCarrierSingleRegistrationEnabled(int subId);
