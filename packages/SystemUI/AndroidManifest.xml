@@ -602,8 +602,7 @@
 
         <service
             android:name=".keyguard.KeyguardService"
-            android:exported="true"
-            android:enabled="@bool/config_enableKeyguardService" />
+            android:exported="true" />
 
         <activity android:name=".keyguard.WorkLockActivity"
                   android:label="@string/accessibility_desc_work_lock"
