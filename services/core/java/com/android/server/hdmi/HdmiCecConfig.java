@@ -37,6 +37,7 @@ import android.provider.Settings.Global;
 import android.util.ArrayMap;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.cec.config.CecSettings;
 import com.android.server.hdmi.cec.config.Setting;
@@ -95,6 +96,9 @@ public class HdmiCecConfig {
     @Nullable private final CecSettings mSystemConfig;
     @Nullable private final CecSettings mVendorOverride;
 
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private final ArrayMap<Setting, Set<SettingChangeListener>>
             mSettingChangeListeners = new ArrayMap<>();
 
@@ -297,6 +301,8 @@ public class HdmiCecConfig {
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return STORAGE_SHARED_PREFS;
+            case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
+                return STORAGE_GLOBAL_SETTINGS;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
                         + "' storage.");
@@ -317,6 +323,8 @@ public class HdmiCecConfig {
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING:
                 return setting.getName();
+            case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
+                return Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED;
             default:
                 throw new RuntimeException("Invalid CEC setting '" + setting.getName()
                     + "' storage key.");
@@ -385,12 +393,14 @@ public class HdmiCecConfig {
     }
 
     private void notifySettingChanged(@NonNull Setting setting) {
-        Set<SettingChangeListener> listeners = mSettingChangeListeners.get(setting);
-        if (listeners == null) {
-            return;  // No listeners registered, do nothing.
-        }
-        for (SettingChangeListener listener: listeners) {
-            listener.onChange(setting.getName());
+        synchronized (mLock) {
+            Set<SettingChangeListener> listeners = mSettingChangeListeners.get(setting);
+            if (listeners == null) {
+                return;  // No listeners registered, do nothing.
+            }
+            for (SettingChangeListener listener: listeners) {
+                listener.onChange(setting.getName());
+            }
         }
     }
 
@@ -436,10 +446,12 @@ public class HdmiCecConfig {
             throw new IllegalArgumentException("Change listeners for setting '" + name
                     + "' not supported.");
         }
-        if (!mSettingChangeListeners.containsKey(setting)) {
-            mSettingChangeListeners.put(setting, new HashSet<>());
+        synchronized (mLock) {
+            if (!mSettingChangeListeners.containsKey(setting)) {
+                mSettingChangeListeners.put(setting, new HashSet<>());
+            }
+            mSettingChangeListeners.get(setting).add(listener);
         }
-        mSettingChangeListeners.get(setting).add(listener);
     }
 
     /**
@@ -451,11 +463,13 @@ public class HdmiCecConfig {
         if (setting == null) {
             throw new IllegalArgumentException("Setting '" + name + "' does not exist.");
         }
-        if (mSettingChangeListeners.containsKey(setting)) {
-            Set<SettingChangeListener> listeners = mSettingChangeListeners.get(setting);
-            listeners.remove(listener);
-            if (listeners.isEmpty()) {
-                mSettingChangeListeners.remove(setting);
+        synchronized (mLock) {
+            if (mSettingChangeListeners.containsKey(setting)) {
+                Set<SettingChangeListener> listeners = mSettingChangeListeners.get(setting);
+                listeners.remove(listener);
+                if (listeners.isEmpty()) {
+                    mSettingChangeListeners.remove(setting);
+                }
             }
         }
     }

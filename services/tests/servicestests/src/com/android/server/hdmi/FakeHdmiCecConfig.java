@@ -104,6 +104,15 @@ final class FakeHdmiCecConfig extends HdmiCecConfig {
                     + "    </allowed-values>"
                     + "    <default-value int-value=\"1\" />"
                     + "  </setting>"
+                    + "  <setting name=\"tv_wake_on_one_touch_play\""
+                    + "           value-type=\"int\""
+                    + "           user-configurable=\"true\">"
+                    + "    <allowed-values>"
+                    + "      <value int-value=\"0\" />"
+                    + "      <value int-value=\"1\" />"
+                    + "    </allowed-values>"
+                    + "    <default-value int-value=\"1\" />"
+                    + "  </setting>"
                     + "</cec-settings>";
 
     FakeHdmiCecConfig(@NonNull Context context) {
