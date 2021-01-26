@@ -596,6 +596,15 @@ public class HdmiCecLocalDeviceAudioSystemTest {
     }
 
     @Test
+    public void setArcStatus() {
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(true);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isTrue();
+
+        mHdmiCecLocalDeviceAudioSystem.setArcStatus(false);
+        assertThat(mHdmiCecLocalDeviceAudioSystem.isArcEnabled()).isFalse();
+    }
+
+    @Test
     @Ignore("b/151150320")
     public void handleSystemAudioModeRequest_fromNonTV_tVNotSupport() {
         HdmiCecMessage message =
