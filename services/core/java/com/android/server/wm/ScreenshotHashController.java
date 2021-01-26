@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
-import static android.service.attestation.ImpressionAttestationService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
+import static android.service.screenshot.ScreenshotHasherService.EXTRA_SCREENSHOT_HASH;
+import static android.service.screenshot.ScreenshotHasherService.EXTRA_VERIFICATION_STATUS;
+import static android.service.screenshot.ScreenshotHasherService.SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -44,9 +46,9 @@ import android.os.Message;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.service.attestation.IImpressionAttestationService;
-import android.service.attestation.ImpressionAttestationService;
-import android.service.attestation.ImpressionToken;
+import android.service.screenshot.IScreenshotHasherService;
+import android.service.screenshot.ScreenshotHash;
+import android.service.screenshot.ScreenshotHasherService;
 import android.util.Slog;
 import android.view.MagnificationSpec;
 
@@ -59,30 +61,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
- * Handles requests into {@link ImpressionAttestationService}
+ * Handles requests into {@link android.service.screenshot.ScreenshotHasherService}
  *
  * Do not hold the {@link WindowManagerService#mGlobalLock} when calling methods since they are
  * blocking calls into another service.
  */
-public class ImpressionAttestationController {
-    private static final String TAG =
-            TAG_WITH_CLASS_NAME ? "ImpressionAttestationController" : TAG_WM;
+public class ScreenshotHashController {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ScreenshotHashController" : TAG_WM;
     private static final boolean DEBUG = false;
 
     private final Object mServiceConnectionLock = new Object();
 
     @GuardedBy("mServiceConnectionLock")
-    private ImpressionAttestationServiceConnection mServiceConnection;
+    private ScreenshotHasherServiceConnection mServiceConnection;
 
     private final Context mContext;
 
     /**
-     * Lock used for the cached {@link #mImpressionAlgorithms} array
+     * Lock used for the cached {@link #mHashingAlgorithms} array
      */
-    private final Object mImpressionAlgorithmsLock = new Object();
+    private final Object mHashingAlgorithmsLock = new Object();
 
-    @GuardedBy("mImpressionAlgorithmsLock")
-    private String[] mImpressionAlgorithms;
+    @GuardedBy("mHashingAlgorithmsLock")
+    private String[] mHashingAlgorithms;
 
     private final Handler mHandler;
 
@@ -93,24 +94,24 @@ public class ImpressionAttestationController {
     private final RectF mTmpRectF = new RectF();
 
     private interface Command {
-        void run(IImpressionAttestationService service) throws RemoteException;
+        void run(IScreenshotHasherService service) throws RemoteException;
     }
 
-    ImpressionAttestationController(Context context) {
+    ScreenshotHashController(Context context) {
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
         mSalt = UUID.randomUUID().toString().getBytes();
     }
 
-    String[] getSupportedImpressionAlgorithms() {
-        // We have a separate lock for the impression algorithm array since it doesn't need to make
+    String[] getSupportedHashingAlgorithms() {
+        // We have a separate lock for the hashing algorithm array since it doesn't need to make
         // the request through the service connection. Instead, we have a lock to ensure we can
-        // properly cache the impression algorithms array so we don't need to call into the
+        // properly cache the hashing algorithms array so we don't need to call into the
         // ExtServices process for each request.
-        synchronized (mImpressionAlgorithmsLock) {
+        synchronized (mHashingAlgorithmsLock) {
             // Already have cached values
-            if (mImpressionAlgorithms != null) {
-                return mImpressionAlgorithms;
+            if (mHashingAlgorithms != null) {
+                return mHashingAlgorithms;
             }
 
             final ServiceInfo serviceInfo = getServiceInfo();
@@ -127,54 +128,55 @@ public class ImpressionAttestationController {
 
             final int resourceId = serviceInfo.metaData.getInt(
                     SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS);
-            mImpressionAlgorithms = res.getStringArray(resourceId);
+            mHashingAlgorithms = res.getStringArray(resourceId);
 
-            return mImpressionAlgorithms;
+            return mHashingAlgorithms;
         }
     }
 
-    boolean verifyImpressionToken(ImpressionToken impressionToken) {
+    boolean verifyScreenshotHash(ScreenshotHash screenshotHash) {
         final SyncCommand syncCommand = new SyncCommand();
         Bundle results = syncCommand.run((service, remoteCallback) -> {
             try {
-                service.verifyImpressionToken(mSalt, impressionToken, remoteCallback);
+                service.verifyScreenshotHash(mSalt, screenshotHash, remoteCallback);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke verifyImpressionToken command");
+                Slog.e(TAG, "Failed to invoke verifyScreenshotHash command");
             }
         });
 
-        return results.getBoolean(ImpressionAttestationService.EXTRA_VERIFICATION_STATUS);
+        return results.getBoolean(EXTRA_VERIFICATION_STATUS);
     }
 
-    ImpressionToken generateImpressionToken(HardwareBuffer screenshot, Rect bounds,
+    ScreenshotHash generateScreenshotHash(HardwareBuffer screenshot, Rect bounds,
             String hashAlgorithm) {
         final SyncCommand syncCommand = new SyncCommand();
         Bundle results = syncCommand.run((service, remoteCallback) -> {
             try {
-                service.generateImpressionToken(mSalt, screenshot, bounds, hashAlgorithm,
+                service.generateScreenshotHash(mSalt, screenshot, bounds, hashAlgorithm,
                         remoteCallback);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to invoke generateImpressionToken command", e);
+                Slog.e(TAG, "Failed to invoke generateScreenshotHash command", e);
             }
         });
 
-        return results.getParcelable(ImpressionAttestationService.EXTRA_IMPRESSION_TOKEN);
+        return results.getParcelable(EXTRA_SCREENSHOT_HASH);
     }
 
     /**
-     * Calculate the bounds to take the screenshot when generating the impression token. This takes
-     * into account window transform, magnification, and display bounds.
+     * Calculate the bounds to take the screenshot when generating the ScreenshotHash. This
+     * takes into account window transform, magnification, and display bounds.
      *
      * Call while holding {@link WindowManagerService#mGlobalLock}
      *
-     * @param win Window that the impression token is generated for.
+     * @param win Window that the ScreenshotHash is generated for.
      * @param boundsInWindow The bounds passed in about where in the window to take the screenshot.
      * @param outBounds The result of the calculated bounds
      */
-    void calculateImpressionTokenBoundsLocked(WindowState win, Rect boundsInWindow,
+    void calculateScreenshotHashBoundsLocked(WindowState win, Rect boundsInWindow,
             Rect outBounds) {
         if (DEBUG) {
-            Slog.d(TAG, "calculateImpressionTokenBounds: boundsInWindow=" + boundsInWindow);
+            Slog.d(TAG,
+                    "calculateScreenshotHashBoundsLocked: boundsInWindow=" + boundsInWindow);
         }
         outBounds.set(boundsInWindow);
 
@@ -192,7 +194,8 @@ public class ImpressionAttestationController {
         outBounds.intersectUnchecked(windowBounds);
 
         if (DEBUG) {
-            Slog.d(TAG, "calculateImpressionTokenBounds: boundsIntersectWindow=" + outBounds);
+            Slog.d(TAG,
+                    "calculateScreenshotHashBoundsLocked: boundsIntersectWindow=" + outBounds);
         }
 
         if (outBounds.isEmpty()) {
@@ -207,7 +210,7 @@ public class ImpressionAttestationController {
         outBounds.set((int) mTmpRectF.left, (int) mTmpRectF.top, (int) mTmpRectF.right,
                 (int) mTmpRectF.bottom);
         if (DEBUG) {
-            Slog.d(TAG, "calculateImpressionTokenBounds: boundsInDisplay=" + outBounds);
+            Slog.d(TAG, "calculateScreenshotHashBoundsLocked: boundsInDisplay=" + outBounds);
         }
 
         // Apply the magnification spec values to the bounds since the content could be magnified
@@ -218,7 +221,8 @@ public class ImpressionAttestationController {
         }
 
         if (DEBUG) {
-            Slog.d(TAG, "calculateImpressionTokenBounds: boundsWithMagnification=" + outBounds);
+            Slog.d(TAG, "calculateScreenshotHashBoundsLocked: boundsWithMagnification="
+                    + outBounds);
         }
 
         if (outBounds.isEmpty()) {
@@ -230,7 +234,7 @@ public class ImpressionAttestationController {
         final Rect displayBounds = displayContent.getBounds();
         outBounds.intersectUnchecked(displayBounds);
         if (DEBUG) {
-            Slog.d(TAG, "calculateImpressionTokenBounds: finalBounds=" + outBounds);
+            Slog.d(TAG, "calculateScreenshotHashBoundsLocked: finalBounds=" + outBounds);
         }
     }
 
@@ -244,7 +248,7 @@ public class ImpressionAttestationController {
                 if (DEBUG) Slog.v(TAG, "creating connection");
 
                 // Create the connection
-                mServiceConnection = new ImpressionAttestationServiceConnection();
+                mServiceConnection = new ScreenshotHasherServiceConnection();
 
                 final ComponentName component = getServiceComponentName();
                 if (DEBUG) Slog.v(TAG, "binding to: " + component);
@@ -275,7 +279,7 @@ public class ImpressionAttestationController {
             return null;
         }
 
-        final Intent intent = new Intent(ImpressionAttestationService.SERVICE_INTERFACE);
+        final Intent intent = new Intent(ScreenshotHasherService.SERVICE_INTERFACE);
         intent.setPackage(packageName);
         final ResolveInfo resolveInfo = mContext.getPackageManager().resolveService(intent,
                 PackageManager.GET_SERVICES | PackageManager.GET_META_DATA);
@@ -292,10 +296,10 @@ public class ImpressionAttestationController {
         if (serviceInfo == null) return null;
 
         final ComponentName name = new ComponentName(serviceInfo.packageName, serviceInfo.name);
-        if (!Manifest.permission.BIND_IMPRESSION_ATTESTATION_SERVICE
+        if (!Manifest.permission.BIND_SCREENSHOT_HASHER_SERVICE
                 .equals(serviceInfo.permission)) {
             Slog.w(TAG, name.flattenToShortString() + " requires permission "
-                    + Manifest.permission.BIND_IMPRESSION_ATTESTATION_SERVICE);
+                    + Manifest.permission.BIND_SCREENSHOT_HASHER_SERVICE);
             return null;
         }
 
@@ -308,7 +312,7 @@ public class ImpressionAttestationController {
         private Bundle mResult;
         private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
 
-        public Bundle run(BiConsumer<IImpressionAttestationService, RemoteCallback> func) {
+        public Bundle run(BiConsumer<IScreenshotHasherService, RemoteCallback> func) {
             connectAndRun(service -> {
                 RemoteCallback callback = new RemoteCallback(result -> {
                     mResult = result;
@@ -327,9 +331,9 @@ public class ImpressionAttestationController {
         }
     }
 
-    private class ImpressionAttestationServiceConnection implements ServiceConnection {
+    private class ScreenshotHasherServiceConnection implements ServiceConnection {
         @GuardedBy("mServiceConnectionLock")
-        private IImpressionAttestationService mRemoteService;
+        private IScreenshotHasherService mRemoteService;
 
         @GuardedBy("mServiceConnectionLock")
         private ArrayList<Command> mQueuedCommands;
@@ -338,7 +342,7 @@ public class ImpressionAttestationController {
         public void onServiceConnected(ComponentName name, IBinder service) {
             if (DEBUG) Slog.v(TAG, "onServiceConnected(): " + name);
             synchronized (mServiceConnectionLock) {
-                mRemoteService = IImpressionAttestationService.Stub.asInterface(service);
+                mRemoteService = IScreenshotHasherService.Stub.asInterface(service);
                 if (mQueuedCommands != null) {
                     final int size = mQueuedCommands.size();
                     if (DEBUG) Slog.d(TAG, "running " + size + " queued commands");

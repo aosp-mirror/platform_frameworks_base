@@ -58,7 +58,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.Trace;
 import android.os.UserHandle;
-import android.service.attestation.ImpressionToken;
+import android.service.screenshot.ScreenshotHash;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.MergedConfiguration;
@@ -866,11 +866,11 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     }
 
     @Override
-    public ImpressionToken generateImpressionToken(IWindow window, Rect boundsInWindow,
+    public ScreenshotHash generateScreenshotHash(IWindow window, Rect boundsInWindow,
             String hashAlgorithm) {
         final long origId = Binder.clearCallingIdentity();
         try {
-            return mService.generateImpressionToken(this, window, boundsInWindow, hashAlgorithm);
+            return mService.generateScreenshotHash(this, window, boundsInWindow, hashAlgorithm);
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
