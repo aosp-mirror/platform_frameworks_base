@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import android.annotation.NonNull;
 

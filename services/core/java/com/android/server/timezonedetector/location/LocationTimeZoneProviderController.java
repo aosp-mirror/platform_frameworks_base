@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.os.Handler;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.Dumpable;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState;
 
 import java.time.Duration;
 import java.util.Objects;

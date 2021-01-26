@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState;
 
 import java.util.ArrayList;
 import java.util.Collections;

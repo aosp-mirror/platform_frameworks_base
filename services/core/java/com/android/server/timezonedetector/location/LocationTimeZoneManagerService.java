@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import static android.app.time.LocationTimeZoneManager.PRIMARY_PROVIDER_NAME;
 import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_DISABLED;

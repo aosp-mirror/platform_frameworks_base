@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_ON_BIND;
 import static android.app.time.LocationTimeZoneManager.SIMULATED_PROVIDER_TEST_COMMAND_ON_UNBIND;
