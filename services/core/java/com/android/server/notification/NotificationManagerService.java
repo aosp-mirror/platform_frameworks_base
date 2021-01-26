@@ -377,7 +377,8 @@ public class NotificationManagerService extends SystemService {
 
     static final String[] DEFAULT_ALLOWED_ADJUSTMENTS = new String[] {
             Adjustment.KEY_CONTEXTUAL_ACTIONS,
-            Adjustment.KEY_TEXT_REPLIES};
+            Adjustment.KEY_TEXT_REPLIES,
+            Adjustment.KEY_NOT_CONVERSATION};
 
     static final String[] NON_BLOCKABLE_DEFAULT_ROLES = new String[] {
             RoleManager.ROLE_DIALER,
@@ -2312,6 +2313,13 @@ public class NotificationManagerService extends SystemService {
                         mAssistants.allowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
                     } else if ("false".equals(value)) {
                         mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
+                    }
+                } else if (SystemUiDeviceConfigFlags.ENABLE_NAS_NOT_CONVERSATION.equals(name)) {
+                    String value = properties.getString(name, null);
+                    if ("true".equals(value)) {
+                        mAssistants.allowAdjustmentType(Adjustment.KEY_NOT_CONVERSATION);
+                    } else if ("false".equals(value)) {
+                        mAssistants.disallowAdjustmentType(Adjustment.KEY_NOT_CONVERSATION);
                     }
                 }
             }
