@@ -28304,6 +28304,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                     continue;
                 }
+                if (ps.appId < Process.FIRST_APPLICATION_UID) {
+                    if (DEBUG_PER_UID_READ_TIMEOUTS) {
+                        Slog.i(TAG, "PerUidReadTimeouts: package is system, appId=" + ps.appId);
+                    }
+                    continue;
+                }
+
                 final AndroidPackage pkg = ps.getPkg();
                 if (pkg.getLongVersionCode() < perPackage.versionCodes.minVersionCode
                         || pkg.getLongVersionCode() > perPackage.versionCodes.maxVersionCode) {
