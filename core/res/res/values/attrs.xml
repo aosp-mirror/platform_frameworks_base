@@ -7993,6 +7993,9 @@
             <!-- The widget is added directly by the app, and does not need to appear in
                  the global list of available widgets -->
             <flag name="hide_from_picker" value="0x2" />
+              <!-- The widget provides a default configuration. The host may decide not to launch
+                   the provided configuration activity. -->
+           <flag name="configuration_optional" value="0x3" />
         </attr>
     </declare-styleable>
 

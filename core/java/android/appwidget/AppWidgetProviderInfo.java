@@ -112,10 +112,19 @@ public class AppWidgetProviderInfo implements Parcelable {
      */
     public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2;
 
+    /**
+     * The widget provides a default configuration. The host may choose not to launch the provided
+     * configuration activity.
+     *
+     * @see #widgetFeatures
+     */
+    public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 3;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
             WIDGET_FEATURE_RECONFIGURABLE,
             WIDGET_FEATURE_HIDE_FROM_PICKER,
+            WIDGET_FEATURE_CONFIGURATION_OPTIONAL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FeatureFlags {}
@@ -269,6 +278,7 @@ public class AppWidgetProviderInfo implements Parcelable {
      *
      * @see #WIDGET_FEATURE_RECONFIGURABLE
      * @see #WIDGET_FEATURE_HIDE_FROM_PICKER
+     * @see #WIDGET_FEATURE_CONFIGURATION_OPTIONAL
      */
     @FeatureFlags
     public int widgetFeatures;
