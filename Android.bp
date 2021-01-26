@@ -484,7 +484,7 @@ java_library {
         "android.hardware.vibrator-V1.3-java",
         "android.security.apc-java",
         "android.security.authorization-java",
-        "android.system.keystore2-java",
+        "android.system.keystore2-V1-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
 
