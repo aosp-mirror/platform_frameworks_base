@@ -1726,7 +1726,6 @@ package android.util {
     method public static java.util.Map<java.lang.String,java.lang.String> getAllFeatureFlags();
     method public static boolean isEnabled(android.content.Context, String);
     method public static void setEnabled(android.content.Context, String, boolean);
-    field public static final String DYNAMIC_SYSTEM = "settings_dynamic_system";
     field public static final String FFLAG_OVERRIDE_PREFIX = "sys.fflag.override.";
     field public static final String FFLAG_PREFIX = "sys.fflag.";
     field public static final String HEARING_AID_SETTINGS = "settings_bluetooth_hearing_aid";
