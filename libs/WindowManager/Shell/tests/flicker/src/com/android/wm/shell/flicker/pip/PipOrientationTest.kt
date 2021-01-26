@@ -110,10 +110,10 @@ class PipOrientationTest(
                         showsAppWindowOnTop(pipApp.defaultWindowName)
                     }
                     start("pipApp window hides testApp") {
-                        hidesAppWindow(testApp.defaultWindowName)
+                        isInvisible(testApp.defaultWindowName)
                     }
                     end("testApp windows is shown") {
-                        showsAppWindow(testApp.defaultWindowName)
+                        isVisible(testApp.defaultWindowName)
                     }
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
@@ -123,7 +123,7 @@ class PipOrientationTest(
                     val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
                     start("pipApp layer hides testApp") {
                         hasVisibleRegion(pipApp.defaultWindowName, startingBounds)
-                        hidesLayer(testApp.defaultWindowName)
+                        isInvisible(testApp.defaultWindowName)
                     }
                     end("testApp layer covers fullscreen") {
                         hasVisibleRegion(testApp.defaultWindowName, endingBounds)

@@ -4946,6 +4946,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isIntentSenderAService(IIntentSender pendingResult) {
+        if (pendingResult instanceof PendingIntentRecord) {
+            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
+            return res.key.type == ActivityManager.INTENT_SENDER_SERVICE;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isIntentSenderABroadcast(IIntentSender pendingResult) {
         if (pendingResult instanceof PendingIntentRecord) {
             final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
@@ -4967,6 +4976,39 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (ClassCastException e) {
         }
         return null;
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentComponentsForIntentSender(
+            IIntentSender pendingResult, int matchFlags) {
+        enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
+                "queryIntentComponentsForIntentSender()");
+        Preconditions.checkNotNull(pendingResult);
+        final PendingIntentRecord res;
+        try {
+            res = (PendingIntentRecord) pendingResult;
+        } catch (ClassCastException e) {
+            return null;
+        }
+        final Intent intent = res.key.requestIntent;
+        if (intent == null) {
+            return null;
+        }
+        final int userId = res.key.userId;
+        switch (res.key.type) {
+            case ActivityManager.INTENT_SENDER_ACTIVITY:
+                return mContext.getPackageManager().queryIntentActivitiesAsUser(
+                        intent, matchFlags, userId);
+            case ActivityManager.INTENT_SENDER_SERVICE:
+            case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
+                return mContext.getPackageManager().queryIntentServicesAsUser(
+                        intent, matchFlags, userId);
+            case ActivityManager.INTENT_SENDER_BROADCAST:
+                return mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                        intent, matchFlags, userId);
+            default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
+                throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
+        }
     }
 
     @Override

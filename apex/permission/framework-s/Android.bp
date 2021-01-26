@@ -22,11 +22,33 @@ filegroup {
     visibility: ["//frameworks/base"],
 }
 
+java_library {
+    name: "framework-permission-s-shared",
+    srcs: [":framework-permission-s-shared-srcs"],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    apex_available: [
+        "com.android.permission",
+        "test_com.android.permission",
+    ],
+    installable: false,
+    min_sdk_version: "30",
+    sdk_version: "module_current",
+}
+
 java_sdk_library {
     name: "framework-permission-s",
     defaults: ["framework-module-defaults"],
     srcs: [
         ":framework-permission-s-sources",
+    ],
+    libs: [
+        "framework-annotations-lib"
+    ],
+    static_libs: [
+        "framework-permission-s-shared",
     ],
     apex_available: [
         "com.android.permission",
@@ -36,9 +58,12 @@ java_sdk_library {
     // Restrict access to implementation library.
     impl_library_visibility: ["//frameworks/base/apex/permission:__subpackages__"],
     installable: true,
+    jarjar_rules: ":permission-jarjar-rules",
     min_sdk_version: "30",
     permitted_packages: [
         "android.permission",
         "android.app.role",
+        // For com.android.permission.jarjar.
+        "com.android.permission",
     ],
 }

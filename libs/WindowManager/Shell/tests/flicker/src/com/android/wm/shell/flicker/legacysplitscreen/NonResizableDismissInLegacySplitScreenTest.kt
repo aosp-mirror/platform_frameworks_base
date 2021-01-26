@@ -52,8 +52,8 @@ class NonResizableDismissInLegacySplitScreenTest(
             withTestName { testTag }
             repeat { SplitScreenHelper.TEST_REPETITIONS }
             transitions {
-                nonResizeableApp.launchViaIntent()
-                splitScreenApp.launchViaIntent()
+                nonResizeableApp.launchViaIntent(wmHelper)
+                splitScreenApp.launchViaIntent(wmHelper)
                 device.launchSplitScreen()
                 nonResizeableApp.reopenAppFromOverview()
             }
@@ -72,8 +72,8 @@ class NonResizableDismissInLegacySplitScreenTest(
                 }
                 windowManagerTrace {
                     end {
-                        showsAppWindow(nonResizeableApp.defaultWindowName)
-                        hidesAppWindow(splitScreenApp.defaultWindowName)
+                        isVisible(nonResizeableApp.defaultWindowName)
+                            .isInvisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }

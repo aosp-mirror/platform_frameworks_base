@@ -144,8 +144,9 @@ public:
         }
     }
     Control openMount(std::string_view path) const final { return incfs::open(path); }
-    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const final {
-        return incfs::createControl(cmd, pendingReads, logs);
+    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
+                          IncFsFd blocksWritten) const final {
+        return incfs::createControl(cmd, pendingReads, logs, blocksWritten);
     }
     ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                        incfs::NewFileParams params) const final {

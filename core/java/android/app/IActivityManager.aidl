@@ -51,6 +51,7 @@ import android.content.pm.ConfigurationInfo;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ProviderInfo;
+import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.LocusId;
@@ -704,4 +705,9 @@ interface IActivityManager {
      * @throws IllegalArgumentException if the user is not a profile.
      */
     boolean stopProfile(int userId);
+
+    /** Called by PendingIntent.queryIntentComponents() */
+    List<ResolveInfo> queryIntentComponentsForIntentSender(in IIntentSender sender, int matchFlags);
+
+    boolean isIntentSenderAService(in IIntentSender sender);
 }

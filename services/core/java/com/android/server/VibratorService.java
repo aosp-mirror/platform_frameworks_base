@@ -679,13 +679,21 @@ public class VibratorService extends IVibratorService.Stub {
         }
     }
 
-    private void updateVibrators() {
+    @VisibleForTesting
+    void updateVibrators() {
         synchronized (mLock) {
-            mInputDeviceDelegate.updateInputDeviceVibrators(
+            boolean inputDevicesChanged = mInputDeviceDelegate.updateInputDeviceVibrators(
                     mVibrationSettings.shouldVibrateInputDevices());
 
-            // If the state changes out from under us then just reset.
-            doCancelVibrateLocked(Vibration.Status.CANCELLED);
+            if (mCurrentVibration == null) {
+                return;
+            }
+
+            if (inputDevicesChanged || !mVibrationSettings.shouldVibrateForPowerMode(
+                    mCurrentVibration.attrs.getUsage())) {
+                // If the state changes out from under us then just reset.
+                doCancelVibrateLocked(Vibration.Status.CANCELLED);
+            }
         }
     }
 

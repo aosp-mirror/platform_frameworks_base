@@ -34,7 +34,6 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
 import org.junit.Assert
@@ -117,7 +116,7 @@ class EnterLegacySplitScreenTest(
                 }
                 windowManagerTrace {
                     end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
+                        isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }
@@ -141,23 +140,23 @@ class EnterLegacySplitScreenTest(
             assertions {
                 layersTrace {
                     dockedStackPrimaryBoundsIsVisible(
-                            rotation, splitScreenApp.defaultWindowName, 169271943)
+                        rotation, splitScreenApp.defaultWindowName, 169271943)
                     dockedStackSecondaryBoundsIsVisible(
-                            rotation, secondaryApp.defaultWindowName, 169271943)
+                        rotation, secondaryApp.defaultWindowName, 169271943)
                     dockedStackDividerBecomesVisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                    secondaryApp.defaultWindowName)
+                        listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                            secondaryApp.defaultWindowName)
                     )
                 }
                 windowManagerTrace {
                     end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
-                                .and().showsAppWindow(secondaryApp.defaultWindowName)
+                        isVisible(splitScreenApp.defaultWindowName)
+                            .isVisible(secondaryApp.defaultWindowName)
                     }
                     visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                    secondaryApp.defaultWindowName))
+                        listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                            secondaryApp.defaultWindowName))
                 }
             }
         }
@@ -182,15 +181,15 @@ class EnterLegacySplitScreenTest(
                 layersTrace {
                     dockedStackDividerIsInvisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName)
+                        listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName)
                     )
                 }
                 windowManagerTrace {
                     end {
-                        hidesAppWindow(nonResizeableApp.defaultWindowName)
+                        isInvisible(nonResizeableApp.defaultWindowName)
                     }
                     visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName))
+                        listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName))
                 }
             }
         }

@@ -212,6 +212,23 @@ public abstract class Image implements AutoCloseable {
     public abstract int getScalingMode();
 
     /**
+     * Get the fence file descriptor associated with this frame.
+     * @return The fence file descriptor for this frame.
+     * @hide
+     */
+    public int getFenceFd() {
+        return -1;
+    }
+
+    /**
+     * Get the number of planes.
+     * @return The number of expected planes.
+     * @hide
+     */
+    public int getPlaneCount() {
+        return -1;
+    }
+    /**
      * Get the {@link android.hardware.HardwareBuffer HardwareBuffer} handle of the input image
      * intended for GPU and/or hardware access.
      * <p>
@@ -330,8 +347,9 @@ public abstract class Image implements AutoCloseable {
      * @return true if the image is attachable to a new owner, false if the image is still attached
      *         to its current owner, or the image is a stand-alone image and is not attachable to
      *         a new owner.
+     * @hide
      */
-    boolean isAttachable() {
+    public boolean isAttachable() {
         throwISEIfImageIsInvalid();
 
         return false;

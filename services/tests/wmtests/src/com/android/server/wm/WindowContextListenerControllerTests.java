@@ -60,18 +60,21 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
     @Test
     public void testRegisterWindowContextListener() {
-        mController.registerWindowContainerListener(mClientToken, mContainer, -1);
+        mController.registerWindowContainerListener(mClientToken, mContainer, -1,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         assertEquals(1, mController.mListeners.size());
 
         final IBinder clientToken = new Binder();
-        mController.registerWindowContainerListener(clientToken, mContainer, -1);
+        mController.registerWindowContainerListener(clientToken, mContainer, -1,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         assertEquals(2, mController.mListeners.size());
 
         final WindowContainer container = createTestWindowToken(TYPE_APPLICATION_OVERLAY,
                 mDefaultDisplay);
-        mController.registerWindowContainerListener(mClientToken, container, -1);
+        mController.registerWindowContainerListener(mClientToken, container, -1,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         // The number of listeners doesn't increase since the listener just gets updated.
         assertEquals(2, mController.mListeners.size());
@@ -91,7 +94,8 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         config1.densityDpi = 100;
         mContainer.onRequestedOverrideConfigurationChanged(config1);
 
-        mController.registerWindowContainerListener(clientToken, mContainer, -1);
+        mController.registerWindowContainerListener(clientToken, mContainer, -1,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         assertEquals(bounds1, clientToken.mConfiguration.windowConfiguration.getBounds());
         assertEquals(config1.densityDpi, clientToken.mConfiguration.densityDpi);
@@ -106,7 +110,8 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
         config2.densityDpi = 200;
         container.onRequestedOverrideConfigurationChanged(config2);
 
-        mController.registerWindowContainerListener(clientToken, container, -1);
+        mController.registerWindowContainerListener(clientToken, container, -1,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         assertEquals(bounds2, clientToken.mConfiguration.windowConfiguration.getBounds());
         assertEquals(config2.densityDpi, clientToken.mConfiguration.densityDpi);
@@ -132,7 +137,8 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
     @Test
     public void testCanCallerRemoveListener_CanManageAppTokens_ReturnTrue() {
-        mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID);
+        mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         assertTrue(mController.assertCallerCanRemoveListener(mClientToken,
                 true /* callerCanManagerAppTokens */, ANOTHER_UID));
@@ -140,7 +146,8 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
     @Test
     public void testCanCallerRemoveListener_SameUid_ReturnTrue() {
-        mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID);
+        mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         assertTrue(mController.assertCallerCanRemoveListener(mClientToken,
                 false /* callerCanManagerAppTokens */, TEST_UID));
@@ -148,7 +155,8 @@ public class WindowContextListenerControllerTests extends WindowTestsBase {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testCanCallerRemoveListener_DifferentUid_ThrowException() {
-        mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID);
+        mController.registerWindowContainerListener(mClientToken, mContainer, TEST_UID,
+                TYPE_APPLICATION_OVERLAY, null /* options */);
 
         mController.assertCallerCanRemoveListener(mClientToken,
                 false /* callerCanManagerAppTokens */, ANOTHER_UID);

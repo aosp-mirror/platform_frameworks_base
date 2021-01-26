@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker.launch
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.WmAssertion
+import com.android.server.wm.flicker.dsl.WmAssertionBuilder
 
-fun WmAssertion.appWindowReplacesLauncherAsTopWindow(
+fun WmAssertionBuilder.appWindowReplacesLauncherAsTopWindow(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0

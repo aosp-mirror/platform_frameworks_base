@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.InputConfiguration;
 import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
@@ -349,6 +350,66 @@ public abstract class CameraDevice implements AutoCloseable {
             @NonNull CameraCaptureSession.StateCallback callback,
             @Nullable Handler handler)
             throws CameraAccessException;
+
+    /**
+     * Initialize a specific device-specific extension augmented camera capture
+     * session.
+     *
+     * <p>Extension sessions can be used to enable device-specific operation modes like
+     * {@link CameraExtensionCharacteristics#EXTENSION_NIGHT} or
+     * {@link CameraExtensionCharacteristics#EXTENSION_HDR}. These modes are less flexible than the
+     * full camera API, but enable access to more sophisticated processing algorithms that can
+     * capture multi-frame bursts to generate single output images. To query for available
+     * extensions on this device call
+     * {@link CameraExtensionCharacteristics#getSupportedExtensions()}.</p>
+     *
+     * <p>This method will also trigger the setup of the internal
+     * processing pipeline for extension augmented preview and multi-frame
+     * still capture.</p>
+     *
+     * <p>If a prior CameraCaptureSession already exists when this method is called, the previous
+     * session will no longer be able to accept new capture requests and will be closed. Any
+     * in-progress capture requests made on the prior session will be completed before it's closed.
+     * </p>
+     *
+     * <p>The CameraExtensionSession will be active until the client
+     * either calls CameraExtensionSession.close() or creates a new camera
+     * capture session. In both cases all internal resources will be
+     * released, continuous repeating requests stopped and any pending
+     * multi-frame capture requests flushed.</p>
+     *
+     * <p>Note that the CameraExtensionSession currently supports at most two
+     * multi frame capture surface formats: ImageFormat.YUV_420_888 and
+     * ImageFormat.JPEG. Clients must query the multi-frame capture format support using
+     * {@link CameraExtensionCharacteristics#getExtensionSupportedSizes(int, int)}.
+     * For repeating requests CameraExtensionSession supports only
+     * {@link android.graphics.SurfaceTexture} as output. Clients can query the supported resolution
+     * for the repeating request output using
+     * {@link CameraExtensionCharacteristics#getExtensionSupportedSizes(int, Class)
+     * getExtensionSupportedSizes(..., Class)}.</p>
+     *
+     * <p>At the very minimum the initialization expects either one valid output
+     * surface for repeating or one valid output for high-quality single requests registered in the
+     * outputs argument of the extension configuration argument. At the maximum the initialization
+     * will accept two valid output surfaces, one for repeating and the other for single requests.
+     * Additional unsupported surfaces passed to ExtensionSessionConfiguration will cause an
+     * {@link IllegalArgumentException} to be thrown.</p>
+     *
+     * @param extensionConfiguration extension configuration
+     * @throws IllegalArgumentException If both the preview and still
+     *                                  capture surfaces are not set or invalid, or if any of the
+     *                                  registered surfaces do not meet the device-specific
+     *                                  extension requirements such as dimensions and/or
+     *                                  (output format)/(surface type), or if the extension is not
+     *                                  supported.
+     * @see CameraExtensionCharacteristics#getSupportedExtensions
+     * @see CameraExtensionCharacteristics#getExtensionSupportedSizes
+     */
+    public void createExtensionSession(
+            @NonNull ExtensionSessionConfiguration extensionConfiguration)
+            throws CameraAccessException {
+        throw new UnsupportedOperationException("No default implementation");
+    }
 
     /**
      * Standard camera operation mode.

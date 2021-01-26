@@ -81,6 +81,7 @@ class UdfpsController implements DozeReceiver {
     private final WindowManager mWindowManager;
     private final SystemSettings mSystemSettings;
     private final DelayableExecutor mFgExecutor;
+    private final StatusBarStateController mStatusBarStateController;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -181,6 +182,7 @@ class UdfpsController implements DozeReceiver {
         mWindowManager = windowManager;
         mSystemSettings = systemSettings;
         mFgExecutor = fgExecutor;
+        mStatusBarStateController = statusBarStateController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -208,7 +210,6 @@ class UdfpsController implements DozeReceiver {
 
         mHbmSupported = !TextUtils.isEmpty(mHbmPath);
         mView.setHbmSupported(mHbmSupported);
-        statusBarStateController.addCallback(mView);
 
         // This range only consists of the minimum and maximum values, which only cover
         // non-high-brightness mode.
@@ -340,7 +341,7 @@ class UdfpsController implements DozeReceiver {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
-                    mView.setShowReason(reason);
+                    mView.setUdfpsAnimation(getUdfpsAnimationForReason(reason));
                     mWindowManager.addView(mView, computeLayoutParams());
                     mView.setOnTouchListener(mOnTouchListener);
                     mIsOverlayShowing = true;
@@ -353,11 +354,27 @@ class UdfpsController implements DozeReceiver {
         });
     }
 
+    @Nullable
+    private UdfpsAnimation getUdfpsAnimationForReason(int reason) {
+        Log.d(TAG, "getUdfpsAnimationForReason: " + reason);
+        switch (reason) {
+            case IUdfpsOverlayController.REASON_ENROLL:
+                return new UdfpsAnimationEnroll(mContext);
+            case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
+                return new UdfpsAnimationKeyguard(mView, mContext, mStatusBarStateController);
+            case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
+                return new UdfpsAnimationFpmOther(mContext);
+            default:
+                Log.d(TAG, "Animation for reason " + reason + " not supported yet");
+                return null;
+        }
+    }
+
     private void hideUdfpsOverlay() {
         mFgExecutor.execute(() -> {
             if (mIsOverlayShowing) {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
-                mView.setShowReason(IUdfpsOverlayController.REASON_UNKNOWN);
+                mView.setUdfpsAnimation(null);
                 mView.setOnTouchListener(null);
                 // Reset the controller back to its starting state.
                 onFingerUp();

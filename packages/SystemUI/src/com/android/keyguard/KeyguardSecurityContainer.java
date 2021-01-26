@@ -48,6 +48,7 @@ import androidx.annotation.VisibleForTesting;
 import androidx.dynamicanimation.animation.DynamicAnimation;
 import androidx.dynamicanimation.animation.SpringAnimation;
 
+import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.widget.LockPatternUtils;
@@ -112,6 +113,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 @Override
                 public WindowInsetsAnimation.Bounds onStart(WindowInsetsAnimation animation,
                         WindowInsetsAnimation.Bounds bounds) {
+                    if (!mDisappearAnimRunning) {
+                        beginJankInstrument(InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_APPEAR);
+                    }
                     mSecurityViewFlipper.getBoundsOnScreen(mFinalBounds);
                     return bounds;
                 }
@@ -144,6 +148,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
                 @Override
                 public void onEnd(WindowInsetsAnimation animation) {
                     if (!mDisappearAnimRunning) {
+                        endJankInstrument(InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_APPEAR);
                         mSecurityViewFlipper.animateForIme(0, /* interpolatedFraction */ 1f);
                     }
                 }
@@ -354,7 +359,17 @@ public class KeyguardSecurityContainer extends FrameLayout {
                             });
                             anim.addListener(new AnimatorListenerAdapter() {
                                 @Override
+                                public void onAnimationStart(Animator animation) {
+                                    beginJankInstrument(
+                                            InteractionJankMonitor
+                                                    .CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR);
+                                }
+
+                                @Override
                                 public void onAnimationEnd(Animator animation) {
+                                    endJankInstrument(
+                                            InteractionJankMonitor
+                                                    .CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR);
                                     controller.finish(false);
                                 }
                             });
@@ -372,9 +387,23 @@ public class KeyguardSecurityContainer extends FrameLayout {
                         @Override
                         public void onCancelled(
                                 @Nullable WindowInsetsAnimationController controller) {
+                            cancelJankInstrument(
+                                    InteractionJankMonitor.CUJ_LOCKSCREEN_PASSWORD_DISAPPEAR);
                         }
                     });
         }
+    }
+
+    private void beginJankInstrument(int cuj) {
+        InteractionJankMonitor.getInstance().begin(mSecurityViewFlipper.getSecurityView(), cuj);
+    }
+
+    private void endJankInstrument(int cuj) {
+        InteractionJankMonitor.getInstance().end(cuj);
+    }
+
+    private void cancelJankInstrument(int cuj) {
+        InteractionJankMonitor.getInstance().cancel(cuj);
     }
 
     /**

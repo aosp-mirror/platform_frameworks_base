@@ -19,6 +19,7 @@ package android.app;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -28,7 +29,10 @@ import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.IWindowManager;
+import android.view.View;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
+import android.view.WindowManagerImpl;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -50,23 +54,41 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 public class WindowContextTest {
+    private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
+    private final WindowContext mWindowContext = createWindowContext();
+
     @Test
     public void testWindowContextRelease_doRemoveWindowToken() throws Throwable {
-        final Context instContext = InstrumentationRegistry.getInstrumentation()
-                .getTargetContext();
+        final IBinder token = mWindowContext.getWindowContextToken();
+        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
+
+        assertTrue("Token must be registered to WMS", wms.isWindowToken(token));
+
+        mWindowContext.release();
+
+        assertFalse("Token must be unregistered to WMS", wms.isWindowToken(token));
+    }
+
+    @Test
+    public void testCreateWindowContextWindowManagerAttachClientToken() {
+        final WindowManager windowContextWm = WindowManagerImpl
+                .createWindowContextWindowManager(mWindowContext);
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        mInstrumentation.runOnMainSync(() -> {
+            final View view = new View(mWindowContext);
+            windowContextWm.addView(view, params);
+        });
+
+        assertEquals(mWindowContext.getWindowContextToken(), params.mWindowContextToken);
+    }
+
+    private WindowContext createWindowContext() {
+        final Context instContext = mInstrumentation.getTargetContext();
         final Display display = instContext.getSystemService(DisplayManager.class)
                 .getDisplay(DEFAULT_DISPLAY);
         final Context context = instContext.createDisplayContext(display);
-        final WindowContext windowContext = new WindowContext(context, TYPE_APPLICATION_OVERLAY,
+        return new WindowContext(context, TYPE_APPLICATION_OVERLAY,
                 null /* options */);
-
-        final IBinder token = windowContext.getWindowContextToken();
-
-        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
-        assertTrue("Token must be registered to WMS", wms.isWindowToken(token));
-
-        windowContext.release();
-
-        assertFalse("Token must be unregistered to WMS", wms.isWindowToken(token));
     }
 }

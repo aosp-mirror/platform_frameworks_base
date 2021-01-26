@@ -29,6 +29,7 @@ import android.hardware.ICameraService;
 import android.hardware.ICameraServiceListener;
 import android.hardware.camera2.impl.CameraDeviceImpl;
 import android.hardware.camera2.impl.CameraMetadataNative;
+import android.hardware.camera2.params.ExtensionSessionConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
@@ -435,6 +436,28 @@ public final class CameraManager {
     }
 
     /**
+     * <p>Query the camera extension capabilities of a camera device.</p>
+     *
+     * @param cameraId The id of the camera device to query. This must be a standalone
+     * camera ID which can be directly opened by {@link #openCamera}.
+     * @return The properties of the given camera
+     *
+     * @throws IllegalArgumentException if the cameraId does not match any
+     *         known camera device.
+     * @throws CameraAccessException if the camera device has been disconnected.
+     *
+     * @see CameraExtensionCharacteristics
+     * @see CameraDevice#createExtensionSession(ExtensionSessionConfiguration)
+     * @see CameraExtensionSession
+     */
+    @NonNull
+    public CameraExtensionCharacteristics getCameraExtensionCharacteristics(
+            @NonNull String cameraId) throws CameraAccessException {
+        CameraCharacteristics chars = getCameraCharacteristics(cameraId);
+        return new CameraExtensionCharacteristics(mContext, cameraId, chars);
+    }
+
+    /**
      * Helper for opening a connection to a camera with the given ID.
      *
      * @param cameraId The unique identifier of the camera device to open
@@ -473,7 +496,8 @@ public final class CameraManager {
                         callback,
                         executor,
                         characteristics,
-                        mContext.getApplicationInfo().targetSdkVersion);
+                        mContext.getApplicationInfo().targetSdkVersion,
+                        mContext);
 
             ICameraDeviceCallbacks callbacks = deviceImpl.getCallbacks();
 

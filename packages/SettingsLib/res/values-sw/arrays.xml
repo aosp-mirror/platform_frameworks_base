@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", inatumika (maudhui)"</item>
     <item msgid="5001852592115448348">", inatumika (simu)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"Imezimwa"</item>
+    <item msgid="7839165897132179888">"K64"</item>
+    <item msgid="2715700596495505626">"K256"</item>
+    <item msgid="7099386891713159947">"M1"</item>
+    <item msgid="6069075827077845520">"M4"</item>
+    <item msgid="6078203297886482480">"M8"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Imezimwa"</item>
     <item msgid="4064786181089783077">"K64"</item>
     <item msgid="3052710745383602630">"K256"</item>
     <item msgid="3691785423374588514">"M1"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"Imezimwa"</item>
+    <item msgid="4195153527464162486">"K64 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="7464037639415220106">"K256 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="8539423820514360724">"M1 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="1984761927103140651">"M4 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="2983219471251787208">"M8 kwa kila akiba ya kumbukumbu"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Yamezimwa"</item>
     <item msgid="6014837961827347618">"Zote"</item>

@@ -72,6 +72,7 @@ import android.content.res.Resources;
 import android.content.rollback.RollbackManagerFrameworkInitializer;
 import android.debug.AdbManager;
 import android.debug.IAdbManager;
+import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
@@ -216,6 +217,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.graphics.fonts.IFontManager;
 import com.android.internal.net.INetworkWatchlistManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
@@ -342,6 +344,14 @@ public final class SystemServiceRegistry {
             @Override
             public TextClassificationManager createService(ContextImpl ctx) {
                 return new TextClassificationManager(ctx);
+            }});
+
+        registerService(Context.FONT_SERVICE, FontManager.class,
+                new CachedServiceFetcher<FontManager>() {
+            @Override
+            public FontManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.FONT_SERVICE);
+                return FontManager.create(IFontManager.Stub.asInterface(b));
             }});
 
         registerService(Context.CLIPBOARD_SERVICE, ClipboardManager.class,
