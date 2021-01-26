@@ -16,6 +16,7 @@
 
 package com.android.server.musicrecognition;
 
+import static android.Manifest.permission.RECORD_AUDIO;
 import static android.media.musicrecognition.MusicRecognitionManager.RECOGNITION_FAILED_AUDIO_UNAVAILABLE;
 import static android.media.musicrecognition.MusicRecognitionManager.RECOGNITION_FAILED_SERVICE_KILLED;
 import static android.media.musicrecognition.MusicRecognitionManager.RECOGNITION_FAILED_SERVICE_UNAVAILABLE;
@@ -25,6 +26,7 @@ import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppGlobals;
+import android.app.AppOpsManager;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
@@ -45,6 +47,7 @@ import com.android.server.infra.AbstractPerUserSystemService;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 /**
  * Handles per-user requests received by
@@ -64,11 +67,20 @@ public final class MusicRecognitionManagerPerUserService extends
     @Nullable
     @GuardedBy("mLock")
     private RemoteMusicRecognitionService mRemoteService;
+    private final AppOpsManager mAppOpsManager;
+
+    private String mAttributionTag;
+    private String mAttributionMessage;
+    private ServiceInfo mServiceInfo;
 
     MusicRecognitionManagerPerUserService(
             @NonNull MusicRecognitionManagerService primary,
             @NonNull Object lock, int userId) {
         super(primary, lock, userId);
+        mAppOpsManager = getContext().getSystemService(AppOpsManager.class);
+        mAttributionMessage = String.format("MusicRecognitionManager.invokedByUid.%s", userId);
+        mAttributionTag = null;
+        mServiceInfo = null;
     }
 
     @NonNull
@@ -114,6 +126,13 @@ public final class MusicRecognitionManagerPerUserService extends
                     new MusicRecognitionServiceCallback(clientCallback),
                     mMaster.isBindInstantServiceAllowed(),
                     mMaster.verbose);
+            try {
+                mServiceInfo =
+                        getContext().getPackageManager().getServiceInfo(
+                                mRemoteService.getComponentName(), 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                Slog.e(TAG, "Service was not found.", e);
+            }
         }
 
         return mRemoteService;
@@ -127,12 +146,8 @@ public final class MusicRecognitionManagerPerUserService extends
     public void beginRecognitionLocked(
             @NonNull RecognitionRequest recognitionRequest,
             @NonNull IBinder callback) {
-        int maxAudioLengthSeconds = Math.min(recognitionRequest.getMaxAudioLengthSeconds(),
-                MAX_STREAMING_SECONDS);
         IMusicRecognitionManagerCallback clientCallback =
                 IMusicRecognitionManagerCallback.Stub.asInterface(callback);
-        AudioRecord audioRecord = createAudioRecord(recognitionRequest, maxAudioLengthSeconds);
-
         mRemoteService = ensureRemoteServiceLocked(clientCallback);
         if (mRemoteService == null) {
             try {
@@ -158,49 +173,89 @@ public final class MusicRecognitionManagerPerUserService extends
         ParcelFileDescriptor clientRead = clientPipe.first;
 
         mMaster.mExecutorService.execute(() -> {
-            try (OutputStream fos =
-                        new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {
-                int halfSecondBufferSize =
-                        audioRecord.getBufferSizeInFrames() / maxAudioLengthSeconds;
-                byte[] byteBuffer = new byte[halfSecondBufferSize];
-                int bytesRead = 0;
-                int totalBytesRead = 0;
-                int ignoreBytes =
-                        recognitionRequest.getIgnoreBeginningFrames() * BYTES_PER_SAMPLE;
-                audioRecord.startRecording();
-                while (bytesRead >= 0 && totalBytesRead
-                        < audioRecord.getBufferSizeInFrames() * BYTES_PER_SAMPLE
-                        && mRemoteService != null) {
-                    bytesRead = audioRecord.read(byteBuffer, 0, byteBuffer.length);
-                    if (bytesRead > 0) {
-                        totalBytesRead += bytesRead;
-                        // If we are ignoring the first x bytes, update that counter.
-                        if (ignoreBytes > 0) {
-                            ignoreBytes -= bytesRead;
-                            // If we've dipped negative, we've skipped through all ignored bytes
-                            // and then some.  Write out the bytes we shouldn't have skipped.
-                            if (ignoreBytes < 0) {
-                                fos.write(byteBuffer, bytesRead + ignoreBytes, -ignoreBytes);
-                            }
-                        } else {
-                            fos.write(byteBuffer);
-                        }
-                    }
-                }
-                Slog.i(TAG, String.format("Streamed %s bytes from audio record", totalBytesRead));
-            } catch (IOException e) {
-                Slog.e(TAG, "Audio streaming stopped.", e);
-            } finally {
-                audioRecord.release();
-                try {
-                    clientCallback.onAudioStreamClosed();
-                } catch (RemoteException ignored) {
-                    // Ignored.
-                }
-            }
+            streamAudio(recognitionRequest, clientCallback, audioSink);
         });
         // Send the pipe down to the lookup service while we write to it asynchronously.
         mRemoteService.writeAudioToPipe(clientRead, recognitionRequest.getAudioFormat());
+    }
+
+    /**
+     * Streams audio based on given request to the given audioSink. Notifies callback of errors.
+     *
+     * @param recognitionRequest the recognition request specifying audio parameters.
+     * @param clientCallback the callback to notify on errors.
+     * @param audioSink the sink to which to stream audio to.
+     */
+    private void streamAudio(@NonNull RecognitionRequest recognitionRequest,
+            IMusicRecognitionManagerCallback clientCallback, ParcelFileDescriptor audioSink) {
+        try {
+            startRecordAudioOp();
+        } catch (SecurityException e) {
+            // A security exception can occur if the MusicRecognitionService (receiving the audio)
+            // does not (or does no longer) hold the necessary permissions to record audio.
+            Slog.e(TAG, "RECORD_AUDIO op not permitted on behalf of "
+                    + mServiceInfo.getComponentName(), e);
+            try {
+                clientCallback.onRecognitionFailed(
+                        RECOGNITION_FAILED_AUDIO_UNAVAILABLE);
+            } catch (RemoteException ignored) {
+                // Ignored.
+            }
+            return;
+        }
+
+        int maxAudioLengthSeconds = Math.min(recognitionRequest.getMaxAudioLengthSeconds(),
+                MAX_STREAMING_SECONDS);
+        AudioRecord audioRecord = createAudioRecord(recognitionRequest, maxAudioLengthSeconds);
+        try (OutputStream fos =
+                     new ParcelFileDescriptor.AutoCloseOutputStream(audioSink)) {
+            streamAudio(recognitionRequest, maxAudioLengthSeconds, audioRecord, fos);
+        } catch (IOException e) {
+            Slog.e(TAG, "Audio streaming stopped.", e);
+        } finally {
+            audioRecord.release();
+            finishRecordAudioOp();
+            try {
+                clientCallback.onAudioStreamClosed();
+            } catch (RemoteException ignored) {
+                // Ignored.
+            }
+        }
+    }
+
+    /** Performs the actual streaming from audioRecord into outputStream. **/
+    private void streamAudio(@NonNull RecognitionRequest recognitionRequest,
+            int maxAudioLengthSeconds, AudioRecord audioRecord, OutputStream outputStream)
+            throws IOException {
+        int halfSecondBufferSize =
+                audioRecord.getBufferSizeInFrames() / maxAudioLengthSeconds;
+        byte[] byteBuffer = new byte[halfSecondBufferSize];
+        int bytesRead = 0;
+        int totalBytesRead = 0;
+        int ignoreBytes =
+                recognitionRequest.getIgnoreBeginningFrames() * BYTES_PER_SAMPLE;
+        audioRecord.startRecording();
+        while (bytesRead >= 0 && totalBytesRead
+                < audioRecord.getBufferSizeInFrames() * BYTES_PER_SAMPLE
+                && mRemoteService != null) {
+            bytesRead = audioRecord.read(byteBuffer, 0, byteBuffer.length);
+            if (bytesRead > 0) {
+                totalBytesRead += bytesRead;
+                // If we are ignoring the first x bytes, update that counter.
+                if (ignoreBytes > 0) {
+                    ignoreBytes -= bytesRead;
+                    // If we've dipped negative, we've skipped through all ignored bytes
+                    // and then some.  Write out the bytes we shouldn't have skipped.
+                    if (ignoreBytes < 0) {
+                        outputStream.write(byteBuffer, bytesRead + ignoreBytes, -ignoreBytes);
+                    }
+                } else {
+                    outputStream.write(byteBuffer);
+                }
+            }
+        }
+        Slog.i(TAG,
+                String.format("Streamed %s bytes from audio record", totalBytesRead));
     }
 
     /**
@@ -262,6 +317,29 @@ public final class MusicRecognitionManagerPerUserService extends
                 mRemoteService = null;
             }
         }
+    }
+
+    /**
+     * Tracks that the RECORD_AUDIO operation started (attributes it to the service receiving the
+     * audio).
+     */
+    private void startRecordAudioOp() {
+        mAppOpsManager.startProxyOp(
+                Objects.requireNonNull(AppOpsManager.permissionToOp(RECORD_AUDIO)),
+                mServiceInfo.applicationInfo.uid,
+                mServiceInfo.packageName,
+                mAttributionTag,
+                mAttributionMessage);
+    }
+
+
+    /** Tracks that the RECORD_AUDIO operation finished. */
+    private void finishRecordAudioOp() {
+        mAppOpsManager.finishProxyOp(
+                Objects.requireNonNull(AppOpsManager.permissionToOp(RECORD_AUDIO)),
+                mServiceInfo.applicationInfo.uid,
+                mServiceInfo.packageName,
+                mAttributionTag);
     }
 
     /** Establishes an audio stream from the DSP audio source. */
