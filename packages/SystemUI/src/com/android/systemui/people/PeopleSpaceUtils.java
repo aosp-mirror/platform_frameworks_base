@@ -23,6 +23,7 @@ import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.people.ConversationChannel;
 import android.app.people.IPeopleManager;
+import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
@@ -221,7 +222,7 @@ public class PeopleSpaceUtils {
             return tile;
         }
         return tile.toBuilder()
-                .setStatusText(storedTile.getStatusText())
+                .setBirthdayText(storedTile.getBirthdayText())
                 .setNotificationKey(storedTile.getNotificationKey())
                 .setNotificationContent(storedTile.getNotificationContent())
                 .setNotificationDataUri(storedTile.getNotificationDataUri())
@@ -234,6 +235,10 @@ public class PeopleSpaceUtils {
             int appWidgetId) {
         Bundle options = appWidgetManager.getAppWidgetOptions(appWidgetId);
         PeopleSpaceTile storedTile = options.getParcelable(OPTIONS_PEOPLE_SPACE_TILE);
+        if (storedTile == null) {
+            if (DEBUG) Log.d(TAG, "Could not find stored tile to add notification to");
+            return;
+        }
         if (notificationAction == PeopleSpaceUtils.NotificationAction.POSTED) {
             if (DEBUG) Log.i(TAG, "Adding notification to storage, appWidgetId: " + appWidgetId);
             Notification.MessagingStyle.Message message = getLastMessagingStyleMessage(sbn);
@@ -263,6 +268,10 @@ public class PeopleSpaceUtils {
 
     private static void updateAppWidgetOptions(AppWidgetManager appWidgetManager, int appWidgetId,
             PeopleSpaceTile tile) {
+        if (tile == null) {
+            if (DEBUG) Log.d(TAG, "Requested to store null tile");
+            return;
+        }
         Bundle newOptions = new Bundle();
         newOptions.putParcelable(OPTIONS_PEOPLE_SPACE_TILE, tile);
         appWidgetManager.updateAppWidgetOptions(appWidgetId, newOptions);
@@ -274,7 +283,7 @@ public class PeopleSpaceUtils {
         RemoteViews views;
         if (tile.getNotificationKey() != null) {
             views = createNotificationRemoteViews(context, tile);
-        } else if (tile.getStatusText() != null) {
+        } else if (tile.getBirthdayText() != null) {
             views = createStatusRemoteViews(context, tile);
         } else {
             views = createLastInteractionRemoteViews(context, tile);
@@ -344,7 +353,7 @@ public class PeopleSpaceUtils {
             PeopleSpaceTile tile) {
         RemoteViews views = new RemoteViews(
                 context.getPackageName(), R.layout.people_space_large_avatar_tile);
-        views.setTextViewText(R.id.status, tile.getStatusText());
+        views.setTextViewText(R.id.status, tile.getBirthdayText());
         return views;
     }
 
@@ -536,10 +545,9 @@ public class PeopleSpaceUtils {
     }
 
     private static boolean hasBirthdayStatus(PeopleSpaceTile tile, Context context) {
-        return tile.getStatusText() != null && tile.getStatusText().equals(
+        return tile.getBirthdayText() != null && tile.getBirthdayText().equals(
                 context.getString(R.string.birthday_status));
     }
-
 
     /** Calls to retrieve birthdays on a background thread. */
     private static void getBirthdaysOnBackgroundThread(Context context,
@@ -581,7 +589,7 @@ public class PeopleSpaceUtils {
             if (DEBUG) Log.d(TAG, "Remove " + storedTile.getUserName() + "'s birthday");
             updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId,
                     storedTile.toBuilder()
-                            .setStatusText(null)
+                            .setBirthdayText(null)
                             .build());
         }
     }
@@ -605,7 +613,7 @@ public class PeopleSpaceUtils {
                     if (DEBUG) Log.d(TAG, storedTile.getUserName() + "'s birthday today!");
                     updateAppWidgetOptionsAndView(appWidgetManager, context, appWidgetId,
                             storedTile.toBuilder()
-                                    .setStatusText(context.getString(R.string.birthday_status))
+                                    .setBirthdayText(context.getString(R.string.birthday_status))
                                     .build());
                     return;
                 }
