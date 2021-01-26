@@ -10373,6 +10373,7 @@ package android.content {
     field public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final String LOCATION_SERVICE = "location";
+    field public static final String MEDIA_METRICS_SERVICE = "media_metrics";
     field public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final String MEDIA_ROUTER_SERVICE = "media_router";
     field public static final String MEDIA_SESSION_SERVICE = "media_session";
