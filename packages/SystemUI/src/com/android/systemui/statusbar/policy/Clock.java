@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.policy;
 
-import android.annotation.ColorInt;
 import android.app.StatusBarManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -100,12 +99,6 @@ public class Clock extends TextView implements
     private final int mAmPmStyle;
     private boolean mShowSeconds;
     private Handler mSecondsHandler;
-
-    /**
-     * Whether we should use colors that adapt based on wallpaper/the scrim behind quick settings
-     * for text.
-     */
-    private boolean mUseWallpaperTextColor;
 
     /**
      * Color to be set on this {@link TextView}, when wallpaperTextColor is <b>not</b> utilized.
@@ -323,9 +316,6 @@ public class Clock extends TextView implements
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
         mNonAdaptedColor = DarkIconDispatcher.getTint(area, this, tint);
-        if (!mUseWallpaperTextColor) {
-            setTextColor(mNonAdaptedColor);
-        }
     }
 
     // Update text color based when shade scrim changes color.
@@ -345,25 +335,6 @@ public class Clock extends TextView implements
                 mContext.getResources().getDimensionPixelSize(
                         R.dimen.status_bar_clock_end_padding),
                 0);
-    }
-
-    /**
-     * Sets whether the clock uses the wallpaperTextColor. If we're not using it, we'll revert back
-     * to dark-mode-based/tinted colors.
-     *
-     * @param shouldUseWallpaperTextColor whether we should use wallpaperTextColor for text color
-     */
-    public void useWallpaperTextColor(boolean shouldUseWallpaperTextColor) {
-        if (shouldUseWallpaperTextColor == mUseWallpaperTextColor) {
-            return;
-        }
-        mUseWallpaperTextColor = shouldUseWallpaperTextColor;
-
-        if (mUseWallpaperTextColor) {
-            setTextColor(Utils.getColorAttr(mContext, R.attr.wallpaperTextColor));
-        } else {
-            setTextColor(mNonAdaptedColor);
-        }
     }
 
     private void updateShowSeconds() {
