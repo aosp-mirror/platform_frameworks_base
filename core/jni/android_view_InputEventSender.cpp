@@ -199,7 +199,13 @@ status_t NativeInputEventSender::receiveFinishedSignals(JNIEnv* env) {
     for (;;) {
         uint32_t publishedSeq;
         bool handled;
-        status_t status = mInputPublisher.receiveFinishedSignal(&publishedSeq, &handled);
+        std::function<void(uint32_t seq, bool handled, nsecs_t consumeTime)> callback =
+                [&publishedSeq, &handled](uint32_t inSeq, bool inHandled,
+                                          nsecs_t inConsumeTime) -> void {
+            publishedSeq = inSeq;
+            handled = inHandled;
+        };
+        status_t status = mInputPublisher.receiveFinishedSignal(callback);
         if (status) {
             if (status == WOULD_BLOCK) {
                 return OK;
