@@ -22951,6 +22951,12 @@ public class PackageManagerService extends IPackageManager.Stub
                 getPackageFromComponentString(R.string.config_defaultAttentionService));
     }
 
+    @Override
+    public @Nullable String getRotationResolverPackageName() {
+        return ensureSystemPackageName(
+                getPackageFromComponentString(R.string.config_defaultRotationResolverService));
+    }
+
     private @Nullable String getDocumenterPackageName() {
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);

@@ -46,6 +46,7 @@ package android {
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
+    field public static final String BIND_ROTATION_RESOLVER_SERVICE = "android.permission.BIND_ROTATION_RESOLVER_SERVICE";
     field public static final String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
@@ -133,6 +134,7 @@ package android {
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
     field public static final String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
+    field public static final String MANAGE_ROTATION_RESOLVER = "android.permission.MANAGE_ROTATION_RESOLVER";
     field public static final String MANAGE_SEARCH_UI = "android.permission.MANAGE_SEARCH_UI";
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
@@ -9957,6 +9959,37 @@ package android.service.resumeonreboot {
     method @NonNull public abstract byte[] onUnwrap(@NonNull byte[]) throws java.io.IOException;
     method @NonNull public abstract byte[] onWrap(@NonNull byte[], long) throws java.io.IOException;
     field public static final String SERVICE_INTERFACE = "android.service.resumeonreboot.ResumeOnRebootService";
+  }
+
+}
+
+package android.service.rotationresolver {
+
+  public final class RotationResolutionRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCurrentRotation();
+    method @NonNull public String getPackageName();
+    method public int getProposedRotation();
+    method public long getTimeoutMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.rotationresolver.RotationResolutionRequest> CREATOR;
+  }
+
+  public abstract class RotationResolverService extends android.app.Service {
+    ctor public RotationResolverService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onResolveRotation(@NonNull android.service.rotationresolver.RotationResolutionRequest, @Nullable android.os.CancellationSignal, @NonNull android.service.rotationresolver.RotationResolverService.RotationResolverCallback);
+    field public static final int ROTATION_RESULT_FAILURE_CANCELLED = 0; // 0x0
+    field public static final int ROTATION_RESULT_FAILURE_NOT_SUPPORTED = 4; // 0x4
+    field public static final int ROTATION_RESULT_FAILURE_PREEMPTED = 2; // 0x2
+    field public static final int ROTATION_RESULT_FAILURE_TIMED_OUT = 1; // 0x1
+    field public static final int ROTATION_RESULT_FAILURE_UNKNOWN = 3; // 0x3
+    field public static final String SERVICE_INTERFACE = "android.service.rotationresolver.RotationResolverService";
+  }
+
+  public static interface RotationResolverService.RotationResolverCallback {
+    method public void onFailure(int);
+    method public void onSuccess(int);
   }
 
 }

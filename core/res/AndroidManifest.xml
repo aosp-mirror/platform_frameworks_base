@@ -3568,6 +3568,15 @@
                 android:protectionLevel="signature" />
     <uses-permission android:name="android.permission.BIND_ATTENTION_SERVICE" />
 
+    <!-- @SystemApi Must be required by a RotationResolverService
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_ROTATION_RESOLVER_SERVICE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="android.permission.BIND_ROTATION_RESOLVER_SERVICE" />
+
     <!-- Must be required by a {@link android.net.VpnService},
          to ensure that only the system can bind to it.
          <p>Protection level: signature
@@ -5119,6 +5128,11 @@
          @hide  <p>Not for use by third-party applications.</p> -->
     <permission android:name="android.permission.MANAGE_CONTENT_CAPTURE"
         android:protectionLevel="signature" />
+
+    <!-- @SystemApi Allows an application to manager the rotation resolver service.
+         @hide <p>Not for use by third-party applications.</p> -->
+    <permission android:name="android.permission.MANAGE_ROTATION_RESOLVER"
+        android:protectionLevel="signature"/>
 
     <!-- @SystemApi Allows an application to manage the music recognition service.
          @hide  <p>Not for use by third-party applications.</p> -->

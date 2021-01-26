@@ -169,6 +169,7 @@ import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleServicePlatformHelper;
+import com.android.server.rotationresolver.RotationResolverManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -1628,7 +1629,7 @@ public final class SystemServer implements Dumpable {
 
             startContentCaptureService(context, t);
             startAttentionService(context, t);
-
+            startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
 
             // App prediction manager service
@@ -2831,6 +2832,19 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartAttentionManagerService");
         mSystemServiceManager.startService(AttentionManagerService.class);
         t.traceEnd();
+    }
+
+    private void startRotationResolverService(@NonNull Context context,
+            @NonNull TimingsTraceAndSlog t) {
+        if (!RotationResolverManagerService.isServiceConfigured(context)) {
+            Slog.d(TAG, "RotationResolverService is not configured on this device");
+            return;
+        }
+
+        t.traceBegin("StartRotationResolverService");
+        mSystemServiceManager.startService(RotationResolverManagerService.class);
+        t.traceEnd();
+
     }
 
     private static void startSystemUi(Context context, WindowManagerService windowManager) {
