@@ -34,12 +34,10 @@ import android.app.PendingIntent;
 import android.app.StatusBarManager;
 import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricSourceType;
 import android.media.AudioAttributes;
@@ -91,7 +89,6 @@ import com.android.systemui.SystemUIFactory;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.keyguard.KeyguardService;
 import com.android.systemui.keyguard.dagger.KeyguardModule;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.shared.system.QuickStepContract;
@@ -787,7 +784,7 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
         // Assume keyguard is showing (unless it's disabled) until we know for sure, unless Keyguard
         // is disabled.
-        if (isKeyguardServiceEnabled()) {
+        if (mContext.getResources().getBoolean(R.bool.config_enableKeyguardService)) {
             setShowingLocked(!shouldWaitForProvisioning()
                     && !mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser()), true /* forceCallbacks */);
@@ -963,15 +960,6 @@ public class KeyguardViewMediator extends SystemUI implements Dumpable {
 
         }
         mUpdateMonitor.dispatchFinishedGoingToSleep(why);
-    }
-
-    private boolean isKeyguardServiceEnabled() {
-        try {
-            return mContext.getPackageManager().getServiceInfo(
-                    new ComponentName(mContext, KeyguardService.class), 0).isEnabled();
-        } catch (NameNotFoundException e) {
-            return true;
-        }
     }
 
     private long getLockTimeout(int userId) {
