@@ -49,6 +49,15 @@ class ToastLogger @Inject constructor(
         })
     }
 
+    fun logOrientationChange(text: String, isPortrait: Boolean) {
+        log(DEBUG, {
+            str1 = text
+            bool1 = isPortrait
+        }, {
+            "Orientation change for toast. msg=\'$str1\' isPortrait=$bool1"
+        })
+    }
+
     private inline fun log(
         logLevel: LogLevel,
         initializer: LogMessage.() -> Unit,

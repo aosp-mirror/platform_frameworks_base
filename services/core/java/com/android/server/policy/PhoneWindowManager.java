@@ -346,8 +346,21 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** Amount of time (in milliseconds) to wait for windows drawn before powering on. */
     static final int WAITING_FOR_DRAWN_TIMEOUT = 1000;
 
-    /** Amount of time (in milliseconds) a toast window can be shown. */
-    public static final int TOAST_WINDOW_TIMEOUT = 3500; // 3.5 seconds
+    /**
+      * Extra time for additional SystemUI animations.
+      * <p>Since legacy apps can add Toast windows directly instead of using Toast APIs,
+      * {@link DisplayPolicy} ensures that the window manager removes toast windows after
+      * TOAST_WINDOW_TIMEOUT. We increase this timeout by TOAST_WINDOW_ANIM_BUFFER to account for
+      * SystemUI's in/out toast animations, so that the toast text is still shown for a minimum
+      * of 3.5 seconds and the animations are finished before window manager removes the window.
+      */
+    public static final int TOAST_WINDOW_ANIM_BUFFER = 600;
+
+    /**
+      * Amount of time (in milliseconds) a toast window can be shown before it's automatically
+      * removed by window manager.
+      */
+    public static final int TOAST_WINDOW_TIMEOUT = 3500 + TOAST_WINDOW_ANIM_BUFFER;
 
     /**
      * Lock protecting internal state.  Must not call out into window
