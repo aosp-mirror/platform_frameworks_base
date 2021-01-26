@@ -4547,13 +4547,15 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         return userState.getUidState(appId);
     }
 
-    private void removeUidState(@AppIdInt int appId, @UserIdInt int userId) {
+    private void removeUidStateAndResetPackageInstallPermissionsFixed(@AppIdInt int appId,
+            @NonNull String packageName, @UserIdInt int userId) {
         synchronized (mLock) {
             final UserPermissionState userState = mState.getUserState(userId);
             if (userState == null) {
                 return;
             }
             userState.removeUidState(appId);
+            userState.setInstallPermissionsFixed(packageName, false);
         }
     }
 
@@ -4828,7 +4830,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
         updatePermissions(packageName, null);
         if (sharedUserPkgs.isEmpty()) {
-            removeUidState(appId, userId);
+            removeUidStateAndResetPackageInstallPermissionsFixed(appId, packageName, userId);
         } else {
             // Remove permissions associated with package. Since runtime
             // permissions are per user we have to kill the removed package
