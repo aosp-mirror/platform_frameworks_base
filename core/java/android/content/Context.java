@@ -4478,6 +4478,18 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.graphics.fonts.FontManager} for font services.
+     *
+     * @see #getSystemService(String)
+     * @see android.graphics.fonts.FontManager
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String FONT_SERVICE = "font";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link com.android.server.attention.AttentionManagerService} for attention services.
      *
      * @see #getSystemService(String)

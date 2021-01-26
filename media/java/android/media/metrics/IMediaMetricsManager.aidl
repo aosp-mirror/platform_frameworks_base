@@ -26,7 +26,7 @@ import android.media.metrics.TrackChangeEvent;
  * Interface to the playback manager service.
  * @hide
  */
-interface IPlaybackMetricsManager {
+interface IMediaMetricsManager {
     void reportPlaybackMetrics(in String sessionId, in PlaybackMetrics metrics, int userId);
     String getSessionId(int userId);
     void reportNetworkEvent(in String sessionId, in NetworkEvent event, int userId);

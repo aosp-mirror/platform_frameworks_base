@@ -100,10 +100,10 @@ public class FontListParser {
             @NonNull FontCustomizationParser.Result customization,
             @Nullable Map<String, File> updatableFontMap)
             throws XmlPullParserException, IOException {
-        List<FontConfig.Family> families = new ArrayList<>();
+        List<FontConfig.FontFamily> families = new ArrayList<>();
         List<FontConfig.Alias> aliases = new ArrayList<>(customization.getAdditionalAliases());
 
-        Map<String, FontConfig.Family> oemNamedFamilies =
+        Map<String, FontConfig.FontFamily> oemNamedFamilies =
                 customization.getAdditionalNamedFamilies();
 
         parser.require(XmlPullParser.START_TAG, null, "familyset");
@@ -111,8 +111,8 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
-                FontConfig.Family family = readFamily(parser, fontDir, updatableFontMap);
-                String name = family.getFallbackName();
+                FontConfig.FontFamily family = readFamily(parser, fontDir, updatableFontMap);
+                String name = family.getName();
                 if (name == null || !oemNamedFamilies.containsKey(name)) {
                     // The OEM customization overrides system named family. Skip if OEM
                     // customization XML defines the same named family.
@@ -132,7 +132,7 @@ public class FontListParser {
     /**
      * Read family tag in fonts.xml or oem_customization.xml
      */
-    public static FontConfig.Family readFamily(XmlPullParser parser, String fontDir,
+    public static FontConfig.FontFamily readFamily(XmlPullParser parser, String fontDir,
             @Nullable Map<String, File> updatableFontMap)
             throws XmlPullParserException, IOException {
         final String name = parser.getAttributeValue(null, "name");
@@ -148,15 +148,15 @@ public class FontListParser {
                 skip(parser);
             }
         }
-        int intVariant = FontConfig.Family.VARIANT_DEFAULT;
+        int intVariant = FontConfig.FontFamily.VARIANT_DEFAULT;
         if (variant != null) {
             if (variant.equals("compact")) {
-                intVariant = FontConfig.Family.VARIANT_COMPACT;
+                intVariant = FontConfig.FontFamily.VARIANT_COMPACT;
             } else if (variant.equals("elegant")) {
-                intVariant = FontConfig.Family.VARIANT_ELEGANT;
+                intVariant = FontConfig.FontFamily.VARIANT_ELEGANT;
             }
         }
-        return new FontConfig.Family(fonts, name, LocaleList.forLanguageTags(lang), intVariant);
+        return new FontConfig.FontFamily(fonts, name, LocaleList.forLanguageTags(lang), intVariant);
     }
 
     /** Matches leading and trailing XML whitespace. */

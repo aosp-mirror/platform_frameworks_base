@@ -17,7 +17,7 @@
 package com.android.server.media.metrics;
 
 import android.content.Context;
-import android.media.metrics.IPlaybackMetricsManager;
+import android.media.metrics.IMediaMetricsManager;
 import android.media.metrics.NetworkEvent;
 import android.media.metrics.PlaybackErrorEvent;
 import android.media.metrics.PlaybackMetrics;
@@ -33,9 +33,9 @@ import com.android.server.SystemService;
 import java.security.SecureRandom;
 
 /**
- * System service manages playback metrics.
+ * System service manages media metrics.
  */
-public final class PlaybackMetricsManagerService extends SystemService {
+public final class MediaMetricsManagerService extends SystemService {
     private final SecureRandom mSecureRandom;
 
     /**
@@ -43,7 +43,7 @@ public final class PlaybackMetricsManagerService extends SystemService {
      *
      * @param context The system server context.
      */
-    public PlaybackMetricsManagerService(Context context) {
+    public MediaMetricsManagerService(Context context) {
         super(context);
         mSecureRandom = new SecureRandom();
     }
@@ -54,7 +54,7 @@ public final class PlaybackMetricsManagerService extends SystemService {
         publishBinderService("playback_metrics", new BinderService());
     }
 
-    private final class BinderService extends IPlaybackMetricsManager.Stub {
+    private final class BinderService extends IMediaMetricsManager.Stub {
         @Override
         public void reportPlaybackMetrics(String sessionId, PlaybackMetrics metrics, int userId) {
             StatsEvent statsEvent = StatsEvent.newBuilder()

@@ -1151,10 +1151,10 @@ public class Typeface {
 
         for (int i = 0; i < aliases.size(); ++i) {
             final FontConfig.Alias alias = aliases.get(i);
-            if (outSystemFontMap.containsKey(alias.getAliasName())) {
+            if (outSystemFontMap.containsKey(alias.getName())) {
                 continue; // If alias and named family are conflict, use named family.
             }
-            final Typeface base = outSystemFontMap.get(alias.getReferName());
+            final Typeface base = outSystemFontMap.get(alias.getOriginal());
             if (base == null) {
                 // The missing target is a valid thing, some configuration don't have font files,
                 // e.g. wear devices. Just skip this alias.
@@ -1163,7 +1163,7 @@ public class Typeface {
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :
                     new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
-            outSystemFontMap.put(alias.getAliasName(), newFace);
+            outSystemFontMap.put(alias.getName(), newFace);
         }
     }
 

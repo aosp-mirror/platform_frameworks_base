@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.ime
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -38,6 +39,7 @@ import com.android.server.wm.flicker.noUncoveredRegions
 import com.android.server.wm.flicker.repetitions
 import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.endRotation
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
@@ -51,6 +53,7 @@ import org.junit.runners.Parameterized
  * Test IME window opening transitions.
  * To run this test: `atest FlickerTests:ReOpenImeWindowTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -109,9 +112,11 @@ class ReOpenImeWindowTest(
                             layersTrace {
                                 noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation)
                                 navBarLayerRotatesAndScales(Surface.ROTATION_0,
-                                        configuration.endRotation)
+                                        configuration.endRotation,
+                                        enabled = !configuration.startRotation.isRotated())
                                 statusBarLayerRotatesScales(Surface.ROTATION_0,
-                                        configuration.endRotation)
+                                        configuration.endRotation,
+                                        enabled = !configuration.startRotation.isRotated())
                                 statusBarLayerIsAlwaysVisible()
                                 navBarLayerIsAlwaysVisible()
                                 visibleLayersShownMoreThanOneConsecutiveEntry()

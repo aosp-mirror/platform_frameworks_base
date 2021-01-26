@@ -23,7 +23,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
 import android.media.tv.TvInputService;
@@ -54,6 +53,7 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Process;
 import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -352,7 +352,7 @@ public class Tuner implements AutoCloseable  {
                 profile, new HandlerExecutor(mHandler), mResourceListener, clientId);
         mClientId = clientId[0];
 
-        mUserId = ActivityManager.getCurrentUser();
+        mUserId = Process.myUid();
     }
 
     /**

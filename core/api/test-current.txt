@@ -627,6 +627,7 @@ package android.content {
     field public static final String CONTENT_CAPTURE_MANAGER_SERVICE = "content_capture";
     field public static final String DEVICE_IDLE_CONTROLLER = "deviceidle";
     field public static final String DREAM_SERVICE = "dream";
+    field public static final String FONT_SERVICE = "font";
     field public static final String POWER_WHITELIST_MANAGER = "power_whitelist";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
@@ -815,6 +816,14 @@ package android.graphics.drawable {
 
   public class ShapeDrawable extends android.graphics.drawable.Drawable {
     method public void setXfermode(@Nullable android.graphics.Xfermode);
+  }
+
+}
+
+package android.graphics.fonts {
+
+  public class FontManager {
+    method @Nullable public android.text.FontConfig getFontConfig();
   }
 
 }
@@ -2018,6 +2027,47 @@ package android.telephony.ims.feature {
 }
 
 package android.text {
+
+  public final class FontConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.text.FontConfig.Alias> getAliases();
+    method @NonNull public java.util.List<android.text.FontConfig.FontFamily> getFontFamilies();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig> CREATOR;
+  }
+
+  public static final class FontConfig.Alias implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public String getName();
+    method @NonNull public String getOriginal();
+    method @IntRange(from=0, to=1000) public int getWeight();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.Alias> CREATOR;
+  }
+
+  public static final class FontConfig.Font implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.io.File getFile();
+    method @Nullable public String getFontFamilyName();
+    method @NonNull public String getFontVariationSettings();
+    method @NonNull public android.graphics.fonts.FontStyle getStyle();
+    method public int getTtcIndex();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.Font> CREATOR;
+  }
+
+  public static final class FontConfig.FontFamily implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.text.FontConfig.Font> getFontList();
+    method @NonNull public android.os.LocaleList getLocaleList();
+    method @Nullable public String getName();
+    method public int getVariant();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig.FontFamily> CREATOR;
+    field public static final int VARIANT_COMPACT = 1; // 0x1
+    field public static final int VARIANT_DEFAULT = 0; // 0x0
+    field public static final int VARIANT_ELEGANT = 2; // 0x2
+  }
 
   public static final class Selection.MemoryTextWatcher implements android.text.TextWatcher {
     ctor public Selection.MemoryTextWatcher();

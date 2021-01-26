@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker.close
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -50,6 +51,7 @@ import org.junit.runners.Parameterized
  * Test app closes by pressing back button
  * To run this test: `atest FlickerTests:CloseAppBackButtonTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -93,7 +95,7 @@ class CloseAppBackButtonTest(
                         windowManagerTrace {
                             navBarWindowIsAlwaysVisible()
                             statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 174635878)
+                            visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173684672)
 
                             launcherReplacesAppWindowAsTopWindow(testApp)
                             wallpaperWindowBecomesVisible()
@@ -110,7 +112,7 @@ class CloseAppBackButtonTest(
                                 enabled = !configuration.startRotation.isRotated())
                             navBarLayerIsAlwaysVisible()
                             statusBarLayerIsAlwaysVisible()
-                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 174635878)
+                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173684672)
 
                             wallpaperLayerReplacesAppLayer(testApp)
                         }
