@@ -3189,6 +3189,17 @@ public final class Settings implements Watchable, Snappable {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+        } finally {
+            if (!mVersion.containsKey(StorageManager.UUID_PRIVATE_INTERNAL)) {
+                Slog.wtf(PackageManagerService.TAG,
+                        "No internal VersionInfo found in settings, using current.");
+                findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL).forceCurrent();
+            }
+            if (!mVersion.containsKey(StorageManager.UUID_PRIMARY_PHYSICAL)) {
+                Slog.wtf(PackageManagerService.TAG,
+                        "No external VersionInfo found in settings, using current.");
+                findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL).forceCurrent();
+            }
         }
 
         // If the build is setup to drop runtime permissions
