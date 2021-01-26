@@ -18,9 +18,10 @@ package com.android.server.powerstats;
 
 import android.annotation.Nullable;
 import android.content.Context;
-import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.Channel;
+import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
-import android.hardware.power.stats.PowerEntityInfo;
+import android.hardware.power.stats.PowerEntity;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -29,14 +30,15 @@ import android.os.UserHandle;
 import android.power.PowerStatsInternal;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
-import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
-import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
-import com.android.server.powerstats.ProtoStreamUtils.PowerEntityInfoUtils;
+import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerUtils;
+import com.android.server.powerstats.ProtoStreamUtils.PowerEntityUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -70,6 +72,7 @@ public class PowerStatsService extends SystemService {
 
     @VisibleForTesting
     static class Injector {
+        @GuardedBy("this")
         private IPowerStatsHALWrapper mPowerStatsHALWrapper;
 
         File createDataStoragePath() {
@@ -94,10 +97,12 @@ public class PowerStatsService extends SystemService {
         }
 
         IPowerStatsHALWrapper getPowerStatsHALWrapperImpl() {
-            if (mPowerStatsHALWrapper == null) {
-                mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
+            synchronized (this) {
+                if (mPowerStatsHALWrapper == null) {
+                    mPowerStatsHALWrapper = PowerStatsHALWrapper.getPowerStatsHalImpl();
+                }
+                return mPowerStatsHALWrapper;
             }
-            return mPowerStatsHALWrapper;
         }
 
         PowerStatsLogger createPowerStatsLogger(Context context, File dataStoragePath,
@@ -133,17 +138,17 @@ public class PowerStatsService extends SystemService {
                         mPowerStatsLogger.writeResidencyDataToFile(fd);
                     }
                 } else if (args.length == 0) {
-                    pw.println("PowerStatsService dumpsys: available PowerEntityInfos");
-                    PowerEntityInfo[] powerEntityInfo = getPowerStatsHal().getPowerEntityInfo();
-                    PowerEntityInfoUtils.dumpsys(powerEntityInfo, pw);
+                    pw.println("PowerStatsService dumpsys: available PowerEntities");
+                    PowerEntity[] powerEntity = getPowerStatsHal().getPowerEntityInfo();
+                    PowerEntityUtils.dumpsys(powerEntity, pw);
 
-                    pw.println("PowerStatsService dumpsys: available ChannelInfos");
-                    ChannelInfo[] channelInfo = getPowerStatsHal().getEnergyMeterInfo();
-                    ChannelInfoUtils.dumpsys(channelInfo, pw);
+                    pw.println("PowerStatsService dumpsys: available Channels");
+                    Channel[] channel = getPowerStatsHal().getEnergyMeterInfo();
+                    ChannelUtils.dumpsys(channel, pw);
 
-                    pw.println("PowerStatsService dumpsys: available EnergyConsumerIds");
-                    int[] energyConsumerId = getPowerStatsHal().getEnergyConsumerInfo();
-                    EnergyConsumerIdUtils.dumpsys(energyConsumerId, pw);
+                    pw.println("PowerStatsService dumpsys: available EnergyConsumers");
+                    EnergyConsumer[] energyConsumer = getPowerStatsHal().getEnergyConsumerInfo();
+                    EnergyConsumerUtils.dumpsys(energyConsumer, pw);
                 }
             }
         }
@@ -203,6 +208,12 @@ public class PowerStatsService extends SystemService {
             HandlerThread thread = new HandlerThread(TAG);
             thread.start();
             mHandler = new Handler(thread.getLooper());
+        }
+
+
+        @Override
+        public EnergyConsumer[] getEnergyConsumerInfo() {
+            return getPowerStatsHal().getEnergyConsumerInfo();
         }
 
         @Override

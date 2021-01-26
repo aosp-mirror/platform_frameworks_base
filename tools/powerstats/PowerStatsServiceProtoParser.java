@@ -27,16 +27,16 @@ import java.io.IOException;
 public class PowerStatsServiceProtoParser {
     private static void printEnergyMeterInfo(PowerStatsServiceMeterProto proto) {
         String csvHeader = new String();
-        for (int i = 0; i < proto.getChannelInfoCount(); i++) {
-            ChannelInfoProto energyMeterInfo = proto.getChannelInfo(i);
-            csvHeader += "Index,Timestamp," + energyMeterInfo.getChannelId()
-                + "/" + energyMeterInfo.getChannelName() + ",";
+        for (int i = 0; i < proto.getChannelCount(); i++) {
+            ChannelProto energyMeterInfo = proto.getChannel(i);
+            csvHeader += "Index,Timestamp,Duration," + energyMeterInfo.getId()
+                + "/" + energyMeterInfo.getName() + ",";
         }
         System.out.println(csvHeader);
     }
 
     private static void printEnergyMeasurements(PowerStatsServiceMeterProto proto) {
-        int energyMeterInfoCount = proto.getChannelInfoCount();
+        int energyMeterInfoCount = proto.getChannelCount();
 
         if (energyMeterInfoCount > 0) {
             int energyMeasurementCount = proto.getEnergyMeasurementCount();
@@ -47,8 +47,9 @@ public class PowerStatsServiceProtoParser {
                 for (int j = 0; j < energyMeterInfoCount; j++) {
                     EnergyMeasurementProto energyMeasurement =
                             proto.getEnergyMeasurement(i * energyMeterInfoCount + j);
-                    csvRow += energyMeasurement.getChannelId() + ","
+                    csvRow += energyMeasurement.getId() + ","
                         + energyMeasurement.getTimestampMs() + ","
+                        + energyMeasurement.getDurationMs() + ","
                         + energyMeasurement.getEnergyUws() + ",";
                 }
                 System.out.println(csvRow);
@@ -58,47 +59,49 @@ public class PowerStatsServiceProtoParser {
         }
     }
 
-    private static void printEnergyConsumerId(PowerStatsServiceModelProto proto) {
+    private static void printEnergyConsumer(PowerStatsServiceModelProto proto) {
         String csvHeader = new String();
-        for (int i = 0; i < proto.getEnergyConsumerIdCount(); i++) {
-            EnergyConsumerIdProto energyConsumerId = proto.getEnergyConsumerId(i);
-            csvHeader += "Index,Timestamp," + energyConsumerId.getEnergyConsumerId() + ",";
+        for (int i = 0; i < proto.getEnergyConsumerCount(); i++) {
+            EnergyConsumerProto energyConsumer = proto.getEnergyConsumer(i);
+            csvHeader += "Index,Timestamp," + energyConsumer.getId() + "/"
+                + energyConsumer.getOrdinal() + "/"
+                + energyConsumer.getType() + "/"
+                + energyConsumer.getName() + ",";
         }
         System.out.println(csvHeader);
     }
 
     private static void printEnergyConsumerResults(PowerStatsServiceModelProto proto) {
-        int energyConsumerIdCount = proto.getEnergyConsumerIdCount();
+        int energyConsumerCount = proto.getEnergyConsumerCount();
 
-        if (energyConsumerIdCount > 0) {
+        if (energyConsumerCount > 0) {
             int energyConsumerResultCount = proto.getEnergyConsumerResultCount();
-            int energyConsumerResultSetCount = energyConsumerResultCount / energyConsumerIdCount;
+            int energyConsumerResultSetCount = energyConsumerResultCount / energyConsumerCount;
 
             for (int i = 0; i < energyConsumerResultSetCount; i++) {
                 String csvRow = new String();
-                for (int j = 0; j < energyConsumerIdCount; j++) {
+                for (int j = 0; j < energyConsumerCount; j++) {
                     EnergyConsumerResultProto energyConsumerResult =
-                            proto.getEnergyConsumerResult(i * energyConsumerIdCount + j);
-                    csvRow += energyConsumerResult.getEnergyConsumerId() + ","
+                            proto.getEnergyConsumerResult(i * energyConsumerCount + j);
+                    csvRow += energyConsumerResult.getId() + ","
                         + energyConsumerResult.getTimestampMs() + ","
                         + energyConsumerResult.getEnergyUws() + ",";
                 }
                 System.out.println(csvRow);
             }
         } else {
-            System.out.println("Error:  energyConsumerIdCount is zero");
+            System.out.println("Error:  energyConsumerCount is zero");
         }
     }
 
     private static void printPowerEntityInfo(PowerStatsServiceResidencyProto proto) {
         String csvHeader = new String();
-        for (int i = 0; i < proto.getPowerEntityInfoCount(); i++) {
-            PowerEntityInfoProto powerEntityInfo = proto.getPowerEntityInfo(i);
-            csvHeader += powerEntityInfo.getPowerEntityId() + ","
-                + powerEntityInfo.getPowerEntityName() + ",";
-            for (int j = 0; j < powerEntityInfo.getStatesCount(); j++) {
-                StateInfoProto stateInfo = powerEntityInfo.getStates(j);
-                csvHeader += stateInfo.getStateId() + "," + stateInfo.getStateName() + ",";
+        for (int i = 0; i < proto.getPowerEntityCount(); i++) {
+            PowerEntityProto powerEntity = proto.getPowerEntity(i);
+            csvHeader += powerEntity.getId() + "," + powerEntity.getName() + ",";
+            for (int j = 0; j < powerEntity.getStatesCount(); j++) {
+                StateProto state = powerEntity.getStates(j);
+                csvHeader += state.getId() + "," + state.getName() + ",";
             }
         }
         System.out.println(csvHeader);
@@ -109,11 +112,11 @@ public class PowerStatsServiceProtoParser {
             String csvRow = new String();
 
             StateResidencyResultProto stateResidencyResult = proto.getStateResidencyResult(i);
-            csvRow += stateResidencyResult.getPowerEntityId() + ",";
+            csvRow += stateResidencyResult.getId() + ",";
 
             for (int j = 0; j < stateResidencyResult.getStateResidencyDataCount(); j++) {
                 StateResidencyProto stateResidency = stateResidencyResult.getStateResidencyData(j);
-                csvRow += stateResidency.getStateId() + ","
+                csvRow += stateResidency.getId() + ","
                     + stateResidency.getTotalTimeInStateMs() + ","
                     + stateResidency.getTotalStateEntryCount() + ","
                     + stateResidency.getLastEntryTimestampMs() + ",";
@@ -142,7 +145,7 @@ public class PowerStatsServiceProtoParser {
 
             if (irModelProto.hasIncidentReport()) {
                 PowerStatsServiceModelProto pssModelProto = irModelProto.getIncidentReport();
-                printEnergyConsumerId(pssModelProto);
+                printEnergyConsumer(pssModelProto);
                 printEnergyConsumerResults(pssModelProto);
             } else {
                 System.out.println("Model incident report not found.  Exiting.");
