@@ -304,7 +304,10 @@ public abstract class PackageManager {
     /**
      * {@link PackageInfo} flag: return information about the
      * intent filters supported by the activity.
+     *
+     * @deprecated The platform does not support getting {@link IntentFilter}s for the package.
      */
+    @Deprecated
     public static final int GET_INTENT_FILTERS          = 0x00000020;
 
     /**
