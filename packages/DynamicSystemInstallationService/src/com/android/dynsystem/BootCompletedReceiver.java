@@ -19,11 +19,9 @@ package com.android.dynsystem;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.image.DynamicSystemClient;
 import android.os.image.DynamicSystemManager;
-import android.util.FeatureFlagUtils;
 
 
 /**
@@ -48,7 +46,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         boolean isInUse = (dynSystem != null) && dynSystem.isInUse();
 
-        if (!isInUse && !featureFlagEnabled()) {
+        if (!isInUse) {
             return;
         }
 
@@ -57,10 +55,5 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
         startServiceIntent.setAction(DynamicSystemClient.ACTION_NOTIFY_IF_IN_USE);
         context.startServiceAsUser(startServiceIntent, UserHandle.SYSTEM);
-    }
-
-    private boolean featureFlagEnabled() {
-        return SystemProperties.getBoolean(
-                FeatureFlagUtils.PERSIST_PREFIX + FeatureFlagUtils.DYNAMIC_SYSTEM, false);
     }
 }
