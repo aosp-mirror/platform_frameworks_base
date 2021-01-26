@@ -2312,6 +2312,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK);
     }
 
+    private void enforceOemNetworkPreferencesPermission() {
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE,
+                "ConnectivityService");
+    }
+
     private boolean checkNetworkStackPermission() {
         return checkAnyPermissionOf(
                 android.Manifest.permission.NETWORK_STACK,
@@ -9334,8 +9340,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void setOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
             @Nullable final IOnSetOemNetworkPreferenceListener listener) {
+
+        enforceOemNetworkPreferencesPermission();
         enforceAutomotiveDevice();
-        // TODO http://b/176496438 add permission check once permissions are added.
 
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         validateOemNetworkPreferences(preference);

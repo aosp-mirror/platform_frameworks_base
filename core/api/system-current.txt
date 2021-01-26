@@ -74,6 +74,7 @@ package android {
     field public static final String CONTROL_DISPLAY_SATURATION = "android.permission.CONTROL_DISPLAY_SATURATION";
     field public static final String CONTROL_INCALL_EXPERIENCE = "android.permission.CONTROL_INCALL_EXPERIENCE";
     field public static final String CONTROL_KEYGUARD_SECURE_NOTIFICATIONS = "android.permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS";
+    field public static final String CONTROL_OEM_PAID_NETWORK_PREFERENCE = "android.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE";
     field public static final String CONTROL_VPN = "android.permission.CONTROL_VPN";
     field public static final String CREATE_USERS = "android.permission.CREATE_USERS";
     field public static final String CRYPT_KEEPER = "android.permission.CRYPT_KEEPER";

@@ -5116,6 +5116,7 @@ public class ConnectivityManager {
      * @throws SecurityException if missing the appropriate permissions.
      * @throws UnsupportedOperationException if called on a non-automotive device.
      */
+    @RequiresPermission(android.Manifest.permission.CONTROL_OEM_PAID_NETWORK_PREFERENCE)
     private void setOemNetworkPreference(@NonNull final OemNetworkPreferences preference,
             @Nullable @CallbackExecutor final Executor executor,
             @Nullable final OnSetOemNetworkPreferenceListener listener) {
