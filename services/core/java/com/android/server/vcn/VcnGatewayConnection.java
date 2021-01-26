@@ -24,7 +24,6 @@ import static com.android.server.VcnManagementService.VDBG;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.net.ConnectivityManager;
 import android.net.InetAddresses;
 import android.net.IpPrefix;
 import android.net.IpSecManager;
@@ -36,8 +35,6 @@ import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.DetailedState;
 import android.net.RouteInfo;
 import android.net.annotations.PolicyDirection;
 import android.net.ipsec.ike.ChildSessionCallback;
@@ -54,7 +51,6 @@ import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Message;
 import android.os.ParcelUuid;
-import android.telephony.TelephonyManager;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -668,7 +664,7 @@ public class VcnGatewayConnection extends StateMachine {
 
         protected void teardownNetwork() {
             if (mNetworkAgent != null) {
-                mNetworkAgent.sendNetworkInfo(buildNetworkInfo(false /* isConnected */));
+                mNetworkAgent.unregister();
                 mNetworkAgent = null;
             }
         }
@@ -813,20 +809,6 @@ public class VcnGatewayConnection extends StateMachine {
     class RetryTimeoutState extends ActiveBaseState {
         @Override
         protected void processStateMsg(Message msg) {}
-    }
-
-    // TODO: Remove this when migrating to new NetworkAgent API
-    private static NetworkInfo buildNetworkInfo(boolean isConnected) {
-        NetworkInfo info =
-                new NetworkInfo(
-                        ConnectivityManager.TYPE_MOBILE,
-                        TelephonyManager.NETWORK_TYPE_UNKNOWN,
-                        "MOBILE",
-                        "VCN");
-        info.setDetailedState(
-                isConnected ? DetailedState.CONNECTED : DetailedState.DISCONNECTED, null, null);
-
-        return info;
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
