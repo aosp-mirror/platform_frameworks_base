@@ -753,6 +753,15 @@
             </intent-filter>
         </activity>
 
+        <activity android:name="RenderEffectShaderActivity"
+                  android:label="RenderEffect/Shader"
+                  android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="com.android.test.hwui.TEST"/>
+            </intent-filter>
+        </activity>
+
         <activity android:name="TextActivity"
              android:label="Text/Simple Text"
              android:theme="@android:style/Theme.NoTitleBar"
