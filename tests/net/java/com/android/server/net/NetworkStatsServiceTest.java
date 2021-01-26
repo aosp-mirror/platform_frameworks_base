@@ -21,7 +21,6 @@ import static android.content.Intent.EXTRA_UID;
 import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
-import static android.net.ConnectivityManager.TYPE_WIMAX;
 import static android.net.NetworkStats.DEFAULT_NETWORK_ALL;
 import static android.net.NetworkStats.DEFAULT_NETWORK_NO;
 import static android.net.NetworkStats.DEFAULT_NETWORK_YES;
@@ -44,6 +43,7 @@ import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.NETWORK_TYPE_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateMobileWithRatType;
+import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.net.TrafficStats.UID_REMOVED;
@@ -146,7 +146,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
     private static final String IMSI_2 = "310260";
     private static final String TEST_SSID = "AndroidAP";
 
-    private static NetworkTemplate sTemplateWifi = buildTemplateWifiWildcard();
+    private static NetworkTemplate sTemplateWifi = buildTemplateWifi(TEST_SSID);
     private static NetworkTemplate sTemplateImsi1 = buildTemplateMobileAll(IMSI_1);
     private static NetworkTemplate sTemplateImsi2 = buildTemplateMobileAll(IMSI_2);
 
@@ -290,7 +290,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
         // verify service has empty history for wifi
         assertNetworkTotal(sTemplateWifi, 0L, 0L, 0L, 0L, 0);
-
 
         // modify some number on wifi, and trigger poll event
         incrementCurrentTime(HOUR_IN_MILLIS);
@@ -564,61 +563,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         assertUidTotal(sTemplateWifi, UID_GREEN, 16L, 1L, 16L, 1L, 0);
         assertUidTotal(sTemplateWifi, UID_REMOVED, 4112L, 259L, 528L, 33L, 10);
 
-    }
-
-    @Test
-    public void testUid3gWimaxCombinedByTemplate() throws Exception {
-        // pretend that network comes online
-        expectDefaultSettings();
-        NetworkState[] states = new NetworkState[] {buildMobile3gState(IMSI_1)};
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(buildEmptyStats());
-
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states), new VpnInfo[0]);
-
-        // create some traffic
-        incrementCurrentTime(HOUR_IN_MILLIS);
-        expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
-                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
-        mService.incrementOperationCount(UID_RED, 0xF00D, 5);
-
-        forcePollAndWaitForIdle();
-
-        // verify service recorded history
-        assertUidTotal(sTemplateImsi1, UID_RED, 1024L, 8L, 1024L, 8L, 5);
-
-
-        // now switch over to wimax network
-        incrementCurrentTime(HOUR_IN_MILLIS);
-        expectDefaultSettings();
-        states = new NetworkState[] {buildWimaxState(TEST_IFACE2)};
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
-                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L));
-
-        mService.forceUpdateIfaces(NETWORKS_MOBILE, states, getActiveIface(states), new VpnInfo[0]);
-        forcePollAndWaitForIdle();
-
-
-        // create traffic on second network
-        incrementCurrentTime(HOUR_IN_MILLIS);
-        expectDefaultSettings();
-        expectNetworkStatsSummary(buildEmptyStats());
-        expectNetworkStatsUidDetail(new NetworkStats(getElapsedRealtime(), 1)
-                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, TAG_NONE, 1024L, 8L, 1024L, 8L, 0L)
-                .insertEntry(TEST_IFACE, UID_RED, SET_DEFAULT, 0xF00D, 512L, 4L, 512L, 4L, 0L)
-                .insertEntry(TEST_IFACE2, UID_RED, SET_DEFAULT, TAG_NONE, 512L, 4L, 256L, 2L, 0L)
-                .insertEntry(TEST_IFACE2, UID_RED, SET_DEFAULT, 0xFAAD, 512L, 4L, 256L, 2L, 0L));
-        mService.incrementOperationCount(UID_RED, 0xFAAD, 5);
-
-        forcePollAndWaitForIdle();
-
-        // verify that ALL_MOBILE template combines both
-        assertUidTotal(sTemplateImsi1, UID_RED, 1536L, 12L, 1280L, 10L, 10);
     }
 
     @Test
@@ -1503,6 +1447,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, !isMetered);
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_WIFI);
+        capabilities.setSSID(TEST_SSID);
         return new NetworkState(info, prop, capabilities, WIFI_NETWORK, null, TEST_SSID);
     }
 
@@ -1522,17 +1467,6 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
         capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, !isRoaming);
         capabilities.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
         return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, subscriberId, null);
-    }
-
-    private static NetworkState buildWimaxState(@NonNull String iface) {
-        final NetworkInfo info = new NetworkInfo(TYPE_WIMAX, 0, null, null);
-        info.setDetailedState(DetailedState.CONNECTED, null, null);
-        final LinkProperties prop = new LinkProperties();
-        prop.setInterfaceName(iface);
-        final NetworkCapabilities capabilities = new NetworkCapabilities();
-        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED, false);
-        capabilities.setCapability(NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING, true);
-        return new NetworkState(info, prop, capabilities, MOBILE_NETWORK, null, null);
     }
 
     private NetworkStats buildEmptyStats() {
