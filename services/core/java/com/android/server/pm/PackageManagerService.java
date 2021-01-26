@@ -3138,6 +3138,14 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (info.serviceInfo.splitName != null
                             && !ArrayUtils.contains(info.serviceInfo.applicationInfo.splitNames,
                                     info.serviceInfo.splitName)) {
+                        if (instantAppInstallerActivity() == null) {
+                            if (DEBUG_INSTANT) {
+                                Slog.v(TAG, "No installer - not adding it to the ResolveInfo"
+                                        + "list");
+                            }
+                            resolveInfos.remove(i);
+                            continue;
+                        }
                         // requested service is defined in a split that hasn't been installed yet.
                         // add the installer to the resolve list
                         if (DEBUG_INSTANT) {
@@ -10563,6 +10571,13 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (info.providerInfo.splitName != null
                         && !ArrayUtils.contains(info.providerInfo.applicationInfo.splitNames,
                                 info.providerInfo.splitName)) {
+                    if (mInstantAppInstallerActivity == null) {
+                        if (DEBUG_INSTANT) {
+                            Slog.v(TAG, "No installer - not adding it to the ResolveInfo list");
+                        }
+                        resolveInfos.remove(i);
+                        continue;
+                    }
                     // requested provider is defined in a split that hasn't been installed yet.
                     // add the installer to the resolve list
                     if (DEBUG_INSTANT) {
