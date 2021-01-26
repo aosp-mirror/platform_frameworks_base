@@ -343,7 +343,6 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
                     mOneHandedAccessibilityUtil.getOneHandedStartDescription());
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
-
             mOneHandedUiEventLogger.writeEvent(
                     OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN);
         }
@@ -351,12 +350,7 @@ public class OneHandedController implements RemoteCallable<OneHandedController> 
 
     @VisibleForTesting
     void stopOneHanded() {
-        if (mDisplayAreaOrganizer.isInOneHanded()) {
-            mOneHandedAccessibilityUtil.announcementForScreenReader(
-                    mOneHandedAccessibilityUtil.getOneHandedStopDescription());
-            mDisplayAreaOrganizer.scheduleOffset(0, 0);
-            mTimeoutHandler.removeTimer();
-        }
+        stopOneHanded(OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
     }
 
     private void stopOneHanded(int uiEvent) {
