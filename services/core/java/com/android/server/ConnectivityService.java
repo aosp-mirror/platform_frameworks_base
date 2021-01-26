@@ -6108,7 +6108,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkAgentPortalData = lp.getCaptivePortalData();
     }
 
-    private void updateLinkProperties(NetworkAgentInfo networkAgent, @NonNull LinkProperties newLp,
+    private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties newLp,
             @NonNull LinkProperties oldLp) {
         int netId = networkAgent.network.getNetId();
 
@@ -6117,7 +6117,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the LinkProperties for the network are accurate.
         networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
 
-        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities);
+        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities,
+                networkAgent.networkInfo.getType());
 
         // update filtering rules, need to happen after the interface update so netd knows about the
         // new interface (the interface name -> index map becomes initialized)
@@ -6256,7 +6257,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void updateInterfaces(final @Nullable LinkProperties newLp,
             final @Nullable LinkProperties oldLp, final int netId,
-            final @NonNull NetworkCapabilities caps) {
+            final @Nullable NetworkCapabilities caps, final int legacyType) {
         final CompareResult<String> interfaceDiff = new CompareResult<>(
                 oldLp != null ? oldLp.getAllInterfaceNames() : null,
                 newLp != null ? newLp.getAllInterfaceNames() : null);
@@ -6267,7 +6268,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (DBG) log("Adding iface " + iface + " to network " + netId);
                     mNetd.networkAddInterface(netId, iface);
                     wakeupModifyInterface(iface, caps, true);
-                    bs.noteNetworkInterfaceForTransports(iface, caps.getTransportTypes());
+                    bs.noteNetworkInterfaceType(iface, legacyType);
                 } catch (Exception e) {
                     loge("Exception adding interface: " + e);
                 }
@@ -6539,7 +6540,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * maintained here that the NetworkAgent is not aware of (e.g., validated, captive portal,
      * and foreground status).
      */
-    @NonNull
     private NetworkCapabilities mixInCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
         // Once a NetworkAgent is connected, complain if some immutable capabilities are removed.
          // Don't complain for VPNs since they're not driven by requests and there is no risk of

@@ -16,8 +16,6 @@
 
 package com.android.internal.os;
 
-import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
-import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
@@ -38,6 +36,7 @@ import android.content.IntentFilter;
 import android.database.ContentObserver;
 import android.hardware.usb.UsbManager;
 import android.location.GnssSignalQuality;
+import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.NetworkStats;
 import android.net.Uri;
@@ -112,7 +111,6 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.XmlUtils;
-import com.android.net.module.util.NetworkCapabilitiesUtils;
 
 import libcore.util.EmptyArray;
 
@@ -6713,12 +6711,11 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     /** @hide */
-    public void noteNetworkInterfaceForTransports(String iface, int[] transportTypes) {
+    public void noteNetworkInterfaceType(String iface, int networkType) {
         if (TextUtils.isEmpty(iface)) return;
-        final int displayTransport = NetworkCapabilitiesUtils.getDisplayTransport(transportTypes);
 
         synchronized (mModemNetworkLock) {
-            if (displayTransport == TRANSPORT_CELLULAR) {
+            if (ConnectivityManager.isNetworkTypeMobile(networkType)) {
                 mModemIfaces = includeInStringArray(mModemIfaces, iface);
                 if (DEBUG) Slog.d(TAG, "Note mobile iface " + iface + ": " + mModemIfaces);
             } else {
@@ -6728,7 +6725,7 @@ public class BatteryStatsImpl extends BatteryStats {
         }
 
         synchronized (mWifiNetworkLock) {
-            if (displayTransport == TRANSPORT_WIFI) {
+            if (ConnectivityManager.isNetworkTypeWifi(networkType)) {
                 mWifiIfaces = includeInStringArray(mWifiIfaces, iface);
                 if (DEBUG) Slog.d(TAG, "Note wifi iface " + iface + ": " + mWifiIfaces);
             } else {
