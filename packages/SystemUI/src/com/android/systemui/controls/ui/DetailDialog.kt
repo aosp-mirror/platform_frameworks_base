@@ -73,7 +73,8 @@ class DetailDialog(
 
             activityView.startActivity(
                     PendingIntent.getActivity(context, 0, launchIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT), null, ActivityOptions.makeBasic())
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE),
+                    null, ActivityOptions.makeBasic())
         }
 
         override fun onTaskRemovalStarted(taskId: Int) {
