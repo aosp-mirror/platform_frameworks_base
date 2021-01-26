@@ -171,7 +171,8 @@ public class TypefaceSystemFallbackTest {
         FontConfig fontConfig;
         try {
             fontConfig = FontListParser.parse(
-                    TEST_FONTS_XML, TEST_FONT_DIR, oemXmlPath, TEST_OEM_DIR, updatableFontMap);
+                    TEST_FONTS_XML, TEST_FONT_DIR, oemXmlPath, TEST_OEM_DIR, updatableFontMap, 0,
+                    0);
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
         }
@@ -199,7 +200,7 @@ public class TypefaceSystemFallbackTest {
         FontConfig fontConfig;
         try {
             fontConfig = FontListParser.parse(
-                    SYSTEM_FONTS_XML, SYSTEM_FONT_DIR, null, TEST_OEM_DIR, null);
+                    SYSTEM_FONTS_XML, SYSTEM_FONT_DIR, null, TEST_OEM_DIR, null, 0, 0);
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
         }

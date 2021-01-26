@@ -53,6 +53,8 @@ import java.util.List;
 public final class FontConfig implements Parcelable {
     private final @NonNull List<FontFamily> mFamilies;
     private final @NonNull List<Alias> mAliases;
+    private final long mLastModifiedDate;
+    private final int mConfigVersion;
 
     /**
      * Construct a FontConfig instance.
@@ -62,9 +64,12 @@ public final class FontConfig implements Parcelable {
      *
      * @hide Only system server can create this instance and passed via IPC.
      */
-    public FontConfig(@NonNull List<FontFamily> families, @NonNull List<Alias> aliases) {
+    public FontConfig(@NonNull List<FontFamily> families, @NonNull List<Alias> aliases,
+            long lastModifiedDate, @IntRange(from = 0) int configVersion) {
         mFamilies = families;
         mAliases = aliases;
+        mLastModifiedDate = lastModifiedDate;
+        mConfigVersion = configVersion;
     }
 
     /**
@@ -88,6 +93,26 @@ public final class FontConfig implements Parcelable {
     }
 
     /**
+     * Returns the last modified date as Java epoch seconds.
+     *
+     * If there is no update, this return 0.
+     * @hide
+     */
+    public long getLastModifiedDate() {
+        return mLastModifiedDate;
+    }
+
+    /**
+     * Returns the monotonically increasing config version value.
+     *
+     * The config version is reset to 0 when the system is restarted.
+     * @hide
+     */
+    public @IntRange(from = 0) int getConfigVersion() {
+        return mConfigVersion;
+    }
+
+    /**
      * Returns the ordered list of families included in the system fonts.
      * @deprecated Use getFontFamilies instead.
      * @hide
@@ -107,6 +132,8 @@ public final class FontConfig implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mFamilies, flags);
         dest.writeParcelableList(mAliases, flags);
+        dest.writeLong(mLastModifiedDate);
+        dest.writeInt(mConfigVersion);
     }
 
     public static final @NonNull Creator<FontConfig> CREATOR = new Creator<FontConfig>() {
@@ -116,7 +143,9 @@ public final class FontConfig implements Parcelable {
                     FontFamily.class.getClassLoader());
             List<Alias> aliases = source.readParcelableList(new ArrayList<>(),
                     Alias.class.getClassLoader());
-            return new FontConfig(families, aliases);
+            long lastModifiedDate = source.readLong();
+            int configVersion = source.readInt();
+            return new FontConfig(families, aliases, lastModifiedDate, configVersion);
         }
 
         @Override

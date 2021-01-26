@@ -16,18 +16,28 @@
 
 package com.android.server.graphics.fonts;
 
+import static com.android.server.graphics.fonts.FontManagerService.SystemFontException;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.fonts.FontManager;
+import android.graphics.fonts.SystemFonts;
 import android.os.FileUtils;
+import android.text.FontConfig;
 import android.util.Base64;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 
+import org.xmlpull.v1.XmlPullParserException;
+
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +48,8 @@ final class UpdatableFontDir {
     private static final String RANDOM_DIR_PREFIX = "~~";
     // TODO: Support .otf
     private static final String ALLOWED_EXTENSION = ".ttf";
+
+    private static final String CONFIG_XML_FILE = "/data/fonts/config/config.xml";
 
     /** Interface to mock font file access in tests. */
     interface FontFileParser {
@@ -52,6 +64,15 @@ final class UpdatableFontDir {
 
         void setUpFsverity(String path, byte[] pkcs7Signature) throws IOException;
 
+        boolean rename(File src, File dest);
+    }
+
+    /** Interface to mock persistent configuration */
+    interface PersistentConfig {
+        void loadFromXml(PersistentSystemFontConfig.Config out)
+                throws XmlPullParserException, IOException;
+        void writeToXml(PersistentSystemFontConfig.Config config)
+                throws IOException;
         boolean rename(File src, File dest);
     }
 
@@ -87,6 +108,16 @@ final class UpdatableFontDir {
     private final List<File> mPreinstalledFontDirs;
     private final FontFileParser mParser;
     private final FsverityUtil mFsverityUtil;
+    private final File mConfigFile;
+    private final File mTmpConfigFile;
+
+    @GuardedBy("UpdatableFontDir.this")
+    private final PersistentSystemFontConfig.Config mConfig =
+            new PersistentSystemFontConfig.Config();
+
+    @GuardedBy("UpdatableFontDir.this")
+    private int mConfigVersion = 1;
+
     /**
      * A mutable map containing mapping from font file name (e.g. "NotoColorEmoji.ttf") to {@link
      * FontFileInfo}. All files in this map are validated, and have higher revision numbers than
@@ -101,6 +132,20 @@ final class UpdatableFontDir {
         mPreinstalledFontDirs = preinstalledFontDirs;
         mParser = parser;
         mFsverityUtil = fsverityUtil;
+        mConfigFile = new File(CONFIG_XML_FILE);
+        mTmpConfigFile = new File(CONFIG_XML_FILE + ".tmp");
+        loadFontFileMap();
+    }
+
+    // For unit testing
+    UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
+            FsverityUtil fsverityUtil, File configFile) {
+        mFilesDir = filesDir;
+        mPreinstalledFontDirs = preinstalledFontDirs;
+        mParser = parser;
+        mFsverityUtil = fsverityUtil;
+        mConfigFile = configFile;
+        mTmpConfigFile = new File(configFile.getAbsoluteFile() + ".tmp");
         loadFontFileMap();
     }
 
@@ -108,6 +153,13 @@ final class UpdatableFontDir {
         // TODO: SIGBUS crash protection
         synchronized (UpdatableFontDir.this) {
             boolean success = false;
+
+            try (FileInputStream fis = new FileInputStream(mConfigFile)) {
+                PersistentSystemFontConfig.loadFromXml(fis, mConfig);
+            } catch (IOException | XmlPullParserException e) {
+                mConfig.reset();
+            }
+
             mFontFileInfoMap.clear();
             try {
                 File[] dirs = mFilesDir.listFiles();
@@ -117,13 +169,13 @@ final class UpdatableFontDir {
                     File[] files = dir.listFiles();
                     if (files == null || files.length != 1) return;
                     FontFileInfo fontFileInfo = validateFontFile(files[0]);
-                    if (fontFileInfo == null) {
-                        Slog.w(TAG, "Broken file is found. Clearing files.");
-                        return;
-                    }
-                    addFileToMapLocked(fontFileInfo, true /* deleteOldFile */);
+                    addFileToMapIfNewerLocked(fontFileInfo, true /* deleteOldFile */);
                 }
                 success = true;
+            } catch (Throwable t) {
+                // If something happened during loading system fonts, clear all contents in finally
+                // block. Here, just dumping errors.
+                Slog.e(TAG, "Failed to load font mappings.", t);
             } finally {
                 // Delete all files just in case if we find a problematic file.
                 if (!success) {
@@ -131,6 +183,24 @@ final class UpdatableFontDir {
                     FileUtils.deleteContents(mFilesDir);
                 }
             }
+        }
+    }
+
+    /* package */ void clearUpdates() throws SystemFontException {
+        synchronized (UpdatableFontDir.this) {
+            mFontFileInfoMap.clear();
+            FileUtils.deleteContents(mFilesDir);
+
+            mConfig.reset();
+            mConfig.lastModifiedDate = Instant.now().getEpochSecond();
+            try (FileOutputStream fos = new FileOutputStream(mConfigFile)) {
+                PersistentSystemFontConfig.writeToXml(fos, mConfig);
+            } catch (Exception e) {
+                throw new SystemFontException(
+                        FontManager.ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE,
+                        "Failed to write config XML.", e);
+            }
+            mConfigVersion++;
         }
     }
 
@@ -143,38 +213,92 @@ final class UpdatableFontDir {
      *
      * @param fd             A file descriptor to the font file.
      * @param pkcs7Signature A PKCS#7 detached signature to enable fs-verity for the font file.
+     * @throws SystemFontException if error occurs.
      */
-    void installFontFile(FileDescriptor fd, byte[] pkcs7Signature) throws IOException {
+    void installFontFile(FileDescriptor fd, byte[] pkcs7Signature) throws SystemFontException {
         synchronized (UpdatableFontDir.this) {
             File newDir = getRandomDir(mFilesDir);
             if (!newDir.mkdir()) {
-                // TODO: Define and return an error code for API
-                throw new IOException("Failed to create a new dir");
+                throw new SystemFontException(
+                        FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
+                        "Failed to create font directory.");
             }
             boolean success = false;
             try {
                 File tempNewFontFile = new File(newDir, "font.ttf");
                 try (FileOutputStream out = new FileOutputStream(tempNewFontFile)) {
                     FileUtils.copy(fd, out.getFD());
+                } catch (IOException e) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
+                            "Failed to write font file to storage.", e);
                 }
-                // Do not parse font file before setting up fs-verity.
-                // setUpFsverity throws IOException if failed.
-                mFsverityUtil.setUpFsverity(tempNewFontFile.getAbsolutePath(), pkcs7Signature);
-                String postScriptName = mParser.getPostScriptName(tempNewFontFile);
+                try {
+                    // Do not parse font file before setting up fs-verity.
+                    // setUpFsverity throws IOException if failed.
+                    mFsverityUtil.setUpFsverity(tempNewFontFile.getAbsolutePath(),
+                            pkcs7Signature);
+                } catch (IOException e) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_VERIFICATION_FAILURE,
+                            "Failed to setup fs-verity.", e);
+                }
+                String postScriptName;
+                try {
+                    postScriptName = mParser.getPostScriptName(tempNewFontFile);
+                } catch (IOException e) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_INVALID_FONT_FILE,
+                            "Failed to read PostScript name from font file", e);
+                }
+                if (postScriptName == null) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_MISSING_POST_SCRIPT_NAME,
+                            "Failed to read PostScript name from font file");
+                }
                 File newFontFile = new File(newDir, postScriptName + ALLOWED_EXTENSION);
                 if (!mFsverityUtil.rename(tempNewFontFile, newFontFile)) {
-                    // TODO: Define and return an error code for API
-                    throw new IOException("Failed to rename");
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
+                            "Failed to move verified font file.");
                 }
                 FontFileInfo fontFileInfo = validateFontFile(newFontFile);
-                if (fontFileInfo == null) {
-                    // TODO: Define and return an error code for API
-                    throw new IllegalArgumentException("Invalid file");
+
+                // Write config file.
+                PersistentSystemFontConfig.Config copied = new PersistentSystemFontConfig.Config();
+                mConfig.copyTo(copied);
+
+                copied.lastModifiedDate = Instant.now().getEpochSecond();
+                try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
+                    PersistentSystemFontConfig.writeToXml(fos, copied);
+                } catch (Exception e) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE,
+                            "Failed to write config XML.", e);
                 }
-                if (!addFileToMapLocked(fontFileInfo, false)) {
-                    // TODO: Define and return an error code for API
-                    throw new IllegalArgumentException("Version downgrade");
+
+                // Backup the mapping for rollback.
+                HashMap<String, FontFileInfo> backup = new HashMap<>(mFontFileInfoMap);
+                if (!addFileToMapIfNewerLocked(fontFileInfo, false)) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_DOWNGRADING,
+                            "Downgrading font file is forbidden.");
                 }
+
+                if (!mFsverityUtil.rename(mTmpConfigFile, mConfigFile)) {
+                    // If we fail to stage the config file, need to rollback the config.
+                    mFontFileInfoMap.clear();
+                    mFontFileInfoMap.putAll(backup);
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE,
+                            "Failed to stage the config file.");
+                }
+
+
+                // Now font update is succeeded. Update config version.
+                copied.copyTo(mConfig);
+                mConfigVersion++;
+
                 success = true;
             } finally {
                 if (!success) {
@@ -207,7 +331,7 @@ final class UpdatableFontDir {
      * higher than the currently used font file (either in {@link #mFontFileInfoMap} or {@link
      * #mPreinstalledFontDirs}).
      */
-    private boolean addFileToMapLocked(FontFileInfo fontFileInfo, boolean deleteOldFile) {
+    private boolean addFileToMapIfNewerLocked(FontFileInfo fontFileInfo, boolean deleteOldFile) {
         String name = fontFileInfo.getFile().getName();
         FontFileInfo existingInfo = mFontFileInfoMap.get(name);
         final boolean shouldAddToMap;
@@ -224,13 +348,12 @@ final class UpdatableFontDir {
                 FileUtils.deleteContentsAndDir(existingInfo.getRandomizedFontDir());
             }
             mFontFileInfoMap.put(name, fontFileInfo);
-            return true;
         } else {
             if (deleteOldFile) {
                 FileUtils.deleteContentsAndDir(fontFileInfo.getRandomizedFontDir());
             }
-            return false;
         }
+        return shouldAddToMap;
     }
 
     private long getPreinstalledFontRevision(String name) {
@@ -255,20 +378,23 @@ final class UpdatableFontDir {
      * returns a {@link FontFileInfo} on success. This method does not check if the font revision
      * is higher than the currently used font.
      */
-    @Nullable
-    private FontFileInfo validateFontFile(File file) {
+    @NonNull
+    private FontFileInfo validateFontFile(File file) throws SystemFontException {
         if (!mFsverityUtil.hasFsverity(file.getAbsolutePath())) {
-            Slog.w(TAG, "Font validation failed. Fs-verity is not enabled: " + file);
-            return null;
+            throw new SystemFontException(
+                    FontManager.ERROR_CODE_VERIFICATION_FAILURE,
+                    "Font validation failed. Fs-verity is not enabled: " + file);
         }
         if (!validateFontFileName(file)) {
-            Slog.w(TAG, "Font validation failed. Could not validate font file name: " + file);
-            return null;
+            throw new SystemFontException(
+                    FontManager.ERROR_CODE_FONT_NAME_MISMATCH,
+                    "Font validation failed. Could not validate font file name: " + file);
         }
         long revision = getFontRevision(file);
         if (revision == -1) {
-            Slog.w(TAG, "Font validation failed. Could not read font revision: " + file);
-            return null;
+            throw new SystemFontException(
+                    FontManager.ERROR_CODE_INVALID_FONT_FILE,
+                    "Font validation failed. Could not read font revision: " + file);
         }
         return new FontFileInfo(file, revision);
     }
@@ -317,5 +443,15 @@ final class UpdatableFontDir {
             }
         }
         return map;
+    }
+
+    /* package */ FontConfig getSystemFontConfig() {
+        synchronized (UpdatableFontDir.this) {
+            return SystemFonts.getSystemFontConfig(
+                    getFontFileMap(),
+                    mConfig.lastModifiedDate,
+                    mConfigVersion
+            );
+        }
     }
 }
