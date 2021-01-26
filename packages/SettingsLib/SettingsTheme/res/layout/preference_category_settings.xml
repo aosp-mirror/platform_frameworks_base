@@ -19,14 +19,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingLeft="24dp"
-    android:paddingStart="24dp"
     android:paddingRight="?android:attr/listPreferredItemPaddingRight"
     android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
     android:background="?android:attr/selectableItemBackground"
     android:baselineAligned="false"
     android:layout_marginTop="16dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    style="@style/PreferenceCategoryStartMargin">
 
     <RelativeLayout
         android:layout_width="0dp"
@@ -57,6 +56,5 @@
             android:textColor="?android:attr/textColorSecondary"
             android:maxLines="10"
             style="@style/PreferenceSummaryTextStyle"/>
-
     </RelativeLayout>
 </LinearLayout>
