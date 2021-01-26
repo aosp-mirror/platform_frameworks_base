@@ -4275,6 +4275,9 @@ class Task extends WindowContainer<WindowContainer> {
             if (mainWindow != null) {
                 info.mainWindowLayoutParams = mainWindow.getAttrs();
             }
+            // If the developer has persist a different configuration, we need to override it to the
+            // starting window because persisted configuration does not effect to Task.
+            info.taskInfo.configuration.setTo(topActivity.getConfiguration());
         }
         final ActivityRecord topFullscreenActivity = getTopFullscreenActivity();
         if (topFullscreenActivity != null) {

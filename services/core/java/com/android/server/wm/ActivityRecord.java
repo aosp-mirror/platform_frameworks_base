@@ -1755,6 +1755,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (_createTime > 0) {
             createTime = _createTime;
         }
+        mAtmService.mPackageConfigPersister.updateConfigIfNeeded(this, mUserId, packageName);
     }
 
     /**

@@ -534,6 +534,28 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
         return getActivityType() == ACTIVITY_TYPE_ASSISTANT;
     }
 
+    /**
+     * Overrides the night mode applied to this ConfigurationContainer.
+     * @return true if the nightMode has been changed.
+     */
+    public boolean setOverrideNightMode(int nightMode) {
+        final int currentUiMode = mFullConfiguration.uiMode;
+        final int currentNightMode = getNightMode();
+        final int validNightMode = nightMode & Configuration.UI_MODE_NIGHT_MASK;
+        if (currentNightMode == validNightMode) {
+            return false;
+        }
+        mRequestsTmpConfig.setTo(getRequestedOverrideConfiguration());
+        mRequestsTmpConfig.uiMode = validNightMode
+                | (currentUiMode & ~Configuration.UI_MODE_NIGHT_MASK);
+        onRequestedOverrideConfigurationChanged(mRequestsTmpConfig);
+        return true;
+    }
+
+    int getNightMode() {
+        return mFullConfiguration.uiMode & Configuration.UI_MODE_NIGHT_MASK;
+    }
+
     public boolean isActivityTypeDream() {
         return getActivityType() == ACTIVITY_TYPE_DREAM;
     }

@@ -452,6 +452,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** The controller for all operations related to locktask. */
     private LockTaskController mLockTaskController;
     private ActivityStartController mActivityStartController;
+    PackageConfigPersister mPackageConfigPersister;
 
     boolean mSuppressResizeConfigChanges;
 
@@ -867,6 +868,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         setRecentTasks(new RecentTasks(this, mTaskSupervisor));
         mVrController = new VrController(mGlobalLock);
         mKeyguardController = mTaskSupervisor.getKeyguardController();
+        mPackageConfigPersister = new PackageConfigPersister(mTaskSupervisor.mPersisterQueue);
     }
 
     public void onActivityManagerInternalAdded() {
@@ -5457,6 +5459,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 mAppWarnings.onPackageUninstalled(name);
                 mCompatModePackages.handlePackageUninstalledLocked(name);
+                mPackageConfigPersister.onPackageUninstall(name);
             }
         }
 
@@ -6127,6 +6130,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void removeUser(int userId) {
             synchronized (mGlobalLock) {
                 mRootWindowContainer.removeUser(userId);
+                mPackageConfigPersister.removeUser(userId);
             }
         }
 
@@ -6224,6 +6228,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void loadRecentTasksForUser(int userId) {
             synchronized (mGlobalLock) {
                 mRecentTasks.loadUserRecentsLocked(userId);
+                // TODO renaming the methods(?)
+                mPackageConfigPersister.loadUserPackages(userId);
             }
         }
 
@@ -6331,6 +6337,55 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 return getLockTaskController().isBaseOfLockedTask(packageName);
             }
+        }
+
+        @Override
+        public PackageConfigurationUpdater createPackageConfigurationUpdater() {
+            synchronized (mGlobalLock) {
+                return new PackageConfigurationUpdaterImpl(Binder.getCallingPid());
+            }
+        }
+    }
+
+    final class PackageConfigurationUpdaterImpl implements
+            ActivityTaskManagerInternal.PackageConfigurationUpdater {
+        private int mPid;
+        private int mNightMode;
+
+        PackageConfigurationUpdaterImpl(int pid) {
+            mPid = pid;
+        }
+
+        @Override
+        public ActivityTaskManagerInternal.PackageConfigurationUpdater setNightMode(int nightMode) {
+            mNightMode = nightMode;
+            return this;
+        }
+
+        @Override
+        public void commit() throws RemoteException {
+            if (mPid == 0) {
+                throw new RemoteException("Invalid process");
+            }
+            synchronized (mGlobalLock) {
+                final WindowProcessController wpc = mProcessMap.getProcess(mPid);
+                if (wpc == null) {
+                    Slog.w(TAG, "Override application configuration: cannot find application");
+                    return;
+                }
+                if (wpc.getNightMode() == mNightMode) {
+                    return;
+                }
+                if (!wpc.setOverrideNightMode(mNightMode)) {
+                    return;
+                }
+                wpc.updateNightModeForAllActivities(mNightMode);
+                mPackageConfigPersister.updateFromImpl(wpc.mName, wpc.mUserId, this);
+            }
+        }
+
+        int getNightMode() {
+            return mNightMode;
         }
     }
 }

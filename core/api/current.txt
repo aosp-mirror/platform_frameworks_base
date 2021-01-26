@@ -6659,6 +6659,7 @@ package android.app {
     method @NonNull public java.time.LocalTime getCustomNightModeEnd();
     method @NonNull public java.time.LocalTime getCustomNightModeStart();
     method public int getNightMode();
+    method public void setApplicationNightMode(int);
     method public void setCustomNightModeEnd(@NonNull java.time.LocalTime);
     method public void setCustomNightModeStart(@NonNull java.time.LocalTime);
     method public void setNightMode(int);
