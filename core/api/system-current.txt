@@ -6414,6 +6414,7 @@ package android.net {
 
   public abstract class QosFilter {
     method @NonNull public abstract android.net.Network getNetwork();
+    method public abstract boolean matchesLocalAddress(@NonNull java.net.InetAddress, int, int);
   }
 
   public final class QosSession implements android.os.Parcelable {
