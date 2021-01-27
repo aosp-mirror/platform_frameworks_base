@@ -22,6 +22,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
+import android.graphics.fonts.FontManager;
 import android.os.FileUtils;
 import android.platform.test.annotations.Presubmit;
 
@@ -36,6 +37,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -107,6 +109,7 @@ public final class UpdatableFontDirTest {
 
     private File mCacheDir;
     private File mUpdatableFontFilesDir;
+    private File mConfigFile;
     private List<File> mPreinstalledFontDirs;
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -124,6 +127,7 @@ public final class UpdatableFontDirTest {
         for (File dir : mPreinstalledFontDirs) {
             dir.mkdir();
         }
+        mConfigFile = new File(mCacheDir, "config.xml");
     }
 
     @After
@@ -133,19 +137,30 @@ public final class UpdatableFontDirTest {
 
     @Test
     public void construct() throws Exception {
+        long expectedModifiedDate = 1234567890;
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+        config.lastModifiedDate = expectedModifiedDate;
+        writeConfig(config, mConfigFile);
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedDate())
+                .isEqualTo(expectedModifiedDate);
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,4", GOOD_SIGNATURE);
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
+        //
+        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedDate())
+                .isNotEqualTo(expectedModifiedDate);
 
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         assertThat(dir.getFontFileMap()).containsKey("foo.ttf");
         assertThat(parser.getRevision(dir.getFontFileMap().get("foo.ttf"))).isEqualTo(3);
         assertThat(dir.getFontFileMap()).containsKey("bar.ttf");
@@ -159,7 +174,8 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         assertThat(dir.getFontFileMap()).isEmpty();
     }
 
@@ -168,7 +184,8 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
@@ -179,7 +196,8 @@ public final class UpdatableFontDirTest {
         fakeFsverityUtil.remove(
                 dirForPreparation.getFontFileMap().get("foo.ttf").getAbsolutePath());
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
@@ -190,7 +208,8 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
@@ -202,7 +221,8 @@ public final class UpdatableFontDirTest {
         FileUtils.stringToFile(dirForPreparation.getFontFileMap().get("foo.ttf"), "bar,4");
 
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
@@ -213,7 +233,8 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
@@ -226,7 +247,8 @@ public final class UpdatableFontDirTest {
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "bar.ttf"), "bar,1");
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(1), "bar.ttf"), "bar,2");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
         // For foo.ttf, preinstalled font (revision 5) should be used.
         assertThat(dir.getFontFileMap()).doesNotContainKey("foo.ttf");
         // For bar.ttf, updated font (revision 4) should be used.
@@ -239,11 +261,22 @@ public final class UpdatableFontDirTest {
     }
 
     @Test
+    public void construct_failedToLoadConfig() throws Exception {
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                new File("/dev/null"));
+        assertThat(dir.getFontFileMap()).isEmpty();
+    }
+
+    @Test
     public void installFontFile() throws Exception {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
 
         installFontFile(dir, "test,1", GOOD_SIGNATURE);
         assertThat(dir.getFontFileMap()).containsKey("test.ttf");
@@ -255,7 +288,8 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
 
         installFontFile(dir, "test,1", GOOD_SIGNATURE);
         Map<String, File> mapBeforeUpgrade = dir.getFontFileMap();
@@ -272,14 +306,15 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
 
         installFontFile(dir, "test,2", GOOD_SIGNATURE);
         try {
             installFontFile(dir, "test,1", GOOD_SIGNATURE);
             fail("Expect IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // Expect
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode()).isEqualTo(FontManager.ERROR_CODE_DOWNGRADING);
         }
         assertThat(dir.getFontFileMap()).containsKey("test.ttf");
         assertWithMessage("Font should not be downgraded to an older revision")
@@ -291,7 +326,8 @@ public final class UpdatableFontDirTest {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
 
         installFontFile(dir, "foo,1", GOOD_SIGNATURE);
         installFontFile(dir, "bar,2", GOOD_SIGNATURE);
@@ -302,17 +338,19 @@ public final class UpdatableFontDirTest {
     }
 
     @Test
-    public void installFontFile_invalidSignature() {
+    public void installFontFile_invalidSignature() throws Exception {
         FakeFontFileParser parser = new FakeFontFileParser();
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
 
         try {
             installFontFile(dir, "test,1", "Invalid signature");
-            fail("Expect IOException");
-        } catch (IOException e) {
-            // Expect
+            fail("Expect SystemFontException");
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode())
+                    .isEqualTo(FontManager.ERROR_CODE_VERIFICATION_FAILURE);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }
@@ -323,23 +361,155 @@ public final class UpdatableFontDirTest {
         FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
         FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"), "test,1");
         UpdatableFontDir dir = new UpdatableFontDir(
-                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil);
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
 
         try {
             installFontFile(dir, "test,1", GOOD_SIGNATURE);
             fail("Expect IllegalArgumentException");
-        } catch (IllegalArgumentException e) {
-            // Expect
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode()).isEqualTo(FontManager.ERROR_CODE_DOWNGRADING);
+        }
+        assertThat(dir.getFontFileMap()).isEmpty();
+    }
+
+    @Test
+    public void installFontFile_failedToWriteConfigXml() throws Exception {
+        long expectedModifiedDate = 1234567890;
+        FakeFontFileParser parser = new FakeFontFileParser();
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        FileUtils.stringToFile(new File(mPreinstalledFontDirs.get(0), "test.ttf"), "test,1");
+
+        File readonlyDir = new File(mCacheDir, "readonly");
+        assertThat(readonlyDir.mkdir()).isTrue();
+        File readonlyFile = new File(readonlyDir, "readonly_config.xml");
+
+        PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+        config.lastModifiedDate = expectedModifiedDate;
+        writeConfig(config, readonlyFile);
+
+        assertThat(readonlyDir.setWritable(false, false)).isTrue();
+        try {
+            UpdatableFontDir dir = new UpdatableFontDir(
+                    mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                    readonlyFile);
+
+            try {
+                installFontFile(dir, "test,2", GOOD_SIGNATURE);
+            } catch (FontManagerService.SystemFontException e) {
+                assertThat(e.getErrorCode())
+                        .isEqualTo(FontManager.ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE);
+            }
+            assertThat(dir.getSystemFontConfig().getLastModifiedDate())
+                    .isEqualTo(expectedModifiedDate);
+            assertThat(dir.getFontFileMap()).isEmpty();
+        } finally {
+            assertThat(readonlyDir.setWritable(true, true)).isTrue();
+        }
+    }
+
+    @Test
+    public void installFontFile_failedToParsePostScript() throws Exception {
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs,
+                new UpdatableFontDir.FontFileParser() {
+                    @Override
+                    public String getPostScriptName(File file) throws IOException {
+                        return null;
+                    }
+
+                    @Override
+                    public long getRevision(File file) throws IOException {
+                        return 0;
+                    }
+                }, fakeFsverityUtil, mConfigFile);
+
+        try {
+            installFontFile(dir, "foo,1", GOOD_SIGNATURE);
+            fail("Expect SystemFontException");
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode())
+                    .isEqualTo(FontManager.ERROR_CODE_MISSING_POST_SCRIPT_NAME);
+        }
+        assertThat(dir.getFontFileMap()).isEmpty();
+    }
+
+    @Test
+    public void installFontFile_failedToParsePostScriptName_invalidFont() throws Exception {
+        FakeFsverityUtil fakeFsverityUtil = new FakeFsverityUtil();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs,
+                new UpdatableFontDir.FontFileParser() {
+                    @Override
+                    public String getPostScriptName(File file) throws IOException {
+                        throw new IOException();
+                    }
+
+                    @Override
+                    public long getRevision(File file) throws IOException {
+                        return 0;
+                    }
+                }, fakeFsverityUtil, mConfigFile);
+
+        try {
+            installFontFile(dir, "foo,1", GOOD_SIGNATURE);
+            fail("Expect SystemFontException");
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode())
+                    .isEqualTo(FontManager.ERROR_CODE_INVALID_FONT_FILE);
+        }
+        assertThat(dir.getFontFileMap()).isEmpty();
+    }
+
+    @Test
+    public void installFontFile_renameToPsNameFailure() throws Exception {
+        UpdatableFontDir.FsverityUtil fakeFsverityUtil = new UpdatableFontDir.FsverityUtil() {
+            private final FakeFsverityUtil mFake = new FakeFsverityUtil();
+
+            @Override
+            public boolean hasFsverity(String path) {
+                return mFake.hasFsverity(path);
+            }
+
+            @Override
+            public void setUpFsverity(String path, byte[] pkcs7Signature) throws IOException {
+                mFake.setUpFsverity(path, pkcs7Signature);
+            }
+
+            @Override
+            public boolean rename(File src, File dest) {
+                return false;
+            }
+        };
+        FakeFontFileParser parser = new FakeFontFileParser();
+        UpdatableFontDir dir = new UpdatableFontDir(
+                mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
+                mConfigFile);
+
+        try {
+            installFontFile(dir, "foo,1", GOOD_SIGNATURE);
+            fail("Expect SystemFontException");
+        } catch (FontManagerService.SystemFontException e) {
+            assertThat(e.getErrorCode())
+                    .isEqualTo(FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }
 
     private void installFontFile(UpdatableFontDir dir, String content, String signature)
-            throws IOException {
+            throws Exception {
         File file = File.createTempFile("font", "ttf", mCacheDir);
         FileUtils.stringToFile(file, content);
         try (FileInputStream in = new FileInputStream(file)) {
             dir.installFontFile(in.getFD(), signature.getBytes());
+        }
+    }
+
+    private void writeConfig(PersistentSystemFontConfig.Config config,
+            File file) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(file)) {
+            PersistentSystemFontConfig.writeToXml(fos, config);
         }
     }
 }
