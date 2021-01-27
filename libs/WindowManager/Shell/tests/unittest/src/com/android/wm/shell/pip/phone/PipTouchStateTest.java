@@ -24,18 +24,15 @@ import static android.view.MotionEvent.ACTION_UP;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.os.SystemClock;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
-import android.testing.TestableLooper.RunWithLooper;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestShellExecutor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,23 +42,22 @@ import java.util.concurrent.CountDownLatch;
 
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-@RunWithLooper
 public class PipTouchStateTest extends ShellTestCase {
 
     private PipTouchState mTouchState;
     private CountDownLatch mDoubleTapCallbackTriggeredLatch;
     private CountDownLatch mHoverExitCallbackTriggeredLatch;
+    private TestShellExecutor mShellMainExecutor;
 
     @Before
     public void setUp() throws Exception {
+        mShellMainExecutor = new TestShellExecutor();
         mDoubleTapCallbackTriggeredLatch = new CountDownLatch(1);
         mHoverExitCallbackTriggeredLatch = new CountDownLatch(1);
         mTouchState = new PipTouchState(ViewConfiguration.get(getContext()),
-                Handler.createAsync(Looper.myLooper()), () -> {
-            mDoubleTapCallbackTriggeredLatch.countDown();
-        }, () -> {
-            mHoverExitCallbackTriggeredLatch.countDown();
-        });
+                mDoubleTapCallbackTriggeredLatch::countDown,
+                mHoverExitCallbackTriggeredLatch::countDown,
+                mShellMainExecutor);
         assertFalse(mTouchState.isDoubleTap());
         assertFalse(mTouchState.isWaitingForDoubleTap());
     }
@@ -91,9 +87,7 @@ public class PipTouchStateTest extends ShellTestCase {
         assertTrue(mTouchState.getDoubleTapTimeoutCallbackDelay() == 10);
         mTouchState.scheduleDoubleTapTimeoutCallback();
 
-        // TODO: Remove this sleep. Its only being added because it speeds up this test a bit.
-        Thread.sleep(15);
-        TestableLooper.get(this).processAllMessages();
+        mShellMainExecutor.flushAll();
         assertTrue(mDoubleTapCallbackTriggeredLatch.getCount() == 0);
     }
 
@@ -128,17 +122,13 @@ public class PipTouchStateTest extends ShellTestCase {
     @Test
     public void testHoverExitTimeout_timeoutCallbackCalled() throws Exception {
         mTouchState.scheduleHoverExitTimeoutCallback();
-
-        // TODO: Remove this sleep. Its only being added because it speeds up this test a bit.
-        Thread.sleep(50);
-        TestableLooper.get(this).processAllMessages();
+        mShellMainExecutor.flushAll();
         assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 0);
     }
 
     @Test
     public void testHoverExitTimeout_timeoutCallbackNotCalled() throws Exception {
         mTouchState.scheduleHoverExitTimeoutCallback();
-        TestableLooper.get(this).processAllMessages();
         assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 1);
     }
 
@@ -147,14 +137,12 @@ public class PipTouchStateTest extends ShellTestCase {
         mTouchState.scheduleHoverExitTimeoutCallback();
         mTouchState.onTouchEvent(createMotionEvent(ACTION_BUTTON_PRESS, SystemClock.uptimeMillis(),
                 0, 0));
-
-        // TODO: Remove this sleep. Its only being added because it speeds up this test a bit.
-        Thread.sleep(50);
-        TestableLooper.get(this).processAllMessages();
+        mShellMainExecutor.flushAll();
         assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 1);
     }
 
     private MotionEvent createMotionEvent(int action, long eventTime, float x, float y) {
         return MotionEvent.obtain(0, eventTime, action, x, y, 0);
     }
+
 }
