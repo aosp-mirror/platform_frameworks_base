@@ -24,7 +24,6 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
@@ -56,8 +55,6 @@ import android.security.identity.IdentityCredential;
 import android.util.Slog;
 import android.view.Surface;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.security.Signature;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,13 +94,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     public static final int SENSOR_ID_ANY = -1;
-
-    /**
-     * @hide
-     */
-    @IntDef({SENSOR_ID_ANY})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface SensorId {}
 
     private IFingerprintService mService;
     private Context mContext;
@@ -508,8 +498,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(anyOf = {USE_BIOMETRIC, USE_FINGERPRINT})
     public void authenticate(@Nullable CryptoObject crypto, @Nullable CancellationSignal cancel,
-            @NonNull AuthenticationCallback callback, Handler handler, @SensorId int sensorId,
-            int userId) {
+            @NonNull AuthenticationCallback callback, Handler handler, int sensorId, int userId) {
+
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an authentication callback");
         }
@@ -653,15 +643,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void generateChallenge(int userId, GenerateChallengeCallback callback) {
-        final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
-                getSensorPropertiesInternal();
-        if (fingerprintSensorProperties.isEmpty()) {
+        final FingerprintSensorPropertiesInternal sensorProps = getFirstFingerprintSensor();
+        if (sensorProps == null) {
             Slog.e(TAG, "No sensors");
             return;
         }
-
-        final int sensorId = fingerprintSensorProperties.get(0).sensorId;
-        generateChallenge(sensorId, userId, callback);
+        generateChallenge(sensorProps.sensorId, userId, callback);
     }
 
     /**
@@ -681,18 +668,18 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
     public void revokeChallenge(int userId, long challenge) {
-        if (mService != null) try {
-            final List<FingerprintSensorPropertiesInternal> fingerprintSensorProperties =
-                    getSensorPropertiesInternal();
-            if (fingerprintSensorProperties.isEmpty()) {
-                Slog.e(TAG, "No sensors");
-                return;
+        if (mService != null) {
+            try {
+                final FingerprintSensorPropertiesInternal sensorProps = getFirstFingerprintSensor();
+                if (sensorProps == null) {
+                    Slog.e(TAG, "No sensors");
+                    return;
+                }
+                mService.revokeChallenge(mToken, sensorProps.sensorId, userId,
+                        mContext.getOpPackageName(), challenge);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
             }
-            final int sensorId = fingerprintSensorProperties.get(0).sensorId;
-            mService.revokeChallenge(mToken, sensorId, userId, mContext.getOpPackageName(),
-                    challenge);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1159,6 +1146,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    @Nullable
+    private FingerprintSensorPropertiesInternal getFirstFingerprintSensor() {
+        final List<FingerprintSensorPropertiesInternal> allSensors = getSensorPropertiesInternal();
+        return allSensors.isEmpty() ? null : allSensors.get(0);
     }
 
     private void cancelEnrollment() {

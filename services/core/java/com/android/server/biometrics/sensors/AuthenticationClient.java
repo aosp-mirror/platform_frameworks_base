@@ -149,9 +149,10 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                 pm.incrementAuthForUser(getTargetUserId(), authenticated);
             }
 
-            // Ensure authentication only succeeds if the client activity is on top or is keyguard.
+            // Ensure authentication only succeeds if the client activity is on top.
             boolean isBackgroundAuth = false;
-            if (authenticated && !Utils.isKeyguard(getContext(), getOwnerString())) {
+            if (authenticated && !Utils.isKeyguard(getContext(), getOwnerString())
+                    && !Utils.isSystem(getContext(), getOwnerString())) {
                 final List<ActivityManager.RunningTaskInfo> tasks =
                         mActivityTaskManager.getTasks(1);
                 if (tasks == null || tasks.isEmpty()) {
@@ -166,7 +167,7 @@ public abstract class AuthenticationClient<T> extends AcquisitionClient<T>
                         final String topPackage = topActivity.getPackageName();
                         if (!topPackage.contentEquals(getOwnerString())) {
                             Slog.e(TAG, "Background authentication detected, top: " + topPackage
-                                    + ", client: " + this);
+                                    + ", client: " + getOwnerString());
                             isBackgroundAuth = true;
                         }
                     }
