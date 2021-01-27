@@ -41,6 +41,10 @@
 #define ENCODING_OPUS           20
 #define ENCODING_PCM_24BIT_PACKED 21
 #define ENCODING_PCM_32BIT 22
+#define ENCODING_MPEGH_BL_L3 23
+#define ENCODING_MPEGH_BL_L4 24
+#define ENCODING_MPEGH_LC_L3 25
+#define ENCODING_MPEGH_LC_L4 26
 
 #define ENCODING_INVALID    0
 #define ENCODING_DEFAULT    1
@@ -98,6 +102,14 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_PCM_24_BIT_PACKED;
     case ENCODING_PCM_32BIT:
         return AUDIO_FORMAT_PCM_32_BIT;
+    case ENCODING_MPEGH_BL_L3:
+        return AUDIO_FORMAT_MPEGH_BL_L3;
+    case ENCODING_MPEGH_BL_L4:
+        return AUDIO_FORMAT_MPEGH_BL_L4;
+    case ENCODING_MPEGH_LC_L3:
+        return AUDIO_FORMAT_MPEGH_LC_L3;
+    case ENCODING_MPEGH_LC_L4:
+        return AUDIO_FORMAT_MPEGH_LC_L4;
     default:
         return AUDIO_FORMAT_INVALID;
     }
@@ -159,6 +171,14 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
         return ENCODING_DOLBY_MAT;
     case AUDIO_FORMAT_OPUS:
         return ENCODING_OPUS;
+    case AUDIO_FORMAT_MPEGH_BL_L3:
+        return ENCODING_MPEGH_BL_L3;
+    case AUDIO_FORMAT_MPEGH_BL_L4:
+        return ENCODING_MPEGH_BL_L4;
+    case AUDIO_FORMAT_MPEGH_LC_L3:
+        return ENCODING_MPEGH_LC_L3;
+    case AUDIO_FORMAT_MPEGH_LC_L4:
+        return ENCODING_MPEGH_LC_L4;
     case AUDIO_FORMAT_DEFAULT:
         return ENCODING_DEFAULT;
     default:
