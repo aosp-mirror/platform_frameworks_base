@@ -44,11 +44,6 @@ public class UdfpsAnimationFpmOther extends UdfpsAnimation {
     }
 
     @Override
-    public void setAlpha(int alpha) {
-
-    }
-
-    @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
 
     }
