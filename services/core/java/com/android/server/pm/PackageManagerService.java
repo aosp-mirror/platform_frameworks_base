@@ -18163,12 +18163,14 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
 
-            String codePath = codeFile.getAbsolutePath();
-            if (mIncrementalManager != null && isIncrementalPath(codePath)) {
-                mIncrementalManager.onPackageRemoved(codePath);
-            }
+            final boolean isIncremental = (mIncrementalManager != null && isIncrementalPath(
+                    codeFile.getAbsolutePath()));
 
             removeCodePathLI(codeFile);
+
+            if (isIncremental) {
+                mIncrementalManager.onPackageRemoved(codeFile);
+            }
 
             return true;
         }

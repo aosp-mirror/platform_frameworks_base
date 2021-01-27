@@ -113,6 +113,10 @@ public:
         bool started() const { return totalBlocks > 0; }
         bool fullyLoaded() const { return !isError() && (totalBlocks == filledBlocks); }
 
+        int blocksRemainingOrError() const {
+            return totalBlocks <= 0 ? totalBlocks : totalBlocks - filledBlocks;
+        }
+
         float getProgress() const {
             return totalBlocks < 0
                     ? totalBlocks
@@ -130,14 +134,17 @@ public:
     void onSystemReady();
 
     StorageId createStorage(std::string_view mountPoint,
-                            content::pm::DataLoaderParamsParcel&& dataLoaderParams,
-                            CreateOptions options, const DataLoaderStatusListener& statusListener,
-                            StorageHealthCheckParams&& healthCheckParams,
-                            const StorageHealthListener& healthListener,
-                            const std::vector<PerUidReadTimeouts>& perUidReadTimeouts);
+                            const content::pm::DataLoaderParamsParcel& dataLoaderParams,
+                            CreateOptions options);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
     StorageId openStorage(std::string_view path);
+
+    bool startLoading(StorageId storage, content::pm::DataLoaderParamsParcel&& dataLoaderParams,
+                      const DataLoaderStatusListener& statusListener,
+                      StorageHealthCheckParams&& healthCheckParams,
+                      const StorageHealthListener& healthListener,
+                      const std::vector<PerUidReadTimeouts>& perUidReadTimeouts);
 
     int bind(StorageId storage, std::string_view source, std::string_view target, BindKind kind);
     int unbind(StorageId storage, std::string_view target);
@@ -156,7 +163,9 @@ public:
     int unlink(StorageId storage, std::string_view path);
 
     int isFileFullyLoaded(StorageId storage, std::string_view filePath) const;
-    LoadingProgress getLoadingProgress(StorageId storage) const;
+
+    LoadingProgress getLoadingProgress(StorageId storage, bool stopOnFirstIncomplete) const;
+
     bool registerLoadingProgressListener(StorageId storage,
                                          const StorageLoadingProgressListener& progressListener);
     bool unregisterLoadingProgressListener(StorageId storage);
@@ -166,8 +175,6 @@ public:
     void unregisterStorageHealthListener(StorageId storage);
     RawMetadata getMetadata(StorageId storage, std::string_view path) const;
     RawMetadata getMetadata(StorageId storage, FileId node) const;
-
-    bool startLoading(StorageId storage) const;
 
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                  std::string_view libDirRelativePath, std::string_view abi,
@@ -388,7 +395,8 @@ private:
     binder::Status applyStorageParams(IncFsMount& ifs, bool enableReadLogs);
 
     int isFileFullyLoadedFromPath(const IncFsMount& ifs, std::string_view filePath) const;
-    LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path) const;
+    LoadingProgress getLoadingProgressFromPath(const IncFsMount& ifs, std::string_view path,
+                                               bool stopOnFirstIncomplete) const;
 
     int setFileContent(const IfsMountPtr& ifs, const incfs::FileId& fileId,
                        std::string_view debugFilePath, std::span<const uint8_t> data) const;
