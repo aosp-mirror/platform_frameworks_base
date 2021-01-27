@@ -21,22 +21,20 @@ import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
 
 import android.app.AppOpsManager;
 import android.app.AppOpsManager.OnOpChangedListener;
-import android.app.IActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Handler;
 import android.util.Pair;
 
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipUtils;
 
 public class PipAppOpsListener {
     private static final String TAG = PipAppOpsListener.class.getSimpleName();
 
     private Context mContext;
-    private Handler mHandler;
-    private IActivityManager mActivityManager;
+    private ShellExecutor mMainExecutor;
     private AppOpsManager mAppOpsManager;
     private Callback mCallback;
 
@@ -53,7 +51,7 @@ public class PipAppOpsListener {
                     if (appInfo.packageName.equals(topPipActivityInfo.first.getPackageName()) &&
                             mAppOpsManager.checkOpNoThrow(OP_PICTURE_IN_PICTURE, appInfo.uid,
                                     packageName) != MODE_ALLOWED) {
-                        mHandler.post(() -> mCallback.dismissPip());
+                        mMainExecutor.execute(() -> mCallback.dismissPip());
                     }
                 }
             } catch (NameNotFoundException e) {
@@ -63,11 +61,9 @@ public class PipAppOpsListener {
         }
     };
 
-    public PipAppOpsListener(Context context, IActivityManager activityManager,
-            Callback callback) {
+    public PipAppOpsListener(Context context, Callback callback, ShellExecutor mainExecutor) {
         mContext = context;
-        mHandler = new Handler(mContext.getMainLooper());
-        mActivityManager = activityManager;
+        mMainExecutor = mainExecutor;
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         mCallback = callback;
     }

@@ -24,6 +24,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ParceledListSlice;
+import android.os.Handler;
 import android.util.Log;
 import android.view.SurfaceControl;
 
@@ -47,6 +48,7 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private final Context mContext;
     private final SystemWindows mSystemWindows;
     private final PipBoundsState mPipBoundsState;
+    private final Handler mMainHandler;
 
     private Delegate mDelegate;
     private SurfaceControl mLeash;
@@ -56,10 +58,12 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
     private final List<RemoteAction> mAppActions = new ArrayList<>();
 
     public TvPipMenuController(Context context, PipBoundsState pipBoundsState,
-            SystemWindows systemWindows, PipMediaController pipMediaController) {
+            SystemWindows systemWindows, PipMediaController pipMediaController,
+            Handler mainHandler) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mSystemWindows = systemWindows;
+        mMainHandler = mainHandler;
 
         // We need to "close" the menu the platform call for all the system dialogs to close (for
         // example, on the Home button press).
@@ -69,8 +73,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
                 hideMenu();
             }
         };
-        context.registerReceiver(closeSystemDialogsBroadcastReceiver,
-                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+        context.registerReceiverForAllUsers(closeSystemDialogsBroadcastReceiver,
+                new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS), null /* permission */,
+                mainHandler);
 
         pipMediaController.addActionListener(this::onMediaActionsChanged);
     }
@@ -199,9 +204,9 @@ public class TvPipMenuController implements PipMenuController, TvPipMenuView.Lis
             return;
         }
         if (!mAppActions.isEmpty()) {
-            mMenuView.setAdditionalActions(mAppActions);
+            mMenuView.setAdditionalActions(mAppActions, mMainHandler);
         } else {
-            mMenuView.setAdditionalActions(mMediaActions);
+            mMenuView.setAdditionalActions(mMediaActions, mMainHandler);
         }
     }
 

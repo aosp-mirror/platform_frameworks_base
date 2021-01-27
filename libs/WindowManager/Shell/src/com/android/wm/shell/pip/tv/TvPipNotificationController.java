@@ -27,6 +27,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaMetadata;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.Log;
@@ -60,6 +61,7 @@ public class TvPipNotificationController {
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder;
     private final ActionBroadcastReceiver mActionBroadcastReceiver;
+    private final Handler mMainHandler;
     private Delegate mDelegate;
 
     private String mDefaultTitle;
@@ -70,10 +72,12 @@ public class TvPipNotificationController {
     private String mMediaTitle;
     private Bitmap mArt;
 
-    public TvPipNotificationController(Context context, PipMediaController pipMediaController) {
+    public TvPipNotificationController(Context context, PipMediaController pipMediaController,
+            Handler mainHandler) {
         mContext = context;
         mPackageManager = context.getPackageManager();
         mNotificationManager = context.getSystemService(NotificationManager.class);
+        mMainHandler = mainHandler;
 
         mNotificationBuilder = new Notification.Builder(context, NOTIFICATION_CHANNEL)
                 .setLocalOnly(true)
@@ -219,7 +223,8 @@ public class TvPipNotificationController {
         void register() {
             if (mRegistered) return;
 
-            mContext.registerReceiver(this, mIntentFilter, UserHandle.USER_ALL);
+            mContext.registerReceiverForAllUsers(this, mIntentFilter, null /* permission */,
+                    mMainHandler);
             mRegistered = true;
         }
 
