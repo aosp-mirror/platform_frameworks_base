@@ -22,6 +22,7 @@ import static com.android.server.power.batterysaver.BatterySaverPolicy.POLICY_LE
 import static com.google.common.truth.Truth.assertThat;
 
 import android.content.Context;
+import android.os.BatterySaverPolicyConfig;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerSaveState;
@@ -594,5 +595,37 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertTrue(policy.forceBackgroundCheck);
         assertEquals(PowerManager.LOCATION_MODE_FOREGROUND_ONLY, policy.locationMode);
         assertEquals(PowerManager.SOUND_TRIGGER_MODE_CRITICAL_ONLY, policy.soundTriggerMode);
+    }
+
+    public void testSetFullPolicy_overridesSettingsAndDeviceConfig_clearOnFullExit() {
+        mDeviceSpecificConfigResId = R.string.config_batterySaverDeviceSpecificConfig_1;
+        mMockGlobalSettings.put(Global.BATTERY_SAVER_CONSTANTS,
+                "location_mode=" + PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+        mMockGlobalSettings.put(Global.BATTERY_SAVER_DEVICE_SPECIFIC_CONSTANTS, "");
+
+        mBatterySaverPolicy.onChange();
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
+
+        Policy currentFullPolicy = mBatterySaverPolicy.getPolicyLocked(POLICY_LEVEL_FULL);
+        BatterySaverPolicyConfig currentFullPolicyConfig = currentFullPolicy.toConfig();
+        BatterySaverPolicyConfig newFullPolicyConfig =
+                new BatterySaverPolicyConfig.Builder(currentFullPolicyConfig)
+                        .setLocationMode(PowerManager.LOCATION_MODE_FOREGROUND_ONLY)
+                        .build();
+        mBatterySaverPolicy.setFullPolicyLocked(Policy.fromConfig(newFullPolicyConfig));
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_FOREGROUND_ONLY);
+
+        // Any policy settings set through #setFullPolicy will be cleared when exiting full policy.
+        // Default policy settings will be used on the next full policy mode enter unless
+        // #setFullPolicy is called again.
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_OFF);
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_NO_CHANGE);
+
+        mBatterySaverPolicy.setPolicyLevel(POLICY_LEVEL_FULL);
+        assertThat(mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.LOCATION).locationMode)
+                .isEqualTo(PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF);
     }
 }

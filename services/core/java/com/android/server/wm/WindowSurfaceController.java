@@ -116,14 +116,6 @@ class WindowSurfaceController {
         Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
     }
 
-    void detachChildren(SurfaceControl.Transaction t) {
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SEVER CHILDREN");
-        mChildrenDetached = true;
-        if (mSurfaceControl != null) {
-            t.detachChildren(mSurfaceControl);
-        }
-    }
-
     void hide(SurfaceControl.Transaction transaction, String reason) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE HIDE ( %s ): %s", reason, title);
 

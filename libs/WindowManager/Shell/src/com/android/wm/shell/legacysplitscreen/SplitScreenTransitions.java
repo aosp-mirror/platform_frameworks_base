@@ -64,7 +64,7 @@ public class SplitScreenTransitions implements Transitions.TransitionHandler {
     /** Keeps track of currently running animations */
     private final ArrayList<Animator> mAnimations = new ArrayList<>();
 
-    private Runnable mFinishCallback = null;
+    private Transitions.TransitionFinishCallback mFinishCallback = null;
     private SurfaceControl.Transaction mFinishTransaction;
 
     SplitScreenTransitions(@NonNull TransactionPool pool, @NonNull Transitions transitions,
@@ -203,7 +203,8 @@ public class SplitScreenTransitions implements Transitions.TransitionHandler {
 
     @Override
     public boolean startAnimation(@NonNull IBinder transition, @NonNull TransitionInfo info,
-            @NonNull SurfaceControl.Transaction t, @NonNull Runnable finishCallback) {
+            @NonNull SurfaceControl.Transaction t,
+            @NonNull Transitions.TransitionFinishCallback finishCallback) {
         if (transition != mPendingDismiss && transition != mPendingEnter) {
             // If we're not in split-mode, just abort
             if (!mSplitScreen.isDividerVisible()) return false;
@@ -330,7 +331,7 @@ public class SplitScreenTransitions implements Transitions.TransitionHandler {
         mFinishTransaction.apply();
         mTransactionPool.release(mFinishTransaction);
         mFinishTransaction = null;
-        mFinishCallback.run();
+        mFinishCallback.onTransitionFinished(null /* wct */, null /* wctCB */);
         mFinishCallback = null;
         if (mAnimatingTransition == mPendingEnter) {
             mPendingEnter = null;

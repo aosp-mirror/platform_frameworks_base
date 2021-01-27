@@ -409,15 +409,15 @@ class RemoteAnimationController implements DeathRecipient {
         private @AnimationType int mAnimationType;
         final Point mPosition = new Point();
         final Rect mLocalBounds;
-        final Rect mStackBounds = new Rect();
+        final Rect mRootTaskBounds = new Rect();
         final Rect mStartBounds = new Rect();
 
         RemoteAnimationAdapterWrapper(RemoteAnimationRecord record, Point position,
-                Rect localBounds, Rect stackBounds, Rect startBounds) {
+                Rect localBounds, Rect rootTaskBounds, Rect startBounds) {
             mRecord = record;
             mPosition.set(position.x, position.y);
             mLocalBounds = localBounds;
-            mStackBounds.set(stackBounds);
+            mRootTaskBounds.set(rootTaskBounds);
             mStartBounds.set(startBounds);
         }
 

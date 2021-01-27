@@ -3194,6 +3194,8 @@
   <java-symbol type="array" name="config_reduceBrightColorsCoefficients" />
   <java-symbol type="array" name="config_reduceBrightColorsCoefficientsNative" />
   <java-symbol type="array" name="config_availableColorModes" />
+  <java-symbol type="array" name="config_mappedColorModes" />
+  <java-symbol type="string" name="config_vendorColorModesRestoreHint" />
   <java-symbol type="integer" name="config_accessibilityColorMode" />
   <java-symbol type="array" name="config_displayCompositionColorModes" />
   <java-symbol type="array" name="config_displayCompositionColorSpaces" />
@@ -3497,6 +3499,7 @@
   <java-symbol type="string" name="config_defaultSearchUiService" />
   <java-symbol type="string" name="config_defaultMusicRecognitionService" />
   <java-symbol type="string" name="config_defaultAttentionService" />
+  <java-symbol type="string" name="config_defaultRotationResolverService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsService" />
   <java-symbol type="string" name="config_defaultSystemCaptionsManagerService" />
   <java-symbol type="string" name="config_retailDemoPackage" />
@@ -4159,4 +4162,7 @@
   <java-symbol type="string" name="sensor_privacy_start_use_camera_notification_content" />
   <java-symbol type="string" name="sensor_privacy_start_use_dialog_turn_on_button" />
   <java-symbol type="string" name="sensor_privacy_notification_channel_label" />
+
+  <java-symbol type="bool" name="config_telephony5gStandalone" />
+  <java-symbol type="bool" name="config_telephony5gNonStandalone" />
 </resources>

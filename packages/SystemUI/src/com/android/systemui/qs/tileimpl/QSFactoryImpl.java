@@ -14,6 +14,8 @@
 
 package com.android.systemui.qs.tileimpl;
 
+import static com.android.systemui.qs.dagger.QSFlagsModule.QS_SIDE_LABELS;
+
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -51,9 +53,9 @@ import com.android.systemui.qs.tiles.UserTile;
 import com.android.systemui.qs.tiles.WifiTile;
 import com.android.systemui.qs.tiles.WorkModeTile;
 import com.android.systemui.util.leak.GarbageMonitor;
-import com.android.systemui.util.settings.SecureSettings;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Provider;
 
 import dagger.Lazy;
@@ -96,7 +98,7 @@ public class QSFactoryImpl implements QSFactory {
     @Inject
     public QSFactoryImpl(
             Lazy<QSHost> qsHostLazy,
-            SecureSettings settings,
+            @Named(QS_SIDE_LABELS) boolean useSideLabels,
             Provider<CustomTile.Builder> customTileBuilderProvider,
             Provider<WifiTile> wifiTileProvider,
             Provider<InternetTile> internetTileProvider,
@@ -125,7 +127,7 @@ public class QSFactoryImpl implements QSFactory {
         mQsHostLazy = qsHostLazy;
         mCustomTileBuilderProvider = customTileBuilderProvider;
 
-        mSideLabels = settings.getInt("sysui_side_labels", 0) != 0;
+        mSideLabels = useSideLabels;
 
         mWifiTileProvider = wifiTileProvider;
         mInternetTileProvider = internetTileProvider;

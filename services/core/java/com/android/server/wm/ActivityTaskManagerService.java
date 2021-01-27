@@ -287,7 +287,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * System service for managing activities and their containers (task, stacks, displays,... ).
+ * System service for managing activities and their containers (task, displays,... ).
  *
  * {@hide}
  */
@@ -1713,12 +1713,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isTopActivityImmersive() {
         enforceNotIsolatedCaller("isTopActivityImmersive");
         synchronized (mGlobalLock) {
-            final Task topFocusedStack = getTopDisplayFocusedRootTask();
-            if (topFocusedStack == null) {
+            final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
+            if (topFocusedRootTask == null) {
                 return false;
             }
 
-            final ActivityRecord r = topFocusedStack.topRunningActivity();
+            final ActivityRecord r = topFocusedRootTask.topRunningActivity();
             return r != null && r.immersive;
         }
     }
@@ -1727,8 +1727,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public int getFrontActivityScreenCompatMode() {
         enforceNotIsolatedCaller("getFrontActivityScreenCompatMode");
         synchronized (mGlobalLock) {
-            final Task stack = getTopDisplayFocusedRootTask();
-            final ActivityRecord r = stack != null ? stack.topRunningActivity() : null;
+            final Task rootTask = getTopDisplayFocusedRootTask();
+            final ActivityRecord r = rootTask != null ? rootTask.topRunningActivity() : null;
             if (r == null) {
                 return ActivityManager.COMPAT_MODE_UNKNOWN;
             }
@@ -1742,8 +1742,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "setFrontActivityScreenCompatMode");
         ApplicationInfo ai;
         synchronized (mGlobalLock) {
-            final Task stack = getTopDisplayFocusedRootTask();
-            final ActivityRecord r = stack != null ? stack.topRunningActivity() : null;
+            final Task rootTask = getTopDisplayFocusedRootTask();
+            final ActivityRecord r = rootTask != null ? rootTask.topRunningActivity() : null;
             if (r == null) {
                 Slog.w(TAG, "setFrontActivityScreenCompatMode failed: no top activity");
                 return;
@@ -1760,9 +1760,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                Task focusedStack = getTopDisplayFocusedRootTask();
-                if (focusedStack != null) {
-                    return mRootWindowContainer.getRootTaskInfo(focusedStack.mTaskId);
+                Task focusedRootTask = getTopDisplayFocusedRootTask();
+                if (focusedRootTask != null) {
+                    return mRootWindowContainer.getRootTaskInfo(focusedRootTask.mTaskId);
                 }
                 return null;
             }
@@ -1934,17 +1934,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             + windowingMode);
                 }
 
-                final Task stack = task.getRootTask();
+                final Task rootTask = task.getRootTask();
                 if (toTop) {
-                    stack.moveToFront("setTaskWindowingMode", task);
+                    rootTask.moveToFront("setTaskWindowingMode", task);
                 }
                 // Convert some windowing-mode changes into root-task reparents for split-screen.
-                if (stack.inSplitScreenWindowingMode()) {
-                    stack.getDisplayArea().onSplitScreenModeDismissed();
+                if (rootTask.inSplitScreenWindowingMode()) {
+                    rootTask.getDisplayArea().onSplitScreenModeDismissed();
 
                 } else {
-                    stack.setWindowingMode(windowingMode);
-                    stack.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
+                    rootTask.setWindowingMode(windowingMode);
+                    rootTask.mDisplayContent.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS,
                             true /* notifyClients */);
                 }
                 return true;
@@ -1971,9 +1971,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                final Task topFocusedStack = getTopDisplayFocusedRootTask();
-                if (topFocusedStack != null) {
-                    topFocusedStack.unhandledBackLocked();
+                final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
+                if (topFocusedRootTask != null) {
+                    topFocusedRootTask.unhandledBackLocked();
                 }
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -2428,7 +2428,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
 
-                // When starting lock task mode the stack must be in front and focused
+                // When starting lock task mode the root task must be in front and focused
                 task.getRootTask().moveToFront("startSystemLockTaskMode");
                 startLockTaskMode(task, true /* isSystemCaller */);
             }
@@ -2467,7 +2467,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final int callingUid = Binder.getCallingUid();
         final long ident = Binder.clearCallingIdentity();
         try {
-            // When a task is locked, dismiss the pinned stack if it exists
+            // When a task is locked, dismiss the root pinned task if it exists
             mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
 
             getLockTaskController().startLockTaskMode(task, isSystemCaller, callingUid);
@@ -2736,11 +2736,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return false;
                 }
 
-                // Reparent the task to the right stack if necessary
+                // Reparent the task to the right root task if necessary
                 boolean preserveWindow = (resizeMode & RESIZE_MODE_PRESERVE_WINDOW) != 0;
 
-                // After reparenting (which only resizes the task to the stack bounds), resize the
-                // task to the actual bounds provided
+                // After reparenting (which only resizes the task to the root task bounds),
+                // resize the task to the actual bounds provided
                 return task.resize(bounds, resizeMode, preserveWindow);
             }
         } finally {
@@ -3087,8 +3087,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 "enqueueAssistContext()");
 
         synchronized (mGlobalLock) {
-            final Task stack = getTopDisplayFocusedRootTask();
-            ActivityRecord activity = stack != null ? stack.getTopNonFinishingActivity() : null;
+            final Task rootTask = getTopDisplayFocusedRootTask();
+            ActivityRecord activity =
+                    rootTask != null ? rootTask.getTopNonFinishingActivity() : null;
             if (activity == null) {
                 Slog.w(TAG, "getAssistContextExtras failed: no top activity");
                 return null;
@@ -3216,12 +3217,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public boolean isAssistDataAllowedOnCurrentActivity() {
         int userId;
         synchronized (mGlobalLock) {
-            final Task focusedStack = getTopDisplayFocusedRootTask();
-            if (focusedStack == null || focusedStack.isActivityTypeAssistant()) {
+            final Task focusedRootTask = getTopDisplayFocusedRootTask();
+            if (focusedRootTask == null || focusedRootTask.isActivityTypeAssistant()) {
                 return false;
             }
 
-            final ActivityRecord activity = focusedStack.getTopNonFinishingActivity();
+            final ActivityRecord activity = focusedRootTask.getTopNonFinishingActivity();
             if (activity == null) {
                 return false;
             }
@@ -3247,7 +3248,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Binder.restoreCallingIdentity(token);
             }
             // TODO: VI Should we cache the activity so that it's easier to find later
-            // rather than scan through all the stacks and activities?
+            // rather than scan through all the root tasks and activities?
         } catch (RemoteException re) {
             activityToCallback.clearVoiceSessionLocked();
             // TODO: VI Should this terminate the voice session?
@@ -3341,9 +3342,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 final List<RemoteAction> actions = r.pictureInPictureArgs.getActions();
                 mRootWindowContainer.moveActivityToPinnedRootTask(
                         r, "enterPictureInPictureMode");
-                final Task stack = r.getRootTask();
-                stack.setPictureInPictureAspectRatio(aspectRatio);
-                stack.setPictureInPictureActions(actions);
+                final Task rootTask = r.getRootTask();
+                rootTask.setPictureInPictureAspectRatio(aspectRatio);
+                rootTask.setPictureInPictureActions(actions);
             }
         };
 
@@ -3723,7 +3724,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mWindowManager.disableNonVrUi(disableNonVrUi);
                 if (disableNonVrUi) {
                     // If we are in a VR mode where Picture-in-Picture mode is unsupported,
-                    // then remove the pinned stack.
+                    // then remove the root pinned task.
                     mRootWindowContainer.removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
                 }
             }
@@ -3901,17 +3902,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * The caller should not hold lock when calling this method because it will wait for the
      * activities to complete the dump.
      *
-     * @param dumpVisibleStacksOnly dump activity with {@param name} only if in a visible stack
-     * @param dumpFocusedStackOnly  dump activity with {@param name} only if in the focused stack
+     * @param dumpVisibleRootTasksOnly dump activity with {@param name} only if in a visible root
+     *                                 task
+     * @param dumpFocusedRootTaskOnly  dump activity with {@param name} only if in the focused
+     *                                 root task
      */
     protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
-            int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
-            boolean dumpFocusedStackOnly) {
+            int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
+            boolean dumpFocusedRootTaskOnly) {
         ArrayList<ActivityRecord> activities;
 
         synchronized (mGlobalLock) {
-            activities = mRootWindowContainer.getDumpActivities(name, dumpVisibleStacksOnly,
-                    dumpFocusedStackOnly);
+            activities = mRootWindowContainer.getDumpActivities(name, dumpVisibleRootTasksOnly,
+                    dumpFocusedRootTaskOnly);
         }
 
         if (activities.size() <= 0) {
@@ -4488,7 +4491,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (!shouldSleep) {
             // If wasSleeping is true, we need to wake up activity manager state from when
             // we started sleeping. In either case, we need to apply the sleep tokens, which
-            // will wake up stacks or put them to sleep as appropriate.
+            // will wake up root tasks or put them to sleep as appropriate.
             if (wasSleeping) {
                 mSleeping = false;
                 FrameworkStatsLog.write(FrameworkStatsLog.ACTIVITY_MANAGER_SLEEP_STATE_CHANGED,
@@ -4498,7 +4501,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 Slog.d(TAG, "Top Process State changed to PROCESS_STATE_TOP");
                 mTaskSupervisor.comeOutOfSleepIfNeededLocked();
             }
-            mRootWindowContainer.applySleepTokens(true /* applyToStacks */);
+            mRootWindowContainer.applySleepTokens(true /* applyToRootTasks */);
             if (wasSleeping) {
                 updateOomAdj = true;
             }
@@ -4694,7 +4697,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
             activity = ActivityRecord.isInRootTaskLocked(token);
             if (activity == null) {
-                Slog.w(TAG, "Failed createPendingResult: activity " + token + " not in any stack");
+                Slog.w(TAG, "Failed createPendingResult: activity " + token
+                        + " not in any root task");
                 return null;
             }
             if (activity.finishing) {
@@ -4746,14 +4750,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Applies latest configuration and/or visibility updates if needed. */
     boolean ensureConfigAndVisibilityAfterUpdate(ActivityRecord starting, int changes) {
         boolean kept = true;
-        final Task mainStack = mRootWindowContainer.getTopDisplayFocusedRootTask();
-        // mainStack is null during startup.
-        if (mainStack != null) {
+        final Task mainRootTask = mRootWindowContainer.getTopDisplayFocusedRootTask();
+        // mainRootTask is null during startup.
+        if (mainRootTask != null) {
             if (changes != 0 && starting == null) {
                 // If the configuration changed, and the caller is not already
                 // in the process of starting an activity, then find the top
                 // activity to check if its configuration needs to change.
-                starting = mainStack.topRunningActivity();
+                starting = mainRootTask.topRunningActivity();
             }
 
             if (starting != null) {
@@ -6010,9 +6014,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     mRootWindowContainer.dumpDisplayConfigs(pw, "  ");
                 }
                 if (dumpAll) {
-                    final Task topFocusedStack = getTopDisplayFocusedRootTask();
-                    if (dumpPackage == null && topFocusedStack != null) {
-                        pw.println("  mConfigWillChange: " + topFocusedStack.mConfigWillChange);
+                    final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
+                    if (dumpPackage == null && topFocusedRootTask != null) {
+                        pw.println("  mConfigWillChange: " + topFocusedRootTask.mConfigWillChange);
                     }
                     if (mCompatModePackages.getPackages().size() > 0) {
                         boolean printed = false;
@@ -6093,9 +6097,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 if (dumpPackage == null) {
                     getGlobalConfiguration().dumpDebug(proto, GLOBAL_CONFIGURATION);
-                    final Task topFocusedStack = getTopDisplayFocusedRootTask();
-                    if (topFocusedStack != null) {
-                        proto.write(CONFIG_WILL_CHANGE, topFocusedStack.mConfigWillChange);
+                    final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
+                    if (topFocusedRootTask != null) {
+                        proto.write(CONFIG_WILL_CHANGE, topFocusedRootTask.mConfigWillChange);
                     }
                     writeSleepStateToProto(proto, wakeFullness, testPssMode);
                     if (mRunningVoice != null) {
@@ -6158,10 +6162,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         @Override
         public boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
-                String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
-                boolean dumpFocusedStackOnly) {
+                String[] args, int opti, boolean dumpAll, boolean dumpVisibleRootTasksOnly,
+                boolean dumpFocusedRootTaskOnly) {
             return ActivityTaskManagerService.this.dumpActivity(fd, pw, name, args, opti, dumpAll,
-                    dumpVisibleStacksOnly, dumpFocusedStackOnly);
+                    dumpVisibleRootTasksOnly, dumpFocusedRootTaskOnly);
         }
 
         @Override

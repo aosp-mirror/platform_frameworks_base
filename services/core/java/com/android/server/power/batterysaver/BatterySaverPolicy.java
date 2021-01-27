@@ -138,6 +138,8 @@ public class BatterySaverPolicy extends ContentObserver implements
     static final Policy OFF_POLICY = new Policy(
             1f,    /* adjustBrightnessFactor */
             false, /* advertiseIsEnabled */
+            new CpuFrequencies(), /* cpuFrequenciesForInteractive */
+            new CpuFrequencies(), /* cpuFrequenciesForNoninteractive */
             false, /* deferFullBackup */
             false, /* deferKeyValueBackup */
             false, /* disableAnimation */
@@ -150,8 +152,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             false, /* enableFireWall */
             false, /* enableNightMode */
             false, /* enableQuickDoze */
-            new ArrayMap<>(), /* filesForInteractive */
-            new ArrayMap<>(), /* filesForNoninteractive */
             false, /* forceAllAppsStandby */
             false, /* forceBackgroundCheck */
             PowerManager.LOCATION_MODE_NO_CHANGE, /* locationMode */
@@ -163,6 +163,8 @@ public class BatterySaverPolicy extends ContentObserver implements
     private static final Policy DEFAULT_FULL_POLICY = new Policy(
             0.5f,  /* adjustBrightnessFactor */
             true,  /* advertiseIsEnabled */
+            new CpuFrequencies(), /* cpuFrequenciesForInteractive */
+            new CpuFrequencies(), /* cpuFrequenciesForNoninteractive */
             true,  /* deferFullBackup */
             true,  /* deferKeyValueBackup */
             false, /* disableAnimation */
@@ -175,8 +177,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             true,  /* enableFirewall */
             true, /* enableNightMode */
             true, /* enableQuickDoze */
-            new ArrayMap<>(), /* filesForInteractive */
-            new ArrayMap<>(), /* filesForNoninteractive */
             true, /* forceAllAppsStandby */
             true, /* forceBackgroundCheck */
             PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF, /* locationMode */
@@ -221,6 +221,10 @@ public class BatterySaverPolicy extends ContentObserver implements
     /** The policy that will be used for adaptive battery saver. */
     @GuardedBy("mLock")
     private Policy mAdaptivePolicy = DEFAULT_ADAPTIVE_POLICY;
+
+    /** The current default full policy. */
+    @GuardedBy("mLock")
+    private Policy mDefaultFullPolicy = DEFAULT_FULL_POLICY;
 
     /** The policy to be used for full battery saver. */
     @GuardedBy("mLock")
@@ -377,9 +381,8 @@ public class BatterySaverPolicy extends ContentObserver implements
                 }
             }
 
-            if (newFullPolicy != null && !mFullPolicy.equals(newFullPolicy)) {
-                mFullPolicy = newFullPolicy;
-                changed |= (mPolicyLevel == POLICY_LEVEL_FULL);
+            if (newFullPolicy != null) {
+                changed |= maybeUpdateDefaultFullPolicy(newFullPolicy);
             }
 
             if (newAdaptivePolicy != null && !mAdaptivePolicy.equals(newAdaptivePolicy)) {
@@ -447,13 +450,9 @@ public class BatterySaverPolicy extends ContentObserver implements
             Slog.i(TAG, "mDeviceSpecificSettings=" + mDeviceSpecificSettings);
         }
 
-        boolean changed = false;
-        Policy newFullPolicy = Policy.fromSettings(setting, deviceSpecificSetting,
-                mLastDeviceConfigProperties, null, DEFAULT_FULL_POLICY);
-        if (mPolicyLevel == POLICY_LEVEL_FULL && !mFullPolicy.equals(newFullPolicy)) {
-            changed = true;
-        }
-        mFullPolicy = newFullPolicy;
+        boolean changed = maybeUpdateDefaultFullPolicy(
+                Policy.fromSettings(setting, deviceSpecificSetting,
+                        mLastDeviceConfigProperties, null, DEFAULT_FULL_POLICY));
 
         mDefaultAdaptivePolicy = Policy.fromSettings("", "",
                 mLastDeviceConfigProperties, KEY_SUFFIX_ADAPTIVE, DEFAULT_ADAPTIVE_POLICY);
@@ -488,6 +487,8 @@ public class BatterySaverPolicy extends ContentObserver implements
         mEffectivePolicyRaw = new Policy(
                 rawPolicy.adjustBrightnessFactor,
                 rawPolicy.advertiseIsEnabled,
+                rawPolicy.cpuFrequenciesForInteractive,
+                rawPolicy.cpuFrequenciesForNoninteractive,
                 rawPolicy.deferFullBackup,
                 rawPolicy.deferKeyValueBackup,
                 rawPolicy.disableAnimation,
@@ -502,8 +503,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                 // Don't force night mode when car projection is enabled.
                 rawPolicy.enableNightMode && !mAutomotiveProjectionActive.get(),
                 rawPolicy.enableQuickDoze,
-                rawPolicy.filesForInteractive,
-                rawPolicy.filesForNoninteractive,
                 rawPolicy.forceAllAppsStandby,
                 rawPolicy.forceBackgroundCheck,
                 locationMode,
@@ -649,20 +648,20 @@ public class BatterySaverPolicy extends ContentObserver implements
         public final boolean enableQuickDoze;
 
         /**
-         * List of [Filename -> content] that should be written when battery saver is activated
+         * List of CPU frequencies that should be written when battery saver is activated
          * and the device is interactive.
          *
          * We use this to change the max CPU frequencies.
          */
-        public final ArrayMap<String, String> filesForInteractive;
+        public final CpuFrequencies cpuFrequenciesForInteractive;
 
         /**
-         * List of [Filename -> content] that should be written when battery saver is activated
+         * List of CPU frequencies that should be written when battery saver is activated
          * and the device is non-interactive.
          *
          * We use this to change the max CPU frequencies.
          */
-        public final ArrayMap<String, String> filesForNoninteractive;
+        public final CpuFrequencies cpuFrequenciesForNoninteractive;
 
         /**
          * Whether to put all apps in the stand-by mode.
@@ -688,6 +687,8 @@ public class BatterySaverPolicy extends ContentObserver implements
         Policy(
                 float adjustBrightnessFactor,
                 boolean advertiseIsEnabled,
+                CpuFrequencies cpuFrequenciesForInteractive,
+                CpuFrequencies cpuFrequenciesForNoninteractive,
                 boolean deferFullBackup,
                 boolean deferKeyValueBackup,
                 boolean disableAnimation,
@@ -700,8 +701,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                 boolean enableFirewall,
                 boolean enableNightMode,
                 boolean enableQuickDoze,
-                ArrayMap<String, String> filesForInteractive,
-                ArrayMap<String, String> filesForNoninteractive,
                 boolean forceAllAppsStandby,
                 boolean forceBackgroundCheck,
                 int locationMode,
@@ -709,6 +708,8 @@ public class BatterySaverPolicy extends ContentObserver implements
 
             this.adjustBrightnessFactor = Math.min(1, Math.max(0, adjustBrightnessFactor));
             this.advertiseIsEnabled = advertiseIsEnabled;
+            this.cpuFrequenciesForInteractive = cpuFrequenciesForInteractive;
+            this.cpuFrequenciesForNoninteractive = cpuFrequenciesForNoninteractive;
             this.deferFullBackup = deferFullBackup;
             this.deferKeyValueBackup = deferKeyValueBackup;
             this.disableAnimation = disableAnimation;
@@ -721,8 +722,6 @@ public class BatterySaverPolicy extends ContentObserver implements
             this.enableFirewall = enableFirewall;
             this.enableNightMode = enableNightMode;
             this.enableQuickDoze = enableQuickDoze;
-            this.filesForInteractive = filesForInteractive;
-            this.filesForNoninteractive = filesForNoninteractive;
             this.forceAllAppsStandby = forceAllAppsStandby;
             this.forceBackgroundCheck = forceBackgroundCheck;
 
@@ -745,6 +744,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             mHashCode = Objects.hash(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
+                    cpuFrequenciesForInteractive,
+                    cpuFrequenciesForNoninteractive,
                     deferFullBackup,
                     deferKeyValueBackup,
                     disableAnimation,
@@ -757,8 +758,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                     enableFirewall,
                     enableNightMode,
                     enableQuickDoze,
-                    filesForInteractive,
-                    filesForNoninteractive,
                     forceAllAppsStandby,
                     forceBackgroundCheck,
                     locationMode,
@@ -781,6 +780,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             return new Policy(
                     config.getAdjustBrightnessFactor(),
                     config.getAdvertiseIsEnabled(),
+                    (new CpuFrequencies()).parseString(cpuFreqInteractive),
+                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive),
                     config.getDeferFullBackup(),
                     config.getDeferKeyValueBackup(),
                     config.getDisableAnimation(),
@@ -793,15 +794,38 @@ public class BatterySaverPolicy extends ContentObserver implements
                     config.getEnableFirewall(),
                     config.getEnableNightMode(),
                     config.getEnableQuickDoze(),
-                    /* filesForInteractive */
-                    (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
-                    /* filesForNoninteractive */
-                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     config.getForceAllAppsStandby(),
                     config.getForceBackgroundCheck(),
                     config.getLocationMode(),
                     config.getSoundTriggerMode()
             );
+        }
+
+        BatterySaverPolicyConfig toConfig() {
+            return new BatterySaverPolicyConfig.Builder()
+                    .addDeviceSpecificSetting(KEY_CPU_FREQ_INTERACTIVE,
+                            cpuFrequenciesForInteractive.toString())
+                    .addDeviceSpecificSetting(KEY_CPU_FREQ_NONINTERACTIVE,
+                            cpuFrequenciesForNoninteractive.toString())
+                    .setAdjustBrightnessFactor(adjustBrightnessFactor)
+                    .setAdvertiseIsEnabled(advertiseIsEnabled)
+                    .setDeferFullBackup(deferFullBackup)
+                    .setDeferKeyValueBackup(deferKeyValueBackup)
+                    .setDisableAnimation(disableAnimation)
+                    .setDisableAod(disableAod)
+                    .setDisableLaunchBoost(disableLaunchBoost)
+                    .setDisableOptionalSensors(disableOptionalSensors)
+                    .setDisableVibration(disableVibration)
+                    .setEnableAdjustBrightness(enableAdjustBrightness)
+                    .setEnableDataSaver(enableDataSaver)
+                    .setEnableFirewall(enableFirewall)
+                    .setEnableNightMode(enableNightMode)
+                    .setEnableQuickDoze(enableQuickDoze)
+                    .setForceAllAppsStandby(forceAllAppsStandby)
+                    .setForceBackgroundCheck(forceBackgroundCheck)
+                    .setLocationMode(locationMode)
+                    .setSoundTriggerMode(soundTriggerMode)
+                    .build();
         }
 
         @VisibleForTesting
@@ -894,6 +918,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             return new Policy(
                     adjustBrightnessFactor,
                     advertiseIsEnabled,
+                    (new CpuFrequencies()).parseString(cpuFreqInteractive),
+                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive),
                     deferFullBackup,
                     deferKeyValueBackup,
                     disableAnimation,
@@ -907,10 +933,6 @@ public class BatterySaverPolicy extends ContentObserver implements
                     enableFirewall,
                     enableNightMode,
                     enableQuickDoze,
-                    /* filesForInteractive */
-                    (new CpuFrequencies()).parseString(cpuFreqInteractive).toSysFileMap(),
-                    /* filesForNoninteractive */
-                    (new CpuFrequencies()).parseString(cpuFreqNoninteractive).toSysFileMap(),
                     forceAllAppsStandby,
                     forceBackgroundCheck,
                     locationMode,
@@ -941,8 +963,9 @@ public class BatterySaverPolicy extends ContentObserver implements
                     && forceBackgroundCheck == other.forceBackgroundCheck
                     && locationMode == other.locationMode
                     && soundTriggerMode == other.soundTriggerMode
-                    && filesForInteractive.equals(other.filesForInteractive)
-                    && filesForNoninteractive.equals(other.filesForNoninteractive);
+                    && cpuFrequenciesForInteractive.equals(other.cpuFrequenciesForInteractive)
+                    && cpuFrequenciesForNoninteractive.equals(
+                            other.cpuFrequenciesForNoninteractive);
         }
 
         @Override
@@ -1035,6 +1058,11 @@ public class BatterySaverPolicy extends ContentObserver implements
             if (mPolicyLevel == level) {
                 return false;
             }
+            // If we are leaving the full policy level, then any overrides to the full policy set
+            // through #setFullPolicyLocked should be cleared.
+            if (mPolicyLevel == POLICY_LEVEL_FULL) {
+                mFullPolicy = mDefaultFullPolicy;
+            }
             switch (level) {
                 case POLICY_LEVEL_FULL:
                 case POLICY_LEVEL_ADAPTIVE:
@@ -1048,6 +1076,62 @@ public class BatterySaverPolicy extends ContentObserver implements
             updatePolicyDependenciesLocked();
             return true;
         }
+    }
+
+    /**
+     * Get the current policy for the provided policy level.
+     */
+    Policy getPolicyLocked(@PolicyLevel int policyLevel) {
+        switch (policyLevel) {
+            case POLICY_LEVEL_OFF:
+                return OFF_POLICY;
+            case POLICY_LEVEL_ADAPTIVE:
+                return mAdaptivePolicy;
+            case POLICY_LEVEL_FULL:
+                return mFullPolicy;
+        }
+
+        throw new IllegalArgumentException(
+                "getPolicyLocked: incorrect policy level provided - " + policyLevel);
+    }
+
+    /**
+     * Updates the default policy with the passed in policy.
+     * If the full policy is not overridden with runtime settings, then the full policy will be
+     * updated.
+     *
+     * @return True if the active policy requires an update, false if not.
+     */
+    private boolean maybeUpdateDefaultFullPolicy(Policy p) {
+        boolean fullPolicyChanged = false;
+        if (!mDefaultFullPolicy.equals(p)) {
+            // default policy can be overridden by #setFullPolicyLocked
+            boolean isDefaultFullPolicyOverridden = !mDefaultFullPolicy.equals(mFullPolicy);
+            if (!isDefaultFullPolicyOverridden) {
+                mFullPolicy = p;
+                fullPolicyChanged = (mPolicyLevel == POLICY_LEVEL_FULL);
+            }
+            mDefaultFullPolicy = p;
+        }
+        return fullPolicyChanged;
+    }
+
+    /** @return true if the current policy changed and the policy level is FULL. */
+    boolean setFullPolicyLocked(Policy p) {
+        if (p == null) {
+            Slog.wtf(TAG, "setFullPolicy given null policy");
+            return false;
+        }
+        if (mFullPolicy.equals(p)) {
+            return false;
+        }
+
+        mFullPolicy = p;
+        if (mPolicyLevel == POLICY_LEVEL_FULL) {
+            updatePolicyDependenciesLocked();
+            return true;
+        }
+        return false;
     }
 
     /** @return true if the current policy changed and the policy level is ADAPTIVE. */
@@ -1097,8 +1181,9 @@ public class BatterySaverPolicy extends ContentObserver implements
 
     public ArrayMap<String, String> getFileValues(boolean interactive) {
         synchronized (mLock) {
-            return interactive ? getCurrentPolicyLocked().filesForInteractive
-                    : getCurrentPolicyLocked().filesForNoninteractive;
+            return interactive
+                    ? getCurrentPolicyLocked().cpuFrequenciesForInteractive.toSysFileMap()
+                    : getCurrentPolicyLocked().cpuFrequenciesForNoninteractive.toSysFileMap();
         }
     }
 
@@ -1156,7 +1241,8 @@ public class BatterySaverPolicy extends ContentObserver implements
             ipw.println("mAutomotiveProjectionActive=" + mAutomotiveProjectionActive.get());
             ipw.println("mPolicyLevel=" + mPolicyLevel);
 
-            dumpPolicyLocked(ipw, "full", mFullPolicy);
+            dumpPolicyLocked(ipw, "default full", mDefaultFullPolicy);
+            dumpPolicyLocked(ipw, "current full", mFullPolicy);
             dumpPolicyLocked(ipw, "default adaptive", mDefaultAdaptivePolicy);
             dumpPolicyLocked(ipw, "current adaptive", mAdaptivePolicy);
             dumpPolicyLocked(ipw, "effective", mEffectivePolicyRaw);
@@ -1190,13 +1276,13 @@ public class BatterySaverPolicy extends ContentObserver implements
 
         pw.println("Interactive File values:");
         pw.increaseIndent();
-        dumpMap(pw, p.filesForInteractive);
+        dumpMap(pw, p.cpuFrequenciesForInteractive.toSysFileMap());
         pw.decreaseIndent();
         pw.println();
 
         pw.println("Noninteractive File values:");
         pw.increaseIndent();
-        dumpMap(pw, p.filesForNoninteractive);
+        dumpMap(pw, p.cpuFrequenciesForNoninteractive.toSysFileMap());
         pw.decreaseIndent();
 
         // Decrease from indent right after "Policy" line

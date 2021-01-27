@@ -35,7 +35,7 @@
         android:layout_height="wrap_content"
         android:focusable="true"
         android:text="@string/manage_bubbles_text"
-        android:textColor="?android:attr/textColorPrimaryInverse"
+        android:textColor="?android:attr/textColorPrimary"
     />
 
 </com.android.wm.shell.bubbles.BubbleExpandedView>

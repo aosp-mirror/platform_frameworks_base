@@ -22,6 +22,7 @@ import static android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID;
 import android.app.Activity;
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
+import android.app.people.PeopleSpaceTile;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -134,8 +135,10 @@ public class PeopleSpaceActivity extends Activity {
                     + tile.getId() + " for widget ID: "
                     + mAppWidgetId);
         }
+        // Ensure updates to app widget can be retrieved from both appWidget Id and tile ID.
         editor.putString(String.valueOf(mAppWidgetId), tile.getId());
-        editor.commit();
+        editor.putInt(tile.getId(), mAppWidgetId);
+        editor.apply();
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(mContext);
         Bundle options = new Bundle();
         options.putParcelable(PeopleSpaceUtils.OPTIONS_PEOPLE_SPACE_TILE, tile);

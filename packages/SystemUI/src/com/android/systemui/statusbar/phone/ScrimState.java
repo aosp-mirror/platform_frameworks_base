@@ -248,7 +248,6 @@ public enum ScrimState {
 
             mFrontAlpha = 0f;
             mBehindAlpha = mDefaultScrimAlpha;
-            mBubbleAlpha = ScrimController.BUBBLE_SCRIM_ALPHA;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION;
             mBlankScreen = false;
@@ -357,6 +356,10 @@ public enum ScrimState {
 
     public void setDefaultScrimAlpha(float defaultScrimAlpha) {
         mDefaultScrimAlpha = defaultScrimAlpha;
+    }
+
+    public void setBubbleAlpha(float alpha) {
+        mBubbleAlpha = alpha;
     }
 
     public void setWallpaperSupportsAmbientMode(boolean wallpaperSupportsAmbientMode) {

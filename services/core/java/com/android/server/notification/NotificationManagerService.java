@@ -10496,7 +10496,7 @@ public class NotificationManagerService extends SystemService {
 
         private void toast(String message) {
             mUiHandler.post(() ->
-                    Toast.makeText(getUiContext(), message + "\nSee go/s-trampolines.",
+                    Toast.makeText(getUiContext(), message + "\nSee g.co/dev/trampolines.",
                             Toast.LENGTH_LONG).show());
         }
     }

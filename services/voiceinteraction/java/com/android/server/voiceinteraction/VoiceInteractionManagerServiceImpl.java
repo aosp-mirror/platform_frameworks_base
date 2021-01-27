@@ -36,6 +36,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.hardware.soundtrigger.IRecognitionStatusCallback;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -51,6 +52,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.view.IWindowManager;
 
+import com.android.internal.app.IHotwordRecognitionStatusCallback;
 import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
 import com.android.internal.app.IVoiceInteractor;
@@ -65,6 +67,8 @@ import java.util.List;
 
 class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConnection.Callback {
     final static String TAG = "VoiceInteractionServiceManager";
+    // TODO (b/177502877): Set the Debug flag to false before shipping.
+    static final boolean DEBUG = true;
 
     final static String CLOSE_REASON_VOICE_INTERACTION = "voiceinteraction";
 
@@ -80,8 +84,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
     final VoiceInteractionServiceInfo mInfo;
     final ComponentName mSessionComponentName;
     final IWindowManager mIWindowManager;
+    final ComponentName mHotwordDetectionComponentName;
     boolean mBound = false;
     IVoiceInteractionService mService;
+    HotwordDetectionConnection mHotwordDetectionConnection;
 
     VoiceInteractionSessionConnection mActiveSession;
     int mDisabledShowContext;
@@ -140,6 +146,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             Slog.w(TAG, "Voice interaction service not found: " + service, e);
             mInfo = null;
             mSessionComponentName = null;
+            mHotwordDetectionComponentName = null;
             mIWindowManager = null;
             mValid = false;
             return;
@@ -148,6 +155,7 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (mInfo.getParseError() != null) {
             Slog.w(TAG, "Bad voice interaction service: " + mInfo.getParseError());
             mSessionComponentName = null;
+            mHotwordDetectionComponentName = null;
             mIWindowManager = null;
             mValid = false;
             return;
@@ -155,6 +163,8 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mValid = true;
         mSessionComponentName = new ComponentName(service.getPackageName(),
                 mInfo.getSessionService());
+        // TODO : Need to get the hotword detection service from the xml metadata
+        mHotwordDetectionComponentName = null;
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
@@ -374,6 +384,37 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         return mInfo.getSupportsLocalInteraction();
     }
 
+    public int setHotwordDetectionConfigLocked(Bundle options) {
+        if (DEBUG) {
+            Slog.d(TAG, "setHotwordDetectionConfigLocked");
+        }
+
+        if (!isIsolatedProcessLocked(mHotwordDetectionComponentName)) {
+            return VoiceInteractionService.HOTWORD_CONFIG_FAILURE;
+        }
+        // TODO : Need to check related permissions for hotword detection service
+        // TODO : Sanitize for bundle
+
+        mHotwordDetectionConnection = new HotwordDetectionConnection(mServiceStub, mContext,
+                mHotwordDetectionComponentName, mUser, /* bindInstantServiceAllowed= */ false);
+
+        return VoiceInteractionService.HOTWORD_CONFIG_SUCCESS;
+    }
+
+    public IRecognitionStatusCallback createSoundTriggerCallbackLocked(
+            IHotwordRecognitionStatusCallback callback) {
+        if (DEBUG) {
+            Slog.d(TAG, "createSoundTriggerCallbackLocked");
+        }
+        return new HotwordDetectionConnection.SoundTriggerCallback(callback,
+                mHotwordDetectionConnection);
+    }
+
+    boolean isIsolatedProcessLocked(ComponentName componentName) {
+        // TODO : Need to make sure this component exists and is :isolated.
+        return true;
+    }
+
     public void dumpLocked(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!mValid) {
             pw.print("  NOT VALID: ");
@@ -399,6 +440,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
             pw.println(Integer.toHexString(mDisabledShowContext));
         }
         pw.print("  mBound="); pw.print(mBound);  pw.print(" mService="); pw.println(mService);
+        if (mHotwordDetectionConnection != null) {
+            pw.println("  Hotword detection connection:");
+            mHotwordDetectionConnection.dump("    ", pw);
+        }
         if (mActiveSession != null) {
             pw.println("  Active session:");
             mActiveSession.dump("    ", pw);
@@ -443,7 +488,10 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         } catch (RemoteException e) {
             Slog.w(TAG, "RemoteException in shutdown", e);
         }
-
+        if (mHotwordDetectionConnection != null) {
+            mHotwordDetectionConnection.cancelLocked();
+            mHotwordDetectionConnection = null;
+        }
         if (mBound) {
             mContext.unbindService(mConnection);
             mBound = false;

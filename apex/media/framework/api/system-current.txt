@@ -14,8 +14,10 @@ package android.media {
   public static final class MediaTranscodeManager.TranscodingRequest {
     method public int getClientPid();
     method public int getClientUid();
+    method @Nullable public android.os.ParcelFileDescriptor getDestinationFileDescriptor();
     method @NonNull public android.net.Uri getDestinationUri();
     method public int getPriority();
+    method @Nullable public android.os.ParcelFileDescriptor getSourceFileDescriptor();
     method @NonNull public android.net.Uri getSourceUri();
     method public int getType();
     method @Nullable public android.media.MediaFormat getVideoTrackFormat();
@@ -26,8 +28,10 @@ package android.media {
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest build();
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientPid(int);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setClientUid(int);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setDestinationUri(@NonNull android.net.Uri);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setPriority(int);
+    method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceFileDescriptor(@NonNull android.os.ParcelFileDescriptor);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setSourceUri(@NonNull android.net.Uri);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setType(int);
     method @NonNull public android.media.MediaTranscodeManager.TranscodingRequest.Builder setVideoTrackFormat(@NonNull android.media.MediaFormat);

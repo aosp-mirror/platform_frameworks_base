@@ -266,4 +266,8 @@
     <color name="misalignment_text_color">#F28B82</color>
 
     <color name="screenrecord_status_color">#E94235</color>
+
+    <!-- TODO(b/178093014) Colors for privacy dialog. These should be changed to the new palette -->
+    <color name="privacy_circle_camera">#1E8E3E</color> <!-- g600 -->
+    <color name="privacy_circle_microphone_location">#E8710A</color> <!--o600 -->
 </resources>

@@ -209,10 +209,12 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 if (t != null && callback != null) {
                     syncId = startSyncWithOrganizer(callback);
                 }
-                getTransitionController().finishTransition(transitionToken);
+                // apply the incoming transaction before finish in case it alters the visibility
+                // of the participants.
                 if (t != null) {
                     applyTransaction(t, syncId, null /*transition*/);
                 }
+                getTransitionController().finishTransition(transitionToken);
                 if (syncId >= 0) {
                     setSyncReady(syncId);
                 }
@@ -397,9 +399,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 c.setTo(change.getConfiguration(), configMask, windowMask);
                 container.onRequestedOverrideConfigurationChanged(c);
                 // TODO(b/145675353): remove the following once we could apply new bounds to the
-                // pinned stack together with its children.
+                // root pinned task together with its children.
             }
-            resizePinnedStackIfNeeded(container, configMask, windowMask,
+            resizeRootPinnedTaskIfNeeded(container, configMask, windowMask,
                     container.getRequestedOverrideConfiguration());
             effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
         }
@@ -646,14 +648,14 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return effects;
     }
 
-    private void resizePinnedStackIfNeeded(ConfigurationContainer container, int configMask,
+    private void resizeRootPinnedTaskIfNeeded(ConfigurationContainer container, int configMask,
             int windowMask, Configuration config) {
         if ((container instanceof Task)
                 && ((configMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0)
                 && ((windowMask & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)) {
-            final Task stack = (Task) container;
-            if (stack.inPinnedWindowingMode()) {
-                stack.resize(config.windowConfiguration.getBounds(),
+            final Task rootTask = (Task) container;
+            if (rootTask.inPinnedWindowingMode()) {
+                rootTask.resize(config.windowConfiguration.getBounds(),
                         PRESERVE_WINDOWS, true /* deferResume */);
             }
         }

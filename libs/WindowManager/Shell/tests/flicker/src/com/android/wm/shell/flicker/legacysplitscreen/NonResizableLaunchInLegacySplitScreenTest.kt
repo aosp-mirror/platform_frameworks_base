@@ -67,7 +67,8 @@ class NonResizableLaunchInLegacySplitScreenTest(
                     visibleLayersShownMoreThanOneConsecutiveEntry(
                             listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
                                     nonResizeableApp.defaultWindowName, LETTER_BOX_NAME,
-                                    TOAST_NAME, LIVE_WALLPAPER_PACKAGE_NAME)
+                                    TOAST_NAME, LIVE_WALLPAPER_PACKAGE_NAME),
+                        enabled = false
                     )
                 }
                 windowManagerTrace {

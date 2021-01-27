@@ -81,6 +81,7 @@ public class QSPanelTest extends SysuiTestCase {
 
         mTestableLooper.runWithLooper(() -> {
             mQsPanel = new QSPanel(mContext, null);
+            mQsPanel.initialize(false);
             mQsPanel.onFinishInflate();
             // Provides a parent with non-zero size for QSPanel
             mParentView = new FrameLayout(mContext);

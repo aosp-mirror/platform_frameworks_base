@@ -8378,7 +8378,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public boolean hasUserSetupCompleted() {
-        return hasUserSetupCompleted(UserHandle.getCallingUserId());
+        return hasUserSetupCompleted(mInjector.userHandleGetCallingUserId());
     }
 
     // This checks only if the Setup Wizard has run.  Since Wear devices pair before
@@ -15303,7 +15303,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private List<ActiveAdmin> getProfileOwnerAdminsForCurrentProfileGroup() {
         synchronized (getLockObject()) {
             final List<ActiveAdmin> admins = new ArrayList<>();
-            int[] users = mUserManager.getProfileIdsWithDisabled(UserHandle.getCallingUserId());
+            int[] users = mUserManager.getProfileIdsWithDisabled(
+                    mInjector.userHandleGetCallingUserId());
             for (int i = 0; i < users.length; i++) {
                 final ComponentName componentName = getProfileOwnerAsUser(users[i]);
                 if (componentName != null) {

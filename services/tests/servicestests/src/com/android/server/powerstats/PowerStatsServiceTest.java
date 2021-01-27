@@ -20,11 +20,12 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.content.Context;
-import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.Channel;
+import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
-import android.hardware.power.stats.PowerEntityInfo;
-import android.hardware.power.stats.StateInfo;
+import android.hardware.power.stats.PowerEntity;
+import android.hardware.power.stats.State;
 import android.hardware.power.stats.StateResidency;
 import android.hardware.power.stats.StateResidencyResult;
 
@@ -32,11 +33,11 @@ import androidx.test.InstrumentationRegistry;
 
 import com.android.server.SystemService;
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
-import com.android.server.powerstats.nano.PowerEntityInfoProto;
+import com.android.server.powerstats.nano.PowerEntityProto;
 import com.android.server.powerstats.nano.PowerStatsServiceMeterProto;
 import com.android.server.powerstats.nano.PowerStatsServiceModelProto;
 import com.android.server.powerstats.nano.PowerStatsServiceResidencyProto;
-import com.android.server.powerstats.nano.StateInfoProto;
+import com.android.server.powerstats.nano.StateProto;
 import com.android.server.powerstats.nano.StateResidencyProto;
 import com.android.server.powerstats.nano.StateResidencyResultProto;
 
@@ -68,6 +69,7 @@ public class PowerStatsServiceTest {
     private static final String CHANNEL_NAME = "channelname";
     private static final String POWER_ENTITY_NAME = "powerentityinfo";
     private static final String STATE_NAME = "stateinfo";
+    private static final String ENERGY_CONSUMER_NAME = "energyconsumer";
     private static final int ENERGY_METER_COUNT = 8;
     private static final int ENERGY_CONSUMER_COUNT = 2;
     private static final int POWER_ENTITY_COUNT = 3;
@@ -142,20 +144,20 @@ public class PowerStatsServiceTest {
 
     public static final class TestPowerStatsHALWrapper implements IPowerStatsHALWrapper {
         @Override
-        public PowerEntityInfo[] getPowerEntityInfo() {
-            PowerEntityInfo[] powerEntityInfoList = new PowerEntityInfo[POWER_ENTITY_COUNT];
-            for (int i = 0; i < powerEntityInfoList.length; i++) {
-                powerEntityInfoList[i] = new PowerEntityInfo();
-                powerEntityInfoList[i].powerEntityId = i;
-                powerEntityInfoList[i].powerEntityName = new String(POWER_ENTITY_NAME + i);
-                powerEntityInfoList[i].states = new StateInfo[STATE_INFO_COUNT];
-                for (int j = 0; j < powerEntityInfoList[i].states.length; j++) {
-                    powerEntityInfoList[i].states[j] = new StateInfo();
-                    powerEntityInfoList[i].states[j].stateId = j;
-                    powerEntityInfoList[i].states[j].stateName = new String(STATE_NAME + j);
+        public PowerEntity[] getPowerEntityInfo() {
+            PowerEntity[] powerEntityList = new PowerEntity[POWER_ENTITY_COUNT];
+            for (int i = 0; i < powerEntityList.length; i++) {
+                powerEntityList[i] = new PowerEntity();
+                powerEntityList[i].id = i;
+                powerEntityList[i].name = new String(POWER_ENTITY_NAME + i);
+                powerEntityList[i].states = new State[STATE_INFO_COUNT];
+                for (int j = 0; j < powerEntityList[i].states.length; j++) {
+                    powerEntityList[i].states[j] = new State();
+                    powerEntityList[i].states[j].id = j;
+                    powerEntityList[i].states[j].name = new String(STATE_NAME + j);
                 }
             }
-            return powerEntityInfoList;
+            return powerEntityList;
         }
 
         @Override
@@ -164,12 +166,12 @@ public class PowerStatsServiceTest {
                 new StateResidencyResult[POWER_ENTITY_COUNT];
             for (int i = 0; i < stateResidencyResultList.length; i++) {
                 stateResidencyResultList[i] = new StateResidencyResult();
-                stateResidencyResultList[i].powerEntityId = i;
+                stateResidencyResultList[i].id = i;
                 stateResidencyResultList[i].stateResidencyData =
                     new StateResidency[STATE_RESIDENCY_COUNT];
                 for (int j = 0; j < stateResidencyResultList[i].stateResidencyData.length; j++) {
                     stateResidencyResultList[i].stateResidencyData[j] = new StateResidency();
-                    stateResidencyResultList[i].stateResidencyData[j].stateId = j;
+                    stateResidencyResultList[i].stateResidencyData[j].id = j;
                     stateResidencyResultList[i].stateResidencyData[j].totalTimeInStateMs = j;
                     stateResidencyResultList[i].stateResidencyData[j].totalStateEntryCount = j;
                     stateResidencyResultList[i].stateResidencyData[j].lastEntryTimestampMs = j;
@@ -180,12 +182,16 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        public int[] getEnergyConsumerInfo() {
-            int[] energyConsumerInfoList = new int[ENERGY_CONSUMER_COUNT];
-            for (int i = 0; i < energyConsumerInfoList.length; i++) {
-                energyConsumerInfoList[i] = i;
+        public EnergyConsumer[] getEnergyConsumerInfo() {
+            EnergyConsumer[] energyConsumerList = new EnergyConsumer[ENERGY_CONSUMER_COUNT];
+            for (int i = 0; i < energyConsumerList.length; i++) {
+                energyConsumerList[i] = new EnergyConsumer();
+                energyConsumerList[i].id = i;
+                energyConsumerList[i].ordinal = i;
+                energyConsumerList[i].type = (byte) i;
+                energyConsumerList[i].name = new String(ENERGY_CONSUMER_NAME + i);
             }
-            return energyConsumerInfoList;
+            return energyConsumerList;
         }
 
         @Override
@@ -194,7 +200,7 @@ public class PowerStatsServiceTest {
                 new EnergyConsumerResult[ENERGY_CONSUMER_COUNT];
             for (int i = 0; i < energyConsumedList.length; i++) {
                 energyConsumedList[i] = new EnergyConsumerResult();
-                energyConsumedList[i].energyConsumerId = i;
+                energyConsumedList[i].id = i;
                 energyConsumedList[i].timestampMs = i;
                 energyConsumedList[i].energyUWs = i;
             }
@@ -202,14 +208,14 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        public ChannelInfo[] getEnergyMeterInfo() {
-            ChannelInfo[] energyMeterInfoList = new ChannelInfo[ENERGY_METER_COUNT];
-            for (int i = 0; i < energyMeterInfoList.length; i++) {
-                energyMeterInfoList[i] = new ChannelInfo();
-                energyMeterInfoList[i].channelId = i;
-                energyMeterInfoList[i].channelName = new String(CHANNEL_NAME + i);
+        public Channel[] getEnergyMeterInfo() {
+            Channel[] energyMeterList = new Channel[ENERGY_METER_COUNT];
+            for (int i = 0; i < energyMeterList.length; i++) {
+                energyMeterList[i] = new Channel();
+                energyMeterList[i].id = i;
+                energyMeterList[i].name = new String(CHANNEL_NAME + i);
             }
-            return energyMeterInfoList;
+            return energyMeterList;
         }
 
         @Override
@@ -217,8 +223,9 @@ public class PowerStatsServiceTest {
             EnergyMeasurement[] energyMeasurementList = new EnergyMeasurement[ENERGY_METER_COUNT];
             for (int i = 0; i < energyMeasurementList.length; i++) {
                 energyMeasurementList[i] = new EnergyMeasurement();
-                energyMeasurementList[i].channelId = i;
+                energyMeasurementList[i].id = i;
                 energyMeasurementList[i].timestampMs = i;
+                energyMeasurementList[i].durationMs = i;
                 energyMeasurementList[i].energyUWs = i;
             }
             return energyMeasurementList;
@@ -260,18 +267,19 @@ public class PowerStatsServiceTest {
         // Parse the incident data into a PowerStatsServiceMeterProto object.
         PowerStatsServiceMeterProto pssProto = PowerStatsServiceMeterProto.parseFrom(fileContent);
 
-        // Validate the channelInfo array matches what was written to on-device storage.
-        assertTrue(pssProto.channelInfo.length == ENERGY_METER_COUNT);
-        for (int i = 0; i < pssProto.channelInfo.length; i++) {
-            assertTrue(pssProto.channelInfo[i].channelId == i);
-            assertTrue(pssProto.channelInfo[i].channelName.equals(CHANNEL_NAME + i));
+        // Validate the channel array matches what was written to on-device storage.
+        assertTrue(pssProto.channel.length == ENERGY_METER_COUNT);
+        for (int i = 0; i < pssProto.channel.length; i++) {
+            assertTrue(pssProto.channel[i].id == i);
+            assertTrue(pssProto.channel[i].name.equals(CHANNEL_NAME + i));
         }
 
         // Validate the energyMeasurement array matches what was written to on-device storage.
         assertTrue(pssProto.energyMeasurement.length == ENERGY_METER_COUNT);
         for (int i = 0; i < pssProto.energyMeasurement.length; i++) {
-            assertTrue(pssProto.energyMeasurement[i].channelId == i);
+            assertTrue(pssProto.energyMeasurement[i].id == i);
             assertTrue(pssProto.energyMeasurement[i].timestampMs == i);
+            assertTrue(pssProto.energyMeasurement[i].durationMs == i);
             assertTrue(pssProto.energyMeasurement[i].energyUws == i);
         }
     }
@@ -301,16 +309,16 @@ public class PowerStatsServiceTest {
         // Parse the incident data into a PowerStatsServiceModelProto object.
         PowerStatsServiceModelProto pssProto = PowerStatsServiceModelProto.parseFrom(fileContent);
 
-        // Validate the energyConsumerId array matches what was written to on-device storage.
-        assertTrue(pssProto.energyConsumerId.length == ENERGY_CONSUMER_COUNT);
-        for (int i = 0; i < pssProto.energyConsumerId.length; i++) {
-            assertTrue(pssProto.energyConsumerId[i].energyConsumerId == i);
+        // Validate the energyConsumer array matches what was written to on-device storage.
+        assertTrue(pssProto.energyConsumer.length == ENERGY_CONSUMER_COUNT);
+        for (int i = 0; i < pssProto.energyConsumer.length; i++) {
+            assertTrue(pssProto.energyConsumer[i].id == i);
         }
 
         // Validate the energyConsumerResult array matches what was written to on-device storage.
         assertTrue(pssProto.energyConsumerResult.length == ENERGY_CONSUMER_COUNT);
         for (int i = 0; i < pssProto.energyConsumerResult.length; i++) {
-            assertTrue(pssProto.energyConsumerResult[i].energyConsumerId == i);
+            assertTrue(pssProto.energyConsumerResult[i].id == i);
             assertTrue(pssProto.energyConsumerResult[i].timestampMs == i);
             assertTrue(pssProto.energyConsumerResult[i].energyUws == i);
         }
@@ -342,16 +350,16 @@ public class PowerStatsServiceTest {
         PowerStatsServiceResidencyProto pssProto =
                 PowerStatsServiceResidencyProto.parseFrom(fileContent);
 
-        // Validate the powerEntityInfo array matches what was written to on-device storage.
-        assertTrue(pssProto.powerEntityInfo.length == POWER_ENTITY_COUNT);
-        for (int i = 0; i < pssProto.powerEntityInfo.length; i++) {
-            PowerEntityInfoProto powerEntityInfo = pssProto.powerEntityInfo[i];
-            assertTrue(powerEntityInfo.powerEntityId == i);
-            assertTrue(powerEntityInfo.powerEntityName.equals(POWER_ENTITY_NAME + i));
-            for (int j = 0; j < powerEntityInfo.states.length; j++) {
-                StateInfoProto stateInfo = powerEntityInfo.states[j];
-                assertTrue(stateInfo.stateId == j);
-                assertTrue(stateInfo.stateName.equals(STATE_NAME + j));
+        // Validate the powerEntity array matches what was written to on-device storage.
+        assertTrue(pssProto.powerEntity.length == POWER_ENTITY_COUNT);
+        for (int i = 0; i < pssProto.powerEntity.length; i++) {
+            PowerEntityProto powerEntity = pssProto.powerEntity[i];
+            assertTrue(powerEntity.id == i);
+            assertTrue(powerEntity.name.equals(POWER_ENTITY_NAME + i));
+            for (int j = 0; j < powerEntity.states.length; j++) {
+                StateProto state = powerEntity.states[j];
+                assertTrue(state.id == j);
+                assertTrue(state.name.equals(STATE_NAME + j));
             }
         }
 
@@ -359,11 +367,11 @@ public class PowerStatsServiceTest {
         assertTrue(pssProto.stateResidencyResult.length == POWER_ENTITY_COUNT);
         for (int i = 0; i < pssProto.stateResidencyResult.length; i++) {
             StateResidencyResultProto stateResidencyResult = pssProto.stateResidencyResult[i];
-            assertTrue(stateResidencyResult.powerEntityId == i);
+            assertTrue(stateResidencyResult.id == i);
             assertTrue(stateResidencyResult.stateResidencyData.length == STATE_RESIDENCY_COUNT);
             for (int j = 0; j < stateResidencyResult.stateResidencyData.length; j++) {
                 StateResidencyProto stateResidency = stateResidencyResult.stateResidencyData[j];
-                assertTrue(stateResidency.stateId == j);
+                assertTrue(stateResidency.id == j);
                 assertTrue(stateResidency.totalTimeInStateMs == j);
                 assertTrue(stateResidency.totalStateEntryCount == j);
                 assertTrue(stateResidency.lastEntryTimestampMs == j);
@@ -400,12 +408,12 @@ public class PowerStatsServiceTest {
         // Parse the incident data into a PowerStatsServiceMeterProto object.
         PowerStatsServiceMeterProto pssProto = PowerStatsServiceMeterProto.parseFrom(fileContent);
 
-        // Valid channelInfo data is written to the incident report in the call to
+        // Valid channel data is written to the incident report in the call to
         // mPowerStatsLogger.writeMeterDataToFile().
-        assertTrue(pssProto.channelInfo.length == ENERGY_METER_COUNT);
-        for (int i = 0; i < pssProto.channelInfo.length; i++) {
-            assertTrue(pssProto.channelInfo[i].channelId == i);
-            assertTrue(pssProto.channelInfo[i].channelName.equals(CHANNEL_NAME + i));
+        assertTrue(pssProto.channel.length == ENERGY_METER_COUNT);
+        for (int i = 0; i < pssProto.channel.length; i++) {
+            assertTrue(pssProto.channel[i].id == i);
+            assertTrue(pssProto.channel[i].name.equals(CHANNEL_NAME + i));
         }
 
         // No energyMeasurements should be written to the incident report since it
@@ -442,11 +450,11 @@ public class PowerStatsServiceTest {
         // Parse the incident data into a PowerStatsServiceModelProto object.
         PowerStatsServiceModelProto pssProto = PowerStatsServiceModelProto.parseFrom(fileContent);
 
-        // Valid energyConsumerId data is written to the incident report in the call to
+        // Valid energyConsumer data is written to the incident report in the call to
         // mPowerStatsLogger.writeModelDataToFile().
-        assertTrue(pssProto.energyConsumerId.length == ENERGY_CONSUMER_COUNT);
-        for (int i = 0; i < pssProto.energyConsumerId.length; i++) {
-            assertTrue(pssProto.energyConsumerId[i].energyConsumerId == i);
+        assertTrue(pssProto.energyConsumer.length == ENERGY_CONSUMER_COUNT);
+        for (int i = 0; i < pssProto.energyConsumer.length; i++) {
+            assertTrue(pssProto.energyConsumer[i].id == i);
         }
 
         // No energyConsumerResults should be written to the incident report since it
@@ -484,17 +492,17 @@ public class PowerStatsServiceTest {
         PowerStatsServiceResidencyProto pssProto =
                 PowerStatsServiceResidencyProto.parseFrom(fileContent);
 
-        // Valid powerEntityInfo data is written to the incident report in the call to
+        // Valid powerEntity data is written to the incident report in the call to
         // mPowerStatsLogger.writeResidencyDataToFile().
-        assertTrue(pssProto.powerEntityInfo.length == POWER_ENTITY_COUNT);
-        for (int i = 0; i < pssProto.powerEntityInfo.length; i++) {
-            PowerEntityInfoProto powerEntityInfo = pssProto.powerEntityInfo[i];
-            assertTrue(powerEntityInfo.powerEntityId == i);
-            assertTrue(powerEntityInfo.powerEntityName.equals(POWER_ENTITY_NAME + i));
-            for (int j = 0; j < powerEntityInfo.states.length; j++) {
-                StateInfoProto stateInfo = powerEntityInfo.states[j];
-                assertTrue(stateInfo.stateId == j);
-                assertTrue(stateInfo.stateName.equals(STATE_NAME + j));
+        assertTrue(pssProto.powerEntity.length == POWER_ENTITY_COUNT);
+        for (int i = 0; i < pssProto.powerEntity.length; i++) {
+            PowerEntityProto powerEntity = pssProto.powerEntity[i];
+            assertTrue(powerEntity.id == i);
+            assertTrue(powerEntity.name.equals(POWER_ENTITY_NAME + i));
+            for (int j = 0; j < powerEntity.states.length; j++) {
+                StateProto state = powerEntity.states[j];
+                assertTrue(state.id == j);
+                assertTrue(state.name.equals(STATE_NAME + j));
             }
         }
 
@@ -533,12 +541,12 @@ public class PowerStatsServiceTest {
         // Parse the incident data into a PowerStatsServiceMeterProto object.
         PowerStatsServiceMeterProto pssProto = PowerStatsServiceMeterProto.parseFrom(fileContent);
 
-        // Valid channelInfo data is written to the incident report in the call to
+        // Valid channel data is written to the incident report in the call to
         // mPowerStatsLogger.writeMeterDataToFile().
-        assertTrue(pssProto.channelInfo.length == ENERGY_METER_COUNT);
-        for (int i = 0; i < pssProto.channelInfo.length; i++) {
-            assertTrue(pssProto.channelInfo[i].channelId == i);
-            assertTrue(pssProto.channelInfo[i].channelName.equals(CHANNEL_NAME + i));
+        assertTrue(pssProto.channel.length == ENERGY_METER_COUNT);
+        for (int i = 0; i < pssProto.channel.length; i++) {
+            assertTrue(pssProto.channel[i].id == i);
+            assertTrue(pssProto.channel[i].name.equals(CHANNEL_NAME + i));
         }
 
         // No energyMeasurements should be written to the incident report since the
@@ -576,11 +584,11 @@ public class PowerStatsServiceTest {
         // Parse the incident data into a PowerStatsServiceModelProto object.
         PowerStatsServiceModelProto pssProto = PowerStatsServiceModelProto.parseFrom(fileContent);
 
-        // Valid energyConsumerId data is written to the incident report in the call to
+        // Valid energyConsumer data is written to the incident report in the call to
         // mPowerStatsLogger.writeModelDataToFile().
-        assertTrue(pssProto.energyConsumerId.length == ENERGY_CONSUMER_COUNT);
-        for (int i = 0; i < pssProto.energyConsumerId.length; i++) {
-            assertTrue(pssProto.energyConsumerId[i].energyConsumerId == i);
+        assertTrue(pssProto.energyConsumer.length == ENERGY_CONSUMER_COUNT);
+        for (int i = 0; i < pssProto.energyConsumer.length; i++) {
+            assertTrue(pssProto.energyConsumer[i].id == i);
         }
 
         // No energyConsumerResults should be written to the incident report since the
@@ -619,17 +627,17 @@ public class PowerStatsServiceTest {
         PowerStatsServiceResidencyProto pssProto =
                 PowerStatsServiceResidencyProto.parseFrom(fileContent);
 
-        // Valid powerEntityInfo data is written to the incident report in the call to
+        // Valid powerEntity data is written to the incident report in the call to
         // mPowerStatsLogger.writeResidencyDataToFile().
-        assertTrue(pssProto.powerEntityInfo.length == POWER_ENTITY_COUNT);
-        for (int i = 0; i < pssProto.powerEntityInfo.length; i++) {
-            PowerEntityInfoProto powerEntityInfo = pssProto.powerEntityInfo[i];
-            assertTrue(powerEntityInfo.powerEntityId == i);
-            assertTrue(powerEntityInfo.powerEntityName.equals(POWER_ENTITY_NAME + i));
-            for (int j = 0; j < powerEntityInfo.states.length; j++) {
-                StateInfoProto stateInfo = powerEntityInfo.states[j];
-                assertTrue(stateInfo.stateId == j);
-                assertTrue(stateInfo.stateName.equals(STATE_NAME + j));
+        assertTrue(pssProto.powerEntity.length == POWER_ENTITY_COUNT);
+        for (int i = 0; i < pssProto.powerEntity.length; i++) {
+            PowerEntityProto powerEntity = pssProto.powerEntity[i];
+            assertTrue(powerEntity.id == i);
+            assertTrue(powerEntity.name.equals(POWER_ENTITY_NAME + i));
+            for (int j = 0; j < powerEntity.states.length; j++) {
+                StateProto state = powerEntity.states[j];
+                assertTrue(state.id == j);
+                assertTrue(state.name.equals(STATE_NAME + j));
             }
         }
 

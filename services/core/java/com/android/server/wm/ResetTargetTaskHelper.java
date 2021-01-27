@@ -35,7 +35,7 @@ import java.util.ArrayList;
 class ResetTargetTaskHelper {
     private Task mTask;
     private Task mTargetTask;
-    private Task mTargetStack;
+    private Task mTargetRootTask;
     private ActivityRecord mRoot;
     private boolean mForceReset;
     private boolean mCanMoveOptions;
@@ -59,7 +59,7 @@ class ResetTargetTaskHelper {
         mForceReset = forceReset;
         mTargetTask = targetTask;
         mTargetTaskFound = false;
-        mTargetStack = targetTask.getRootTask();
+        mTargetRootTask = targetTask.getRootTask();
         mActivityReparentPosition = -1;
 
         final PooledConsumer c = PooledLambda.obtainConsumer(
@@ -114,7 +114,7 @@ class ResetTargetTaskHelper {
                         && !r.taskAffinity.equals(mTask.affinity)) {
                     // If this activity has an affinity for another task, then we need to move
                     // it out of here. We will move it as far out of the way as possible, to the
-                    // bottom of the activity stack. This also keeps it correctly ordered with
+                    // bottom of the activity root task. This also keeps it correctly ordered with
                     // any activities we previously moved.
 
                     // Handle this activity after we have done traversing the hierarchy.
@@ -229,18 +229,18 @@ class ResetTargetTaskHelper {
             return;
         }
 
-        final ActivityTaskManagerService atmService = mTargetStack.mAtmService;
-        TaskDisplayArea taskDisplayArea = mTargetStack.getDisplayArea();
+        final ActivityTaskManagerService atmService = mTargetRootTask.mAtmService;
+        TaskDisplayArea taskDisplayArea = mTargetRootTask.getDisplayArea();
 
-        final int windowingMode = mTargetStack.getWindowingMode();
-        final int activityType = mTargetStack.getActivityType();
+        final int windowingMode = mTargetRootTask.getWindowingMode();
+        final int activityType = mTargetRootTask.getActivityType();
 
         while (!mPendingReparentActivities.isEmpty()) {
             final ActivityRecord r = mPendingReparentActivities.remove(0);
             final boolean alwaysCreateTask = DisplayContent.alwaysCreateRootTask(windowingMode,
                     activityType);
             final Task task = alwaysCreateTask
-                    ? taskDisplayArea.getBottomMostTask() : mTargetStack.getBottomMostTask();
+                    ? taskDisplayArea.getBottomMostTask() : mTargetRootTask.getBottomMostTask();
             Task targetTask = null;
             if (task != null && r.taskAffinity.equals(task.affinity)) {
                 // If the activity currently at the bottom has the same task affinity as
@@ -254,7 +254,7 @@ class ResetTargetTaskHelper {
                     targetTask = taskDisplayArea.getOrCreateRootTask(windowingMode,
                             activityType, false /* onTop */);
                 } else {
-                    targetTask = mTargetStack.reuseOrCreateTask(r.info, null /*intent*/,
+                    targetTask = mTargetRootTask.reuseOrCreateTask(r.info, null /*intent*/,
                             false /*toTop*/);
                 }
                 targetTask.affinityIntent = r.intent;

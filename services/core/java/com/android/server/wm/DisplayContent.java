@@ -435,7 +435,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @VisibleForTesting
     final TaskTapPointerEventListener mTapDetector;
 
-    /** Detect user tapping outside of current focused stack bounds .*/
+    /** Detect user tapping outside of current focused root task bounds .*/
     private Region mTouchExcludeRegion = new Region();
 
     /** Save allocating when calculating rects */
@@ -640,9 +640,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /** Array of all UIDs that are present on the display. */
     private IntArray mDisplayAccessUIDs = new IntArray();
 
-    /** All tokens used to put activities on this stack to sleep (including mOffToken) */
+    /** All tokens used to put activities on this root task to sleep (including mOffToken) */
     final ArrayList<RootWindowContainer.SleepToken> mAllSleepTokens = new ArrayList<>();
-    /** The token acquirer to put stacks on the display to sleep */
+    /** The token acquirer to put root tasks on the display to sleep */
     private final ActivityTaskManagerInternal.SleepTokenAcquirer mOffTokenAcquirer;
 
     private boolean mSleeping;
@@ -737,7 +737,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // win.mActivityRecord (return win) or mFocusedApp (return null).
         if (activity != null && w.mAttrs.type != TYPE_APPLICATION_STARTING) {
             if (focusedApp.compareTo(activity) > 0) {
-                // App stack below focused app stack. No focus for you!!!
+                // App root task below focused app root task. No focus for you!!!
                 ProtoLog.v(WM_DEBUG_FOCUS_LIGHT,
                         "findFocusedWindow: Reached focused app=%s", focusedApp);
                 mTmpWindow = null;
@@ -2308,8 +2308,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Returns the topmost stack on the display that is compatible with the input windowing mode and
-     * activity type. Null is no compatible stack on the display.
+     * Returns the topmost root task on the display that is compatible with the input windowing
+     * mode and activity type. Null is no compatible root task on the display.
      */
     @Nullable
     Task getRootTask(int windowingMode, int activityType) {
@@ -2348,7 +2348,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
-        // update resources before cascade so that docked/pinned stacks use the correct info
+        // update resources before cascade so that root docked/pinned tasks use the correct info
         preOnConfigurationChanged();
         final int lastOrientation = getConfiguration().orientation;
         super.onConfigurationChanged(newParentConfig);
@@ -2745,7 +2745,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mTouchExcludeRegion.op(mTmpRegion, Region.Op.UNION);
         }
         amendWindowTapExcludeRegion(mTouchExcludeRegion);
-        // TODO(multi-display): Support docked stacks on secondary displays & task containers.
+        // TODO(multi-display): Support docked root tasks on secondary displays & task containers.
         if (mDisplayId == DEFAULT_DISPLAY
                 && getDefaultTaskDisplayArea().isSplitScreenModeActivated()) {
             mDividerControllerLocked.getTouchRegion(mTmpRect);
@@ -2767,9 +2767,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // We also remove the outside touch area for resizing for all freeform
         // tasks (including the focused).
         // We save the focused task region once we find it, and add it back at the end.
-        // If the task is home stack and it is resizable and visible (top of its root task), we want
-        // to exclude the docked stack from touch so we need the entire screen area and not just a
-        // small portion which the home stack currently is resized to.
+        // If the task is root home task and it is resizable and visible (top of its root task),
+        // we want to exclude the root docked task from touch so we need the entire screen area
+        // and not just a small portion which the root home task currently is resized to.
         if (task.isActivityTypeHome() && task.isVisible() && task.isResizeable()) {
             task.getDisplayArea().getBounds(mTmpRect);
         } else {
@@ -2778,7 +2778,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         if (task == focusedTask) {
             // Add the focused task rect back into the exclude region once we are done
-            // processing stacks.
+            // processing root tasks.
             // NOTE: this *looks* like a no-op, but this usage of mTmpRect2 is expected by
             //       updateTouchExcludeRegion.
             mTmpRect2.set(mTmpRect);
@@ -2999,10 +2999,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mClosingApps.valueAt(i).writeIdentifierToProto(proto, CLOSING_APPS);
         }
 
-        final Task focusedStack = getFocusedRootTask();
-        if (focusedStack != null) {
-            proto.write(FOCUSED_ROOT_TASK_ID, focusedStack.getRootTaskId());
-            final ActivityRecord focusedActivity = focusedStack.getDisplayArea()
+        final Task focusedRootTask = getFocusedRootTask();
+        if (focusedRootTask != null) {
+            proto.write(FOCUSED_ROOT_TASK_ID, focusedRootTask.getRootTaskId());
+            final ActivityRecord focusedActivity = focusedRootTask.getDisplayArea()
                     .getFocusedActivity();
             if (focusedActivity != null) {
                 focusedActivity.writeIdentifierToProto(proto, RESUMED_ACTIVITY);
@@ -5266,7 +5266,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     static boolean alwaysCreateRootTask(int windowingMode, int activityType) {
-        // Always create a stack for fullscreen, freeform, and split-screen-secondary windowing
+        // Always create a root task for fullscreen, freeform, and split-screen-secondary windowing
         // modes so that we can manage visual ordering and return types correctly.
         return activityType == ACTIVITY_TYPE_STANDARD
                 && (windowingMode == WINDOWING_MODE_FULLSCREEN
@@ -5277,8 +5277,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     static boolean canReuseExistingTask(int windowingMode, int activityType) {
-        // Existing Tasks can be reused if a new stack will be created anyway, or for the Dream -
-        // because there can only ever be one DreamActivity.
+        // Existing Tasks can be reused if a new root task will be created anyway, or for the
+        // Dream - because there can only ever be one DreamActivity.
         return alwaysCreateRootTask(windowingMode, activityType)
                 || activityType == ACTIVITY_TYPE_DREAM;
     }
@@ -5350,8 +5350,8 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     }
 
     /**
-     * Returns the top running activity in the focused stack. In the case the focused stack has no
-     * such activity, the next focusable stack on this display is returned.
+     * Returns the top running activity in the focused root task. In the case the focused root
+     * task has no such activity, the next focusable root task on this display is returned.
      *
      * @param considerKeyguardState Indicates whether the locked state should be considered. if
      *                              {@code true} and the keyguard is locked, only activities that
@@ -5524,26 +5524,26 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     void remove() {
         mRemoving = true;
-        Task lastReparentedStack;
+        Task lastReparentedRootTask;
 
         mRootWindowContainer.mTaskSupervisor.beginDeferResume();
         try {
-            lastReparentedStack = reduceOnAllTaskDisplayAreas((taskDisplayArea, stack) -> {
-                final Task lastReparentedStackFromArea = taskDisplayArea.remove();
-                if (lastReparentedStackFromArea != null) {
-                    return lastReparentedStackFromArea;
+            lastReparentedRootTask = reduceOnAllTaskDisplayAreas((taskDisplayArea, rootTask) -> {
+                final Task lastReparentedRootTaskFromArea = taskDisplayArea.remove();
+                if (lastReparentedRootTaskFromArea != null) {
+                    return lastReparentedRootTaskFromArea;
                 }
-                return stack;
+                return rootTask;
             }, null /* initValue */, false /* traverseTopToBottom */);
         } finally {
             mRootWindowContainer.mTaskSupervisor.endDeferResume();
         }
         mRemoved = true;
 
-        // Only update focus/visibility for the last one because there may be many stacks are
+        // Only update focus/visibility for the last one because there may be many root tasks are
         // reparented and the intermediate states are unnecessary.
-        if (lastReparentedStack != null) {
-            lastReparentedStack.postReparent();
+        if (lastReparentedRootTask != null) {
+            lastReparentedRootTask.postReparent();
         }
         releaseSelfIfNeeded();
         mDisplayPolicy.release();

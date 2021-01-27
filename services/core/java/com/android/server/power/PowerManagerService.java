@@ -5032,6 +5032,31 @@ public final class PowerManagerService extends SystemService
         }
 
         @Override // Binder call
+        public BatterySaverPolicyConfig getFullPowerSavePolicy() {
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mBatterySaverStateMachine.getFullBatterySaverPolicy();
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
+        public boolean setFullPowerSavePolicy(@NonNull BatterySaverPolicyConfig config) {
+            if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER)
+                    != PackageManager.PERMISSION_GRANTED) {
+                mContext.enforceCallingOrSelfPermission(
+                        android.Manifest.permission.DEVICE_POWER, "setFullPowerSavePolicy");
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                return mBatterySaverStateMachine.setFullBatterySaverPolicy(config);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override // Binder call
         public boolean setDynamicPowerSaveHint(boolean powerSaveHint, int disableThreshold) {
             mContext.enforceCallingOrSelfPermission(android.Manifest.permission.POWER_SAVER,
                     "updateDynamicPowerSavings");

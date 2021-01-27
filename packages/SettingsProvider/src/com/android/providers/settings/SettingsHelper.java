@@ -25,6 +25,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.hardware.display.ColorDisplayManager;
 import android.icu.util.ULocale;
 import android.media.AudioManager;
 import android.media.RingtoneManager;
@@ -161,6 +162,27 @@ public class SettingsHelper {
                     || Settings.System.ALARM_ALERT.equals(name)) {
                 setRingtone(name, value);
                 return;
+            } else if (Settings.System.DISPLAY_COLOR_MODE.equals(name)) {
+                int mode = Integer.parseInt(value);
+                String restoredVendorHint = Settings.System.getString(mContext.getContentResolver(),
+                        Settings.System.DISPLAY_COLOR_MODE_VENDOR_HINT);
+                final String deviceVendorHint = mContext.getResources().getString(
+                        com.android.internal.R.string.config_vendorColorModesRestoreHint);
+                boolean displayColorModeVendorModeHintsMatch =
+                        !TextUtils.isEmpty(deviceVendorHint)
+                                && deviceVendorHint.equals(restoredVendorHint);
+                // Replace vendor hint with new device's vendor hint.
+                contentValues.clear();
+                contentValues.put(Settings.NameValueTable.NAME,
+                        Settings.System.DISPLAY_COLOR_MODE_VENDOR_HINT);
+                contentValues.put(Settings.NameValueTable.VALUE, deviceVendorHint);
+                cr.insert(destination, contentValues);
+                // If vendor hints match, modes in the vendor range can be restored. Otherwise, only
+                // map standard modes.
+                if (!ColorDisplayManager.isStandardColorMode(mode)
+                        && !displayColorModeVendorModeHintsMatch) {
+                    return;
+                }
             }
 
             // Default case: write the restored value to settings

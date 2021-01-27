@@ -46,6 +46,7 @@ import com.android.server.LocalServices;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.batterysaver.BatterySaverPolicy.BatterySaverPolicyListener;
 import com.android.server.power.batterysaver.BatterySaverPolicy.Policy;
+import com.android.server.power.batterysaver.BatterySaverPolicy.PolicyLevel;
 import com.android.server.power.batterysaver.BatterySavingStats.BatterySaverState;
 import com.android.server.power.batterysaver.BatterySavingStats.DozeState;
 import com.android.server.power.batterysaver.BatterySavingStats.InteractiveState;
@@ -133,6 +134,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF = 10;
     public static final int REASON_ADAPTIVE_DYNAMIC_POWER_SAVINGS_CHANGED = 11;
     public static final int REASON_TIMEOUT = 12;
+    public static final int REASON_FULL_POWER_SAVINGS_CHANGED = 13;
 
     static String reasonToString(int reason) {
         switch (reason) {
@@ -162,6 +164,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
                 return "Adaptive Power Savings changed";
             case BatterySaverController.REASON_TIMEOUT:
                 return "timeout";
+            case BatterySaverController.REASON_FULL_POWER_SAVINGS_CHANGED:
+                return "Full Power Savings changed";
             default:
                 return "Unknown reason: " + reason;
         }
@@ -313,6 +317,10 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         }
     }
 
+    BatterySaverPolicyConfig getPolicyLocked(@PolicyLevel int policyLevel) {
+        return mBatterySaverPolicy.getPolicyLocked(policyLevel).toConfig();
+    }
+
     /**
      * @return whether battery saver is enabled or not. This takes into
      * account whether a policy says to advertise isEnabled so this can be propagated externally.
@@ -338,6 +346,18 @@ public class BatterySaverController implements BatterySaverPolicyListener {
         synchronized (mLock) {
             return getFullEnabledLocked();
         }
+    }
+
+    boolean setFullPolicyLocked(BatterySaverPolicyConfig config, int reason) {
+        return setFullPolicyLocked(BatterySaverPolicy.Policy.fromConfig(config), reason);
+    }
+
+    boolean setFullPolicyLocked(Policy policy, int reason) {
+        if (mBatterySaverPolicy.setFullPolicyLocked(policy)) {
+            mHandler.postStateChanged(/*sendBroadcast=*/ true, reason);
+            return true;
+        }
+        return false;
     }
 
     boolean isAdaptiveEnabled() {

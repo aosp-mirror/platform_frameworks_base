@@ -473,13 +473,197 @@ public final class HdmiControlManager {
      * @see HdmiControlManager#CEC_SETTING_NAME_VOLUME_CONTROL_MODE
      * @hide
      */
-    @IntDef({
+    @IntDef(prefix = { "VOLUME_CONTROL_" }, value = {
             VOLUME_CONTROL_ENABLED,
             VOLUME_CONTROL_DISABLED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface VolumeControl {}
 
+    // -- Whether TV Wake on One Touch Play is enabled or disabled.
+    /**
+     * TV Wake on One Touch Play enabled.
+     *
+     * @hide
+     */
+    public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED = 1;
+    /**
+     * TV Wake on One Touch Play disabled.
+     *
+     * @hide
+     */
+    public static final int TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TV_WAKE_ON_ONE_TOUCH_PLAY_" }, value = {
+            TV_WAKE_ON_ONE_TOUCH_PLAY_ENABLED,
+            TV_WAKE_ON_ONE_TOUCH_PLAY_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TvWakeOnOneTouchPlay {}
+
+    // -- The RC profile of a TV panel.
+    /**
+     * RC profile none.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_NONE = 0x0;
+    /**
+     * RC profile 1.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_ONE = 0x2;
+    /**
+     * RC profile 2.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_TWO = 0x6;
+    /**
+     * RC profile 3.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_THREE = 0xA;
+    /**
+     * RC profile 4.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_TV_FOUR = 0xE;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_TV_" }, value = {
+            RC_PROFILE_TV_NONE,
+            RC_PROFILE_TV_ONE,
+            RC_PROFILE_TV_TWO,
+            RC_PROFILE_TV_THREE,
+            RC_PROFILE_TV_FOUR
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileTv {}
+
+    // -- RC profile parameter defining if a source handles the root menu.
+    /**
+     * Handles the root menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_ROOT_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the root menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_ROOT_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_ROOT_MENU_" }, value = {
+            RC_PROFILE_SOURCE_ROOT_MENU_HANDLED,
+            RC_PROFILE_SOURCE_ROOT_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesRootMenu {}
+
+    // -- RC profile parameter defining if a source handles the setup menu.
+    /**
+     * Handles the setup menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_SETUP_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the setup menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_SETUP_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_SETUP_MENU_" }, value = {
+            RC_PROFILE_SOURCE_SETUP_MENU_HANDLED,
+            RC_PROFILE_SOURCE_SETUP_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesSetupMenu {}
+
+
+    // -- RC profile parameter defining if a source handles the contents menu.
+    /**
+     * Handles the contents menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the contents menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_CONTENTS_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_CONTENTS_MENU_" }, value = {
+            RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED,
+            RC_PROFILE_SOURCE_CONTENTS_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesContentsMenu {}
+
+
+    // -- RC profile parameter defining if a source handles the top menu.
+    /**
+     * Handles the top menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_TOP_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the top menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_TOP_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_TOP_MENU_" }, value = {
+            RC_PROFILE_SOURCE_TOP_MENU_HANDLED,
+            RC_PROFILE_SOURCE_TOP_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesTopMenu {}
+
+
+    // -- RC profile parameter defining if a source handles the media context sensitive menu.
+    /**
+     * Handles the media context sensitive menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED = 1;
+    /**
+     * Doesn't handle the media context sensitive menu.
+     *
+     * @hide
+     */
+    public static final int RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_NOT_HANDLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_" }, value = {
+            RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED,
+            RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_NOT_HANDLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface RcProfileSourceHandlesMediaContextSensitiveMenu {}
 
     // -- Settings available in the CEC Configuration.
     /**
@@ -519,7 +703,6 @@ public final class HdmiControlManager {
     @SystemApi
     public static final String CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING =
             "system_audio_mode_muting";
-
     /**
      * Controls whether volume control commands via HDMI CEC are enabled.
      *
@@ -555,7 +738,62 @@ public final class HdmiControlManager {
      */
     public static final String CEC_SETTING_NAME_VOLUME_CONTROL_MODE =
             "volume_control_enabled";
-
+    /**
+     * Name of a setting deciding whether the TV will automatically turn on upon reception
+     * of the CEC command &lt;Text View On&gt; or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY =
+            "tv_wake_on_one_touch_play";
+    /**
+     * Name of a setting representing the RC profile of a TV panel.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_TV =
+            "rc_profile_tv";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the root
+     * menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU =
+            "rc_profile_source_handles_root_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the
+     * setup menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU =
+            "rc_profile_source_handles_setup_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the
+     * contents menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU =
+            "rc_profile_source_handles_contents_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the top
+     * menu.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU =
+            "rc_profile_source_handles_top_menu";
+    /**
+     * Name of a setting representing the RC profile parameter defining if a source handles the
+     * media context sensitive menu.
+     *
+     * @hide
+     */
+    public static final String
+            CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU =
+            "rc_profile_source_handles_media_context_sensitive_menu";
     /**
      * @hide
      */
@@ -566,6 +804,13 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_POWER_STATE_CHANGE_ON_ACTIVE_SOURCE_LOST,
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
         CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
+        CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+        CEC_SETTING_NAME_RC_PROFILE_TV,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU
     })
     public @interface CecSettingName {}
 
@@ -1865,6 +2110,50 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of TV Wake on One Touch Play.
+     *
+     * <p>Sets whether the TV should wake up upon reception of &lt;Text View On&gt;
+     * or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setTvWakeOnOneTouchPlay(@NonNull @TvWakeOnOneTouchPlay int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of TV Wake on One Touch Play.
+     *
+     * <p>Reflects whether the TV should wake up upon reception of &lt;Text View On&gt;
+     * or &lt;Image View On&gt;.
+     *
+     * @hide
+     */
+    @NonNull
+    @TvWakeOnOneTouchPlay
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getTvWakeOnOneTouchPlay() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

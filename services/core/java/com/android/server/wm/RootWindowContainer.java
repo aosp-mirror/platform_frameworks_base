@@ -222,7 +222,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction;
 
-    /** The token acquirer to put stacks on the displays to sleep */
+    /** The token acquirer to put root tasks on the displays to sleep */
     final ActivityTaskManagerInternal.SleepTokenAcquirer mDisplayOffTokenAcquirer;
 
     /**
@@ -419,8 +419,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (task.rootAffinity.equals(mTaskAffinity)) {
                     ProtoLog.d(WM_DEBUG_TASKS, "Found matching affinity candidate!");
                     // It is possible for multiple tasks to have the same root affinity especially
-                    // if they are in separate stacks. We save off this candidate, but keep looking
-                    // to see if there is a better candidate.
+                    // if they are in separate root tasks. We save off this candidate, but keep
+                    // looking to see if there is a better candidate.
                     mCandidateRecord = r;
                 }
             } else {
@@ -1488,8 +1488,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             boolean fromHomeKey) {
         // Fallback to top focused display or default display if the displayId is invalid.
         if (displayId == INVALID_DISPLAY) {
-            final Task stack = getTopDisplayFocusedRootTask();
-            displayId = stack != null ? stack.getDisplayId() : DEFAULT_DISPLAY;
+            final Task rootTask = getTopDisplayFocusedRootTask();
+            displayId = rootTask != null ? rootTask.getDisplayId() : DEFAULT_DISPLAY;
         }
 
         final DisplayContent display = getDisplayContent(displayId);
@@ -1514,8 +1514,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             boolean allowInstrumenting, boolean fromHomeKey) {
         // Fallback to top focused display area if the provided one is invalid.
         if (taskDisplayArea == null) {
-            final Task stack = getTopDisplayFocusedRootTask();
-            taskDisplayArea = stack != null ? stack.getDisplayArea()
+            final Task rootTask = getTopDisplayFocusedRootTask();
+            taskDisplayArea = rootTask != null ? rootTask.getDisplayArea()
                     : getDefaultTaskDisplayArea();
         }
 
@@ -1987,7 +1987,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         try {
             mTaskSupervisor.beginActivityVisibilityUpdate();
-            // First the front stacks. In case any are not fullscreen and are in front of home.
+            // First the front root tasks. In case any are not fullscreen and are in front of home.
             for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
                 final DisplayContent display = getChildAt(displayNdx);
                 display.ensureActivitiesVisible(starting, configChanges, preserveWindows,
@@ -2053,50 +2053,50 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Move stack with all its existing content to specified task display area.
+     * Move root task with all its existing content to specified task display area.
      *
-     * @param stackId         Id of stack to move.
-     * @param taskDisplayArea The task display area to move stack to.
+     * @param rootTaskId         Id of root task to move.
+     * @param taskDisplayArea The task display area to move root task to.
      * @param onTop           Indicates whether container should be place on top or on bottom.
      */
-    void moveRootTaskToTaskDisplayArea(int stackId, TaskDisplayArea taskDisplayArea,
+    void moveRootTaskToTaskDisplayArea(int rootTaskId, TaskDisplayArea taskDisplayArea,
             boolean onTop) {
-        final Task stack = getRootTask(stackId);
-        if (stack == null) {
-            throw new IllegalArgumentException("moveStackToTaskDisplayArea: Unknown stackId="
-                    + stackId);
+        final Task rootTask = getRootTask(rootTaskId);
+        if (rootTask == null) {
+            throw new IllegalArgumentException("moveRootTaskToTaskDisplayArea: Unknown rootTaskId="
+                    + rootTaskId);
         }
 
-        final TaskDisplayArea currentTaskDisplayArea = stack.getDisplayArea();
+        final TaskDisplayArea currentTaskDisplayArea = rootTask.getDisplayArea();
         if (currentTaskDisplayArea == null) {
-            throw new IllegalStateException("moveStackToTaskDisplayArea: stack=" + stack
+            throw new IllegalStateException("moveRootTaskToTaskDisplayArea: rootTask=" + rootTask
                     + " is not attached to any task display area.");
         }
 
         if (taskDisplayArea == null) {
             throw new IllegalArgumentException(
-                    "moveStackToTaskDisplayArea: Unknown taskDisplayArea=" + taskDisplayArea);
+                    "moveRootTaskToTaskDisplayArea: Unknown taskDisplayArea=" + taskDisplayArea);
         }
 
         if (currentTaskDisplayArea == taskDisplayArea) {
-            throw new IllegalArgumentException("Trying to move stack=" + stack
+            throw new IllegalArgumentException("Trying to move rootTask=" + rootTask
                     + " to its current taskDisplayArea=" + taskDisplayArea);
         }
-        stack.reparent(taskDisplayArea, onTop);
-        // TODO(multi-display): resize stacks properly if moved from split-screen.
+        rootTask.reparent(taskDisplayArea, onTop);
+        // TODO(multi-display): resize rootTasks properly if moved from split-screen.
     }
 
     /**
-     * Move stack with all its existing content to specified display.
+     * Move root task with all its existing content to specified display.
      *
-     * @param rootTaskId   Id of stack to move.
-     * @param displayId Id of display to move stack to.
+     * @param rootTaskId   Id of root task to move.
+     * @param displayId Id of display to move root task to.
      * @param onTop     Indicates whether container should be place on top or on bottom.
      */
     void moveRootTaskToDisplay(int rootTaskId, int displayId, boolean onTop) {
         final DisplayContent displayContent = getDisplayContentOrCreate(displayId);
         if (displayContent == null) {
-            throw new IllegalArgumentException("moveStackToDisplay: Unknown displayId="
+            throw new IllegalArgumentException("moveRootTaskToDisplay: Unknown displayId="
                     + displayId);
         }
 
@@ -2111,12 +2111,12 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         try {
             final Task task = r.getTask();
-            final Task pinnedStack = taskDisplayArea.getRootPinnedTask();
+            final Task rootPinnedTask = taskDisplayArea.getRootPinnedTask();
 
-            // This will change the pinned stack's windowing mode to its original mode, ensuring
-            // we only have one stack that is in pinned mode.
-            if (pinnedStack != null) {
-                pinnedStack.dismissPip();
+            // This will change the root pinned task's windowing mode to its original mode, ensuring
+            // we only have one root task that is in pinned mode.
+            if (rootPinnedTask != null) {
+                rootPinnedTask.dismissPip();
             }
 
             // Set a transition to ensure that we don't immediately try and update the visibility
@@ -2153,7 +2153,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // There are multiple activities in the task and moving the top activity should
                 // reveal/leave the other activities in their original task.
                 // On the other hand, ActivityRecord#onParentChanged takes care of setting the
-                // up-to-dated pinned stack information on this newly created stack.
+                // up-to-dated root pinned task information on this newly created root task.
                 r.reparent(rootTask, MAX_VALUE, reason);
 
                 // Ensure the leash of new task is in sync with its current bounds after reparent.
@@ -2178,7 +2178,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // ActivityRecord to be fullscreen.
             final int intermediateWindowingMode = rootTask.getWindowingMode();
             if (rootTask.getParent() != taskDisplayArea) {
-                // stack is nested, but pinned tasks need to be direct children of their
+                // root task is nested, but pinned tasks need to be direct children of their
                 // display area, so reparent.
                 rootTask.reparent(taskDisplayArea, true /* onTop */);
             }
@@ -2190,7 +2190,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             rootTask.setDeferTaskAppear(false);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it
-            // to the pinned stack
+            // to the root pinned task
             r.supportsEnterPipOnTaskSwitch = false;
         } finally {
             mService.continueWindowLayout();
@@ -2272,18 +2272,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Finish the topmost activities in all stacks that belong to the crashed app.
+     * Finish the topmost activities in all root tasks that belong to the crashed app.
      *
      * @param app    The app that crashed.
      * @param reason Reason to perform this action.
-     * @return The task id that was finished in this stack, or INVALID_TASK_ID if none was finished.
+     * @return The task id that was finished in this root task, or INVALID_TASK_ID if none was
+     * finished.
      */
     int finishTopCrashedActivities(WindowProcessController app, String reason) {
-        Task focusedStack = getTopDisplayFocusedRootTask();
+        Task focusedRootTask = getTopDisplayFocusedRootTask();
         final Task[] finishedTask = new Task[1];
-        forAllTasks(stack -> {
-            final Task t = stack.finishTopCrashedActivityLocked(app, reason);
-            if (stack == focusedStack || finishedTask[0] == null) {
+        forAllTasks(rootTask -> {
+            final Task t = rootTask.finishTopCrashedActivityLocked(app, reason);
+            if (rootTask == focusedRootTask || finishedTask[0] == null) {
                 finishedTask[0] = t;
             }
         });
@@ -2317,7 +2318,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     return;
                 }
                 if (rootTask == targetRootTask) {
-                    // Simply update the result for targetStack because the targetStack
+                    // Simply update the result for targetRootTask because the targetRootTask
                     // had already resumed in above. We don't want to resume it again,
                     // especially in some cases, it would cause a second launch failure
                     // if app process was dead.
@@ -2327,7 +2328,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 if (rootTask.getDisplayArea().isTopRootTask(rootTask)
                         && topRunningActivity.isState(RESUMED)) {
                     // Kick off any lingering app transitions form the MoveTaskToFront
-                    // operation, but only consider the top task and stack on that
+                    // operation, but only consider the top task and root-task on that
                     // display.
                     rootTask.executeAppTransition(targetOptions);
                 } else {
@@ -2338,7 +2339,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (!resumedOnDisplay[0]) {
                 // In cases when there are no valid activities (e.g. device just booted or launcher
                 // crashed) it's possible that nothing was resumed on a display. Requesting resume
-                // of top activity in focused stack explicitly will make sure that at least home
+                // of top activity in focused root task explicitly will make sure that at least home
                 // activity is started and resumed, and no recursion occurs.
                 final Task focusedRoot = display.getFocusedRootTask();
                 if (focusedRoot != null) {
@@ -2818,7 +2819,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Returns the right stack to use for launching factoring in all the input parameters.
+     * Returns the right root task to use for launching factoring in all the input parameters.
      *
      * @param r              The activity we are trying to launch. Can be null.
      * @param options        The activity options used to the launch. Can be null.
@@ -2826,7 +2827,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param launchParams   The resolved launch params to use.
      * @param realCallingPid The pid from {@link ActivityStarter#setRealCallingPid}
      * @param realCallingUid The uid from {@link ActivityStarter#setRealCallingUid}
-     * @return The stack to use for the launch or INVALID_STACK_ID.
+     * @return The roott task to use for the launch or INVALID_TASK_ID.
      */
     Task getLaunchRootTask(@Nullable ActivityRecord r,
             @Nullable ActivityOptions options, @Nullable Task candidateTask, boolean onTop,
@@ -2850,8 +2851,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        // First preference for stack goes to the task Id set in the activity options. Use the stack
-        // associated with that if possible.
+        // First preference for root task goes to the task Id set in the activity options. Use
+        // the root task associated with that if possible.
         if (taskId != INVALID_TASK_ID) {
             // Temporarily set the task id to invalid in case in re-entry.
             options.setLaunchTaskId(INVALID_TASK_ID);
@@ -2864,9 +2865,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         final int activityType = resolveActivityType(r, options, candidateTask);
-        Task stack = null;
+        Task rootTask = null;
 
-        // Next preference for stack goes to the taskDisplayArea candidate.
+        // Next preference for root task goes to the taskDisplayArea candidate.
         if (launchParams != null && launchParams.mPreferredTaskDisplayArea != null) {
             taskDisplayArea = launchParams.mPreferredTaskDisplayArea;
         }
@@ -2894,27 +2895,27 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 }
                 // Falling back to default task container
                 taskDisplayArea = taskDisplayArea.mDisplayContent.getDefaultTaskDisplayArea();
-                stack = taskDisplayArea.getOrCreateRootTask(r, options, candidateTask, activityType,
-                        onTop);
-                if (stack != null) {
-                    return stack;
+                rootTask = taskDisplayArea.getOrCreateRootTask(r, options, candidateTask,
+                        activityType, onTop);
+                if (rootTask != null) {
+                    return rootTask;
                 }
             }
         }
 
-        // Give preference to the stack and display of the input task and activity if they match the
-        // mode we want to launch into.
+        // Give preference to the root task and display of the input task and activity if they
+        // match the mode we want to launch into.
         TaskDisplayArea container = null;
         if (candidateTask != null) {
-            stack = candidateTask.getRootTask();
+            rootTask = candidateTask.getRootTask();
         }
-        if (stack == null && r != null) {
-            stack = r.getRootTask();
+        if (rootTask == null && r != null) {
+            rootTask = r.getRootTask();
         }
         int windowingMode = launchParams != null ? launchParams.mWindowingMode
                 : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-        if (stack != null) {
-            container = stack.getDisplayArea();
+        if (rootTask != null) {
+            container = rootTask.getDisplayArea();
             if (container != null && canLaunchOnDisplay(r, container.mDisplayContent.mDisplayId)) {
                 if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
                     windowingMode = container.resolveWindowingMode(r, options, candidateTask,
@@ -2923,18 +2924,20 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // Always allow organized tasks that created by organizer since the activity type
                 // of an organized task is decided by the activity type of its top child, which
                 // could be incompatible with the given windowing mode and activity type.
-                if (stack.isCompatible(windowingMode, activityType) || stack.mCreatedByOrganizer) {
-                    return stack;
+                if (rootTask.isCompatible(windowingMode, activityType)
+                        || rootTask.mCreatedByOrganizer) {
+                    return rootTask;
                 }
                 if (windowingMode == WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY
-                        && container.getRootSplitScreenPrimaryTask() == stack
-                        && candidateTask == stack.getTopMostTask()) {
+                        && container.getRootSplitScreenPrimaryTask() == rootTask
+                        && candidateTask == rootTask.getTopMostTask()) {
                     // This is a special case when we try to launch an activity that is currently on
-                    // top of split-screen primary stack, but is targeting split-screen secondary.
-                    // In this case we don't want to move it to another stack.
+                    // top of root split-screen primary task, but is targeting split-screen
+                    // secondary.
+                    // In this case we don't want to move it to another root task.
                     // TODO(b/78788972): Remove after differentiating between preferred and required
                     // launch options.
-                    return stack;
+                    return rootTask;
                 }
             }
         }
@@ -2960,13 +2963,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Get a topmost stack on the display area, that is a valid launch stack for specified activity.
-     * If there is no such stack, new dynamic stack can be created.
+     * Get a topmost root task on the display area, that is a valid launch root task for
+     * specified activity. If there is no such root task, new dynamic root task can be created.
      *
      * @param taskDisplayArea Target display area.
      * @param r               Activity that should be launched there.
      * @param candidateTask   The possible task the activity might be put in.
-     * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
+     * @return Existing root task if there is a valid one, new dynamic root task if it is valid
+     * or null.
      */
     @VisibleForTesting
     Task getValidLaunchRootTaskInTaskDisplayArea(@NonNull TaskDisplayArea taskDisplayArea,
@@ -3029,7 +3033,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return null;
     }
 
-    // TODO: Can probably be consolidated into getLaunchStack()...
+    // TODO: Can probably be consolidated into getLaunchRootTask()...
     private boolean isValidLaunchRootTask(Task task, ActivityRecord r, int windowingMode) {
         switch (task.getActivityType()) {
             case ACTIVITY_TYPE_HOME:
@@ -3045,7 +3049,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Don't launch directly into task created by organizer...but why can't we?
             return false;
         }
-        // There is a 1-to-1 relationship between stack and task when not in
+        // There is a 1-to-1 relationship between root task and task when not in
         // primary split-windowing mode.
         if (task.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 && r.supportsSplitScreenWindowingMode()
@@ -3074,34 +3078,34 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Get next focusable stack in the system. This will search through the stack on the same
-     * display as the current focused stack, looking for a focusable and visible stack, different
-     * from the target stack. If no valid candidates will be found, it will then go through all
-     * displays and stacks in last-focused order.
+     * Get next focusable root task in the system. This will search through the root task on the
+     * same display as the current focused root task, looking for a focusable and visible root task,
+     * different from the target root task. If no valid candidates will be found, it will then go
+     * through all displays and root tasks in last-focused order.
      *
-     * @param currentFocus  The stack that previously had focus.
+     * @param currentFocus  The root task that previously had focus.
      * @param ignoreCurrent If we should ignore {@param currentFocus} when searching for next
      *                      candidate.
      * @return Next focusable {@link Task}, {@code null} if not found.
      */
     Task getNextFocusableRootTask(@NonNull Task currentFocus, boolean ignoreCurrent) {
-        // First look for next focusable stack on the same display
+        // First look for next focusable root task on the same display
         TaskDisplayArea preferredDisplayArea = currentFocus.getDisplayArea();
         if (preferredDisplayArea == null) {
-            // Stack is currently detached because it is being removed. Use the previous display it
-            // was on.
+            // Root task is currently detached because it is being removed. Use the previous
+            // display it was on.
             preferredDisplayArea = getDisplayContent(currentFocus.mPrevDisplayId)
                     .getDefaultTaskDisplayArea();
         }
-        final Task preferredFocusableStack = preferredDisplayArea.getNextFocusableRootTask(
+        final Task preferredFocusableRootTask = preferredDisplayArea.getNextFocusableRootTask(
                 currentFocus, ignoreCurrent);
-        if (preferredFocusableStack != null) {
-            return preferredFocusableStack;
+        if (preferredFocusableRootTask != null) {
+            return preferredFocusableRootTask;
         }
         if (preferredDisplayArea.mDisplayContent.supportsSystemDecorations()) {
-            // Stop looking for focusable stack on other displays because the preferred display
+            // Stop looking for focusable root task on other displays because the preferred display
             // supports system decorations. Home activity would be launched on the same display if
-            // no focusable stack found.
+            // no focusable root task found.
             return null;
         }
 
@@ -3112,10 +3116,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // We've already checked this one
                 continue;
             }
-            final Task nextFocusableStack = display.getDefaultTaskDisplayArea()
+            final Task nextFocusableRootTask = display.getDefaultTaskDisplayArea()
                     .getNextFocusableRootTask(currentFocus, ignoreCurrent);
-            if (nextFocusableStack != null) {
-                return nextFocusableStack;
+            if (nextFocusableRootTask != null) {
+                return nextFocusableRootTask;
             }
         }
 
@@ -3302,23 +3306,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     boolean allResumedActivitiesIdle() {
         for (int displayNdx = getChildCount() - 1; displayNdx >= 0; --displayNdx) {
-            // TODO(b/117135575): Check resumed activities on all visible stacks.
+            // TODO(b/117135575): Check resumed activities on all visible root tasks.
             final DisplayContent display = getChildAt(displayNdx);
             if (display.isSleeping()) {
                 // No resumed activities while display is sleeping.
                 continue;
             }
 
-            // If the focused stack is not null or not empty, there should have some activities
+            // If the focused root task is not null or not empty, there should have some activities
             // resuming or resumed. Make sure these activities are idle.
-            final Task stack = display.getFocusedRootTask();
-            if (stack == null || !stack.hasActivity()) {
+            final Task rootTask = display.getFocusedRootTask();
+            if (rootTask == null || !rootTask.hasActivity()) {
                 continue;
             }
-            final ActivityRecord resumedActivity = stack.getResumedActivity();
+            final ActivityRecord resumedActivity = rootTask.getResumedActivity();
             if (resumedActivity == null || !resumedActivity.idle) {
-                ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: stack=%d %s "
-                        + "not idle", stack.getRootTaskId(), resumedActivity);
+                ProtoLog.d(WM_DEBUG_STATES, "allResumedActivitiesIdle: rootTask=%d %s "
+                        + "not idle", rootTask.getRootTaskId(), resumedActivity);
                 return false;
             }
         }
@@ -3367,7 +3371,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Find all visible task stacks containing {@param userId} and intercept them with an activity
+     * Find all visible tasks containing {@param userId} and intercept them with an activity
      * to block out the contents and possibly start a credential-confirming intent.
      *
      * @param userId user handle for the locked managed profile.
@@ -3431,7 +3435,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      * @param id        Id of the task we would like returned.
      * @param matchMode The mode to match the given task id in.
      * @param aOptions  The activity options to use for restoration. Can be null.
-     * @param onTop     If the stack for the task should be the topmost on the display.
+     * @param onTop     If the root task for the task should be the topmost on the display.
      */
     Task anyTaskForId(int id, @RootWindowContainer.AnyTaskForIdMatchTaskMode int matchMode,
             @Nullable ActivityOptions aOptions, boolean onTop) {
@@ -3448,21 +3452,21 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
         if (task != null) {
             if (aOptions != null) {
-                // Resolve the stack the task should be placed in now based on options
+                // Resolve the root task the task should be placed in now based on options
                 // and reparent if needed.
-                final Task launchStack =
+                final Task launchRootTask =
                         getLaunchRootTask(null, aOptions, task, onTop);
-                if (launchStack != null && task.getRootTask() != launchStack) {
+                if (launchRootTask != null && task.getRootTask() != launchRootTask) {
                     final int reparentMode = onTop
                             ? REPARENT_MOVE_ROOT_TASK_TO_FRONT : REPARENT_LEAVE_ROOT_TASK_IN_PLACE;
-                    task.reparent(launchStack, onTop, reparentMode, ANIMATE, DEFER_RESUME,
+                    task.reparent(launchRootTask, onTop, reparentMode, ANIMATE, DEFER_RESUME,
                             "anyTaskForId");
                 }
             }
             return task;
         }
 
-        // If we are matching stack tasks only, return now
+        // If we are matching root task tasks only, return now
         if (matchMode == MATCH_ATTACHED_TASK_ONLY) {
             return null;
         }
@@ -3560,22 +3564,22 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     /**
-     * Dumps the activities matching the given {@param name} in the either the focused stack
-     * or all visible stacks if {@param dumpVisibleStacks} is true.
+     * Dumps the activities matching the given {@param name} in the either the focused root task
+     * or all visible root tasks if {@param dumpVisibleRootTasksOnly} is true.
      */
-    ArrayList<ActivityRecord> getDumpActivities(String name, boolean dumpVisibleStacksOnly,
-            boolean dumpFocusedStackOnly) {
-        if (dumpFocusedStackOnly) {
-            final Task topFocusedStack = getTopDisplayFocusedRootTask();
-            if (topFocusedStack != null) {
-                return topFocusedStack.getDumpActivitiesLocked(name);
+    ArrayList<ActivityRecord> getDumpActivities(String name, boolean dumpVisibleRootTasksOnly,
+            boolean dumpFocusedRootTaskOnly) {
+        if (dumpFocusedRootTaskOnly) {
+            final Task topFocusedRootTask = getTopDisplayFocusedRootTask();
+            if (topFocusedRootTask != null) {
+                return topFocusedRootTask.getDumpActivitiesLocked(name);
             } else {
                 return new ArrayList<>();
             }
         } else {
             final ArrayList<ActivityRecord> activities = new ArrayList<>();
             forAllRootTasks(rootTask -> {
-                if (!dumpVisibleStacksOnly || rootTask.shouldBeVisible(null)) {
+                if (!dumpVisibleRootTasksOnly || rootTask.shouldBeVisible(null)) {
                     activities.addAll(rootTask.getDumpActivitiesLocked(name));
                 }
             });

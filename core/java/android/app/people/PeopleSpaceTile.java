@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.people;
+package android.app.people;
 
 import android.annotation.NonNull;
 import android.app.Person;
@@ -29,6 +29,9 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The People Space tile contains all relevant information to render a tile in People Space: namely
@@ -45,16 +48,15 @@ public class PeopleSpaceTile implements Parcelable {
     private int mUid;
     private Uri mContactUri;
     private String mPackageName;
-    private String mStatusText;
+    private String mBirthdayText;
     private long mLastInteractionTimestamp;
     private boolean mIsImportantConversation;
-    private boolean mIsHiddenConversation;
     private String mNotificationKey;
-    // TODO: add mNotificationTimestamp
     private CharSequence mNotificationContent;
     private Uri mNotificationDataUri;
     private Intent mIntent;
-    // TODO: add a List of the Status objects once created
+    private long mNotificationTimestamp;
+    private List<ConversationStatus> mStatuses;
 
     private PeopleSpaceTile(Builder b) {
         mId = b.mId;
@@ -63,14 +65,15 @@ public class PeopleSpaceTile implements Parcelable {
         mContactUri = b.mContactUri;
         mUid = b.mUid;
         mPackageName = b.mPackageName;
-        mStatusText = b.mStatusText;
+        mBirthdayText = b.mBirthdayText;
         mLastInteractionTimestamp = b.mLastInteractionTimestamp;
         mIsImportantConversation = b.mIsImportantConversation;
-        mIsHiddenConversation = b.mIsHiddenConversation;
         mNotificationKey = b.mNotificationKey;
         mNotificationContent = b.mNotificationContent;
         mNotificationDataUri = b.mNotificationDataUri;
         mIntent = b.mIntent;
+        mNotificationTimestamp = b.mNotificationTimestamp;
+        mStatuses = b.mStatuses;
     }
 
     public String getId() {
@@ -98,8 +101,8 @@ public class PeopleSpaceTile implements Parcelable {
         return mPackageName;
     }
 
-    public String getStatusText() {
-        return mStatusText;
+    public String getBirthdayText() {
+        return mBirthdayText;
     }
 
     /** Returns the timestamp of the last interaction. */
@@ -112,13 +115,6 @@ public class PeopleSpaceTile implements Parcelable {
      */
     public boolean isImportantConversation() {
         return mIsImportantConversation;
-    }
-
-    /**
-     * Whether the conversation should be hidden.
-     */
-    public boolean isHiddenConversation() {
-        return mIsHiddenConversation;
     }
 
     /**
@@ -148,20 +144,32 @@ public class PeopleSpaceTile implements Parcelable {
         return mIntent;
     }
 
+    /** Returns the timestamp of the last notification. */
+    public long getNotificationTimestamp() {
+        return mNotificationTimestamp;
+    }
+
+    /** Returns the statuses associated with the tile. */
+    public List<ConversationStatus> getStatuses() {
+        return mStatuses;
+    }
+
     /** Converts a {@link PeopleSpaceTile} into a {@link PeopleSpaceTile.Builder}. */
-    public PeopleSpaceTile.Builder toBuilder() {
-        PeopleSpaceTile.Builder builder =
-                new PeopleSpaceTile.Builder(mId, mUserName.toString(), mUserIcon, mIntent);
+    public Builder toBuilder() {
+        Builder builder =
+                new Builder(mId, mUserName.toString(), mUserIcon, mIntent);
         builder.setContactUri(mContactUri);
         builder.setUid(mUid);
         builder.setPackageName(mPackageName);
-        builder.setStatusText(mStatusText);
+        builder.setBirthdayText(mBirthdayText);
         builder.setLastInteractionTimestamp(mLastInteractionTimestamp);
         builder.setIsImportantConversation(mIsImportantConversation);
-        builder.setIsHiddenConversation(mIsHiddenConversation);
         builder.setNotificationKey(mNotificationKey);
         builder.setNotificationContent(mNotificationContent);
         builder.setNotificationDataUri(mNotificationDataUri);
+        builder.setIntent(mIntent);
+        builder.setNotificationTimestamp(mNotificationTimestamp);
+        builder.setStatuses(mStatuses);
         return builder;
     }
 
@@ -173,14 +181,15 @@ public class PeopleSpaceTile implements Parcelable {
         private Uri mContactUri;
         private int mUid;
         private String mPackageName;
-        private String mStatusText;
+        private String mBirthdayText;
         private long mLastInteractionTimestamp;
         private boolean mIsImportantConversation;
-        private boolean mIsHiddenConversation;
         private String mNotificationKey;
         private CharSequence mNotificationContent;
         private Uri mNotificationDataUri;
         private Intent mIntent;
+        private long mNotificationTimestamp;
+        private List<ConversationStatus> mStatuses;
 
         /** Builder for use only if a shortcut is not available for the tile. */
         public Builder(String id, String userName, Icon userIcon, Intent intent) {
@@ -200,7 +209,22 @@ public class PeopleSpaceTile implements Parcelable {
             mContactUri = getContactUri(info);
         }
 
-        private Uri getContactUri(ShortcutInfo info) {
+        public Builder(ConversationChannel channel, LauncherApps launcherApps) {
+            ShortcutInfo info = channel.getShortcutInfo();
+            mId = info.getId();
+            mUserName = info.getLabel();
+            mUserIcon = convertDrawableToIcon(launcherApps.getShortcutIconDrawable(info, 0));
+            mUid = info.getUserId();
+            mPackageName = info.getPackage();
+            mContactUri = getContactUri(info);
+            mStatuses = channel.getStatuses();
+            mLastInteractionTimestamp = channel.getLastEventTimestamp();
+            mIsImportantConversation = channel.getParentNotificationChannel() != null
+                    && channel.getParentNotificationChannel().isImportantConversation();
+        }
+
+        /** Returns the Contact's Uri if present. */
+        public Uri getContactUri(ShortcutInfo info) {
             if (info.getPersons() == null || info.getPersons().length != 1) {
                 return null;
             }
@@ -246,8 +270,8 @@ public class PeopleSpaceTile implements Parcelable {
         }
 
         /** Sets the status text. */
-        public Builder setStatusText(String statusText) {
-            mStatusText = statusText;
+        public Builder setBirthdayText(String birthdayText) {
+            mBirthdayText = birthdayText;
             return this;
         }
 
@@ -260,12 +284,6 @@ public class PeopleSpaceTile implements Parcelable {
         /** Sets whether the conversation is important. */
         public Builder setIsImportantConversation(boolean isImportantConversation) {
             mIsImportantConversation = isImportantConversation;
-            return this;
-        }
-
-        /** Sets whether the conversation is hidden. */
-        public Builder setIsHiddenConversation(boolean isHiddenConversation) {
-            mIsHiddenConversation = isHiddenConversation;
             return this;
         }
 
@@ -293,6 +311,18 @@ public class PeopleSpaceTile implements Parcelable {
             return this;
         }
 
+        /** Sets the notification timestamp. */
+        public Builder setNotificationTimestamp(long notificationTimestamp) {
+            mNotificationTimestamp = notificationTimestamp;
+            return this;
+        }
+
+        /** Sets the statuses. */
+        public Builder setStatuses(List<ConversationStatus> statuses) {
+            mStatuses = statuses;
+            return this;
+        }
+
         /** Builds a {@link PeopleSpaceTile}. */
         @NonNull
         public PeopleSpaceTile build() {
@@ -300,21 +330,23 @@ public class PeopleSpaceTile implements Parcelable {
         }
     }
 
-    private PeopleSpaceTile(Parcel in) {
+    public PeopleSpaceTile(Parcel in) {
         mId = in.readString();
         mUserName = in.readCharSequence();
         mUserIcon = in.readParcelable(Icon.class.getClassLoader());
         mContactUri = in.readParcelable(Uri.class.getClassLoader());
         mUid = in.readInt();
         mPackageName = in.readString();
-        mStatusText = in.readString();
+        mBirthdayText = in.readString();
         mLastInteractionTimestamp = in.readLong();
         mIsImportantConversation = in.readBoolean();
-        mIsHiddenConversation = in.readBoolean();
         mNotificationKey = in.readString();
         mNotificationContent = in.readCharSequence();
         mNotificationDataUri = in.readParcelable(Uri.class.getClassLoader());
         mIntent = in.readParcelable(Intent.class.getClassLoader());
+        mNotificationTimestamp = in.readLong();
+        mStatuses = new ArrayList<>();
+        in.readParcelableList(mStatuses, ConversationStatus.class.getClassLoader());
     }
 
     @Override
@@ -330,14 +362,15 @@ public class PeopleSpaceTile implements Parcelable {
         dest.writeParcelable(mContactUri, flags);
         dest.writeInt(mUid);
         dest.writeString(mPackageName);
-        dest.writeString(mStatusText);
+        dest.writeString(mBirthdayText);
         dest.writeLong(mLastInteractionTimestamp);
         dest.writeBoolean(mIsImportantConversation);
-        dest.writeBoolean(mIsHiddenConversation);
         dest.writeString(mNotificationKey);
         dest.writeCharSequence(mNotificationContent);
         dest.writeParcelable(mNotificationDataUri, flags);
         dest.writeParcelable(mIntent, flags);
+        dest.writeLong(mNotificationTimestamp);
+        dest.writeParcelableList(mStatuses, flags);
     }
 
     public static final @android.annotation.NonNull

@@ -1698,8 +1698,9 @@ public class PhoneStateListener {
 
     /**
      * Interface for phone capability listener.
-     *
+     * @hide
      */
+    @SystemApi
     public interface PhoneCapabilityChangedListener {
         /**
          * Callback invoked when phone capability changes.
@@ -2841,7 +2842,6 @@ public class PhoneStateListener {
         }
 
         public void onPhysicalChannelConfigChanged(List<PhysicalChannelConfig> configs) {
-            PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             PhysicalChannelConfigChangedListener listener =
                     (PhysicalChannelConfigChangedListener) mPhoneStateListenerWeakRef.get();
             if (listener == null) return;
@@ -2852,15 +2852,13 @@ public class PhoneStateListener {
         }
 
         public void onDataEnabledChanged(boolean enabled, @DataEnabledReason int reason) {
-            if ((mPhoneStateListenerWeakRef.get() instanceof DataEnabledChangedListener)) {
-                DataEnabledChangedListener listener =
-                        (DataEnabledChangedListener) mPhoneStateListenerWeakRef.get();
-                if (listener == null) return;
+            DataEnabledChangedListener listener =
+                    (DataEnabledChangedListener) mPhoneStateListenerWeakRef.get();
+            if (listener == null) return;
 
-                Binder.withCleanCallingIdentity(
-                        () -> mExecutor.execute(() -> listener.onDataEnabledChanged(
-                                enabled, reason)));
-            }
+            Binder.withCleanCallingIdentity(
+                    () -> mExecutor.execute(() -> listener.onDataEnabledChanged(
+                            enabled, reason)));
         }
 
         public void onAllowedNetworkTypesChanged(Map allowedNetworkTypesList) {

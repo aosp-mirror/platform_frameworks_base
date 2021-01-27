@@ -192,7 +192,6 @@ public final class SurfaceControl implements Parcelable {
             long newParentObject);
     private static native void nativeReparent(long transactionObj, long nativeObject,
             long newParentNativeObject);
-    private static native void nativeSeverChildren(long transactionObj, long nativeObject);
 
     private static native Display.HdrCapabilities nativeGetHdrCapabilities(IBinder displayToken);
 
@@ -2994,15 +2993,6 @@ public final class SurfaceControl implements Parcelable {
             }
             nativeReparent(mNativeObject, sc.mNativeObject, otherObject);
             mReparentedSurfaces.put(sc, newParent);
-            return this;
-        }
-
-        /**
-         * @hide
-         */
-        public Transaction detachChildren(SurfaceControl sc) {
-            checkPreconditions(sc);
-            nativeSeverChildren(mNativeObject, sc.mNativeObject);
             return this;
         }
 

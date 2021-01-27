@@ -372,11 +372,11 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             }
         }
 
-        Task stack = (taskDisplayArea == null && task != null)
+        Task rootTask = (taskDisplayArea == null && task != null)
                 ? task.getRootTask() : null;
-        if (stack != null) {
-            if (DEBUG) appendLog("display-from-task=" + stack.getDisplayId());
-            taskDisplayArea = stack.getDisplayArea();
+        if (rootTask != null) {
+            if (DEBUG) appendLog("display-from-task=" + rootTask.getDisplayId());
+            taskDisplayArea = rootTask.getDisplayArea();
         }
 
         if (taskDisplayArea == null && source != null) {

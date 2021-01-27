@@ -94,6 +94,12 @@ public class AppWidgetServiceImplTest extends InstrumentationTestCase {
         mService.onStart();
     }
 
+    public void testLoadDescription() {
+        AppWidgetProviderInfo info =
+                mManager.getInstalledProvidersForPackage(mPkgName, null).get(0);
+        assertEquals(info.loadDescription(mTestContext), "widget description string");
+    }
+
     public void testRequestPinAppWidget_otherProvider() {
         ComponentName otherProvider = null;
         for (AppWidgetProviderInfo provider : mManager.getInstalledProviders()) {

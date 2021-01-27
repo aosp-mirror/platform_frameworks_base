@@ -19,6 +19,8 @@ package android.net;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 
+import java.net.InetAddress;
+
 /**
  * Provides the related filtering logic to the {@link NetworkAgent} to match {@link QosSession}s
  * to their related {@link QosCallback}.
@@ -58,5 +60,16 @@ public abstract class QosFilter {
      */
     @QosCallbackException.ExceptionType
     public abstract int validate();
+
+    /**
+     * Determines whether or not the parameters is a match for the filter.
+     *
+     * @param address the local address
+     * @param startPort the start of the port range
+     * @param endPort the end of the port range
+     * @return whether the parameters match the local address of the filter
+     */
+    public abstract boolean matchesLocalAddress(@NonNull InetAddress address,
+            int startPort, int endPort);
 }
 
