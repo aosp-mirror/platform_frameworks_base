@@ -3690,4 +3690,9 @@ public final class Parcel {
     public long getBlobAshmemSize() {
         return nativeGetBlobAshmemSize(mNativePtr);
     }
+
+    /** @hide */
+    /*package*/ boolean ownsNativeParcelObject() {
+        return mOwnsNativeParcelObject;
+    }
 }

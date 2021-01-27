@@ -537,7 +537,8 @@ public final class BinderProxy implements IBinder {
         }
 
         try {
-            return transactNative(code, data, reply, flags);
+            boolean replyOwnsNative = (reply == null) ? false : reply.ownsNativeParcelObject();
+            return transactNative(code, data, reply, replyOwnsNative, flags);
         } finally {
             AppOpsManager.resumeNotedAppOpsCollection(prevCollection);
 
@@ -562,7 +563,7 @@ public final class BinderProxy implements IBinder {
      * Native implementation of transact() for proxies
      */
     public native boolean transactNative(int code, Parcel data, Parcel reply,
-            int flags) throws RemoteException;
+            boolean replyOwnsNativeParcelObject, int flags) throws RemoteException;
     /**
      * See {@link IBinder#linkToDeath(DeathRecipient, int)}
      */
