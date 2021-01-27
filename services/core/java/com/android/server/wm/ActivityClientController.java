@@ -63,6 +63,7 @@ import android.util.Slog;
 import android.view.RemoteAnimationDefinition;
 
 import com.android.internal.app.AssistUtils;
+import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.server.LocalServices;
 import com.android.server.Watchdog;
@@ -1015,6 +1016,50 @@ class ActivityClientController extends IActivityClientController.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    @Override
+    public void restartActivityProcessIfVisible(IBinder token) {
+        ActivityTaskManagerService.enforceTaskPermission("restartActivityProcess");
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+                if (r != null) {
+                    r.restartProcessIfVisible();
+                }
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
+        }
+    }
+
+    @Override
+    public void invalidateHomeTaskSnapshot(IBinder token) {
+        synchronized (mGlobalLock) {
+            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
+            if (r != null && r.isActivityTypeHome()) {
+                mService.mWindowManager.mTaskSnapshotController.removeSnapshotCache(
+                        r.getTask().mTaskId);
+            }
+        }
+    }
+
+    @Override
+    public void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback,
+            CharSequence message) {
+        if (message != null) {
+            mService.mAmInternal.enforceCallingPermission(
+                    android.Manifest.permission.SHOW_KEYGUARD_MESSAGE, "dismissKeyguard");
+        }
+        final long callingId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mService.mKeyguardController.dismissKeyguard(token, callback, message);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(callingId);
         }
     }
 
