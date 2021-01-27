@@ -160,6 +160,10 @@ package android.net {
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_TEST_NETWORKS, android.Manifest.permission.NETWORK_STACK}) public void simulateDataStall(int, long, @NonNull android.net.Network, @NonNull android.os.PersistableBundle);
   }
 
+  public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
+    method public int getResourceId();
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
