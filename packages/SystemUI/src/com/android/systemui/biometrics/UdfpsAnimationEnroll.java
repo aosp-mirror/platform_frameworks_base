@@ -23,6 +23,7 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -84,5 +85,13 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     @Override
     public int getOpacity() {
         return 0;
+    }
+
+    public void onEnrollmentProgress(int remaining) {
+        Log.d(TAG, "Remaining: " + remaining);
+    }
+
+    public void onEnrollmentHelp() {
+        Log.d(TAG, "onEnrollmentHelp");
     }
 }
