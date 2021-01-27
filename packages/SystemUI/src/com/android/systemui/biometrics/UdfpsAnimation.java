@@ -47,4 +47,9 @@ public abstract class UdfpsAnimation extends Drawable {
                 (int) sensorRect.right - margin,
                 (int) sensorRect.bottom - margin);
     }
+
+    @Override
+    public void setAlpha(int alpha) {
+        mFingerprintDrawable.setAlpha(alpha);
+    }
 }
