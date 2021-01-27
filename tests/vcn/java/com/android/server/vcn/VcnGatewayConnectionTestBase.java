@@ -17,11 +17,13 @@
 package com.android.server.vcn;
 
 import static com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
+import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -30,6 +32,7 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
@@ -38,6 +41,7 @@ import android.os.test.TestLooper;
 import com.android.server.IpSecService;
 
 import org.junit.Before;
+import org.mockito.ArgumentCaptor;
 
 import java.util.UUID;
 
@@ -68,6 +72,7 @@ public class VcnGatewayConnectionTestBase {
 
     @NonNull protected final IpSecService mIpSecSvc;
 
+    protected VcnIkeSession mMockIkeSession;
     protected VcnGatewayConnection mGatewayConnection;
 
     public VcnGatewayConnectionTestBase() {
@@ -100,6 +105,16 @@ public class VcnGatewayConnectionTestBase {
                         TEST_IPSEC_TUNNEL_IFACE);
         doReturn(resp).when(mIpSecSvc).createTunnelInterface(any(), any(), any(), any(), any());
 
+        mMockIkeSession = mock(VcnIkeSession.class);
+        doReturn(mMockIkeSession).when(mDeps).newIkeSession(any(), any(), any(), any(), any());
+
         mGatewayConnection = new VcnGatewayConnection(mVcnContext, TEST_SUB_GRP, mConfig, mDeps);
+    }
+
+    protected IkeSessionCallback getIkeSessionCallback() {
+        ArgumentCaptor<IkeSessionCallback> captor =
+                ArgumentCaptor.forClass(IkeSessionCallback.class);
+        verify(mDeps).newIkeSession(any(), any(), any(), captor.capture(), any());
+        return captor.getValue();
     }
 }
