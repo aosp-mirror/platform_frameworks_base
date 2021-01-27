@@ -23,6 +23,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
@@ -39,6 +41,7 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Xml;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -99,6 +102,7 @@ public class TvView extends ViewGroup {
     private int mSurfaceWidth;
     private int mSurfaceHeight;
     private final AttributeSet mAttrs;
+    private final XmlResourceParser mParser;
     private final int mDefStyleAttr;
     private int mWindowZOrder;
     private boolean mUseRequestedSurfaceLayout;
@@ -168,7 +172,16 @@ public class TvView extends ViewGroup {
 
     public TvView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mAttrs = attrs;
+        int sourceResId = Resources.getAttributeSetSourceResId(attrs);
+        if (sourceResId != Resources.ID_NULL) {
+            Log.d(TAG, "Build local AttributeSet");
+            mParser  = context.getResources().getXml(sourceResId);
+            mAttrs = Xml.asAttributeSet(mParser);
+        } else {
+            Log.d(TAG, "Use passed in AttributeSet");
+            mParser = null;
+            mAttrs = attrs;
+        }
         mDefStyleAttr = defStyleAttr;
         resetSurfaceView();
         mTvInputManager = (TvInputManager) getContext().getSystemService(Context.TV_INPUT_SERVICE);
