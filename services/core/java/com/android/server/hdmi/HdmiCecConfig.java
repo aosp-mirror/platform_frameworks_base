@@ -303,6 +303,8 @@ public class HdmiCecConfig {
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return STORAGE_GLOBAL_SETTINGS;
+            case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
+                return STORAGE_GLOBAL_SETTINGS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
                 return STORAGE_SHARED_PREFS;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
@@ -338,6 +340,8 @@ public class HdmiCecConfig {
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY:
                 return Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED;
+            case HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP:
+                return Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED;
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_TV:
                 return setting.getName();
             case HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU:
