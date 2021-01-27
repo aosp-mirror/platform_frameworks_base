@@ -250,14 +250,17 @@ public abstract class WMShellBaseModule {
     @Provides
     static PipAppOpsListener providePipAppOpsListener(Context context,
             IActivityManager activityManager,
-            PipTouchHandler pipTouchHandler) {
-        return new PipAppOpsListener(context, activityManager, pipTouchHandler.getMotionHelper());
+            PipTouchHandler pipTouchHandler,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTouchHandler.getMotionHelper(), mainExecutor);
     }
 
+    // Needs handler for registering broadcast receivers
     @WMSingleton
     @Provides
-    static PipMediaController providePipMediaController(Context context) {
-        return new PipMediaController(context);
+    static PipMediaController providePipMediaController(Context context,
+            @ShellMainThread Handler mainHandler) {
+        return new PipMediaController(context, mainHandler);
     }
 
     @WMSingleton
