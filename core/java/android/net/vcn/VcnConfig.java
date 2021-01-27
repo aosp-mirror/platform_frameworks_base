@@ -96,7 +96,11 @@ public final class VcnConfig implements Parcelable {
         return mPackageName;
     }
 
-    /** Retrieves the set of configured tunnels. */
+    /**
+     * Retrieves the set of configured tunnels.
+     *
+     * @hide
+     */
     @NonNull
     public Set<VcnGatewayConnectionConfig> getGatewayConnectionConfigs() {
         return Collections.unmodifiableSet(mGatewayConnectionConfigs);
@@ -146,7 +150,7 @@ public final class VcnConfig implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(toPersistableBundle(), flags);
     }
 
@@ -164,8 +168,12 @@ public final class VcnConfig implements Parcelable {
                 }
             };
 
-    /** This class is used to incrementally build {@link VcnConfig} objects. */
-    public static class Builder {
+    /**
+     * This class is used to incrementally build {@link VcnConfig} objects.
+     *
+     * @hide
+     */
+    public static final class Builder {
         @NonNull private final String mPackageName;
 
         @NonNull
@@ -182,6 +190,7 @@ public final class VcnConfig implements Parcelable {
          *
          * @param gatewayConnectionConfig the configuration for an individual gateway connection
          * @return this {@link Builder} instance, for chaining
+         * @hide
          */
         @NonNull
         public Builder addGatewayConnectionConfig(
@@ -196,6 +205,7 @@ public final class VcnConfig implements Parcelable {
          * Builds and validates the VcnConfig.
          *
          * @return an immutable VcnConfig instance
+         * @hide
          */
         @NonNull
         public VcnConfig build() {
