@@ -20,6 +20,8 @@
 
     <bool name="flag_notification_pipeline2">false</bool>
     <bool name="flag_notification_pipeline2_rendering">false</bool>
+    <bool name="flag_notif_updates">false</bool>
+
     <bool name="flag_shade_is_opaque">false</bool>
 
     <!-- b/171917882 -->
