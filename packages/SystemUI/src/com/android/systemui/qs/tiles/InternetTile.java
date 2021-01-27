@@ -34,6 +34,7 @@ import android.widget.Switch;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.graph.SignalDrawable;
+import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.net.DataUsageController;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -178,6 +179,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         CharSequence mDataSubscriptionName;
         CharSequence mDataContentDescription;
         int mMobileSignalIconId;
+        int mQsTypeIcon;
         boolean mActivityIn;
         boolean mActivityOut;
         boolean mNoSim;
@@ -194,6 +196,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 .append(",mDataSubscriptionName=").append(mDataSubscriptionName)
                 .append(",mDataContentDescription=").append(mDataContentDescription)
                 .append(",mMobileSignalIconId=").append(mMobileSignalIconId)
+                .append(",mQsTypeIcon=").append(mQsTypeIcon)
                 .append(",mActivityIn=").append(mActivityIn)
                 .append(",mActivityOut=").append(mActivityOut)
                 .append(",mNoSim=").append(mNoSim)
@@ -274,6 +277,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
             mCellularInfo.mDataContentDescription =
                     (description != null) ? typeContentDescriptionHtml : null;
             mCellularInfo.mMobileSignalIconId = qsIcon.icon;
+            mCellularInfo.mQsTypeIcon = qsType;
             mCellularInfo.mActivityIn = activityIn;
             mCellularInfo.mActivityOut = activityOut;
             mCellularInfo.mRoaming = roaming;
@@ -292,6 +296,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
             if (mCellularInfo.mNoSim) {
                 // Make sure signal gets cleared out when no sims.
                 mCellularInfo.mMobileSignalIconId = 0;
+                mCellularInfo.mQsTypeIcon = 0;
             }
             refreshState(mCellularInfo);
         }
@@ -374,6 +379,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
         state.label = r.getString(R.string.quick_settings_internet_label);
         if (cb.mAirplaneModeEnabled) {
             if (!state.value) {
+                state.state = Tile.STATE_INACTIVE;
                 state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
                 state.secondaryLabel = r.getString(R.string.status_bar_airplane);
             } else if (!wifiConnected) {
@@ -443,7 +449,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
         state.activityOut = mobileDataEnabled && cb.mActivityOut;
         state.expandedAccessibilityClassName = Switch.class.getName();
 
-        if (cb.mAirplaneModeEnabled && cb.mNoDefaultNetwork) {
+        if (cb.mAirplaneModeEnabled && cb.mQsTypeIcon != TelephonyIcons.ICON_CWF) {
+            state.state = Tile.STATE_INACTIVE;
             state.icon = ResourceIcon.get(R.drawable.ic_qs_no_internet_airplane);
             state.secondaryLabel = r.getString(R.string.status_bar_airplane);
         } else if (cb.mNoDefaultNetwork && cb.mNoNetworksAvailable) {
