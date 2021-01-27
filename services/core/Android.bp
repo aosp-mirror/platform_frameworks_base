@@ -87,6 +87,7 @@ java_library_static {
         ":storaged_aidl",
         ":vold_aidl",
         ":platform-compat-config",
+        ":platform-compat-overrides",
         ":display-device-config",
         ":cec-config",
         ":device-state-config",
