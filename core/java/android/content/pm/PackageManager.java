@@ -2443,6 +2443,35 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
+     * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
+     * at the given feature version.
+     *
+     * <p>Known feature versions include:
+     * <ul>
+     * <li><code>202009</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 11.
+     * <li><code>202101</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 12.
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE =
+            "android.hardware.identity_credential";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
+     * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
+     * with direct access at the given feature version.
+     * See {@link #FEATURE_IDENTITY_CREDENTIAL_HARDWARE} for known feature versions.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE_DIRECT_ACCESS =
+            "android.hardware.identity_credential_direct_access";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports one or more methods of
      * reporting current location.
      */
