@@ -566,4 +566,7 @@
 
     <!-- Whether wallet view is shown in landscape / seascape orientations -->
     <bool name="global_actions_show_landscape_wallet_view">false</bool>
+
+    <!-- Whether to use the split 2-column notification shade -->
+    <bool name="config_use_split_notification_shade">false</bool>
 </resources>
