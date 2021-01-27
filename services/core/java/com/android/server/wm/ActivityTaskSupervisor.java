@@ -142,7 +142,6 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.UserState;
-import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 
 import java.io.FileDescriptor;
@@ -375,41 +374,6 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
     private int mDeferResumeCount;
 
     private boolean mInitialized;
-
-    /**
-     * Description of a request to start a new activity, which has been held
-     * due to app switches being disabled.
-     */
-    static class PendingActivityLaunch {
-        final ActivityRecord r;
-        final ActivityRecord sourceRecord;
-        final int startFlags;
-        final Task rootTask;
-        final WindowProcessController callerApp;
-        final NeededUriGrants intentGrants;
-
-        PendingActivityLaunch(ActivityRecord r, ActivityRecord sourceRecord,
-                int startFlags, Task rootTask, WindowProcessController callerApp,
-                NeededUriGrants intentGrants) {
-            this.r = r;
-            this.sourceRecord = sourceRecord;
-            this.startFlags = startFlags;
-            this.rootTask = rootTask;
-            this.callerApp = callerApp;
-            this.intentGrants = intentGrants;
-        }
-
-        void sendErrorResult(String message) {
-            try {
-                if (callerApp != null && callerApp.hasThread()) {
-                    callerApp.getThread().scheduleCrash(message);
-                }
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Exception scheduling crash of failed "
-                        + "activity launcher sourceRecord=" + sourceRecord, e);
-            }
-        }
-    }
 
     public ActivityTaskSupervisor(ActivityTaskManagerService service, Looper looper) {
         mService = service;

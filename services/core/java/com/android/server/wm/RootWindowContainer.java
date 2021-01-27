@@ -68,7 +68,6 @@ import static com.android.server.wm.ActivityTaskSupervisor.printThisActivity;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RootWindowContainerProto.IS_HOME_RECENTS_COMPONENT;
 import static com.android.server.wm.RootWindowContainerProto.KEYGUARD_CONTROLLER;
-import static com.android.server.wm.RootWindowContainerProto.PENDING_ACTIVITIES;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.Task.ActivityState.FINISHING;
 import static com.android.server.wm.Task.ActivityState.PAUSED;
@@ -1289,7 +1288,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         mTaskSupervisor.getKeyguardController().dumpDebug(proto, KEYGUARD_CONTROLLER);
         proto.write(IS_HOME_RECENTS_COMPONENT,
                 mTaskSupervisor.mRecentTasks.isRecentsComponentHomeActivity(mCurrentUser));
-        mService.getActivityStartController().dumpDebug(proto, PENDING_ACTIVITIES);
 
         proto.end(token);
     }
