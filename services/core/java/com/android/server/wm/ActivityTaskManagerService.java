@@ -486,13 +486,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Whether normal application switches are allowed; a call to {@link #stopAppSwitches()
      * disables this.
      */
-    private boolean mAppSwitchesAllowed = true;
+    private volatile boolean mAppSwitchesAllowed = true;
 
     /**
      * Last stop app switches time, apps finished before this time cannot start background activity
      * even if they are in grace period.
      */
-    private long mLastStopAppSwitchesTime;
+    private volatile long mLastStopAppSwitchesTime;
 
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
@@ -698,6 +698,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int OOM_ADJUSTMENT = 1;
         int LRU_UPDATE = 2;
         int PROCESS_CHANGE = 3;
+        int START_SERVICE = 4;
 
         int caller() default NONE;
     }
@@ -4808,6 +4809,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** A uid is considered to be foreground if it has a visible non-toast window. */
+    @HotPath(caller = HotPath.START_SERVICE)
     boolean hasActiveVisibleWindow(int uid) {
         if (mVisibleActivityProcessTracker.hasVisibleActivity(uid)) {
             return true;
