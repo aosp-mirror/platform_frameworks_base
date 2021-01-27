@@ -94,7 +94,8 @@ public interface ServiceProvider {
 
     void scheduleEnroll(int sensorId, @NonNull IBinder token, @NonNull byte[] hardwareAuthToken,
             int userId, @NonNull IFaceServiceReceiver receiver, @NonNull String opPackageName,
-            @NonNull int[] disabledFeatures, @Nullable NativeHandle surfaceHandle);
+            @NonNull int[] disabledFeatures, @Nullable NativeHandle surfaceHandle,
+            boolean debugConsent);
 
     void cancelEnrollment(int sensorId, @NonNull IBinder token);
 
