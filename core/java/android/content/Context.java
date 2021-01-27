@@ -4668,6 +4668,17 @@ public abstract class Context {
     public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
 
     /**
+     * Use with {@link #getSystemService(String) to retrieve an
+     * {@link android.apphibernation.AppHibernationManager}} for
+     * communicating with the hibernation service.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve an
      * {@link android.app.backup.IBackupManager IBackupManager} for communicating
      * with the backup mechanism.
