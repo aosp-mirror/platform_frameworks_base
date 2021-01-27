@@ -316,6 +316,7 @@ public class Clock extends TextView implements
     @Override
     public void onDarkChanged(Rect area, float darkIntensity, int tint) {
         mNonAdaptedColor = DarkIconDispatcher.getTint(area, this, tint);
+        setTextColor(mNonAdaptedColor);
     }
 
     // Update text color based when shade scrim changes color.
