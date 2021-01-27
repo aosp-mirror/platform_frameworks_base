@@ -19,6 +19,7 @@ import static android.graphics.ColorSpace.Named.SRGB;
 
 import static java.util.Objects.requireNonNull;
 
+import android.annotation.NonNull;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
 import android.graphics.RecordingCanvas;
@@ -50,14 +51,13 @@ class ImageTile implements AutoCloseable {
      * @param image an image containing a hardware buffer
      * @param location the captured area represented by image tile (virtual coordinates)
      */
-    ImageTile(Image image, Rect location) {
+    ImageTile(@NonNull Image image, @NonNull Rect location) {
         mImage = requireNonNull(image, "image");
-        mLocation = location;
-
+        mLocation = requireNonNull(location);
         requireNonNull(mImage.getHardwareBuffer(), "image must be a hardware image");
     }
 
-    RenderNode getDisplayList() {
+    synchronized RenderNode getDisplayList() {
         if (mNode == null) {
             mNode = new RenderNode("Tile{" + Integer.toHexString(mImage.hashCode()) + "}");
         }
@@ -69,7 +69,6 @@ class ImageTile implements AutoCloseable {
         mNode.setPosition(0, 0, w, h);
 
         RecordingCanvas canvas = mNode.beginRecording(w, h);
-        Rect rect = new Rect(0, 0, w, h);
         canvas.save();
         canvas.clipRect(0, 0, mLocation.right, mLocation.bottom);
         canvas.drawBitmap(Bitmap.wrapHardwareBuffer(mImage.getHardwareBuffer(), COLOR_SPACE),
@@ -100,9 +99,11 @@ class ImageTile implements AutoCloseable {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         mImage.close();
-        mNode.discardDisplayList();
+        if (mNode != null) {
+            mNode.discardDisplayList();
+        }
     }
 
     @Override
