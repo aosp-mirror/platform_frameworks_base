@@ -465,4 +465,46 @@ public abstract class DisplayManagerInternal {
     public interface DisplayTransactionListener {
         void onDisplayTransaction(Transaction t);
     }
+
+    /**
+     * Called when there are changes to {@link com.android.server.display.DisplayGroup
+     * DisplayGroups}.
+     */
+    public interface DisplayGroupListener {
+        /**
+         * A new display group with the provided {@code groupId} was added.
+         *
+         * <ol>
+         *     <li>The {@code groupId} is applied to all appropriate {@link Display displays}.
+         *     <li>This method is called.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         * </ol>
+         */
+        void onDisplayGroupAdded(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} was removed.
+         *
+         * <ol>
+         *     <li>All affected {@link Display displays} have their group IDs updated appropriately.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         *     <li>This method is called.
+         * </ol>
+         */
+        void onDisplayGroupRemoved(int groupId);
+
+        /**
+         * The display group with the provided {@code groupId} has changed.
+         *
+         * <ol>
+         *     <li>All affected {@link Display displays} have their group IDs updated appropriately.
+         *     <li>{@link android.hardware.display.DisplayManager.DisplayListener DisplayListeners}
+         *     are informed of any corresponding changes.
+         *     <li>This method is called.
+         * </ol>
+         */
+        void onDisplayGroupChanged(int groupId);
+    }
 }
