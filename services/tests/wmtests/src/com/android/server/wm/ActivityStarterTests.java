@@ -27,7 +27,6 @@ import static android.app.ActivityManager.START_NOT_VOICE_COMPATIBLE;
 import static android.app.ActivityManager.START_PERMISSION_DENIED;
 import static android.app.ActivityManager.START_RETURN_LOCK_TASK_MODE_VIOLATION;
 import static android.app.ActivityManager.START_SUCCESS;
-import static android.app.ActivityManager.START_SWITCHES_CANCELED;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -119,7 +118,6 @@ public class ActivityStarterTests extends WindowTestsBase {
     private static final int PRECONDITION_DIFFERENT_UID = 1 << 7;
     private static final int PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION = 1 << 8;
     private static final int PRECONDITION_CANNOT_START_ANY_ACTIVITY = 1 << 9;
-    private static final int PRECONDITION_DISALLOW_APP_SWITCHING = 1 << 10;
 
     private static final int FAKE_CALLING_UID = 666;
     private static final int FAKE_REAL_CALLING_UID = 667;
@@ -153,8 +151,6 @@ public class ActivityStarterTests extends WindowTestsBase {
                         | PRECONDITION_ACTIVITY_SUPPORTS_INTENT_EXCEPTION,
                 START_NOT_VOICE_COMPATIBLE);
         verifyStartActivityPreconditions(PRECONDITION_CANNOT_START_ANY_ACTIVITY, START_ABORTED);
-        verifyStartActivityPreconditions(PRECONDITION_DISALLOW_APP_SWITCHING,
-                START_SWITCHES_CANCELED);
     }
 
     private static boolean containsConditions(int preconditions, int mask) {
@@ -242,11 +238,6 @@ public class ActivityStarterTests extends WindowTestsBase {
 
         if (!containsConditions(preconditions, PRECONDITION_NO_INTENT_COMPONENT)) {
             intent.setComponent(source.mActivityComponent);
-        }
-
-        if (containsConditions(preconditions, PRECONDITION_DISALLOW_APP_SWITCHING)) {
-            doReturn(false).when(service).checkAppSwitchAllowedLocked(
-                    anyInt(), anyInt(), anyInt(), anyInt(), any());
         }
 
         if (containsConditions(preconditions, PRECONDITION_CANNOT_START_ANY_ACTIVITY)) {
