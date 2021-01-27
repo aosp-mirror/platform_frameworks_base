@@ -82,7 +82,7 @@ public class Authorization {
      *
      * @param locked            - whether it is a lock (true) or unlock (false) event
      * @param syntheticPassword - if it is an unlock event with the password, pass the synthetic
-     *                          password provided by the LockSettingService
+     *                            password provided by the LockSettingService
      *
      * @return 0 if successful or a {@code ResponseCode}.
      */
