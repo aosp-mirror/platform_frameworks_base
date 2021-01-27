@@ -47,6 +47,7 @@ import android.content.pm.PackageManagerInternal;
 import android.content.pm.ShortcutServiceInternal;
 import android.content.pm.UserInfo;
 import android.content.pm.UserInfo.UserInfoFlag;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Binder;
@@ -92,6 +93,7 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.TimeUtils;
+import android.util.TypedValue;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 import android.util.Xml;
@@ -139,6 +141,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Service for {@link UserManager}.
@@ -461,6 +464,26 @@ public class UserManagerService extends IUserManager.Stub {
         }
     };
 
+    /**
+     * Cache the owner name string, since it could be read repeatedly on a critical code path
+     * but hit by slow IO. This could be eliminated once we have the cached UserInfo in place.
+     */
+    private final AtomicReference<String> mOwnerName = new AtomicReference<>();
+
+    private final TypedValue mOwnerNameTypedValue = new TypedValue();
+
+    private final Configuration mLastConfiguration = new Configuration();
+
+    private final BroadcastReceiver mConfigurationChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!Intent.ACTION_CONFIGURATION_CHANGED.equals(intent.getAction())) {
+                return;
+            }
+            invalidateOwnerNameIfNecessary(context.getResources(), false /* forceUpdate */);
+        }
+    };
+
     // TODO(b/161915546): remove once userWithName() is fixed / removed
     // Use to debug / dump when user 0 is allocated at userWithName()
     public static final boolean DBG_ALLOCATION = false; // DO NOT SUBMIT WITH TRUE
@@ -636,6 +659,7 @@ public class UserManagerService extends IUserManager.Stub {
         mHandler = new MainHandler();
         mUserDataPreparer = userDataPreparer;
         mUserTypes = UserTypeFactory.getUserTypes();
+        invalidateOwnerNameIfNecessary(context.getResources(), true /* forceUpdate */);
         synchronized (mPackagesLock) {
             mUsersDir = new File(dataDir, USER_INFO_DIR);
             mUsersDir.mkdirs();
@@ -668,6 +692,10 @@ public class UserManagerService extends IUserManager.Stub {
 
         mContext.registerReceiver(mDisableQuietModeCallback,
                 new IntentFilter(ACTION_DISABLE_QUIET_MODE_AFTER_UNLOCK),
+                null, mHandler);
+
+        mContext.registerReceiver(mConfigurationChangeReceiver,
+                new IntentFilter(Intent.ACTION_CONFIGURATION_CHANGED),
                 null, mHandler);
     }
 
@@ -2851,7 +2879,16 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     private String getOwnerName() {
-        return mContext.getResources().getString(com.android.internal.R.string.owner_name);
+        return mOwnerName.get();
+    }
+
+    private void invalidateOwnerNameIfNecessary(@NonNull Resources res, boolean forceUpdate) {
+        final int configChanges = mLastConfiguration.updateFrom(res.getConfiguration());
+        if (forceUpdate || (configChanges & mOwnerNameTypedValue.changingConfigurations) != 0) {
+            res.getValue(com.android.internal.R.string.owner_name, mOwnerNameTypedValue, true);
+            final CharSequence ownerName = mOwnerNameTypedValue.coerceToString();
+            mOwnerName.set(ownerName != null ? ownerName.toString() : null);
+        }
     }
 
     private void scheduleWriteUser(UserData userData) {
