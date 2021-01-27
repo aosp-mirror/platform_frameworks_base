@@ -11,11 +11,13 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.internal.net;
+package android.net;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -23,14 +25,28 @@ import java.util.Arrays;
 
 /**
  * A lightweight container used to carry information of the ongoing VPN.
- * Internal use only..
+ * Internal use only.
  *
  * @hide
  */
 public class VpnInfo implements Parcelable {
-    public int ownerUid;
-    public String vpnIface;
-    public String[] underlyingIfaces;
+    public final int ownerUid;
+    @Nullable
+    public final String vpnIface;
+    @Nullable
+    public final String[] underlyingIfaces;
+
+    public VpnInfo(int ownerUid, @Nullable String vpnIface, @Nullable String[] underlyingIfaces) {
+        this.ownerUid = ownerUid;
+        this.vpnIface = vpnIface;
+        this.underlyingIfaces = underlyingIfaces;
+    }
+
+    private VpnInfo(@NonNull Parcel in) {
+        this.ownerUid = in.readInt();
+        this.vpnIface = in.readString();
+        this.underlyingIfaces = in.createStringArray();
+    }
 
     @Override
     public String toString() {
@@ -47,22 +63,21 @@ public class VpnInfo implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(ownerUid);
         dest.writeString(vpnIface);
         dest.writeStringArray(underlyingIfaces);
     }
 
+    @NonNull
     public static final Parcelable.Creator<VpnInfo> CREATOR = new Parcelable.Creator<VpnInfo>() {
+        @NonNull
         @Override
-        public VpnInfo createFromParcel(Parcel source) {
-            VpnInfo info = new VpnInfo();
-            info.ownerUid = source.readInt();
-            info.vpnIface = source.readString();
-            info.underlyingIfaces = source.readStringArray();
-            return info;
+        public VpnInfo createFromParcel(@NonNull Parcel in) {
+            return new VpnInfo(in);
         }
 
+        @NonNull
         @Override
         public VpnInfo[] newArray(int size) {
             return new VpnInfo[size];
