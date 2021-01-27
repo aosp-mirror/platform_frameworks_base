@@ -156,9 +156,14 @@ public class NumPadKey extends ViewGroup {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mAnimator.updateMargin((ViewGroup.MarginLayoutParams) getLayoutParams());
+    public void setLayoutParams(ViewGroup.LayoutParams params) {
+        mAnimator.updateMargin((ViewGroup.MarginLayoutParams) params);
 
+        super.setLayoutParams(params);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
