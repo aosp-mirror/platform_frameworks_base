@@ -354,7 +354,7 @@ public final class AudioDeviceInfo {
 
     /**
      * @hide
-     * @return the internal device tyoe
+     * @return the internal device type
      */
     public int getInternalType() {
         return mPort.type();
