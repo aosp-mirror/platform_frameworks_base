@@ -72,6 +72,9 @@ public class StatusBarIconView extends AnimatedImageView {
     public static final int STATE_DOT = 1;
     public static final int STATE_HIDDEN = 2;
 
+    /** Maximum allowed width or height for an icon drawable */
+    private static final int MAX_IMAGE_SIZE = 500;
+
     private static final String TAG = "StatusBarIconView";
     private static final Property<StatusBarIconView, Float> ICON_APPEAR_AMOUNT
             = new FloatProperty<StatusBarIconView>("iconAppearAmount") {
@@ -328,6 +331,13 @@ public class StatusBarIconView extends AnimatedImageView {
             Log.w(TAG, "No icon for slot " + mSlot + "; " + mIcon.icon);
             return false;
         }
+
+        if (drawable.getIntrinsicWidth() > MAX_IMAGE_SIZE
+                || drawable.getIntrinsicHeight() > MAX_IMAGE_SIZE) {
+            Log.w(TAG, "Drawable is too large " + mIcon);
+            return false;
+        }
+
         if (withClear) {
             setImageDrawable(null);
         }
