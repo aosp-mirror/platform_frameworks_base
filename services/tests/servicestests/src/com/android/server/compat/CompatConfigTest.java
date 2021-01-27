@@ -44,6 +44,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
@@ -67,6 +69,10 @@ public class CompatConfigTest {
         OutputStream os = new FileOutputStream(new File(dir, filename));
         os.write(content.getBytes());
         os.close();
+    }
+
+    private String readFile(File file) throws IOException {
+        return new String(Files.readAllBytes(Paths.get(file.toURI())));
     }
 
     @Before
@@ -498,5 +504,87 @@ public class CompatConfigTest {
             ApplicationInfoBuilder.create().withTargetSdk(5).build())).isFalse();
         assertThat(compatConfig.isChangeEnabled(1236L,
             ApplicationInfoBuilder.create().withTargetSdk(1).build())).isTrue();
+    }
+
+    @Test
+    public void testSaveOverrides() throws Exception {
+        File overridesFile = new File(createTempDir(), "overrides.xml");
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1L)
+                .addEnableSinceSdkChangeWithId(2, 2L)
+                .build();
+        compatConfig.forceNonDebuggableFinalForTest(true);
+        compatConfig.initOverrides(overridesFile);
+        when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                                .withPackageName("foo.bar")
+                                .debuggable()
+                                .build());
+        when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        compatConfig.addOverride(1L, "foo.bar", true);
+        compatConfig.addOverride(2L, "bar.baz", false);
+
+        assertThat(readFile(overridesFile)).isEqualTo("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n"
+                + "<overrides>\n"
+                + "    <change-overrides changeId=\"1\">\n"
+                + "        <validated>\n"
+                + "            <override-value packageName=\"foo.bar\" enabled=\"true\">\n"
+                + "            </override-value>\n"
+                + "        </validated>\n"
+                + "        <deferred>\n"
+                + "        </deferred>\n"
+                + "    </change-overrides>\n"
+                + "    <change-overrides changeId=\"2\">\n"
+                + "        <validated>\n"
+                + "        </validated>\n"
+                + "        <deferred>\n"
+                + "            <override-value packageName=\"bar.baz\" enabled=\"false\">\n"
+                + "            </override-value>\n"
+                + "        </deferred>\n"
+                + "    </change-overrides>\n"
+                + "</overrides>\n");
+    }
+
+    @Test
+    public void testLoadOverrides() throws Exception {
+        File tempDir = createTempDir();
+        File overridesFile = new File(tempDir, "overrides.xml");
+        // Change 1 is enabled for foo.bar (validated)
+        // Change 2 is disabled for bar.baz (deferred)
+        String xmlData = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
+                       + "<overrides>"
+                       +    "<change-overrides changeId=\"1\">"
+                       +        "<deferred/>"
+                       +        "<validated>"
+                       +            "<override-value packageName=\"foo.bar\" enabled=\"true\"/>"
+                       +        "</validated>"
+                       +    "</change-overrides>"
+                       +    "<change-overrides changeId=\"2\">"
+                       +        "<deferred>"
+                       +           "<override-value packageName=\"bar.baz\" enabled=\"false\"/>"
+                       +        "</deferred>"
+                       +        "<validated/>"
+                       +    "</change-overrides>"
+                       + "</overrides>";
+        writeToFile(tempDir, "overrides.xml", xmlData);
+        CompatConfig compatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addDisabledChangeWithId(1L)
+                .addEnableSinceSdkChangeWithId(2, 2L)
+                .build();
+        compatConfig.forceNonDebuggableFinalForTest(true);
+        compatConfig.initOverrides(overridesFile);
+        ApplicationInfo applicationInfo = ApplicationInfoBuilder.create()
+                .withPackageName("foo.bar")
+                .debuggable()
+                .build();
+        when(mPackageManager.getApplicationInfo(eq("foo.bar"), anyInt()))
+                .thenReturn(applicationInfo);
+        when(mPackageManager.getApplicationInfo(eq("bar.baz"), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        assertThat(compatConfig.isChangeEnabled(1L, applicationInfo)).isTrue();
+        assertThat(compatConfig.willChangeBeEnabled(2L, "bar.baz")).isFalse();
     }
 }
