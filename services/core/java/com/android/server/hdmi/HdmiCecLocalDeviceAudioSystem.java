@@ -695,7 +695,6 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     @ServiceThreadOnly
     void setArcStatus(boolean enabled) {
-        // TODO(shubang): add tests
         assertRunOnServiceThread();
 
         HdmiLogger.debug("Set Arc Status[old:%b new:%b]", mArcEstablished, enabled);
