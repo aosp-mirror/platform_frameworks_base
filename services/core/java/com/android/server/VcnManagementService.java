@@ -397,7 +397,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                                 // correct instance is torn down. This could happen as a result of a
                                 // Carrier App manually removing/adding a VcnConfig.
                                 if (mVcns.get(uuidToTeardown) == instanceToTeardown) {
-                                    mVcns.remove(uuidToTeardown).teardownAsynchronously();
+                                    stopVcnLocked(uuidToTeardown);
                                 }
                             }
                         }, instanceToTeardown, CARRIER_PRIVILEGES_LOST_TEARDOWN_DELAY_MS);
@@ -411,6 +411,27 @@ public class VcnManagementService extends IVcnManagementService.Stub {
     }
 
     @GuardedBy("mLock")
+    private void stopVcnLocked(@NonNull ParcelUuid uuidToTeardown) {
+        final Vcn vcnToTeardown = mVcns.remove(uuidToTeardown);
+        if (vcnToTeardown == null) {
+            return;
+        }
+
+        vcnToTeardown.teardownAsynchronously();
+
+        // Now that the VCN is removed, notify all registered listeners to refresh their
+        // UnderlyingNetworkPolicy.
+        notifyAllPolicyListenersLocked();
+    }
+
+    @GuardedBy("mLock")
+    private void notifyAllPolicyListenersLocked() {
+        for (final PolicyListenerBinderDeath policyListener : mRegisteredPolicyListeners.values()) {
+            Binder.withCleanCallingIdentity(() -> policyListener.mListener.onPolicyChanged());
+        }
+    }
+
+    @GuardedBy("mLock")
     private void startVcnLocked(@NonNull ParcelUuid subscriptionGroup, @NonNull VcnConfig config) {
         Slog.v(TAG, "Starting VCN config for subGrp: " + subscriptionGroup);
 
@@ -419,6 +440,10 @@ public class VcnManagementService extends IVcnManagementService.Stub {
 
         final Vcn newInstance = mDeps.newVcn(mVcnContext, subscriptionGroup, config, mLastSnapshot);
         mVcns.put(subscriptionGroup, newInstance);
+
+        // Now that a new VCN has started, notify all registered listeners to refresh their
+        // UnderlyingNetworkPolicy.
+        notifyAllPolicyListenersLocked();
     }
 
     @GuardedBy("mLock")
@@ -481,9 +506,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             synchronized (mLock) {
                 mConfigs.remove(subscriptionGroup);
 
-                if (mVcns.containsKey(subscriptionGroup)) {
-                    mVcns.remove(subscriptionGroup).teardownAsynchronously();
-                }
+                stopVcnLocked(subscriptionGroup);
 
                 writeConfigsToDiskLocked();
             }
