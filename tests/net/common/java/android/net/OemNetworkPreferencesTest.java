@@ -54,7 +54,7 @@ public class OemNetworkPreferencesTest {
     @Test
     public void testBuilderRemoveNetworkPreferenceRequiresNonNullPackageName() {
         assertThrows(NullPointerException.class,
-                () -> mBuilder.removeNetworkPreference(null));
+                () -> mBuilder.clearNetworkPreference(null));
     }
 
     @Test
@@ -129,7 +129,7 @@ public class OemNetworkPreferencesTest {
 
         assertTrue(networkPreferences.containsKey(TEST_PACKAGE));
 
-        mBuilder.removeNetworkPreference(TEST_PACKAGE);
+        mBuilder.clearNetworkPreference(TEST_PACKAGE);
         networkPreferences = mBuilder.build().getNetworkPreferences();
 
         assertFalse(networkPreferences.containsKey(TEST_PACKAGE));

@@ -9332,17 +9332,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
      *
      * Calling this will overwrite the existing preference.
      *
+     * @param preference {@link OemNetworkPreferences} The application network preference to be set.
      * @param listener {@link ConnectivityManager.OnSetOemNetworkPreferenceListener} Listener used
      * to communicate completion of setOemNetworkPreference();
-     * @param preference {@link OemNetworkPreferences} The application network preference to be set.
      */
     @Override
     public void setOemNetworkPreference(
             @NonNull final OemNetworkPreferences preference,
             @Nullable final IOnSetOemNetworkPreferenceListener listener) {
 
-        enforceOemNetworkPreferencesPermission();
         enforceAutomotiveDevice();
+        enforceOemNetworkPreferencesPermission();
 
         Objects.requireNonNull(preference, "OemNetworkPreferences must be non-null");
         validateOemNetworkPreferences(preference);
