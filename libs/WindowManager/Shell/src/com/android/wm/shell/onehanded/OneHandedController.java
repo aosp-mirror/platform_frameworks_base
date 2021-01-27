@@ -262,7 +262,6 @@ public class OneHandedController {
             final int yOffSet = Math.round(getDisplaySize().y * mOffSetFraction);
             mDisplayAreaOrganizer.scheduleOffset(0, yOffSet);
             mTimeoutHandler.resetTimer();
-
             mOneHandedUiEventLogger.writeEvent(
                     OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_IN);
         }
@@ -273,6 +272,9 @@ public class OneHandedController {
         if (mDisplayAreaOrganizer.isInOneHanded()) {
             mDisplayAreaOrganizer.scheduleOffset(0, 0);
             mTimeoutHandler.removeTimer();
+            //  Log metrics for Gesture navigation mode.
+            mOneHandedUiEventLogger.writeEvent(
+                    OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
         }
     }
 

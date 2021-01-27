@@ -252,6 +252,7 @@ public final class WMShell extends SystemUI
             public void onStop() {
                 mSysUiMainExecutor.execute(() -> {
                     if (oneHanded.isOneHandedEnabled()) {
+                        // Log metrics for 3-button navigation mode.
                         oneHanded.stopOneHanded(
                                 OneHandedUiEventLogger.EVENT_ONE_HANDED_TRIGGER_GESTURE_OUT);
                     } else if (oneHanded.isSwipeToNotificationEnabled()) {
