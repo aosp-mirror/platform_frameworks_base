@@ -28,6 +28,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import com.android.internal.graphics.ColorUtils;
+import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
 /**
@@ -36,8 +38,11 @@ import com.android.systemui.R;
 public class UdfpsAnimationEnroll extends UdfpsAnimation {
     private static final String TAG = "UdfpsAnimationEnroll";
 
+    private static final float SHADOW_RADIUS = 5.f;
+
     @Nullable private RectF mSensorRect;
     @NonNull private final Paint mSensorPaint;
+    private final int mNotificationShadeColor;
 
     UdfpsAnimationEnroll(@NonNull Context context) {
         super(context);
@@ -45,8 +50,11 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
         mSensorPaint = new Paint(0 /* flags */);
         mSensorPaint.setAntiAlias(true);
         mSensorPaint.setColor(Color.WHITE);
-        mSensorPaint.setShadowLayer(UdfpsView.SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
+        mSensorPaint.setShadowLayer(SHADOW_RADIUS, 0, 0, Color.BLACK);
         mSensorPaint.setStyle(Paint.Style.FILL);
+
+        mNotificationShadeColor = Utils.getColorAttr(context,
+                android.R.attr.colorBackgroundFloating).getDefaultColor();
     }
 
     @Override
@@ -74,7 +82,14 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
 
     @Override
     public void setAlpha(int alpha) {
+        super.setAlpha(alpha);
 
+        // Gradually fade into the notification shade color. This needs to be done because the
+        // UDFPS view is drawn on a layer on top of the notification shade
+        final float percent = alpha / 255.f;
+        mSensorPaint.setColor(ColorUtils.blendARGB(mNotificationShadeColor, Color.WHITE, percent));
+        mSensorPaint.setShadowLayer(SHADOW_RADIUS, 0, 0,
+                ColorUtils.blendARGB(mNotificationShadeColor, Color.BLACK, percent));
     }
 
     @Override
