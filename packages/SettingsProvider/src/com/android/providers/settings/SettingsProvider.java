@@ -3342,7 +3342,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 197;
+            private static final int SETTINGS_VERSION = 198;
 
             private final int mUserId;
 
@@ -4813,6 +4813,24 @@ public class SettingsProvider extends ContentProvider {
                     }
 
                     currentVersion = 197;
+                }
+
+                if (currentVersion == 197) {
+                    // Version 197: Set the default value for Global Settings:
+                    // DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting enableNonResizableMultiWindow = globalSettings.getSettingLocked(
+                            Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW);
+                    if (enableNonResizableMultiWindow.isNull()) {
+                        final boolean defEnableNonResizableMultiWindow = getContext().getResources()
+                                .getBoolean(R.bool.def_enable_non_resizable_multi_window);
+                        globalSettings.insertSettingLocked(
+                                Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
+                                defEnableNonResizableMultiWindow ? "1" : "0", null, true,
+                                SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+
+                    currentVersion = 198;
                 }
 
                 // vXXX: Add new settings above this point.
