@@ -498,7 +498,7 @@ public final class SystemServer implements Dumpable {
                 }
 
                 try {
-                    Thread.sleep(checkInterval);
+                    Thread.sleep(checkInterval * 1000);
                 } catch (InterruptedException ex) {
                     continue;
                 }
