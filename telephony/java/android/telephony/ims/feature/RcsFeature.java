@@ -194,7 +194,6 @@ public class RcsFeature extends ImsFeature {
      * of the capability and notify the capability status as true using
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)}. This will signal to the
      * framework that the capability is available for usage.
-     * @hide
      */
     public static class RcsImsCapabilities extends Capabilities {
         /** @hide*/
@@ -226,12 +225,21 @@ public class RcsFeature extends ImsFeature {
          */
         public static final int CAPABILITY_TYPE_PRESENCE_UCE =  1 << 1;
 
+        /**
+         * Create a new {@link RcsImsCapabilities} instance with the provided capabilities.
+         * @param capabilities The capabilities that are supported for RCS in the form of a
+         * bitfield.
+         */
         public RcsImsCapabilities(@RcsUceAdapter.RcsImsCapabilityFlag int capabilities) {
             super(capabilities);
         }
 
-        private RcsImsCapabilities(Capabilities c) {
-            super(c.getMask());
+        /**
+         * Create a new {@link RcsImsCapabilities} instance with the provided capabilities.
+         * @param capabilities The capabilities instance that are supported for RCS
+         */
+        private RcsImsCapabilities(Capabilities capabilities) {
+            super(capabilities.getMask());
         }
 
         @Override
@@ -307,7 +315,7 @@ public class RcsFeature extends ImsFeature {
      * set, the {@link RcsFeature} has brought up the capability and is ready for framework
      * requests. To change the status of the capabilities
      * {@link #notifyCapabilitiesStatusChanged(RcsImsCapabilities)} should be called.
-     * @hide
+     * @return A copy of the current RcsFeature capability status.
      */
     @Override
     public @NonNull final RcsImsCapabilities queryCapabilityStatus() {
@@ -318,13 +326,13 @@ public class RcsFeature extends ImsFeature {
      * Notify the framework that the capabilities status has changed. If a capability is enabled,
      * this signals to the framework that the capability has been initialized and is ready.
      * Call {@link #queryCapabilityStatus()} to return the current capability status.
-     * @hide
+     * @param capabilities The current capability status of the RcsFeature.
      */
-    public final void notifyCapabilitiesStatusChanged(@NonNull RcsImsCapabilities c) {
-        if (c == null) {
+    public final void notifyCapabilitiesStatusChanged(@NonNull RcsImsCapabilities capabilities) {
+        if (capabilities == null) {
             throw new IllegalArgumentException("RcsImsCapabilities must be non-null!");
         }
-        super.notifyCapabilitiesStatusChanged(c);
+        super.notifyCapabilitiesStatusChanged(capabilities);
     }
 
     /**
@@ -333,7 +341,9 @@ public class RcsFeature extends ImsFeature {
      * {@link #changeEnabledCapabilities(CapabilityChangeRequest, CapabilityCallbackProxy)} to
      * enable or disable capability A, this method should return the correct configuration for
      * capability A afterwards (until it has changed).
-     * @hide
+     * @param capability The capability that we are querying the configuration for.
+     * @param radioTech The radio technology type that we are querying.
+     * @return true if the capability is enabled, false otherwise.
      */
     public boolean queryCapabilityConfiguration(
             @RcsUceAdapter.RcsImsCapabilityFlag int capability,
@@ -355,11 +365,12 @@ public class RcsFeature extends ImsFeature {
      * If for some reason one or more of these capabilities can not be enabled/disabled,
      * {@link CapabilityCallbackProxy#onChangeCapabilityConfigurationError(int, int, int)} should
      * be called for each capability change that resulted in an error.
-     * @hide
+     * @param request The request to change the capability.
+     * @param callback To notify the framework that the result of the capability changes.
      */
     @Override
     public void changeEnabledCapabilities(@NonNull CapabilityChangeRequest request,
-            @NonNull CapabilityCallbackProxy c) {
+            @NonNull CapabilityCallbackProxy callback) {
         // Base Implementation - Override to provide functionality
     }
 
