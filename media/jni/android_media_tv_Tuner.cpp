@@ -1458,7 +1458,7 @@ int JTuner::tune(const FrontendSettings& settings, const FrontendSettingsExt1_1&
         ALOGE("frontend is not initialized");
         return (int)Result::INVALID_STATE;
     }
-    return (int) mFeClient->tune(settings,settingsExt1_1);
+    return (int) mFeClient->tune(settings, settingsExt1_1);
 }
 
 int JTuner::stopTune() {
