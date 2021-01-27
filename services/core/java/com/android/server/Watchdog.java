@@ -704,7 +704,7 @@ public class Watchdog extends Thread {
                 WatchdogDiagnostics.diagnoseCheckers(blockedCheckers);
                 Slog.w(TAG, "*** GOODBYE!");
                 if (!Build.IS_USER && isCrashLoopFound()
-                        && !WatchdogProperties.is_fatal_ignore().orElse(false)) {
+                        && !WatchdogProperties.should_ignore_fatal_count().orElse(false)) {
                     breakCrashLoop();
                 }
                 Process.killProcess(Process.myPid());
@@ -783,7 +783,7 @@ public class Watchdog extends Thread {
     private boolean isCrashLoopFound() {
         int fatalCount = WatchdogProperties.fatal_count().orElse(0);
         long fatalWindowMs = TimeUnit.SECONDS.toMillis(
-                WatchdogProperties.fatal_window_second().orElse(0));
+                WatchdogProperties.fatal_window_seconds().orElse(0));
         if (fatalCount == 0 || fatalWindowMs == 0) {
             if (fatalCount != fatalWindowMs) {
                 Slog.w(TAG, String.format("sysprops '%s' and '%s' should be set or unset together",

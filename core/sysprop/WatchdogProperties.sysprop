@@ -16,7 +16,7 @@ module: "android.sysprop.WatchdogProperties"
 owner: Platform
 
 # To escape the watchdog timeout loop, fatal reboot the system when
-# watchdog timed out 'fatal_count' times in 'fatal_window_second'
+# watchdog timed out 'fatal_count' times in 'fatal_window_seconds'
 # seconds, if both values are not 0. Default value of both is 0.
 prop {
     api_name: "fatal_count"
@@ -26,8 +26,9 @@ prop {
     access: Readonly
 }
 
+# See 'fatal_count' for documentation.
 prop {
-    api_name: "fatal_window_second"
+    api_name: "fatal_window_seconds"
     type: Integer
     prop_name: "framework_watchdog.fatal_window.second"
     scope: Internal
@@ -35,9 +36,9 @@ prop {
 }
 
 # The fatal counting can be disabled by setting property
-# 'is_fatal_ignore' to true.
+# 'should_ignore_fatal_count' to true.
 prop {
-    api_name: "is_fatal_ignore"
+    api_name: "should_ignore_fatal_count"
     type: Boolean
     prop_name: "persist.debug.framework_watchdog.fatal_ignore"
     scope: Internal
