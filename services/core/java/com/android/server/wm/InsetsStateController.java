@@ -104,8 +104,6 @@ class InsetsStateController {
      * visible to the target. e.g., the source which represents the target window itself, and the
      * IME source when the target is above IME. We also need to exclude certain types of insets
      * source for client within specific windowing modes.
-     * This is to get the insets for a window layout on the screen. If the window is not there, use
-     * the {@link #getInsetsForWindowMetrics} to get insets instead.
      *
      * @param target The window associate with the perspective.
      * @return The state stripped of the necessary information.
@@ -119,7 +117,7 @@ class InsetsStateController {
         final @InternalInsetsType int type = provider != null
                 ? provider.getSource().getType() : ITYPE_INVALID;
         return getInsetsForTarget(type, target.getWindowingMode(), target.isAlwaysOnTop(),
-                target.mAboveInsetsState);
+                isAboveIme(target));
     }
 
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
@@ -134,7 +132,19 @@ class InsetsStateController {
         final @WindowingMode int windowingMode = token != null
                 ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        return getInsetsForTarget(type, windowingMode, alwaysOnTop, mState);
+        return getInsetsForTarget(type, windowingMode, alwaysOnTop, isAboveIme(token));
+    }
+
+    private boolean isAboveIme(WindowContainer target) {
+        final WindowState imeWindow = mDisplayContent.mInputMethodWindow;
+        if (target == null || imeWindow == null) {
+            return false;
+        }
+        if (target instanceof WindowState) {
+            final WindowState win = (WindowState) target;
+            return win.needsRelativeLayeringToIme() || !win.mBehindIme;
+        }
+        return false;
     }
 
     private static @InternalInsetsType
@@ -170,12 +180,11 @@ class InsetsStateController {
      * @see #getInsetsForWindowMetrics
      */
     private InsetsState getInsetsForTarget(@InternalInsetsType int type,
-            @WindowingMode int windowingMode, boolean isAlwaysOnTop, InsetsState state) {
-        boolean stateCopied = false;
+            @WindowingMode int windowingMode, boolean isAlwaysOnTop, boolean aboveIme) {
+        InsetsState state = mState;
 
         if (type != ITYPE_INVALID) {
             state = new InsetsState(state);
-            stateCopied = true;
             state.removeSource(type);
 
             // Navigation bar doesn't get influenced by anything else
@@ -210,13 +219,21 @@ class InsetsStateController {
 
         if (WindowConfiguration.isFloating(windowingMode)
                 || (windowingMode == WINDOWING_MODE_MULTI_WINDOW && isAlwaysOnTop)) {
-            if (!stateCopied) {
-                state = new InsetsState(state);
-                stateCopied = true;
-            }
+            state = new InsetsState(state);
             state.removeSource(ITYPE_STATUS_BAR);
             state.removeSource(ITYPE_NAVIGATION_BAR);
             state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
+        }
+
+        if (aboveIme) {
+            InsetsSource imeSource = state.peekSource(ITYPE_IME);
+            if (imeSource != null && imeSource.isVisible()) {
+                imeSource = new InsetsSource(imeSource);
+                imeSource.setVisible(false);
+                imeSource.setFrame(0, 0, 0, 0);
+                state = new InsetsState(state);
+                state.addSource(imeSource);
+            }
         }
 
         return state;
