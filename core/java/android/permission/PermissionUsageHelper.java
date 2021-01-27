@@ -88,10 +88,8 @@ public class PermissionUsageHelper {
     private static final long DEFAULT_RECENT_TIME_MS = 30000L;
 
     private static boolean shouldShowIndicators() {
-        return true;
-        // TODO ntmyren: remove true set when device config is configured correctly
-        //DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-        //PROPERTY_CAMERA_MIC_ICONS_ENABLED, true);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_CAMERA_MIC_ICONS_ENABLED, true);
     }
 
     private static boolean shouldShowLocationIndicator() {
@@ -142,7 +140,7 @@ public class PermissionUsageHelper {
     }
 
     private Context mContext;
-    private Map<UserHandle, Context> mUserContexts;
+    private ArrayMap<UserHandle, Context> mUserContexts;
     private PackageManager mPkgManager;
     private AppOpsManager mAppOpsManager;
 
@@ -154,7 +152,8 @@ public class PermissionUsageHelper {
         mContext = context;
         mPkgManager = context.getPackageManager();
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
-        mUserContexts = Map.of(Process.myUserHandle(), mContext);
+        mUserContexts = new ArrayMap<>();
+        mUserContexts.put(Process.myUserHandle(), mContext);
     }
 
     private Context getUserContext(UserHandle user) {
