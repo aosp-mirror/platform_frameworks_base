@@ -3937,6 +3937,20 @@ public class CarrierConfigManager {
         public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL =
                 KEY_PREFIX + "enable_presence_group_subscribe_bool";
 
+        /**
+         * An integer key associated with the period of time in seconds the non-rcs capability
+         * information of each contact is cached on the device.
+         * <p>
+         * The rcs capability cache expiration sec is managed by
+         * {@code android.telephony.ims.ProvisioningManager} but non-rcs capability is managed by
+         * {@link CarrierConfigManager} since non-rcs capability will be provided via ACS or carrier
+         * config.
+         * <p>
+         * The default value is 2592000 secs (30 days), see RCC.07 Annex A.1.9.
+         */
+        public static final String KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT =
+                KEY_PREFIX + "non_rcs_capabilities_cache_expiration_sec_int";
+
         private Ims() {}
 
         private static PersistableBundle getDefaults() {
@@ -3947,6 +3961,7 @@ public class CarrierConfigManager {
             defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
+            defaults.putInt(KEY_NON_RCS_CAPABILITIES_CACHE_EXPIRATION_SEC_INT, 30 * 24 * 60 * 60);
             return defaults;
         }
     }
