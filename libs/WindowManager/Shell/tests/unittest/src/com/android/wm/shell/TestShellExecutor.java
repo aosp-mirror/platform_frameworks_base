@@ -46,7 +46,7 @@ public class TestShellExecutor implements ShellExecutor {
 
     @Override
     public boolean hasCallback(Runnable r) {
-        return !mRunnables.isEmpty();
+        return mRunnables.contains(r);
     }
 
     @Override
@@ -55,8 +55,8 @@ public class TestShellExecutor implements ShellExecutor {
     }
 
     public void flushAll() {
-        for (int i = mRunnables.size() - 1; i >= 0; --i) {
-            mRunnables.get(i).run();
+        for (Runnable r : mRunnables) {
+            r.run();
         }
         mRunnables.clear();
     }

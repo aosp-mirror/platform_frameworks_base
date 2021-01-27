@@ -29,7 +29,6 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
-import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
 import android.view.BatchedInputEventReceiver;
@@ -45,6 +44,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.wm.shell.R;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
@@ -52,7 +52,7 @@ import com.android.wm.shell.pip.PipTaskOrganizer;
 import com.android.wm.shell.pip.PipUiEventLogger;
 
 import java.io.PrintWriter;
-import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -73,7 +73,7 @@ public class PipResizeGestureHandler {
     private final PhonePipMenuController mPhonePipMenuController;
     private final PipUiEventLogger mPipUiEventLogger;
     private final int mDisplayId;
-    private final Executor mMainExecutor;
+    private final ShellExecutor mMainExecutor;
     private final Region mTmpRegion = new Region();
 
     private final PointF mDownPoint = new PointF();
@@ -91,7 +91,6 @@ public class PipResizeGestureHandler {
     private final Rect mDisplayBounds = new Rect();
     private final Function<Rect, Rect> mMovementBoundsSupplier;
     private final Runnable mUpdateMovementBoundsRunnable;
-    private final Handler mHandler;
 
     private int mDelta;
     private float mTouchSlop;
@@ -119,10 +118,10 @@ public class PipResizeGestureHandler {
             PipBoundsState pipBoundsState, PipMotionHelper motionHelper,
             PipTaskOrganizer pipTaskOrganizer, Function<Rect, Rect> movementBoundsSupplier,
             Runnable updateMovementBoundsRunnable, PipUiEventLogger pipUiEventLogger,
-            PhonePipMenuController menuActivityController) {
+            PhonePipMenuController menuActivityController, ShellExecutor mainExecutor) {
         mContext = context;
         mDisplayId = context.getDisplayId();
-        mMainExecutor = context.getMainExecutor();
+        mMainExecutor = mainExecutor;
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipBoundsState = pipBoundsState;
         mMotionHelper = motionHelper;
@@ -131,7 +130,6 @@ public class PipResizeGestureHandler {
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
         mPhonePipMenuController = menuActivityController;
         mPipUiEventLogger = pipUiEventLogger;
-        mHandler = new Handler(Looper.getMainLooper());
 
         context.getDisplay().getRealSize(mMaxSize);
         reloadResources();
@@ -140,7 +138,8 @@ public class PipResizeGestureHandler {
                 DeviceConfig.NAMESPACE_SYSTEMUI,
                 PIP_PINCH_RESIZE,
                 /* defaultValue = */ false);
-        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI, mMainExecutor,
+        DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
+                mMainExecutor,
                 new DeviceConfig.OnPropertiesChangedListener() {
                     @Override
                     public void onPropertiesChanged(DeviceConfig.Properties properties) {
@@ -213,8 +212,8 @@ public class PipResizeGestureHandler {
             // Register input event receiver
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "pip-resize", mDisplayId);
-            mInputEventReceiver = new SysUiInputEventReceiver(
-                    mInputMonitor.getInputChannel(), Looper.getMainLooper());
+            mInputEventReceiver = new PipResizeInputEventReceiver(
+                    mInputMonitor.getInputChannel(), mMainExecutor.getLooper());
         }
     }
 
@@ -523,7 +522,7 @@ public class PipResizeGestureHandler {
 
     private void finishResize() {
         if (!mLastResizeBounds.isEmpty()) {
-            final Runnable callback = () -> {
+            final Consumer<Rect> callback = (rect) -> {
                 mUserResizeBounds.set(mLastResizeBounds);
                 mMotionHelper.synchronizePinnedStackBounds();
                 mUpdateMovementBoundsRunnable.run();
@@ -537,16 +536,10 @@ public class PipResizeGestureHandler {
                 mPipBoundsAlgorithm.applySnapFraction(mLastResizeBounds,
                         mPipBoundsAlgorithm.getSnapFraction(mPipBoundsState.getBounds()));
                 mPipTaskOrganizer.scheduleAnimateResizePip(startBounds, mLastResizeBounds,
-                        PINCH_RESIZE_SNAP_DURATION, mAngle,
-                        (Rect rect) -> {
-                            mHandler.post(callback);
-                        });
+                        PINCH_RESIZE_SNAP_DURATION, -mAngle, callback);
             } else {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
-                        PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE,
-                        (Rect bounds) -> {
-                            mHandler.post(callback);
-                        });
+                        PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE, callback);
             }
             mPipUiEventLogger.log(
                     PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_RESIZE);
@@ -593,8 +586,8 @@ public class PipResizeGestureHandler {
         pw.println(innerPrefix + "mThresholdCrossed=" + mThresholdCrossed);
     }
 
-    class SysUiInputEventReceiver extends BatchedInputEventReceiver {
-        SysUiInputEventReceiver(InputChannel channel, Looper looper) {
+    class PipResizeInputEventReceiver extends BatchedInputEventReceiver {
+        PipResizeInputEventReceiver(InputChannel channel, Looper looper) {
             super(channel, looper, Choreographer.getSfInstance());
         }
 

@@ -35,52 +35,15 @@ import java.util.function.Consumer;
 @ExternalThread
 public interface Pip {
     /**
-     * Closes PIP (PIPed activity and PIP system UI).
-     */
-    default void closePip() {
-    }
-
-    /**
-     * Dump the current state and information if need.
-     *
-     * @param pw The stream to dump information to.
-     */
-    default void dump(PrintWriter pw) {
-    }
-
-    /**
      * Expand PIP, it's possible that specific request to activate the window via Alt-tab.
      */
     default void expandPip() {
     }
 
     /**
-     * Get the touch handler which manages all the touch handling for PIP on the Phone,
-     * including moving, dismissing and expanding the PIP. (Do not use in TV)
-     *
-     * @return
-     */
-    default @Nullable PipTouchHandler getPipTouchHandler() {
-        return null;
-    }
-
-    /**
      * Hides the PIP menu.
      */
     default void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {}
-
-    /**
-     * Returns {@code true} if PIP is shown.
-     */
-    default boolean isPipShown() {
-        return false;
-    }
-
-    /**
-     * Moves the PIPed activity to the fullscreen and closes PIP system UI.
-     */
-    default void movePipToFullscreen() {
-    }
 
     /**
      * Called when configuration is changed.
@@ -101,12 +64,6 @@ public interface Pip {
     }
 
     /**
-     * Registers the session listener for the current user.
-     */
-    default void registerSessionListenerForCurrentUser() {
-    }
-
-    /**
      * Called when SysUI state changed.
      *
      * @param isSysUiStateValid Is SysUI state valid or not.
@@ -116,19 +73,9 @@ public interface Pip {
     }
 
     /**
-     * Resize the Pip to the appropriate size for the input state.
-     *
-     * @param state In Pip state also used to determine the new size for the Pip.
+     * Registers the session listener for the current user.
      */
-    default void resizePinnedStack(int state) {
-    }
-
-    /**
-     * Resumes resizing operation on the Pip that was previously suspended.
-     *
-     * @param reason The reason resizing operations on the Pip was suspended.
-     */
-    default void resumePipResizing(int reason) {
+    default void registerSessionListenerForCurrentUser() {
     }
 
     /**
@@ -162,14 +109,6 @@ public interface Pip {
     default void showPictureInPictureMenu() {}
 
     /**
-     * Suspends resizing operation on the Pip until {@link #resumePipResizing} is called.
-     *
-     * @param reason The reason for suspending resizing operations on the Pip.
-     */
-    default void suspendPipResizing(int reason) {
-    }
-
-    /**
      * Called by Launcher when swiping an auto-pip enabled Activity to home starts
      * @param componentName {@link ComponentName} represents the Activity entering PiP
      * @param activityInfo {@link ActivityInfo} tied to the Activity
@@ -199,4 +138,12 @@ public interface Pip {
      * PiP and the Back-from-Edge gesture.
      */
     default void setPipExclusionBoundsChangeListener(Consumer<Rect> listener) { }
+
+    /**
+     * Dump the current state and information if need.
+     *
+     * @param pw The stream to dump information to.
+     */
+    default void dump(PrintWriter pw) {
+    }
 }
