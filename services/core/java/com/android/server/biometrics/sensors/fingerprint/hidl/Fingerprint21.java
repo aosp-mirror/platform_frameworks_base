@@ -47,6 +47,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
@@ -397,7 +398,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         });
     }
 
-    private synchronized IBiometricsFingerprint getDaemon() {
+    @VisibleForTesting
+    synchronized IBiometricsFingerprint getDaemon() {
         if (mTestHalEnabled) {
             final TestHal testHal = new TestHal();
             testHal.setNotify(mHalResultController);
