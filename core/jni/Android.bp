@@ -207,9 +207,9 @@ cc_library_shared {
             ],
 
             shared_libs: [
-                "audioclient-types-aidl-unstable-cpp",
-                "audioflinger-aidl-unstable-cpp",
-                "av-types-aidl-unstable-cpp",
+                "audioclient-types-aidl-cpp",
+                "audioflinger-aidl-cpp",
+                "av-types-aidl-cpp",
                 "libandroidicu",
                 "libbpf_android",
                 "libnetdbpf",
