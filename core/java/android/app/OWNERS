@@ -50,6 +50,9 @@ per-file *StatusBar* = file:/packages/SystemUI/OWNERS
 # ResourcesManager
 per-file ResourcesManager = rtmitchell@google.com, toddke@google.com
 
+# VoiceInteraction
+per-file *VoiceInteract* = file:/core/java/android/service/voice/OWNERS
+
 # Wallpaper
 per-file *Wallpaper* = file:/core/java/android/service/wallpaper/OWNERS
 
