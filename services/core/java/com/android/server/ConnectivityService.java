@@ -325,6 +325,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean mRestrictBackground;
 
     private final Context mContext;
+    // The Context is created for UserHandle.ALL.
+    private final Context mUserAllContext;
     private final Dependencies mDeps;
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
@@ -1160,8 +1162,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
         intentFilter.addAction(Intent.ACTION_USER_REMOVED);
         intentFilter.addAction(Intent.ACTION_USER_UNLOCKED);
 
-        final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
-        userAllContext.registerReceiver(
+        mUserAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
+        mUserAllContext.registerReceiver(
                 mIntentReceiver,
                 intentFilter,
                 null /* broadcastPermission */,
@@ -1177,7 +1179,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
         intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
-        userAllContext.registerReceiver(
+        mUserAllContext.registerReceiver(
                 mIntentReceiver,
                 intentFilter,
                 null /* broadcastPermission */,
@@ -1186,7 +1188,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Listen to lockdown VPN reset.
         intentFilter = new IntentFilter();
         intentFilter.addAction(LockdownVpnTracker.ACTION_LOCKDOWN_RESET);
-        userAllContext.registerReceiver(
+        mUserAllContext.registerReceiver(
                 mIntentReceiver, intentFilter, NETWORK_STACK, mHandler);
 
         mNetworkActivityTracker = new LegacyNetworkActivityTracker(mContext, mNMS);
@@ -2350,7 +2352,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 intent.addFlags(Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
             }
             try {
-                mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL, options);
+                mUserAllContext.sendStickyBroadcast(intent, options);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
