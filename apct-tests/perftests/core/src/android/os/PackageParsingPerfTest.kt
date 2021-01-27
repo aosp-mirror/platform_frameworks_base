@@ -178,7 +178,7 @@ class PackageParsingPerfTest {
             // For testing, just disable enforcement to avoid hooking up to compat framework
             ParseTypeImpl(ParseInput.Callback { _, _, _ -> false })
         }
-        val parser = ParsingPackageUtils(false, null, null,
+        val parser = ParsingPackageUtils(false, null, null, emptyList(),
             object : ParsingPackageUtils.Callback {
                 override fun hasFeature(feature: String) = true
 
