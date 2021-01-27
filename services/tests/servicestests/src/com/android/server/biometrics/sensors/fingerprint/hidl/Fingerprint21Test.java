@@ -19,17 +19,20 @@ package com.android.server.biometrics.sensors.fingerprint.hidl;
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.biometrics.BiometricManager;
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.UserManager;
 import android.platform.test.annotations.Presubmit;
 
+import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
@@ -80,7 +83,7 @@ public class Fingerprint21Test {
                 .thenReturn(5);
 
         mLockoutResetDispatcher = new LockoutResetDispatcher(mContext);
-        mFingerprint21 = new Fingerprint21(mContext, mScheduler,
+        mFingerprint21 = new TestableFingerprint21(mContext, mScheduler,
                 new Handler(Looper.getMainLooper()), SENSOR_ID,
                 BiometricManager.Authenticators.BIOMETRIC_WEAK, mLockoutResetDispatcher,
                 mHalResultController);
@@ -99,5 +102,22 @@ public class Fingerprint21Test {
         mFingerprint21.serviceDied(0 /* cookie */);
         waitForIdle();
         verify(mScheduler).reset();
+    }
+
+    private static class TestableFingerprint21 extends Fingerprint21 {
+
+        TestableFingerprint21(@NonNull Context context,
+                @NonNull BiometricScheduler scheduler,
+                @NonNull Handler handler, int sensorId, int strength,
+                @NonNull LockoutResetDispatcher lockoutResetDispatcher,
+                @NonNull HalResultController controller) {
+            super(context, scheduler, handler, sensorId, strength, lockoutResetDispatcher,
+                    controller);
+        }
+
+        @Override
+        synchronized IBiometricsFingerprint getDaemon() {
+            return mock(IBiometricsFingerprint.class);
+        }
     }
 }
