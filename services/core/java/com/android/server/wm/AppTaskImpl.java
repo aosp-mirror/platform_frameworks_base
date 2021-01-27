@@ -101,10 +101,6 @@ class AppTaskImpl extends IAppTask.Stub {
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mService.mGlobalLock) {
-                if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid, -1, -1,
-                        "Move to front")) {
-                    return;
-                }
                 WindowProcessController callerApp = null;
                 if (appThread != null) {
                     callerApp = mService.getProcessController(appThread);
