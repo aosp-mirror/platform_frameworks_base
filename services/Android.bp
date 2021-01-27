@@ -36,6 +36,7 @@ filegroup {
         ":services.usb-sources",
         ":services.voiceinteraction-sources",
         ":services.wifi-sources",
+        ":service-media-s-sources", // TODO (b/177640454)
         ":service-permission-sources",
         ":service-statsd-sources",
     ],

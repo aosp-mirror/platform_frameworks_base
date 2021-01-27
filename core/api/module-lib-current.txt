@@ -103,6 +103,7 @@ package android.media {
   }
 
   public class MediaServiceManager {
+    method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaCommunicationServiceRegisterer();
     method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaSessionServiceRegisterer();
     method @NonNull public android.media.MediaServiceManager.ServiceRegisterer getMediaTranscodingServiceRegisterer();
   }

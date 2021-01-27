@@ -28,6 +28,9 @@ package android.media {
     ctor public ApplicationMediaCapabilities.FormatNotFoundException(@NonNull String);
   }
 
+  public class MediaCommunicationManager {
+  }
+
   public class MediaController2 implements java.lang.AutoCloseable {
     method public void cancelSessionCommand(@NonNull Object);
     method public void close();
