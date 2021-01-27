@@ -33,21 +33,15 @@ void rasterizeCanvasBuffer(const CanvasOpBuffer& source, SkCanvas* destination) 
     SkMatrix& currentGlobalTransform = globalMatrixStack.emplace_back(SkMatrix::I());
 
     source.for_each([&]<CanvasOpType T>(const CanvasOpContainer<T> * op) {
-        if constexpr (
-            T == CanvasOpType::BeginZ ||
-            T == CanvasOpType::EndZ   ||
-            T == CanvasOpType::DrawLayer
-        ) {
-            // Do beginZ or endZ
-            LOG_ALWAYS_FATAL("TODO");
-            return;
-        } else {
+        if constexpr (CanvasOpTraits::can_draw<CanvasOp<T>>) {
             // Generic OP
             // First apply the current transformation
             destination->setMatrix(SkMatrix::Concat(currentGlobalTransform, op->transform()));
             // Now draw it
             (*op)->draw(destination);
+            return;
         }
+        LOG_ALWAYS_FATAL("TODO, unable to rasterize %d", static_cast<int>(T));
     });
 }
 
