@@ -91,6 +91,7 @@ java_library_static {
         ":storaged_aidl",
         ":vold_aidl",
         ":platform-compat-config",
+        ":platform-compat-overrides",
         ":display-device-config",
         "java/com/android/server/EventLogTags.logtags",
         "java/com/android/server/am/EventLogTags.logtags",
