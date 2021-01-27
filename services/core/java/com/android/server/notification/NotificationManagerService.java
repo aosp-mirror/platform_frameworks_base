@@ -9302,21 +9302,30 @@ public class NotificationManagerService extends SystemService {
                 Slog.v(TAG, "onNotificationEnqueuedLocked() called with: r = [" + r + "]");
             }
             final StatusBarNotification sbn = r.getSbn();
-            notifyAssistantLocked(
-                    sbn,
-                    r.getNotificationType(),
-                    true /* sameUserOnly */,
-                    (assistant, sbnHolder) -> {
-                        try {
-                            if (debug) {
-                                Slog.v(TAG,
-                                        "calling onNotificationEnqueuedWithChannel " + sbnHolder);
-                            }
-                            assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel());
-                        } catch (RemoteException ex) {
-                            Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+
+            for (final ManagedServiceInfo info : NotificationAssistants.this.getServices()) {
+                boolean sbnVisible = isVisibleToListener(
+                        sbn, r.getNotificationType(), info)
+                        && info.isSameUser(r.getUserId());
+                if (sbnVisible) {
+                    TrimCache trimCache = new TrimCache(sbn);
+                    final INotificationListener assistant = (INotificationListener) info.service;
+                    final StatusBarNotification sbnToPost = trimCache.ForListener(info);
+                    final StatusBarNotificationHolder sbnHolder =
+                            new StatusBarNotificationHolder(sbnToPost);
+                    try {
+                        if (debug) {
+                            Slog.v(TAG,
+                                    "calling onNotificationEnqueuedWithChannel " + sbnHolder);
                         }
-                    });
+                        final NotificationRankingUpdate update = makeRankingUpdateLocked(info);
+                        assistant.onNotificationEnqueuedWithChannel(sbnHolder, r.getChannel(),
+                                update);
+                    } catch (RemoteException ex) {
+                        Slog.e(TAG, "unable to notify assistant (enqueued): " + assistant, ex);
+                    }
+                }
+            }
         }
 
         @GuardedBy("mNotificationLock")

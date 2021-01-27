@@ -126,7 +126,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      * {@link #onNotificationEnqueued(StatusBarNotification, NotificationChannel)}.</p>
      *
      * @param sbn the new notification
-     * @return an adjustment or null to take no action, within 100ms.
+     * @return an adjustment or null to take no action, within 200ms.
      */
     abstract public @Nullable Adjustment onNotificationEnqueued(@NonNull StatusBarNotification sbn);
 
@@ -135,11 +135,25 @@ public abstract class NotificationAssistantService extends NotificationListenerS
      *
      * @param sbn the new notification
      * @param channel the channel the notification was posted to
-     * @return an adjustment or null to take no action, within 100ms.
+     * @return an adjustment or null to take no action, within 200ms.
      */
     public @Nullable Adjustment onNotificationEnqueued(@NonNull StatusBarNotification sbn,
             @NonNull NotificationChannel channel) {
         return onNotificationEnqueued(sbn);
+    }
+
+    /**
+     * A notification was posted by an app. Called before post.
+     *
+     * @param sbn the new notification
+     * @param channel the channel the notification was posted to
+     * @param rankingMap The current ranking map that can be used to retrieve ranking information
+     *                   for active notifications.
+     * @return an adjustment or null to take no action, within 200ms.
+     */
+    public @Nullable Adjustment onNotificationEnqueued(@NonNull StatusBarNotification sbn,
+            @NonNull NotificationChannel channel, @NonNull RankingMap rankingMap) {
+        return onNotificationEnqueued(sbn, channel);
     }
 
     /**
@@ -316,7 +330,7 @@ public abstract class NotificationAssistantService extends NotificationListenerS
     private class NotificationAssistantServiceWrapper extends NotificationListenerWrapper {
         @Override
         public void onNotificationEnqueuedWithChannel(IStatusBarNotificationHolder sbnHolder,
-                NotificationChannel channel) {
+                NotificationChannel channel, NotificationRankingUpdate update) {
             StatusBarNotification sbn;
             try {
                 sbn = sbnHolder.get();
@@ -330,9 +344,11 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 return;
             }
 
+            applyUpdateLocked(update);
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
             args.arg2 = channel;
+            args.arg3 = getCurrentRanking();
             mHandler.obtainMessage(MyHandler.MSG_ON_NOTIFICATION_ENQUEUED,
                     args).sendToTarget();
         }
@@ -472,8 +488,9 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                     SomeArgs args = (SomeArgs) msg.obj;
                     StatusBarNotification sbn = (StatusBarNotification) args.arg1;
                     NotificationChannel channel = (NotificationChannel) args.arg2;
+                    RankingMap ranking = (RankingMap) args.arg3;
                     args.recycle();
-                    Adjustment adjustment = onNotificationEnqueued(sbn, channel);
+                    Adjustment adjustment = onNotificationEnqueued(sbn, channel, ranking);
                     setAdjustmentIssuer(adjustment);
                     if (adjustment != null) {
                         if (!isBound()) {
