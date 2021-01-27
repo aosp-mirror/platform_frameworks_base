@@ -237,6 +237,7 @@ import android.os.DropBoxManager;
 import android.os.FactoryTest;
 import android.os.FileUtils;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IDeviceIdentifiersPolicyService;
 import android.os.IPermissionController;
@@ -2089,11 +2090,19 @@ public class ActivityManagerService extends IActivityManager.Stub
         mEnableOffloadQueue = SystemProperties.getBoolean(
                 "persist.device_config.activity_manager_native_boot.offload_queue_enabled", false);
 
-        mFgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        // Decouple broadcast-related timing operations from other OS activity by
+        // using a dedicated thread.  Sharing this thread between queues is safe
+        // because we know the nature of the activity on it and can't stall
+        // unexpectedly.
+        HandlerThread broadcastThread = new HandlerThread("broadcast");
+        broadcastThread.start();
+        Handler broadcastHandler = broadcastThread.getThreadHandler();
+
+        mFgBroadcastQueue = new BroadcastQueue(this, broadcastHandler,
                 "foreground", foreConstants, false);
-        mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mBgBroadcastQueue = new BroadcastQueue(this, broadcastHandler,
                 "background", backConstants, true);
-        mOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+        mOffloadBroadcastQueue = new BroadcastQueue(this, broadcastHandler,
                 "offload", offloadConstants, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
