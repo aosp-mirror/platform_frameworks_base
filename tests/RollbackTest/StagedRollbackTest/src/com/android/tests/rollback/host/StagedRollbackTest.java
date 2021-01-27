@@ -153,13 +153,14 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().reboot();
         runPhase("testBadApkOnly_Phase2_VerifyInstall");
 
-        // Trigger rollback and wait for reboot to happen
-        runPhase("testBadApkOnly_Phase3_Crash");
+        // Launch the app to crash to trigger rollback
+        startActivity(TESTAPP_A);
+        // Wait for reboot to happen
         waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
 
         getDevice().waitForDeviceAvailable();
 
-        runPhase("testBadApkOnly_Phase4_VerifyRollback");
+        runPhase("testBadApkOnly_Phase3_VerifyRollback");
 
         assertThat(mLogger).eventOccurred(ROLLBACK_INITIATE, null, REASON_APP_CRASH, TESTAPP_A);
         assertThat(mLogger).eventOccurred(ROLLBACK_BOOT_TRIGGERED, null, null, null);
@@ -304,8 +305,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         getDevice().reboot();
         // Verify apex was installed and then crash the apk
         runPhase("testRollbackApexWithApkCrashing_Phase2_Crash");
-        // Wait for crash to trigger rollback
-        waitForDeviceNotAvailable(5, TimeUnit.MINUTES);
+        // Launch the app to crash to trigger rollback
+        startActivity(TESTAPP_A);
+        // Wait for reboot to happen
+        waitForDeviceNotAvailable(2, TimeUnit.MINUTES);
         getDevice().waitForDeviceAvailable();
         // Verify rollback occurred due to crash of apk-in-apex
         runPhase("testRollbackApexWithApkCrashing_Phase3_VerifyRollback");
@@ -629,6 +632,12 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         } finally {
             getDevice().disableAdbRoot();
         }
+    }
+
+    private void startActivity(String packageName) throws Exception {
+        String cmd = "am start -S -a android.intent.action.MAIN "
+                + "-c android.intent.category.LAUNCHER " + packageName;
+        getDevice().executeShellCommand(cmd);
     }
 
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {
