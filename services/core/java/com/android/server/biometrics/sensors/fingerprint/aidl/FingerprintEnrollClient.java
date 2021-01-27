@@ -65,8 +65,19 @@ class FingerprintEnrollClient extends EnrollClient<ISession> implements Udfps {
     public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
         super.onEnrollResult(identifier, remaining);
 
+        UdfpsHelper.onEnrollmentProgress(getSensorId(), remaining, mUdfpsOverlayController);
+
         if (remaining == 0) {
             UdfpsHelper.hideUdfpsOverlay(getSensorId(), mUdfpsOverlayController);
+        }
+    }
+
+    @Override
+    public void onAcquired(int acquiredInfo, int vendorCode) {
+        super.onAcquired(acquiredInfo, vendorCode);
+
+        if (UdfpsHelper.isValidAcquisitionMessage(getContext(), acquiredInfo, vendorCode)) {
+            UdfpsHelper.onEnrollmentHelp(getSensorId(), mUdfpsOverlayController);
         }
     }
 
