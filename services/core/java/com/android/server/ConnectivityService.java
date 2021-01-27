@@ -133,6 +133,7 @@ import android.net.TetheringManager;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.Uri;
+import android.net.VpnInfo;
 import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.metrics.INetdEventListener;
@@ -184,7 +185,6 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.AsyncChannel;
@@ -4904,16 +4904,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         if (interfaces.isEmpty()) return null;
 
-        VpnInfo info = new VpnInfo();
-        info.ownerUid = nai.networkCapabilities.getOwnerUid();
-        info.vpnIface = nai.linkProperties.getInterfaceName();
         // Must be non-null or NetworkStatsService will crash.
         // Cannot happen in production code because Vpn only registers the NetworkAgent after the
         // tun or ipsec interface is created.
-        if (info.vpnIface == null) return null;
-        info.underlyingIfaces = interfaces.toArray(new String[0]);
+        if (nai.linkProperties.getInterfaceName() == null) return null;
 
-        return info;
+        return new VpnInfo(nai.networkCapabilities.getOwnerUid(),
+                nai.linkProperties.getInterfaceName(),
+                interfaces.toArray(new String[0]));
     }
 
     /**
