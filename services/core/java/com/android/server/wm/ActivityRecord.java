@@ -1355,11 +1355,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final boolean surfaceReady = w.isDrawn()  // Regular case
                 || w.mWinAnimator.mSurfaceDestroyDeferred  // The preserved surface is still ready.
                 || w.isDragResizeChanged();  // Waiting for relayoutWindow to call preserveSurface.
-        final boolean needsLetterbox = surfaceReady && w.isLetterboxedAppWindow() && fillsParent();
+        final boolean needsLetterbox = surfaceReady && isLetterboxed(w);
+        updateRoundedCorners(w);
         if (needsLetterbox) {
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null),
-                        mWmService.mTransactionFactory);
+                        mWmService.mTransactionFactory,
+                        mWmService::isLetterboxActivityCornersRounded);
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
@@ -1376,6 +1378,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             mLetterbox.layout(spaceToFill, w.getFrame(), mTmpPoint);
         } else if (mLetterbox != null) {
             mLetterbox.hide();
+        }
+    }
+
+    /** @return {@code true} when main window is letterboxed and activity isn't transparent. */
+    private boolean isLetterboxed(WindowState mainWindow) {
+        return mainWindow.isLetterboxedAppWindow() && fillsParent();
+    }
+
+    private void updateRoundedCorners(WindowState mainWindow) {
+        int cornersRadius =
+                // Don't round corners if letterboxed only for display cutout.
+                isLetterboxed(mainWindow) && !mainWindow.isLetterboxedForDisplayCutout()
+                        ? Math.max(0, mWmService.getLetterboxActivityCornersRadius()) : 0;
+        setCornersRadius(mainWindow, cornersRadius);
+    }
+
+    private void setCornersRadius(WindowState mainWindow, int cornersRadius) {
+        final SurfaceControl windowSurface = mainWindow.getClientViewRootSurface();
+        if (windowSurface != null && windowSurface.isValid()) {
+            Transaction transaction = getPendingTransaction();
+            transaction.setCornerRadius(windowSurface, cornersRadius);
         }
     }
 
@@ -1408,10 +1431,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     * @return {@code true} if bar shown within a given rectangle is allowed to be transparent
+     *     when the current activity is displayed.
      */
-    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
-        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
+    boolean isTransparentBarAllowed(Rect rect) {
+        // TODO(b/175482966): Allow status and navigation bars to be semi-transparent black
+        // in letterbox mode.
+        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect)
+                || mWmService.isLetterboxActivityCornersRounded();
     }
 
     /**

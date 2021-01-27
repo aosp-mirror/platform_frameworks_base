@@ -3807,11 +3807,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     * @return {@code true} if bar shown within a given frame is allowed to be transparent
+     *     when the current window is displayed.
      */
-    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
-        return mActivityRecord == null
-                || mActivityRecord.letterboxNotIntersectsOrFullyContains(rect);
+    boolean isTransparentBarAllowed(Rect frame) {
+        return mActivityRecord == null || mActivityRecord.isTransparentBarAllowed(frame);
     }
 
     public boolean isLetterboxedOverlappingWith(Rect rect) {
