@@ -13730,13 +13730,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             long kernelUsed = memInfo.getKernelUsedSizeKb();
             final long ionHeap = Debug.getIonHeapsSizeKb();
             final long ionPool = Debug.getIonPoolsSizeKb();
+            final long dmabufMapped = Debug.getDmabufMappedSizeKb();
             if (ionHeap >= 0 && ionPool >= 0) {
-                final long ionMapped = Debug.getDmabufMappedSizeKb();
-                final long ionUnmapped = ionHeap - ionMapped;
+                final long ionUnmapped = ionHeap - dmabufMapped;
                 pw.print("      ION: ");
                         pw.print(stringifyKBSize(ionHeap + ionPool));
                         pw.print(" (");
-                        pw.print(stringifyKBSize(ionMapped));
+                        pw.print(stringifyKBSize(dmabufMapped));
                         pw.print(" mapped + ");
                         pw.print(stringifyKBSize(ionUnmapped));
                         pw.print(" unmapped + ");
@@ -13745,6 +13745,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
                 // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
                 kernelUsed += ionHeap;
+            } else {
+                final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
+                if (totalExportedDmabuf >= 0) {
+                    final long dmabufUnmapped = totalExportedDmabuf - dmabufMapped;
+                    pw.print("DMA-BUF: ");
+                    pw.print(stringifyKBSize(totalExportedDmabuf));
+                    pw.print(" (");
+                    pw.print(stringifyKBSize(dmabufMapped));
+                    pw.print(" mapped + ");
+                    pw.print(stringifyKBSize(dmabufUnmapped));
+                    pw.println(" unmapped)");
+                    // TODO(b/167709539): also add pooled memory from DMA-BUF heaps
+                    kernelUsed += totalExportedDmabuf;
+                }
             }
             final long gpuUsage = Debug.getGpuTotalUsageKb();
             if (gpuUsage >= 0) {
@@ -14549,15 +14563,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long ionHeap = Debug.getIonHeapsSizeKb();
         final long ionPool = Debug.getIonPoolsSizeKb();
         if (ionHeap >= 0 && ionPool >= 0) {
-            final long ionMapped = Debug.getDmabufMappedSizeKb();
-            final long ionUnmapped = ionHeap - ionMapped;
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
             // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
             // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
             kernelUsed += ionHeap;
+        } else {
+            final long totalExportedDmabuf = Debug.getDmabufTotalExportedKb();
+            if (totalExportedDmabuf >= 0) {
+                memInfoBuilder.append("DMA-BUF: ");
+                memInfoBuilder.append(stringifyKBSize(totalExportedDmabuf));
+                memInfoBuilder.append("\n");
+                // TODO(b/167709539): also add pooled memory from DMA-BUF heaps
+                kernelUsed += totalExportedDmabuf;
+            }
         }
+
         final long gpuUsage = Debug.getGpuTotalUsageKb();
         if (gpuUsage >= 0) {
             memInfoBuilder.append("       GPU: ");

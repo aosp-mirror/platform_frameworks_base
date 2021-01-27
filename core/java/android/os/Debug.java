@@ -2551,6 +2551,14 @@ public final class Debug
     public static native long getZramFreeKb();
 
     /**
+     * Return total memory size in kilobytes for exported DMA-BUFs or -1 if
+     * the DMA-BUF sysfs stats at /sys/kernel/dmabuf/buffers could not be read.
+     *
+     * @hide
+     */
+    public static native long getDmabufTotalExportedKb();
+
+    /**
      * Return memory size in kilobytes allocated for ION heaps or -1 if
      * /sys/kernel/ion/total_heaps_kb could not be read.
      *
