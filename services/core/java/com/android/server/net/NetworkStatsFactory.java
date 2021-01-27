@@ -27,6 +27,7 @@ import static com.android.server.NetworkManagementSocketTagger.kernelToTag;
 import android.annotation.Nullable;
 import android.net.INetd;
 import android.net.NetworkStats;
+import android.net.VpnInfo;
 import android.net.util.NetdService;
 import android.os.RemoteException;
 import android.os.StrictMode;
@@ -34,7 +35,6 @@ import android.os.SystemClock;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.net.VpnInfo;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ProcFileReader;
 
