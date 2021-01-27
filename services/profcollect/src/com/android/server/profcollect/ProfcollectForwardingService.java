@@ -102,7 +102,7 @@ public final class ProfcollectForwardingService extends SystemService {
             return false;
         }
         try {
-            return !mIProfcollect.GetSupportedProvider().isEmpty();
+            return !mIProfcollect.get_supported_provider().isEmpty();
         } catch (RemoteException e) {
             Log.e(LOG_TAG, e.getMessage());
             return false;
@@ -191,7 +191,7 @@ public final class ProfcollectForwardingService extends SystemService {
             }
 
             try {
-                sSelfService.mIProfcollect.ProcessProfile();
+                sSelfService.mIProfcollect.process(false);
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
@@ -234,7 +234,7 @@ public final class ProfcollectForwardingService extends SystemService {
                 if (DEBUG) {
                     Log.d(LOG_TAG, "Tracing on app launch event: " + packageName);
                 }
-                mIProfcollect.TraceOnce("applaunch");
+                mIProfcollect.trace_once("applaunch");
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
@@ -296,7 +296,7 @@ public final class ProfcollectForwardingService extends SystemService {
         }
 
         try {
-            mIProfcollect.CreateProfileReport();
+            mIProfcollect.report();
         } catch (RemoteException e) {
             Log.e(LOG_TAG, e.getMessage());
         }
