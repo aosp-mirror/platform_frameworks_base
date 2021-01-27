@@ -15,6 +15,7 @@
  */
 package com.android.server.hdmi;
 
+import static com.android.server.hdmi.Constants.ADDR_BROADCAST;
 import static com.android.server.hdmi.Constants.ADDR_PLAYBACK_1;
 import static com.android.server.hdmi.Constants.ADDR_TV;
 import static com.android.server.hdmi.HdmiControlService.INITIATED_BY_ENABLE_CEC;
@@ -266,6 +267,30 @@ public class HdmiCecLocalDeviceTvTest {
         assertThat(mHdmiCecLocalDeviceTv.dispatchMessage(imageViewOn)).isTrue();
         mTestLooper.dispatchAll();
         assertThat(mWokenUp).isFalse();
+    }
+
+    @Test
+    public void tvSendStandbyOnSleep_Enabled() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage standby = HdmiCecMessageBuilder.buildStandby(ADDR_TV, ADDR_BROADCAST);
+        assertThat(mNativeWrapper.getResultMessages()).contains(standby);
+    }
+
+    @Test
+    public void tvSendStandbyOnSleep_Disabled() {
+        mHdmiCecLocalDeviceTv.mService.getHdmiCecConfig().setIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
+                HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_DISABLED);
+        mTestLooper.dispatchAll();
+        mHdmiControlService.onStandby(HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+        HdmiCecMessage standby = HdmiCecMessageBuilder.buildStandby(ADDR_TV, ADDR_BROADCAST);
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standby);
     }
 
     @Test

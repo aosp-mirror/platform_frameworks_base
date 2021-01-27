@@ -661,7 +661,6 @@ public class HdmiControlService extends SystemService {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
-                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                 Global.MHL_INPUT_SWITCHING_ENABLED,
                 Global.MHL_POWER_CHARGE_ENABLED,
@@ -688,15 +687,6 @@ public class HdmiControlService extends SystemService {
                 case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
                     setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
                             HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
-                    break;
-                case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
-                    for (int type : mLocalDevices) {
-                        HdmiCecLocalDevice localDevice = mHdmiCecNetwork.getLocalDevice(type);
-                        if (localDevice != null) {
-                            localDevice.setAutoDeviceOff(enabled);
-                        }
-                    }
-                    // No need to propagate to HAL.
                     break;
                 case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
                     if (isTvDeviceEnabled()) {

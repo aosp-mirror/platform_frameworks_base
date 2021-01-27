@@ -956,8 +956,6 @@ abstract class HdmiCecLocalDevice {
         }
     }
 
-    void setAutoDeviceOff(boolean enabled) {}
-
     /**
      * Called when a hot-plug event issued.
      *
