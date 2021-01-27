@@ -38570,6 +38570,7 @@ package android.speech {
 
   public class SpeechRecognizer {
     method public void cancel();
+    method @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
     method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
     method public void destroy();
