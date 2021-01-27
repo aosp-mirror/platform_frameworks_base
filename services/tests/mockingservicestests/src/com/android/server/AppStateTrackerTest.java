@@ -271,8 +271,7 @@ public class AppStateTrackerTest {
         verify(mMockIActivityManager).registerUidObserver(
                 uidObserverArgumentCaptor.capture(),
                 eq(ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_IDLE
-                        | ActivityManager.UID_OBSERVER_ACTIVE
-                        | ActivityManager.UID_OBSERVER_PROCSTATE),
+                        | ActivityManager.UID_OBSERVER_ACTIVE),
                 eq(ActivityManager.PROCESS_STATE_UNKNOWN),
                 isNull());
         verify(mMockIAppOpsService).startWatchingMode(
@@ -650,11 +649,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActiveSynced(UID_2));
         assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
 
-        assertFalse(instance.isUidInForeground(UID_1));
-        assertFalse(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
-
-
         mIUidObserver.onUidStateChanged(UID_2,
                 ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
@@ -670,11 +664,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActiveSynced(UID_2));
         assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
 
-        assertFalse(instance.isUidInForeground(UID_1));
-        assertTrue(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
-
-
         mIUidObserver.onUidStateChanged(UID_1,
                 ActivityManager.PROCESS_STATE_FOREGROUND_SERVICE, 0,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
@@ -686,10 +675,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
 
-        assertTrue(instance.isUidInForeground(UID_1));
-        assertTrue(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
-
         mIUidObserver.onUidGone(UID_1, true);
 
         waitUntilMainHandlerDrain();
@@ -699,10 +684,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
 
-        assertFalse(instance.isUidInForeground(UID_1));
-        assertTrue(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
-
         mIUidObserver.onUidIdle(UID_2, true);
 
         waitUntilMainHandlerDrain();
@@ -711,10 +692,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
-
-        assertFalse(instance.isUidInForeground(UID_1));
-        assertFalse(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
 
         mIUidObserver.onUidStateChanged(UID_1,
                 ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND, 0,
@@ -726,10 +703,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActive(UID_1));
         assertFalse(instance.isUidActive(UID_2));
         assertTrue(instance.isUidActive(Process.SYSTEM_UID));
-
-        assertTrue(instance.isUidInForeground(UID_1));
-        assertFalse(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
 
         mIUidObserver.onUidStateChanged(UID_1,
                 ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND, 0,
@@ -746,10 +719,6 @@ public class AppStateTrackerTest {
         assertFalse(instance.isUidActiveSynced(UID_2));
         assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
 
-        assertFalse(instance.isUidInForeground(UID_1));
-        assertFalse(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
-
         // The result from AMI.isUidActive() only affects isUidActiveSynced().
         when(mMockIActivityManagerInternal.isUidActive(anyInt())).thenReturn(true);
 
@@ -760,11 +729,6 @@ public class AppStateTrackerTest {
         assertTrue(instance.isUidActiveSynced(UID_1));
         assertTrue(instance.isUidActiveSynced(UID_2));
         assertTrue(instance.isUidActiveSynced(Process.SYSTEM_UID));
-
-        assertFalse(instance.isUidInForeground(UID_1));
-        assertFalse(instance.isUidInForeground(UID_2));
-        assertTrue(instance.isUidInForeground(Process.SYSTEM_UID));
-
     }
 
     @Test
@@ -1480,7 +1444,6 @@ public class AppStateTrackerTest {
         callStart(instance);
 
         instance.mActiveUids.put(UID_1, true);
-        instance.mForegroundUids.put(UID_2, true);
         instance.mRunAnyRestrictedPackages.add(Pair.create(UID_1, PACKAGE_1));
         instance.mExemptedBucketPackages.add(UserHandle.getUserId(UID_2), PACKAGE_2);
 
@@ -1493,7 +1456,6 @@ public class AppStateTrackerTest {
         mReceiver.onReceive(mMockContext, packageRemoved);
 
         assertEquals(1, instance.mActiveUids.size());
-        assertEquals(1, instance.mForegroundUids.size());
         assertEquals(1, instance.mRunAnyRestrictedPackages.size());
         assertEquals(1, instance.mExemptedBucketPackages.size());
 
@@ -1506,7 +1468,6 @@ public class AppStateTrackerTest {
         mReceiver.onReceive(mMockContext, packageRemoved);
 
         assertEquals(1, instance.mActiveUids.size());
-        assertEquals(1, instance.mForegroundUids.size());
         assertEquals(1, instance.mRunAnyRestrictedPackages.size());
         assertEquals(1, instance.mExemptedBucketPackages.size());
 
@@ -1518,7 +1479,6 @@ public class AppStateTrackerTest {
         mReceiver.onReceive(mMockContext, packageRemoved);
 
         assertEquals(0, instance.mActiveUids.size());
-        assertEquals(1, instance.mForegroundUids.size());
         assertEquals(0, instance.mRunAnyRestrictedPackages.size());
         assertEquals(1, instance.mExemptedBucketPackages.size());
 
@@ -1530,7 +1490,6 @@ public class AppStateTrackerTest {
         mReceiver.onReceive(mMockContext, packageRemoved);
 
         assertEquals(0, instance.mActiveUids.size());
-        assertEquals(0, instance.mForegroundUids.size());
         assertEquals(0, instance.mRunAnyRestrictedPackages.size());
         assertEquals(0, instance.mExemptedBucketPackages.size());
     }
