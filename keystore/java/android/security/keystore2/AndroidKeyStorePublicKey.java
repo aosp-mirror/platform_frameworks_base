@@ -32,13 +32,15 @@ import java.security.PublicKey;
 public abstract class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implements PublicKey {
     private final byte[] mCertificate;
     private final byte[] mCertificateChain;
+    private final byte[] mEncoded;
 
     public AndroidKeyStorePublicKey(@NonNull KeyDescriptor descriptor,
-            @NonNull KeyMetadata metadata, @NonNull String algorithm,
-            @NonNull KeyStoreSecurityLevel securityLevel) {
+            @NonNull KeyMetadata metadata, @NonNull byte[] x509EncodedForm,
+            @NonNull String algorithm, @NonNull KeyStoreSecurityLevel securityLevel) {
         super(descriptor, metadata.key.nspace, metadata.authorizations, algorithm, securityLevel);
         mCertificate = metadata.certificate;
         mCertificateChain = metadata.certificateChain;
+        mEncoded = x509EncodedForm;
     }
 
     abstract AndroidKeyStorePrivateKey getPrivateKey();
@@ -50,7 +52,7 @@ public abstract class AndroidKeyStorePublicKey extends AndroidKeyStoreKey implem
 
     @Override
     public byte[] getEncoded() {
-        return ArrayUtils.cloneIfNotEmpty(mCertificate);
+        return ArrayUtils.cloneIfNotEmpty(mEncoded);
     }
 
     @Override
