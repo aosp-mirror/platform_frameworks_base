@@ -70,6 +70,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
@@ -249,6 +250,21 @@ public class Typeface {
     }
 
     /**
+     * Returns true if the system has the font family with the name [familyName]. For example
+     * querying with "sans-serif" would check if the "sans-serif" family is defined in the system
+     * and return true if does.
+     *
+     * @param familyName The name of the font family, cannot be null. If null, exception will be
+     *                   thrown.
+     */
+    private static boolean hasFontFamily(@NonNull String familyName) {
+        Objects.requireNonNull(familyName, "familyName cannot be null");
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sSystemFontMap.containsKey(familyName);
+        }
+    }
+
+    /**
      * @hide
      * Used by Resources to load a font resource of type xml.
      */
@@ -257,6 +273,11 @@ public class Typeface {
             FamilyResourceEntry entry, AssetManager mgr, String path) {
         if (entry instanceof ProviderResourceEntry) {
             final ProviderResourceEntry providerEntry = (ProviderResourceEntry) entry;
+
+            String systemFontFamilyName = providerEntry.getSystemFontFamilyName();
+            if (systemFontFamilyName != null && hasFontFamily(systemFontFamilyName)) {
+                return Typeface.create(systemFontFamilyName, NORMAL);
+            }
             // Downloadable font
             List<List<String>> givenCerts = providerEntry.getCerts();
             List<List<byte[]>> certs = new ArrayList<>();
