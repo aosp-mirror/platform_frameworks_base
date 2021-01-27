@@ -66,4 +66,8 @@ public class FeatureFlags {
     public boolean useNewBrightnessSlider() {
         return mFlagReader.isEnabled(R.bool.flag_brightness_slider);
     }
+
+    public boolean isPeopleTileEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_conversations);
+    }
 }
