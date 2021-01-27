@@ -166,6 +166,11 @@ cc_library_shared {
         "tv_tuner_aidl_interface-ndk_platform",
         "tv_tuner_resource_manager_aidl_interface-ndk_platform"
     ],
+
+    static_libs: [
+        "libaidlcommonsupport",
+    ],
+
     defaults: [
         "libcodec2-impl-defaults",
     ],

@@ -142,7 +142,16 @@ long DemuxClient::getAvSyncTime(int avSyncHwId) {
 }
 
 sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int bufferSize, sp<DvrClientCallback> cb) {
-    // TODO: pending aidl interface
+    if (mTunerDemux != NULL) {
+        shared_ptr<ITunerDvr> tunerDvr;
+        shared_ptr<TunerDvrCallback> callback =
+                ::ndk::SharedRefBase::make<TunerDvrCallback>(cb);
+        Status s = mTunerDemux->openDvr((int)dvbType, bufferSize, callback, &tunerDvr);
+        if (ClientHelper::getServiceSpecificErrorCode(s) != Result::SUCCESS) {
+            return NULL;
+        }
+        return new DvrClient(tunerDvr);
+    }
 
     if (mDemux != NULL) {
         sp<HidlDvrCallback> callback = new HidlDvrCallback(cb);
@@ -178,7 +187,10 @@ Result DemuxClient::disconnectCiCam() {
 }
 
 Result DemuxClient::close() {
-    // TODO: pending aidl interface
+    if (mTunerDemux != NULL) {
+        Status s = mTunerDemux->close();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mDemux != NULL) {
         Result res = mDemux->close();

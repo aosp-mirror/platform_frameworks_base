@@ -20,6 +20,8 @@
 #include <aidl/android/media/tv/tuner/ITunerFilter.h>
 #include <aidl/android/media/tv/tuner/BnTunerFilterCallback.h>
 #include <aidl/android/media/tv/tuner/TunerFilterEvent.h>
+#include <aidl/android/media/tv/tuner/TunerFilterSettings.h>
+#include <aidlcommonsupport/NativeHandle.h>
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
@@ -31,7 +33,9 @@
 using Status = ::ndk::ScopedAStatus;
 using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
 using ::aidl::android::media::tv::tuner::ITunerFilter;
+using ::aidl::android::media::tv::tuner::TunerFilterConfiguration;
 using ::aidl::android::media::tv::tuner::TunerFilterEvent;
+using ::aidl::android::media::tv::tuner::TunerFilterSettings;
 
 using ::android::hardware::EventFlag;
 using ::android::hardware::MessageQueue;
@@ -61,11 +65,13 @@ class TunerFilterCallback : public BnTunerFilterCallback {
 
 public:
     TunerFilterCallback(sp<FilterClientCallback> filterClientCallback);
-    // TODO: complete TunerFilterCallback
     Status onFilterStatus(int status);
-    Status onFilterEvent(vector<TunerFilterEvent>* filterEvent);
+    Status onFilterEvent(const vector<TunerFilterEvent>& filterEvents);
 
 private:
+    void getHidlFilterEvent(const vector<TunerFilterEvent>& filterEvents,
+            DemuxFilterEvent& event, DemuxFilterEventExt& eventExt);
+
     sp<FilterClientCallback> mFilterClientCallback;
 };
 
@@ -174,10 +180,12 @@ public:
     Result close();
 
 private:
+    TunerFilterConfiguration getAidlFilterSettings(DemuxFilterSettings configure);
     Result getFilterMq();
     int copyData(uint8_t* buffer, int size);
     void checkIsMediaFilter(DemuxFilterType type);
     void handleAvShareMemory();
+    void closeAvSharedMemory();
 
     /**
      * An AIDL Tuner Filter Singleton assigned at the first time when the Tuner Client
