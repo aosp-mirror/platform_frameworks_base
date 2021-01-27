@@ -192,19 +192,6 @@ public class RemoteTransitionCompat implements Parcelable {
     //   Settings > Editor > Code Style > Formatter Control
     //@formatter:off
 
-
-    @DataClass.Generated.Member
-    /* package-private */ RemoteTransitionCompat(
-            @NonNull IRemoteTransition transition,
-            @Nullable TransitionFilter filter) {
-        this.mTransition = transition;
-        com.android.internal.util.AnnotationValidations.validate(
-                NonNull.class, null, mTransition);
-        this.mFilter = filter;
-
-        // onConstructed(); // You can define this method to get a callback
-    }
-
     @DataClass.Generated.Member
     public @NonNull IRemoteTransition getTransition() {
         return mTransition;
@@ -308,9 +295,8 @@ public class RemoteTransitionCompat implements Parcelable {
             if ((mBuilderFieldsSet & 0x2) == 0) {
                 mFilter = null;
             }
-            RemoteTransitionCompat o = new RemoteTransitionCompat(
-                    mTransition,
-                    mFilter);
+            RemoteTransitionCompat o = new RemoteTransitionCompat(mTransition);
+            o.mFilter = this.mFilter;
             return o;
         }
 
