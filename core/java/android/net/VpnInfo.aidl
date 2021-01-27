@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package com.android.internal.net;
+package android.net;
 
 parcelable VpnInfo;
