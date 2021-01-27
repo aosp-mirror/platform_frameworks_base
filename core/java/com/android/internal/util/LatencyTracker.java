@@ -106,7 +106,6 @@ public class LatencyTracker {
     private static LatencyTracker sLatencyTracker;
 
     private final SparseLongArray mStartRtc = new SparseLongArray();
-    private final Context mContext;
     private volatile int mSamplingInterval;
     private volatile boolean mEnabled;
 
@@ -114,15 +113,14 @@ public class LatencyTracker {
         if (sLatencyTracker == null) {
             synchronized (LatencyTracker.class) {
                 if (sLatencyTracker == null) {
-                    sLatencyTracker = new LatencyTracker(context);
+                    sLatencyTracker = new LatencyTracker();
                 }
             }
         }
         return sLatencyTracker;
     }
 
-    public LatencyTracker(Context context) {
-        mContext = context;
+    private LatencyTracker() {
         mEnabled = DEFAULT_ENABLED;
         mSamplingInterval = DEFAULT_SAMPLING_INTERVAL;
 
@@ -173,8 +171,8 @@ public class LatencyTracker {
         }
     }
 
-    private String getTraceNameOfAcion(int action) {
-        return "L<" + getNameOfAction(action) + ">";
+    private static String getTraceNameOfAction(int action) {
+        return "L<" + getNameOfAction(STATSD_ACTION[action]) + ">";
     }
 
     public static boolean isEnabled(Context ctx) {
@@ -194,7 +192,7 @@ public class LatencyTracker {
         if (!isEnabled()) {
             return;
         }
-        Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, getTraceNameOfAcion(action), 0);
+        Trace.asyncTraceBegin(Trace.TRACE_TAG_APP, getTraceNameOfAction(action), 0);
         mStartRtc.put(action, SystemClock.elapsedRealtime());
     }
 
@@ -213,7 +211,7 @@ public class LatencyTracker {
             return;
         }
         mStartRtc.delete(action);
-        Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, getTraceNameOfAcion(action), 0);
+        Trace.asyncTraceEnd(Trace.TRACE_TAG_APP, getTraceNameOfAction(action), 0);
         logAction(action, (int) (endRtc - startRtc));
     }
 
@@ -236,7 +234,7 @@ public class LatencyTracker {
      * @param writeToStatsLog Whether to write the measured latency to FrameworkStatsLog.
      */
     public static void logActionDeprecated(int action, int duration, boolean writeToStatsLog) {
-        Log.i(TAG, "action=" + action + " latency=" + duration);
+        Log.i(TAG, getNameOfAction(STATSD_ACTION[action]) + " latency=" + duration);
         EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, duration);
 
         if (writeToStatsLog) {
