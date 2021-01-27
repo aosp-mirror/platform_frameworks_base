@@ -89,9 +89,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     @GuardedBy("mLock")
     private boolean mSystemAudioMute = false;
 
-    // If true, TV going to standby mode puts other devices also to standby.
-    private boolean mAutoDeviceOff;
-
     private final HdmiCecStandbyModeHandler mStandbyHandler;
 
     // If true, do not do routing control/send active source for internal source.
@@ -156,8 +153,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
     HdmiCecLocalDeviceTv(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_TV);
         mPrevPortId = Constants.INVALID_PORT_ID;
-        mAutoDeviceOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
-                true);
         mSystemAudioControlFeatureEnabled =
                 mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);
         mStandbyHandler = new HdmiCecStandbyModeHandler(service, this);
@@ -1202,13 +1197,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    @Override
-    @ServiceThreadOnly
-    void setAutoDeviceOff(boolean enabled) {
-        assertRunOnServiceThread();
-        mAutoDeviceOff = enabled;
-    }
-
     @ServiceThreadOnly
     boolean getAutoWakeup() {
         assertRunOnServiceThread();
@@ -1286,7 +1274,11 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (!mService.isControlEnabled()) {
             return;
         }
-        if (!initiatedByCec && mAutoDeviceOff) {
+        boolean sendStandbyOnSleep =
+                mService.getHdmiCecConfig().getIntValue(
+                    HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)
+                        == HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED;
+        if (!initiatedByCec && sendStandbyOnSleep) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildStandby(
                     mAddress, Constants.ADDR_BROADCAST));
         }
@@ -1545,7 +1537,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         pw.println("mArcFeatureEnabled: " + mArcFeatureEnabled);
         pw.println("mSystemAudioMute: " + mSystemAudioMute);
         pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
-        pw.println("mAutoDeviceOff: " + mAutoDeviceOff);
         pw.println("mSkipRoutingControl: " + mSkipRoutingControl);
         pw.println("mPrevPortId: " + mPrevPortId);
     }
