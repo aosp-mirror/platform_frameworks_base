@@ -678,9 +678,9 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsFails) {
     mVold->mountIncFsFails();
     EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
 
@@ -689,9 +689,9 @@ TEST_F(IncrementalServiceTest, testCreateStorageMountIncFsInvalidControlParcel) 
     EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(0);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
 
@@ -702,9 +702,9 @@ TEST_F(IncrementalServiceTest, testCreateStorageMakeFileFails) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
 
@@ -716,9 +716,9 @@ TEST_F(IncrementalServiceTest, testCreateStorageBindMountFails) {
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(0);
     EXPECT_CALL(*mVold, unmountIncFs(_));
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_LT(storageId, 0);
 }
 
@@ -734,24 +734,24 @@ TEST_F(IncrementalServiceTest, testCreateStoragePrepareDataLoaderFails) {
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(0);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
-    ASSERT_LT(storageId, 0);
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {}, {});
 }
 
 TEST_F(IncrementalServiceTest, testDeleteStorageSuccess) {
-    EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
-    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
-    EXPECT_CALL(*mDataLoader, start(_)).Times(0);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(1);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {}, {});
     mIncrementalService->deleteStorage(storageId);
 }
 
@@ -759,14 +759,15 @@ TEST_F(IncrementalServiceTest, testDataLoaderDestroyed) {
     EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(2);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(2);
-    EXPECT_CALL(*mDataLoader, start(_)).Times(0);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(2);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {}, {});
     // Simulated crash/other connection breakage.
     mDataLoaderManager->setDataLoaderStatusDestroyed();
 }
@@ -780,12 +781,13 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderCreate) {
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     mDataLoaderManager->setDataLoaderStatusCreated();
-    ASSERT_TRUE(mIncrementalService->startLoading(storageId));
     mDataLoaderManager->setDataLoaderStatusStarted();
 }
 
@@ -793,16 +795,17 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderPendingStart) {
     mDataLoader->initializeCreateOkNoStatus();
     EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
-    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(2);
+    EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoader, start(_)).Times(1);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
-    ASSERT_TRUE(mIncrementalService->startLoading(storageId));
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     mDataLoaderManager->setDataLoaderStatusCreated();
 }
 
@@ -815,10 +818,12 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderCreateUnavailable) {
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     mDataLoaderManager->setDataLoaderStatusUnavailable();
 }
 
@@ -836,10 +841,12 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderRecreateOnPendingReads) {
     EXPECT_CALL(*mLooper, addFd(MockIncFs::kPendingReadsFd, _, _, _, _)).Times(1);
     EXPECT_CALL(*mLooper, removeFd(MockIncFs::kPendingReadsFd)).Times(1);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     mDataLoaderManager->setDataLoaderStatusUnavailable();
     ASSERT_NE(nullptr, mLooper->mCallback);
     ASSERT_NE(nullptr, mLooper->mCallbackData);
@@ -890,10 +897,12 @@ TEST_F(IncrementalServiceTest, testStartDataLoaderUnhealthyStorage) {
             kFirstTimestampUs - std::chrono::duration_cast<MCS>(unhealthyTimeout).count();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, std::move(params), listener, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {},
+                                      std::move(params), listener, {});
 
     // Healthy state, registered for pending reads.
     ASSERT_NE(nullptr, mLooper->mCallback);
@@ -985,10 +994,12 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
     // Not expecting callback removal.
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
 }
 
@@ -1006,10 +1017,12 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndDisabled) {
     // Not expecting callback removal.
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
     // Now disable.
     mIncrementalService->disallowReadLogs(storageId);
@@ -1032,10 +1045,12 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChang
     // After callback is called, disable read logs and remove callback.
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(1);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
     ASSERT_NE(nullptr, mAppOpsManager->mStoredCallback.get());
     mAppOpsManager->mStoredCallback->opChanged(0, {});
@@ -1051,10 +1066,12 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionFails) {
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     ASSERT_LT(mDataLoader->setStorageParams(true), 0);
 }
 
@@ -1068,10 +1085,12 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsCheckPermissionNoCrossUse
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     ASSERT_LT(mDataLoader->setStorageParams(true), 0);
 }
 
@@ -1087,18 +1106,20 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsFails) {
     EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(0);
     EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    ASSERT_TRUE(mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {},
+                                                  {}, {}));
     ASSERT_LT(mDataLoader->setStorageParams(true), 0);
 }
 
 TEST_F(IncrementalServiceTest, testMakeDirectory) {
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     std::string dir_path("test");
 
     // Expecting incfs to call makeDir on a path like:
@@ -1115,9 +1136,9 @@ TEST_F(IncrementalServiceTest, testMakeDirectory) {
 
 TEST_F(IncrementalServiceTest, testMakeDirectories) {
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     auto first = "first"sv;
     auto second = "second"sv;
     auto third = "third"sv;
@@ -1138,9 +1159,9 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedFailsWithNoFile) {
     mFs->hasNoFile();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_EQ(-1, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
 }
 
@@ -1149,9 +1170,9 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedFailsWithFailedRanges) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
     ASSERT_EQ(-1, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
 }
@@ -1161,9 +1182,9 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedSuccessWithEmptyRanges) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
     ASSERT_EQ(0, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
 }
@@ -1173,9 +1194,9 @@ TEST_F(IncrementalServiceTest, testIsFileFullyLoadedSuccess) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
     ASSERT_EQ(0, mIncrementalService->isFileFullyLoaded(storageId, "base.apk"));
 }
@@ -1185,10 +1206,12 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithNoFile) {
     mFs->hasNoFile();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
-    ASSERT_EQ(1, mIncrementalService->getLoadingProgress(storageId).getProgress());
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
+    ASSERT_EQ(1,
+              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
+                      .getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithFailedRanges) {
@@ -1196,11 +1219,13 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressFailsWithFailedRanges) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(1);
-    ASSERT_EQ(-1, mIncrementalService->getLoadingProgress(storageId).getProgress());
+    ASSERT_EQ(-1,
+              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
+                      .getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithEmptyRanges) {
@@ -1208,11 +1233,13 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccessWithEmptyRanges) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(3);
-    ASSERT_EQ(1, mIncrementalService->getLoadingProgress(storageId).getProgress());
+    ASSERT_EQ(1,
+              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
+                      .getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccess) {
@@ -1220,11 +1247,13 @@ TEST_F(IncrementalServiceTest, testGetLoadingProgressSuccess) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     EXPECT_CALL(*mIncFs, countFilledBlocks(_, _)).Times(3);
-    ASSERT_EQ(0.5, mIncrementalService->getLoadingProgress(storageId).getProgress());
+    ASSERT_EQ(0.5,
+              mIncrementalService->getLoadingProgress(storageId, /*stopOnFirstIncomplete=*/false)
+                      .getProgress());
 }
 
 TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerSuccess) {
@@ -1232,9 +1261,9 @@ TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerSuccess) {
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     sp<NiceMock<MockStorageLoadingProgressListener>> listener{
             new NiceMock<MockStorageLoadingProgressListener>};
     NiceMock<MockStorageLoadingProgressListener>* listenerMock = listener.get();
@@ -1257,9 +1286,9 @@ TEST_F(IncrementalServiceTest, testRegisterLoadingProgressListenerFailsToGetProg
     mFs->hasFiles();
 
     TemporaryDir tempDir;
-    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                                       IncrementalService::CreateOptions::CreateNew,
-                                                       {}, {}, {}, {});
+    int storageId =
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     sp<NiceMock<MockStorageLoadingProgressListener>> listener{
             new NiceMock<MockStorageLoadingProgressListener>};
     NiceMock<MockStorageLoadingProgressListener>* listenerMock = listener.get();
@@ -1275,10 +1304,12 @@ TEST_F(IncrementalServiceTest, testRegisterStorageHealthListenerSuccess) {
 
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                               IncrementalService::CreateOptions::CreateNew, {},
-                                               StorageHealthCheckParams{}, listener, {});
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, listener,
+                                      {});
+
     StorageHealthCheckParams newParams;
     newParams.blockedTimeoutMs = 10000;
     newParams.unhealthyTimeoutMs = 20000;
@@ -1378,19 +1409,19 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsTooShort) {
     EXPECT_CALL(*mDataLoaderManager, bindToDataLoader(_, _, _, _)).Times(1);
     EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_)).Times(1);
     EXPECT_CALL(*mDataLoader, create(_, _, _, _)).Times(1);
-    EXPECT_CALL(*mDataLoader, start(_)).Times(0);
+    EXPECT_CALL(*mDataLoader, start(_)).Times(1);
     EXPECT_CALL(*mDataLoader, destroy(_)).Times(1);
     EXPECT_CALL(*mIncFs, setUidReadTimeouts(_, _)).Times(0);
     EXPECT_CALL(*mTimedQueue, addJob(_, _, _)).Times(0);
     EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                               IncrementalService::CreateOptions::CreateNew, {}, {},
-                                               {},
-                                               createPerUidTimeouts(
-                                                       {{0, 1, 2, 3}, {1, 2, 3, 4}, {2, 3, 4, 5}}));
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {},
+                                      createPerUidTimeouts(
+                                              {{0, 1, 2, 3}, {1, 2, 3, 4}, {2, 3, 4, 5}}));
 }
 
 TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
@@ -1410,13 +1441,12 @@ TEST_F(IncrementalServiceTest, testPerUidTimeoutsSuccess) {
 
     TemporaryDir tempDir;
     int storageId =
-            mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
-                                               IncrementalService::CreateOptions::CreateNew, {}, {},
-                                               {},
-                                               createPerUidTimeouts({{0, 1, 2, 3},
-                                                                     {1, 2, 3, 4},
-                                                                     {2, 3, 4, 100000000}}));
+            mIncrementalService->createStorage(tempDir.path, mDataLoaderParcel,
+                                               IncrementalService::CreateOptions::CreateNew);
     ASSERT_GE(storageId, 0);
+    mIncrementalService->startLoading(storageId, std::move(mDataLoaderParcel), {}, {}, {},
+                                      createPerUidTimeouts(
+                                              {{0, 1, 2, 3}, {1, 2, 3, 4}, {2, 3, 4, 100000000}}));
 
     {
         // Timed callback present -> 0 progress.

@@ -18,11 +18,14 @@ package android.os.incremental;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.pm.DataLoaderParams;
+import android.content.pm.IDataLoaderStatusListener;
 import android.os.RemoteException;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -323,6 +326,24 @@ public final class IncrementalStorage {
         }
     }
 
+
+    /**
+     * Checks if all files in the storage are fully loaded.
+     */
+    public boolean isFullyLoaded() throws IOException {
+        try {
+            final int res = mService.isFullyLoaded(mId);
+            if (res < 0) {
+                throw new IOException(
+                        "isFullyLoaded() failed at querying loading progress, errno " + -res);
+            }
+            return res == 0;
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+            return false;
+        }
+    }
+
     /**
      * Returns the loading progress of a storage
      *
@@ -376,13 +397,21 @@ public final class IncrementalStorage {
     }
 
     /**
-     * Informs the data loader service associated with the current storage to start data loader
-     *
-     * @return True if data loader is successfully started.
+     * Iinitializes and starts the DataLoader.
+     * This makes sure all install-time parameters are applied.
+     * Does not affect persistent DataLoader params.
+     * @return True if start request was successfully queued.
      */
-    public boolean startLoading() {
+    public boolean startLoading(
+            @NonNull DataLoaderParams dataLoaderParams,
+            @Nullable IDataLoaderStatusListener statusListener,
+            @Nullable StorageHealthCheckParams healthCheckParams,
+            @Nullable IStorageHealthListener healthListener,
+            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) {
+        Objects.requireNonNull(perUidReadTimeouts);
         try {
-            return mService.startLoading(mId);
+            return mService.startLoading(mId, dataLoaderParams.getData(), statusListener,
+                    healthCheckParams, healthListener, perUidReadTimeouts);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
             return false;
