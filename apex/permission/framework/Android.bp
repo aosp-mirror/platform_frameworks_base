@@ -27,7 +27,10 @@ java_sdk_library {
     defaults: ["framework-module-defaults"],
 
     // Restrict access to implementation library.
-    impl_library_visibility: ["//frameworks/base/apex/permission:__subpackages__"],
+    impl_library_visibility: [
+        "//frameworks/base/apex/permission:__subpackages__",
+        "//packages/modules/Permission:__subpackages__",
+    ],
 
     srcs: [
         ":framework-permission-sources",
