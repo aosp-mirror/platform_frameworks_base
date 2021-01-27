@@ -81,6 +81,7 @@ public class SystemSettings {
         Settings.System.NOTIFICATION_VIBRATION_INTENSITY,
         Settings.System.RING_VIBRATION_INTENSITY,
         Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+        Settings.System.DISPLAY_COLOR_MODE_VENDOR_HINT, // must precede DISPLAY_COLOR_MODE
         Settings.System.DISPLAY_COLOR_MODE,
         Settings.System.ALARM_ALERT,
         Settings.System.NOTIFICATION_LIGHT_PULSE,

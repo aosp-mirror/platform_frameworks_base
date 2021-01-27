@@ -17,11 +17,14 @@
 package android.media.metrics;
 
 import android.annotation.NonNull;
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.RemoteException;
 
 /**
  * This class gives information about, and interacts with media metrics.
  */
+@SystemService(Context.MEDIA_METRICS_SERVICE)
 public class MediaMetricsManager {
     // TODO: unhide APIs.
     private static final String TAG = "MediaMetricsManager";

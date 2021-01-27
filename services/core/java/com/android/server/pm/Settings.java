@@ -5497,6 +5497,12 @@ public final class Settings implements Watchable, Snappable {
                     List<RuntimePermissionsState.PermissionState> permissions =
                             getPermissionsFromPermissionsState(
                                     packageSetting.getLegacyPermissionState(), userId);
+                    if (permissions.isEmpty() && !packageSetting.areInstallPermissionsFixed()) {
+                        // Storing an empty state means the package is known to the system and its
+                        // install permissions have been granted and fixed. If this is not the case,
+                        // we should not store anything.
+                        continue;
+                    }
                     packagePermissions.put(packageName, permissions);
                 }
             }

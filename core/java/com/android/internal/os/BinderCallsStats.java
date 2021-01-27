@@ -633,7 +633,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     protected int getNativeTid() {
-        return Binder.getNativeTid();
+        return Process.myTid();
     }
 
     /**

@@ -2864,14 +2864,15 @@ public class AccountManagerService
 
         // Get the calling package. We will use it for the purpose of caching.
         final String callerPkg = loginOptions.getString(AccountManager.KEY_ANDROID_PACKAGE_NAME);
-        List<String> callerOwnedPackageNames;
+        String[] callerOwnedPackageNames;
         final long ident2 = Binder.clearCallingIdentity();
         try {
-            callerOwnedPackageNames = Arrays.asList(mPackageManager.getPackagesForUid(callerUid));
+            callerOwnedPackageNames = mPackageManager.getPackagesForUid(callerUid);
         } finally {
             Binder.restoreCallingIdentity(ident2);
         }
-        if (callerPkg == null || !callerOwnedPackageNames.contains(callerPkg)) {
+        if (callerPkg == null || callerOwnedPackageNames == null
+                || !ArrayUtils.contains(callerOwnedPackageNames, callerPkg)) {
             String msg = String.format(
                     "Uid %s is attempting to illegally masquerade as package %s!",
                     callerUid,

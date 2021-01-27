@@ -631,7 +631,7 @@ public class DisplayRotation {
             return false;
         }
 
-        // In the presence of the PINNED stack or System Alert windows we unfortunately can not
+        // In the presence of the PINNED root task or System Alert windows we unfortunately can not
         // seamlessly rotate.
         if (mDisplayContent.getDefaultTaskDisplayArea().hasPinnedTask()
                 || mDisplayContent.hasAlertWindowSurfaces()) {

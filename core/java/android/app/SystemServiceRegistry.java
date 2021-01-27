@@ -107,6 +107,8 @@ import android.media.AudioManager;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaFrameworkPlatformInitializer;
 import android.media.MediaRouter;
+import android.media.metrics.IMediaMetricsManager;
+import android.media.metrics.MediaMetricsManager;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
 import android.media.musicrecognition.IMusicRecognitionManager;
@@ -1410,6 +1412,18 @@ public final class SystemServiceRegistry {
                     @Override
                     public DeviceStateManager createService(ContextImpl ctx) {
                         return new DeviceStateManager();
+                    }});
+
+        registerService(Context.MEDIA_METRICS_SERVICE, MediaMetricsManager.class,
+                new CachedServiceFetcher<MediaMetricsManager>() {
+                    @Override
+                    public MediaMetricsManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder =
+                                ServiceManager.getServiceOrThrow(Context.MEDIA_METRICS_SERVICE);
+                        IMediaMetricsManager service =
+                                IMediaMetricsManager.Stub.asInterface(iBinder);
+                        return new MediaMetricsManager(service, ctx.getUserId());
                     }});
 
         sInitializing = true;

@@ -56,7 +56,10 @@ java_sdk_library {
     ],
     hostdex: true,
     // Restrict access to implementation library.
-    impl_library_visibility: ["//frameworks/base/apex/permission:__subpackages__"],
+    impl_library_visibility: [
+        "//frameworks/base/apex/permission:__subpackages__",
+        "//packages/modules/Permission:__subpackages__",
+    ],
     installable: true,
     jarjar_rules: ":permission-jarjar-rules",
     min_sdk_version: "30",

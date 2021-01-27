@@ -323,19 +323,19 @@ public class DisplayAreaOrganizerController extends IDisplayAreaOrganizerControl
         mService.mRootWindowContainer.mTaskSupervisor.beginDeferResume();
 
         // TaskDisplayArea#remove() move the stacks to the default TaskDisplayArea.
-        Task lastReparentedStack;
+        Task lastReparentedRootTask;
         try {
-            lastReparentedStack = taskDisplayArea.remove();
+            lastReparentedRootTask = taskDisplayArea.remove();
         } finally {
             mService.mRootWindowContainer.mTaskSupervisor.endDeferResume();
         }
 
         taskDisplayArea.removeImmediately();
 
-        // Only update focus/visibility for the last one because there may be many stacks are
+        // Only update focus/visibility for the last one because there may be many root tasks are
         // reparented and the intermediate states are unnecessary.
-        if (lastReparentedStack != null) {
-            lastReparentedStack.postReparent();
+        if (lastReparentedRootTask != null) {
+            lastReparentedRootTask.postReparent();
         }
     }
 }

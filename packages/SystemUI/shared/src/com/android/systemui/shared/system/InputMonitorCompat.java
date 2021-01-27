@@ -15,6 +15,7 @@
  */
 package com.android.systemui.shared.system;
 
+import android.hardware.input.InputManager;
 import android.os.Bundle;
 import android.os.Looper;
 import android.os.Parcel;
@@ -31,6 +32,13 @@ import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 public class InputMonitorCompat implements Parcelable {
     private final InputMonitor mInputMonitor;
     private boolean mForReturn = false;
+
+    /**
+     * Monitor input on the specified display for gestures.
+     */
+    public InputMonitorCompat(String name, int displayId) {
+        mInputMonitor = InputManager.getInstance().monitorGestureInput(name, displayId);
+    }
 
     private InputMonitorCompat(InputMonitor monitor) {
         mInputMonitor = monitor;

@@ -37,6 +37,7 @@ package android {
     field public static final String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final String BIND_EXTERNAL_STORAGE_SERVICE = "android.permission.BIND_EXTERNAL_STORAGE_SERVICE";
     field public static final String BIND_GBA_SERVICE = "android.permission.BIND_GBA_SERVICE";
+    field public static final String BIND_HOTWORD_DETECTION_SERVICE = "android.permission.BIND_HOTWORD_DETECTION_SERVICE";
     field public static final String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
     field public static final String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final String BIND_MUSIC_RECOGNITION_SERVICE = "android.permission.BIND_MUSIC_RECOGNITION_SERVICE";
@@ -46,6 +47,7 @@ package android {
     field public static final String BIND_PRINT_RECOMMENDATION_SERVICE = "android.permission.BIND_PRINT_RECOMMENDATION_SERVICE";
     field public static final String BIND_RESOLVER_RANKER_SERVICE = "android.permission.BIND_RESOLVER_RANKER_SERVICE";
     field public static final String BIND_RESUME_ON_REBOOT_SERVICE = "android.permission.BIND_RESUME_ON_REBOOT_SERVICE";
+    field public static final String BIND_ROTATION_RESOLVER_SERVICE = "android.permission.BIND_ROTATION_RESOLVER_SERVICE";
     field public static final String BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE = "android.permission.BIND_RUNTIME_PERMISSION_PRESENTER_SERVICE";
     field public static final String BIND_SETTINGS_SUGGESTIONS_SERVICE = "android.permission.BIND_SETTINGS_SUGGESTIONS_SERVICE";
     field public static final String BIND_SOUND_TRIGGER_DETECTION_SERVICE = "android.permission.BIND_SOUND_TRIGGER_DETECTION_SERVICE";
@@ -133,6 +135,7 @@ package android {
     field public static final String MANAGE_ONE_TIME_PERMISSION_SESSIONS = "android.permission.MANAGE_ONE_TIME_PERMISSION_SESSIONS";
     field public static final String MANAGE_ROLE_HOLDERS = "android.permission.MANAGE_ROLE_HOLDERS";
     field public static final String MANAGE_ROLLBACKS = "android.permission.MANAGE_ROLLBACKS";
+    field public static final String MANAGE_ROTATION_RESOLVER = "android.permission.MANAGE_ROTATION_RESOLVER";
     field public static final String MANAGE_SEARCH_UI = "android.permission.MANAGE_SEARCH_UI";
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
@@ -7218,6 +7221,7 @@ package android.net {
 
   public abstract class QosFilter {
     method @NonNull public abstract android.net.Network getNetwork();
+    method public abstract boolean matchesLocalAddress(@NonNull java.net.InetAddress, int, int);
   }
 
   public final class QosSession implements android.os.Parcelable {
@@ -7863,6 +7867,7 @@ package android.os {
 
   public static final class BatterySaverPolicyConfig.Builder {
     ctor public BatterySaverPolicyConfig.Builder();
+    ctor public BatterySaverPolicyConfig.Builder(@NonNull android.os.BatterySaverPolicyConfig);
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder addDeviceSpecificSetting(@NonNull String, @NonNull String);
     method @NonNull public android.os.BatterySaverPolicyConfig build();
     method @NonNull public android.os.BatterySaverPolicyConfig.Builder setAdjustBrightnessFactor(float);
@@ -8230,6 +8235,7 @@ package android.os {
   public final class PowerManager {
     method @RequiresPermission(allOf={android.Manifest.permission.READ_DREAM_STATE, android.Manifest.permission.WRITE_DREAM_STATE}) public void dream(long);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public boolean forceSuspend();
+    method @NonNull public android.os.BatterySaverPolicyConfig getFullPowerSavePolicy();
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public int getPowerSaveModeTrigger();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplayAvailable();
     method @RequiresPermission(android.Manifest.permission.READ_DREAM_STATE) public boolean isAmbientDisplaySuppressed();
@@ -8238,6 +8244,7 @@ package android.os {
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setAdaptivePowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(android.Manifest.permission.DEVICE_POWER) public void setBatteryDischargePrediction(@NonNull java.time.Duration, boolean);
     method @RequiresPermission(android.Manifest.permission.POWER_SAVER) public boolean setDynamicPowerSaveHint(boolean, int);
+    method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setFullPowerSavePolicy(@NonNull android.os.BatterySaverPolicyConfig);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.POWER_SAVER}) public boolean setPowerSaveModeEnabled(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_DREAM_STATE) public void suppressAmbientDisplay(@NonNull String, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.DEVICE_POWER, android.Manifest.permission.USER_ACTIVITY}) public void userActivity(long, int, int);
@@ -9961,6 +9968,37 @@ package android.service.resumeonreboot {
 
 }
 
+package android.service.rotationresolver {
+
+  public final class RotationResolutionRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCurrentRotation();
+    method @NonNull public String getPackageName();
+    method public int getProposedRotation();
+    method public long getTimeoutMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.rotationresolver.RotationResolutionRequest> CREATOR;
+  }
+
+  public abstract class RotationResolverService extends android.app.Service {
+    ctor public RotationResolverService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onResolveRotation(@NonNull android.service.rotationresolver.RotationResolutionRequest, @Nullable android.os.CancellationSignal, @NonNull android.service.rotationresolver.RotationResolverService.RotationResolverCallback);
+    field public static final int ROTATION_RESULT_FAILURE_CANCELLED = 0; // 0x0
+    field public static final int ROTATION_RESULT_FAILURE_NOT_SUPPORTED = 4; // 0x4
+    field public static final int ROTATION_RESULT_FAILURE_PREEMPTED = 2; // 0x2
+    field public static final int ROTATION_RESULT_FAILURE_TIMED_OUT = 1; // 0x1
+    field public static final int ROTATION_RESULT_FAILURE_UNKNOWN = 3; // 0x3
+    field public static final String SERVICE_INTERFACE = "android.service.rotationresolver.RotationResolverService";
+  }
+
+  public static interface RotationResolverService.RotationResolverCallback {
+    method public void onFailure(int);
+    method public void onSuccess(int);
+  }
+
+}
+
 package android.service.search {
 
   public abstract class SearchUiService extends android.app.Service {
@@ -10174,6 +10212,7 @@ package android.service.voice {
     method @RequiresPermission(allOf={android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.CAPTURE_AUDIO_HOTWORD}) public boolean stopRecognition();
     field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
     field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field public static final int HOTWORD_DETECTION_FALSE_ALERT = 0; // 0x0
     field public static final int MODEL_PARAM_THRESHOLD_FACTOR = 0; // 0x0
     field public static final int RECOGNITION_FLAG_ALLOW_MULTIPLE_TRIGGERS = 2; // 0x2
     field public static final int RECOGNITION_FLAG_CAPTURE_TRIGGER_AUDIO = 1; // 0x1
@@ -10196,6 +10235,7 @@ package android.service.voice {
     method public abstract void onError();
     method public abstract void onRecognitionPaused();
     method public abstract void onRecognitionResumed();
+    method public void onRejected(int);
   }
 
   public static class AlwaysOnHotwordDetector.EventPayload {
@@ -10208,9 +10248,24 @@ package android.service.voice {
     method public int getStart();
   }
 
+  public abstract class HotwordDetectionService extends android.app.Service {
+    ctor public HotwordDetectionService();
+    method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public void onDetectFromDspSource(int, @NonNull android.service.voice.HotwordDetectionService.DspHotwordDetectionCallback);
+    field public static final String SERVICE_INTERFACE = "android.service.voice.HotwordDetectionService";
+  }
+
+  public static final class HotwordDetectionService.DspHotwordDetectionCallback {
+    method public void onDetected();
+    method public void onRejected();
+  }
+
   public class VoiceInteractionService extends android.app.Service {
     method @NonNull public final android.service.voice.AlwaysOnHotwordDetector createAlwaysOnHotwordDetector(String, java.util.Locale, android.service.voice.AlwaysOnHotwordDetector.Callback);
     method @NonNull @RequiresPermission("android.permission.MANAGE_VOICE_KEYPHRASES") public final android.media.voice.KeyphraseModelManager createKeyphraseModelManager();
+    method public final int setHotwordDetectionConfig(@Nullable android.os.Bundle);
+    field public static final int HOTWORD_CONFIG_FAILURE = 1; // 0x1
+    field public static final int HOTWORD_CONFIG_SUCCESS = 0; // 0x0
   }
 
 }
@@ -10946,6 +11001,18 @@ package android.telephony {
     field public static final int REASON_UNSPECIFIED = 0; // 0x0
   }
 
+  public final class PhoneCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getDeviceNrCapabilityBitmask();
+    method @IntRange(from=1) public int getMaxActiveInternetData();
+    method @IntRange(from=1) public int getMaxActivePacketSwitchedVoiceCalls();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
+    field public static final int DEVICE_NR_CAPABILITY_NONE = 0; // 0x0
+    field public static final int DEVICE_NR_CAPABILITY_NSA = 1; // 0x1
+    field public static final int DEVICE_NR_CAPABILITY_SA = 2; // 0x2
+  }
+
   public final class PhoneNumberRange implements android.os.Parcelable {
     ctor public PhoneNumberRange(@NonNull String, @NonNull String, @NonNull String, @NonNull String);
     method public int describeContents();
@@ -11032,6 +11099,10 @@ package android.telephony {
 
   public static interface PhoneStateListener.OutgoingEmergencySmsListener {
     method @RequiresPermission(android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION) public void onOutgoingEmergencySms(@NonNull android.telephony.emergency.EmergencyNumber, int);
+  }
+
+  public static interface PhoneStateListener.PhoneCapabilityChangedListener {
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
   }
 
   public static interface PhoneStateListener.PhysicalChannelConfigChangedListener {
@@ -11458,6 +11529,7 @@ package android.telephony {
     method public int getMaxNumberOfSimultaneouslyActiveSims();
     method public static long getMaxNumberVerificationTimeoutMillis();
     method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String[] getMergedImsisFromGroup();
+    method @NonNull @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public android.telephony.PhoneCapability getPhoneCapability();
     method @Deprecated @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public long getPreferredNetworkTypeBitmask();
     method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public int getRadioPowerState();
     method public int getSimApplicationState();
@@ -13030,6 +13102,7 @@ package android.telephony.ims {
     ctor public SipMessage(@NonNull String, @NonNull String, @NonNull byte[]);
     method public int describeContents();
     method @NonNull public byte[] getContent();
+    method @NonNull public byte[] getEncodedMessage();
     method @NonNull public String getHeaderSection();
     method @NonNull public String getStartLine();
     method public void writeToParcel(@NonNull android.os.Parcel, int);

@@ -48,7 +48,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -2585,14 +2584,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mAccessibilityController.onWindowTransitionLocked(win, transit);
         }
 
-        // When we start the exit animation we take the Surface from the client
-        // so it will stop perturbing it. We need to likewise takeaway the SurfaceFlinger
-        // side child surfaces, so they will remain preserved in their current state
-        // (rather than be cleaned up immediately by the app code).
-        SurfaceControl.openTransaction();
-        winAnimator.detachChildren(getGlobalTransaction());
-        SurfaceControl.closeTransaction();
-
         return focusMayChange;
     }
 
@@ -3022,10 +3013,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
-    void getStackBounds(int windowingMode, int activityType, Rect bounds) {
-        final Task stack = mRoot.getRootTask(windowingMode, activityType);
-        if (stack != null) {
-            stack.getBounds(bounds);
+    void getRootTaskBounds(int windowingMode, int activityType, Rect bounds) {
+        final Task rootTask = mRoot.getRootTask(windowingMode, activityType);
+        if (rootTask != null) {
+            rootTask.getBounds(bounds);
             return;
         }
         bounds.setEmpty();
@@ -3484,7 +3475,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.switchUser(newUserId);
             mWindowPlacerLocked.performSurfacePlacement();
 
-            // Notify whether the docked stack exists for the current user
+            // Notify whether the root docked task exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
 
             mRoot.forAllDisplays(dc -> dc.mAppTransition.setCurrentUser(newUserId));
@@ -4848,7 +4839,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRoot.getTopFocusedDisplayContent().mCurrentFocus;
     }
 
-    Task getImeFocusStackLocked() {
+    Task getImeFocusRootTaskLocked() {
         // Don't use mCurrentFocus.getStack() because it returns home stack for system windows.
         // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
         // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
@@ -6836,7 +6827,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
-    void setDockedStackResizing(boolean resizing) {
+    void setDockedRootTaskResizing(boolean resizing) {
         getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
         requestTraversal();
     }
@@ -8210,11 +8201,11 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        // We ignore home stack since we don't want home stack to move to front when touched.
-        // Specifically, in freeform we don't want tapping on home to cause the freeform apps to go
-        // behind home. See b/117376413
+        // We ignore root home task since we don't want root home task to move to front when
+        // touched. Specifically, in freeform we don't want tapping on home to cause the freeform
+        // apps to go behind home. See b/117376413
         if (task.isActivityTypeHome()) {
-            // Only ignore home stack if the requested focus home Task is in the same
+            // Only ignore root home task if the requested focus home Task is in the same
             // TaskDisplayArea as the current focus Task.
             TaskDisplayArea homeTda = task.getDisplayArea();
             WindowState curFocusedWindow = getFocusedWindow();

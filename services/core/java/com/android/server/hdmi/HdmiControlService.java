@@ -526,6 +526,16 @@ public class HdmiControlService extends SystemService {
                         initializeCec(INITIATED_BY_ENABLE_CEC);
                     }
                 });
+        mHdmiCecConfig.registerChangeListener(
+                HdmiControlManager.CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+                new HdmiCecConfig.SettingChangeListener() {
+                    @Override
+                    public void onChange(String setting) {
+                        if (isTvDeviceEnabled()) {
+                            setCecOption(OptionKey.WAKEUP, tv().getAutoWakeup());
+                        }
+                    }
+                });
     }
 
     private void bootCompleted() {
@@ -651,7 +661,6 @@ public class HdmiControlService extends SystemService {
         ContentResolver resolver = getContext().getContentResolver();
         String[] settings = new String[] {
                 Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
-                Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED,
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                 Global.MHL_INPUT_SWITCHING_ENABLED,
@@ -679,12 +688,6 @@ public class HdmiControlService extends SystemService {
                 case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
                     setHdmiCecVolumeControlEnabledInternal(getHdmiCecConfig().getIntValue(
                             HdmiControlManager.CEC_SETTING_NAME_VOLUME_CONTROL_MODE));
-                    break;
-                case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
-                    if (isTvDeviceEnabled()) {
-                        tv().setAutoWakeup(enabled);
-                    }
-                    setCecOption(OptionKey.WAKEUP, enabled);
                     break;
                 case Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED:
                     for (int type : mLocalDevices) {

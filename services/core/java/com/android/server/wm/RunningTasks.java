@@ -48,7 +48,7 @@ class RunningTasks {
     private ArraySet<Integer> mProfileIds;
     private boolean mAllowed;
     private boolean mFilterOnlyVisibleRecents;
-    private Task mTopDisplayFocusStack;
+    private Task mTopDisplayFocusRootTask;
     private RecentTasks mRecentTasks;
 
     void getTasks(int maxNum, List<RunningTaskInfo> list, boolean filterOnlyVisibleRecents,
@@ -67,7 +67,7 @@ class RunningTasks {
         mProfileIds = profileIds;
         mAllowed = allowed;
         mFilterOnlyVisibleRecents = filterOnlyVisibleRecents;
-        mTopDisplayFocusStack = root.getTopDisplayFocusedRootTask();
+        mTopDisplayFocusRootTask = root.getTopDisplayFocusedRootTask();
         mRecentTasks = root.mService.getRecentTasks();
 
         final PooledConsumer c = PooledLambda.obtainConsumer(RunningTasks::processTask, this,
@@ -113,10 +113,11 @@ class RunningTasks {
             return;
         }
 
-        final Task stack = task.getRootTask();
-        if (stack == mTopDisplayFocusStack && stack.getTopMostTask() == task) {
-            // For the focused stack top task, update the last stack active time so that it can be
-            // used to determine the order of the tasks (it may not be set for newly created tasks)
+        final Task rootTask = task.getRootTask();
+        if (rootTask == mTopDisplayFocusRootTask && rootTask.getTopMostTask() == task) {
+            // For the focused top root task, update the last root task active time so that it
+            // can be used to determine the order of the tasks (it may not be set for newly
+            // created tasks)
             task.touchActiveTime();
         }
 

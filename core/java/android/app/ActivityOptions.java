@@ -987,6 +987,18 @@ public class ActivityOptions {
         return opts;
     }
 
+    /**
+     * Create an {@link ActivityOptions} instance that lets the application control the entire
+     * transition using a {@link IRemoteTransition}.
+     * @hide
+     */
+    @RequiresPermission(CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS)
+    public static ActivityOptions makeRemoteTransition(IRemoteTransition remoteTransition) {
+        final ActivityOptions opts = new ActivityOptions();
+        opts.mRemoteTransition = remoteTransition;
+        return opts;
+    }
+
     /** @hide */
     public boolean getLaunchTaskBehind() {
         return mAnimationType == ANIM_LAUNCH_TASK_BEHIND;

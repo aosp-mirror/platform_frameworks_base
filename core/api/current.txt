@@ -8349,6 +8349,7 @@ package android.appwidget {
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
     method public final android.os.UserHandle getProfile();
+    method @Nullable public final String loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
     method public final android.graphics.drawable.Drawable loadPreviewImage(@NonNull android.content.Context, int);
@@ -8361,10 +8362,12 @@ package android.appwidget {
     field public static final int WIDGET_CATEGORY_HOME_SCREEN = 1; // 0x1
     field public static final int WIDGET_CATEGORY_KEYGUARD = 2; // 0x2
     field public static final int WIDGET_CATEGORY_SEARCHBOX = 4; // 0x4
+    field public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 3; // 0x3
     field public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2; // 0x2
     field public static final int WIDGET_FEATURE_RECONFIGURABLE = 1; // 0x1
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
+    field @IdRes public int descriptionResource;
     field public int icon;
     field public int initialKeyguardLayout;
     field public int initialLayout;
@@ -10370,6 +10373,7 @@ package android.content {
     field public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final String LOCATION_SERVICE = "location";
+    field public static final String MEDIA_METRICS_SERVICE = "media_metrics";
     field public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final String MEDIA_ROUTER_SERVICE = "media_router";
     field public static final String MEDIA_SESSION_SERVICE = "media_session";
@@ -41215,12 +41219,6 @@ package android.telephony {
     field public static final int SCAN_TYPE_PERIODIC = 1; // 0x1
   }
 
-  public final class PhoneCapability implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
-  }
-
   public class PhoneNumberFormattingTextWatcher implements android.text.TextWatcher {
     ctor public PhoneNumberFormattingTextWatcher();
     ctor public PhoneNumberFormattingTextWatcher(String);
@@ -41395,10 +41393,6 @@ package android.telephony {
 
   public static interface PhoneStateListener.MessageWaitingIndicatorChangedListener {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onMessageWaitingIndicatorChanged(boolean);
-  }
-
-  public static interface PhoneStateListener.PhoneCapabilityChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
   }
 
   public static interface PhoneStateListener.PreciseDataConnectionStateChangedListener {

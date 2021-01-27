@@ -20,8 +20,6 @@ import android.app.AlarmManager.AlarmClockInfo;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.provider.AlarmClock;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
@@ -43,6 +41,7 @@ import com.android.systemui.demomode.DemoModeController;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.PrivacyChipEvent;
+import com.android.systemui.privacy.PrivacyDialogController;
 import com.android.systemui.privacy.PrivacyItem;
 import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.privacy.logging.PrivacyLogger;
@@ -94,6 +93,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
     private final StatusBarIconController.TintedIconManager mIconManager;
     private final DemoMode mDemoModeReceiver;
     private final PrivacyLogger mPrivacyLogger;
+    private final PrivacyDialogController mPrivacyDialogController;
 
     private boolean mListening;
     private AlarmClockInfo mNextAlarm;
@@ -198,13 +198,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
                 }
             } else if (v == mPrivacyChip) {
                 // If the privacy chip is visible, it means there were some indicators
-                Handler mUiHandler = new Handler(Looper.getMainLooper());
                 mUiEventLogger.log(PrivacyChipEvent.ONGOING_INDICATORS_CHIP_CLICK);
-                mUiHandler.post(() -> {
-                    mActivityStarter.postStartActivityDismissingKeyguard(
-                            new Intent(Intent.ACTION_REVIEW_ONGOING_PERMISSION_USAGE), 0);
-                    mQSTileHost.collapsePanels();
-                });
+                mPrivacyDialogController.showDialog(getContext());
             } else if (v == mRingerContainer && mRingerContainer.isVisibleToUser()) {
                 mActivityStarter.postStartActivityDismissingKeyguard(new Intent(
                         Settings.ACTION_SOUND_SETTINGS), 0);
@@ -222,7 +217,8 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
             UserTracker userTracker, QuickQSPanelController quickQSPanelController,
             QSCarrierGroupController.Builder qsCarrierGroupControllerBuilder,
             PrivacyLogger privacyLogger,
-            SysuiColorExtractor colorExtractor) {
+            SysuiColorExtractor colorExtractor,
+            PrivacyDialogController privacyDialogController) {
         super(view);
         mZenModeController = zenModeController;
         mNextAlarmController = nextAlarmController;
@@ -238,6 +234,7 @@ class QuickStatusBarHeaderController extends ViewController<QuickStatusBarHeader
         mLifecycle = new LifecycleRegistry(mLifecycleOwner);
         mHeaderQsPanelController = quickQSPanelController;
         mPrivacyLogger = privacyLogger;
+        mPrivacyDialogController = privacyDialogController;
 
         mQSCarrierGroupController = qsCarrierGroupControllerBuilder
                 .setQSCarrierGroup(mView.findViewById(R.id.carrier_group))

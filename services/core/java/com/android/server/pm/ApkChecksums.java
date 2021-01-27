@@ -63,8 +63,10 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.security.VerityUtils;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -72,16 +74,23 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.security.DigestException;
+import java.security.InvalidParameterException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import sun.security.pkcs.PKCS7;
+import sun.security.pkcs.SignerInfo;
 
 /**
  * Provides checksums for APK.
@@ -90,12 +99,15 @@ public class ApkChecksums {
     static final String TAG = "ApkChecksums";
 
     private static final String DIGESTS_FILE_EXTENSION = ".digests";
+    private static final String DIGESTS_SIGNATURE_FILE_EXTENSION = ".signature";
 
     // MessageDigest algorithms.
     static final String ALGO_MD5 = "MD5";
     static final String ALGO_SHA1 = "SHA1";
     static final String ALGO_SHA256 = "SHA256";
     static final String ALGO_SHA512 = "SHA512";
+
+    private static final Certificate[] EMPTY_CERTIFICATE_ARRAY = {};
 
     /**
      * Check back in 1 second after we detected we needed to wait for the APK to be fully available.
@@ -167,6 +179,21 @@ public class ApkChecksums {
     }
 
     /**
+     * Return the signature path associated with the given digests path.
+     * (appends '.signature' to the end)
+     */
+    public static String buildSignaturePathForDigests(String digestsPath) {
+        return digestsPath + DIGESTS_SIGNATURE_FILE_EXTENSION;
+    }
+
+    /** Returns true if the given file looks like containing digests or digests' signature. */
+    public static boolean isDigestOrDigestSignatureFile(File file) {
+        final String name = file.getName();
+        return name.endsWith(DIGESTS_FILE_EXTENSION) || name.endsWith(
+                DIGESTS_SIGNATURE_FILE_EXTENSION);
+    }
+
+    /**
      * Search for the digests file associated with the given target file.
      * If it exists, the method returns the digests file; otherwise it returns null.
      */
@@ -177,19 +204,30 @@ public class ApkChecksums {
     }
 
     /**
+     * Search for the signature file associated with the given digests file.
+     * If it exists, the method returns the signature file; otherwise it returns null.
+     */
+    public static File findSignatureForDigests(File digestsFile) {
+        String signaturePath = buildSignaturePathForDigests(digestsFile.getAbsolutePath());
+        File signatureFile = new File(signaturePath);
+        return signatureFile.exists() ? signatureFile : null;
+    }
+
+    /**
      * Serialize checksums to the stream in binary format.
      */
     public static void writeChecksums(OutputStream os, Checksum[] checksums)
-            throws IOException, CertificateException {
+            throws IOException {
         try (DataOutputStream dos = new DataOutputStream(os)) {
-            dos.writeInt(checksums.length);
             for (Checksum checksum : checksums) {
-                dos.writeInt(checksum.getType());
-
-                final byte[] valueBytes = checksum.getValue();
-                dos.writeInt(valueBytes.length);
-                dos.write(valueBytes);
+                Checksum.writeToStream(dos, checksum);
             }
+        }
+    }
+
+    private static Checksum[] readChecksums(File file) throws IOException {
+        try (InputStream is = new FileInputStream(file)) {
+            return readChecksums(is);
         }
     }
 
@@ -197,20 +235,59 @@ public class ApkChecksums {
      * Deserialize array of checksums previously stored in
      * {@link #writeChecksums(OutputStream, Checksum[])}.
      */
-    private static Checksum[] readChecksums(File file) throws IOException {
-        try (InputStream is = new FileInputStream(file);
-             DataInputStream dis = new DataInputStream(is)) {
-            final int size = dis.readInt();
-            Checksum[] checksums = new Checksum[size];
-            for (int i = 0; i < size; ++i) {
-                final int type = dis.readInt();
-
-                final byte[] valueBytes = new byte[dis.readInt()];
-                dis.read(valueBytes);
-                checksums[i] = new Checksum(type, valueBytes);
+    public static Checksum[] readChecksums(InputStream is) throws IOException {
+        try (DataInputStream dis = new DataInputStream(is)) {
+            ArrayList<Checksum> checksums = new ArrayList<>();
+            try {
+                // 100 is an arbitrary very big number. We should stop at EOF.
+                for (int i = 0; i < 100; ++i) {
+                    checksums.add(Checksum.readFromStream(dis));
+                }
+            } catch (EOFException e) {
+                // expected
             }
-            return checksums;
+            return checksums.toArray(new Checksum[checksums.size()]);
         }
+    }
+
+    /**
+     * Verifies signature over binary serialized checksums.
+     * @param checksums array of checksums
+     * @param signature detached PKCS7 signature in DER format
+     * @return all certificates that passed verification
+     * @throws SignatureException if verification fails
+     */
+    public static @NonNull Certificate[] verifySignature(Checksum[] checksums, byte[] signature)
+            throws NoSuchAlgorithmException, IOException, SignatureException {
+        final byte[] blob;
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            writeChecksums(os, checksums);
+            blob = os.toByteArray();
+        }
+
+        PKCS7 pkcs7 = new PKCS7(signature);
+
+        final Certificate[] certs = pkcs7.getCertificates();
+        if (certs == null || certs.length == 0) {
+            throw new SignatureException("Signature missing certificates");
+        }
+
+        final SignerInfo[] signerInfos = pkcs7.verify(blob);
+        if (signerInfos == null || signerInfos.length == 0) {
+            throw new SignatureException("Verification failed");
+        }
+
+        ArrayList<Certificate> certificates = new ArrayList<>(signerInfos.length);
+        for (SignerInfo signerInfo : signerInfos) {
+            ArrayList<X509Certificate> chain = signerInfo.getCertificateChain(pkcs7);
+            if (chain == null) {
+                throw new SignatureException(
+                        "Verification passed, but certification chain is empty.");
+            }
+            certificates.addAll(chain);
+        }
+
+        return certificates.toArray(new Certificate[certificates.size()]);
     }
 
     /**
@@ -335,6 +412,8 @@ public class ApkChecksums {
             }
         }
 
+        // Note: this compares installer and system digests internally and
+        // has to be called right after all system digests are populated.
         getInstallerChecksums(split, file, types, installerPackageName, trustedInstallers,
                 checksums, injector);
     }
@@ -352,31 +431,52 @@ public class ApkChecksums {
             return;
         }
 
-        final File digestsFile = new File(buildDigestsPathForApk(file.getAbsolutePath()));
-        if (!digestsFile.exists()) {
+        final File digestsFile = findDigestsForFile(file);
+        if (digestsFile == null) {
             return;
         }
-
-        final AndroidPackage installer = injector.getPackageManagerInternal().getPackage(
-                installerPackageName);
-        if (installer == null) {
-            Slog.e(TAG, "Installer package not found.");
-            return;
-        }
-
-        // Obtaining array of certificates used for signing the installer package.
-        final Signature[] certs = installer.getSigningDetails().signatures;
-        final Signature[] pastCerts = installer.getSigningDetails().pastSigningCertificates;
-        if (certs == null || certs.length == 0 || certs[0] == null) {
-            Slog.e(TAG, "Can't obtain calling installer package's certificates.");
-            return;
-        }
-        // According to V2/V3 signing schema, the first certificate corresponds to the public key
-        // in the signing block.
-        byte[] trustedCertBytes = certs[0].toByteArray();
+        final File signatureFile = findSignatureForDigests(digestsFile);
 
         try {
             final Checksum[] digests = readChecksums(digestsFile);
+            final Signature[] certs;
+            final Signature[] pastCerts;
+
+            if (signatureFile != null) {
+                final Certificate[] certificates = verifySignature(digests,
+                        Files.readAllBytes(signatureFile.toPath()));
+                if (certificates == null || certificates.length == 0) {
+                    Slog.e(TAG, "Error validating signature");
+                    return;
+                }
+
+                certs = new Signature[certificates.length];
+                for (int i = 0, size = certificates.length; i < size; i++) {
+                    certs[i] = new Signature(certificates[i].getEncoded());
+                }
+
+                pastCerts = null;
+            } else {
+                final AndroidPackage installer = injector.getPackageManagerInternal().getPackage(
+                        installerPackageName);
+                if (installer == null) {
+                    Slog.e(TAG, "Installer package not found.");
+                    return;
+                }
+
+                // Obtaining array of certificates used for signing the installer package.
+                certs = installer.getSigningDetails().signatures;
+                pastCerts = installer.getSigningDetails().pastSigningCertificates;
+            }
+            if (certs == null || certs.length == 0 || certs[0] == null) {
+                Slog.e(TAG, "Can't obtain certificates.");
+                return;
+            }
+
+            // According to V2/V3 signing schema, the first certificate corresponds to the public
+            // key in the signing block.
+            byte[] trustedCertBytes = certs[0].toByteArray();
+
             final Set<Signature> trusted = convertToSet(trustedInstallers);
 
             if (trusted != null && !trusted.isEmpty()) {
@@ -391,6 +491,16 @@ public class ApkChecksums {
                 trustedCertBytes = trustedCert.toByteArray();
             }
 
+            // Compare OS-enforced digests.
+            for (Checksum digest : digests) {
+                final ApkChecksum system = checksums.get(digest.getType());
+                if (system != null && !Arrays.equals(system.getValue(), digest.getValue())) {
+                    throw new InvalidParameterException("System digest " + digest.getType()
+                            + " mismatch, can't bind installer-provided digests to the APK.");
+                }
+            }
+
+            // Append missing digests.
             for (Checksum digest : digests) {
                 if (isRequired(digest.getType(), types, checksums)) {
                     checksums.put(digest.getType(),
@@ -398,7 +508,16 @@ public class ApkChecksums {
                 }
             }
         } catch (IOException e) {
-            Slog.e(TAG, "Error reading .digests", e);
+            Slog.e(TAG, "Error reading .digests or .signature", e);
+        } catch (NoSuchAlgorithmException | SignatureException | InvalidParameterException e) {
+            Slog.e(TAG, "Error validating digests. Invalid digests will be removed", e);
+            try {
+                Files.deleteIfExists(digestsFile.toPath());
+                if (signatureFile != null) {
+                    Files.deleteIfExists(signatureFile.toPath());
+                }
+            } catch (IOException ignored) {
+            }
         } catch (CertificateEncodingException e) {
             Slog.e(TAG, "Error encoding trustedInstallers", e);
         }

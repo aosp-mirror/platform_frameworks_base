@@ -56,6 +56,8 @@ public class PipAnimationController {
     public static final int TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN = 4;
     public static final int TRANSITION_DIRECTION_REMOVE_STACK = 5;
     public static final int TRANSITION_DIRECTION_SNAP_AFTER_RESIZE = 6;
+    public static final int TRANSITION_DIRECTION_USER_RESIZE = 7;
+    public static final int TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND = 8;
 
     @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
             TRANSITION_DIRECTION_NONE,
@@ -64,7 +66,9 @@ public class PipAnimationController {
             TRANSITION_DIRECTION_LEAVE_PIP,
             TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN,
             TRANSITION_DIRECTION_REMOVE_STACK,
-            TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
+            TRANSITION_DIRECTION_SNAP_AFTER_RESIZE,
+            TRANSITION_DIRECTION_USER_RESIZE,
+            TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransitionDirection {}

@@ -25,6 +25,7 @@ import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 import static com.android.wm.shell.ShellTaskOrganizer.taskListenerTypeToString;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_ALPHA;
 import static com.android.wm.shell.pip.PipAnimationController.ANIM_TYPE_BOUNDS;
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_NONE;
@@ -32,9 +33,13 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SAME;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_SNAP_AFTER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -820,13 +825,22 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
      */
     public void scheduleAnimateResizePip(Rect toBounds, int duration,
             Consumer<Rect> updateBoundsCallback) {
+        scheduleAnimateResizePip(toBounds, duration, TRANSITION_DIRECTION_NONE,
+                updateBoundsCallback);
+    }
+
+    /**
+     * Animates resizing of the pinned stack given the duration.
+     */
+    public void scheduleAnimateResizePip(Rect toBounds, int duration,
+            @PipAnimationController.TransitionDirection int direction,
+            Consumer<Rect> updateBoundsCallback) {
         if (mWaitForFixedRotation) {
             Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
             return;
         }
         scheduleAnimateResizePip(mPipBoundsState.getBounds(), toBounds, 0 /* startingAngle */,
-                null /* sourceHintRect */, TRANSITION_DIRECTION_NONE, duration,
-                updateBoundsCallback);
+                null /* sourceHintRect */, direction, duration, updateBoundsCallback);
     }
 
     /**
@@ -919,7 +933,15 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         scheduleFinishResizePip(destinationBounds, TRANSITION_DIRECTION_NONE, updateBoundsCallback);
     }
 
-    private void scheduleFinishResizePip(Rect destinationBounds,
+    /**
+     * Finish an intermediate resize operation. This is expected to be called after
+     * {@link #scheduleResizePip}.
+     *
+     * @param destinationBounds the final bounds of the PIP after resizing
+     * @param direction the transition direction
+     * @param updateBoundsCallback a callback to invoke after finishing the resize
+     */
+    public void scheduleFinishResizePip(Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             Consumer<Rect> updateBoundsCallback) {
         if (mState.shouldBlockResizeRequest()) {
@@ -1049,7 +1071,60 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         WindowContainerTransaction wct = new WindowContainerTransaction();
         prepareFinishResizeTransaction(destinationBounds, direction, tx, wct);
-        applyFinishBoundsResize(wct, direction);
+
+        // Only corner drag, pinch or expand/un-expand resizing may lead to animating the finish
+        // resize operation.
+        final boolean mayAnimateFinishResize = direction == TRANSITION_DIRECTION_USER_RESIZE
+                || direction == TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
+                || direction == TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
+        // Animate with a cross-fade if enabled and seamless resize is disables by the app.
+        final boolean animateCrossFadeResize = mayAnimateFinishResize
+                && !mPictureInPictureParams.isSeamlessResizeEnabled();
+        if (animateCrossFadeResize) {
+            // Take a snapshot of the PIP task and hide it. We'll show it and fade it out after
+            // the wct transaction is applied and the activity is laid out again.
+            final SurfaceControl snapshotSurface = mTaskOrganizer.takeScreenshot(mToken);
+            mSurfaceTransactionHelper.reparentAndShowSurfaceSnapshot(
+                    mSurfaceControlTransactionFactory.getTransaction(), mLeash, snapshotSurface);
+            mTaskOrganizer.applySyncTransaction(wct, new WindowContainerTransactionCallback() {
+                @Override
+                public void onTransactionReady(int id, @NonNull SurfaceControl.Transaction t) {
+                    // Scale the snapshot from its pre-resize bounds to the post-resize bounds.
+                    final Rect snapshotSrc = new Rect(0, 0, snapshotSurface.getWidth(),
+                            snapshotSurface.getHeight());
+                    final Rect snapshotDest = new Rect(0, 0, destinationBounds.width(),
+                            destinationBounds.height());
+                    mSurfaceTransactionHelper.scale(t, snapshotSurface, snapshotSrc, snapshotDest);
+                    t.apply();
+
+                    mUpdateHandler.post(() -> {
+                        // Start animation to fade out the snapshot.
+                        final ValueAnimator animator = ValueAnimator.ofFloat(1.0f, 0.0f);
+                        animator.setDuration(mEnterExitAnimationDuration);
+                        animator.addUpdateListener(animation -> {
+                            final float alpha = (float) animation.getAnimatedValue();
+                            final SurfaceControl.Transaction tx =
+                                    mSurfaceControlTransactionFactory.getTransaction();
+                            tx.setAlpha(snapshotSurface, alpha);
+                            tx.apply();
+                        });
+                        animator.addListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                final SurfaceControl.Transaction tx =
+                                        mSurfaceControlTransactionFactory.getTransaction();
+                                tx.remove(snapshotSurface);
+                                tx.apply();
+                            }
+                        });
+                        animator.start();
+                    });
+                }
+            });
+        } else {
+            applyFinishBoundsResize(wct, direction);
+        }
+
         finishResizeForMenu(destinationBounds);
     }
 

@@ -28,37 +28,37 @@ using android::hardware::power::stats::V1_0::EnergyData;
 using android::hardware::power::stats::V1_0::RailInfo;
 using android::hardware::power::stats::V1_0::Status;
 
-// ChannelInfo
-static jclass class_CI;
-static jmethodID method_CI_init;
-static jfieldID field_CI_channelId;
-static jfieldID field_CI_channelName;
+// Channel
+static jclass class_C;
+static jmethodID method_C_init;
+static jfieldID field_C_id;
+static jfieldID field_C_name;
 
 // EnergyMeasurement
 static jclass class_EM;
 static jmethodID method_EM_init;
-static jfieldID field_EM_channelId;
+static jfieldID field_EM_id;
 static jfieldID field_EM_timestampMs;
 static jfieldID field_EM_durationMs;
 static jfieldID field_EM_energyUWs;
 
-// StateInfo
-static jclass class_SI;
-static jmethodID method_SI_init;
-static jfieldID field_SI_stateId;
-static jfieldID field_SI_stateName;
+// State
+static jclass class_S;
+static jmethodID method_S_init;
+static jfieldID field_S_id;
+static jfieldID field_S_name;
 
-// PowerEntityInfo
-static jclass class_PEI;
-static jmethodID method_PEI_init;
-static jfieldID field_PEI_powerEntityId;
-static jfieldID field_PEI_powerEntityName;
-static jfieldID field_PEI_states;
+// PowerEntity
+static jclass class_PE;
+static jmethodID method_PE_init;
+static jfieldID field_PE_id;
+static jfieldID field_PE_name;
+static jfieldID field_PE_states;
 
 // StateResidency
 static jclass class_SR;
 static jmethodID method_SR_init;
-static jfieldID field_SR_stateId;
+static jfieldID field_SR_id;
 static jfieldID field_SR_totalTimeInStateMs;
 static jfieldID field_SR_totalStateEntryCount;
 static jfieldID field_SR_lastEntryTimestampMs;
@@ -66,7 +66,7 @@ static jfieldID field_SR_lastEntryTimestampMs;
 // StateResidencyResult
 static jclass class_SRR;
 static jmethodID method_SRR_init;
-static jfieldID field_SRR_powerEntityId;
+static jfieldID field_SRR_id;
 static jfieldID field_SRR_stateResidencyData;
 
 namespace android {
@@ -134,24 +134,21 @@ static jobjectArray nativeGetPowerEntityInfo(JNIEnv *env, jclass clazz) {
         return nullptr;
     }
 
-    jobjectArray powerEntityInfoArray = nullptr;
+    jobjectArray powerEntityArray = nullptr;
     Return<void> ret = gPowerStatsHalV1_0_ptr->getPowerEntityInfo(
-            [&env, &powerEntityInfoArray](auto infos, auto status) {
+            [&env, &powerEntityArray](auto infos, auto status) {
                 if (status != Status::SUCCESS) {
                     ALOGE("Error getting power entity info");
                 } else {
-                    powerEntityInfoArray = env->NewObjectArray(infos.size(), class_PEI, nullptr);
+                    powerEntityArray = env->NewObjectArray(infos.size(), class_PE, nullptr);
                     for (int i = 0; i < infos.size(); i++) {
-                        jstring powerEntityName =
-                                env->NewStringUTF(infos[i].powerEntityName.c_str());
-                        jobject powerEntityInfo = env->NewObject(class_PEI, method_PEI_init);
-                        env->SetIntField(powerEntityInfo, field_PEI_powerEntityId,
-                                         infos[i].powerEntityId);
-                        env->SetObjectField(powerEntityInfo, field_PEI_powerEntityName,
-                                            powerEntityName);
-                        env->SetObjectArrayElement(powerEntityInfoArray, i, powerEntityInfo);
-                        env->DeleteLocalRef(powerEntityName);
-                        env->DeleteLocalRef(powerEntityInfo);
+                        jstring name = env->NewStringUTF(infos[i].powerEntityName.c_str());
+                        jobject powerEntity = env->NewObject(class_PE, method_PE_init);
+                        env->SetIntField(powerEntity, field_PE_id, infos[i].powerEntityId);
+                        env->SetObjectField(powerEntity, field_PE_name, name);
+                        env->SetObjectArrayElement(powerEntityArray, i, powerEntity);
+                        env->DeleteLocalRef(name);
+                        env->DeleteLocalRef(powerEntity);
                     }
                 }
             });
@@ -159,47 +156,44 @@ static jobjectArray nativeGetPowerEntityInfo(JNIEnv *env, jclass clazz) {
         return nullptr;
     }
 
-    ret = gPowerStatsHalV1_0_ptr->getPowerEntityStateInfo(
-            {}, [&env, &powerEntityInfoArray](auto infos, auto status) {
-                if (status != Status::SUCCESS) {
-                    ALOGE("Error getting power entity state info");
-                } else {
-                    for (int i = 0; i < infos.size(); i++) {
-                        jobjectArray stateInfoArray =
-                                env->NewObjectArray(infos[i].states.size(), class_SI, nullptr);
-                        for (int j = 0; j < infos[i].states.size(); j++) {
-                            jstring powerEntityStateName = env->NewStringUTF(
-                                    infos[i].states[j].powerEntityStateName.c_str());
-                            jobject stateInfo = env->NewObject(class_SI, method_SI_init);
-                            env->SetIntField(stateInfo, field_SI_stateId,
-                                             infos[i].states[j].powerEntityStateId);
-                            env->SetObjectField(stateInfo, field_SI_stateName,
-                                                powerEntityStateName);
-                            env->SetObjectArrayElement(stateInfoArray, j, stateInfo);
-                            env->DeleteLocalRef(powerEntityStateName);
-                            env->DeleteLocalRef(stateInfo);
-                        }
+    ret = gPowerStatsHalV1_0_ptr
+                  ->getPowerEntityStateInfo({}, [&env, &powerEntityArray](auto infos, auto status) {
+                      if (status != Status::SUCCESS) {
+                          ALOGE("Error getting power entity state info");
+                      } else {
+                          for (int i = 0; i < infos.size(); i++) {
+                              jobjectArray stateArray =
+                                      env->NewObjectArray(infos[i].states.size(), class_S, nullptr);
+                              for (int j = 0; j < infos[i].states.size(); j++) {
+                                  jstring name = env->NewStringUTF(
+                                          infos[i].states[j].powerEntityStateName.c_str());
+                                  jobject state = env->NewObject(class_S, method_S_init);
+                                  env->SetIntField(state, field_S_id,
+                                                   infos[i].states[j].powerEntityStateId);
+                                  env->SetObjectField(state, field_S_name, name);
+                                  env->SetObjectArrayElement(stateArray, j, state);
+                                  env->DeleteLocalRef(name);
+                                  env->DeleteLocalRef(state);
+                              }
 
-                        for (int j = 0; j < env->GetArrayLength(powerEntityInfoArray); j++) {
-                            jobject powerEntityInfo =
-                                    env->GetObjectArrayElement(powerEntityInfoArray, j);
-                            if (env->GetIntField(powerEntityInfo, field_PEI_powerEntityId) ==
-                                infos[i].powerEntityId) {
-                                env->SetObjectField(powerEntityInfo, field_PEI_states,
-                                                    stateInfoArray);
-                                env->SetObjectArrayElement(powerEntityInfoArray, j,
-                                                           powerEntityInfo);
-                                break;
-                            }
-                        }
-                    }
-                }
-            });
+                              for (int j = 0; j < env->GetArrayLength(powerEntityArray); j++) {
+                                  jobject powerEntity =
+                                          env->GetObjectArrayElement(powerEntityArray, j);
+                                  if (env->GetIntField(powerEntity, field_PE_id) ==
+                                      infos[i].powerEntityId) {
+                                      env->SetObjectField(powerEntity, field_PE_states, stateArray);
+                                      env->SetObjectArrayElement(powerEntityArray, j, powerEntity);
+                                      break;
+                                  }
+                              }
+                          }
+                      }
+                  });
     if (!checkResult(ret, __func__)) {
         return nullptr;
     }
 
-    return powerEntityInfoArray;
+    return powerEntityArray;
 }
 
 static jobjectArray nativeGetStateResidency(JNIEnv *env, jclass clazz, jintArray powerEntityIds) {
@@ -233,7 +227,7 @@ static jobjectArray nativeGetStateResidency(JNIEnv *env, jclass clazz, jintArray
                                                     nullptr);
                         for (int j = 0; j < results[i].stateResidencyData.size(); j++) {
                             jobject stateResidency = env->NewObject(class_SR, method_SR_init);
-                            env->SetIntField(stateResidency, field_SR_stateId,
+                            env->SetIntField(stateResidency, field_SR_id,
                                              results[i].stateResidencyData[j].powerEntityStateId);
                             env->SetLongField(stateResidency, field_SR_totalTimeInStateMs,
                                               results[i].stateResidencyData[j].totalTimeInStateMs);
@@ -249,7 +243,7 @@ static jobjectArray nativeGetStateResidency(JNIEnv *env, jclass clazz, jintArray
                             env->DeleteLocalRef(stateResidency);
                         }
                         jobject stateResidencyResult = env->NewObject(class_SRR, method_SRR_init);
-                        env->SetIntField(stateResidencyResult, field_SRR_powerEntityId,
+                        env->SetIntField(stateResidencyResult, field_SRR_id,
                                          results[i].powerEntityId);
                         env->SetObjectField(stateResidencyResult, field_SRR_stateResidencyData,
                                             stateResidencyArray);
@@ -274,21 +268,21 @@ static jobjectArray nativeGetEnergyMeterInfo(JNIEnv *env, jclass clazz) {
         return nullptr;
     }
 
-    jobjectArray channelInfoArray = nullptr;
-    Return<void> ret = gPowerStatsHalV1_0_ptr->getRailInfo(
-            [&env, &channelInfoArray](auto railInfo, auto status) {
+    jobjectArray channelArray = nullptr;
+    Return<void> ret =
+            gPowerStatsHalV1_0_ptr->getRailInfo([&env, &channelArray](auto railInfo, auto status) {
                 if (status != Status::SUCCESS) {
                     ALOGW("Error getting rail info");
                 } else {
-                    channelInfoArray = env->NewObjectArray(railInfo.size(), class_CI, nullptr);
+                    channelArray = env->NewObjectArray(railInfo.size(), class_C, nullptr);
                     for (int i = 0; i < railInfo.size(); i++) {
-                        jstring channelName = env->NewStringUTF(railInfo[i].railName.c_str());
-                        jobject channelInfo = env->NewObject(class_CI, method_CI_init);
-                        env->SetIntField(channelInfo, field_CI_channelId, railInfo[i].index);
-                        env->SetObjectField(channelInfo, field_CI_channelName, channelName);
-                        env->SetObjectArrayElement(channelInfoArray, i, channelInfo);
-                        env->DeleteLocalRef(channelName);
-                        env->DeleteLocalRef(channelInfo);
+                        jstring name = env->NewStringUTF(railInfo[i].railName.c_str());
+                        jobject channel = env->NewObject(class_C, method_C_init);
+                        env->SetIntField(channel, field_C_id, railInfo[i].index);
+                        env->SetObjectField(channel, field_C_name, name);
+                        env->SetObjectArrayElement(channelArray, i, channel);
+                        env->DeleteLocalRef(name);
+                        env->DeleteLocalRef(channel);
                     }
                 }
             });
@@ -298,7 +292,7 @@ static jobjectArray nativeGetEnergyMeterInfo(JNIEnv *env, jclass clazz) {
         return nullptr;
     }
 
-    return channelInfoArray;
+    return channelArray;
 }
 
 static jobjectArray nativeReadEnergyMeters(JNIEnv *env, jclass clazz, jintArray channelIds) {
@@ -331,8 +325,7 @@ static jobjectArray nativeReadEnergyMeters(JNIEnv *env, jclass clazz, jintArray 
                                             for (int i = 0; i < energyData.size(); i++) {
                                                 jobject energyMeasurement =
                                                         env->NewObject(class_EM, method_EM_init);
-                                                env->SetIntField(energyMeasurement,
-                                                                 field_EM_channelId,
+                                                env->SetIntField(energyMeasurement, field_EM_id,
                                                                  energyData[i].index);
                                                 env->SetLongField(energyMeasurement,
                                                                   field_EM_timestampMs,
@@ -360,43 +353,42 @@ static jobjectArray nativeReadEnergyMeters(JNIEnv *env, jclass clazz, jintArray 
 static jboolean nativeInit(JNIEnv *env, jclass clazz) {
     std::lock_guard<std::mutex> lock(gPowerStatsHalMutex);
 
-    // ChannelInfo
-    jclass temp = env->FindClass("android/hardware/power/stats/ChannelInfo");
-    class_CI = (jclass)env->NewGlobalRef(temp);
-    method_CI_init = env->GetMethodID(class_CI, "<init>", "()V");
-    field_CI_channelId = env->GetFieldID(class_CI, "channelId", "I");
-    field_CI_channelName = env->GetFieldID(class_CI, "channelName", "Ljava/lang/String;");
+    // Channel
+    jclass temp = env->FindClass("android/hardware/power/stats/Channel");
+    class_C = (jclass)env->NewGlobalRef(temp);
+    method_C_init = env->GetMethodID(class_C, "<init>", "()V");
+    field_C_id = env->GetFieldID(class_C, "id", "I");
+    field_C_name = env->GetFieldID(class_C, "name", "Ljava/lang/String;");
 
     // EnergyMeasurement
     temp = env->FindClass("android/hardware/power/stats/EnergyMeasurement");
     class_EM = (jclass)env->NewGlobalRef(temp);
     method_EM_init = env->GetMethodID(class_EM, "<init>", "()V");
-    field_EM_channelId = env->GetFieldID(class_EM, "channelId", "I");
+    field_EM_id = env->GetFieldID(class_EM, "id", "I");
     field_EM_timestampMs = env->GetFieldID(class_EM, "timestampMs", "J");
     field_EM_durationMs = env->GetFieldID(class_EM, "durationMs", "J");
     field_EM_energyUWs = env->GetFieldID(class_EM, "energyUWs", "J");
 
-    // StateInfo
-    temp = env->FindClass("android/hardware/power/stats/StateInfo");
-    class_SI = (jclass)env->NewGlobalRef(temp);
-    method_SI_init = env->GetMethodID(class_SI, "<init>", "()V");
-    field_SI_stateId = env->GetFieldID(class_SI, "stateId", "I");
-    field_SI_stateName = env->GetFieldID(class_SI, "stateName", "Ljava/lang/String;");
+    // State
+    temp = env->FindClass("android/hardware/power/stats/State");
+    class_S = (jclass)env->NewGlobalRef(temp);
+    method_S_init = env->GetMethodID(class_S, "<init>", "()V");
+    field_S_id = env->GetFieldID(class_S, "id", "I");
+    field_S_name = env->GetFieldID(class_S, "name", "Ljava/lang/String;");
 
-    // PowerEntityInfo
-    temp = env->FindClass("android/hardware/power/stats/PowerEntityInfo");
-    class_PEI = (jclass)env->NewGlobalRef(temp);
-    method_PEI_init = env->GetMethodID(class_PEI, "<init>", "()V");
-    field_PEI_powerEntityId = env->GetFieldID(class_PEI, "powerEntityId", "I");
-    field_PEI_powerEntityName = env->GetFieldID(class_PEI, "powerEntityName", "Ljava/lang/String;");
-    field_PEI_states =
-            env->GetFieldID(class_PEI, "states", "[Landroid/hardware/power/stats/StateInfo;");
+    // PowerEntity
+    temp = env->FindClass("android/hardware/power/stats/PowerEntity");
+    class_PE = (jclass)env->NewGlobalRef(temp);
+    method_PE_init = env->GetMethodID(class_PE, "<init>", "()V");
+    field_PE_id = env->GetFieldID(class_PE, "id", "I");
+    field_PE_name = env->GetFieldID(class_PE, "name", "Ljava/lang/String;");
+    field_PE_states = env->GetFieldID(class_PE, "states", "[Landroid/hardware/power/stats/State;");
 
     // StateResidency
     temp = env->FindClass("android/hardware/power/stats/StateResidency");
     class_SR = (jclass)env->NewGlobalRef(temp);
     method_SR_init = env->GetMethodID(class_SR, "<init>", "()V");
-    field_SR_stateId = env->GetFieldID(class_SR, "stateId", "I");
+    field_SR_id = env->GetFieldID(class_SR, "id", "I");
     field_SR_totalTimeInStateMs = env->GetFieldID(class_SR, "totalTimeInStateMs", "J");
     field_SR_totalStateEntryCount = env->GetFieldID(class_SR, "totalStateEntryCount", "J");
     field_SR_lastEntryTimestampMs = env->GetFieldID(class_SR, "lastEntryTimestampMs", "J");
@@ -405,7 +397,7 @@ static jboolean nativeInit(JNIEnv *env, jclass clazz) {
     temp = env->FindClass("android/hardware/power/stats/StateResidencyResult");
     class_SRR = (jclass)env->NewGlobalRef(temp);
     method_SRR_init = env->GetMethodID(class_SRR, "<init>", "()V");
-    field_SRR_powerEntityId = env->GetFieldID(class_SRR, "powerEntityId", "I");
+    field_SRR_id = env->GetFieldID(class_SRR, "id", "I");
     field_SRR_stateResidencyData =
             env->GetFieldID(class_SRR, "stateResidencyData",
                             "[Landroid/hardware/power/stats/StateResidency;");
@@ -420,11 +412,11 @@ static jboolean nativeInit(JNIEnv *env, jclass clazz) {
 
 static const JNINativeMethod method_table[] = {
         {"nativeInit", "()Z", (void *)nativeInit},
-        {"nativeGetPowerEntityInfo", "()[Landroid/hardware/power/stats/PowerEntityInfo;",
+        {"nativeGetPowerEntityInfo", "()[Landroid/hardware/power/stats/PowerEntity;",
          (void *)nativeGetPowerEntityInfo},
         {"nativeGetStateResidency", "([I)[Landroid/hardware/power/stats/StateResidencyResult;",
          (void *)nativeGetStateResidency},
-        {"nativeGetEnergyMeterInfo", "()[Landroid/hardware/power/stats/ChannelInfo;",
+        {"nativeGetEnergyMeterInfo", "()[Landroid/hardware/power/stats/Channel;",
          (void *)nativeGetEnergyMeterInfo},
         {"nativeReadEnergyMeters", "([I)[Landroid/hardware/power/stats/EnergyMeasurement;",
          (void *)nativeReadEnergyMeters},
