@@ -573,6 +573,7 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
+    field public static final int edgeEffectType = 16844329; // 0x1010629
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -53561,6 +53562,7 @@ package android.widget {
     method @Nullable public android.graphics.BlendMode getBlendMode();
     method @ColorInt public int getColor();
     method public int getMaxHeight();
+    method public int getType();
     method public boolean isFinished();
     method public void onAbsorb(int);
     method public void onPull(float);
@@ -53569,7 +53571,10 @@ package android.widget {
     method public void setBlendMode(@Nullable android.graphics.BlendMode);
     method public void setColor(@ColorInt int);
     method public void setSize(int, int);
+    method public void setType(int);
     field public static final android.graphics.BlendMode DEFAULT_BLEND_MODE;
+    field public static final int TYPE_GLOW = 0; // 0x0
+    field public static final int TYPE_STRETCH = 1; // 0x1
   }
 
   public class EditText extends android.widget.TextView {
