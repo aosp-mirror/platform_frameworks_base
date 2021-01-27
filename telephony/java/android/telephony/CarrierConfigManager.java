@@ -4718,7 +4718,7 @@ public class CarrierConfigManager {
      * Indicates whether RTT is supported while roaming.
      */
     public static final String KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL =
-            "rtt_supported_while_roaming";
+            "rtt_supported_while_roaming_bool";
 
     /**
      * Indicates if auto-configuration server is used for the RCS config
