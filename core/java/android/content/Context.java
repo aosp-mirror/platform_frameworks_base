@@ -3576,6 +3576,7 @@ public abstract class Context {
             //@hide: PEOPLE_SERVICE,
             //@hide: DEVICE_STATE_SERVICE,
             UWB_SERVICE,
+            MEDIA_METRICS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4499,6 +4500,16 @@ public abstract class Context {
     public static final String ATTENTION_SERVICE = "attention";
 
     /**
+     * Official published name of the (internal) rotation resolver service.
+     *
+     * // TODO(b/178151184): change it back to rotation resolver before S release.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String ROTATION_RESOLVER_SERVICE = "resolver";
+
+    /**
      * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.view.inputmethod.InputMethodManager} for accessing input
      * methods.
@@ -5376,6 +5387,16 @@ public abstract class Context {
      * @hide
      */
     public static final String DEVICE_STATE_SERVICE = "device_state";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.metrics.MediaMetricsManager} for interacting with media metrics
+     * on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.metrics.MediaMetricsManager
+     */
+    public static final String MEDIA_METRICS_SERVICE = "media_metrics";
 
     /**
      * Determine whether the given permission is allowed for a particular

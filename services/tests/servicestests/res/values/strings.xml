@@ -34,4 +34,6 @@
     <string name="config_batterySaverDeviceSpecificConfig_3">cpufreq-n=2:222,cpufreq-i=3:333/4:444</string>
     <string name="module_1_name" translatable="false">module_1_name</string>
     <string name="module_2_name" translatable="false">module_2_name</string>
+
+    <string name="widget_description">widget description string</string>
 </resources>

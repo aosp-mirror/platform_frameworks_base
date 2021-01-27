@@ -53,12 +53,12 @@ message IncidentReportResidencyProto {
 /**
  * EnergyConsumer (model) data is exposed by the PowerStats HAL.  This data
  * represents modeled energy consumption estimates and is provided per
- * subsystem.  The default subsystems are defined in EnergyConsumerId.aidl.
+ * subsystem.  The default subsystems are defined in EnergyConsumerType.aidl.
  * Energy model estimates will be logged to incident reports in addition to
  * the raw energy meter data.
  */
 message PowerStatsServiceModelProto {
-    repeated EnergyConsumerIdProto energy_consumer_id = 1;
+    repeated EnergyConsumerProto energy_consumer = 1;
     repeated EnergyConsumerResultProto energy_consumer_result = 2;
 }
 
@@ -68,13 +68,13 @@ message PowerStatsServiceModelProto {
  * This raw energy meter data will be logged to incident reports.
  */
 message PowerStatsServiceMeterProto {
-    repeated ChannelInfoProto channel_info = 1;
+    repeated ChannelProto channel = 1;
     repeated EnergyMeasurementProto energy_measurement = 2;
 }
 
 /**
  * A PowerEntity is defined as a platform subsystem, peripheral, or power domain
- * that impacts the total device power consumption.  PowerEntityInfo is
+ * that impacts the total device power consumption.  PowerEntity is
  * information related to each power entity.  Each PowerEntity may reside in one
  * of multiple states. It may also transition from one state to another.
  * StateResidency is defined as an accumulation of time that a PowerEntity
@@ -83,44 +83,44 @@ message PowerStatsServiceMeterProto {
  * entered.
  */
 message PowerStatsServiceResidencyProto {
-    repeated PowerEntityInfoProto power_entity_info = 1;
+    repeated PowerEntityProto power_entity = 1;
     repeated StateResidencyResultProto state_residency_result = 2;
 }
 
 /**
  * Information about the possible states for a particular PowerEntity.
  */
-message StateInfoProto {
+message StateProto {
     /**
-     * Unique (for a given PowerEntityInfo) ID of this StateInfo
+     * Unique (for a given PowerEntity) ID of this State
      */
-    optional int32 state_id = 1;
+    optional int32 id = 1;
     /**
-     * Unique (for a given PowerEntityInfo) name of the state. Vendor/device specific.
+     * Unique (for a given PowerEntity) name of the state. Vendor/device specific.
      * Opaque to framework
      */
-    optional string state_name = 2;
+    optional string name = 2;
 }
 
 /**
  * A PowerEntity is defined as a platform subsystem, peripheral, or power domain
- * that impacts the total device power consumption.  PowerEntityInfo is
+ * that impacts the total device power consumption.  PowerEntity is
  * information about a PowerEntity.  It includes an array of information about
  * each possible state of the PowerEntity.
  */
-message PowerEntityInfoProto {
+message PowerEntityProto {
     /**
-     * Unique ID of this PowerEntityInfo
+     * Unique ID of this PowerEntity
      */
-    optional int32 power_entity_id = 1;
+    optional int32 id = 1;
     /**
      * Unique name of the PowerEntity. Vendor/device specific. Opaque to framework
      */
-    optional string power_entity_name = 2;
+    optional string name = 2;
     /**
      * List of states that the PowerEntity may reside in
      */
-    repeated StateInfoProto states = 3;
+    repeated StateProto states = 3;
 }
 
 /**
@@ -133,7 +133,7 @@ message StateResidencyProto {
     /**
      * ID of the state associated with this residency
      */
-    optional int32 state_id = 1;
+    optional int32 id = 1;
     /**
      * Total time in milliseconds that the corresponding PowerEntity resided
      * in this state since boot
@@ -152,13 +152,13 @@ message StateResidencyProto {
 /**
  * A StateResidencyResult is an array of StateResidencies for a particular
  * PowerEntity.  The StateResidencyResult can be matched to its corresponding
- * PowerEntityInfo through the power_entity_id field.
+ * PowerEntity through the id field.
  */
 message StateResidencyResultProto {
     /**
      * ID of the PowerEntity associated with this result
      */
-    optional int32 power_entity_id = 1;
+    optional int32 id = 1;
     /**
      * Residency for each state in the PowerEntity's state space
      */
@@ -166,23 +166,39 @@ message StateResidencyResultProto {
 }
 
 /**
- * Energy consumer ID:
+ * Energy consumer:
  * A list of default subsystems for which energy consumption estimates
  * may be provided (hardware dependent).
  */
-message EnergyConsumerIdProto {
-    /** Unique index identifying the energy consumer. */
-    optional int32 energy_consumer_id = 1;
+message EnergyConsumerProto {
+    /** Unique ID of this EnergyConsumer */
+    optional int32 id = 1;
+
+    /**
+     * For a group of EnergyConsumers of the same logical type, sorting by
+     * ordinal should be give their physical order. No other meaning is
+     * carried by it.
+     */
+    optional int32 ordinal = 2;
+
+    /** Type of this EnergyConsumer */
+    optional int32 type = 3;
+
+    /**
+     * Unique name of this EnergyConsumer. Vendor/device specific. Opaque
+     * to framework
+     */
+    optional string name = 4;
 }
 
 /**
  * Energy consumer result:
  * An estimate of energy consumption since boot for the subsystem identified
- * by the unique energy_consumer_id.
+ * by the unique id.
  */
 message EnergyConsumerResultProto {
     /** Unique index identifying the energy consumer. */
-    optional int32 energy_consumer_id = 1;
+    optional int32 id = 1;
 
     /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
     optional int64 timestamp_ms = 2;
@@ -195,15 +211,15 @@ message EnergyConsumerResultProto {
  * Channel information:
  * Reports information related to the energy meter channels being monitored.
  */
-message ChannelInfoProto {
+message ChannelProto {
     /**
      * Index corresponding to the energy meter channel. This index matches
-     * the index returned in ChannelInfo.
+     * the index returned in Channel.
      */
-    optional int32 channel_id = 1;
+    optional int32 id = 1;
 
     /** Name of the energy meter channel */
-    optional string channel_name = 2;
+    optional string name = 2;
 }
 
 /**
@@ -213,13 +229,17 @@ message ChannelInfoProto {
 message EnergyMeasurementProto {
     /**
      * Index corresponding to the energy meter channel. This index matches
-     * the index returned in ChannelInfo.
+     * the index returned in Channel.
      */
-    optional int32 channel_id = 1;
+    optional int32 id = 1;
 
     /** Time since device boot(CLOCK_BOOTTIME) in milli-seconds */
     optional int64 timestamp_ms = 2;
 
     /** Accumulated energy since device boot in microwatt-seconds (uWs) */
     optional int64 energy_uws = 3;
+
+    /** Duration in milliseconds that energy has been accumulated */
+    optional int64 duration_ms = 4;
+
 }

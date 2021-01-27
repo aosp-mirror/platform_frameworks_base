@@ -30,6 +30,7 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
+import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionInfo;
 
 /**
@@ -98,7 +99,7 @@ public class RemoteAnimationAdapterCompat {
         return new IRemoteTransition.Stub() {
             @Override
             public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
-                    IRemoteAnimationFinishedCallback finishCallback) {
+                    IRemoteTransitionFinishedCallback finishCallback) {
                 final RemoteAnimationTargetCompat[] appsCompat =
                         RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
                 final RemoteAnimationTargetCompat[] wallpapersCompat =
@@ -107,7 +108,7 @@ public class RemoteAnimationAdapterCompat {
                     @Override
                     public void run() {
                         try {
-                            finishCallback.onAnimationFinished();
+                            finishCallback.onTransitionFinished(null /* wct */);
                         } catch (RemoteException e) {
                             Log.e("ActivityOptionsCompat", "Failed to call app controlled animation"
                                     + " finished callback", e);

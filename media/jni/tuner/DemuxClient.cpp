@@ -148,7 +148,7 @@ sp<DvrClient> DemuxClient::openDvr(DvrType dvbType, int bufferSize, sp<DvrClient
         sp<HidlDvrCallback> callback = new HidlDvrCallback(cb);
         sp<IDvr> hidlDvr = openHidlDvr(dvbType, bufferSize, callback);
         if (hidlDvr != NULL) {
-            sp<DvrClient> dvrClient = new DvrClient();
+            sp<DvrClient> dvrClient = new DvrClient(NULL);
             dvrClient->setHidlDvr(hidlDvr);
             return dvrClient;
         }

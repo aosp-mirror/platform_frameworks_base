@@ -30,6 +30,7 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import com.google.android.collect.Lists;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -304,8 +305,34 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
 
     @Override
     protected List<Integer> getRcFeatures() {
-        return Lists.newArrayList(Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
-                Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU);
+        List<Integer> features = new ArrayList<>();
+        HdmiCecConfig hdmiCecConfig = mService.getHdmiCecConfig();
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU)
+                == HdmiControlManager.RC_PROFILE_SOURCE_ROOT_MENU_HANDLED) {
+            features.add(Constants.RC_PROFILE_SOURCE_HANDLES_ROOT_MENU);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU)
+                == HdmiControlManager.RC_PROFILE_SOURCE_SETUP_MENU_HANDLED) {
+            features.add(Constants.RC_PROFILE_SOURCE_HANDLES_SETUP_MENU);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU)
+                == HdmiControlManager.RC_PROFILE_SOURCE_CONTENTS_MENU_HANDLED) {
+            features.add(Constants.RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU);
+        }
+        if (hdmiCecConfig.getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU)
+                == HdmiControlManager.RC_PROFILE_SOURCE_TOP_MENU_HANDLED) {
+            features.add(Constants.RC_PROFILE_SOURCE_HANDLES_TOP_MENU);
+        }
+        if (hdmiCecConfig.getIntValue(HdmiControlManager
+                .CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU)
+                == HdmiControlManager.RC_PROFILE_SOURCE_MEDIA_CONTEXT_SENSITIVE_MENU_HANDLED) {
+            features.add(Constants.RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU);
+        }
+        return features;
     }
 
     @Override

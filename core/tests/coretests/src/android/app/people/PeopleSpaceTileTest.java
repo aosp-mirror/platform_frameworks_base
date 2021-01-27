@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.people;
+package android.app.people;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -25,6 +25,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
@@ -34,13 +36,13 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
+import android.os.Parcel;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.systemui.SysuiTestCase;
-import com.android.systemui.people.PeopleSpaceTile;
+import com.google.common.collect.ImmutableList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,10 +50,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
+
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class PeopleSpaceTileTest extends SysuiTestCase {
+public class PeopleSpaceTileTest {
 
+    private Context mContext;
     private final Drawable mDrawable = new ColorDrawable(Color.BLUE);
     private final Icon mIcon = PeopleSpaceTile.convertDrawableToIcon(mDrawable);
 
@@ -60,6 +65,7 @@ public class PeopleSpaceTileTest extends SysuiTestCase {
 
     @Before
     public void setUp() {
+        mContext = InstrumentationRegistry.getContext();
         MockitoAnnotations.initMocks(this);
         when(mLauncherApps.getShortcutIconDrawable(any(), eq(0))).thenReturn(mDrawable);
     }
@@ -132,7 +138,7 @@ public class PeopleSpaceTileTest extends SysuiTestCase {
         PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
                 new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
         // Automatically added by creating a ShortcutInfo.
-        assertThat(tile.getPackageName()).isEqualTo("com.android.systemui.tests");
+        assertThat(tile.getPackageName()).isEqualTo("com.android.frameworks.coretests");
 
         tile = new PeopleSpaceTile.Builder(
                 new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).setPackageName(
@@ -171,16 +177,85 @@ public class PeopleSpaceTileTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHiddenConversation() {
+    public void testStatuses() {
         PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
                 new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps).build();
-        assertFalse(tile.isHiddenConversation());
+        assertThat(tile.getStatuses()).isNull();
 
+        List<ConversationStatus> statusList = ImmutableList.of(
+                new ConversationStatus.Builder("id", ConversationStatus.ACTIVITY_BIRTHDAY).build());
         tile = new PeopleSpaceTile
                 .Builder(new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
-                .setIsHiddenConversation(true)
+                .setStatuses(statusList)
                 .build();
-        assertTrue(tile.isHiddenConversation());
+        assertThat(tile.getStatuses()).isEqualTo(statusList);
+    }
+
+    @Test
+    public void testCreateFromConversationChannel() {
+        ShortcutInfo shortcutInfo = new ShortcutInfo.Builder(mContext, "123").setLongLabel(
+                "name").build();
+        ConversationChannel convo = new ConversationChannel(shortcutInfo, 0, null, null,
+                0L, false, true, null);
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(convo, mLauncherApps).build();
+        assertThat(tile.getStatuses()).isNull();
+        assertThat(tile.getId()).isEqualTo("123");
+        assertThat(tile.getUserName()).isEqualTo("name");
+        assertFalse(tile.isImportantConversation());
+        assertThat(tile.getLastInteractionTimestamp()).isEqualTo(0L);
+
+        List<ConversationStatus> statuses = ImmutableList.of(
+                new ConversationStatus.Builder("id", ConversationStatus.ACTIVITY_BIRTHDAY).build());
+        NotificationChannel notificationChannel = new NotificationChannel("123",
+                "channel",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        notificationChannel.setImportantConversation(true);
+        convo = new ConversationChannel(shortcutInfo, 0, notificationChannel, null,
+                123L, false, true, statuses);
+        tile = new PeopleSpaceTile.Builder(convo, mLauncherApps).build();
+        assertThat(tile.getStatuses()).isEqualTo(statuses);
+        assertTrue(tile.isImportantConversation());
+        assertThat(tile.getLastInteractionTimestamp()).isEqualTo(123L);
+    }
+
+    @Test
+    public void testWriteThenReadFromParcel() {
+        List<ConversationStatus> statusList = ImmutableList.of(
+                new ConversationStatus.Builder("id", ConversationStatus.ACTIVITY_BIRTHDAY).build());
+        PeopleSpaceTile tile = new PeopleSpaceTile.Builder(
+                new ShortcutInfo.Builder(mContext, "123").build(), mLauncherApps)
+                .setUserName("name")
+                .setUserIcon(mIcon)
+                .setContactUri(Uri.parse("contact"))
+                .setUid(42)
+                .setPackageName("package.name")
+                .setLastInteractionTimestamp(7L)
+                .setIsImportantConversation(true)
+                .setStatuses(statusList).setNotificationKey("key")
+                .setNotificationContent("content")
+                .setNotificationDataUri(Uri.parse("data"))
+                .setIntent(new Intent())
+                .build();
+
+        Parcel parcel = Parcel.obtain();
+        tile.writeToParcel(parcel, 0);
+        parcel.setDataPosition(0);
+        PeopleSpaceTile readTile = PeopleSpaceTile.CREATOR.createFromParcel(parcel);
+
+        assertThat(readTile.getId()).isEqualTo(tile.getId());
+        assertThat(readTile.getUserName()).isEqualTo(tile.getUserName());
+        assertThat(readTile.getUserIcon().toString()).isEqualTo(tile.getUserIcon().toString());
+        assertThat(readTile.getContactUri()).isEqualTo(tile.getContactUri());
+        assertThat(readTile.getUid()).isEqualTo(tile.getUid());
+        assertThat(readTile.getPackageName()).isEqualTo(tile.getPackageName());
+        assertThat(readTile.getLastInteractionTimestamp()).isEqualTo(
+                tile.getLastInteractionTimestamp());
+        assertThat(readTile.isImportantConversation()).isEqualTo(tile.isImportantConversation());
+        assertThat(readTile.getStatuses()).isEqualTo(tile.getStatuses());
+        assertThat(readTile.getNotificationKey()).isEqualTo(tile.getNotificationKey());
+        assertThat(readTile.getNotificationContent()).isEqualTo(tile.getNotificationContent());
+        assertThat(readTile.getNotificationDataUri()).isEqualTo(tile.getNotificationDataUri());
+        assertThat(readTile.getIntent().toString()).isEqualTo(tile.getIntent().toString());
     }
 
     @Test
@@ -208,8 +283,8 @@ public class PeopleSpaceTileTest extends SysuiTestCase {
         PeopleSpaceTile tile =
                 new PeopleSpaceTile.Builder(new ShortcutInfo.Builder(mContext, "123").build(),
                         mLauncherApps)
-                .setNotificationDataUri(Uri.parse("test"))
-                .build();
+                        .setNotificationDataUri(Uri.parse("test"))
+                        .build();
 
         assertThat(tile.getNotificationDataUri()).isEqualTo(Uri.parse("test"));
     }

@@ -27,7 +27,7 @@ import static android.content.pm.PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INVALID_APK;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_MISSING_SPLIT;
-import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING;
+import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_NO_CERTIFICATES;
 import static android.content.pm.PackageManager.INSTALL_STAGED;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.system.OsConstants.O_CREAT;
@@ -59,7 +59,6 @@ import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.pm.ApkChecksum;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.Checksum;
 import android.content.pm.DataLoaderManager;
@@ -160,7 +159,9 @@ import java.io.FileDescriptor;
 import java.io.FileFilter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.cert.CertificateException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -249,7 +250,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final String PROPERTY_NAME_INHERIT_NATIVE = "pi.inherit_native_on_dont_kill";
     private static final int[] EMPTY_CHILD_SESSION_ARRAY = EmptyArray.INT;
     private static final InstallationFile[] EMPTY_INSTALLATION_FILE_ARRAY = {};
-    private static final ApkChecksum[] EMPTY_FILE_CHECKSUM_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
     private static final String APEX_FILE_EXTENSION = ".apex";
@@ -805,6 +805,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             if (file.getName().endsWith(REMOVE_MARKER_EXTENSION)) return false;
             if (DexMetadataHelper.isDexMetadataFile(file)) return false;
             if (VerityUtils.isFsveritySignatureFile(file)) return false;
+            if (ApkChecksums.isDigestOrDigestSignatureFile(file)) return false;
             return true;
         }
     };
@@ -1294,13 +1295,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         if (signature != null && signature.length != 0) {
-            final boolean standardMode = PackageManagerServiceUtils.isApkVerityEnabled();
-            final boolean legacyMode = PackageManagerServiceUtils.isLegacyApkVerityEnabled();
-            if (!standardMode || legacyMode) {
-                Slog.e(TAG,
-                        "Can't enforce checksum's signature: Apk-Verity is disabled or in legacy "
-                                + "mode.");
-                signature = null;
+            try {
+                Certificate[] ignored = ApkChecksums.verifySignature(checksums, signature);
+            } catch (IOException | NoSuchAlgorithmException | SignatureException e) {
+                throw new IllegalArgumentException("Can't verify signature", e);
             }
         }
 
@@ -3093,30 +3091,35 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final String targetDigestsPath = ApkChecksums.buildDigestsPathForApk(targetFile.getName());
         final File targetDigestsFile = new File(stageDir, targetDigestsPath);
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            // Storing and staging checksums.
             ApkChecksums.writeChecksums(os, checksums);
+
+            final byte[] signature = perFileChecksum.getSignature();
+            if (signature != null && signature.length > 0) {
+                Certificate[] ignored = ApkChecksums.verifySignature(checksums, signature);
+            }
+
+            // Storing and staging checksums.
             storeBytesToInstallationFile(targetDigestsPath, targetDigestsFile.getAbsolutePath(),
                     os.toByteArray());
             stageFileLocked(targetDigestsFile, targetDigestsFile);
 
-            final byte[] signature = perFileChecksum.getSignature();
+            // Storing and staging signature.
             if (signature == null || signature.length == 0) {
                 return;
             }
 
-            // Storing and staging signature.
-            final String targetDigestsSignaturePath = VerityUtils.getFsveritySignatureFilePath(
+            final String targetDigestsSignaturePath = ApkChecksums.buildSignaturePathForDigests(
                     targetDigestsPath);
             final File targetDigestsSignatureFile = new File(stageDir, targetDigestsSignaturePath);
             storeBytesToInstallationFile(targetDigestsSignaturePath,
                     targetDigestsSignatureFile.getAbsolutePath(), signature);
             stageFileLocked(targetDigestsSignatureFile, targetDigestsSignatureFile);
-        } catch (CertificateException e) {
-            throw new PackageManagerException(INSTALL_PARSE_FAILED_CERTIFICATE_ENCODING,
-                    "Failed to encode certificate for " + mPackageName, e);
         } catch (IOException e) {
             throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
                     "Failed to store digests for " + mPackageName, e);
+        } catch (NoSuchAlgorithmException | SignatureException e) {
+            throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                    "Failed to verify digests' signature for " + mPackageName, e);
         }
     }
 
@@ -3160,6 +3163,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         final File digestsFile = ApkChecksums.findDigestsForFile(origFile);
         if (digestsFile != null) {
             mResolvedInheritedFiles.add(digestsFile);
+
+            final File signatureFile = ApkChecksums.findSignatureForDigests(digestsFile);
+            if (signatureFile != null) {
+                mResolvedInheritedFiles.add(signatureFile);
+            }
         }
     }
 

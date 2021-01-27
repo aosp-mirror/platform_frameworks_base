@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.content.Intent
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.runFlicker
@@ -44,6 +45,7 @@ import org.junit.runners.Parameterized
  * Test Pip with orientation changes.
  * To run this test: `atest WMShellFlickerTests:PipOrientationTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)

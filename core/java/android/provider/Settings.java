@@ -3986,6 +3986,14 @@ public final class Settings {
         public static final String DISPLAY_COLOR_MODE = "display_color_mode";
 
         /**
+         * Hint to decide whether restored vendor color modes are compatible with the new device. If
+         * unset or a match is not made, only the standard color modes will be restored.
+         * @hide
+         */
+        public static final String DISPLAY_COLOR_MODE_VENDOR_HINT =
+                "display_color_mode_vendor_hint";
+
+        /**
          * The user selected min refresh rate in frames per second.
          *
          * If this isn't set, 0 will be used.
@@ -4943,6 +4951,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(EGG_MODE);
             PRIVATE_SETTINGS.add(SHOW_BATTERY_PERCENT);
             PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE);
+            PRIVATE_SETTINGS.add(DISPLAY_COLOR_MODE_VENDOR_HINT);
         }
 
         /**
@@ -9224,6 +9233,14 @@ public final class Settings {
          */
         public static final String ACCESSIBILITY_FLOATING_MENU_ICON_TYPE =
                 "accessibility_floating_menu_icon_type";
+
+        /**
+         * Whether the fade effect for the accessibility floating menu is enabled.
+         *
+         * @hide
+         */
+        public static final String ACCESSIBILITY_FLOATING_MENU_FADE_ENABLED =
+                "accessibility_floating_menu_fade_enabled";
 
         /**
          * The opacity value for the accessibility floating menu fade out effect, from 0.0
@@ -14619,15 +14636,6 @@ public final class Settings {
          */
         public static final String PEOPLE_SPACE_CONVERSATION_TYPE =
                 "people_space_conversation_type";
-
-        /**
-         * Whether to show new lockscreen & AOD UI.
-         * Values are:
-         * 0: Disabled (default)
-         * 1: Enabled
-         * @hide
-         */
-        public static final String SHOW_NEW_LOCKSCREEN = "show_new_lockscreen";
 
         /**
          * Whether to show new notification dismissal.

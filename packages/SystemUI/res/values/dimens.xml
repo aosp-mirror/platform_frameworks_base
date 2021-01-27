@@ -1174,6 +1174,10 @@
     <!-- Radius of Ongoing App Ops chip corners -->
     <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
 
+    <dimen name="ongoing_appops_dialog_bg_corner_radius">@dimen/notification_corner_radius</dimen>
+
+    <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
+
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 

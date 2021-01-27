@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.apppairs
 
 import android.os.Bundle
 import android.os.SystemClock
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -27,9 +28,11 @@ import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.buildTestTag
+import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
+import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
@@ -46,6 +49,7 @@ import org.junit.runners.Parameterized
  * Test open apps to app pairs and rotate.
  * To run this test: `atest WMShellFlickerTests:RotateTwoLaunchedAppsInAppPairsMode`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -72,7 +76,8 @@ class RotateTwoLaunchedAppsInAppPairsMode(
                 }
                 assertions {
                     layersTrace {
-                        navBarLayerRotatesAndScales(Surface.ROTATION_0, configuration.endRotation)
+                        navBarLayerRotatesAndScales(Surface.ROTATION_0, configuration.endRotation,
+                            enabled = !configuration.startRotation.isRotated())
                         statusBarLayerRotatesScales(Surface.ROTATION_0, configuration.endRotation)
                         appPairsDividerIsVisible()
                         appPairsPrimaryBoundsIsVisible(configuration.endRotation,

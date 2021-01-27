@@ -35,12 +35,12 @@ import com.android.internal.os.SomeArgs;
 import java.util.ArrayList;
 
 class TaskChangeNotificationController {
-    private static final int LOG_STACK_STATE_MSG = 1;
+    private static final int LOG_TASK_STATE_MSG = 1;
     private static final int NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG = 2;
     private static final int NOTIFY_ACTIVITY_PINNED_LISTENERS_MSG = 3;
     private static final int NOTIFY_ACTIVITY_RESTART_ATTEMPT_LISTENERS_MSG = 4;
     private static final int NOTIFY_FORCED_RESIZABLE_MSG = 6;
-    private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG = 7;
+    private static final int NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG = 7;
     private static final int NOTIFY_TASK_ADDED_LISTENERS_MSG = 8;
     private static final int NOTIFY_TASK_REMOVED_LISTENERS_MSG = 9;
     private static final int NOTIFY_TASK_MOVED_TO_FRONT_LISTENERS_MSG = 10;
@@ -196,7 +196,7 @@ class TaskChangeNotificationController {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
-                case LOG_STACK_STATE_MSG: {
+                case LOG_TASK_STATE_MSG: {
                     synchronized (mServiceLock) {
                         mTaskSupervisor.logRootTaskState();
                     }
@@ -235,7 +235,7 @@ class TaskChangeNotificationController {
                 case NOTIFY_FORCED_RESIZABLE_MSG:
                     forAllRemoteListeners(mNotifyActivityForcedResizable, msg);
                     break;
-                case NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG:
+                case NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG:
                     forAllRemoteListeners(mNotifyActivityDismissingDockedStack, msg);
                     break;
                 case NOTIFY_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_FAILED_MSG:
@@ -345,7 +345,7 @@ class TaskChangeNotificationController {
 
     /** Notifies all listeners when the task stack has changed. */
     void notifyTaskStackChanged() {
-        mHandler.sendEmptyMessage(LOG_STACK_STATE_MSG);
+        mHandler.sendEmptyMessage(LOG_TASK_STATE_MSG);
         mHandler.removeMessages(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         final Message msg = mHandler.obtainMessage(NOTIFY_TASK_STACK_CHANGE_LISTENERS_MSG);
         forAllLocalListeners(mNotifyTaskStackChanged, msg);
@@ -389,9 +389,9 @@ class TaskChangeNotificationController {
         msg.sendToTarget();
     }
 
-    void notifyActivityDismissingDockedStack() {
-        mHandler.removeMessages(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
-        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_STACK_MSG);
+    void notifyActivityDismissingDockedRootTask() {
+        mHandler.removeMessages(NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG);
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_DISMISSING_DOCKED_ROOT_TASK_MSG);
         forAllLocalListeners(mNotifyActivityDismissingDockedStack, msg);
         msg.sendToTarget();
     }

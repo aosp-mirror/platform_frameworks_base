@@ -19,10 +19,8 @@ package android.media;
 import android.annotation.NonNull;
 
 /**
- * AudioProfile is a class used by {@link AudioDeviceInfo} to list the audio formats, sampling rates
- * and channel masks supported.
- * Each AudioProfile is specific to an audio format and lists all sampling rates and channel masks
- * supported for this format.
+ * An AudioProfile is specific to an audio format and lists supported sampling rates and
+ * channel masks for that format.  An {@link AudioDeviceInfo} has a list of supported AudioProfiles.
  */
 public class AudioProfile {
     private final int mFormat;

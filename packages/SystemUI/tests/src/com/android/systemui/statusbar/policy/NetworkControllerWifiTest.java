@@ -12,12 +12,14 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 
+import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.systemui.statusbar.policy.NetworkController.IconState;
 
 import org.junit.Before;
@@ -34,6 +36,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
     private static final int MIN_RSSI = -100;
     private static final int MAX_RSSI = -55;
     private WifiInfo mWifiInfo = mock(WifiInfo.class);
+    private VcnTransportInfo mVcnTransportInfo = mock(VcnTransportInfo.class);
 
     @Before
     public void setUp() throws Exception {
@@ -214,6 +217,32 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         assertEquals(testSsid, mNetworkController.mWifiSignalController.mCurrentState.ssid);
     }
 
+    @Test
+    public void testVcnWithUnderlyingWifi() {
+        String testSsid = "Test VCN SSID";
+        setWifiEnabled(true);
+        verifyLastWifiIcon(false, WifiIcons.WIFI_NO_NETWORK);
+
+        setWifiStateForVcn(true, testSsid);
+        setWifiLevelForVcn(0);
+
+        // Connected, but still not validated - does not show
+        //verifyLastWifiIcon(false, WifiIcons.WIFI_SIGNAL_STRENGTH[0][0]);
+        verifyLastMobileDataIndicatorsForVcn(false, 0, TelephonyIcons.ICON_CWF, false);
+
+        for (int testLevel = 0; testLevel < WifiIcons.WIFI_LEVEL_COUNT; testLevel++) {
+            setWifiLevelForVcn(testLevel);
+
+            setConnectivityViaBroadcastForVcn(
+                    NetworkCapabilities.TRANSPORT_CELLULAR, true, true, mVcnTransportInfo);
+            verifyLastMobileDataIndicatorsForVcn(true, testLevel, TelephonyIcons.ICON_CWF, true);
+
+            setConnectivityViaBroadcastForVcn(
+                    NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
+            verifyLastMobileDataIndicatorsForVcn(false, testLevel, TelephonyIcons.ICON_CWF, false);
+        }
+    }
+
     protected void setWifiActivity(int activity) {
         // TODO: Not this, because this variable probably isn't sticking around.
         mNetworkController.mWifiSignalController.setActivity(activity);
@@ -239,6 +268,28 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         when(mWifiInfo.getSSID()).thenReturn(ssid);
         setConnectivityViaCallbackInWifiTracker(
                 NetworkCapabilities.TRANSPORT_WIFI, false, connected, mWifiInfo);
+    }
+
+    protected void setWifiLevelForVcn(int level) {
+        float amountPerLevel = (MAX_RSSI - MIN_RSSI) / (WifiIcons.WIFI_LEVEL_COUNT - 1);
+        int rssi = (int) (MIN_RSSI + level * amountPerLevel);
+        // Put RSSI in the middle of the range.
+        rssi += amountPerLevel / 2;
+        when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
+        when(mWifiInfo.getRssi()).thenReturn(rssi);
+        when(mWifiInfo.isCarrierMerged()).thenReturn(true);
+        when(mWifiInfo.getSubscriptionId()).thenReturn(1);
+        setConnectivityViaCallbackInWifiTrackerForVcn(
+                NetworkCapabilities.TRANSPORT_CELLULAR, false, true, mVcnTransportInfo);
+    }
+
+    protected void setWifiStateForVcn(boolean connected, String ssid) {
+        when(mVcnTransportInfo.getWifiInfo()).thenReturn(mWifiInfo);
+        when(mWifiInfo.getSSID()).thenReturn(ssid);
+        when(mWifiInfo.isCarrierMerged()).thenReturn(true);
+        when(mWifiInfo.getSubscriptionId()).thenReturn(1);
+        setConnectivityViaCallbackInWifiTrackerForVcn(
+                NetworkCapabilities.TRANSPORT_CELLULAR, false, connected, mVcnTransportInfo);
     }
 
     protected void verifyLastQsDataDirection(boolean in, boolean out) {

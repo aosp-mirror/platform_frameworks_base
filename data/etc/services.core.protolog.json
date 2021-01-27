@@ -985,6 +985,12 @@
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
     },
+    "-938271693": {
+      "message": "allResumedActivitiesIdle: rootTask=%d %s not idle",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
+    },
     "-937498525": {
       "message": "Executing finish of failed to pause activity: %s",
       "level": "VERBOSE",
@@ -1183,12 +1189,6 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-716565534": {
-      "message": "moveActivityStackToFront: unfocusable activity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "-705939410": {
       "message": "Waiting for pause to complete...",
       "level": "VERBOSE",
@@ -1315,12 +1315,6 @@
       "group": "WM_DEBUG_CONFIGURATION",
       "at": "com\/android\/server\/am\/ActivityManagerService.java"
     },
-    "-592371899": {
-      "message": "Skipping rootTask: (mismatch activity\/rootTask) %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_TASKS",
-      "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
     "-583031528": {
       "message": "%s",
       "level": "INFO",
@@ -1428,6 +1422,12 @@
       "level": "INFO",
       "group": "WM_SHOW_SURFACE_ALLOC",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
+    },
+    "-463348344": {
+      "message": "Removing and adding activity %s to root task at top callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/Task.java"
     },
     "-449118559": {
       "message": "Trying to update display configuration for invalid process, pid=%d",
@@ -1555,12 +1555,6 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
-    "-332679827": {
-      "message": "resumeNextFocusableActivityWhenStackIsEmpty: %s, go home",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/Task.java"
-    },
     "-322743468": {
       "message": "setInputMethodInputTarget %s",
       "level": "INFO",
@@ -1591,6 +1585,12 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "-302468788": {
+      "message": "Expected target rootTask=%s to be top most but found rootTask=%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
     "-302335479": {
       "message": "        remove from topTargets %s",
       "level": "VERBOSE",
@@ -1614,12 +1614,6 @@
       "level": "INFO",
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
-    "-260960989": {
-      "message": "Removing and adding activity %s to stack at top callers=%s",
-      "level": "INFO",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "-251259736": {
       "message": "No longer freezing: %s",
@@ -1693,6 +1687,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-143556958": {
+      "message": "resumeNextFocusableActivityWhenRootTaskIsEmpty: %s, go home",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_STATES",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
     "-118786523": {
       "message": "Resume failed; resetting state to %s: %s",
       "level": "VERBOSE",
@@ -1741,6 +1741,12 @@
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/Session.java"
     },
+    "-50336993": {
+      "message": "moveFocusableActivityToTop: activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "-33096143": {
       "message": "applyAnimation: transition animation is disabled or skipped. container=%s",
       "level": "VERBOSE",
@@ -1753,8 +1759,8 @@
       "group": "WM_DEBUG_STATES",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-7343917": {
-      "message": "onAnimationFinished(): targetStack=%s targetActivity=%s mRestoreTargetBehindStack=%s",
+    "-8483143": {
+      "message": "No root task above target root task=%s",
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
@@ -2011,6 +2017,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "240271590": {
+      "message": "moveFocusableActivityToTop: unfocusable activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "241961619": {
       "message": "Adding %s to %s",
       "level": "VERBOSE",
@@ -2143,6 +2155,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/AppTransition.java"
     },
+    "350168164": {
+      "message": "Removing activity %s, reason= %s callers=%s",
+      "level": "INFO",
+      "group": "WM_DEBUG_ADD_REMOVE",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
     "355720268": {
       "message": "stopFreezingDisplayLocked: Unfreezing now",
       "level": "DEBUG",
@@ -2251,12 +2269,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "474000473": {
-      "message": "No stack above target stack=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
     "485170982": {
       "message": "Not finishing noHistory %s on stop because we're just sleeping",
       "level": "DEBUG",
@@ -2268,12 +2280,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/DisplayAreaOrganizerController.java"
-    },
-    "495032901": {
-      "message": "Expected target stack=%s to restored behind stack=%s but it is behind stack=%s",
-      "level": "WARN",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
     "508887531": {
       "message": "applyAnimation voice: anim=%s transit=%s isEntrance=%b Callers=%s",
@@ -2569,18 +2575,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowToken.java"
     },
-    "853091290": {
-      "message": "Moved stack=%s behind stack=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
-    "869266572": {
-      "message": "Removing activity %s from stack, reason= %s callers=%s",
-      "level": "INFO",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
-    },
     "872933199": {
       "message": "Changing focus from %s to %s displayId=%d Callers=%s",
       "level": "DEBUG",
@@ -2725,12 +2719,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "1035154109": {
-      "message": "SURFACE backgroundBlur=%o: %s",
-      "level": "INFO",
-      "group": "WM_SHOW_TRANSACTIONS",
-      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
-    },
     "1040675582": {
       "message": "Can't report activity configuration update - client not running, activityRecord=%s",
       "level": "WARN",
@@ -2845,6 +2833,12 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/Transition.java"
     },
+    "1191587912": {
+      "message": "Moved rootTask=%s behind rootTask=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
+    },
     "1192413464": {
       "message": "Comparing existing cls=%s \/aff=%s to new cls=%s \/aff=%s",
       "level": "DEBUG",
@@ -2952,12 +2946,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ScreenRotationAnimation.java"
-    },
-    "1360551978": {
-      "message": "Trying to update display configuration for non-existing displayId=%d",
-      "level": "WARN",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityTaskManagerService.java"
     },
     "1364126018": {
       "message": "Resumed activity; dropping state of: %s",
@@ -3102,12 +3090,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "1522489371": {
-      "message": "moveActivityStackToFront: activity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1524174282": {
       "message": "Launch on display check: no caller info, skip check",
@@ -3295,17 +3277,17 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/WindowStateAnimator.java"
     },
-    "1762317752": {
-      "message": "Expected target stack=%s to be top most but found stack=%s",
-      "level": "WARN",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
     "1774661765": {
       "message": "Devices still not ready after waiting %d milliseconds before attempting to detect safe mode.",
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "1781673113": {
+      "message": "onAnimationFinished(): targetRootTask=%s targetActivity=%s mRestoreTargetBehindRootTask=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
     "1789603530": {
       "message": "Removing activity %s hasSavedState=%b stateNotNeeded=%s finishing=%b state=%s callers=%s",
@@ -3319,17 +3301,17 @@
       "group": "WM_DEBUG_WINDOW_TRANSITIONS",
       "at": "com\/android\/server\/wm\/TransitionController.java"
     },
-    "1804435108": {
-      "message": "allResumedActivitiesIdle: stack=%d %s not idle",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_STATES",
-      "at": "com\/android\/server\/wm\/RootWindowContainer.java"
-    },
     "1810019902": {
       "message": "TRANSIT_FLAG_OPEN_BEHIND,  adding %s to mOpeningApps",
       "level": "DEBUG",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1822314934": {
+      "message": "Expected target rootTask=%s to restored behind rootTask=%s but it is behind rootTask=%s",
+      "level": "WARN",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
     },
     "1822843721": {
       "message": "Aborted starting %s: startingData=%s",
@@ -3377,6 +3359,12 @@
       "message": "Notify removed startingWindow %s",
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
+      "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1856211951": {
+      "message": "moveFocusableActivityToTop: already on top, activity=%s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_FOCUS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "1865125884": {
@@ -3493,12 +3481,6 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "2022322588": {
-      "message": "Adding activity %s to stack to task %s callers: %s",
-      "level": "INFO",
-      "group": "WM_DEBUG_ADD_REMOVE",
-      "at": "com\/android\/server\/wm\/Task.java"
-    },
     "2022422429": {
       "message": "createAnimationAdapter(): container=%s",
       "level": "DEBUG",
@@ -3588,12 +3570,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
-    },
-    "2134999275": {
-      "message": "moveActivityStackToFront: already on top, activity=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_FOCUS",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "2137411379": {
       "message": "applyAnimation: anim=%s animAttr=0x%x transit=%s isEntrance=%b Callers=%s",

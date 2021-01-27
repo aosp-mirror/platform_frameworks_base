@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 
@@ -624,7 +625,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         // Intentionally resize here even if the current bounds match the destination bounds.
         // This is so all the proper callbacks are performed.
-        mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration, mUpdateBoundsCallback);
+        mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration,
+                TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND, mUpdateBoundsCallback);
         setAnimatingToBounds(toBounds);
     }
 

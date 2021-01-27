@@ -45,6 +45,7 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.wm.shell.R;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipTaskOrganizer;
@@ -542,6 +543,7 @@ public class PipResizeGestureHandler {
                         });
             } else {
                 mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
+                        PipAnimationController.TRANSITION_DIRECTION_USER_RESIZE,
                         (Rect bounds) -> {
                             mHandler.post(callback);
                         });

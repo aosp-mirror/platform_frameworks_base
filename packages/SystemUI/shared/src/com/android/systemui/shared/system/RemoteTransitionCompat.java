@@ -17,16 +17,29 @@
 package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
+import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.graphics.Rect;
 import android.os.Parcelable;
+import android.os.RemoteException;
+import android.util.Log;
+import android.view.IRecentsAnimationController;
+import android.view.SurfaceControl;
 import android.window.IRemoteTransition;
+import android.window.IRemoteTransitionFinishedCallback;
 import android.window.TransitionFilter;
+import android.window.TransitionInfo;
+import android.window.WindowContainerToken;
+import android.window.WindowContainerTransaction;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.DataClass;
+import com.android.systemui.shared.recents.model.ThumbnailData;
 
 /**
  * Wrapper to expose RemoteTransition (shell transitions) to Launcher.
@@ -43,6 +56,43 @@ public class RemoteTransitionCompat implements Parcelable {
         mTransition = transition;
     }
 
+    /** Constructor specifically for recents animation */
+    public RemoteTransitionCompat(RecentsAnimationListener recents,
+            RecentsAnimationControllerCompat controller) {
+        mTransition = new IRemoteTransition.Stub() {
+            @Override
+            public void startAnimation(TransitionInfo info, SurfaceControl.Transaction t,
+                    IRemoteTransitionFinishedCallback finishedCallback) {
+                final RemoteAnimationTargetCompat[] apps =
+                        RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
+                final RemoteAnimationTargetCompat[] wallpapers =
+                        RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */);
+                // TODO(b/177438007): Move this set-up logic into launcher's animation impl.
+                // This transition is for opening recents, so recents is on-top. We want to draw
+                // the current going-away task on top of recents, though, so move it to front
+                WindowContainerToken pausingTask = null;
+                for (int i = info.getChanges().size() - 1; i >= 0; --i) {
+                    final TransitionInfo.Change change = info.getChanges().get(i);
+                    if (change.getMode() == TRANSIT_CLOSE || change.getMode() == TRANSIT_TO_BACK) {
+                        t.setLayer(change.getLeash(), info.getChanges().size() * 3 - i);
+                        if (change.getTaskInfo() != null) {
+                            pausingTask = change.getTaskInfo().token;
+                        }
+                    }
+                }
+                // Also make all the wallpapers opaque since we want the visible from the start
+                for (int i = wallpapers.length - 1; i >= 0; --i) {
+                    t.setAlpha(wallpapers[i].leash.mSurfaceControl, 1);
+                }
+                t.apply();
+                final RecentsAnimationControllerCompat wrapControl =
+                        new RecentsControllerWrap(controller, finishedCallback, pausingTask);
+                recents.onAnimationStart(wrapControl, apps, wallpapers, new Rect(0, 0, 0, 0),
+                        new Rect());
+            }
+        };
+    }
+
     /** Adds a filter check that restricts this remote transition to home open transitions. */
     public void addHomeOpenCheck() {
         if (mFilter == null) {
@@ -52,6 +102,80 @@ public class RemoteTransitionCompat implements Parcelable {
                 new TransitionFilter.Requirement[]{new TransitionFilter.Requirement()};
         mFilter.mRequirements[0].mActivityType = ACTIVITY_TYPE_HOME;
         mFilter.mRequirements[0].mModes = new int[]{TRANSIT_OPEN, TRANSIT_TO_FRONT};
+    }
+
+    /**
+     * Wrapper to hook up parts of recents animation to shell transition.
+     * TODO(b/177438007): Remove this once Launcher handles shell transitions directly.
+     */
+    @VisibleForTesting
+    static class RecentsControllerWrap extends RecentsAnimationControllerCompat {
+        private final RecentsAnimationControllerCompat mWrapped;
+        private final IRemoteTransitionFinishedCallback mFinishCB;
+        private final WindowContainerToken mPausingTask;
+
+        RecentsControllerWrap(RecentsAnimationControllerCompat wrapped,
+                IRemoteTransitionFinishedCallback finishCB, WindowContainerToken pausingTask) {
+            mWrapped = wrapped;
+            mFinishCB = finishCB;
+            mPausingTask = pausingTask;
+        }
+
+        @Override public ThumbnailData screenshotTask(int taskId) {
+            return mWrapped != null ? mWrapped.screenshotTask(taskId) : null;
+        }
+
+        @Override public void setInputConsumerEnabled(boolean enabled) {
+            if (mWrapped != null) mWrapped.setInputConsumerEnabled(enabled);
+        }
+
+        @Override public void setAnimationTargetsBehindSystemBars(boolean behindSystemBars) {
+            if (mWrapped != null) mWrapped.setAnimationTargetsBehindSystemBars(behindSystemBars);
+        }
+
+        @Override public void hideCurrentInputMethod() {
+            mWrapped.hideCurrentInputMethod();
+        }
+
+        @Override public void setFinishTaskBounds(int taskId, Rect destinationBounds) {
+            if (mWrapped != null) mWrapped.setFinishTaskBounds(taskId, destinationBounds);
+        }
+
+        @Override public void finish(boolean toHome, boolean sendUserLeaveHint) {
+            try {
+                if (!toHome && mPausingTask != null) {
+                    // The gesture went back to opening the app rather than continuing with
+                    // recents, so end the transition by moving the app back to the top.
+                    final WindowContainerTransaction wct = new WindowContainerTransaction();
+                    wct.reorder(mPausingTask, true /* onTop */);
+                    mFinishCB.onTransitionFinished(wct);
+                } else {
+                    mFinishCB.onTransitionFinished(null /* wct */);
+                }
+            } catch (RemoteException e) {
+                Log.e("RemoteTransitionCompat", "Failed to call animation finish callback", e);
+            }
+            if (mWrapped != null) mWrapped.finish(toHome, sendUserLeaveHint);
+        }
+
+        @Override public void setDeferCancelUntilNextTransition(boolean defer, boolean screenshot) {
+            if (mWrapped != null) mWrapped.setDeferCancelUntilNextTransition(defer, screenshot);
+        }
+
+        @Override public void cleanupScreenshot() {
+            if (mWrapped != null) mWrapped.cleanupScreenshot();
+        }
+
+        @Override public void setWillFinishToHome(boolean willFinishToHome) {
+            if (mWrapped != null) mWrapped.setWillFinishToHome(willFinishToHome);
+        }
+
+        /**
+         * @see IRecentsAnimationController#removeTask
+         */
+        @Override public boolean removeTask(int taskId) {
+            return mWrapped != null ? mWrapped.removeTask(taskId) : false;
+        }
     }
 
 

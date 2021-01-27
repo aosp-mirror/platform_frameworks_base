@@ -16,7 +16,9 @@
 
 package android.power;
 
-import android.hardware.power.stats.EnergyConsumerId;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 
 import java.util.concurrent.CompletableFuture;
@@ -28,6 +30,15 @@ import java.util.concurrent.CompletableFuture;
  */
 public abstract class PowerStatsInternal {
     /**
+     * Returns the energy consumer info for all available {@link EnergyConsumer}
+     *
+     * @return List of available {@link EnergyConsumer}, or null if {@link EnergyConsumer} not
+     * supported
+     */
+    @Nullable
+    public abstract EnergyConsumer[] getEnergyConsumerInfo();
+
+    /**
      * Returns a CompletableFuture that will get an {@link EnergyConsumerResult} array for the
      * available requested energy consumers (power models).
      *
@@ -37,6 +48,7 @@ public abstract class PowerStatsInternal {
      * @return A Future containing a list of {@link EnergyConsumerResult} objects containing energy
      *         consumer results for all listed {@link EnergyConsumerId}.
      */
+    @NonNull
     public abstract CompletableFuture<EnergyConsumerResult[]> getEnergyConsumedAsync(
-            @EnergyConsumerId int[] energyConsumerIds);
+            int[] energyConsumerIds);
 }
