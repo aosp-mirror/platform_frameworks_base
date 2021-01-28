@@ -408,21 +408,24 @@ struct CanvasOp<CanvasOpType::DrawImageLattice> {
         const sk_sp<Bitmap>& bitmap,
         SkRect dst,
         SkCanvas::Lattice lattice,
+        SkFilterMode filter,
         SkPaint  paint
     ):  dst(dst),
         lattice(lattice),
+        filter(filter),
         bitmap(bitmap),
         image(bitmap->makeImage()),
         paint(std::move(paint)) {}
 
     SkRect dst;
     SkCanvas::Lattice lattice;
+    SkFilterMode filter;
     const sk_sp<Bitmap> bitmap;
     const sk_sp<SkImage> image;
 
     SkPaint paint;
     void draw(SkCanvas* canvas) const {
-        canvas->drawImageLattice(image.get(), lattice, dst, &paint);
+        canvas->drawImageLattice(image.get(), lattice, dst, filter, &paint);
     }
     ASSERT_DRAWABLE()
 };
