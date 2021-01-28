@@ -385,7 +385,7 @@ public class PackageInfoWithoutStateUtils {
         }
 
         // CompatibilityMode is global state.
-        if (!PackageParser.sCompatibilityModeEnabled) {
+        if (!ParsingPackageUtils.sCompatibilityModeEnabled) {
             ai.disableCompatibilityMode();
         }
 

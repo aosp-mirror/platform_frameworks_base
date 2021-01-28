@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageParser;
 import android.content.pm.parsing.ParsingPackage;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
@@ -65,7 +66,7 @@ public class ParsedIntentInfoUtils {
                 }
             }
 
-            if (PackageParser.sUseRoundIcon) {
+            if (ParsingPackageUtils.sUseRoundIcon) {
                 intentInfo.icon = sa.getResourceId(
                         R.styleable.AndroidManifestIntentFilter_roundIcon, 0);
             }
@@ -141,7 +142,7 @@ public class ParsedIntentInfoUtils {
 
         intentInfo.hasDefault = intentInfo.hasCategory(Intent.CATEGORY_DEFAULT);
 
-        if (PackageParser.DEBUG_PARSER) {
+        if (DEBUG) {
             final StringBuilder cats = new StringBuilder("Intent d=");
             cats.append(intentInfo.isHasDefault());
             cats.append(", cat=");

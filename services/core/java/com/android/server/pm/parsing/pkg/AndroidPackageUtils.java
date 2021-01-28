@@ -21,12 +21,12 @@ import android.annotation.Nullable;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.parsing.ParsingPackageRead;
+import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.component.ParsedActivity;
 import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedProvider;
@@ -233,7 +233,7 @@ public class AndroidPackageUtils {
     }
 
     public static int getIcon(ParsingPackageRead pkg) {
-        return (PackageParser.sUseRoundIcon && pkg.getRoundIconRes() != 0)
+        return (ParsingPackageUtils.sUseRoundIcon && pkg.getRoundIconRes() != 0)
                 ? pkg.getRoundIconRes() : pkg.getIconRes();
     }
 
