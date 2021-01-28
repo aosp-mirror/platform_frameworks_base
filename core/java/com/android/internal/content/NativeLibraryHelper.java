@@ -27,9 +27,10 @@ import static android.system.OsConstants.S_IXOTH;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.PackageLite;
-import android.content.pm.PackageParser.PackageParserException;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.SELinux;
@@ -86,17 +87,19 @@ public class NativeLibraryHelper {
         final boolean debuggable;
 
         public static Handle create(File packageFile) throws IOException {
-            try {
-                final PackageLite lite = PackageParser.parsePackageLite(packageFile, 0);
-                return create(lite);
-            } catch (PackageParserException e) {
-                throw new IOException("Failed to parse package: " + packageFile, e);
+            final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+            final ParseResult<PackageLite> ret = ApkLiteParseUtils.parsePackageLite(input.reset(),
+                    packageFile, /* flags */ 0);
+            if (ret.isError()) {
+                throw new IOException("Failed to parse package: " + packageFile,
+                        ret.getException());
             }
+            return create(ret.getResult());
         }
 
         public static Handle create(PackageLite lite) throws IOException {
-            return create(lite.getAllCodePaths(), lite.multiArch, lite.extractNativeLibs,
-                    lite.debuggable);
+            return create(lite.getAllApkPaths(), lite.isMultiArch(), lite.isExtractNativeLibs(),
+                    lite.isDebuggable());
         }
 
         public static Handle create(List<String> codePaths, boolean multiArch,
@@ -122,14 +125,14 @@ public class NativeLibraryHelper {
 
         public static Handle createFd(PackageLite lite, FileDescriptor fd) throws IOException {
             final long[] apkHandles = new long[1];
-            final String path = lite.baseCodePath;
+            final String path = lite.getBaseApkPath();
             apkHandles[0] = nativeOpenApkFd(fd, path);
             if (apkHandles[0] == 0) {
                 throw new IOException("Unable to open APK " + path + " from fd " + fd);
             }
 
-            return new Handle(new String[]{path}, apkHandles, lite.multiArch,
-                    lite.extractNativeLibs, lite.debuggable);
+            return new Handle(new String[]{path}, apkHandles, lite.isMultiArch(),
+                    lite.isExtractNativeLibs(), lite.isDebuggable());
         }
 
         Handle(String[] apkPaths, long[] apkHandles, boolean multiArch,
