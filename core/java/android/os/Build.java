@@ -26,6 +26,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -86,6 +87,14 @@ public class Build {
 
     /** The end-user-visible name for the end product. */
     public static final String MODEL = getString("ro.product.model");
+
+    /** The manufacturer of the device's primary system-on-chip. */
+    @NonNull
+    public static final String SOC_MANUFACTURER = SocProperties.soc_manufacturer().orElse(UNKNOWN);
+
+    /** The model name of the device's primary system-on-chip. */
+    @NonNull
+    public static final String SOC_MODEL = SocProperties.soc_model().orElse(UNKNOWN);
 
     /** The system bootloader version number. */
     public static final String BOOTLOADER = getString("ro.bootloader");
