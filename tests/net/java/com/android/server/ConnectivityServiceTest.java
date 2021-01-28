@@ -36,6 +36,7 @@ import static android.net.ConnectivityManager.TYPE_MOBILE;
 import static android.net.ConnectivityManager.TYPE_MOBILE_FOTA;
 import static android.net.ConnectivityManager.TYPE_MOBILE_MMS;
 import static android.net.ConnectivityManager.TYPE_MOBILE_SUPL;
+import static android.net.ConnectivityManager.TYPE_VPN;
 import static android.net.ConnectivityManager.TYPE_WIFI;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_DNS;
 import static android.net.INetworkMonitor.NETWORK_VALIDATION_PROBE_FALLBACK;
@@ -6287,6 +6288,19 @@ public class ConnectivityServiceTest {
         defaultCallback.assertNoCallback();
 
         mCm.unregisterNetworkCallback(defaultCallback);
+    }
+
+    private void checkNetworkInfo(NetworkInfo ni, int type, DetailedState state) {
+        assertNotNull(ni);
+        assertEquals(type, ni.getType());
+        assertEquals(ConnectivityManager.getNetworkTypeName(type), state, ni.getDetailedState());
+    }
+
+    private void assertActiveNetworkInfo(int type, DetailedState state) {
+        checkNetworkInfo(mCm.getActiveNetworkInfo(), type, state);
+    }
+    private void assertNetworkInfo(int type, DetailedState state) {
+        checkNetworkInfo(mCm.getNetworkInfo(type), type, state);
     }
 
     @Test
