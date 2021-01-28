@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import static android.app.time.LocationTimeZoneManager.DUMP_STATE_OPTION_PROTO;
 import static android.app.time.LocationTimeZoneManager.PRIMARY_PROVIDER_NAME;
@@ -28,13 +28,13 @@ import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_SET_PROVIDE
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_START;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_STOP;
 
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_UNKNOWN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_UNKNOWN;
 
 import android.annotation.NonNull;
 import android.app.time.GeolocationTimeZoneSuggestionProto;
@@ -47,8 +47,8 @@ import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
-import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.ProviderStateEnum;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

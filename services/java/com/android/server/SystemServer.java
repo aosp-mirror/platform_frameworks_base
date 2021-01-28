@@ -326,7 +326,7 @@ public final class SystemServer implements Dumpable {
     private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
             "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS =
-            "com.android.server.location.timezone.LocationTimeZoneManagerService$Lifecycle";
+            "com.android.server.timezonedetector.location.LocationTimeZoneManagerService$Lifecycle";
     private static final String GNSS_TIME_UPDATE_SERVICE_CLASS =
             "com.android.server.timedetector.GnssTimeUpdateService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
