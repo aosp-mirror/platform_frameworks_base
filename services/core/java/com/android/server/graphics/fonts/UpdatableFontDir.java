@@ -23,6 +23,8 @@ import android.annotation.Nullable;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.SystemFonts;
 import android.os.FileUtils;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.text.FontConfig;
 import android.util.Base64;
 import android.util.Slog;
@@ -223,6 +225,14 @@ final class UpdatableFontDir {
                         FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
                         "Failed to create font directory.");
             }
+            try {
+                // Make newDir executable so that apps can access font file inside newDir.
+                Os.chmod(newDir.getAbsolutePath(), 0711);
+            } catch (ErrnoException e) {
+                throw new SystemFontException(
+                        FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
+                        "Failed to change mode to 711", e);
+            }
             boolean success = false;
             try {
                 File tempNewFontFile = new File(newDir, "font.ttf");
@@ -261,6 +271,14 @@ final class UpdatableFontDir {
                     throw new SystemFontException(
                             FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
                             "Failed to move verified font file.");
+                }
+                try {
+                    // Make the font file readable by apps.
+                    Os.chmod(newFontFile.getAbsolutePath(), 0644);
+                } catch (ErrnoException e) {
+                    throw new SystemFontException(
+                            FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
+                            "Failed to change mode to 711", e);
                 }
                 FontFileInfo fontFileInfo = validateFontFile(newFontFile);
 
