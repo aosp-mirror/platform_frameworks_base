@@ -141,6 +141,11 @@ final class MediaButtonReceiverHolder {
                 packageName != null ? packageName : "");
     }
 
+    public static MediaButtonReceiverHolder create(int userId, ComponentName broadcastReceiver) {
+        return new MediaButtonReceiverHolder(userId, null, broadcastReceiver,
+                COMPONENT_TYPE_BROADCAST);
+    }
+
     private MediaButtonReceiverHolder(int userId, PendingIntent pendingIntent,
             ComponentName componentName, @ComponentType int componentType) {
         mUserId = userId;
