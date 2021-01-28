@@ -344,6 +344,7 @@ applications that come with the platform
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.MOVE_PACKAGE"/>
         <!-- Needed for test only -->
+        <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
         <permission name="android.permission.NETWORK_AIRPLANE_MODE"/>
         <permission name="android.permission.OBSERVE_APP_USAGE"/>
         <permission name="android.permission.NETWORK_SCAN"/>
