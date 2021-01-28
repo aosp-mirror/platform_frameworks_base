@@ -19,11 +19,13 @@ package com.android.wm.shell.common;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.Surface.ROTATION_0;
+import static android.view.WindowInsets.Type.ime;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
@@ -40,18 +42,22 @@ import com.android.internal.view.IInputMethodManager;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.concurrent.Executor;
+
 @SmallTest
 public class DisplayImeControllerTest {
 
     private SurfaceControl.Transaction mT;
     private DisplayImeController.PerDisplay mPerDisplay;
     private IInputMethodManager mMock;
+    private Executor mExecutor;
 
     @Before
     public void setUp() throws Exception {
         mT = mock(SurfaceControl.Transaction.class);
         mMock = mock(IInputMethodManager.class);
-        mPerDisplay = new DisplayImeController(null, null, Runnable::run, new TransactionPool() {
+        mExecutor = spy(Runnable::run);
+        mPerDisplay = new DisplayImeController(null, null, mExecutor, new TransactionPool() {
             @Override
             public SurfaceControl.Transaction acquire() {
                 return mT;
@@ -68,6 +74,30 @@ public class DisplayImeControllerTest {
             @Override
             void removeImeSurface() { }
         }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
+    }
+
+    @Test
+    public void insetsControlChanged_schedulesNoWorkOnExecutor() {
+        mPerDisplay.insetsControlChanged(insetsStateWithIme(false), insetsSourceControl());
+        verifyZeroInteractions(mExecutor);
+    }
+
+    @Test
+    public void insetsChanged_schedulesNoWorkOnExecutor() {
+        mPerDisplay.insetsChanged(insetsStateWithIme(false));
+        verifyZeroInteractions(mExecutor);
+    }
+
+    @Test
+    public void showInsets_schedulesNoWorkOnExecutor() {
+        mPerDisplay.showInsets(ime(), true);
+        verifyZeroInteractions(mExecutor);
+    }
+
+    @Test
+    public void hideInsets_schedulesNoWorkOnExecutor() {
+        mPerDisplay.hideInsets(ime(), true);
+        verifyZeroInteractions(mExecutor);
     }
 
     @Test
