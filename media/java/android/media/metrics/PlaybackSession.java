@@ -75,9 +75,8 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports track change event.
-     * @hide
      */
-    public void reportTrackChangeEvent(TrackChangeEvent event) {
+    public void reportTrackChangeEvent(@NonNull TrackChangeEvent event) {
         mManager.reportTrackChangeEvent(mId, event);
     }
 

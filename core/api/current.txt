@@ -24110,6 +24110,7 @@ package android.media.metrics {
     method @NonNull public String getId();
     method public void reportPlaybackErrorEvent(@NonNull android.media.metrics.PlaybackErrorEvent);
     method public void reportPlaybackStateEvent(@NonNull android.media.metrics.PlaybackStateEvent);
+    method public void reportTrackChangeEvent(@NonNull android.media.metrics.TrackChangeEvent);
   }
 
   public final class PlaybackStateEvent extends android.media.metrics.Event implements android.os.Parcelable {
@@ -24139,6 +24140,54 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.PlaybackStateEvent build();
     method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setState(int);
     method @NonNull public android.media.metrics.PlaybackStateEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
+  }
+
+  public final class TrackChangeEvent extends android.media.metrics.Event implements android.os.Parcelable {
+    ctor public TrackChangeEvent(int, int, @Nullable String, @Nullable String, @Nullable String, int, long, int, @Nullable String, @Nullable String, int, int, int, int);
+    method public int describeContents();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getBitrate();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getChannelCount();
+    method @Nullable public String getCodecName();
+    method @Nullable public String getContainerMimeType();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getHeight();
+    method @Nullable public String getLanguage();
+    method @Nullable public String getLanguageRegion();
+    method @Nullable public String getSampleMimeType();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getSampleRate();
+    method public int getTrackChangeReason();
+    method public int getTrackState();
+    method public int getTrackType();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getWidth();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.TrackChangeEvent> CREATOR;
+    field public static final int TRACK_CHANGE_REASON_ADAPTIVE = 4; // 0x4
+    field public static final int TRACK_CHANGE_REASON_INITIAL = 2; // 0x2
+    field public static final int TRACK_CHANGE_REASON_MANUAL = 3; // 0x3
+    field public static final int TRACK_CHANGE_REASON_OTHER = 1; // 0x1
+    field public static final int TRACK_CHANGE_REASON_UNKNOWN = 0; // 0x0
+    field public static final int TRACK_STATE_OFF = 0; // 0x0
+    field public static final int TRACK_STATE_ON = 1; // 0x1
+    field public static final int TRACK_TYPE_AUDIO = 0; // 0x0
+    field public static final int TRACK_TYPE_TEXT = 2; // 0x2
+    field public static final int TRACK_TYPE_VIDEO = 1; // 0x1
+  }
+
+  public static final class TrackChangeEvent.Builder {
+    ctor public TrackChangeEvent.Builder(int);
+    method @NonNull public android.media.metrics.TrackChangeEvent build();
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setBitrate(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setChannelCount(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setCodecName(@NonNull String);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setContainerMimeType(@NonNull String);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setHeight(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setLanguage(@NonNull String);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setLanguageRegion(@NonNull String);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setSampleMimeType(@NonNull String);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setSampleRate(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTrackChangeReason(int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setTrackState(int);
+    method @NonNull public android.media.metrics.TrackChangeEvent.Builder setWidth(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
   }
 
 }
