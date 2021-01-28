@@ -2621,7 +2621,6 @@ public abstract class Window {
      * callback with the root view of the window.
      *
      * @param callback the callback to add
-     * @hide
      */
     public void registerScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
     }
@@ -2630,7 +2629,6 @@ public abstract class Window {
      * Unregisters a {@link ScrollCaptureCallback} previously registered with this window.
      *
      * @param callback the callback to remove
-     * @hide
      */
     public void unregisterScrollCaptureCallback(@NonNull ScrollCaptureCallback callback) {
     }

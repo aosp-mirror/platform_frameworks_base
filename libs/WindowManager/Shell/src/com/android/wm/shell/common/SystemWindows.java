@@ -39,12 +39,12 @@ import android.view.IWindowSession;
 import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
+import android.view.ScrollCaptureResponse;
 import android.view.SurfaceControl;
-import android.view.SurfaceSession;
 import android.view.SurfaceControlViewHost;
+import android.view.SurfaceSession;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.ClientWindowFrames;
@@ -371,7 +371,11 @@ public class SystemWindows {
         @Override
         public void requestScrollCapture(IScrollCaptureCallbacks callbacks) {
             try {
-                callbacks.onUnavailable();
+                callbacks.onScrollCaptureResponse(
+                        new ScrollCaptureResponse.Builder()
+                                .setDescription("Not Implemented")
+                                .build());
+
             } catch (RemoteException ex) {
                 // ignore
             }

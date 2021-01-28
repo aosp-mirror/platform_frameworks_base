@@ -16,15 +16,19 @@
 
 package com.android.internal.view;
 
+import android.annotation.UiThread;
+import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.graphics.HardwareRenderer;
 import android.graphics.Matrix;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.RenderNode;
-import android.os.Handler;
+import android.os.CancellationSignal;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display.ColorMode;
 import android.view.ScrollCaptureCallback;
 import android.view.ScrollCaptureSession;
 import android.view.Surface;
@@ -44,9 +48,8 @@ import java.util.function.Consumer;
  * @param <V> the specific View subclass handled
  * @see ScrollCaptureViewHelper
  */
+@UiThread
 public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCallback {
-
-    public static final long NO_FRAME_PRODUCED = -1;
 
     private static final String TAG = "ScrollCaptureViewSupport";
 
@@ -54,22 +57,33 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
 
     private final WeakReference<V> mWeakView;
     private final ScrollCaptureViewHelper<V> mViewHelper;
-    private ViewRenderer mRenderer;
-    private Handler mUiHandler;
+    private final ViewRenderer mRenderer;
     private boolean mStarted;
     private boolean mEnded;
 
     ScrollCaptureViewSupport(V containingView, ScrollCaptureViewHelper<V> viewHelper) {
         mWeakView = new WeakReference<>(containingView);
         mRenderer = new ViewRenderer();
-        mUiHandler = containingView.getHandler();
+        // TODO(b/177649144): provide access to color space from android.media.Image
         mViewHelper = viewHelper;
     }
 
-    // Base implementation of ScrollCaptureCallback
+    /** Based on ViewRootImpl#updateColorModeIfNeeded */
+    @ColorMode
+    private static int getColorMode(View containingView) {
+        Context context = containingView.getContext();
+        int colorMode = containingView.getViewRootImpl().mWindowAttributes.getColorMode();
+        if (!context.getResources().getConfiguration().isScreenWideColorGamut()) {
+            colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+        }
+        return colorMode;
+    }
 
     @Override
-    public final void onScrollCaptureSearch(Consumer<Rect> onReady) {
+    public final void onScrollCaptureSearch(CancellationSignal signal, Consumer<Rect> onReady) {
+        if (signal.isCanceled()) {
+            return;
+        }
         V view = mWeakView.get();
         mStarted = false;
         mEnded = false;
@@ -82,7 +96,11 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
     }
 
     @Override
-    public final void onScrollCaptureStart(ScrollCaptureSession session, Runnable onReady) {
+    public final void onScrollCaptureStart(ScrollCaptureSession session, CancellationSignal signal,
+            Runnable onReady) {
+        if (signal.isCanceled()) {
+            return;
+        }
         V view = mWeakView.get();
 
         mEnded = false;
@@ -99,18 +117,22 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
     }
 
     @Override
-    public final void onScrollCaptureImageRequest(ScrollCaptureSession session, Rect requestRect) {
+    public final void onScrollCaptureImageRequest(ScrollCaptureSession session,
+            CancellationSignal signal, Rect requestRect, Consumer<Rect> onComplete) {
+        if (signal.isCanceled()) {
+            return;
+        }
         V view = mWeakView.get();
         if (view == null || !view.isVisibleToUser()) {
             // Signal to the controller that we have a problem and can't continue.
-            session.notifyBufferSent(NO_FRAME_PRODUCED, new Rect());
+            onComplete.accept(new Rect());
             return;
         }
         // Ask the view to scroll as needed to bring this area into view.
         ScrollResult scrollResult = mViewHelper.onScrollRequested(view, session.getScrollBounds(),
                 requestRect);
         if (scrollResult.availableArea.isEmpty()) {
-            session.notifyBufferSent(NO_FRAME_PRODUCED, scrollResult.availableArea);
+            onComplete.accept(scrollResult.availableArea);
             return;
         }
         view.invalidate(); // don't wait for vsync
@@ -121,17 +143,13 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
         viewCaptureArea.offset(0, -scrollResult.scrollDelta);
 
         if (WAIT_FOR_ANIMATION) {
-            Log.d(TAG, "render: delaying until animation");
             view.postOnAnimation(() ->  {
-                Log.d(TAG, "postOnAnimation(): rendering now");
-                long resultFrame = mRenderer.renderView(view, viewCaptureArea);
-                Log.d(TAG, "notifyBufferSent: " + scrollResult.availableArea);
-
-                session.notifyBufferSent(resultFrame, new Rect(scrollResult.availableArea));
+                mRenderer.renderView(view, viewCaptureArea);
+                onComplete.accept(new Rect(scrollResult.availableArea));
             });
         } else {
-            long resultFrame = mRenderer.renderView(view, viewCaptureArea);
-            session.notifyBufferSent(resultFrame, new Rect(scrollResult.availableArea));
+            mRenderer.renderView(view, viewCaptureArea);
+            onComplete.accept(new Rect(scrollResult.availableArea));
         }
     }
 
@@ -239,7 +257,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mCaptureRenderNode.endRecording();
         }
 
-        public long renderView(View view, Rect sourceRect) {
+        public void renderView(View view, Rect sourceRect) {
             if (updateForView(view)) {
                 setupLighting(view);
             }
@@ -258,7 +276,7 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             switch (request.syncAndDraw()) {
                 case HardwareRenderer.SYNC_OK:
                 case HardwareRenderer.SYNC_REDRAW_REQUESTED:
-                    return frameNumber;
+                    return;
 
                 case HardwareRenderer.SYNC_FRAME_DROPPED:
                     Log.e(TAG, "syncAndDraw(): SYNC_FRAME_DROPPED !");
@@ -270,7 +288,6 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
                     Log.e(TAG, "syncAndDraw(): SYNC_CONTEXT_IS_STOPPED !");
                     break;
             }
-            return NO_FRAME_PRODUCED;
         }
 
         public void trimMemory() {
@@ -289,5 +306,17 @@ public class ScrollCaptureViewSupport<V extends View> implements ScrollCaptureCa
             mTempMatrix.mapRect(mTempRectF);
             mTempRectF.round(outRect);
         }
+
+        public void setColorMode(@ColorMode int colorMode) {
+            mRenderer.setColorMode(colorMode);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ScrollCaptureViewSupport{"
+                + "view=" + mWeakView.get()
+                + ", helper=" + mViewHelper
+                + '}';
     }
 }
