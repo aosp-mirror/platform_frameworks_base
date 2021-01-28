@@ -745,7 +745,8 @@ public class VibratorServiceTest {
 
     private InputDevice createInputDeviceWithVibrator(int id) {
         return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, /* hasVibrator= */ true, false, false, false /* hasSensor */);
+                null, /* hasVibrator= */ true, false, false, false /* hasSensor */,
+                false /* hasBattery */);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {

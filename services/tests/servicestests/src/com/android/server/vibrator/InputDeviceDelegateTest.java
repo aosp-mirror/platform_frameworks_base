@@ -294,6 +294,8 @@ public class InputDeviceDelegateTest {
 
     private InputDevice createInputDevice(int id, boolean hasVibrator) {
         return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, hasVibrator, false, false, false /* hasSensor */);
+                null, hasVibrator, false, false, false /* hasSensor */, false /* hasBattery */);
+
+
     }
 }

@@ -70,7 +70,8 @@ jobject android_view_InputDevice_create(JNIEnv* env, const InputDeviceInfo& devi
                                           deviceInfo.isExternal(), deviceInfo.getSources(),
                                           deviceInfo.getKeyboardType(), kcmObj.get(),
                                           deviceInfo.hasVibrator(), hasMic,
-                                          deviceInfo.hasButtonUnderPad(), deviceInfo.hasSensor()));
+                                          deviceInfo.hasButtonUnderPad(), deviceInfo.hasSensor(),
+                                          deviceInfo.hasBattery()));
 
     const std::vector<InputDeviceInfo::MotionRange>& ranges = deviceInfo.getMotionRanges();
     for (const InputDeviceInfo::MotionRange& range: ranges) {
@@ -90,9 +91,10 @@ int register_android_view_InputDevice(JNIEnv* env)
     gInputDeviceClassInfo.clazz = FindClassOrDie(env, "android/view/InputDevice");
     gInputDeviceClassInfo.clazz = MakeGlobalRefOrDie(env, gInputDeviceClassInfo.clazz);
 
-    gInputDeviceClassInfo.ctor = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
-                                                  "(IIILjava/lang/String;IILjava/lang/"
-                                                  "String;ZIILandroid/view/KeyCharacterMap;ZZZZ)V");
+    gInputDeviceClassInfo.ctor =
+            GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz, "<init>",
+                             "(IIILjava/lang/String;IILjava/lang/"
+                             "String;ZIILandroid/view/KeyCharacterMap;ZZZZZ)V");
 
     gInputDeviceClassInfo.addMotionRange = GetMethodIDOrDie(env, gInputDeviceClassInfo.clazz,
             "addMotionRange", "(IIFFFFF)V");

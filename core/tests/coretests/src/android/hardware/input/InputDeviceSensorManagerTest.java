@@ -149,7 +149,7 @@ public class InputDeviceSensorManagerTest {
                 0 /* vendorId */, 0 /* productId */, "descriptor", true /* isExternal */,
                 0 /* sources */, 0 /* keyboardType */, null /* keyCharacterMap */,
                 false /* hasVibrator */, false /* hasMicrophone */, false /* hasButtonUnderpad */,
-                true /* hasSensor */);
+                true /* hasSensor */, false /* hasBattery */);
         assertTrue(d.hasSensor());
         return d;
     }
