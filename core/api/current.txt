@@ -36822,9 +36822,10 @@ package android.security.identity {
 package android.security.keystore {
 
   public class BackendBusyException extends java.security.ProviderException {
-    ctor public BackendBusyException();
-    ctor public BackendBusyException(@NonNull String);
-    ctor public BackendBusyException(@NonNull String, @NonNull Throwable);
+    ctor public BackendBusyException(long);
+    ctor public BackendBusyException(long, @NonNull String);
+    ctor public BackendBusyException(long, @NonNull String, @NonNull Throwable);
+    method public long getBackOffHintMillis();
   }
 
   public class KeyExpiredException extends java.security.InvalidKeyException {
