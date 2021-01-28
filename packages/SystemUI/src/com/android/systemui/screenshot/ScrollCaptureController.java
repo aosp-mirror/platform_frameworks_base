@@ -16,16 +16,24 @@
 
 package com.android.systemui.screenshot;
 
+import android.annotation.IdRes;
+import android.annotation.UiThread;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewTreeObserver.InternalInsetsInfo;
+import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
+import android.view.Window;
+import android.widget.ImageView;
 
+import com.android.systemui.R;
 import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
+import com.android.systemui.screenshot.TakeScreenshotService.RequestCallback;
 
 import com.google.common.util.concurrent.ListenableFuture;
 
@@ -38,10 +46,8 @@ import java.util.function.Consumer;
 /**
  * Interaction controller between the UI and ScrollCaptureClient.
  */
-public class ScrollCaptureController {
+public class ScrollCaptureController implements OnComputeInternalInsetsListener {
     private static final String TAG = "ScrollCaptureController";
-
-    private static final boolean USE_TILED_IMAGE = false;
 
     public static final int MAX_PAGES = 5;
     public static final int MAX_HEIGHT = 12000;
@@ -53,9 +59,19 @@ public class ScrollCaptureController {
     private final Executor mBgExecutor;
     private final ImageExporter mImageExporter;
     private final ImageTileSet mImageTileSet;
+    private final LayoutInflater mLayoutInflater;
 
     private ZonedDateTime mCaptureTime;
     private UUID mRequestId;
+    private RequestCallback mCallback;
+    private Window mWindow;
+    private ImageView mPreview;
+    private View mClose;
+    private View mEdit;
+    private View mShare;
+
+    private ListenableFuture<ImageExporter.Result> mExportFuture;
+    private Runnable mPendingAction;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter) {
@@ -65,20 +81,126 @@ public class ScrollCaptureController {
         mBgExecutor = bgExecutor;
         mImageExporter = exporter;
         mImageTileSet = new ImageTileSet();
+        mLayoutInflater = mContext.getSystemService(LayoutInflater.class);
+    }
+
+    /**
+     * @param window the window to display the preview
+     */
+    public void attach(Window window) {
+        mWindow = window;
     }
 
     /**
      * Run scroll capture!
      *
-     * @param after action to take after the flow is complete
+     * @param callback request callback to report back to the service
      */
-    public void start(final Runnable after) {
+    public void start(RequestCallback callback) {
         mCaptureTime = ZonedDateTime.now();
         mRequestId = UUID.randomUUID();
-        mConnection.start((session) -> startCapture(session, after));
+        mCallback = callback;
+
+        setContentView(R.layout.long_screenshot);
+        mWindow.getDecorView().getViewTreeObserver()
+                .addOnComputeInternalInsetsListener(this);
+        mPreview = findViewById(R.id.preview);
+
+        mClose = findViewById(R.id.close);
+        mEdit = findViewById(R.id.edit);
+        mShare = findViewById(R.id.share);
+
+        mClose.setOnClickListener(this::onClicked);
+        mEdit.setOnClickListener(this::onClicked);
+        mShare.setOnClickListener(this::onClicked);
+
+        mPreview.setImageDrawable(mImageTileSet.getDrawable());
+        mConnection.start(this::startCapture);
     }
 
-    private void startCapture(Session session, final Runnable onDismiss) {
+
+    /** Ensure the entire window is touchable */
+    public void onComputeInternalInsets(InternalInsetsInfo inoutInfo) {
+        inoutInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_FRAME);
+    }
+
+    void disableButtons() {
+        mClose.setEnabled(false);
+        mEdit.setEnabled(false);
+        mShare.setEnabled(false);
+    }
+
+    private void onClicked(View v) {
+        Log.d(TAG, "button clicked!");
+
+        int id = v.getId();
+        if (id == R.id.close) {
+            v.setPressed(true);
+            disableButtons();
+            finish();
+        } else if (id == R.id.edit) {
+            v.setPressed(true);
+            disableButtons();
+            edit();
+        } else if (id == R.id.share) {
+            v.setPressed(true);
+            disableButtons();
+            share();
+        }
+    }
+
+    private void finish() {
+        if (mExportFuture == null) {
+            doFinish();
+        } else {
+            mExportFuture.addListener(this::doFinish, mUiExecutor);
+        }
+    }
+
+    private void doFinish() {
+        mPreview.setImageDrawable(null);
+        mImageTileSet.clear();
+        mCallback.onFinish();
+        mWindow.getDecorView().getViewTreeObserver()
+                .removeOnComputeInternalInsetsListener(this);
+    }
+
+    private void edit() {
+        sendIntentWhenReady(Intent.ACTION_EDIT);
+    }
+
+    private void share() {
+        sendIntentWhenReady(Intent.ACTION_SEND);
+    }
+
+    void sendIntentWhenReady(String action) {
+        if (mExportFuture != null) {
+            mExportFuture.addListener(() -> {
+                try {
+                    ImageExporter.Result result = mExportFuture.get();
+                    sendIntent(action, result.uri);
+                    mCallback.onFinish();
+                } catch (InterruptedException | ExecutionException e) {
+                    Log.e(TAG, "failed to export", e);
+                    mCallback.onFinish();
+                }
+
+            }, mUiExecutor);
+        } else {
+            mPendingAction = this::edit;
+        }
+    }
+
+    private void setContentView(@IdRes int id) {
+        mWindow.setContentView(id);
+    }
+
+    <T extends View> T findViewById(@IdRes int res) {
+        return mWindow.findViewById(res);
+    }
+
+    private void startCapture(Session session) {
+        Log.d(TAG, "startCapture");
         Consumer<ScrollCaptureClient.CaptureResult> consumer =
                 new Consumer<ScrollCaptureClient.CaptureResult>() {
 
@@ -91,17 +213,17 @@ public class ScrollCaptureController {
 
                         boolean emptyFrame = result.captured.height() == 0;
                         if (!emptyFrame) {
-                            mImageTileSet.addTile(new ImageTile(result.image, result.captured));
+                            ImageTile tile = new ImageTile(result.image, result.captured);
+                            Log.d(TAG, "Adding tile: " + tile);
+                            mImageTileSet.addTile(tile);
+                            Log.d(TAG, "New dimens: w=" + mImageTileSet.getWidth() + ", "
+                                    + "h=" + mImageTileSet.getHeight());
                         }
 
                         if (emptyFrame || mFrameCount >= MAX_PAGES
                                 || mTop + session.getTileHeight() > MAX_HEIGHT) {
-                            if (!mImageTileSet.isEmpty()) {
-                                exportToFile(mImageTileSet.toBitmap(), session, onDismiss);
-                                mImageTileSet.clear();
-                            } else {
-                                session.end(onDismiss);
-                            }
+
+                            mUiExecutor.execute(() -> afterCaptureComplete(session));
                             return;
                         }
                         mTop += result.captured.height();
@@ -113,25 +235,24 @@ public class ScrollCaptureController {
         session.requestTile(0, consumer);
     };
 
-    void exportToFile(Bitmap bitmap, Session session, Runnable afterEnd) {
-        mImageExporter.setFormat(Bitmap.CompressFormat.PNG);
-        mImageExporter.setQuality(6);
-        ListenableFuture<ImageExporter.Result> future =
-                mImageExporter.export(mBgExecutor, mRequestId, bitmap, mCaptureTime);
-        future.addListener(() -> {
-            try {
-                ImageExporter.Result result = future.get();
-                launchViewer(result.uri);
-            } catch (InterruptedException | ExecutionException e) {
-                Toast.makeText(mContext, "Failed to write image", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Error storing screenshot to media store", e.getCause());
+    @UiThread
+    void afterCaptureComplete(Session session) {
+        Log.d(TAG, "afterCaptureComplete");
+
+        if (mImageTileSet.isEmpty()) {
+            session.end(mCallback::onFinish);
+        } else {
+            mExportFuture = mImageExporter.export(
+                    mBgExecutor, mRequestId, mImageTileSet.toBitmap(), mCaptureTime);
+            // The user chose an action already, link it to the result
+            if (mPendingAction != null) {
+                mExportFuture.addListener(mPendingAction, mUiExecutor);
             }
-            session.end(afterEnd); // end session, close connection, afterEnd.run()
-        }, mUiExecutor);
+        }
     }
 
-    void launchViewer(Uri uri) {
-        Intent editIntent = new Intent(Intent.ACTION_VIEW);
+    void sendIntent(String action, Uri uri) {
+        Intent editIntent = new Intent(action);
         editIntent.setType("image/png");
         editIntent.setData(uri);
         editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
