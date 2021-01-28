@@ -20,7 +20,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
@@ -54,10 +53,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipRotationTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -65,9 +62,9 @@ class PipRotationTest(
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = FixedAppHelper(instrumentation)
             val pipApp = PipAppHelper(instrumentation)
-            return FlickerTestRunnerFactory(instrumentation,
-                    listOf(Surface.ROTATION_0, Surface.ROTATION_90))
-                    .buildRotationTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance().buildRotationTest(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)) {
+                configuration ->
                         withTestName { buildTestTag("PipRotationTest", testApp, configuration) }
                         repeat { configuration.repetitions }
                         setup {

@@ -21,7 +21,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
@@ -55,18 +54,16 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 178015460)
 class CloseImeAutoOpenWindowToAppTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
 
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
-                .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance()
+                .buildTest(instrumentation, repetitions = 5) { configuration ->
                     val testApp = ImeAppAutoFocusHelper(instrumentation,
                         configuration.startRotation)
                     withTestName { buildTestTag("imeToAppAutoOpen", configuration) }
