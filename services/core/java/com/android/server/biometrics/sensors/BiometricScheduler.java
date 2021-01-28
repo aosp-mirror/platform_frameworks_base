@@ -563,14 +563,26 @@ public class BiometricScheduler {
         final boolean isAuthenticating =
                 mCurrentOperation.mClientMonitor instanceof AuthenticationConsumer;
         final boolean tokenMatches = mCurrentOperation.mClientMonitor.getToken() == token;
-        if (!isAuthenticating || !tokenMatches) {
-            Slog.w(getTag(), "Not cancelling authentication"
-                    + ", current operation : " + mCurrentOperation
-                    + ", tokenMatches: " + tokenMatches);
-            return;
-        }
 
-        cancelInternal(mCurrentOperation);
+        if (isAuthenticating && tokenMatches) {
+            Slog.d(getTag(), "Cancelling authentication: " + mCurrentOperation);
+            cancelInternal(mCurrentOperation);
+        } else if (!isAuthenticating) {
+            // Look through the current queue for all authentication clients for the specified
+            // token, and mark them as STATE_WAITING_IN_QUEUE_CANCELING. Note that we're marking
+            // all of them, instead of just the first one, since the API surface currently doesn't
+            // allow us to distinguish between multiple authentication requests from the same
+            // process. However, this generally does not happen anyway, and would be a class of
+            // bugs on its own.
+            for (Operation operation : mPendingOperations) {
+                if (operation.mClientMonitor instanceof AuthenticationConsumer
+                        && operation.mClientMonitor.getToken() == token) {
+                    Slog.d(getTag(), "Marking " + operation
+                            + " as STATE_WAITING_IN_QUEUE_CANCELING");
+                    operation.mState = Operation.STATE_WAITING_IN_QUEUE_CANCELING;
+                }
+            }
+        }
     }
 
     /**

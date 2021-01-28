@@ -202,7 +202,6 @@ import android.os.UserManager;
 import android.os.WorkSource;
 import android.os.storage.IStorageManager;
 import android.os.storage.StorageManager;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.service.dreams.DreamActivity;
 import android.service.voice.IVoiceInteractionSession;
@@ -324,12 +323,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** This activity is being relaunched due to a free-resize operation. */
     public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
 
-    /**
-     * Apps are blocked from starting activities in the foreground after the user presses home.
-     */
-    public static final String BLOCK_ACTIVITY_STARTS_AFTER_HOME_FLAG =
-            "am_block_activity_starts_after_home";
-
     Context mContext;
 
     /**
@@ -386,7 +379,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     volatile WindowProcessController mHeavyWeightProcess;
     boolean mHasHeavyWeightFeature;
     boolean mHasLeanbackFeature;
-    boolean mBlockActivityAfterHomeEnabled;
     /** The process of the top most activity. */
     volatile WindowProcessController mTopApp;
     /**
@@ -490,20 +482,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     /** Temporary to avoid allocations. */
     final StringBuilder mStringBuilder = new StringBuilder(256);
 
-    // Amount of time after a call to stopAppSwitches() during which we will
-    // prevent further untrusted switches from happening.
-    private static final long APP_SWITCH_DELAY_TIME = 5 * 1000;
-
     /**
-     * The time at which we will allow normal application switches again,
-     * after a call to {@link #stopAppSwitches()}.
+     * Whether normal application switches are allowed; a call to {@link #stopAppSwitches()
+     * disables this.
      */
-    private long mAppSwitchesAllowedTime;
-    /**
-     * This is set to true after the first switch after mAppSwitchesAllowedTime
-     * is set; any switches after that will clear the time.
-     */
-    private boolean mDidAppSwitch;
+    private boolean mAppSwitchesAllowed = true;
 
     /**
      * Last stop app switches time, apps finished before this time cannot start background activity
@@ -749,9 +732,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mRecentTasks.onSystemReadyLocked();
             mTaskSupervisor.onSystemReady();
             mActivityClientController.onSystemReady();
-            mBlockActivityAfterHomeEnabled = DeviceConfig.getBoolean(
-                    DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
-                    BLOCK_ACTIVITY_STARTS_AFTER_HOME_FLAG, true);
         }
     }
 
@@ -1146,7 +1126,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (topFocusedRootTask != null && topFocusedRootTask.getResumedActivity() != null
                     && topFocusedRootTask.getResumedActivity().info.applicationInfo.uid
                     == Binder.getCallingUid()) {
-                mAppSwitchesAllowedTime = 0;
+                mAppSwitchesAllowed = true;
             }
         }
         return pir.sendInner(0, fillInIntent, resolvedType, allowlistToken, null, null,
@@ -2002,10 +1982,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
         assertPackageMatchesCallingUid(callingPackage);
-        if (!checkAppSwitchAllowedLocked(callingPid, callingUid, -1, -1, "Task to front")) {
-            SafeActivityOptions.abort(options);
-            return;
-        }
+
         final long origId = Binder.clearCallingIdentity();
         WindowProcessController callerApp = null;
         if (appThread != null) {
@@ -2086,76 +2063,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /**
-     * Return true if app switch protection will be handled by background activity launch logic.
-     */
-    boolean getBalAppSwitchesProtectionEnabled() {
-         return mBlockActivityAfterHomeEnabled;
-    }
-
-    /**
      * Return true if app switching is allowed.
      */
     boolean getBalAppSwitchesAllowed() {
-        if (getBalAppSwitchesProtectionEnabled()) {
-            // Apps no longer able to start BAL again until app switching is resumed.
-            return mAppSwitchesAllowedTime == 0;
-        } else {
-            // Legacy behavior, BAL logic won't block app switching.
-            return true;
-        }
-    }
-
-    boolean checkAppSwitchAllowedLocked(int sourcePid, int sourceUid,
-            int callingPid, int callingUid, String name) {
-
-        // Background activity launch logic replaces app switching protection, so allow
-        // apps to start activity here now.
-        if (getBalAppSwitchesProtectionEnabled()) {
-            return true;
-        }
-
-        if (mAppSwitchesAllowedTime < SystemClock.uptimeMillis()) {
-            return true;
-        }
-
-        if (getRecentTasks().isCallerRecents(sourceUid)) {
-            return true;
-        }
-
-        int perm = checkComponentPermission(STOP_APP_SWITCHES, sourcePid, sourceUid, -1, true);
-        if (perm == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (checkAllowAppSwitchUid(sourceUid)) {
-            return true;
-        }
-
-        // If the actual IPC caller is different from the logical source, then
-        // also see if they are allowed to control app switches.
-        if (callingUid != -1 && callingUid != sourceUid) {
-            perm = checkComponentPermission(STOP_APP_SWITCHES, callingPid, callingUid, -1, true);
-            if (perm == PackageManager.PERMISSION_GRANTED) {
-                return true;
-            }
-            if (checkAllowAppSwitchUid(callingUid)) {
-                return true;
-            }
-        }
-
-        Slog.w(TAG, name + " request from " + sourceUid + " stopped");
-        return false;
-    }
-
-    private boolean checkAllowAppSwitchUid(int uid) {
-        ArrayMap<String, Integer> types = mAllowAppSwitchUids.get(UserHandle.getUserId(uid));
-        if (types != null) {
-            for (int i = types.size() - 1; i >= 0; i--) {
-                if (types.valueAt(i).intValue() == uid) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return mAppSwitchesAllowed;
     }
 
     @Override
@@ -3663,13 +3574,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void stopAppSwitches() {
         enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "stopAppSwitches");
         synchronized (mGlobalLock) {
-            mAppSwitchesAllowedTime = SystemClock.uptimeMillis() + APP_SWITCH_DELAY_TIME;
+            mAppSwitchesAllowed = false;
             mLastStopAppSwitchesTime = SystemClock.uptimeMillis();
-            mDidAppSwitch = false;
-            // If BAL app switching enabled, app switches are blocked not delayed.
-            if (!getBalAppSwitchesProtectionEnabled()) {
-                getActivityStartController().schedulePendingActivityLaunches(APP_SWITCH_DELAY_TIME);
-            }
         }
     }
 
@@ -3677,28 +3583,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void resumeAppSwitches() {
         enforceCallerIsRecentsOrHasPermission(STOP_APP_SWITCHES, "resumeAppSwitches");
         synchronized (mGlobalLock) {
-            // Note that we don't execute any pending app switches... we will
-            // let those wait until either the timeout, or the next start
-            // activity request.
-            mAppSwitchesAllowedTime = 0;
+            mAppSwitchesAllowed = true;
         }
     }
 
     long getLastStopAppSwitchesTime() {
         return mLastStopAppSwitchesTime;
-    }
-
-    void onStartActivitySetDidAppSwitch() {
-        if (mDidAppSwitch) {
-            // This is the second allowed switch since we stopped switches, so now just generally
-            // allow switches. Use case:
-            // - user presses home (switches disabled, switch to home, mDidAppSwitch now true);
-            // - user taps a home icon (coming from home so allowed, we hit here and now allow
-            // anyone to switch again).
-            mAppSwitchesAllowedTime = 0;
-        } else {
-            mDidAppSwitch = true;
-        }
     }
 
     /** @return whether the system should disable UI modes incompatible with VR mode. */
@@ -5822,15 +5712,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 int userId) {
             synchronized (mGlobalLock) {
 
-                boolean didSomething =
-                        getActivityStartController().clearPendingActivityLaunches(packageName);
-                didSomething |= mRootWindowContainer.finishDisabledPackageActivities(packageName,
+                return mRootWindowContainer.finishDisabledPackageActivities(packageName,
                         null /* filterByClasses */, doit, evenPersistent, userId,
                         // Only remove the activities without process because the activities with
                         // attached process will be removed when handling process died with
                         // WindowProcessController#isRemoved == true.
                         true /* onlyRemoveNoProcess */);
-                return didSomething;
             }
         }
 

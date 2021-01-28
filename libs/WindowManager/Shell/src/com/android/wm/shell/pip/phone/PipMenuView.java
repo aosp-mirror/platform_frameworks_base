@@ -63,6 +63,7 @@ import android.widget.LinearLayout;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipUtils;
 
 import java.util.ArrayList;
@@ -116,7 +117,8 @@ public class PipMenuView extends FrameLayout {
                 }
             };
 
-    private Handler mHandler = new Handler();
+    private ShellExecutor mMainExecutor;
+    private Handler mMainHandler;
 
     private final Runnable mHideMenuRunnable = this::hideMenu;
 
@@ -127,10 +129,13 @@ public class PipMenuView extends FrameLayout {
     protected View mTopEndContainer;
     protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
-    public PipMenuView(Context context, PhonePipMenuController controller) {
+    public PipMenuView(Context context, PhonePipMenuController controller,
+            ShellExecutor mainExecutor, Handler mainHandler) {
         super(context, null, 0);
         mContext = context;
         mController = controller;
+        mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
 
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
@@ -412,17 +417,15 @@ public class PipMenuView extends FrameLayout {
                             d.setTint(Color.WHITE);
                             actionView.setImageDrawable(d);
                         }
-                    }, mHandler);
+                    }, mMainHandler);
                     actionView.setContentDescription(action.getContentDescription());
                     if (action.isEnabled()) {
                         actionView.setOnClickListener(v -> {
-                            mHandler.post(() -> {
-                                try {
-                                    action.getActionIntent().send();
-                                } catch (CanceledException e) {
-                                    Log.w(TAG, "Failed to send action", e);
-                                }
-                            });
+                            try {
+                                action.getActionIntent().send();
+                            } catch (CanceledException e) {
+                                Log.w(TAG, "Failed to send action", e);
+                            }
                         });
                     }
                     actionView.setEnabled(action.isEnabled());
@@ -480,13 +483,13 @@ public class PipMenuView extends FrameLayout {
     }
 
     private void cancelDelayedHide() {
-        mHandler.removeCallbacks(mHideMenuRunnable);
+        mMainExecutor.removeCallbacks(mHideMenuRunnable);
     }
 
     private void repostDelayedHide(int delay) {
         int recommendedTimeout = mAccessibilityManager.getRecommendedTimeoutMillis(delay,
                 FLAG_CONTENT_ICONS | FLAG_CONTENT_CONTROLS);
-        mHandler.removeCallbacks(mHideMenuRunnable);
-        mHandler.postDelayed(mHideMenuRunnable, recommendedTimeout);
+        mMainExecutor.removeCallbacks(mHideMenuRunnable);
+        mMainExecutor.executeDelayed(mHideMenuRunnable, recommendedTimeout);
     }
 }
