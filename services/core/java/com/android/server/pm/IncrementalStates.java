@@ -61,12 +61,12 @@ public final class IncrementalStates {
 
     public IncrementalStates() {
         // By default the package is not startable and not fully loaded (i.e., is loading)
-        this(false, true);
+        this(false, true, 0);
     }
 
-    public IncrementalStates(boolean isStartable, boolean isLoading) {
+    public IncrementalStates(boolean isStartable, boolean isLoading, float loadingProgress) {
         mStartableState = new StartableState(isStartable);
-        mLoadingState = new LoadingState(isLoading);
+        mLoadingState = new LoadingState(isLoading, loadingProgress);
         mStatusConsumer = new StatusConsumer();
     }
 
@@ -405,9 +405,10 @@ public final class IncrementalStates {
         private boolean mIsLoading;
         private float mProgress;
 
-        LoadingState(boolean isLoading) {
+        LoadingState(boolean isLoading, float loadingProgress) {
             mIsLoading = isLoading;
-            mProgress = isLoading ? 0 : 1;
+            // loading progress is reset to 1 if loading has finished
+            mProgress = isLoading ? loadingProgress : 1;
         }
 
         public boolean isLoading() {
