@@ -25,6 +25,7 @@ import android.content.Context;
 import android.graphics.fonts.FontManager;
 import android.os.FileUtils;
 import android.platform.test.annotations.Presubmit;
+import android.system.Os;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -281,6 +282,10 @@ public final class UpdatableFontDirTest {
         installFontFile(dir, "test,1", GOOD_SIGNATURE);
         assertThat(dir.getFontFileMap()).containsKey("test.ttf");
         assertThat(parser.getRevision(dir.getFontFileMap().get("test.ttf"))).isEqualTo(1);
+        File fontFile = dir.getFontFileMap().get("test.ttf");
+        assertThat(Os.stat(fontFile.getAbsolutePath()).st_mode & 0777).isEqualTo(0644);
+        File fontDir = fontFile.getParentFile();
+        assertThat(Os.stat(fontDir.getAbsolutePath()).st_mode & 0777).isEqualTo(0711);
     }
 
     @Test
