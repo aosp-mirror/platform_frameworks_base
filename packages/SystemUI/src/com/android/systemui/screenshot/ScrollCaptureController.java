@@ -72,7 +72,7 @@ public class ScrollCaptureController {
      *
      * @param after action to take after the flow is complete
      */
-    public void run(final Runnable after) {
+    public void start(final Runnable after) {
         mCaptureTime = ZonedDateTime.now();
         mRequestId = UUID.randomUUID();
         mConnection.start((session) -> startCapture(session, after));
