@@ -16,7 +16,7 @@
 
 package com.android.systemui;
 
-import android.app.ActivityTaskManager;
+import android.app.ActivityClient;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -27,7 +27,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
@@ -237,12 +236,7 @@ public class SizeCompatModeActivityController extends SystemUI implements Comman
 
         @Override
         public void onClick(View v) {
-            try {
-                ActivityTaskManager.getService().restartActivityProcessIfVisible(
-                        mLastActivityToken);
-            } catch (RemoteException e) {
-                Log.w(TAG, "Unable to restart activity", e);
-            }
+            ActivityClient.getInstance().restartActivityProcessIfVisible(mLastActivityToken);
         }
 
         @Override

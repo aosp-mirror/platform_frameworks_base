@@ -72,7 +72,6 @@ import android.view.RemoteAnimationAdapter;
 import android.window.IWindowOrganizerController;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.os.IResultReceiver;
-import com.android.internal.policy.IKeyguardDismissCallback;
 
 import java.util.List;
 
@@ -85,8 +84,6 @@ import java.util.List;
 // TODO(b/174040395): Make this interface private to ActivityTaskManager.java and have external
 // caller go through that call instead. This would help us better separate and control the API
 // surface exposed.
-// TODO(b/174041144): Move callback methods from Activity (Things that take param 'IBinder token')
-// to a separate interface that is only available to the Activity.
 // TODO(b/174041603): Create a builder interface for things like startActivityXXX(...) to reduce
 // interface duplication.
 // TODO(b/174040691): Clean-up/remove all obsolete or unused interfaces like things that should be
@@ -294,9 +291,6 @@ interface IActivityTaskManager {
     // Get device configuration
     ConfigurationInfo getDeviceConfigurationInfo();
 
-    void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback,
-            in CharSequence message);
-
     /** Cancels the window transitions for the given task. */
     void cancelTaskWindowTransition(int taskId);
 
@@ -307,14 +301,6 @@ interface IActivityTaskManager {
      * @return a graphic buffer representing a screenshot of a task
      */
     android.window.TaskSnapshot getTaskSnapshot(int taskId, boolean isLowResolution);
-
-    /**
-     * It should only be called from home activity to remove its outdated snapshot. The home
-     * snapshot is used to speed up entering home from screen off. If the content of home activity
-     * is significantly different from before taking the snapshot, then the home activity can use
-     * this method to avoid inconsistent transition.
-     */
-    void invalidateHomeTaskSnapshot(IBinder homeToken);
 
     /**
      * Return the user id of last resumed activity.
@@ -362,14 +348,4 @@ interface IActivityTaskManager {
      * Clears launch params for given packages.
      */
     void clearLaunchParamsForPackages(in List<String> packageNames);
-
-    /**
-     * Restarts the activity by killing its process if it is visible. If the activity is not
-     * visible, the activity will not be restarted immediately and just keep the activity record in
-     * the stack. It also resets the current override configuration so the activity will use the
-     * configuration according to the latest state.
-     *
-     * @param activityToken The token of the target activity to restart.
-     */
-    void restartActivityProcessIfVisible(in IBinder activityToken);
 }
