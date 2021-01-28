@@ -34,7 +34,13 @@ interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
     oneway void activityResumed(in IBinder token);
     oneway void activityTopResumedStateLost();
-    oneway void activityPaused(in IBinder token);
+    /**
+     * Notifies that the activity has completed paused. This call is not one-way because it can make
+     * consecutive launch in the same process more coherent. About the order of binder call, it
+     * should be fine with other one-way calls because if pause hasn't completed on the server side,
+     * there won't be other lifecycle changes.
+     */
+    void activityPaused(in IBinder token);
     oneway void activityStopped(in IBinder token, in Bundle state,
             in PersistableBundle persistentState, in CharSequence description);
     oneway void activityDestroyed(in IBinder token);
