@@ -1431,14 +1431,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return {@code true} if bar shown within a given rectangle is allowed to be transparent
+     * @return {@code true} if bar shown within a given rectangle is allowed to be fully transparent
      *     when the current activity is displayed.
      */
-    boolean isTransparentBarAllowed(Rect rect) {
-        // TODO(b/175482966): Allow status and navigation bars to be semi-transparent black
-        // in letterbox mode.
-        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect)
-                || mWmService.isLetterboxActivityCornersRounded();
+    boolean isFullyTransparentBarAllowed(Rect rect) {
+        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
     }
 
     /**

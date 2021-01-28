@@ -26,6 +26,7 @@ import static android.view.InsetsState.ITYPE_STATUS_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
 
 import static androidx.lifecycle.Lifecycle.State.RESUMED;
 
@@ -2428,6 +2429,8 @@ public class StatusBar extends SystemUI implements DemoMode,
             return MODE_LIGHTS_OUT_TRANSPARENT;
         } else if ((appearance & APPEARANCE_OPAQUE_STATUS_BARS) != 0) {
             return MODE_OPAQUE;
+        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS) != 0) {
+            return MODE_SEMI_TRANSPARENT;
         } else {
             return MODE_TRANSPARENT;
         }
