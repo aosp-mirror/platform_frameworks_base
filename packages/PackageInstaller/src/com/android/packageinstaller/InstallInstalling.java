@@ -25,7 +25,10 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
+import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
+import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -143,16 +146,21 @@ public class InstallInstalling extends AlertActivity {
 
                 File file = new File(mPackageURI.getPath());
                 try {
-                    PackageParser.PackageLite pkg = PackageParser.parsePackageLite(file, 0);
-                    params.setAppPackageName(pkg.packageName);
-                    params.setInstallLocation(pkg.installLocation);
-                    params.setSize(
-                            PackageHelper.calculateInstalledSize(pkg, false, params.abiOverride));
-                } catch (PackageParser.PackageParserException e) {
-                    Log.e(LOG_TAG, "Cannot parse package " + file + ". Assuming defaults.");
-                    Log.e(LOG_TAG,
-                            "Cannot calculate installed size " + file + ". Try only apk size.");
-                    params.setSize(file.length());
+                    final ParseTypeImpl input = ParseTypeImpl.forDefaultParsing();
+                    final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+                            input.reset(), file, /* flags */ 0);
+                    if (result.isError()) {
+                        Log.e(LOG_TAG, "Cannot parse package " + file + ". Assuming defaults.");
+                        Log.e(LOG_TAG,
+                                "Cannot calculate installed size " + file + ". Try only apk size.");
+                        params.setSize(file.length());
+                    } else {
+                        final PackageLite pkg = result.getResult();
+                        params.setAppPackageName(pkg.getPackageName());
+                        params.setInstallLocation(pkg.getInstallLocation());
+                        params.setSize(
+                                PackageHelper.calculateInstalledSize(pkg, params.abiOverride));
+                    }
                 } catch (IOException e) {
                     Log.e(LOG_TAG,
                             "Cannot calculate installed size " + file + ". Try only apk size.");
