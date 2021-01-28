@@ -20,7 +20,7 @@ import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.EXTRA_REMOVED_FOR_ALL_USERS;
 import static android.content.Intent.EXTRA_REPLACING;
-import static android.content.pm.PackageManager.MATCH_ALL;
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
 import static android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION;
 
 import android.annotation.NonNull;
@@ -34,7 +34,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Environment;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceManager;
@@ -52,10 +54,14 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 /**
  * System service that manages app hibernation state, a state apps can enter that means they are
@@ -64,6 +70,11 @@ import java.util.Set;
  */
 public final class AppHibernationService extends SystemService {
     private static final String TAG = "AppHibernationService";
+    private static final int PACKAGE_MATCH_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE
+                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.MATCH_UNINSTALLED_PACKAGES
+                    | PackageManager.MATCH_DISABLED_COMPONENTS;
 
     /**
      * Lock for accessing any in-memory hibernation state
@@ -74,9 +85,13 @@ public final class AppHibernationService extends SystemService {
     private final IActivityManager mIActivityManager;
     private final UserManager mUserManager;
     @GuardedBy("mLock")
-    private final SparseArray<Map<String, UserPackageState>> mUserStates = new SparseArray<>();
+    private final SparseArray<Map<String, UserLevelState>> mUserStates = new SparseArray<>();
+    private final SparseArray<HibernationStateDiskStore<UserLevelState>> mUserDiskStores =
+            new SparseArray<>();
     @GuardedBy("mLock")
-    private final Set<String> mGloballyHibernatedPackages = new ArraySet<>();
+    private final Map<String, GlobalLevelState> mGlobalHibernationStates = new ArrayMap<>();
+    private final HibernationStateDiskStore<GlobalLevelState> mGlobalLevelHibernationDiskStore;
+    private final Injector mInjector;
 
     /**
      * Initializes the system service.
@@ -98,6 +113,8 @@ public final class AppHibernationService extends SystemService {
         mIPackageManager = injector.getPackageManager();
         mIActivityManager = injector.getActivityManager();
         mUserManager = injector.getUserManager();
+        mGlobalLevelHibernationDiskStore = injector.getGlobalLevelDiskStore();
+        mInjector = injector;
 
         final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
 
@@ -111,6 +128,17 @@ public final class AppHibernationService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.APP_HIBERNATION_SERVICE, mServiceStub);
+    }
+
+    @Override
+    public void onBootPhase(int phase) {
+        if (phase == PHASE_BOOT_COMPLETED) {
+            List<GlobalLevelState> states =
+                    mGlobalLevelHibernationDiskStore.readHibernationStates();
+            synchronized (mLock) {
+                initializeGlobalHibernationStates(states);
+            }
+        }
     }
 
     /**
@@ -128,8 +156,8 @@ public final class AppHibernationService extends SystemService {
             return false;
         }
         synchronized (mLock) {
-            final Map<String, UserPackageState> packageStates = mUserStates.get(userId);
-            final UserPackageState pkgState = packageStates.get(packageName);
+            final Map<String, UserLevelState> packageStates = mUserStates.get(userId);
+            final UserLevelState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
                 throw new IllegalArgumentException(
                         String.format("Package %s is not installed for user %s",
@@ -147,7 +175,12 @@ public final class AppHibernationService extends SystemService {
      */
     boolean isHibernatingGlobally(String packageName) {
         synchronized (mLock) {
-            return mGloballyHibernatedPackages.contains(packageName);
+            GlobalLevelState state = mGlobalHibernationStates.get(packageName);
+            if (state == null) {
+                throw new IllegalArgumentException(
+                        String.format("Package %s is not installed", packageName));
+            }
+            return state.hibernated;
         }
     }
 
@@ -166,8 +199,8 @@ public final class AppHibernationService extends SystemService {
             return;
         }
         synchronized (mLock) {
-            Map<String, UserPackageState> packageStates = mUserStates.get(userId);
-            UserPackageState pkgState = packageStates.get(packageName);
+            final Map<String, UserLevelState> packageStates = mUserStates.get(userId);
+            final UserLevelState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
                 throw new IllegalArgumentException(
                         String.format("Package %s is not installed for user %s",
@@ -183,6 +216,8 @@ public final class AppHibernationService extends SystemService {
             } else {
                 unhibernatePackageForUser(packageName, userId, pkgState);
             }
+            List<UserLevelState> states = new ArrayList<>(mUserStates.get(userId).values());
+            mUserDiskStores.get(userId).scheduleWriteHibernationStates(states);
         }
     }
 
@@ -194,13 +229,20 @@ public final class AppHibernationService extends SystemService {
      * @param isHibernating new hibernation state
      */
     void setHibernatingGlobally(String packageName, boolean isHibernating) {
-        if (isHibernating != mGloballyHibernatedPackages.contains(packageName)) {
-            synchronized (mLock) {
+        synchronized (mLock) {
+            GlobalLevelState state = mGlobalHibernationStates.get(packageName);
+            if (state == null) {
+                throw new IllegalArgumentException(
+                        String.format("Package %s is not installed for any user", packageName));
+            }
+            if (state.hibernated != isHibernating) {
                 if (isHibernating) {
-                    hibernatePackageGlobally(packageName);
+                    hibernatePackageGlobally(packageName, state);
                 } else {
-                    unhibernatePackageGlobally(packageName);
+                    unhibernatePackageGlobally(packageName, state);
                 }
+                List<GlobalLevelState> states = new ArrayList<>(mGlobalHibernationStates.values());
+                mGlobalLevelHibernationDiskStore.scheduleWriteHibernationStates(states);
             }
         }
     }
@@ -212,7 +254,7 @@ public final class AppHibernationService extends SystemService {
      */
     @GuardedBy("mLock")
     private void hibernatePackageForUser(@NonNull String packageName, int userId,
-            @NonNull UserPackageState pkgState) {
+            @NonNull UserLevelState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackage");
         final long caller = Binder.clearCallingIdentity();
         try {
@@ -236,7 +278,7 @@ public final class AppHibernationService extends SystemService {
      */
     @GuardedBy("mLock")
     private void unhibernatePackageForUser(@NonNull String packageName, int userId,
-            UserPackageState pkgState) {
+            UserLevelState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
         final long caller = Binder.clearCallingIdentity();
         try {
@@ -255,10 +297,10 @@ public final class AppHibernationService extends SystemService {
      * Put a package into global hibernation, optimizing its storage at a package / APK level.
      */
     @GuardedBy("mLock")
-    private void hibernatePackageGlobally(@NonNull String packageName) {
+    private void hibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
         // TODO(175830194): Delete vdex/odex when DexManager API is built out
-        mGloballyHibernatedPackages.add(packageName);
+        state.hibernated = true;
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
@@ -266,52 +308,127 @@ public final class AppHibernationService extends SystemService {
      * Unhibernate a package from global hibernation.
      */
     @GuardedBy("mLock")
-    private void unhibernatePackageGlobally(@NonNull String packageName) {
+    private void unhibernatePackageGlobally(@NonNull String packageName, GlobalLevelState state) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
-        mGloballyHibernatedPackages.remove(packageName);
+        state.hibernated = false;
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**
-     * Populates {@link #mUserStates} with the users installed packages.
+     * Initializes in-memory store of user-level hibernation states for the given user
      *
      * @param userId user id to add installed packages for
+     * @param diskStates states pulled from disk, if available
      */
     @GuardedBy("mLock")
-    private void addUserPackageStates(int userId) {
-        Map<String, UserPackageState> packages = new ArrayMap<>();
-        List<PackageInfo> packageList;
+    private void initializeUserHibernationStates(int userId,
+            @Nullable List<UserLevelState> diskStates) {
+        List<PackageInfo> packages;
         try {
-            packageList = mIPackageManager.getInstalledPackages(MATCH_ALL, userId).getList();
+            packages = mIPackageManager.getInstalledPackages(PACKAGE_MATCH_FLAGS, userId).getList();
         } catch (RemoteException e) {
-            throw new IllegalStateException("Package manager not available.", e);
+            throw new IllegalStateException("Package manager not available", e);
         }
 
-        for (int i = 0, size = packageList.size(); i < size; i++) {
-            packages.put(packageList.get(i).packageName, new UserPackageState());
+        Map<String, UserLevelState> userLevelStates = new ArrayMap<>();
+
+        for (int i = 0, size = packages.size(); i < size; i++) {
+            String packageName = packages.get(i).packageName;
+            UserLevelState state = new UserLevelState();
+            state.packageName = packageName;
+            userLevelStates.put(packageName, state);
         }
-        mUserStates.put(userId, packages);
+
+        if (diskStates != null) {
+            Set<String> installedPackages = new ArraySet<>();
+            for (int i = 0, size = packages.size(); i < size; i++) {
+                installedPackages.add(packages.get(i).packageName);
+            }
+            for (int i = 0, size = diskStates.size(); i < size; i++) {
+                String packageName = diskStates.get(i).packageName;
+                if (!installedPackages.contains(packageName)) {
+                    Slog.w(TAG, String.format(
+                            "No hibernation state associated with package %s user %d. Maybe"
+                                    + "the package was uninstalled? ", packageName, userId));
+                    continue;
+                }
+                userLevelStates.put(packageName, diskStates.get(i));
+            }
+        }
+        mUserStates.put(userId, userLevelStates);
+    }
+
+    /**
+     * Initialize in-memory store of global level hibernation states.
+     *
+     * @param diskStates global level hibernation states pulled from disk, if available
+     */
+    @GuardedBy("mLock")
+    private void initializeGlobalHibernationStates(@Nullable List<GlobalLevelState> diskStates) {
+        List<PackageInfo> packages;
+        try {
+            packages = mIPackageManager.getInstalledPackages(
+                    PACKAGE_MATCH_FLAGS | MATCH_ANY_USER, 0 /* userId */).getList();
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Package manager not available", e);
+        }
+
+        for (int i = 0, size = packages.size(); i < size; i++) {
+            String packageName = packages.get(i).packageName;
+            GlobalLevelState state = new GlobalLevelState();
+            state.packageName = packageName;
+            mGlobalHibernationStates.put(packageName, state);
+        }
+        if (diskStates != null) {
+            Set<String> installedPackages = new ArraySet<>();
+            for (int i = 0, size = packages.size(); i < size; i++) {
+                installedPackages.add(packages.get(i).packageName);
+            }
+            for (int i = 0, size = diskStates.size(); i < size; i++) {
+                GlobalLevelState state = diskStates.get(i);
+                if (!installedPackages.contains(state.packageName)) {
+                    Slog.w(TAG, String.format(
+                            "No hibernation state associated with package %s. Maybe the "
+                                    + "package was uninstalled? ", state.packageName));
+                    continue;
+                }
+                mGlobalHibernationStates.put(state.packageName, state);
+            }
+        }
     }
 
     @Override
     public void onUserUnlocking(@NonNull TargetUser user) {
-        // TODO: Pull from persistent disk storage. For now, just make from scratch.
+        int userId = user.getUserIdentifier();
+        HibernationStateDiskStore<UserLevelState> diskStore =
+                mInjector.getUserLevelDiskStore(userId);
+        mUserDiskStores.put(userId, diskStore);
+        List<UserLevelState> storedStates = diskStore.readHibernationStates();
         synchronized (mLock) {
-            addUserPackageStates(user.getUserIdentifier());
+            initializeUserHibernationStates(userId, storedStates);
         }
     }
 
     @Override
     public void onUserStopping(@NonNull TargetUser user) {
+        int userId = user.getUserIdentifier();
+        // TODO: Flush any scheduled writes to disk immediately on user stopping / power off.
         synchronized (mLock) {
-            // TODO: Flush to disk when persistence is implemented
-            mUserStates.remove(user.getUserIdentifier());
+            mUserDiskStores.remove(userId);
+            mUserStates.remove(userId);
         }
     }
 
     private void onPackageAdded(@NonNull String packageName, int userId) {
         synchronized (mLock) {
-            mUserStates.get(userId).put(packageName, new UserPackageState());
+            UserLevelState userState = new UserLevelState();
+            userState.packageName = packageName;
+            mUserStates.get(userId).put(packageName, userState);
+            if (!mGlobalHibernationStates.containsKey(packageName)) {
+                GlobalLevelState globalState = new GlobalLevelState();
+                globalState.packageName = packageName;
+                mGlobalHibernationStates.put(packageName, globalState);
+            }
         }
     }
 
@@ -323,7 +440,7 @@ public final class AppHibernationService extends SystemService {
 
     private void onPackageRemovedForAllUsers(@NonNull String packageName) {
         synchronized (mLock) {
-            mGloballyHibernatedPackages.remove(packageName);
+            mGlobalHibernationStates.remove(packageName);
         }
     }
 
@@ -424,14 +541,6 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Data class that contains hibernation state info of a package for a user.
-     */
-    private static final class UserPackageState {
-        public boolean hibernated;
-        // TODO: Track whether hibernation is exempted by the user
-    }
-
-    /**
      * Dependency injector for {@link #AppHibernationService)}.
      */
     interface Injector {
@@ -442,13 +551,22 @@ public final class AppHibernationService extends SystemService {
         IActivityManager getActivityManager();
 
         UserManager getUserManager();
+
+        HibernationStateDiskStore<GlobalLevelState> getGlobalLevelDiskStore();
+
+        HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId);
     }
 
     private static final class InjectorImpl implements Injector {
+        private static final String HIBERNATION_DIR_NAME = "hibernation";
         private final Context mContext;
+        private final ScheduledExecutorService mScheduledExecutorService;
+        private final UserLevelHibernationProto mUserLevelHibernationProto;
 
         InjectorImpl(Context context) {
             mContext = context;
+            mScheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+            mUserLevelHibernationProto = new UserLevelHibernationProto();
         }
 
         @Override
@@ -469,6 +587,20 @@ public final class AppHibernationService extends SystemService {
         @Override
         public UserManager getUserManager() {
             return mContext.getSystemService(UserManager.class);
+        }
+
+        @Override
+        public HibernationStateDiskStore<GlobalLevelState> getGlobalLevelDiskStore() {
+            File dir = new File(Environment.getDataSystemDirectory(), HIBERNATION_DIR_NAME);
+            return new HibernationStateDiskStore<>(
+                    dir, new GlobalLevelHibernationProto(), mScheduledExecutorService);
+        }
+
+        @Override
+        public HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId) {
+            File dir = new File(Environment.getDataSystemCeDirectory(userId), HIBERNATION_DIR_NAME);
+            return new HibernationStateDiskStore<>(
+                    dir, mUserLevelHibernationProto, mScheduledExecutorService);
         }
     }
 }

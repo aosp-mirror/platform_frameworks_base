@@ -16,12 +16,15 @@
 
 package com.android.server.apphibernation;
 
+import static android.content.pm.PackageManager.MATCH_ANY_USER;
+
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsArgAt;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.intThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -47,6 +50,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -75,11 +79,15 @@ public final class AppHibernationServiceTest {
     private IActivityManager mIActivityManager;
     @Mock
     private UserManager mUserManager;
+    @Mock
+    private HibernationStateDiskStore<UserLevelState> mHibernationStateDiskStore;
     @Captor
     private ArgumentCaptor<BroadcastReceiver> mReceiverCaptor;
 
     @Before
     public void setUp() throws RemoteException {
+        // Share class loader to allow access to package-private classes
+        System.setProperty("dexmaker.share_classloader", "true");
         MockitoAnnotations.initMocks(this);
         doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
 
@@ -92,6 +100,12 @@ public final class AppHibernationServiceTest {
 
         doAnswer(returnsArgAt(2)).when(mIActivityManager).handleIncomingUser(anyInt(), anyInt(),
                 anyInt(), anyBoolean(), anyBoolean(), any(), any());
+
+        List<PackageInfo> packages = new ArrayList<>();
+        packages.add(makePackageInfo(PACKAGE_NAME_1));
+        doReturn(new ParceledListSlice<>(packages)).when(mIPackageManager).getInstalledPackages(
+                intThat(arg -> (arg & MATCH_ANY_USER) != 0), anyInt());
+        mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         UserInfo userInfo = addUser(USER_ID_1);
         mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
@@ -151,7 +165,7 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testSetHibernatingGlobally_packageIsHibernatingGlobally() {
+    public void testSetHibernatingGlobally_packageIsHibernatingGlobally() throws RemoteException {
         // WHEN we hibernate a package
         mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
 
@@ -177,7 +191,7 @@ public final class AppHibernationServiceTest {
             userPackages.add(makePackageInfo(pkgName));
         }
         doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
-                .getInstalledPackages(anyInt(), eq(userId));
+                .getInstalledPackages(intThat(arg -> (arg & MATCH_ANY_USER) == 0), eq(userId));
         return userInfo;
     }
 
@@ -212,6 +226,16 @@ public final class AppHibernationServiceTest {
         @Override
         public UserManager getUserManager() {
             return mUserManager;
+        }
+
+        @Override
+        public HibernationStateDiskStore<GlobalLevelState> getGlobalLevelDiskStore() {
+            return Mockito.mock(HibernationStateDiskStore.class);
+        }
+
+        @Override
+        public HibernationStateDiskStore<UserLevelState> getUserLevelDiskStore(int userId) {
+            return Mockito.mock(HibernationStateDiskStore.class);
         }
     }
 }
