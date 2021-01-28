@@ -355,7 +355,7 @@ public class ProxyInfo implements Parcelable {
                     port = in.readInt();
                 }
                 String exclList = in.readString();
-                String[] parsedExclList = in.readStringArray();
+                String[] parsedExclList = in.createStringArray();
                 ProxyInfo proxyProperties = new ProxyInfo(host, port, exclList, parsedExclList);
                 return proxyProperties;
             }
