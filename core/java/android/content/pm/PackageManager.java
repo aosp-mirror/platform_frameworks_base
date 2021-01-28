@@ -3759,7 +3759,7 @@ public abstract class PackageManager {
      * Passed to an intent filter verifier and is used to call back to
      * {@link #verifyIntentFilter}
      *
-     * @deprecated Use {@link DomainVerificationManager} APIs.
+     * @deprecated Use DomainVerificationManager APIs.
      * @hide
      */
     @Deprecated
@@ -3772,7 +3772,7 @@ public abstract class PackageManager {
      *
      * Usually this is "https"
      *
-     * @deprecated Use {@link DomainVerificationManager} APIs.
+     * @deprecated Use DomainVerificationManager APIs.
      * @hide
      */
     @Deprecated
@@ -3786,7 +3786,7 @@ public abstract class PackageManager {
      *
      * This is a space delimited list of hosts.
      *
-     * @deprecated Use {@link DomainVerificationManager} APIs.
+     * @deprecated Use DomainVerificationManager APIs.
      * @hide
      */
     @Deprecated
@@ -3799,7 +3799,7 @@ public abstract class PackageManager {
      * from the hosts. Each host response will need to include the package name of APK containing
      * the intent filter.
      *
-     * @deprecated Use {@link DomainVerificationManager} APIs.
+     * @deprecated Use DomainVerificationManager APIs.
      * @hide
      */
     @Deprecated

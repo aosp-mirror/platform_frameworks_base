@@ -37,7 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.SuspendDialogInfo;
-import android.content.pm.domain.verify.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;

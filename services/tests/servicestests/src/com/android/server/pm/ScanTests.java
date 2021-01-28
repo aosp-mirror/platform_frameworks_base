@@ -50,7 +50,7 @@ import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 
 import com.android.server.compat.PlatformCompat;
-import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.PackageImpl;
