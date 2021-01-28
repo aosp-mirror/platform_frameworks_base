@@ -27,6 +27,7 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
@@ -34,20 +35,20 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
-import android.view.View;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.ViewTreeObserver;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.ScrimController;
 
 /**
  * A full screen view with a configurable illumination dot and scrim.
  */
-public class UdfpsView extends View implements DozeReceiver,
-        StatusBarStateController.StateListener,  ScrimController.ScrimChangedListener{
+public class UdfpsView extends SurfaceView implements DozeReceiver,
+        StatusBarStateController.StateListener,  ScrimController.ScrimChangedListener {
     private static final String TAG = "UdfpsView";
 
     // Values in pixels.
@@ -86,6 +87,29 @@ public class UdfpsView extends View implements DozeReceiver,
     // The runnable is reset to null after it's executed once.
     @Nullable private Runnable mRunAfterShowingScrimAndDot;
 
+    @NonNull private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
+        @Override
+        public void surfaceCreated(@NonNull SurfaceHolder holder) {
+            Log.d(TAG, "Surface created");
+            // SurfaceView sets this to true by default. We must set it to false to allow
+            // onDraw to be called
+            setWillNotDraw(false);
+        }
+
+        @Override
+        public void surfaceChanged(@NonNull SurfaceHolder holder, int format,
+                int width, int height) {
+
+        }
+
+        @Override
+        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
+            Log.d(TAG, "Surface destroyed");
+            // Must not draw when the surface is destroyed
+            setWillNotDraw(true);
+        }
+    };
+
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
@@ -102,6 +126,8 @@ public class UdfpsView extends View implements DozeReceiver,
             a.recycle();
         }
 
+        getHolder().addCallback(mSurfaceCallback);
+        getHolder().setFormat(PixelFormat.TRANSLUCENT);
 
         mScrimRect = new Rect();
         mScrimPaint = new Paint(0 /* flags */);
