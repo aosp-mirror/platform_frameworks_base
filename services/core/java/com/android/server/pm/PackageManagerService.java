@@ -5763,8 +5763,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 (i, pm) -> new ViewCompiler(i.getInstallLock(), i.getInstaller()),
                 (i, pm) -> (IncrementalManager)
                         i.getContext().getSystemService(Context.INCREMENTAL_SERVICE),
-                (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(
-                        RoleManager.class)),
+                (i, pm) -> new DefaultAppProvider(() -> context.getSystemService(RoleManager.class),
+                        () -> LocalServices.getService(UserManagerInternal.class)),
                 (i, pm) -> new DisplayMetrics(),
                 (i, pm) -> new PackageParser2(pm.mSeparateProcesses, pm.mOnlyCore,
                         i.getDisplayMetrics(), pm.mCacheDir,
