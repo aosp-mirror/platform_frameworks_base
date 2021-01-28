@@ -16,13 +16,17 @@
 
 package android.graphics.fonts;
 
+import android.Manifest;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.content.Context;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.text.FontConfig;
 import android.util.Log;
@@ -35,6 +39,10 @@ import java.util.Objects;
 
 /**
  * This class gives you control of system installed font files.
+ *
+ * <p>
+ * This class gives you the information of system font configuration and ability of changing them.
+ *
  * @hide
  */
 @SystemApi
@@ -45,68 +53,87 @@ public class FontManager {
     private final @NonNull IFontManager mIFontManager;
 
     /** @hide */
-    @IntDef(prefix = "ERROR_CODE_",
-            value = { ERROR_CODE_OK, ERROR_CODE_FAILED_TO_WRITE_FONT_FILE,
-                    ERROR_CODE_VERIFICATION_FAILURE, ERROR_CODE_FONT_NAME_MISMATCH,
-                    ERROR_CODE_INVALID_FONT_FILE, ERROR_CODE_MISSING_POST_SCRIPT_NAME,
-                    ERROR_CODE_DOWNGRADING, ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE,
-                    ERROR_CODE_FONT_UPDATER_DISABLED })
+    @IntDef(prefix = "RESULT_",
+            value = { RESULT_SUCCESS, RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE,
+                    RESULT_ERROR_VERIFICATION_FAILURE, RESULT_ERROR_VERSION_MISMATCH,
+                    RESULT_ERROR_INVALID_FONT_FILE, RESULT_ERROR_INVALID_FONT_NAME,
+                    RESULT_ERROR_DOWNGRADING, RESULT_ERROR_FAILED_UPDATE_CONFIG,
+                    RESULT_ERROR_FONT_UPDATER_DISABLED, RESULT_ERROR_REMOTE_EXCEPTION })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface ErrorCode {}
+    public @interface ResultCode {}
 
     /**
-     * Indicates an operation has processed successfully.
-     * @hide
+     * Indicates that the request has been processed successfully.
      */
-    public static final int ERROR_CODE_OK = 0;
+    public static final int RESULT_SUCCESS = 0;
 
     /**
-     * Indicates a failure of writing font files.
-     * @hide
+     * Indicates that a failure occurred while writing the font file to disk.
+     *
+     * This is an internal error that the system cannot place the font file for being used by
+     * application.
      */
-    public static final int ERROR_CODE_FAILED_TO_WRITE_FONT_FILE = -1;
+    public static final int RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE = -1;
 
     /**
-     * Indicates a failure of fs-verity setup.
-     * @hide
+     * Indicates that a failure occurred during the verification of the font file.
+     *
+     * The system failed to verify given font file contents and signature with system installed
+     * certificate.
      */
-    public static final int ERROR_CODE_VERIFICATION_FAILURE = -2;
+    public static final int RESULT_ERROR_VERIFICATION_FAILURE = -2;
 
     /**
-     * Indicates a failure of verifying the font name with PostScript name.
-     * @hide
+     * Indicates that a failure occurred as a result of invalid font format or content.
+     *
+     * Android only accepts OpenType compliant font files.
      */
-    public static final int ERROR_CODE_FONT_NAME_MISMATCH = -3;
+    public static final int RESULT_ERROR_INVALID_FONT_FILE = -3;
 
     /**
-     * Indicates a failure of placing fonts due to unexpected font contents.
-     * @hide
+     * Indicates a failure due to missing PostScript name in font's name table.
+     *
+     * Indicates that a failure occurred since PostScript name in the name table(ID=6) was missing.
+     * The font is expected to have a PostScript name.
      */
-    public static final int ERROR_CODE_INVALID_FONT_FILE = -4;
+    public static final int RESULT_ERROR_INVALID_FONT_NAME = -4;
 
     /**
-     * Indicates a failure due to missing PostScript name in name table.
-     * @hide
+     * Indicates that a failure occurred due to downgrading the font version.
+     *
+     * The font must have equal or newer revision in its head table.
      */
-    public static final int ERROR_CODE_MISSING_POST_SCRIPT_NAME = -5;
+    public static final int RESULT_ERROR_DOWNGRADING = -5;
 
     /**
-     * Indicates a failure of placing fonts due to downgrading.
-     * @hide
+     * Indicates that a failure occurred while updating system font configuration.
+     *
+     * This is an internal error that the system couldn't update the {@link FontConfig}.
      */
-    public static final int ERROR_CODE_DOWNGRADING = -6;
-
-    /**
-     * Indicates a failure of writing system font configuration XML file.
-     * @hide
-     */
-    public static final int ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE = -7;
+    public static final int RESULT_ERROR_FAILED_UPDATE_CONFIG = -6;
 
     /**
      * Indicates a failure due to disabled font updater.
-     * @hide
+     *
+     * This is typically returned due to missing Linux kernel feature.
+     * The font updater only works with the Linux kernel that has fs-verity feature. The fs-verity
+     * is required after the device shipped with Android 11. Thus the updated device may not have
+     * fs-verity feature and font updater is disabled.
      */
-    public static final int ERROR_CODE_FONT_UPDATER_DISABLED = -8;
+    public static final int RESULT_ERROR_FONT_UPDATER_DISABLED = -7;
+
+    /**
+     * Indicates that a failure occurred because provided {@code baseVersion} did not match.
+     *
+     * The {@code baseVersion} provided does not match to the current {@link FontConfig} version.
+     * Please get the latest configuration and update {@code baseVersion} accordingly.
+     */
+    public static final int RESULT_ERROR_VERSION_MISMATCH = -8;
+
+    /**
+     * Indicates a failure due to IPC communication.
+     */
+    public static final int RESULT_ERROR_REMOTE_EXCEPTION = -9;
 
     /**
      * Indicates a failure of opening font file.
@@ -115,7 +142,7 @@ public class FontManager {
      *
      * @hide
      */
-    public static final int ERROR_CODE_FAILED_TO_OPEN_FONT_FILE = -10001;
+    public static final int RESULT_ERROR_FAILED_TO_OPEN_FONT_FILE = -10001;
 
     /**
      * Indicates a failure of opening signature file.
@@ -124,7 +151,7 @@ public class FontManager {
      *
      * @hide
      */
-    public static final int ERROR_CODE_FAILED_TO_OPEN_SIGNATURE_FILE = -10002;
+    public static final int RESULT_ERROR_FAILED_TO_OPEN_SIGNATURE_FILE = -10002;
 
     /**
      * Indicates a failure of invalid shell command arguments.
@@ -133,7 +160,7 @@ public class FontManager {
      *
      * @hide
      */
-    public static final int ERROR_CODE_INVALID_SHELL_ARGUMENT = -10003;
+    public static final int RESULT_ERROR_INVALID_SHELL_ARGUMENT = -10003;
 
     /**
      * Indicates a failure of reading signature file.
@@ -142,7 +169,7 @@ public class FontManager {
      *
      * @hide
      */
-    public static final int ERROR_CODE_INVALID_SIGNATURE_FILE = -10004;
+    public static final int RESULT_ERROR_INVALID_SIGNATURE_FILE = -10004;
 
     /**
      * Indicates a failure due to exceeding allowed signature file size (8kb).
@@ -151,7 +178,7 @@ public class FontManager {
      *
      * @hide
      */
-    public static final int ERROR_CODE_SIGNATURE_TOO_LARGE = -10005;
+    public static final int RESULT_ERROR_SIGNATURE_TOO_LARGE = -10005;
 
 
     private FontManager(@NonNull IFontManager iFontManager) {
@@ -174,6 +201,70 @@ public class FontManager {
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call getFontConfig", e);
             return null;
+        }
+    }
+
+    /**
+     * Update system installed font file.
+     *
+     * <p>
+     * To protect devices, system font updater relies on the Linux Kernel feature called fs-verity.
+     * If the device is not ready for fs-verity, {@link #RESULT_ERROR_FONT_UPDATER_DISABLED} will be
+     * returned.
+     *
+     * Android only accepts OpenType compliant font files. If other font files are provided,
+     * {@link #RESULT_ERROR_INVALID_FONT_FILE} will be returned.
+     *
+     * The font file to be updated is identified by PostScript name stored in name table. If the
+     * font file doesn't have PostScript name entry, {@link #RESULT_ERROR_INVALID_FONT_NAME} will be
+     * returned.
+     *
+     * The entire font file is verified with the given signature for the system installed
+     * certificate. If the system cannot verify the font contents,
+     * {@link #RESULT_ERROR_VERIFICATION_FAILURE} will be returned.
+     *
+     * The font file must have newer or equal revision number in the head table. In other words, the
+     * downgrading font file is not allowed. If the older font file is provided,
+     * {@link #RESULT_ERROR_DOWNGRADING} will be returned.
+     *
+     * The caller must specify the base config version for keeping consist system configuration. If
+     * the system configuration is updated for some reason between you get config with
+     * {@link #getFontConfig()} and calling this method, {@link #RESULT_ERROR_VERSION_MISMATCH} will
+     * be returned. Get the latest font configuration by calling {@link #getFontConfig()} again and
+     * try with the latest config version again.
+     *
+     * @param pfd A file descriptor of the font file.
+     * @param signature A PKCS#7 detached signature for verifying entire font files.
+     * @param baseVersion A base config version to be updated. You can get latest config version by
+     *                    {@link FontConfig#getConfigVersion()} via {@link #getFontConfig()}. If the
+     *                    system has newer config version, the update will fail with
+     *                    {@link #RESULT_ERROR_VERSION_MISMATCH}. Try to get the latest config and
+     *                    try update again.
+     * @return result code.
+     *
+     * @see FontConfig#getConfigVersion()
+     * @see #getFontConfig()
+     * @see #RESULT_SUCCESS
+     * @see #RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE
+     * @see #RESULT_ERROR_VERIFICATION_FAILURE
+     * @see #RESULT_ERROR_VERSION_MISMATCH
+     * @see #RESULT_ERROR_INVALID_FONT_FILE
+     * @see #RESULT_ERROR_INVALID_FONT_NAME
+     * @see #RESULT_ERROR_DOWNGRADING
+     * @see #RESULT_ERROR_FAILED_UPDATE_CONFIG
+     * @see #RESULT_ERROR_FONT_UPDATER_DISABLED
+     * @see #RESULT_ERROR_REMOTE_EXCEPTION
+     */
+    @RequiresPermission(Manifest.permission.UPDATE_FONTS) public @ResultCode int updateFontFile(
+            @NonNull ParcelFileDescriptor pfd,
+            @NonNull byte[] signature,
+            @IntRange(from = 0) int baseVersion
+    ) {
+        try {
+            return mIFontManager.updateFont(pfd, signature, baseVersion);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to call updateFont API", e);
+            return RESULT_ERROR_REMOTE_EXCEPTION;
         }
     }
 

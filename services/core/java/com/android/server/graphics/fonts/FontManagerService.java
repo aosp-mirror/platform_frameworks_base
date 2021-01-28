@@ -16,6 +16,7 @@
 
 package com.android.server.graphics.fonts;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -24,6 +25,7 @@ import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.SystemFonts;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SharedMemory;
@@ -37,6 +39,7 @@ import android.util.Slog;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.graphics.fonts.IFontManager;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.security.FileIntegrityService;
@@ -53,6 +56,7 @@ import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 /** A service for managing system fonts. */
 // TODO(b/173619554): Add API to update fonts.
@@ -66,10 +70,27 @@ public final class FontManagerService extends IFontManager.Stub {
         return getSystemFontConfig();
     }
 
+    @Override
+    public int updateFont(ParcelFileDescriptor fd, byte[] signature, int baseVersion)
+            throws RemoteException {
+        Objects.requireNonNull(fd);
+        Objects.requireNonNull(signature);
+        Preconditions.checkArgumentNonnegative(baseVersion);
+        getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
+                "UPDATE_FONTS permission required.");
+        try {
+            installFontFile(fd.getFileDescriptor(), signature, baseVersion);
+            return FontManager.RESULT_SUCCESS;
+        } catch (SystemFontException e) {
+            Slog.e(TAG, "Failed to update font file", e);
+            return e.getErrorCode();
+        }
+    }
+
     /* package */ static class SystemFontException extends AndroidException {
         private final int mErrorCode;
 
-        SystemFontException(@FontManager.ErrorCode int errorCode, String msg, Throwable cause) {
+        SystemFontException(@FontManager.ResultCode int errorCode, String msg, Throwable cause) {
             super(msg, cause);
             mErrorCode = errorCode;
         }
@@ -79,7 +100,8 @@ public final class FontManagerService extends IFontManager.Stub {
             mErrorCode = errorCode;
         }
 
-        @FontManager.ErrorCode int getErrorCode() {
+        @FontManager.ResultCode
+        int getErrorCode() {
             return mErrorCode;
         }
     }
@@ -197,14 +219,21 @@ public final class FontManagerService extends IFontManager.Stub {
         }
     }
 
-    /* package */ void installFontFile(FileDescriptor fd, byte[] pkcs7Signature)
+    /* package */ void installFontFile(FileDescriptor fd, byte[] pkcs7Signature, int baseVersion)
             throws SystemFontException {
         if (mUpdatableFontDir == null) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_FONT_UPDATER_DISABLED,
+                    FontManager.RESULT_ERROR_FONT_UPDATER_DISABLED,
                     "The font updater is disabled.");
         }
         synchronized (FontManagerService.this) {
+            // baseVersion == -1 only happens from shell command. This is filtered and treated as
+            // error from SystemApi call.
+            if (baseVersion != -1 && mUpdatableFontDir.getConfigVersion() != baseVersion) {
+                throw new SystemFontException(
+                        FontManager.RESULT_ERROR_VERSION_MISMATCH,
+                        "The base config version is older than current.");
+            }
             mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
             // Create updated font map in the next getSerializedSystemFontMap() call.
             mSerializedFontMap = null;
@@ -214,7 +243,7 @@ public final class FontManagerService extends IFontManager.Stub {
     /* package */ void clearUpdates() throws SystemFontException {
         if (mUpdatableFontDir == null) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_FONT_UPDATER_DISABLED,
+                    FontManager.RESULT_ERROR_FONT_UPDATER_DISABLED,
                     "The font updater is disabled.");
         }
         mUpdatableFontDir.clearUpdates();
