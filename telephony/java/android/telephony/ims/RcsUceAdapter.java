@@ -63,6 +63,7 @@ public class RcsUceAdapter {
      * RcsFeature should not publish capabilities or service capability requests.
      * @hide
      */
+    @SystemApi
     public static final int CAPABILITY_TYPE_PRESENCE_UCE = 1 << 1;
 
     /**@hide*/
@@ -77,12 +78,14 @@ public class RcsUceAdapter {
      * An unknown error has caused the request to fail.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_GENERIC_FAILURE = 1;
 
     /**
      * The carrier network does not have UCE support enabled for this subscriber.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_NOT_ENABLED = 2;
 
     /**
@@ -90,12 +93,14 @@ public class RcsUceAdapter {
      * 1x only currently).
      * @hide
      */
+    @SystemApi
     public static final int ERROR_NOT_AVAILABLE = 3;
 
     /**
      * The network has responded with SIP 403 error and a reason "User not registered."
      * @hide
      */
+    @SystemApi
     public static final int ERROR_NOT_REGISTERED = 4;
 
     /**
@@ -103,12 +108,14 @@ public class RcsUceAdapter {
      * presence" for this subscriber.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_NOT_AUTHORIZED = 5;
 
     /**
      * The network has responded to this request with a SIP 403 error and no reason.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_FORBIDDEN = 6;
 
     /**
@@ -116,6 +123,7 @@ public class RcsUceAdapter {
      * subscriber to the carrier network.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_NOT_FOUND = 7;
 
     /**
@@ -123,6 +131,7 @@ public class RcsUceAdapter {
      * with a lower number of contact numbers. The number varies per carrier.
      * @hide
      */
+    @SystemApi
     // TODO: Try to integrate this into the API so that the service will split based on carrier.
     public static final int ERROR_REQUEST_TOO_LARGE = 8;
 
@@ -130,18 +139,21 @@ public class RcsUceAdapter {
      * The network did not respond to the capabilities request before the request timed out.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_REQUEST_TIMEOUT = 9;
 
     /**
      * The request failed due to the service having insufficient memory.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_INSUFFICIENT_MEMORY = 10;
 
     /**
      * The network was lost while trying to complete the request.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_LOST_NETWORK = 11;
 
     /**
@@ -149,6 +161,7 @@ public class RcsUceAdapter {
      * time returned in {@link CapabilitiesCallback#onError} has elapsed.
      * @hide
      */
+    @SystemApi
     public static final int ERROR_SERVER_UNAVAILABLE = 12;
 
     /**@hide*/
@@ -405,6 +418,7 @@ public class RcsUceAdapter {
      * @see #requestCapabilities(Executor, List, CapabilitiesCallback)
      * @hide
      */
+    @SystemApi
     public interface CapabilitiesCallback {
 
         /**
@@ -424,10 +438,10 @@ public class RcsUceAdapter {
          * The pending request has resulted in an error and may need to be retried, depending on the
          * error code.
          * @param errorCode The reason for the framework being unable to process the request.
-         * @param retryAfterMilliseconds The time in milliseconds the requesting application should
+         * @param retryIntervalMillis The time in milliseconds the requesting application should
          * wait before retrying, if non-zero.
          */
-        void onError(@ErrorCode int errorCode, long retryAfterMilliseconds);
+        void onError(@ErrorCode int errorCode, long retryIntervalMillis);
     }
 
     private final Context mContext;
@@ -458,9 +472,9 @@ public class RcsUceAdapter {
      * {@link RcsFeature.RcsImsCapabilities#CAPABILITY_TYPE_PRESENCE_UCE} is enabled or else
      * this operation will fail with {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
      *
+     * @param contactNumbers A list of numbers that the capabilities are being requested for.
      * @param executor The executor that will be used when the request is completed and the
      *         {@link CapabilitiesCallback} is called.
-     * @param contactNumbers A list of numbers that the capabilities are being requested for.
      * @param c A one-time callback for when the request for capabilities completes or there is an
      *         error processing the request.
      * @throws ImsException if the subscription associated with this instance of
@@ -469,9 +483,10 @@ public class RcsUceAdapter {
      * becomes inactive. See {@link ImsException#getCode()} for more information on the error codes.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    public void requestCapabilities(@NonNull @CallbackExecutor Executor executor,
-            @NonNull List<Uri> contactNumbers,
+    public void requestCapabilities(@NonNull List<Uri> contactNumbers,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull CapabilitiesCallback c) throws ImsException {
         if (c == null) {
             throw new IllegalArgumentException("Must include a non-null CapabilitiesCallback.");
@@ -495,8 +510,7 @@ public class RcsUceAdapter {
             public void onCapabilitiesReceived(List<RcsContactUceCapability> contactCapabilities) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() ->
-                            c.onCapabilitiesReceived(contactCapabilities));
+                    executor.execute(() -> c.onCapabilitiesReceived(contactCapabilities));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -550,13 +564,17 @@ public class RcsUceAdapter {
      * {@link #ERROR_NOT_AVAILABLE} or {@link #ERROR_NOT_ENABLED}.
      *
      * @param contactNumber The contact of the capabilities is being requested for.
+     * @param executor The executor that will be used when the request is completed and the
+     * {@link CapabilitiesCallback} is called.
      * @param c A one-time callback for when the request for capabilities completes or there is
      * an error processing the request.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
-    public void requestNetworkAvailability(@NonNull @CallbackExecutor Executor executor,
-            @NonNull Uri contactNumber, @NonNull CapabilitiesCallback c) throws ImsException {
+    public void requestAvailability(@NonNull Uri contactNumber,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull CapabilitiesCallback c) throws ImsException {
         if (executor == null) {
             throw new IllegalArgumentException("Must include a non-null Executor.");
         }
@@ -569,7 +587,7 @@ public class RcsUceAdapter {
 
         IImsRcsController imsRcsController = getIImsRcsController();
         if (imsRcsController == null) {
-            Log.e(TAG, "requestNetworkAvailability: IImsRcsController is null");
+            Log.e(TAG, "requestAvailability: IImsRcsController is null");
             throw new ImsException("Cannot find remote IMS service",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
@@ -579,8 +597,7 @@ public class RcsUceAdapter {
             public void onCapabilitiesReceived(List<RcsContactUceCapability> contactCapabilities) {
                 final long callingIdentity = Binder.clearCallingIdentity();
                 try {
-                    executor.execute(() ->
-                            c.onCapabilitiesReceived(contactCapabilities));
+                    executor.execute(() -> c.onCapabilitiesReceived(contactCapabilities));
                 } finally {
                     restoreCallingIdentity(callingIdentity);
                 }
@@ -606,12 +623,12 @@ public class RcsUceAdapter {
         };
 
         try {
-            imsRcsController.requestNetworkAvailability(mSubId, mContext.getOpPackageName(),
+            imsRcsController.requestAvailability(mSubId, mContext.getOpPackageName(),
                     mContext.getAttributionTag(), contactNumber, internalCallback);
         } catch (ServiceSpecificException e) {
             throw new ImsException(e.toString(), e.errorCode);
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling IImsRcsController#requestNetworkAvailability", e);
+            Log.e(TAG, "Error calling IImsRcsController#requestAvailability", e);
             throw new ImsException("Remote IMS Service is not available",
                     ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
@@ -683,7 +700,7 @@ public class RcsUceAdapter {
         if (imsRcsController == null) {
             Log.e(TAG, "addOnPublishStateChangedListener : IImsRcsController is null");
             throw new ImsException("Cannot find remote IMS service",
-                ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
 
         PublishStateCallbackAdapter stateCallback = addPublishStateCallback(executor, listener);
@@ -694,7 +711,7 @@ public class RcsUceAdapter {
         } catch (RemoteException e) {
             Log.e(TAG, "Error calling IImsRcsController#registerUcePublishStateCallback", e);
             throw new ImsException("Remote IMS Service is not available",
-                ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
     }
 
