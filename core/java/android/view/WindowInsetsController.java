@@ -142,7 +142,7 @@ public interface WindowInsetsController {
      * change as soon as the window gains control. The app can listen to the event by observing
      * {@link View#onApplyWindowInsets} and checking visibility with {@link WindowInsets#isVisible}.
      *
-     * @param types A bitmask of {@link InsetsType} specifying what windows the app
+     * @param types A bitmask of {@link WindowInsets.Type} specifying what windows the app
      *              would like to make appear on screen.
      */
     void show(@InsetsType int types);
@@ -154,7 +154,7 @@ public interface WindowInsetsController {
      * change as soon as the window gains control. The app can listen to the event by observing
      * {@link View#onApplyWindowInsets} and checking visibility with {@link WindowInsets#isVisible}.
      *
-     * @param types A bitmask of {@link InsetsType} specifying what windows the app
+     * @param types A bitmask of {@link WindowInsets.Type} specifying what windows the app
      *              would like to make disappear.
      */
     void hide(@InsetsType int types);
@@ -163,7 +163,7 @@ public interface WindowInsetsController {
      * Lets the application control window inset animations in a frame-by-frame manner by modifying
      * the position of the windows in the system causing insets directly.
      *
-     * @param types The {@link InsetsType}s the application has requested to control.
+     * @param types The {@link WindowInsets.Type}s the application has requested to control.
      * @param durationMillis Duration of animation in
      *                       {@link java.util.concurrent.TimeUnit#MILLISECONDS}, or -1 if the
      *                       animation doesn't have a predetermined duration. This value will be
@@ -199,7 +199,7 @@ public interface WindowInsetsController {
      * setSystemBarsAppearance(0, APPEARANCE_LIGHT_STATUS_BARS)
      * </pre>
      *
-     * @param appearance Bitmask of {@link Appearance} flags.
+     * @param appearance Bitmask of appearance flags.
      * @param mask Specifies which flags of appearance should be changed.
      * @see #getSystemBarsAppearance
      */
@@ -280,11 +280,11 @@ public interface WindowInsetsController {
             @NonNull OnControllableInsetsChangedListener listener);
 
     /**
-     * Listener to be notified when the set of controllable {@link InsetsType} controlled by a
-     * {@link WindowInsetsController} changes.
+     * Listener to be notified when the set of controllable {@link WindowInsets.Type} controlled by
+     * a {@link WindowInsetsController} changes.
      * <p>
-     * Once a {@link InsetsType} becomes controllable, the app will be able to control the window
-     * that is causing this type of insets by calling {@link #controlWindowInsetsAnimation}.
+     * Once a {@link WindowInsets.Type} becomes controllable, the app will be able to control the
+     * window that is causing this type of insets by calling {@link #controlWindowInsetsAnimation}.
      * <p>
      * Note: When listening to controllability of the {@link Type#ime},
      * {@link #controlWindowInsetsAnimation} may still fail in case the {@link InputMethodService}
@@ -297,12 +297,12 @@ public interface WindowInsetsController {
     interface OnControllableInsetsChangedListener {
 
         /**
-         * Called when the set of controllable {@link InsetsType} changes.
+         * Called when the set of controllable {@link WindowInsets.Type} changes.
          *
-         * @param controller The controller for which the set of controllable {@link InsetsType}s
-         *                   are changing.
-         * @param typeMask Bitwise type-mask of the {@link InsetsType}s the controller is currently
-         *                 able to control.
+         * @param controller The controller for which the set of controllable
+         *                   {@link WindowInsets.Type}s are changing.
+         * @param typeMask Bitwise type-mask of the {@link WindowInsets.Type}s the controller is
+         *                 currently able to control.
          */
         void onControllableInsetsChanged(@NonNull WindowInsetsController controller,
                 @InsetsType int typeMask);
