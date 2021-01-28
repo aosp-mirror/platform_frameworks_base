@@ -30,6 +30,8 @@ import android.util.TypedValue;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 
+import com.android.wm.shell.common.DisplayLayout;
+
 import java.io.PrintWriter;
 
 /**
@@ -190,9 +192,9 @@ public class PipBoundsAlgorithm {
                 size = adjustSizeToAspectRatio(overrideMinSize, aspectRatio);
             } else {
                 // Calculate the default size using the display size and default min edge size.
-                final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
+                final DisplayLayout displayLayout = mPipBoundsState.getDisplayLayout();
                 size = getSizeForAspectRatio(aspectRatio, mDefaultMinSize,
-                        displayInfo.logicalWidth, displayInfo.logicalHeight);
+                        displayLayout.width(), displayLayout.height());
             }
         }
 
@@ -232,7 +234,7 @@ public class PipBoundsAlgorithm {
         final Size defaultSize;
         final Rect insetBounds = new Rect();
         getInsetBounds(insetBounds);
-        final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
+        final DisplayLayout displayLayout = mPipBoundsState.getDisplayLayout();
         final Size overrideMinSize = mPipBoundsState.getOverrideMinSize();
         if (overrideMinSize != null) {
             // The override minimal size is set, use that as the default size making sure it's
@@ -241,7 +243,7 @@ public class PipBoundsAlgorithm {
         } else {
             // Calculate the default size using the display size and default min edge size.
             defaultSize = getSizeForAspectRatio(mDefaultAspectRatio,
-                    mDefaultMinSize, displayInfo.logicalWidth, displayInfo.logicalHeight);
+                    mDefaultMinSize, displayLayout.width(), displayLayout.height());
         }
 
         // Now that we have the default size, apply the snap fraction if valid or position the
@@ -264,12 +266,12 @@ public class PipBoundsAlgorithm {
      * Populates the bounds on the screen that the PIP can be visible in.
      */
     public void getInsetBounds(Rect outRect) {
-        final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
+        final DisplayLayout displayLayout = mPipBoundsState.getDisplayLayout();
         Rect insets = mPipBoundsState.getDisplayLayout().stableInsets();
         outRect.set(insets.left + mScreenEdgeInsets.x,
                 insets.top + mScreenEdgeInsets.y,
-                displayInfo.logicalWidth - insets.right - mScreenEdgeInsets.x,
-                displayInfo.logicalHeight - insets.bottom - mScreenEdgeInsets.y);
+                displayLayout.width() - insets.right - mScreenEdgeInsets.x,
+                displayLayout.height() - insets.bottom - mScreenEdgeInsets.y);
     }
 
     /**
