@@ -249,11 +249,13 @@ public class CallLog {
             // Nasty casework for the shadow calllog begins...
             // First see if we're just inserting for one user. If so, insert into the shadow
             // based on whether that user is unlocked.
-            if (user != null) {
-                Uri baseUri = userManager.isUserUnlocked(user) ? CALL_COMPOSER_PICTURE_URI
+            UserHandle realUser = UserHandle.CURRENT.equals(user)
+                    ? android.os.Process.myUserHandle() : user;
+            if (realUser != null) {
+                Uri baseUri = userManager.isUserUnlocked(realUser) ? CALL_COMPOSER_PICTURE_URI
                         : SHADOW_CALL_COMPOSER_PICTURE_URI;
                 Uri pictureInsertionUri = ContentProvider.maybeAddUserId(baseUri,
-                        user.getIdentifier());
+                        realUser.getIdentifier());
                 Log.i(LOG_TAG, "Inserting call composer for single user at "
                         + pictureInsertionUri);
 
