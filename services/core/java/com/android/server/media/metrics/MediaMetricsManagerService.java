@@ -110,7 +110,7 @@ public final class MediaMetricsManagerService extends SystemService {
                     .writeString(event.getExceptionStack())
                     .writeInt(event.getErrorCode())
                     .writeInt(event.getSubErrorCode())
-                    .writeLong(event.getTimeSincePlaybackCreatedMillis())
+                    .writeLong(event.getTimeSinceCreatedMillis())
                     .usePooledBuffer()
                     .build();
             StatsLog.write(statsEvent);
