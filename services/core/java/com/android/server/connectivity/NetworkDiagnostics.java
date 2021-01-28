@@ -686,7 +686,7 @@ public class NetworkDiagnostics {
 
             mHostname = hostname;
             mMeasurement.description = "DNS TLS dst{" + mTarget.getHostAddress() + "} hostname{"
-                    + TextUtils.emptyIfNull(mHostname) + "}";
+                    + (mHostname == null ? "" : mHostname) + "}";
         }
 
         private SSLSocket setupSSLSocket() throws IOException {
