@@ -79,8 +79,6 @@ import java.nio.ByteBuffer;
 
 @RunWith(Parameterized.class)
 public class SoundTriggerMiddlewareImplTest {
-    private static final String TAG = "SoundTriggerMiddlewareImplTest";
-
     // We run the test once for every version of the underlying driver.
     @Parameterized.Parameters
     public static Object[] data() {
@@ -97,7 +95,7 @@ public class SoundTriggerMiddlewareImplTest {
     public android.hardware.soundtrigger.V2_0.ISoundTriggerHw mHalDriver;
 
     @Mock
-    private SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider = mock(
+    private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider = mock(
             SoundTriggerMiddlewareImpl.AudioSessionProvider.class);
 
     private SoundTriggerMiddlewareImpl mService;
@@ -354,9 +352,7 @@ public class SoundTriggerMiddlewareImplTest {
             }).when(driver).getProperties_2_3(any());
         }
 
-        mService = new SoundTriggerMiddlewareImpl(() -> {
-            return mHalDriver;
-        }, mAudioSessionProvider);
+        mService = new SoundTriggerMiddlewareImpl(() -> mHalDriver, mAudioSessionProvider);
     }
 
     private Pair<Integer, SoundTriggerHwCallback> loadGenericModel_2_0(ISoundTriggerModule module,
@@ -371,22 +367,11 @@ public class SoundTriggerMiddlewareImplTest {
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
 
         doAnswer(invocation -> {
-            android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback callback =
-                    invocation.getArgument(1);
-            int callbackCookie = invocation.getArgument(2);
             android.hardware.soundtrigger.V2_0.ISoundTriggerHw.loadSoundModelCallback
                     resultCallback = invocation.getArgument(3);
 
             // This is the return of this method.
             resultCallback.onValues(0, hwHandle);
-
-            // This is the async mCallback that comes after.
-            android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.ModelEvent modelEvent =
-                    new android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.ModelEvent();
-            modelEvent.status =
-                    android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.SoundModelStatus.UPDATED;
-            modelEvent.model = hwHandle;
-            callback.soundModelCallback(modelEvent, callbackCookie);
             return null;
         }).when(mHalDriver).loadSoundModel(modelCaptor.capture(), callbackCaptor.capture(),
                 cookieCaptor.capture(), any());
@@ -424,22 +409,11 @@ public class SoundTriggerMiddlewareImplTest {
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
 
         doAnswer(invocation -> {
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback callback =
-                    invocation.getArgument(1);
-            int callbackCookie = invocation.getArgument(2);
             android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadSoundModel_2_1Callback
                     resultCallback = invocation.getArgument(3);
 
             // This is the return of this method.
             resultCallback.onValues(0, hwHandle);
-
-            // This is the async mCallback that comes after.
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.ModelEvent modelEvent =
-                    new android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.ModelEvent();
-            modelEvent.header.status =
-                    android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.SoundModelStatus.UPDATED;
-            modelEvent.header.model = hwHandle;
-            callback.soundModelCallback_2_1(modelEvent, callbackCookie);
             return null;
         }).when(driver).loadSoundModel_2_1(modelCaptor.capture(), callbackCaptor.capture(),
                 cookieCaptor.capture(), any());
@@ -485,10 +459,6 @@ public class SoundTriggerMiddlewareImplTest {
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
 
         doAnswer(invocation -> {
-            android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback callback =
-                    invocation.getArgument(
-                            1);
-            int callbackCookie = invocation.getArgument(2);
             android.hardware.soundtrigger.V2_0.ISoundTriggerHw.loadPhraseSoundModelCallback
                     resultCallback =
                     invocation.getArgument(
@@ -496,14 +466,6 @@ public class SoundTriggerMiddlewareImplTest {
 
             // This is the return of this method.
             resultCallback.onValues(0, hwHandle);
-
-            // This is the async mCallback that comes after.
-            android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.ModelEvent modelEvent =
-                    new android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.ModelEvent();
-            modelEvent.status =
-                    android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback.SoundModelStatus.UPDATED;
-            modelEvent.model = hwHandle;
-            callback.soundModelCallback(modelEvent, callbackCookie);
             return null;
         }).when(mHalDriver).loadPhraseSoundModel(modelCaptor.capture(), callbackCaptor.capture(),
                 cookieCaptor.capture(), any());
@@ -557,10 +519,6 @@ public class SoundTriggerMiddlewareImplTest {
         ArgumentCaptor<Integer> cookieCaptor = ArgumentCaptor.forClass(Integer.class);
 
         doAnswer(invocation -> {
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback callback =
-                    invocation.getArgument(
-                            1);
-            int callbackCookie = invocation.getArgument(2);
             android.hardware.soundtrigger.V2_1.ISoundTriggerHw.loadPhraseSoundModel_2_1Callback
                     resultCallback =
                     invocation.getArgument(
@@ -568,14 +526,6 @@ public class SoundTriggerMiddlewareImplTest {
 
             // This is the return of this method.
             resultCallback.onValues(0, hwHandle);
-
-            // This is the async mCallback that comes after.
-            android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.ModelEvent modelEvent =
-                    new android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.ModelEvent();
-            modelEvent.header.status =
-                    android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback.SoundModelStatus.UPDATED;
-            modelEvent.header.model = hwHandle;
-            callback.soundModelCallback_2_1(modelEvent, callbackCookie);
             return null;
         }).when(driver).loadPhraseSoundModel_2_1(modelCaptor.capture(), callbackCaptor.capture(),
                 cookieCaptor.capture(), any());
@@ -775,12 +725,12 @@ public class SoundTriggerMiddlewareImplTest {
 
     private void verifyNotStartRecognition() throws RemoteException {
         verify(mHalDriver, never()).startRecognition(anyInt(), any(), any(), anyInt());
-        if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
-            verify((android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver,
-                    never()).startRecognition_2_1(anyInt(), any(), any(), anyInt());
-        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
             verify((android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver,
                     never()).startRecognition_2_3(anyInt(), any());
+        } else if (mHalDriver instanceof android.hardware.soundtrigger.V2_1.ISoundTriggerHw) {
+            verify((android.hardware.soundtrigger.V2_1.ISoundTriggerHw) mHalDriver,
+                    never()).startRecognition_2_1(anyInt(), any(), any(), anyInt());
         }
     }
 
