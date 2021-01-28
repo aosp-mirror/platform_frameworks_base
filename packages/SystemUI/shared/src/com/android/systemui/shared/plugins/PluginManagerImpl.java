@@ -64,8 +64,6 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private static final String TAG = PluginManagerImpl.class.getSimpleName();
     static final String DISABLE_PLUGIN = "com.android.systemui.action.DISABLE_PLUGIN";
 
-    private static PluginManager sInstance;
-
     private final ArrayMap<PluginListener<?>, PluginInstanceManager> mPluginMap
             = new ArrayMap<>();
     private final Map<String, ClassLoader> mClassLoaders = new ArrayMap<>();
@@ -73,7 +71,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private final ArraySet<String> mWhitelistedPlugins = new ArraySet<>();
     private final Context mContext;
     private final PluginInstanceManagerFactory mFactory;
-    private final boolean isDebuggable;
+    private final boolean mIsDebuggable;
     private final PluginPrefs mPluginPrefs;
     private final PluginEnabler mPluginEnabler;
     private final PluginInitializer mPluginInitializer;
@@ -83,7 +81,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private Looper mLooper;
 
     public PluginManagerImpl(Context context, PluginInitializer initializer) {
-        this(context, new PluginInstanceManagerFactory(), Build.IS_DEBUGGABLE,
+        this(context, new PluginInstanceManagerFactory(), initializer.isDebuggable(),
                 Thread.getUncaughtExceptionPreHandler(), initializer);
     }
 
@@ -93,7 +91,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         mContext = context;
         mFactory = factory;
         mLooper = initializer.getBgLooper();
-        isDebuggable = debuggable;
+        mIsDebuggable = debuggable;
         mWhitelistedPlugins.addAll(Arrays.asList(initializer.getWhitelistedPlugins(mContext)));
         mPluginPrefs = new PluginPrefs(mContext);
         mPluginEnabler = initializer.getPluginEnabler(mContext);
@@ -109,6 +107,10 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                 initializer.onPluginManagerInit();
             }
         });
+    }
+
+    public boolean isDebuggable() {
+        return mIsDebuggable;
     }
 
     public String[] getWhitelistedPlugins() {
@@ -297,7 +299,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     /** Returns class loader specific for the given plugin. */
     public ClassLoader getClassLoader(ApplicationInfo appInfo) {
-        if (!isDebuggable && !isPluginPackageWhitelisted(appInfo.packageName)) {
+        if (!mIsDebuggable && !isPluginPackageWhitelisted(appInfo.packageName)) {
             Log.w(TAG, "Cannot get class loader for non-whitelisted plugin. Src:"
                     + appInfo.sourceDir + ", pkg: " + appInfo.packageName);
             return null;
