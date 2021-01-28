@@ -67,6 +67,7 @@ public class PowerStatsServiceTest {
     private static final String RESIDENCY_FILENAME = "residencytest";
     private static final String PROTO_OUTPUT_FILENAME = "powerstats.proto";
     private static final String CHANNEL_NAME = "channelname";
+    private static final String CHANNEL_SUBSYSTEM = "channelsubsystem";
     private static final String POWER_ENTITY_NAME = "powerentityinfo";
     private static final String STATE_NAME = "stateinfo";
     private static final String ENERGY_CONSUMER_NAME = "energyconsumer";
@@ -214,6 +215,7 @@ public class PowerStatsServiceTest {
                 energyMeterList[i] = new Channel();
                 energyMeterList[i].id = i;
                 energyMeterList[i].name = new String(CHANNEL_NAME + i);
+                energyMeterList[i].subsystem = new String(CHANNEL_SUBSYSTEM + i);
             }
             return energyMeterList;
         }
@@ -272,6 +274,7 @@ public class PowerStatsServiceTest {
         for (int i = 0; i < pssProto.channel.length; i++) {
             assertTrue(pssProto.channel[i].id == i);
             assertTrue(pssProto.channel[i].name.equals(CHANNEL_NAME + i));
+            assertTrue(pssProto.channel[i].subsystem.equals(CHANNEL_SUBSYSTEM + i));
         }
 
         // Validate the energyMeasurement array matches what was written to on-device storage.
@@ -414,6 +417,7 @@ public class PowerStatsServiceTest {
         for (int i = 0; i < pssProto.channel.length; i++) {
             assertTrue(pssProto.channel[i].id == i);
             assertTrue(pssProto.channel[i].name.equals(CHANNEL_NAME + i));
+            assertTrue(pssProto.channel[i].subsystem.equals(CHANNEL_SUBSYSTEM + i));
         }
 
         // No energyMeasurements should be written to the incident report since it
@@ -547,6 +551,7 @@ public class PowerStatsServiceTest {
         for (int i = 0; i < pssProto.channel.length; i++) {
             assertTrue(pssProto.channel[i].id == i);
             assertTrue(pssProto.channel[i].name.equals(CHANNEL_NAME + i));
+            assertTrue(pssProto.channel[i].subsystem.equals(CHANNEL_SUBSYSTEM + i));
         }
 
         // No energyMeasurements should be written to the incident report since the

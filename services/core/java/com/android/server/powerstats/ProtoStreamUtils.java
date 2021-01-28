@@ -266,6 +266,7 @@ public class ProtoStreamUtils {
                 long token = pos.start(PowerStatsServiceMeterProto.CHANNEL);
                 pos.write(ChannelProto.ID, channel[i].id);
                 pos.write(ChannelProto.NAME, channel[i].name);
+                pos.write(ChannelProto.SUBSYSTEM, channel[i].subsystem);
                 pos.end(token);
             }
         }
@@ -275,7 +276,8 @@ public class ProtoStreamUtils {
 
             for (int i = 0; i < channel.length; i++) {
                 Slog.d(TAG, "ChannelId: " + channel[i].id
-                        + ", ChannelName: " + channel[i].name);
+                        + ", ChannelName: " + channel[i].name
+                        + ", ChannelSubsystem: " + channel[i].subsystem);
             }
         }
 
@@ -284,7 +286,8 @@ public class ProtoStreamUtils {
 
             for (int i = 0; i < channel.length; i++) {
                 pw.println("ChannelId: " + channel[i].id
-                        + ", ChannelName: " + channel[i].name);
+                        + ", ChannelName: " + channel[i].name
+                        + ", ChannelSubsystem: " + channel[i].subsystem);
             }
         }
     }
