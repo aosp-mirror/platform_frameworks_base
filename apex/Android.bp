@@ -96,6 +96,10 @@ java_defaults {
         sdk_version: "module_current",
     },
 
+    // installable implies we'll create a non-apex (platform) variant, which
+    // we shouldn't ordinarily need (and it can create issues), so disable that.
+    installable: false,
+
     // Configure framework module specific metalava options.
     droiddoc_options: [mainline_stubs_args],
 
