@@ -3800,6 +3800,12 @@
 -->
     <string name="config_defaultSearchUiService" translatable="false"></string>
 
+    <!-- The package name for the system's speech recognition service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         Example: "com.android.speech/.RecognitionService"
+    -->
+    <string name="config_defaultOnDeviceSpeechRecognitionService" translatable="false"></string>
+
     <string name="config_defaultMusicRecognitionService" translatable="false"></string>
 
     <!-- The package name for the default retail demo app.

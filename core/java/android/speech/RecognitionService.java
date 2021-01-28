@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 
@@ -50,7 +51,9 @@ public abstract class RecognitionService extends Service {
     /**
      * Name under which a RecognitionService component publishes information about itself.
      * This meta-data should reference an XML resource containing a
-     * <code>&lt;{@link android.R.styleable#RecognitionService recognition-service}&gt;</code> tag.
+     * <code>&lt;{@link android.R.styleable#RecognitionService recognition-service}&gt;</code> or
+     * <code>&lt;{@link android.R.styleable#RecognitionService on-device-recognition-service}
+     * &gt;</code> tag.
      */
     public static final String SERVICE_META_DATA = "android.speech";
 
@@ -182,6 +185,13 @@ public abstract class RecognitionService extends Service {
     private boolean checkPermissions(IRecognitionListener listener, boolean forDataDelivery,
             @NonNull String packageName, @Nullable String featureId) {
         if (DBG) Log.d(TAG, "checkPermissions");
+
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid == Process.SYSTEM_UID) {
+            // Assuming system has verified permissions of the caller.
+            return true;
+        }
+
         if (forDataDelivery) {
             if (PermissionChecker.checkCallingOrSelfPermissionForDataDelivery(this,
                     android.Manifest.permission.RECORD_AUDIO, packageName, featureId,
@@ -342,6 +352,7 @@ public abstract class RecognitionService extends Service {
          * Return the Linux uid assigned to the process that sent you the current transaction that
          * is being processed. This is obtained from {@link Binder#getCallingUid()}.
          */
+        // TODO(b/176578753): need to make sure this is fixed when proxied through system.
         public int getCallingUid() {
             return mCallingUid;
         }

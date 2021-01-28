@@ -8288,6 +8288,23 @@
     </declare-styleable>
 
     <!-- =============================== -->
+    <!-- System Speech Recognition attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>on-device-recognition-service</code> as the root tag of the XML resource that
+         describes a {@link android.service.speech.RecognitionService}, which is referenced
+         from its {@link android.service.speech.RecognitionService#SERVICE_META_DATA} meta-data
+         entry.
+         @hide @SystemApi
+    -->
+    <declare-styleable name="OnDeviceRecognitionService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
+    </declare-styleable>
+
+    <!-- =============================== -->
     <!-- Content Capture attributes -->
     <!-- =============================== -->
     <eat-comment />
