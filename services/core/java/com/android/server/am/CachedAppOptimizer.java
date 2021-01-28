@@ -234,6 +234,8 @@ public final class CachedAppOptimizer {
     @VisibleForTesting
     Handler mCompactionHandler;
     private Handler mFreezeHandler;
+    @GuardedBy("mAm")
+    private boolean mFreezerOverride = false;
 
     // Maps process ID to last compaction statistics for processes that we've fully compacted. Used
     // when evaluating throttles that we only consider for "full" compaction, so we don't store
@@ -464,21 +466,35 @@ public final class CachedAppOptimizer {
             }
         }
 
-        try {
-            enableFreezerInternal(enable);
-            return true;
-        } catch (java.lang.RuntimeException e) {
-            if (enable) {
-                mFreezerDisableCount = 0;
-            } else {
-                mFreezerDisableCount = 1;
-            }
+        // Override is applied immediately, restore is delayed
+        synchronized (mAm) {
+            int processCount = mAm.mProcessList.mLruProcesses.size();
 
-            Slog.e(TAG_AM, "Exception handling freezer state (enable: " + enable + "): "
-                    + e.toString());
+            mFreezerOverride = !enable;
+            Slog.d(TAG_AM, "freezer override set to " + mFreezerOverride);
+
+            for (int i = 0; i < processCount; i++) {
+                ProcessRecord process = mAm.mProcessList.mLruProcesses.get(i);
+
+                if (process == null) {
+                    continue;
+                }
+
+                if (enable && process.freezerOverride) {
+                    freezeAppAsync(process);
+                    process.freezerOverride = false;
+                }
+
+                if (!enable && process.frozen) {
+                    unfreezeAppLocked(process);
+
+                    // Set freezerOverride *after* calling unfreezeAppLocked (it resets the flag)
+                    process.freezerOverride = true;
+                }
+            }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -525,7 +541,7 @@ public final class CachedAppOptimizer {
         FileReader fr = null;
 
         try {
-            fr = new FileReader("/sys/fs/cgroup/freezer/cgroup.freeze");
+            fr = new FileReader("/sys/fs/cgroup/uid_0/cgroup.freeze");
             char state = (char) fr.read();
 
             if (state == '1' || state == '0') {
@@ -747,6 +763,8 @@ public final class CachedAppOptimizer {
     void unfreezeAppLocked(ProcessRecord app) {
         mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
 
+        app.freezerOverride = false;
+
         if (!app.frozen) {
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM,
@@ -756,6 +774,8 @@ public final class CachedAppOptimizer {
             return;
         }
 
+        // Unfreeze the binder interface first, to avoid transactions triggered by timers fired
+        // right after unfreezing the process to fail
         boolean processKilled = false;
 
         try {
@@ -1135,10 +1155,29 @@ public final class CachedAppOptimizer {
                     return;
                 }
 
+                if (mFreezerOverride) {
+                    proc.freezerOverride = true;
+                    Slog.d(TAG_AM, "Skipping freeze for process " + pid
+                            + " " + name + " curAdj = " + proc.curAdj
+                            + "(override)");
+                    return;
+                }
+
                 if (pid == 0 || proc.frozen) {
                     // Already frozen or not a real process, either one being
                     // launched or one being killed
                     return;
+                }
+
+                // Freeze binder interface before the process, to flush any
+                // transactions that might be pending.
+                try {
+                    freezeBinder(pid, true);
+                } catch (RuntimeException e) {
+                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
+                    proc.kill("Unable to freeze binder interface",
+                            ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
                 }
 
                 long unfreezeTime = proc.freezeUnfreezeTime;
@@ -1166,15 +1205,6 @@ public final class CachedAppOptimizer {
             }
 
             EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
-
-            try {
-                freezeBinder(pid, true);
-            } catch (RuntimeException e) {
-                Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
-                proc.kill("Unable to freeze binder interface",
-                        ApplicationExitInfo.REASON_OTHER,
-                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
-            }
 
             // See above for why we're not taking mPhenotypeFlagLock here
             if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
