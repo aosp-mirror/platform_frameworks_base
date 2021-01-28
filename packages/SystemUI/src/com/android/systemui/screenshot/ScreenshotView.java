@@ -316,21 +316,21 @@ public class ScreenshotView extends FrameLayout implements
         mScreenshotSelectorView.requestFocus();
     }
 
-    void prepareForAnimation(Bitmap bitmap, Insets screenInsets) {
+    void setScreenshot(Bitmap bitmap, Insets screenInsets) {
         mScreenshotPreview.setImageDrawable(createScreenDrawable(mResources, bitmap, screenInsets));
-        // make static preview invisible (from gone) so we can query its location on screen
-        mScreenshotPreview.setVisibility(View.INVISIBLE);
     }
 
     AnimatorSet createScreenshotDropInAnimation(Rect bounds, boolean showFlash) {
-        mScreenshotPreview.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        mScreenshotPreview.buildLayer();
+        if (DEBUG_ANIM) {
+            Log.d(TAG, "createAnim: bounds=" + bounds + " showFlash=" + showFlash);
+        }
 
         Rect previewBounds = new Rect();
         mScreenshotPreview.getBoundsOnScreen(previewBounds);
-        int[] previewLocation = new int[2];
-        mScreenshotPreview.getLocationInWindow(previewLocation);
+        Rect targetPosition = new Rect();
+        mScreenshotPreview.getHitRect(targetPosition);
 
+        // ratio of preview width, end vs. start size
         float cornerScale =
                 mCornerSizeX / (mOrientationPortrait ? bounds.width() : bounds.height());
         final float currentScale = 1 / cornerScale;
@@ -358,8 +358,13 @@ public class ScreenshotView extends FrameLayout implements
 
         // animate from the current location, to the static preview location
         final PointF startPos = new PointF(bounds.centerX(), bounds.centerY());
-        final PointF finalPos = new PointF(previewLocation[0] + previewBounds.width() / 2f,
-                previewLocation[1] + previewBounds.height() / 2f);
+        final PointF finalPos = new PointF(targetPosition.exactCenterX(),
+                targetPosition.exactCenterY());
+
+        if (DEBUG_ANIM) {
+            Log.d(TAG, "toCorner: startPos=" + startPos);
+            Log.d(TAG, "toCorner: finalPos=" + finalPos);
+        }
 
         ValueAnimator toCorner = ValueAnimator.ofFloat(0, 1);
         toCorner.setDuration(SCREENSHOT_TO_CORNER_Y_DURATION_MS);
@@ -427,7 +432,7 @@ public class ScreenshotView extends FrameLayout implements
             @Override
             public void onAnimationEnd(Animator animation) {
                 if (DEBUG_ANIM) {
-                    Log.d(TAG, "drop-in animation completed");
+                    Log.d(TAG, "drop-in animation ended");
                 }
                 mDismissButton.setOnClickListener(view -> {
                     if (DEBUG_INPUT) {
@@ -653,13 +658,12 @@ public class ScreenshotView extends FrameLayout implements
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
         // Clear any references to the bitmap
         mScreenshotPreview.setImageDrawable(null);
+        mScreenshotPreview.setVisibility(View.INVISIBLE);
         mPendingSharedTransition = false;
         mActionsContainerBackground.setVisibility(View.GONE);
         mActionsContainer.setVisibility(View.GONE);
         mBackgroundProtection.setAlpha(0f);
         mDismissButton.setVisibility(View.GONE);
-        mScreenshotPreview.setVisibility(View.GONE);
-        mScreenshotPreview.setLayerType(View.LAYER_TYPE_NONE, null);
         mScreenshotStatic.setTranslationX(0);
         mScreenshotPreview.setTranslationY(0);
         mScreenshotPreview.setContentDescription(
