@@ -16,37 +16,66 @@
 
 package android.security.keystore;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 
 import java.security.ProviderException;
 
 /**
  * Indicates a transient error that prevented a key operation from being created.
- * Callers should try again with a back-off period of 10-30 milliseconds.
+ * Callers should try again with a back-off period of {@link #getBackOffHintMillis()}
+ * milliseconds.
  */
 public class BackendBusyException extends ProviderException {
 
+    private final long mBackOffHintMillis;
+
     /**
      * Constructs a new {@code BackendBusyException} without detail message and cause.
+     *
      */
-    public BackendBusyException() {
+    public BackendBusyException(@DurationMillisLong long backOffHintMillis) {
         super("The keystore backend has no operation slots available. Retry later.");
+        if (backOffHintMillis < 0) {
+            throw new IllegalArgumentException("Back-off hint cannot be negative.");
+        }
+        mBackOffHintMillis = backOffHintMillis;
     }
 
     /**
      * Constructs a new {@code BackendBusyException} with the provided detail message and
      * no cause.
      */
-    public BackendBusyException(@NonNull String message) {
+    public BackendBusyException(@DurationMillisLong long backOffHintMillis,
+            @NonNull String message) {
         super(message);
+        if (backOffHintMillis < 0) {
+            throw new IllegalArgumentException("Back-off hint cannot be negative.");
+        }
+        mBackOffHintMillis = backOffHintMillis;
     }
 
     /**
      * Constructs a new {@code BackendBusyException} with the provided detail message and
      * cause.
      */
-    public BackendBusyException(@NonNull String message, @NonNull Throwable cause) {
+    public BackendBusyException(@DurationMillisLong long backOffHintMillis,
+            @NonNull String message, @NonNull Throwable cause) {
         super(message, cause);
+        if (backOffHintMillis < 0) {
+            throw new IllegalArgumentException("Back-off hint cannot be negative.");
+        }
+        mBackOffHintMillis = backOffHintMillis;
     }
 
+    /**
+     * When retrying to start a Keystore operation after receiving this exception, this can be
+     * used to determine how long to wait before retrying. It is not guaranteed that the operation
+     * will succeeds after this time. Multiple retries may be necessary if the system is congested.
+     *
+     * @return Number of milliseconds to back off before retrying.
+     */
+    public @DurationMillisLong long getBackOffHintMillis() {
+        return mBackOffHintMillis;
+    }
 }

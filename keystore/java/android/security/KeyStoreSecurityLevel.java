@@ -96,20 +96,21 @@ public class KeyStoreSecurityLevel {
             } catch (ServiceSpecificException e) {
                 switch (e.errorCode) {
                     case ResponseCode.BACKEND_BUSY: {
+                        long backOffHint = (long) (Math.random() * 80 + 20);
                         if (CompatChanges.isChangeEnabled(
                                 KeyStore2.KEYSTORE_OPERATION_CREATION_MAY_FAIL)) {
                             // Starting with Android S we inform the caller about the
                             // backend being busy.
-                            throw new BackendBusyException();
+                            throw new BackendBusyException(backOffHint);
                         } else {
                             // Before Android S operation creation must always succeed. So we
                             // just have to retry. We do so with a randomized back-off between
-                            // 50 and 250ms.
+                            // 20 and 100ms.
                             // It is a little awkward that we cannot break out of this loop
                             // by interrupting this thread. But that is the expected behavior.
                             // There is some comfort in the fact that interrupting a thread
                             // also does not unblock a thread waiting for a binder transaction.
-                            interruptedPreservingSleep((long) (Math.random() * 200 + 50));
+                            interruptedPreservingSleep(backOffHint);
                         }
                         break;
                     }
