@@ -5607,12 +5607,12 @@ package android.media.tv.tuner.filter {
   public class Filter implements java.lang.AutoCloseable {
     method public void close();
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
-    method public int configureMonitorEvent(int);
     method public int flush();
     method public int getId();
     method public long getId64Bit();
     method public int read(@NonNull byte[], long, long);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
+    method public int setMonitorEventMask(int);
     method public int start();
     method public int stop();
     field public static final int MONITOR_EVENT_IP_CID_CHANGE = 2; // 0x2
