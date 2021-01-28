@@ -547,16 +547,17 @@ public final class DisplayInfo implements Parcelable {
      * Returns the id of the "default" mode with the given refresh rate, or {@code 0} if no suitable
      * mode could be found.
      */
-    public int findDefaultModeByRefreshRate(float refreshRate) {
+    @Nullable
+    public Display.Mode findDefaultModeByRefreshRate(float refreshRate) {
         Display.Mode[] modes = supportedModes;
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].matches(
                     defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), refreshRate)) {
-                return modes[i].getModeId();
+                return modes[i];
             }
         }
-        return 0;
+        return null;
     }
 
     /**
