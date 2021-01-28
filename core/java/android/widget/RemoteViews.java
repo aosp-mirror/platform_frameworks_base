@@ -65,6 +65,7 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.DisplayMetrics;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.Pair;
@@ -183,6 +184,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_INT_TAG_TAG = 22;
     private static final int REMOVE_FROM_PARENT_ACTION_TAG = 23;
     private static final int RESOURCE_REFLECTION_ACTION_TAG = 24;
+    private static final int COMPLEX_UNIT_DIMENSION_REFLECTION_ACTION_TAG = 25;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -1684,6 +1686,59 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private final class ComplexUnitDimensionReflectionAction extends BaseReflectionAction {
+
+        private final float mValue;
+        @ComplexDimensionUnit
+        private final int mUnit;
+
+        ComplexUnitDimensionReflectionAction(int viewId, String methodName, int parameterType,
+                float value, @ComplexDimensionUnit int unit) {
+            super(viewId, methodName, parameterType);
+            this.mValue = value;
+            this.mUnit = unit;
+        }
+
+        ComplexUnitDimensionReflectionAction(Parcel in) {
+            super(in);
+            this.mValue = in.readFloat();
+            this.mUnit = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            super.writeToParcel(dest, flags);
+            dest.writeFloat(this.mValue);
+            dest.writeInt(this.mUnit);
+        }
+
+        @Override
+        protected Object getParameterValue(View view) throws ActionException {
+            DisplayMetrics dm = view.getContext().getResources().getDisplayMetrics();
+            try {
+                int data = TypedValue.createComplexDimension(this.mValue, this.mUnit);
+                switch (this.type) {
+                    case ReflectionAction.INT:
+                        return TypedValue.complexToDimensionPixelSize(data, dm);
+                    case ReflectionAction.FLOAT:
+                        return TypedValue.complexToDimension(data, dm);
+                    default:
+                        throw new ActionException(
+                                "parameter type must be INT or FLOAT, not " + this.type);
+                }
+            } catch (ActionException ex) {
+                throw ex;
+            } catch (Throwable t) {
+                throw new ActionException(t);
+            }
+        }
+
+        @Override
+        public int getActionTag() {
+            return COMPLEX_UNIT_DIMENSION_REFLECTION_ACTION_TAG;
+        }
+    }
+
     /**
      * This is only used for async execution of actions and it not parcelable.
      */
@@ -2709,6 +2764,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new RemoveFromParentAction(parcel);
             case RESOURCE_REFLECTION_ACTION_TAG:
                 return new ResourceReflectionAction(parcel);
+            case COMPLEX_UNIT_DIMENSION_REFLECTION_ACTION_TAG:
+                return new ComplexUnitDimensionReflectionAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -3504,6 +3561,23 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one int, a size in pixels, on a view in the layout for this
+     * RemoteViews.
+     *
+     * The dimension will be resolved from the specified dimension at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The value of the dimension.
+     * @param unit The unit in which the value is specified.
+     */
+    public void setIntDimen(@IdRes int viewId, @NonNull String methodName,
+            float value, @ComplexDimensionUnit int unit) {
+        addAction(new ComplexUnitDimensionReflectionAction(viewId, methodName, ReflectionAction.INT,
+                value, unit));
+    }
+
+    /**
      * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
      *
      * The ColorStateList will be resolved from the resources at the time of inflation.
@@ -3585,6 +3659,24 @@ public class RemoteViews implements Parcelable, Filter {
             @DimenRes int dimenResource) {
         addAction(new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.FLOAT,
                 ResourceReflectionAction.DIMEN_RESOURCE, dimenResource));
+    }
+
+    /**
+     * Call a method taking one float, a size in pixels, on a view in the layout for this
+     * RemoteViews.
+     *
+     * The dimension will be resolved from the specified dimension at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param value The value of the dimension.
+     * @param unit The unit in which the value is specified.
+     */
+    public void setFloatDimen(@IdRes int viewId, @NonNull String methodName,
+            float value, @ComplexDimensionUnit int unit) {
+        addAction(
+                new ComplexUnitDimensionReflectionAction(viewId, methodName, ReflectionAction.FLOAT,
+                        value, unit));
     }
 
     /**

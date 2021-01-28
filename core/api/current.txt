@@ -54469,6 +54469,7 @@ package android.widget {
     method public void setEmptyView(@IdRes int, @IdRes int);
     method public void setFloat(@IdRes int, String, float);
     method public void setFloatDimen(@IdRes int, @NonNull String, @DimenRes int);
+    method public void setFloatDimen(@IdRes int, @NonNull String, float, int);
     method public void setIcon(@IdRes int, String, android.graphics.drawable.Icon);
     method public void setImageViewBitmap(@IdRes int, android.graphics.Bitmap);
     method public void setImageViewIcon(@IdRes int, android.graphics.drawable.Icon);
@@ -54476,6 +54477,7 @@ package android.widget {
     method public void setImageViewUri(@IdRes int, android.net.Uri);
     method public void setInt(@IdRes int, String, int);
     method public void setIntDimen(@IdRes int, @NonNull String, @DimenRes int);
+    method public void setIntDimen(@IdRes int, @NonNull String, float, int);
     method public void setIntent(@IdRes int, String, android.content.Intent);
     method public void setLabelFor(@IdRes int, @IdRes int);
     method public void setLightBackgroundLayoutId(@LayoutRes int);
