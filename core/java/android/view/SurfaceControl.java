@@ -339,8 +339,6 @@ public final class SurfaceControl implements Parcelable {
      */
     public long mNativeObject;
     private long mNativeHandle;
-    private boolean mDebugRelease = false;
-    private Throwable mReleaseStack = null;
 
     // TODO: Move width/height to native and fix locking through out.
     private final Object mLock = new Object();
@@ -588,13 +586,6 @@ public final class SurfaceControl implements Parcelable {
         }
         mNativeObject = nativeObject;
         mNativeHandle = mNativeObject != 0 ? nativeGetHandle(nativeObject) : 0;
-        if (mNativeObject == 0) {
-            if (mDebugRelease) {
-                mReleaseStack = new Throwable("assigned zero nativeObject here");
-            }
-        } else {
-            mReleaseStack = null;
-        }
     }
 
     /**
@@ -605,7 +596,6 @@ public final class SurfaceControl implements Parcelable {
         mWidth = other.mWidth;
         mHeight = other.mHeight;
         mLocalOwnerView = other.mLocalOwnerView;
-        mDebugRelease = other.mDebugRelease;
         assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject), callsite);
     }
 
@@ -1435,7 +1425,6 @@ public final class SurfaceControl implements Parcelable {
         mName = in.readString8();
         mWidth = in.readInt();
         mHeight = in.readInt();
-        mDebugRelease = in.readBoolean();
 
         long object = 0;
         if (in.readInt() != 0) {
@@ -1454,12 +1443,8 @@ public final class SurfaceControl implements Parcelable {
         dest.writeString8(mName);
         dest.writeInt(mWidth);
         dest.writeInt(mHeight);
-        dest.writeBoolean(mDebugRelease);
         if (mNativeObject == 0) {
             dest.writeInt(0);
-            if (mReleaseStack != null) {
-                Log.w(TAG, "Sending invalid " + this + " caused by:", mReleaseStack);
-            }
         } else {
             dest.writeInt(1);
         }
@@ -1468,13 +1453,6 @@ public final class SurfaceControl implements Parcelable {
         if ((flags & Parcelable.PARCELABLE_WRITE_RETURN_VALUE) != 0) {
             release();
         }
-    }
-
-    /**
-     * @hide
-     */
-    public void setDebugRelease(boolean debug) {
-        mDebugRelease = debug;
     }
 
     /**
@@ -1547,9 +1525,6 @@ public final class SurfaceControl implements Parcelable {
             nativeRelease(mNativeObject);
             mNativeObject = 0;
             mNativeHandle = 0;
-            if (mDebugRelease) {
-                mReleaseStack = new Throwable("released here");
-            }
             mCloseGuard.close();
         }
     }
@@ -1565,11 +1540,8 @@ public final class SurfaceControl implements Parcelable {
     }
 
     private void checkNotReleased() {
-        if (mNativeObject == 0) {
-            Log.wtf(TAG, "Invalid " + this + " caused by:", mReleaseStack);
-            throw new NullPointerException(
-                "mNativeObject of " + this + " is null. Have you called release() already?");
-        }
+        if (mNativeObject == 0) throw new NullPointerException(
+                "Invalid " + this + ", mNativeObject is null. Have you called release() already?");
     }
 
     /**
@@ -2417,7 +2389,6 @@ public final class SurfaceControl implements Parcelable {
     public static SurfaceControl mirrorSurface(SurfaceControl mirrorOf) {
         long nativeObj = nativeMirrorSurface(mirrorOf.mNativeObject);
         SurfaceControl sc = new SurfaceControl();
-        sc.mDebugRelease = mirrorOf.mDebugRelease;
         sc.assignNativeObject(nativeObj, "mirrorSurface");
         return sc;
     }

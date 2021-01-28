@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import static android.os.Build.IS_DEBUGGABLE;
 import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
 import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
@@ -553,11 +552,6 @@ class InsetsSourceProvider {
                 // TODO: use 0 alpha and remove t.hide() once b/138459974 is fixed.
                 t.setAlpha(animationLeash, 1 /* alpha */);
                 t.hide(animationLeash);
-
-                // TODO(b/175954493): Remove this after finding root cause.
-                if (IS_DEBUGGABLE) {
-                    animationLeash.setDebugRelease(true);
-                }
             }
             ProtoLog.i(WM_DEBUG_IME,
                     "ControlAdapter startAnimation mSource: %s controlTarget: %s", mSource,
