@@ -32,6 +32,7 @@ import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
@@ -115,6 +116,13 @@ public class VcnGatewayConnectionTestBase {
         ArgumentCaptor<IkeSessionCallback> captor =
                 ArgumentCaptor.forClass(IkeSessionCallback.class);
         verify(mDeps).newIkeSession(any(), any(), any(), captor.capture(), any());
+        return captor.getValue();
+    }
+
+    protected ChildSessionCallback getChildSessionCallback() {
+        ArgumentCaptor<ChildSessionCallback> captor =
+                ArgumentCaptor.forClass(ChildSessionCallback.class);
+        verify(mDeps).newIkeSession(any(), any(), any(), any(), captor.capture());
         return captor.getValue();
     }
 }
