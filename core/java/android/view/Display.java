@@ -121,6 +121,19 @@ public final class Display {
     public static final int INVALID_DISPLAY = -1;
 
     /**
+     * The default display group id, which is the display group id of the primary display assuming
+     * there is one.
+     * @hide
+     */
+    public static final int DEFAULT_DISPLAY_GROUP = 0;
+
+    /**
+     * Invalid display group id.
+     * @hide
+     */
+    public static final int INVALID_DISPLAY_GROUP = -1;
+
+    /**
      * Display flag: Indicates that the display supports compositing content
      * that is stored in protected graphics buffers.
      * <p>
