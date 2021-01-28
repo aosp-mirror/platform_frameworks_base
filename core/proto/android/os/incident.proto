@@ -41,7 +41,6 @@ import "frameworks/base/core/proto/android/server/jobscheduler.proto";
 import "frameworks/base/core/proto/android/server/location/context_hub.proto";
 import "frameworks/base/core/proto/android/server/powermanagerservice.proto";
 import "frameworks/base/core/proto/android/server/powerstatsservice.proto";
-import "frameworks/base/apex/permission/service/proto/com/android/role/roleservice.proto";
 import "frameworks/base/core/proto/android/server/windowmanagerservice.proto";
 import "frameworks/base/core/proto/android/service/appwidget.proto";
 import "frameworks/base/core/proto/android/service/battery.proto";
@@ -63,6 +62,7 @@ import "frameworks/base/core/proto/android/privacy.proto";
 import "frameworks/base/core/proto/android/section.proto";
 import "frameworks/base/proto/src/ipconnectivity.proto";
 import "frameworks/proto_logging/stats/enums/service/usb.proto";
+import "packages/modules/Permission/service/proto/com/android/role/roleservice.proto";
 
 package android.os;
 
