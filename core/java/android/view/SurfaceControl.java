@@ -416,6 +416,15 @@ public final class SurfaceControl implements Parcelable {
      */
     public static final int SECURE = 0x00000080;
 
+
+    /**
+     * Queue up BufferStateLayer buffers instead of dropping the oldest buffer when this flag is
+     * set. This blocks the client until all the buffers have been presented. If the buffers
+     * have presentation timestamps, then we may drop buffers.
+     * @hide
+     */
+    public static final int ENABLE_BACKPRESSURE = 0x00000100;
+
     /**
      * Surface creation flag: Creates a surface where color components are interpreted
      * as "non pre-multiplied" by their alpha channel. Of course this flag is
