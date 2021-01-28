@@ -14,20 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
-import static com.android.server.location.timezone.LocationTimeZoneManagerService.debugLog;
-import static com.android.server.location.timezone.LocationTimeZoneManagerService.warnLog;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
-import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
-import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
-import static com.android.server.location.timezone.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.debugLog;
+import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.warnLog;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_PERM_FAILED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
+import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_PERMANENT_FAILURE;
+import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_SUGGESTION;
+import static com.android.server.timezonedetector.location.TimeZoneProviderEvent.EVENT_TYPE_UNCERTAIN;
 
 import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
@@ -36,9 +36,9 @@ import android.os.RemoteCallback;
 import android.util.IndentingPrintWriter;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.location.timezone.ThreadingDomain.SingleRunnableQueue;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.GeolocationTimeZoneSuggestion;
+import com.android.server.timezonedetector.location.ThreadingDomain.SingleRunnableQueue;
 
 import java.time.Duration;
 import java.util.List;

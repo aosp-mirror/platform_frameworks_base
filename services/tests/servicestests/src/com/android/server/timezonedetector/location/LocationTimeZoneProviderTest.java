@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
-import static com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
-import static com.android.server.location.timezone.TestSupport.USER1_CONFIG_GEO_DETECTION_ENABLED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_DESTROYED;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_CERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_INITIALIZING;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STARTED_UNCERTAIN;
+import static com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState.PROVIDER_STATE_STOPPED;
+import static com.android.server.timezonedetector.location.TestSupport.USER1_CONFIG_GEO_DETECTION_ENABLED;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -40,10 +40,10 @@ import android.platform.test.annotations.Presubmit;
 import android.service.timezone.TimeZoneProviderSuggestion;
 import android.util.IndentingPrintWriter;
 
-import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderListener;
-import com.android.server.location.timezone.LocationTimeZoneProvider.ProviderState;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.TestState;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderListener;
+import com.android.server.timezonedetector.location.LocationTimeZoneProvider.ProviderState;
 
 import org.junit.Before;
 import org.junit.Test;
