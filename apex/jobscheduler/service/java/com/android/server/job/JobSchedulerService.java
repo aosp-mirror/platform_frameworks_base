@@ -369,12 +369,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         case Constants.KEY_MODERATE_USE_FACTOR:
                             mConstants.updateUseFactorConstantsLocked();
                             break;
-                        case Constants.KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS:
-                            if (!concurrencyUpdated) {
-                                mConstants.updateConcurrencyConstantsLocked();
-                                concurrencyUpdated = true;
-                            }
-                            break;
                         case Constants.KEY_MIN_LINEAR_BACKOFF_TIME_MS:
                         case Constants.KEY_MIN_EXP_BACKOFF_TIME_MS:
                             mConstants.updateBackoffConstantsLocked();
@@ -384,10 +378,10 @@ public class JobSchedulerService extends com.android.server.SystemService
                             mConstants.updateConnectivityConstantsLocked();
                             break;
                         default:
-                            // Too many max_job_* strings to list.
-                            if (name.startsWith(Constants.KEY_PREFIX_MAX_JOB)
+                            if (name.startsWith(JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY)
                                     && !concurrencyUpdated) {
                                 mConstants.updateConcurrencyConstantsLocked();
+                                mConcurrencyManager.updateConfigLocked();
                                 concurrencyUpdated = true;
                             } else {
                                 for (int ctrlr = 0; ctrlr < mControllers.size(); ctrlr++) {
@@ -552,9 +546,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final String KEY_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT =
                 "aq_schedule_return_failure";
 
-        private static final String KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS =
-                "screen_off_job_concurrency_increase_delay_ms";
-
         private static final int DEFAULT_MIN_READY_NON_ACTIVE_JOBS_COUNT = 5;
         private static final long DEFAULT_MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS = 31 * MINUTE_IN_MILLIS;
         private static final float DEFAULT_HEAVY_USE_FACTOR = .9f;
@@ -568,7 +559,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         private static final long DEFAULT_API_QUOTA_SCHEDULE_WINDOW_MS = MINUTE_IN_MILLIS;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_THROW_EXCEPTION = true;
         private static final boolean DEFAULT_API_QUOTA_SCHEDULE_RETURN_FAILURE_RESULT = false;
-        private static final long DEFAULT_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS = 30_000;
 
         /**
          * Minimum # of non-ACTIVE jobs for which the JMS will be happy running some work early.
@@ -591,7 +581,8 @@ public class JobSchedulerService extends com.android.server.SystemService
         float MODERATE_USE_FACTOR = DEFAULT_MODERATE_USE_FACTOR;
 
         /** Prefix for all of the max_job constants. */
-        private static final String KEY_PREFIX_MAX_JOB = "max_job_";
+        private static final String KEY_PREFIX_MAX_JOB =
+                JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY + "max_job_";
 
         // Max job counts for screen on / off, for each memory trim level.
         final MaxJobCountsPerMemoryTrimLevel MAX_JOB_COUNTS_SCREEN_ON =
@@ -631,11 +622,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                                 5, KEY_PREFIX_MAX_JOB + "total_off_critical",
                                 1, KEY_PREFIX_MAX_JOB + "max_bg_off_critical",
                                 1, KEY_PREFIX_MAX_JOB + "min_bg_off_critical"));
-
-
-        /** Wait for this long after screen off before increasing the job concurrency. */
-        long SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS =
-                DEFAULT_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS;
 
         /**
          * The minimum backoff time to allow for linear backoff.
@@ -710,11 +696,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             MAX_JOB_COUNTS_SCREEN_OFF.moderate.update();
             MAX_JOB_COUNTS_SCREEN_OFF.low.update();
             MAX_JOB_COUNTS_SCREEN_OFF.critical.update();
-
-            SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS = DeviceConfig.getLong(
-                    DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                    KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS,
-                    DEFAULT_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
         }
 
         private void updateBackoffConstantsLocked() {
@@ -776,9 +757,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             MAX_JOB_COUNTS_SCREEN_OFF.low.dump(pw, "");
             MAX_JOB_COUNTS_SCREEN_OFF.critical.dump(pw, "");
 
-            pw.print(KEY_SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS,
-                    SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS).println();
-
             pw.print(KEY_MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS).println();
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
@@ -805,9 +783,6 @@ public class JobSchedulerService extends com.android.server.SystemService
 
             MAX_JOB_COUNTS_SCREEN_ON.dumpProto(proto, ConstantsProto.MAX_JOB_COUNTS_SCREEN_ON);
             MAX_JOB_COUNTS_SCREEN_OFF.dumpProto(proto, ConstantsProto.MAX_JOB_COUNTS_SCREEN_OFF);
-
-            proto.write(ConstantsProto.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS,
-                    SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
 
             proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS);
             proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS);
