@@ -423,6 +423,9 @@ package android.app {
     method @Nullable public static String opToPermission(@NonNull String);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setMode(@NonNull String, int, @Nullable String, int);
     method @RequiresPermission("android.permission.MANAGE_APP_OPS_MODES") public void setUidMode(@NonNull String, int, int);
+    field public static final int HISTORY_FLAGS_ALL = 3; // 0x3
+    field public static final int HISTORY_FLAG_AGGREGATE = 1; // 0x1
+    field public static final int HISTORY_FLAG_DISCRETE = 2; // 0x2
     field public static final String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
     field public static final String OPSTR_ACCESS_ACCESSIBILITY = "android:access_accessibility";
     field public static final String OPSTR_ACCESS_NOTIFICATIONS = "android:access_notifications";
@@ -536,9 +539,14 @@ package android.app {
     method public long getAccessDuration(int, int, int);
     method public long getBackgroundAccessCount(int);
     method public long getBackgroundAccessDuration(int);
+    method @NonNull public java.util.List<android.app.AppOpsManager.AttributedOpEntry> getBackgroundDiscreteAccesses(int);
     method public long getBackgroundRejectCount(int);
+    method @NonNull public android.app.AppOpsManager.AttributedOpEntry getDiscreteAccessAt(@IntRange(from=0) int);
+    method @IntRange(from=0) public int getDiscreteAccessCount();
+    method @NonNull public java.util.List<android.app.AppOpsManager.AttributedOpEntry> getDiscreteAccesses(int, int, int);
     method public long getForegroundAccessCount(int);
     method public long getForegroundAccessDuration(int);
+    method @NonNull public java.util.List<android.app.AppOpsManager.AttributedOpEntry> getForegroundDiscreteAccesses(int);
     method public long getForegroundRejectCount(int);
     method @NonNull public String getOpName();
     method public long getRejectCount(int, int, int);
@@ -565,6 +573,7 @@ package android.app {
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest build();
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setAttributionTag(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setFlags(int);
+    method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setHistoryFlags(int);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setOpNames(@Nullable java.util.List<java.lang.String>);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setPackageName(@Nullable String);
     method @NonNull public android.app.AppOpsManager.HistoricalOpsRequest.Builder setUid(int);
