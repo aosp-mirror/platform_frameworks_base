@@ -151,8 +151,7 @@ public class AlarmManagerService extends SystemService {
     static final boolean DEBUG_BG_LIMIT = localLOGV || false;
     static final boolean DEBUG_STANDBY = localLOGV || false;
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
-    // TODO (b/178484639): Turn off once allow-while-idle revamp is completed.
-    static final boolean RECORD_DEVICE_IDLE_ALARMS = true;
+    static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
     static final int TICK_HISTORY_DEPTH = 10;
