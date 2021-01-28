@@ -267,6 +267,9 @@ interface IDevicePolicyManager {
     void setSecondaryLockscreenEnabled(in ComponentName who, boolean enabled);
     boolean isSecondaryLockscreenEnabled(in UserHandle userHandle);
 
+    void setNetworkSlicingEnabled(in boolean enabled);
+    boolean isNetworkSlicingEnabled(int userHandle);
+
     void setLockTaskPackages(in ComponentName who, in String[] packages);
     String[] getLockTaskPackages(in ComponentName who);
     boolean isLockTaskPermitted(in String pkg);

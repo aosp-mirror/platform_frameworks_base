@@ -11132,6 +11132,50 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
+    public void setNetworkSlicingEnabled(boolean enabled) {
+        if (!mHasFeature) {
+            return;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(isProfileOwner(caller),
+                "Caller is not profile owner; only profile owner may control the network slicing");
+
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(
+                    caller.getUserId());
+            if (requiredAdmin != null && requiredAdmin.mNetworkSlicingEnabled != enabled) {
+                requiredAdmin.mNetworkSlicingEnabled = enabled;
+                saveSettingsLocked(caller.getUserId());
+                // TODO(b/178655595) notify CS the change.
+                // TODO(b/178655595) DevicePolicyEventLogger metrics
+            }
+        }
+    }
+
+    @Override
+    public boolean isNetworkSlicingEnabled(int userHandle) {
+        if (!mHasFeature) {
+            return false;
+        }
+
+        final CallerIdentity caller = getCallerIdentity();
+        Preconditions.checkCallAuthorization(hasFullCrossUsersPermission(caller, userHandle));
+        Preconditions.checkCallAuthorization(hasCallingOrSelfPermission(
+                permission.READ_NETWORK_DEVICE_CONFIG) || isProfileOwner(caller),
+                        "Caller is not profile owner and not granted"
+                                + " READ_NETWORK_DEVICE_CONFIG permission");
+        synchronized (getLockObject()) {
+            final ActiveAdmin requiredAdmin = getProfileOwnerAdminLocked(userHandle);
+            if (requiredAdmin != null) {
+                return requiredAdmin.mNetworkSlicingEnabled;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    @Override
     public void setLockTaskPackages(ComponentName who, String[] packages)
             throws SecurityException {
         Objects.requireNonNull(who, "ComponentName is null");

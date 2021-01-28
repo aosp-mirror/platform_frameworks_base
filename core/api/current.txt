@@ -7080,6 +7080,7 @@ package android.app.admin {
     method public boolean isManagedProfile(@NonNull android.content.ComponentName);
     method public boolean isMasterVolumeMuted(@NonNull android.content.ComponentName);
     method public boolean isNetworkLoggingEnabled(@Nullable android.content.ComponentName);
+    method public boolean isNetworkSlicingEnabled();
     method public boolean isOrganizationOwnedDeviceWithManagedProfile();
     method public boolean isOverrideApnEnabled(@NonNull android.content.ComponentName);
     method public boolean isPackageSuspended(@NonNull android.content.ComponentName, String) throws android.content.pm.PackageManager.NameNotFoundException;
@@ -7151,6 +7152,7 @@ package android.app.admin {
     method public void setMaximumTimeToLock(@NonNull android.content.ComponentName, long);
     method @NonNull public java.util.List<java.lang.String> setMeteredDataDisabledPackages(@NonNull android.content.ComponentName, @NonNull java.util.List<java.lang.String>);
     method public void setNetworkLoggingEnabled(@Nullable android.content.ComponentName, boolean);
+    method public void setNetworkSlicingEnabled(boolean);
     method @Deprecated public void setOrganizationColor(@NonNull android.content.ComponentName, int);
     method public void setOrganizationId(@NonNull String);
     method public void setOrganizationName(@NonNull android.content.ComponentName, @Nullable CharSequence);
