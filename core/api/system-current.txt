@@ -2370,6 +2370,7 @@ package android.content.pm {
     field public static final int FLAG_PERMISSION_REVIEW_REQUIRED = 64; // 0x40
     field public static final int FLAG_PERMISSION_REVOKED_COMPAT = 8; // 0x8
     field @Deprecated public static final int FLAG_PERMISSION_REVOKE_ON_UPGRADE = 8; // 0x8
+    field public static final int FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY = 524288; // 0x80000
     field public static final int FLAG_PERMISSION_SYSTEM_FIXED = 16; // 0x10
     field public static final int FLAG_PERMISSION_USER_FIXED = 2; // 0x2
     field public static final int FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED = 512; // 0x200
