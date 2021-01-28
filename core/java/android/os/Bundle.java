@@ -45,6 +45,7 @@ public final class Bundle extends BaseBundle implements Cloneable, Parcelable {
     @VisibleForTesting
     static final int FLAG_ALLOW_FDS = 1 << 10;
 
+    /** An unmodifiable {@code Bundle} that is always {@link #isEmpty() empty}. */
     public static final Bundle EMPTY;
 
     /**
