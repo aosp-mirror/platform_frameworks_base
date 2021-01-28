@@ -10907,12 +10907,8 @@ package android.telephony.euicc {
 
   public static final class DownloadableSubscription.Builder {
     ctor public DownloadableSubscription.Builder();
-    ctor public DownloadableSubscription.Builder(android.telephony.euicc.DownloadableSubscription);
-    method public android.telephony.euicc.DownloadableSubscription build();
-    method public android.telephony.euicc.DownloadableSubscription.Builder setAccessRules(java.util.List<android.telephony.UiccAccessRule>);
-    method public android.telephony.euicc.DownloadableSubscription.Builder setCarrierName(String);
-    method public android.telephony.euicc.DownloadableSubscription.Builder setConfirmationCode(String);
-    method public android.telephony.euicc.DownloadableSubscription.Builder setEncodedActivationCode(String);
+    method @NonNull public android.telephony.euicc.DownloadableSubscription.Builder setAccessRules(@NonNull java.util.List<android.telephony.UiccAccessRule>);
+    method @NonNull public android.telephony.euicc.DownloadableSubscription.Builder setCarrierName(@NonNull String);
   }
 
   public class EuiccCardManager {

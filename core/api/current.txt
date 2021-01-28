@@ -41716,6 +41716,14 @@ package android.telephony.euicc {
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.euicc.DownloadableSubscription> CREATOR;
   }
 
+  public static final class DownloadableSubscription.Builder {
+    ctor public DownloadableSubscription.Builder(@NonNull android.telephony.euicc.DownloadableSubscription);
+    ctor public DownloadableSubscription.Builder(@NonNull String);
+    method @NonNull public android.telephony.euicc.DownloadableSubscription build();
+    method @NonNull public android.telephony.euicc.DownloadableSubscription.Builder setConfirmationCode(@NonNull String);
+    method @NonNull public android.telephony.euicc.DownloadableSubscription.Builder setEncodedActivationCode(@NonNull String);
+  }
+
   public final class EuiccInfo implements android.os.Parcelable {
     ctor public EuiccInfo(@Nullable String);
     method public int describeContents();
