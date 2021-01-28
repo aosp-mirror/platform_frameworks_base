@@ -1,5 +1,0 @@
-rule android.os.HandlerExecutor com.android.permission.jarjar.@0
-rule android.util.IndentingPrintWriter com.android.permission.jarjar.@0
-rule com.android.internal.** com.android.permission.jarjar.@0
-rule com.android.modules.** com.android.permission.jarjar.@0
-rule com.android.role.*Proto com.android.permission.jarjar.@0
