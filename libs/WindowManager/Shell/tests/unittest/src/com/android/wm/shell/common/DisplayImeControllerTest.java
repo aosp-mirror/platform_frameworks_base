@@ -65,6 +65,8 @@ public class DisplayImeControllerTest {
             public IInputMethodManager getImms() {
                 return mMock;
             }
+            @Override
+            void removeImeSurface() { }
         }.new PerDisplay(DEFAULT_DISPLAY, ROTATION_0);
     }
 

@@ -3947,58 +3947,61 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
-        // By this IPC call, only a process which shares the same uid with the IME can add
-        // additional input method subtypes to the IME.
-        if (TextUtils.isEmpty(imiId) || subtypes == null) return;
-        final ArrayList<InputMethodSubtype> toBeAdded = new ArrayList<>();
-        for (InputMethodSubtype subtype : subtypes) {
-            if (!toBeAdded.contains(subtype)) {
-                toBeAdded.add(subtype);
-            } else {
-                Slog.w(TAG, "Duplicated subtype definition found: "
-                        + subtype.getLocale() + ", " + subtype.getMode());
+    public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
+            IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            // By this IPC call, only a process which shares the same uid with the IME can add
+            // additional input method subtypes to the IME.
+            if (TextUtils.isEmpty(imiId) || subtypes == null) return;
+            final ArrayList<InputMethodSubtype> toBeAdded = new ArrayList<>();
+            for (InputMethodSubtype subtype : subtypes) {
+                if (!toBeAdded.contains(subtype)) {
+                    toBeAdded.add(subtype);
+                } else {
+                    Slog.w(TAG, "Duplicated subtype definition found: "
+                            + subtype.getLocale() + ", " + subtype.getMode());
+                }
             }
-        }
-        synchronized (mMethodMap) {
-            if (!calledFromValidUserLocked()) {
-                return;
-            }
-            if (!mSystemReady) {
-                return;
-            }
-            final InputMethodInfo imi = mMethodMap.get(imiId);
-            if (imi == null) return;
-            final String[] packageInfos;
-            try {
-                packageInfos = mIPackageManager.getPackagesForUid(Binder.getCallingUid());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get package infos");
-                return;
-            }
-            if (packageInfos != null) {
-                final int packageNum = packageInfos.length;
-                for (int i = 0; i < packageNum; ++i) {
-                    if (packageInfos[i].equals(imi.getPackageName())) {
-                        if (subtypes.length > 0) {
-                            mAdditionalSubtypeMap.put(imi.getId(), toBeAdded);
-                        } else {
-                            mAdditionalSubtypeMap.remove(imi.getId());
+            synchronized (mMethodMap) {
+                if (!calledFromValidUserLocked()) {
+                    return;
+                }
+                if (!mSystemReady) {
+                    return;
+                }
+                final InputMethodInfo imi = mMethodMap.get(imiId);
+                if (imi == null) return;
+                final String[] packageInfos;
+                try {
+                    packageInfos = mIPackageManager.getPackagesForUid(Binder.getCallingUid());
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to get package infos");
+                    return;
+                }
+                if (packageInfos != null) {
+                    final int packageNum = packageInfos.length;
+                    for (int i = 0; i < packageNum; ++i) {
+                        if (packageInfos[i].equals(imi.getPackageName())) {
+                            if (subtypes.length > 0) {
+                                mAdditionalSubtypeMap.put(imi.getId(), toBeAdded);
+                            } else {
+                                mAdditionalSubtypeMap.remove(imi.getId());
+                            }
+                            AdditionalSubtypeUtils.save(mAdditionalSubtypeMap, mMethodMap,
+                                    mSettings.getCurrentUserId());
+                            final long ident = Binder.clearCallingIdentity();
+                            try {
+                                buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
+                            } finally {
+                                Binder.restoreCallingIdentity(ident);
+                            }
+                            return;
                         }
-                        AdditionalSubtypeUtils.save(mAdditionalSubtypeMap, mMethodMap,
-                                mSettings.getCurrentUserId());
-                        final long ident = Binder.clearCallingIdentity();
-                        try {
-                            buildInputMethodListLocked(false /* resetDefaultEnabledIme */);
-                        } finally {
-                            Binder.restoreCallingIdentity(ident);
-                        }
-                        return;
                     }
                 }
             }
-        }
-        return;
+            return;
+        });
     }
 
     /**
@@ -4103,16 +4106,21 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void removeImeSurface() {
-        mContext.enforceCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW, null);
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
+    public void removeImeSurface(IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            mContext.enforceCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW, null);
+            mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
+        });
     }
 
     @Override
-    public void removeImeSurfaceFromWindow(IBinder windowToken) {
-        // No permission check, because we'll only execute the request if the calling window is
-        // also the current IME client.
-        mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
+    public void removeImeSurfaceFromWindow(IBinder windowToken,
+            IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            // No permission check, because we'll only execute the request if the calling window is
+            // also the current IME client.
+            mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE_FROM_WINDOW, windowToken).sendToTarget();
+        });
     }
 
     /**
