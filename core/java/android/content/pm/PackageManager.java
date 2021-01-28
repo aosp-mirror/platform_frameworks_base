@@ -3971,6 +3971,15 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT =  1 << 18;
 
     /**
+     * Permission flag: This location permission is selected as the level of granularity of
+     * location accuracy.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY =  1 << 19;
+
+    /**
      * Permission flags: Reserved for use by the permission controller. The platform and any
      * packages besides the permission controller should not assume any definition about these
      * flags.
