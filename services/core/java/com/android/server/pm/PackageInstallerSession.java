@@ -70,7 +70,6 @@ import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.IPackageInstallObserver2;
 import android.content.pm.IPackageInstallerSession;
 import android.content.pm.IPackageInstallerSessionFileSystemConnector;
-import android.content.pm.IPackageLoadingProgressCallback;
 import android.content.pm.InstallationFile;
 import android.content.pm.InstallationFileParcel;
 import android.content.pm.PackageInfo;
@@ -322,8 +321,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private float mProgress = 0;
     @GuardedBy("mLock")
     private float mReportedProgress = -1;
-    @GuardedBy("mLock")
-    private float mIncrementalProgress = 0;
 
     /** State of the session. */
     @GuardedBy("mLock")
@@ -1202,12 +1199,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     @GuardedBy("mLock")
     private void computeProgressLocked(boolean forcePublish) {
-        // This method is triggered when the client progress is updated or the incremental progress
-        // is updated. For incremental installs, ignore the progress values reported from client.
-        // Instead, only use the progress reported by IncFs as the percentage of loading completion.
-        final float loadingProgress =
-                isIncrementalInstallation() ? mIncrementalProgress : mClientProgress;
-        mProgress = MathUtils.constrain(loadingProgress * 0.8f, 0f, 0.8f)
+        mProgress = MathUtils.constrain(mClientProgress * 0.8f, 0f, 0.8f)
                 + MathUtils.constrain(mInternalProgress * 0.2f, 0f, 0.2f);
 
         // Only publish when meaningful change
@@ -3767,16 +3759,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             try {
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
                         params, statusListener, healthCheckParams, healthListener, addedFiles,
-                        perUidReadTimeouts,
-                        new IPackageLoadingProgressCallback.Stub() {
-                            @Override
-                            public void onPackageLoadingProgressChanged(float progress) {
-                                synchronized (mLock) {
-                                    mIncrementalProgress = progress;
-                                    computeProgressLocked(true);
-                                }
-                            }
-                        });
+                        perUidReadTimeouts);
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
