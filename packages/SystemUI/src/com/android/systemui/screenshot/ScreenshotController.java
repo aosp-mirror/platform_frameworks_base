@@ -603,7 +603,18 @@ public class ScreenshotController {
         cancelTimeout();
         ScrollCaptureController controller = new ScrollCaptureController(mContext, connection,
                 mMainExecutor, mBgExecutor, mImageExporter);
-        controller.start(/* onDismiss */ () -> dismissScreenshot(false));
+        controller.attach(mWindow);
+        controller.start(new TakeScreenshotService.RequestCallback() {
+            @Override
+            public void reportError() {
+            }
+
+            @Override
+            public void onFinish() {
+                Log.d(TAG, "onFinish from ScrollCaptureController");
+                finishDismiss();
+            }
+        });
     }
 
     /**
