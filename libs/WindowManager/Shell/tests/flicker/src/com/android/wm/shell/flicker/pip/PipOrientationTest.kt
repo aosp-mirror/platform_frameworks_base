@@ -127,7 +127,7 @@ class PipOrientationTest(
                         hasVisibleRegion(pipApp.defaultWindowName, startingBounds)
                         isInvisible(testApp.defaultWindowName)
                     }
-                    end("testApp layer covers fullscreen") {
+                    end("testApp layer covers fullscreen", enabled = false) {
                         hasVisibleRegion(testApp.defaultWindowName, endingBounds)
                     }
                     navBarLayerIsAlwaysVisible(bugId = 140855415)
