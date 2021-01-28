@@ -657,6 +657,7 @@ package android {
     field @Deprecated public static final int fontProviderCerts = 16844125; // 0x101055d
     field @Deprecated public static final int fontProviderPackage = 16844119; // 0x1010557
     field @Deprecated public static final int fontProviderQuery = 16844113; // 0x1010551
+    field public static final int fontProviderSystemFontFamily = 16844322; // 0x1010622
     field public static final int fontStyle = 16844095; // 0x101053f
     field public static final int fontVariationSettings = 16844144; // 0x1010570
     field public static final int fontWeight = 16844083; // 0x1010533
