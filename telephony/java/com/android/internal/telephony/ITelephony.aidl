@@ -2350,6 +2350,11 @@ interface ITelephony {
      */
     String getMobileProvisioningUrl();
 
+    /*
+     * Remove the EAB contacts from the EAB database.
+     */
+    int removeContactFromEab(int subId, String contacts);
+
     /**
      * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the
      * specified thresholds.
