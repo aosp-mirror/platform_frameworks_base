@@ -71,6 +71,9 @@ final class LogicalDisplay {
 
     private final int mDisplayId;
     private final int mLayerStack;
+
+    private int mDisplayGroupId = Display.INVALID_DISPLAY_GROUP;
+
     /**
      * Override information set by the window manager. Will be reported instead of {@link #mInfo}
      * if not null.
@@ -265,6 +268,19 @@ final class LogicalDisplay {
     }
 
     /**
+     * Updates the {@link DisplayGroup} to which the logical display belongs.
+     *
+     * @param groupId Identifier for the {@link DisplayGroup}.
+     */
+    public void updateDisplayGroupIdLocked(int groupId) {
+        if (groupId != mDisplayGroupId) {
+            mDisplayGroupId = groupId;
+            mBaseDisplayInfo.displayGroupId = groupId;
+            mInfo.set(null);
+        }
+    }
+
+    /**
      * Updates the state of the logical display based on the available display devices.
      * The logical display might become invalid if it is attached to a display device
      * that no longer exists.
@@ -365,6 +381,7 @@ final class LogicalDisplay {
                     (deviceInfo.flags & DisplayDeviceInfo.FLAG_MASK_DISPLAY_CUTOUT) != 0;
             mBaseDisplayInfo.displayCutout = maskCutout ? null : deviceInfo.displayCutout;
             mBaseDisplayInfo.displayId = mDisplayId;
+            mBaseDisplayInfo.displayGroupId = mDisplayGroupId;
             updateFrameRateOverrides(deviceInfo);
             mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;

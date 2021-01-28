@@ -25,7 +25,6 @@ import android.util.SparseIntArray;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.server.display.DisplayGroup;
 
 /**
  * Responsible for creating {@link DisplayPowerRequest}s and associating them with
@@ -110,8 +109,8 @@ class DisplayPowerRequestMapper {
             DisplayManagerInternal displayManagerInternal, Handler handler) {
         mDisplayManagerInternal = displayManagerInternal;
         displayManager.registerDisplayListener(mDisplayListener, handler);
-        mDisplayPowerRequests.append(DisplayGroup.DEFAULT, new DisplayPowerRequest());
-        mDisplayGroupIds.append(Display.DEFAULT_DISPLAY, DisplayGroup.DEFAULT);
+        mDisplayPowerRequests.append(Display.DEFAULT_DISPLAY_GROUP, new DisplayPowerRequest());
+        mDisplayGroupIds.append(Display.DEFAULT_DISPLAY, Display.DEFAULT_DISPLAY_GROUP);
     }
 
     DisplayPowerRequest get(int displayId) {
