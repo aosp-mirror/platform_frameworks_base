@@ -37,15 +37,11 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.proto.ProtoOutputStream;
 import android.view.RemoteAnimationAdapter;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -55,10 +51,8 @@ import com.android.server.am.PendingIntentRecord;
 import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityStarter.DefaultFactory;
 import com.android.server.wm.ActivityStarter.Factory;
-import com.android.server.wm.ActivityTaskSupervisor.PendingActivityLaunch;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -87,34 +81,11 @@ public class ActivityStartController {
     /** The result of the last home activity we attempted to start. */
     private int mLastHomeActivityStartResult;
 
-    /** A list of activities that are waiting to launch. */
-    private final ArrayList<ActivityTaskSupervisor.PendingActivityLaunch>
-            mPendingActivityLaunches = new ArrayList<>();
-
     private final Factory mFactory;
-
-    private final Handler mHandler;
 
     private final PendingRemoteAnimationRegistry mPendingRemoteAnimationRegistry;
 
     boolean mCheckedForSetup = false;
-
-    private final class StartHandler extends Handler {
-        public StartHandler(Looper looper) {
-            super(looper, null, true);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            switch(msg.what) {
-                case DO_PENDING_ACTIVITY_LAUNCHES_MSG:
-                    synchronized (mService.mGlobalLock) {
-                        doPendingActivityLaunches(true);
-                    }
-                    break;
-            }
-        }
-    }
 
     /**
      * TODO(b/64750076): Capture information necessary for dump and
@@ -134,7 +105,6 @@ public class ActivityStartController {
             Factory factory) {
         mService = service;
         mSupervisor = supervisor;
-        mHandler = new StartHandler(mService.mH.getLooper());
         mFactory = factory;
         mFactory.setController(this);
         mPendingRemoteAnimationRegistry = new PendingRemoteAnimationRegistry(service.mGlobalLock,
@@ -514,45 +484,6 @@ public class ActivityStartController {
         return START_SUCCESS;
     }
 
-    void schedulePendingActivityLaunches(long delayMs) {
-        mHandler.removeMessages(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
-        Message msg = mHandler.obtainMessage(DO_PENDING_ACTIVITY_LAUNCHES_MSG);
-        mHandler.sendMessageDelayed(msg, delayMs);
-    }
-
-    void doPendingActivityLaunches(boolean doResume) {
-        while (!mPendingActivityLaunches.isEmpty()) {
-            final PendingActivityLaunch pal = mPendingActivityLaunches.remove(0);
-            final boolean resume = doResume && mPendingActivityLaunches.isEmpty();
-            final ActivityStarter starter = obtainStarter(null /* intent */,
-                    "pendingActivityLaunch");
-            try {
-                starter.startResolvedActivity(pal.r, pal.sourceRecord, null, null, pal.startFlags,
-                        resume, pal.r.getOptions(), null, pal.intentGrants);
-            } catch (Exception e) {
-                Slog.e(TAG, "Exception during pending activity launch pal=" + pal, e);
-                pal.sendErrorResult(e.getMessage());
-            }
-        }
-    }
-
-    void addPendingActivityLaunch(PendingActivityLaunch launch) {
-        mPendingActivityLaunches.add(launch);
-    }
-
-    boolean clearPendingActivityLaunches(String packageName) {
-        final int pendingLaunches = mPendingActivityLaunches.size();
-
-        for (int palNdx = pendingLaunches - 1; palNdx >= 0; --palNdx) {
-            final PendingActivityLaunch pal = mPendingActivityLaunches.get(palNdx);
-            final ActivityRecord r = pal.r;
-            if (r != null && r.packageName.equals(packageName)) {
-                mPendingActivityLaunches.remove(palNdx);
-            }
-        }
-        return mPendingActivityLaunches.size() < pendingLaunches;
-    }
-
     void registerRemoteAnimationForNextActivityStart(String packageName,
             RemoteAnimationAdapter adapter) {
         mPendingRemoteAnimationRegistry.addPendingAnimation(packageName, adapter);
@@ -607,12 +538,6 @@ public class ActivityStartController {
         if (!dumped) {
             pw.print(prefix);
             pw.println("(nothing)");
-        }
-    }
-
-    public void dumpDebug(ProtoOutputStream proto, long fieldId) {
-        for (PendingActivityLaunch activity: mPendingActivityLaunches) {
-            activity.r.writeIdentifierToProto(proto, fieldId);
         }
     }
 }

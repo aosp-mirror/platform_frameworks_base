@@ -189,6 +189,12 @@ public class ParsingPackageUtils {
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
     public static final int PARSE_DEFAULT_TARGET_SANDBOX = 1;
 
+    /** If set to true, we will only allow package files that exactly match
+     *  the DTD. Otherwise, we try to get as much from the package as we
+     *  can without failing. This should normally be set to false, to
+     *  support extensions to the DTD in future versions. */
+    public static final boolean RIGID_PARSER = false;
+
     public static final int PARSE_MUST_BE_APK = 1 << 0;
     public static final int PARSE_IGNORE_PROCESSES = 1 << 1;
     public static final int PARSE_EXTERNAL_STORAGE = 1 << 3;
@@ -220,7 +226,7 @@ public class ParsingPackageUtils {
      */
     @NonNull
     public static ParseResult<ParsingPackage> parseDefaultOneTime(File file,
-            @PackageParser.ParseFlags int parseFlags, boolean collectCertificates) {
+            @ParseFlags int parseFlags, boolean collectCertificates) {
         ParseInput input = ParseTypeImpl.forDefaultParsing().reset();
         return parseDefault(input, file, parseFlags, collectCertificates);
     }
@@ -232,7 +238,7 @@ public class ParsingPackageUtils {
      */
     @NonNull
     public static ParseResult<ParsingPackage> parseDefault(ParseInput input, File file,
-            @PackageParser.ParseFlags int parseFlags, boolean collectCertificates) {
+            @ParseFlags int parseFlags, boolean collectCertificates) {
         ParseResult<ParsingPackage> result;
 
         ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, new Callback() {
@@ -334,14 +340,14 @@ public class ParsingPackageUtils {
      */
     private ParseResult<ParsingPackage> parseClusterPackage(ParseInput input, File packageDir,
             int flags) {
-        ParseResult<PackageParser.PackageLite> liteResult =
+        final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseClusterPackageLite(input, packageDir, 0);
         if (liteResult.isError()) {
             return input.error(liteResult);
         }
 
-        final PackageParser.PackageLite lite = liteResult.getResult();
-        if (mOnlyCoreApps && !lite.coreApp) {
+        final PackageLite lite = liteResult.getResult();
+        if (mOnlyCoreApps && !lite.isCoreApp()) {
             return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
                     "Not a coreApp: " + packageDir);
         }
@@ -349,7 +355,7 @@ public class ParsingPackageUtils {
         // Build the split dependency tree.
         SparseArray<int[]> splitDependencies = null;
         final SplitAssetLoader assetLoader;
-        if (lite.isolatedSplits && !ArrayUtils.isEmpty(lite.splitNames)) {
+        if (lite.isIsolatedSplits() && !ArrayUtils.isEmpty(lite.getSplitNames())) {
             try {
                 splitDependencies = SplitAssetDependencyLoader.createDependenciesFromPackage(lite);
                 assetLoader = new SplitAssetDependencyLoader(lite, splitDependencies, flags);
@@ -362,22 +368,22 @@ public class ParsingPackageUtils {
 
         try {
             final AssetManager assets = assetLoader.getBaseAssetManager();
-            final File baseApk = new File(lite.baseCodePath);
-            ParseResult<ParsingPackage> result = parseBaseApk(input, baseApk,
-                    lite.codePath, assets, flags);
+            final File baseApk = new File(lite.getBaseApkPath());
+            final ParseResult<ParsingPackage> result = parseBaseApk(input, baseApk,
+                    lite.getPath(), assets, flags);
             if (result.isError()) {
                 return input.error(result);
             }
 
             ParsingPackage pkg = result.getResult();
-            if (!ArrayUtils.isEmpty(lite.splitNames)) {
+            if (!ArrayUtils.isEmpty(lite.getSplitNames())) {
                 pkg.asSplit(
-                        lite.splitNames,
-                        lite.splitCodePaths,
-                        lite.splitRevisionCodes,
+                        lite.getSplitNames(),
+                        lite.getSplitApkPaths(),
+                        lite.getSplitRevisionCodes(),
                         splitDependencies
                 );
-                final int num = lite.splitNames.length;
+                final int num = lite.getSplitNames().length;
 
                 for (int i = 0; i < num; i++) {
                     final AssetManager splitAssets = assetLoader.getSplitAssetManager(i);
@@ -385,11 +391,11 @@ public class ParsingPackageUtils {
                 }
             }
 
-            pkg.setUse32BitAbi(lite.use32bitAbi);
+            pkg.setUse32BitAbi(lite.isUse32bitAbi());
             return input.success(pkg);
         } catch (PackageParserException e) {
             return input.error(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
-                    "Failed to load assets: " + lite.baseCodePath, e);
+                    "Failed to load assets: " + lite.getBaseApkPath(), e);
         } finally {
             IoUtils.closeQuietly(assetLoader);
         }
@@ -403,21 +409,21 @@ public class ParsingPackageUtils {
      */
     private ParseResult<ParsingPackage> parseMonolithicPackage(ParseInput input, File apkFile,
             int flags) throws PackageParserException {
-        ParseResult<PackageParser.PackageLite> liteResult =
+        final ParseResult<PackageLite> liteResult =
                 ApkLiteParseUtils.parseMonolithicPackageLite(input, apkFile, flags);
         if (liteResult.isError()) {
             return input.error(liteResult);
         }
 
-        final PackageParser.PackageLite lite = liteResult.getResult();
-        if (mOnlyCoreApps && !lite.coreApp) {
+        final PackageLite lite = liteResult.getResult();
+        if (mOnlyCoreApps && !lite.isCoreApp()) {
             return input.error(INSTALL_PARSE_FAILED_ONLY_COREAPP_ALLOWED,
                     "Not a coreApp: " + apkFile);
         }
 
         final SplitAssetLoader assetLoader = new DefaultSplitAssetLoader(lite, flags);
         try {
-            ParseResult<ParsingPackage> result = parseBaseApk(input,
+            final ParseResult<ParsingPackage> result = parseBaseApk(input,
                     apkFile,
                     apkFile.getCanonicalPath(),
                     assetLoader.getBaseAssetManager(), flags);
@@ -426,7 +432,7 @@ public class ParsingPackageUtils {
             }
 
             return input.success(result.getResult()
-                    .setUse32BitAbi(lite.use32bitAbi));
+                    .setUse32BitAbi(lite.isUse32bitAbi()));
         } catch (IOException e) {
             return input.error(INSTALL_PARSE_FAILED_UNEXPECTED_EXCEPTION,
                     "Failed to get path: " + apkFile, e);
@@ -440,12 +446,12 @@ public class ParsingPackageUtils {
         final String apkPath = apkFile.getAbsolutePath();
 
         String volumeUuid = null;
-        if (apkPath.startsWith(PackageParser.MNT_EXPAND)) {
-            final int end = apkPath.indexOf('/', PackageParser.MNT_EXPAND.length());
-            volumeUuid = apkPath.substring(PackageParser.MNT_EXPAND.length(), end);
+        if (apkPath.startsWith(MNT_EXPAND)) {
+            final int end = apkPath.indexOf('/', MNT_EXPAND.length());
+            volumeUuid = apkPath.substring(MNT_EXPAND.length(), end);
         }
 
-        if (PackageParser.DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
+        if (DEBUG_JAR) Slog.d(TAG, "Scanning base APK: " + apkPath);
 
         final int cookie = assets.findCookieForPath(apkPath);
         if (cookie == 0) {
@@ -454,7 +460,7 @@ public class ParsingPackageUtils {
         }
 
         try (XmlResourceParser parser = assets.openXmlResourceParser(cookie,
-                PackageParser.ANDROID_MANIFEST_FILENAME)) {
+                ANDROID_MANIFEST_FILENAME)) {
             final Resources res = new Resources(assets, mDisplayMetrics, null);
 
             ParseResult<ParsingPackage> result = parseBaseApk(input, apkPath, codePath, res,
@@ -495,7 +501,7 @@ public class ParsingPackageUtils {
 
             pkg.setVolumeUuid(volumeUuid);
 
-            if ((flags & PackageParser.PARSE_COLLECT_CERTIFICATES) != 0) {
+            if ((flags & PARSE_COLLECT_CERTIFICATES) != 0) {
                 pkg.setSigningDetails(getSigningDetails(pkg, false));
             } else {
                 pkg.setSigningDetails(SigningDetails.UNKNOWN);
@@ -512,7 +518,7 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, int splitIndex, AssetManager assets, int flags) {
         final String apkPath = pkg.getSplitCodePaths()[splitIndex];
 
-        if (PackageParser.DEBUG_JAR) Slog.d(TAG, "Scanning split APK: " + apkPath);
+        if (DEBUG_JAR) Slog.d(TAG, "Scanning split APK: " + apkPath);
 
         // This must always succeed, as the path has been added to the AssetManager before.
         final int cookie = assets.findCookieForPath(apkPath);
@@ -521,7 +527,7 @@ public class ParsingPackageUtils {
                     "Failed adding asset path: " + apkPath);
         }
         try (XmlResourceParser parser = assets.openXmlResourceParser(cookie,
-                PackageParser.ANDROID_MANIFEST_FILENAME)) {
+                ANDROID_MANIFEST_FILENAME)) {
             Resources res = new Resources(assets, mDisplayMetrics, null);
             ParseResult<ParsingPackage> parseResult = parseSplitApk(input, pkg, res,
                     parser, flags, splitIndex);
@@ -620,9 +626,9 @@ public class ParsingPackageUtils {
 
             final ParseResult result;
             String tagName = parser.getName();
-            if (PackageParser.TAG_APPLICATION.equals(tagName)) {
+            if (TAG_APPLICATION.equals(tagName)) {
                 if (foundApp) {
-                    if (PackageParser.RIGID_PARSER) {
+                    if (RIGID_PARSER) {
                         result = input.error("<manifest> has more than one <application>");
                     } else {
                         Slog.w(TAG, "<manifest> has more than one <application>");
@@ -701,7 +707,7 @@ public class ParsingPackageUtils {
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
                                     res,
-                                    parser, flags, PackageParser.sUseRoundIcon, input);
+                                    parser, flags, sUseRoundIcon, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         if (isActivity) {
@@ -716,7 +722,7 @@ public class ParsingPackageUtils {
                 case "service":
                     ParseResult<ParsedService> serviceResult = ParsedServiceUtils.parseService(
                             mSeparateProcesses, pkg, res, parser, flags,
-                            PackageParser.sUseRoundIcon, input);
+                            sUseRoundIcon, input);
                     if (serviceResult.isSuccess()) {
                         ParsedService service = serviceResult.getResult();
                         pkg.addService(service);
@@ -727,7 +733,7 @@ public class ParsingPackageUtils {
                 case "provider":
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
-                                    flags, PackageParser.sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, input);
                     if (providerResult.isSuccess()) {
                         ParsedProvider provider = providerResult.getResult();
                         pkg.addProvider(provider);
@@ -737,7 +743,7 @@ public class ParsingPackageUtils {
                     break;
                 case "activity-alias":
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res, parser,
-                            PackageParser.sUseRoundIcon, input);
+                            sUseRoundIcon, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         pkg.addActivity(activity);
@@ -815,12 +821,12 @@ public class ParsingPackageUtils {
             return sharedUserResult;
         }
 
-        pkg.setInstallLocation(anInteger(PackageParser.PARSE_DEFAULT_INSTALL_LOCATION,
+        pkg.setInstallLocation(anInteger(PARSE_DEFAULT_INSTALL_LOCATION,
                 R.styleable.AndroidManifest_installLocation, sa))
-                .setTargetSandboxVersion(anInteger(PackageParser.PARSE_DEFAULT_TARGET_SANDBOX,
+                .setTargetSandboxVersion(anInteger(PARSE_DEFAULT_TARGET_SANDBOX,
                         R.styleable.AndroidManifest_targetSandboxVersion, sa))
                 /* Set the global "on SD card" flag */
-                .setExternalStorage((flags & PackageParser.PARSE_EXTERNAL_STORAGE) != 0);
+                .setExternalStorage((flags & PARSE_EXTERNAL_STORAGE) != 0);
 
         boolean foundApp = false;
         final int depth = parser.getDepth();
@@ -836,9 +842,9 @@ public class ParsingPackageUtils {
             final ParseResult result;
 
             // <application> has special logic, so it's handled outside the general method
-            if (PackageParser.TAG_APPLICATION.equals(tagName)) {
+            if (TAG_APPLICATION.equals(tagName)) {
                 if (foundApp) {
-                    if (PackageParser.RIGID_PARSER) {
+                    if (RIGID_PARSER) {
                         result = input.error("<manifest> has more than one <application>");
                     } else {
                         Slog.w(TAG, "<manifest> has more than one <application>");
@@ -897,51 +903,51 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser, int flags)
             throws IOException, XmlPullParserException {
         switch (tag) {
-            case PackageParser.TAG_OVERLAY:
+            case TAG_OVERLAY:
                 return parseOverlay(input, pkg, res, parser);
-            case PackageParser.TAG_KEY_SETS:
+            case TAG_KEY_SETS:
                 return parseKeySets(input, pkg, res, parser);
             case "feature": // TODO moltmann: Remove
-            case PackageParser.TAG_ATTRIBUTION:
+            case TAG_ATTRIBUTION:
                 return parseAttribution(input, pkg, res, parser);
-            case PackageParser.TAG_PERMISSION_GROUP:
+            case TAG_PERMISSION_GROUP:
                 return parsePermissionGroup(input, pkg, res, parser);
-            case PackageParser.TAG_PERMISSION:
+            case TAG_PERMISSION:
                 return parsePermission(input, pkg, res, parser);
-            case PackageParser.TAG_PERMISSION_TREE:
+            case TAG_PERMISSION_TREE:
                 return parsePermissionTree(input, pkg, res, parser);
-            case PackageParser.TAG_USES_PERMISSION:
-            case PackageParser.TAG_USES_PERMISSION_SDK_M:
-            case PackageParser.TAG_USES_PERMISSION_SDK_23:
+            case TAG_USES_PERMISSION:
+            case TAG_USES_PERMISSION_SDK_M:
+            case TAG_USES_PERMISSION_SDK_23:
                 return parseUsesPermission(input, pkg, res, parser);
-            case PackageParser.TAG_USES_CONFIGURATION:
+            case TAG_USES_CONFIGURATION:
                 return parseUsesConfiguration(input, pkg, res, parser);
-            case PackageParser.TAG_USES_FEATURE:
+            case TAG_USES_FEATURE:
                 return parseUsesFeature(input, pkg, res, parser);
-            case PackageParser.TAG_FEATURE_GROUP:
+            case TAG_FEATURE_GROUP:
                 return parseFeatureGroup(input, pkg, res, parser);
-            case PackageParser.TAG_USES_SDK:
+            case TAG_USES_SDK:
                 return parseUsesSdk(input, pkg, res, parser);
-            case PackageParser.TAG_SUPPORT_SCREENS:
+            case TAG_SUPPORT_SCREENS:
                 return parseSupportScreens(input, pkg, res, parser);
-            case PackageParser.TAG_PROTECTED_BROADCAST:
+            case TAG_PROTECTED_BROADCAST:
                 return parseProtectedBroadcast(input, pkg, res, parser);
-            case PackageParser.TAG_INSTRUMENTATION:
+            case TAG_INSTRUMENTATION:
                 return parseInstrumentation(input, pkg, res, parser);
-            case PackageParser.TAG_ORIGINAL_PACKAGE:
+            case TAG_ORIGINAL_PACKAGE:
                 return parseOriginalPackage(input, pkg, res, parser);
-            case PackageParser.TAG_ADOPT_PERMISSIONS:
+            case TAG_ADOPT_PERMISSIONS:
                 return parseAdoptPermissions(input, pkg, res, parser);
-            case PackageParser.TAG_USES_GL_TEXTURE:
-            case PackageParser.TAG_COMPATIBLE_SCREENS:
-            case PackageParser.TAG_SUPPORTS_INPUT:
-            case PackageParser.TAG_EAT_COMMENT:
+            case TAG_USES_GL_TEXTURE:
+            case TAG_COMPATIBLE_SCREENS:
+            case TAG_SUPPORTS_INPUT:
+            case TAG_EAT_COMMENT:
                 // Just skip this tag
                 XmlUtils.skipCurrentTag(parser);
                 return input.success(pkg);
-            case PackageParser.TAG_RESTRICT_UPDATE:
+            case TAG_RESTRICT_UPDATE:
                 return parseRestrictUpdateHash(flags, input, pkg, res, parser);
-            case PackageParser.TAG_QUERIES:
+            case TAG_QUERIES:
                 return parseQueries(input, pkg, res, parser);
             default:
                 return ParsingUtils.unknownTag("<manifest>", pkg, parser, input);
@@ -1125,7 +1131,7 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         ParseResult<ParsedPermissionGroup> result = ParsedPermissionUtils.parsePermissionGroup(
-                pkg, res, parser, PackageParser.sUseRoundIcon, input);
+                pkg, res, parser, sUseRoundIcon, input);
         if (result.isError()) {
             return input.error(result);
         }
@@ -1136,7 +1142,7 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         ParseResult<ParsedPermission> result = ParsedPermissionUtils.parsePermission(
-                pkg, res, parser, PackageParser.sUseRoundIcon, input);
+                pkg, res, parser, sUseRoundIcon, input);
         if (result.isError()) {
             return input.error(result);
         }
@@ -1147,7 +1153,7 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         ParseResult<ParsedPermission> result = ParsedPermissionUtils.parsePermissionTree(
-                pkg, res, parser, PackageParser.sUseRoundIcon, input);
+                pkg, res, parser, sUseRoundIcon, input);
         if (result.isError()) {
             return input.error(result);
         }
@@ -1405,7 +1411,7 @@ public class ParsingPackageUtils {
     private static ParseResult<ParsingPackage> parseUsesSdk(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws IOException, XmlPullParserException {
-        if (PackageParser.SDK_VERSION > 0) {
+        if (SDK_VERSION > 0) {
             TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestUsesSdk);
             try {
                 int minVers = 1;
@@ -1440,7 +1446,7 @@ public class ParsingPackageUtils {
                 }
 
                 ParseResult<Integer> targetSdkVersionResult = computeTargetSdkVersion(
-                        targetVers, targetCode, PackageParser.SDK_CODENAMES, input);
+                        targetVers, targetCode, SDK_CODENAMES, input);
                 if (targetSdkVersionResult.isError()) {
                     return input.error(targetSdkVersionResult);
                 }
@@ -1454,7 +1460,7 @@ public class ParsingPackageUtils {
                 }
 
                 ParseResult<Integer> minSdkVersionResult = computeMinSdkVersion(minVers, minCode,
-                        PackageParser.SDK_VERSION, PackageParser.SDK_CODENAMES, input);
+                        SDK_VERSION, SDK_CODENAMES, input);
                 if (minSdkVersionResult.isError()) {
                     return input.error(minSdkVersionResult);
                 }
@@ -1637,7 +1643,7 @@ public class ParsingPackageUtils {
 
     private static ParseResult<ParsingPackage> parseRestrictUpdateHash(int flags, ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser) {
-        if ((flags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0) {
+        if ((flags & PARSE_IS_SYSTEM_DIR) != 0) {
             TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestRestrictUpdate);
             try {
                 final String hash = sa.getNonConfigurationString(
@@ -1846,7 +1852,7 @@ public class ParsingPackageUtils {
                         return input.error("Empty class name in package " + pkgName);
                     }
 
-                    if (PackageParser.DEBUG_BACKUP) {
+                    if (DEBUG_BACKUP) {
                         Slog.v(TAG, "android:backupAgent = " + backupAgentName
                                 + " from " + pkgName + "+" + backupAgent);
                     }
@@ -1870,7 +1876,7 @@ public class ParsingPackageUtils {
                     fullBackupContent = v.resourceId;
 
                     if (v.resourceId == 0) {
-                        if (PackageParser.DEBUG_BACKUP) {
+                        if (DEBUG_BACKUP) {
                             Slog.v(TAG, "fullBackupContent specified as boolean=" +
                                     (v.data == 0 ? "false" : "true"));
                         }
@@ -1880,7 +1886,7 @@ public class ParsingPackageUtils {
 
                     pkg.setFullBackupContent(fullBackupContent);
                 }
-                if (PackageParser.DEBUG_BACKUP) {
+                if (DEBUG_BACKUP) {
                     Slog.v(TAG, "fullBackupContent=" + fullBackupContent + " for " + pkgName);
                 }
             }
@@ -1994,7 +2000,7 @@ public class ParsingPackageUtils {
                 case "receiver":
                     ParseResult<ParsedActivity> activityResult =
                             ParsedActivityUtils.parseActivityOrReceiver(mSeparateProcesses, pkg,
-                                    res, parser, flags, PackageParser.sUseRoundIcon, input);
+                                    res, parser, flags, sUseRoundIcon, input);
 
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
@@ -2012,7 +2018,7 @@ public class ParsingPackageUtils {
                 case "service":
                     ParseResult<ParsedService> serviceResult =
                             ParsedServiceUtils.parseService(mSeparateProcesses, pkg, res, parser,
-                                    flags, PackageParser.sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, input);
                     if (serviceResult.isSuccess()) {
                         ParsedService service = serviceResult.getResult();
                         hasServiceOrder |= (service.getOrder() != 0);
@@ -2024,7 +2030,7 @@ public class ParsingPackageUtils {
                 case "provider":
                     ParseResult<ParsedProvider> providerResult =
                             ParsedProviderUtils.parseProvider(mSeparateProcesses, pkg, res, parser,
-                                    flags, PackageParser.sUseRoundIcon, input);
+                                    flags, sUseRoundIcon, input);
                     if (providerResult.isSuccess()) {
                         pkg.addProvider(providerResult.getResult());
                     }
@@ -2033,7 +2039,7 @@ public class ParsingPackageUtils {
                     break;
                 case "activity-alias":
                     activityResult = ParsedActivityUtils.parseActivityAlias(pkg, res,
-                            parser, PackageParser.sUseRoundIcon, input);
+                            parser, sUseRoundIcon, input);
                     if (activityResult.isSuccess()) {
                         ParsedActivity activity = activityResult.getResult();
                         hasActivityOrder |= (activity.getOrder() != 0);
@@ -2505,8 +2511,7 @@ public class ParsingPackageUtils {
     private static void setMaxAspectRatio(ParsingPackage pkg) {
         // Default to (1.86) 16.7:9 aspect ratio for pre-O apps and unset for O and greater.
         // NOTE: 16.7:9 was the max aspect ratio Android devices can support pre-O per the CDD.
-        float maxAspectRatio = pkg.getTargetSdkVersion() < O
-                ? PackageParser.DEFAULT_PRE_O_MAX_ASPECT_RATIO : 0;
+        float maxAspectRatio = pkg.getTargetSdkVersion() < O ? DEFAULT_PRE_O_MAX_ASPECT_RATIO : 0;
 
         float packageMaxAspectRatio = pkg.getMaxAspectRatio();
         if (packageMaxAspectRatio != 0) {
@@ -2514,10 +2519,8 @@ public class ParsingPackageUtils {
             maxAspectRatio = packageMaxAspectRatio;
         } else {
             Bundle appMetaData = pkg.getMetaData();
-            if (appMetaData != null && appMetaData.containsKey(
-                    PackageParser.METADATA_MAX_ASPECT_RATIO)) {
-                maxAspectRatio = appMetaData.getFloat(PackageParser.METADATA_MAX_ASPECT_RATIO,
-                        maxAspectRatio);
+            if (appMetaData != null && appMetaData.containsKey(METADATA_MAX_ASPECT_RATIO)) {
+                maxAspectRatio = appMetaData.getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio);
             }
         }
 
@@ -2536,8 +2539,7 @@ public class ParsingPackageUtils {
             // process the meta data here since this method is called at the end of processing
             // the application and all meta data is guaranteed.
             final float activityAspectRatio = activity.getMetaData() != null
-                    ? activity.getMetaData().getFloat(PackageParser.METADATA_MAX_ASPECT_RATIO,
-                    maxAspectRatio)
+                    ? activity.getMetaData().getFloat(METADATA_MAX_ASPECT_RATIO, maxAspectRatio)
                     : maxAspectRatio;
 
             activity.setMaxAspectRatio(activity.getResizeMode(), activityAspectRatio);
@@ -2565,7 +2567,7 @@ public class ParsingPackageUtils {
     private void setSupportsSizeChanges(ParsingPackage pkg) {
         final Bundle appMetaData = pkg.getMetaData();
         final boolean supportsSizeChanges = appMetaData != null
-                && appMetaData.getBoolean(PackageParser.METADATA_SUPPORTS_SIZE_CHANGES, false);
+                && appMetaData.getBoolean(METADATA_SUPPORTS_SIZE_CHANGES, false);
 
         List<ParsedActivity> activities = pkg.getActivities();
         int activitiesSize = activities.size();
@@ -2573,7 +2575,7 @@ public class ParsingPackageUtils {
             ParsedActivity activity = activities.get(index);
             if (supportsSizeChanges || (activity.getMetaData() != null
                     && activity.getMetaData().getBoolean(
-                            PackageParser.METADATA_SUPPORTS_SIZE_CHANGES, false))) {
+                            METADATA_SUPPORTS_SIZE_CHANGES, false))) {
                 activity.setSupportsSizeChanges(true);
             }
         }
@@ -2674,7 +2676,7 @@ public class ParsingPackageUtils {
             ParsingPackage pkg, Resources res, XmlResourceParser parser)
             throws XmlPullParserException, IOException {
         ParseResult<ParsedInstrumentation> result = ParsedInstrumentationUtils.parseInstrumentation(
-                pkg, res, parser, PackageParser.sUseRoundIcon, input);
+                pkg, res, parser, sUseRoundIcon, input);
         if (result.isError()) {
             return input.error(result);
         }
@@ -2860,7 +2862,7 @@ public class ParsingPackageUtils {
                     } else if (v.type == TypedValue.TYPE_FLOAT) {
                         property = new Property(name, v.getFloat(), packageName, className);
                     } else {
-                        if (!PackageParser.RIGID_PARSER) {
+                        if (!RIGID_PARSER) {
                             Slog.w(TAG,
                                     tagName + " only supports string, integer, float, color, "
                                             + "boolean, and resource reference types: "

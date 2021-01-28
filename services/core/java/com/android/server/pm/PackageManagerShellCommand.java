@@ -49,8 +49,6 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.PackageParser.ApkLite;
-import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -61,7 +59,9 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.ISnapshotRuntimeProfileCallback;
+import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.AssetManager;
@@ -555,8 +555,8 @@ class PackageManagerShellCommand extends ShellCommand {
                             apkLiteResult.getException());
                 }
                 final ApkLite apkLite = apkLiteResult.getResult();
-                PackageLite pkgLite = new PackageLite(null, apkLite.codePath, apkLite, null, null,
-                        null, null, null, null);
+                final PackageLite pkgLite = new PackageLite(null, apkLite.getPath(), apkLite, null,
+                        null, null, null, null, null);
                 sessionSize += PackageHelper.calculateInstalledSize(pkgLite,
                         params.sessionParams.abiOverride, fd.getFileDescriptor());
             } catch (IOException e) {

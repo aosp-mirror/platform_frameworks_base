@@ -3136,6 +3136,12 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.STORAGE_INTERNAL);
 
         if (isFsEncrypted) {
+            // When a user has secure lock screen, require secret to actually unlock.
+            // This check is mostly in place for emulation mode.
+            if (StorageManager.isFileEncryptedEmulatedOnly() &&
+                mLockPatternUtils.isSecure(userId) && ArrayUtils.isEmpty(secret)) {
+                throw new IllegalStateException("Secret required to unlock secure user " + userId);
+            }
             try {
                 mVold.unlockUserKey(userId, serialNumber, encodeBytes(token),
                         encodeBytes(secret));

@@ -25,6 +25,7 @@ import android.view.VelocityTracker;
 import android.view.ViewConfiguration;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.wm.shell.common.ShellExecutor;
 
 import java.io.PrintWriter;
 
@@ -39,7 +40,7 @@ public class PipTouchState {
     public static final long DOUBLE_TAP_TIMEOUT = 200;
     static final long HOVER_EXIT_TIMEOUT = 50;
 
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
     private final ViewConfiguration mViewConfig;
     private final Runnable mDoubleTapTimeoutCallback;
     private final Runnable mHoverExitTimeoutCallback;
@@ -67,12 +68,12 @@ public class PipTouchState {
     private int mActivePointerId;
     private int mLastTouchDisplayId = Display.INVALID_DISPLAY;
 
-    public PipTouchState(ViewConfiguration viewConfig, Handler handler,
-            Runnable doubleTapTimeoutCallback, Runnable hoverExitTimeoutCallback) {
+    public PipTouchState(ViewConfiguration viewConfig, Runnable doubleTapTimeoutCallback,
+            Runnable hoverExitTimeoutCallback, ShellExecutor mainExecutor) {
         mViewConfig = viewConfig;
-        mHandler = handler;
         mDoubleTapTimeoutCallback = doubleTapTimeoutCallback;
         mHoverExitTimeoutCallback = hoverExitTimeoutCallback;
+        mMainExecutor = mainExecutor;
     }
 
     /**
@@ -116,7 +117,7 @@ public class PipTouchState {
                 mIsDragging = false;
                 mLastDownTouchTime = mDownTouchTime;
                 if (mDoubleTapTimeoutCallback != null) {
-                    mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
+                    mMainExecutor.removeCallbacks(mDoubleTapTimeoutCallback);
                 }
                 break;
             }
@@ -324,8 +325,8 @@ public class PipTouchState {
     public void scheduleDoubleTapTimeoutCallback() {
         if (mIsWaitingForDoubleTap) {
             long delay = getDoubleTapTimeoutCallbackDelay();
-            mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
-            mHandler.postDelayed(mDoubleTapTimeoutCallback, delay);
+            mMainExecutor.removeCallbacks(mDoubleTapTimeoutCallback);
+            mMainExecutor.executeDelayed(mDoubleTapTimeoutCallback, delay);
         }
     }
 
@@ -342,17 +343,17 @@ public class PipTouchState {
      */
     public void removeDoubleTapTimeoutCallback() {
         mIsWaitingForDoubleTap = false;
-        mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
+        mMainExecutor.removeCallbacks(mDoubleTapTimeoutCallback);
     }
 
     @VisibleForTesting
     public void scheduleHoverExitTimeoutCallback() {
-        mHandler.removeCallbacks(mHoverExitTimeoutCallback);
-        mHandler.postDelayed(mHoverExitTimeoutCallback, HOVER_EXIT_TIMEOUT);
+        mMainExecutor.removeCallbacks(mHoverExitTimeoutCallback);
+        mMainExecutor.executeDelayed(mHoverExitTimeoutCallback, HOVER_EXIT_TIMEOUT);
     }
 
     void removeHoverExitTimeoutCallback() {
-        mHandler.removeCallbacks(mHoverExitTimeoutCallback);
+        mMainExecutor.removeCallbacks(mHoverExitTimeoutCallback);
     }
 
     void addMovementToVelocityTracker(MotionEvent event) {

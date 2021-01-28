@@ -23,12 +23,11 @@ import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageParser;
-import android.content.pm.PackageParser.ApkLite;
-import android.content.pm.PackageParser.PackageLite;
 import android.content.pm.PackageParser.PackageParserException;
 import android.content.pm.dex.DexMetadataHelper;
+import android.content.pm.parsing.ApkLite;
 import android.content.pm.parsing.ApkLiteParseUtils;
+import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.os.FileUtils;
@@ -38,6 +37,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.servicestests.R;
+import com.android.server.pm.PackageManagerException;
 import com.android.server.pm.parsing.TestPackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
@@ -207,28 +207,35 @@ public class DexMetadataHelperTest {
     }
 
     @Test
-    public void testPackageSizeWithDmFile()
-            throws IOException, PackageParserException {
+    public void testPackageSizeWithDmFile() throws IOException {
         copyApkToToTmpDir("install_split_base.apk", R.raw.install_split_base);
-        File dm = createDexMetadataFile("install_split_base.apk");
-        ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
+        final File dm = createDexMetadataFile("install_split_base.apk");
+        final ParseResult<PackageLite> result = ApkLiteParseUtils.parsePackageLite(
                 ParseTypeImpl.forDefaultParsing().reset(), mTmpDir, 0 /* flags */);
         if (result.isError()) {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }
-        PackageParser.PackageLite pkg = result.getResult();
+        final PackageLite pkg = result.getResult();
         Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkg));
     }
 
     // This simulates the 'adb shell pm install' flow.
     @Test
-    public void testPackageSizeWithPartialPackageLite() throws IOException, PackageParserException {
-        File base = copyApkToToTmpDir("install_split_base", R.raw.install_split_base);
-        File dm = createDexMetadataFile("install_split_base.apk");
+    public void testPackageSizeWithPartialPackageLite() throws IOException,
+            PackageManagerException {
+        final File base = copyApkToToTmpDir("install_split_base", R.raw.install_split_base);
+        final File dm = createDexMetadataFile("install_split_base.apk");
         try (FileInputStream is = new FileInputStream(base)) {
-            ApkLite baseApk = PackageParser.parseApkLite(is.getFD(), base.getAbsolutePath(), 0);
-            PackageLite pkgLite = new PackageLite(null, baseApk.codePath, baseApk, null, null, null,
-                    null, null, null);
+            final ParseResult<ApkLite> result = ApkLiteParseUtils.parseApkLite(
+                    ParseTypeImpl.forDefaultParsing().reset(), is.getFD(),
+                    base.getAbsolutePath(), /* flags */ 0);
+            if (result.isError()) {
+                throw new PackageManagerException(result.getErrorCode(),
+                        result.getErrorMessage(), result.getException());
+            }
+            final ApkLite baseApk = result.getResult();
+            final PackageLite pkgLite = new PackageLite(null, baseApk.getPath(), baseApk, null,
+                    null, null, null, null, null);
             Assert.assertEquals(dm.length(), DexMetadataHelper.getPackageDexMetadataSize(pkgLite));
         }
 

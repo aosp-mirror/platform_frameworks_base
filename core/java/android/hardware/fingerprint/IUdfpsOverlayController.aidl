@@ -32,6 +32,12 @@ oneway interface IUdfpsOverlayController {
     // Hides the overlay.
     void hideUdfpsOverlay(int sensorId);
 
+    // Notifies of enrollment progress changes.
+    void onEnrollmentProgress(int sensorId, int remaining);
+
+    // Notifies when a non-terminal error occurs (e.g. user moved their finger too fast).
+    void onEnrollmentHelp(int sensorId);
+
     // Shows debug messages on the UDFPS overlay.
     void setDebugMessage(int sensorId, String message);
 }

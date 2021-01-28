@@ -192,7 +192,7 @@ public class KeyguardClockSwitch extends RelativeLayout {
             statusAreaLP.removeRule(RelativeLayout.ALIGN_PARENT_START);
             statusAreaLP.removeRule(RelativeLayout.START_OF);
             statusAreaLP.addRule(RelativeLayout.BELOW, R.id.clock_view);
-            statusAreaLP.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+            statusAreaLP.width = ViewGroup.LayoutParams.MATCH_PARENT;
         }
 
         requestLayout();

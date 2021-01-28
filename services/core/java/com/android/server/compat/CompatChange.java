@@ -23,8 +23,11 @@ import android.content.pm.ApplicationInfo;
 
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.server.compat.config.Change;
+import com.android.server.compat.overrides.ChangeOverrides;
+import com.android.server.compat.overrides.OverrideValue;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -251,6 +254,71 @@ public final class CompatChange extends CompatibilityChangeInfo {
      */
     boolean hasDeferredOverride(String packageName) {
         return mDeferredOverrides != null && mDeferredOverrides.containsKey(packageName);
+    }
+
+    /**
+     * Checks whether a change has any package overrides.
+     * @return true if the change has at least one deferred override
+     */
+    boolean hasAnyPackageOverride() {
+        return mDeferredOverrides != null && !mDeferredOverrides.isEmpty();
+    }
+
+    /**
+     * Checks whether a change has any deferred overrides.
+     * @return true if the change has at least one deferred override
+     */
+    boolean hasAnyDeferredOverride() {
+        return mPackageOverrides != null && !mPackageOverrides.isEmpty();
+    }
+
+    void loadOverrides(ChangeOverrides changeOverrides) {
+        if (mDeferredOverrides == null) {
+            mDeferredOverrides = new HashMap<>();
+        }
+        mDeferredOverrides.clear();
+        for (OverrideValue override : changeOverrides.getDeferred().getOverrideValue()) {
+            mDeferredOverrides.put(override.getPackageName(), override.getEnabled());
+        }
+
+        if (mPackageOverrides == null) {
+            mPackageOverrides = new HashMap<>();
+        }
+        mPackageOverrides.clear();
+        for (OverrideValue override : changeOverrides.getValidated().getOverrideValue()) {
+            mPackageOverrides.put(override.getPackageName(), override.getEnabled());
+        }
+    }
+
+    ChangeOverrides saveOverrides() {
+        if (!hasAnyDeferredOverride() && !hasAnyPackageOverride()) {
+            return null;
+        }
+        ChangeOverrides changeOverrides = new ChangeOverrides();
+        changeOverrides.setChangeId(getId());
+        ChangeOverrides.Deferred deferredOverrides = new ChangeOverrides.Deferred();
+        List<OverrideValue> deferredList = deferredOverrides.getOverrideValue();
+        if (mDeferredOverrides != null) {
+            for (Map.Entry<String, Boolean> entry : mDeferredOverrides.entrySet()) {
+                OverrideValue override = new OverrideValue();
+                override.setPackageName(entry.getKey());
+                override.setEnabled(entry.getValue());
+                deferredList.add(override);
+            }
+        }
+        changeOverrides.setDeferred(deferredOverrides);
+        ChangeOverrides.Validated validatedOverrides = new ChangeOverrides.Validated();
+        List<OverrideValue> validatedList = validatedOverrides.getOverrideValue();
+        if (mPackageOverrides != null) {
+            for (Map.Entry<String, Boolean> entry : mPackageOverrides.entrySet()) {
+                OverrideValue override = new OverrideValue();
+                override.setPackageName(entry.getKey());
+                override.setEnabled(entry.getValue());
+                validatedList.add(override);
+            }
+        }
+        changeOverrides.setValidated(validatedOverrides);
+        return changeOverrides;
     }
 
     @Override

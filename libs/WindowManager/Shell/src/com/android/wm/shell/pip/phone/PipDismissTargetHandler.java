@@ -37,8 +37,11 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.DismissCircleView;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.pip.PipUiEventLogger;
+
+import java.util.concurrent.TimeUnit;
 
 import kotlin.Unit;
 
@@ -57,35 +60,31 @@ public class PipDismissTargetHandler {
      * MagnetizedObject wrapper for PIP. This allows the magnetic target library to locate and move
      * PIP.
      */
-    private final MagnetizedObject<Rect> mMagnetizedPip;
+    private MagnetizedObject<Rect> mMagnetizedPip;
 
     /**
      * Container for the dismiss circle, so that it can be animated within the container via
      * translation rather than within the WindowManager via slow layout animations.
      */
-    private final ViewGroup mTargetViewContainer;
+    private ViewGroup mTargetViewContainer;
 
     /** Circle view used to render the dismiss target. */
-    private final DismissCircleView mTargetView;
+    private DismissCircleView mTargetView;
 
     /**
      * MagneticTarget instance wrapping the target view and allowing us to set its magnetic radius.
      */
-    private final MagnetizedObject.MagneticTarget mMagneticTarget;
+    private MagnetizedObject.MagneticTarget mMagneticTarget;
 
-    /** PhysicsAnimator instance for animating the dismiss target in/out. */
-    private final PhysicsAnimator<View> mMagneticTargetAnimator;
+    /**
+     * PhysicsAnimator instance for animating the dismiss target in/out.
+     */
+    private PhysicsAnimator<View> mMagneticTargetAnimator;
 
     /** Default configuration to use for springing the dismiss target in/out. */
     private final PhysicsAnimator.SpringConfig mTargetSpringConfig =
             new PhysicsAnimator.SpringConfig(
                     SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
-
-    /**
-     * Runnable that can be posted delayed to show the target. This needs to be saved as a member
-     * variable so we can pass it to removeCallbacks.
-     */
-    private Runnable mShowTargetAction = this::showDismissTargetMaybe;
 
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDismissDragToEdge;
@@ -96,74 +95,76 @@ public class PipDismissTargetHandler {
     private final PipMotionHelper mMotionHelper;
     private final PipUiEventLogger mPipUiEventLogger;
     private final WindowManager mWindowManager;
-    private final Handler mHandler;
+    private final ShellExecutor mMainExecutor;
 
     public PipDismissTargetHandler(Context context, PipUiEventLogger pipUiEventLogger,
-            PipMotionHelper motionHelper, Handler handler) {
+            PipMotionHelper motionHelper, ShellExecutor mainExecutor) {
         mContext = context;
         mPipUiEventLogger = pipUiEventLogger;
         mMotionHelper = motionHelper;
-        mHandler = handler;
+        mMainExecutor = mainExecutor;
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
 
         Resources res = context.getResources();
         mEnableDismissDragToEdge = res.getBoolean(R.bool.config_pipEnableDismissDragToEdge);
         mDismissAreaHeight = res.getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height);
 
-        mTargetView = new DismissCircleView(context);
-        mTargetViewContainer = new FrameLayout(context);
-        mTargetViewContainer.setBackgroundDrawable(
-                context.getDrawable(R.drawable.floating_dismiss_gradient_transition));
-        mTargetViewContainer.setClipChildren(false);
-        mTargetViewContainer.addView(mTargetView);
+        mMainExecutor.execute(() -> {
+            mTargetView = new DismissCircleView(context);
+            mTargetViewContainer = new FrameLayout(context);
+            mTargetViewContainer.setBackgroundDrawable(
+                    context.getDrawable(R.drawable.floating_dismiss_gradient_transition));
+            mTargetViewContainer.setClipChildren(false);
+            mTargetViewContainer.addView(mTargetView);
 
-        mMagnetizedPip = mMotionHelper.getMagnetizedPip();
-        mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
-        updateMagneticTargetSize();
+            mMagnetizedPip = mMotionHelper.getMagnetizedPip();
+            mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
+            updateMagneticTargetSize();
 
-        mMagnetizedPip.setAnimateStuckToTarget(
-                (target, velX, velY, flung, after) -> {
+            mMagnetizedPip.setAnimateStuckToTarget(
+                    (target, velX, velY, flung, after) -> {
+                        if (mEnableDismissDragToEdge) {
+                            mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung,
+                                    after);
+                        }
+                        return Unit.INSTANCE;
+                    });
+            mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
+                @Override
+                public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    // Show the dismiss target, in case the initial touch event occurred within
+                    // the magnetic field radius.
                     if (mEnableDismissDragToEdge) {
-                        mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung, after);
+                        showDismissTargetMaybe();
                     }
-                    return Unit.INSTANCE;
-                });
-        mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
-            @Override
-            public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                // Show the dismiss target, in case the initial touch event occurred within the
-                // magnetic field radius.
-                if (mEnableDismissDragToEdge) {
-                    showDismissTargetMaybe();
                 }
-            }
 
-            @Override
-            public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
-                    float velX, float velY, boolean wasFlungOut) {
-                if (wasFlungOut) {
-                    mMotionHelper.flingToSnapTarget(velX, velY, null /* endAction */);
-                    hideDismissTargetMaybe();
-                } else {
-                    mMotionHelper.setSpringingToTouch(true);
+                @Override
+                public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
+                        float velX, float velY, boolean wasFlungOut) {
+                    if (wasFlungOut) {
+                        mMotionHelper.flingToSnapTarget(velX, velY, null /* endAction */);
+                        hideDismissTargetMaybe();
+                    } else {
+                        mMotionHelper.setSpringingToTouch(true);
+                    }
                 }
-            }
 
-            @Override
-            public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                mMotionHelper.notifyDismissalPending();
+                @Override
+                public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    mMainExecutor.executeDelayed(() -> {
+                        mMotionHelper.notifyDismissalPending();
+                        mMotionHelper.animateDismiss();
+                        hideDismissTargetMaybe();
 
-                handler.post(() -> {
-                    mMotionHelper.animateDismiss();
-                    hideDismissTargetMaybe();
-                });
+                        mPipUiEventLogger.log(
+                                PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
+                    }, 0);
+                }
+            });
 
-                mPipUiEventLogger.log(
-                        PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_DRAG_TO_REMOVE);
-            }
+            mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
         });
-
-        mMagneticTargetAnimator = PhysicsAnimator.getInstance(mTargetView);
     }
 
     /**
@@ -200,7 +201,6 @@ public class PipDismissTargetHandler {
     /** Adds the magnetic target view to the WindowManager so it's ready to be animated in. */
     public void createOrUpdateDismissTarget() {
         if (!mTargetViewContainer.isAttachedToWindow()) {
-            mHandler.removeCallbacks(mShowTargetAction);
             mMagneticTargetAnimator.cancel();
 
             mTargetViewContainer.setVisibility(View.INVISIBLE);
@@ -270,7 +270,6 @@ public class PipDismissTargetHandler {
             return;
         }
 
-        mHandler.removeCallbacks(mShowTargetAction);
         mMagneticTargetAnimator
                 .spring(DynamicAnimation.TRANSLATION_Y,
                         mTargetViewContainer.getHeight(),
@@ -286,8 +285,6 @@ public class PipDismissTargetHandler {
      * Removes the dismiss target and cancels any pending callbacks to show it.
      */
     public void cleanUpDismissTarget() {
-        mHandler.removeCallbacks(mShowTargetAction);
-
         if (mTargetViewContainer.isAttachedToWindow()) {
             mWindowManager.removeViewImmediate(mTargetViewContainer);
         }

@@ -421,7 +421,7 @@ public class Network implements Parcelable {
             throw new SocketException("Only AF_INET/AF_INET6 sockets supported");
         }
 
-        final int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
+        final int err = NetworkUtils.bindSocketToNetwork(fd, netId);
         if (err != 0) {
             // bindSocketToNetwork returns negative errno.
             throw new ErrnoException("Binding socket to network " + netId, -err)

@@ -201,6 +201,7 @@ import android.net.SocketKeepalive;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.Uri;
+import android.net.VpnInfo;
 import android.net.VpnManager;
 import android.net.metrics.IpConnectivityLog;
 import android.net.shared.NetworkMonitorUtils;
@@ -245,7 +246,6 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.net.VpnConfig;
-import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.WakeupMessage;
@@ -8323,8 +8323,7 @@ public class ConnectivityServiceTest {
         assertVpnUidRangesUpdated(true, vpnRange, vpnOwnerUid);
         mMockVpn.setVpnType(vpnType);
 
-        final VpnInfo vpnInfo = new VpnInfo();
-        vpnInfo.ownerUid = vpnOwnerUid;
+        final VpnInfo vpnInfo = new VpnInfo(vpnOwnerUid, null, null);
         mMockVpn.setVpnInfo(vpnInfo);
     }
 

@@ -49,7 +49,6 @@ import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.media.MediaActionSound;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -185,7 +184,6 @@ public class ScreenshotController {
     private final View mDecorView;
     private final DisplayManager mDisplayManager;
 
-    private final Binder mWindowToken;
     private ScreenshotView mScreenshotView;
     private Bitmap mScreenBitmap;
     private SaveImageInBackgroundTask mSaveInBgTask;
@@ -247,9 +245,6 @@ public class ScreenshotController {
         mAccessibilityManager = AccessibilityManager.getInstance(mContext);
         mConfigProxy = configProxy;
 
-        mWindowToken = new Binder("ScreenshotController");
-        mScrollCaptureClient.setHostWindowToken(mWindowToken);
-
         // Setup the window that we are going to use
         mWindowLayoutParams = new WindowManager.LayoutParams(
                 MATCH_PARENT, MATCH_PARENT, /* xpos */ 0, /* ypos */ 0, TYPE_SCREENSHOT,
@@ -263,7 +258,6 @@ public class ScreenshotController {
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowLayoutParams.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        mWindowLayoutParams.token = mWindowToken;
         // This is needed to let touches pass through outside the touchable areas
         mWindowLayoutParams.privateFlags |= WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 
@@ -526,21 +520,6 @@ public class ScreenshotController {
 
         // Start the post-screenshot animation
         startAnimation(finisher, screenRect, screenInsets, showFlash);
-
-        if (mConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
-                SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED, false)) {
-            mScrollCaptureClient.request(DEFAULT_DISPLAY, (connection) ->
-                    mScreenshotView.showScrollChip(() ->
-                            runScrollCapture(connection,
-                                    () -> mScreenshotHandler.post(
-                                            () -> dismissScreenshot(false)))));
-        }
-    }
-
-    private void runScrollCapture(ScrollCaptureClient.Connection connection, Runnable andThen) {
-        ScrollCaptureController controller = new ScrollCaptureController(mContext, connection,
-                mMainExecutor, mBgExecutor, mImageExporter);
-        controller.run(andThen);
     }
 
     /**
@@ -571,17 +550,48 @@ public class ScreenshotController {
     }
 
     /**
+     * If scrolling is enabled, check whether the current view is scrollable and if so, show the
+     * scroll chip.
+     */
+    private void maybeRequestScrollCapture() {
+        if (mConfigProxy.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
+                SystemUiDeviceConfigFlags.SCREENSHOT_SCROLLING_ENABLED, false)) {
+            mScrollCaptureClient.setHostWindowToken(mDecorView.getWindowToken());
+            mScrollCaptureClient.request(DEFAULT_DISPLAY, (connection) ->
+                    mScreenshotView.showScrollChip(() -> {
+                        ScrollCaptureController controller = new ScrollCaptureController(
+                                mContext, connection, mMainExecutor, mBgExecutor, mImageExporter);
+                        controller.run(() -> mScreenshotHandler.post(
+                                () -> dismissScreenshot(false)));
+                    }));
+        }
+    }
+
+    /**
      * Starts the animation after taking the screenshot
      */
     private void startAnimation(final Consumer<Uri> finisher, Rect screenRect, Insets screenInsets,
             boolean showFlash) {
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         mScreenshotHandler.post(() -> {
-            if (!mScreenshotView.isAttachedToWindow()) {
+            if (!mDecorView.isAttachedToWindow()) {
                 if (DEBUG_WINDOW) {
                     Log.d(TAG, "Adding screenshot window");
                 }
+                mDecorView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+                    @Override
+                    public void onViewAttachedToWindow(View v) {
+                        mDecorView.removeOnAttachStateChangeListener(this);
+                        maybeRequestScrollCapture();
+                    }
+
+                    @Override
+                    public void onViewDetachedFromWindow(View v) {
+                    }
+                });
                 mWindowManager.addView(mWindow.getDecorView(), mWindowLayoutParams);
+            } else {
+                maybeRequestScrollCapture();
             }
 
             mScreenshotView.prepareForAnimation(mScreenBitmap, screenInsets);
@@ -618,10 +628,10 @@ public class ScreenshotController {
             if (DEBUG_WINDOW) {
                 Log.d(TAG, "Removing screenshot window");
             }
-            mWindowManager.removeView(mDecorView);
+            mWindowManager.removeViewImmediate(mDecorView);
         }
-        mScreenshotView.reset();
         mOnCompleteRunnable.run();
+        mScreenshotView.reset();
     }
 
     /**
