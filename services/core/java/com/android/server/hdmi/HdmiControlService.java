@@ -621,7 +621,14 @@ public class HdmiControlService extends SystemService {
         mWakeUpMessageReceived = false;
 
         if (isTvDeviceEnabled()) {
-            mCecController.setOption(OptionKey.WAKEUP, tv().getAutoWakeup());
+            boolean autoWakeupEnabled =
+                readBooleanSetting(Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED, true);
+            boolean autoDeviceOffEnabled =
+                readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, true);
+
+            mCecController.setOption(OptionKey.WAKEUP, autoWakeupEnabled);
+            tv().setAutoWakeup(autoWakeupEnabled);
+            tv().setAutoDeviceOff(autoDeviceOffEnabled);
         }
         int reason = -1;
         switch (initiatedBy) {
