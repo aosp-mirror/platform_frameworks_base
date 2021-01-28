@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,14 +35,135 @@ import java.util.List;
  * network during a SUBSCRIBE request. See RFC3863 for more information.
  * @hide
  */
+@SystemApi
 public final class RcsContactPresenceTuple implements Parcelable {
 
-    /** The service id of the MMTEL */
+    /**
+     * The service ID used to indicate that MMTEL service is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
     public static final String SERVICE_ID_MMTEL = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.mmtel";
 
-    /** The service id of the Call Composer */
+    /**
+     * The service ID used to indicate that the chat(v1.0) is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_CHAT_V1 = "org.openmobilealliance:IM-session";
+
+    /**
+     * The service ID used to indicate that the chat(v2.0) is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_CHAT_V2 = "org.openmobilealliance:ChatSession";
+
+    /**
+     * The service ID used to indicate that the File Transfer is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_FT = "org.openmobilealliance:File-Transfer-HTTP";
+
+    /**
+     * The service ID used to indicate that the File Transfer over SMS is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_FT_OVER_SMS =
+            "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.ftsms";
+
+    /**
+     * The service ID used to indicate that the Geolocation Push is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_GEO_PUSH =
+            "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.geopush";
+
+    /**
+     * The service ID used to indicate that the Geolocation Push via SMS is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_GEO_PUSH_VIA_SMS =
+            "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.geosms";
+
+    /**
+     * The service ID used to indicate that the Call Composer is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
     public static final String SERVICE_ID_CALL_COMPOSER =
-            "org.3gpp.urn:urn-7:3gppservice.ims.icsi.gsma.callcomposer";
+            "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.callcomposer";
+
+    /**
+     * The service ID used to indicate that the Post Call is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_POST_CALL =
+            "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.callunanswered";
+
+    /**
+     * The service ID used to indicate that the Shared Map is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_SHARED_MAP =
+            "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.sharedmap";
+
+    /**
+     * The service ID used to indicate that the Shared Sketch is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_SHARED_SKETCH =
+            "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.sharedsketch";
+
+    /**
+     * The service ID used to indicate that the Chatbot using Session is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_CHATBOT =
+            "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.chatbot";
+
+    /**
+     * The service ID used to indicate that the Standalone Messaging is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_CHATBOT_STANDALONE =
+            " org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.chatbot.sa";
+
+    /**
+     * The service ID used to indicate that the Chatbot Role is available.
+     * <p>
+     * See the GSMA RCC.07 specification for more information.
+     */
+    public static final String SERVICE_ID_CHATBOT_ROLE = "org.gsma.rcs.isbot";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @StringDef(prefix = "SERVICE_ID_", value = {
+            SERVICE_ID_MMTEL,
+            SERVICE_ID_CHAT_V1,
+            SERVICE_ID_CHAT_V2,
+            SERVICE_ID_FT,
+            SERVICE_ID_FT_OVER_SMS,
+            SERVICE_ID_GEO_PUSH,
+            SERVICE_ID_GEO_PUSH_VIA_SMS,
+            SERVICE_ID_CALL_COMPOSER,
+            SERVICE_ID_POST_CALL,
+            SERVICE_ID_SHARED_MAP,
+            SERVICE_ID_SHARED_SKETCH,
+            SERVICE_ID_CHATBOT,
+            SERVICE_ID_CHATBOT_STANDALONE,
+            SERVICE_ID_CHATBOT_ROLE
+    })
+    public @interface ServiceId {}
 
     /** The service capabilities is available. */
     public static final String TUPLE_BASIC_STATUS_OPEN = "open";
@@ -149,6 +271,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
             in.readStringList(mSupportedDuplexModeList);
             in.readStringList(mUnsupportedDuplexModeList);
         }
+
         @Override
         public void writeToParcel(@NonNull Parcel out, int flags) {
             out.writeBoolean(mIsAudioCapable);
@@ -217,12 +340,14 @@ public final class RcsContactPresenceTuple implements Parcelable {
 
         /**
          * Builds a RcsContactPresenceTuple instance.
+         * @param status The status associated with the service capability. See RFC3865 for more
+         * information.
          * @param serviceId The OMA Presence service-id associated with this capability. See the
          * OMA Presence SIMPLE specification v1.1, section 10.5.1.
          * @param serviceVersion The OMA Presence version associated with the service capability.
          * See the OMA Presence SIMPLE specification v1.1, section 10.5.1.
          */
-        public Builder(@NonNull @BasicStatus String status, @NonNull String serviceId,
+        public Builder(@NonNull @BasicStatus String status, @NonNull @ServiceId String serviceId,
                 @NonNull String serviceVersion) {
             mPresenceTuple = new RcsContactPresenceTuple(status, serviceId, serviceVersion);
         }
@@ -230,16 +355,17 @@ public final class RcsContactPresenceTuple implements Parcelable {
         /**
          * The optional SIP Contact URI associated with the PIDF tuple element.
          */
-        public @NonNull Builder addContactUri(@NonNull Uri contactUri) {
+        public @NonNull Builder setContactUri(@NonNull Uri contactUri) {
             mPresenceTuple.mContactUri = contactUri;
             return this;
         }
 
         /**
          * The optional timestamp indicating the data and time of the status change of this tuple.
-         * See RFC3863, section 4.1.7 for more information on the expected format.
+         * Per RFC3863 section 4.1.7, the timestamp is formatted as an IMPP datetime format
+         * string per RFC3339.
          */
-        public @NonNull Builder addTimeStamp(@NonNull String timestamp) {
+        public @NonNull Builder setTimestamp(@NonNull String timestamp) {
             mPresenceTuple.mTimestamp = timestamp;
             return this;
         }
@@ -248,7 +374,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
          * An optional parameter containing the description element of the service-description. See
          * OMA Presence SIMPLE specification v1.1
          */
-        public @NonNull Builder addDescription(@NonNull String description) {
+        public @NonNull Builder setServiceDescription(@NonNull String description) {
             mPresenceTuple.mServiceDescription = description;
             return this;
         }
@@ -257,7 +383,7 @@ public final class RcsContactPresenceTuple implements Parcelable {
          * An optional parameter containing the service capabilities of the presence tuple if they
          * are present in the servcaps element.
          */
-        public @NonNull Builder addServiceCapabilities(@NonNull ServiceCapabilities caps) {
+        public @NonNull Builder setServiceCapabilities(@NonNull ServiceCapabilities caps) {
             mPresenceTuple.mServiceCapabilities = caps;
             return this;
         }
