@@ -16,7 +16,7 @@
   -->
 
 <resources>
-    <bool name="are_flags_overrideable">true</bool>
+    <bool name="are_flags_overrideable">false</bool>
 
     <bool name="flag_notification_pipeline2">false</bool>
     <bool name="flag_notification_pipeline2_rendering">false</bool>
