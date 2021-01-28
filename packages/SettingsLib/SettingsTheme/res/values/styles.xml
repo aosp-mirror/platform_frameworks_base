@@ -22,4 +22,9 @@
         <!-- 0.8 Spacing, 0.8/11 = 0.072727273 -->
         <item name="android:letterSpacing">0.072727273</item>
     </style>
+
+    <style name="PreferenceCategoryStartMargin">
+        <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingLeft</item>
+        <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
+    </style>
 </resources>
