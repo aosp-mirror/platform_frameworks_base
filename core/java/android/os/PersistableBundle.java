@@ -47,6 +47,8 @@ import java.util.ArrayList;
 public final class PersistableBundle extends BaseBundle implements Cloneable, Parcelable,
         XmlUtils.WriteMapCallback {
     private static final String TAG_PERSISTABLEMAP = "pbundle_as_map";
+
+    /** An unmodifiable {@code PersistableBundle} that is always {@link #isEmpty() empty}. */
     public static final PersistableBundle EMPTY;
 
     static {
