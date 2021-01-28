@@ -63,7 +63,6 @@ public class WMShellTest extends SysuiTestCase {
     @Mock ScreenLifecycle mScreenLifecycle;
     @Mock SysUiState mSysUiState;
     @Mock Pip mPip;
-    @Mock PipTouchHandler mPipTouchHandler;
     @Mock LegacySplitScreen mLegacySplitScreen;
     @Mock OneHanded mOneHanded;
     @Mock HideDisplayCutout mHideDisplayCutout;
@@ -80,8 +79,6 @@ public class WMShellTest extends SysuiTestCase {
                 Optional.of(mShellCommandHandler), mCommandQueue, mConfigurationController,
                 mKeyguardUpdateMonitor, mNavigationModeController,
                 mScreenLifecycle, mSysUiState, mProtoTracer, mSysUiMainExecutor);
-
-        when(mPip.getPipTouchHandler()).thenReturn(mPipTouchHandler);
     }
 
     @Test

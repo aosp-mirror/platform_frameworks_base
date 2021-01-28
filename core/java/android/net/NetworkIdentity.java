@@ -195,13 +195,15 @@ public class NetworkIdentity implements Comparable<NetworkIdentity> {
         subscriberId = state.subscriberId;
 
         if (type == TYPE_WIFI) {
-            if (state.networkId != null) {
-                networkId = state.networkId;
-            } else {
-                final WifiManager wifi = (WifiManager) context.getSystemService(
-                        Context.WIFI_SERVICE);
-                final WifiInfo info = wifi.getConnectionInfo();
-                networkId = info != null ? info.getSSID() : null;
+            if (state.networkCapabilities.getSsid() != null) {
+                networkId = state.networkCapabilities.getSsid();
+                if (networkId == null) {
+                    // TODO: Figure out if this code path never runs. If so, remove them.
+                    final WifiManager wifi = (WifiManager) context.getSystemService(
+                            Context.WIFI_SERVICE);
+                    final WifiInfo info = wifi.getConnectionInfo();
+                    networkId = info != null ? info.getSSID() : null;
+                }
             }
         }
 

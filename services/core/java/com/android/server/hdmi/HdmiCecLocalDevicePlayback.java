@@ -24,7 +24,6 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
-import android.provider.Settings.Global;
 import android.sysprop.HdmiProperties;
 import android.util.Slog;
 
@@ -56,9 +55,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     // Lazily initialized - should call getWakeLock() to get the instance.
     private ActiveWakeLock mWakeLock;
 
-    // If true, turn off TV upon standby. False by default.
-    private boolean mAutoTvOff;
-
     // Determines what action should be taken upon receiving Routing Control messages.
     @VisibleForTesting
     protected HdmiProperties.playback_device_action_on_routing_control_values
@@ -68,12 +64,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
 
     HdmiCecLocalDevicePlayback(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_PLAYBACK);
-
-        mAutoTvOff = mService.readBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, false);
-
-        // The option is false by default. Update settings db as well to have the right
-        // initial setting on UI.
-        mService.writeBooleanSetting(Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED, mAutoTvOff);
     }
 
     @Override
@@ -154,7 +144,10 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         // Invalidate the internal active source record when goes to standby
         mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS,
                 "HdmiCecLocalDevicePlayback#onStandby()");
-        if (initiatedByCec || !mAutoTvOff || !wasActiveSource) {
+        boolean mTvSendStandbyOnSleep = mService.getHdmiCecConfig().getIntValue(
+                HdmiControlManager.CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP)
+                    == HdmiControlManager.TV_SEND_STANDBY_ON_SLEEP_ENABLED;
+        if (initiatedByCec || !mTvSendStandbyOnSleep || !wasActiveSource) {
             return;
         }
         switch (standbyAction) {
@@ -198,13 +191,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
                 }
             });
         }
-    }
-
-    @Override
-    @ServiceThreadOnly
-    void setAutoDeviceOff(boolean enabled) {
-        assertRunOnServiceThread();
-        mAutoTvOff = enabled;
     }
 
     @Override
@@ -425,7 +411,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     protected void dump(final IndentingPrintWriter pw) {
         super.dump(pw);
         pw.println("isActiveSource(): " + isActiveSource());
-        pw.println("mAutoTvOff:" + mAutoTvOff);
     }
 
     // Wrapper interface over PowerManager.WakeLock

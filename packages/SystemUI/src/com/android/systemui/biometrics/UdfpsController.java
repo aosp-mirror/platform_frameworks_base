@@ -50,6 +50,7 @@ import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SystemSettings;
 
@@ -131,6 +132,16 @@ class UdfpsController implements DozeReceiver {
         }
 
         @Override
+        public void onEnrollmentProgress(int sensorId, int remaining) {
+            mView.onEnrollmentProgress(remaining);
+        }
+
+        @Override
+        public void onEnrollmentHelp(int sensorId) {
+            mView.onEnrollmentHelp();
+        }
+
+        @Override
         public void setDebugMessage(int sensorId, String message) {
             mView.setDebugMessage(message);
         }
@@ -174,7 +185,8 @@ class UdfpsController implements DozeReceiver {
             WindowManager windowManager,
             SystemSettings systemSettings,
             @NonNull StatusBarStateController statusBarStateController,
-            @Main DelayableExecutor fgExecutor) {
+            @Main DelayableExecutor fgExecutor,
+            @NonNull ScrimController scrimController) {
         mContext = context;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
@@ -210,6 +222,8 @@ class UdfpsController implements DozeReceiver {
 
         mHbmSupported = !TextUtils.isEmpty(mHbmPath);
         mView.setHbmSupported(mHbmSupported);
+        scrimController.addScrimChangedListener(mView);
+        statusBarStateController.addCallback(mView);
 
         // This range only consists of the minimum and maximum values, which only cover
         // non-high-brightness mode.

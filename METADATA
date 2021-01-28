@@ -1,3 +1,4 @@
 third_party {
-  license_type: NOTICE
+  # would be NOTICE save for libs/usb/tests/accessorytest/f_accessory.h
+  license_type: RESTRICTED
 }

@@ -49,7 +49,7 @@ import java.util.List;
 /**
  * A View that represents Pip Menu on TV. It's responsible for displaying 2 ever-present Pip Menu
  * actions: Fullscreen and Close, but could also display "additional" actions, that may be set via
- * a {@link #setAdditionalActions(List)} call.
+ * a {@link #setAdditionalActions(List, Handler)} call.
  */
 public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     private static final String TAG = "TvPipMenuView";
@@ -57,7 +57,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
 
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
-    private final Handler mUiThreadHandler;
     private final Animator mFadeInAnimation;
     private final Animator mFadeOutAnimation;
     @Nullable private Listener mListener;
@@ -80,7 +79,6 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
     public TvPipMenuView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mUiThreadHandler = new Handler(Looper.getMainLooper());
 
         inflate(context, R.layout.tv_pip_menu, this);
 
@@ -132,7 +130,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
         }
     }
 
-    void setAdditionalActions(List<RemoteAction> actions) {
+    void setAdditionalActions(List<RemoteAction> actions, Handler mainHandler) {
         if (DEBUG) Log.d(TAG, "setAdditionalActions()");
 
         // Make sure we exactly as many additional buttons as we have actions to display.
@@ -176,7 +174,7 @@ public class TvPipMenuView extends FrameLayout implements View.OnClickListener {
             action.getIcon().loadDrawableAsync(mContext, drawable -> {
                 drawable.setTint(Color.WHITE);
                 button.setImageDrawable(drawable);
-            }, mUiThreadHandler);
+            }, mainHandler);
         }
     }
 

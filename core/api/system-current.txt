@@ -217,6 +217,7 @@ package android {
     field public static final String REQUEST_NETWORK_SCORES = "android.permission.REQUEST_NETWORK_SCORES";
     field public static final String REQUEST_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.REQUEST_NOTIFICATION_ASSISTANT_SERVICE";
     field public static final String RESET_PASSWORD = "android.permission.RESET_PASSWORD";
+    field public static final String RESTART_WIFI_SUBSYSTEM = "android.permission.RESTART_WIFI_SUBSYSTEM";
     field public static final String RESTORE_RUNTIME_PERMISSIONS = "android.permission.RESTORE_RUNTIME_PERMISSIONS";
     field public static final String RESTRICTED_VR_ACCESS = "android.permission.RESTRICTED_VR_ACCESS";
     field public static final String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
@@ -1624,6 +1625,15 @@ package android.app.usage {
 
 }
 
+package android.apphibernation {
+
+  public final class AppHibernationManager {
+    method public boolean isHibernating(@NonNull String);
+    method public void setHibernating(@NonNull String, boolean);
+  }
+
+}
+
 package android.bluetooth {
 
   public final class BluetoothA2dp implements android.bluetooth.BluetoothProfile {
@@ -1920,6 +1930,7 @@ package android.content {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public abstract void sendBroadcastAsUser(@RequiresPermission android.content.Intent, android.os.UserHandle, @Nullable String, @Nullable android.os.Bundle);
     method public abstract void sendOrderedBroadcast(@NonNull android.content.Intent, @Nullable String, @Nullable android.os.Bundle, @Nullable android.content.BroadcastReceiver, @Nullable android.os.Handler, int, @Nullable String, @Nullable android.os.Bundle);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS) public void startActivityAsUser(@NonNull @RequiresPermission android.content.Intent, @NonNull android.os.UserHandle);
+    field public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
     field public static final String APP_INTEGRITY_SERVICE = "app_integrity";
     field public static final String APP_PREDICTION_SERVICE = "app_prediction";
     field public static final String BACKUP_SERVICE = "backup";
@@ -6926,15 +6937,11 @@ package android.net {
   }
 
   public final class IpSecManager {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void applyTunnelModeTransform(@NonNull android.net.IpSecManager.IpSecTunnelInterface, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
+    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void addAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
-    method public void close();
     method @NonNull public String getInterfaceName();
-    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public static class IpSecTransform.Builder {

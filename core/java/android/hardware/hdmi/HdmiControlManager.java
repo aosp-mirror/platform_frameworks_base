@@ -503,6 +503,29 @@ public final class HdmiControlManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface TvWakeOnOneTouchPlay {}
 
+    // -- Whether TV should send &lt;Standby&gt; on sleep.
+    /**
+     * Sending &lt;Standby&gt; on sleep.
+     *
+     * @hide
+     */
+    public static final int TV_SEND_STANDBY_ON_SLEEP_ENABLED = 1;
+    /**
+     * Not sending &lt;Standby&gt; on sleep.
+     *
+     * @hide
+     */
+    public static final int TV_SEND_STANDBY_ON_SLEEP_DISABLED = 0;
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "TV_SEND_STANDBY_ON_SLEEP_" }, value = {
+            TV_SEND_STANDBY_ON_SLEEP_ENABLED,
+            TV_SEND_STANDBY_ON_SLEEP_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TvSendStandbyOnSleep {}
+
     // -- The RC profile of a TV panel.
     /**
      * RC profile none.
@@ -747,6 +770,14 @@ public final class HdmiControlManager {
     public static final String CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY =
             "tv_wake_on_one_touch_play";
     /**
+     * Name of a setting deciding whether the device will also turn off other CEC devices
+     * when it goes to standby mode.
+     *
+     * @hide
+     */
+    public static final String CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP =
+            "tv_send_standby_on_sleep";
+    /**
      * Name of a setting representing the RC profile of a TV panel.
      *
      * @hide
@@ -805,12 +836,13 @@ public final class HdmiControlManager {
         CEC_SETTING_NAME_SYSTEM_AUDIO_MODE_MUTING,
         CEC_SETTING_NAME_VOLUME_CONTROL_MODE,
         CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY,
+        CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP,
         CEC_SETTING_NAME_RC_PROFILE_TV,
         CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_ROOT_MENU,
         CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_SETUP_MENU,
         CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_CONTENTS_MENU,
         CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_TOP_MENU,
-        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU
+        CEC_SETTING_NAME_RC_PROFILE_SOURCE_HANDLES_MEDIA_CONTEXT_SENSITIVE_MENU,
     })
     public @interface CecSettingName {}
 
@@ -2154,6 +2186,50 @@ public final class HdmiControlManager {
         }
         try {
             return mService.getCecSettingIntValue(CEC_SETTING_NAME_TV_WAKE_ON_ONE_TOUCH_PLAY);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set the current status of TV send &lt;Standby&gt; on Sleep.
+     *
+     * <p>Sets whether the device will also turn off other CEC devices
+     * when it goes to standby mode.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public void setTvSendStandbyOnSleep(@NonNull @TvSendStandbyOnSleep int value) {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            mService.setCecSettingIntValue(CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP, value);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the current status of TV send &lt;Standby&gt; on Sleep.
+     *
+     * <p>Reflects whether the device will also turn off other CEC devices
+     * when it goes to standby mode.
+     *
+     * @hide
+     */
+    @NonNull
+    @TvSendStandbyOnSleep
+    @RequiresPermission(android.Manifest.permission.HDMI_CEC)
+    public int getTvSendStandbyOnSleep() {
+        if (mService == null) {
+            Log.e(TAG, "HdmiControlService is not available");
+            throw new RuntimeException("HdmiControlService is not available");
+        }
+        try {
+            return mService.getCecSettingIntValue(CEC_SETTING_NAME_TV_SEND_STANDBY_ON_SLEEP);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
