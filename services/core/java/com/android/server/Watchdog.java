@@ -31,6 +31,7 @@ import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ServiceDebugInfo;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -134,6 +135,11 @@ public class Watchdog extends Thread {
             "android.hardware.vr@1.0::IVr",
             "android.system.suspend@1.0::ISystemSuspend"
     );
+
+    public static final String[] AIDL_INTERFACE_PREFIXES_OF_INTEREST = new String[] {
+            "android.hardware.light.ILights/",
+            "android.hardware.power.stats.IPowerStats/",
+    };
 
     private static Watchdog sWatchdog;
 
@@ -515,12 +521,11 @@ public class Watchdog extends Thread {
         return builder.toString();
     }
 
-    private static ArrayList<Integer> getInterestingHalPids() {
+    private static void addInterestingHidlPids(HashSet<Integer> pids) {
         try {
             IServiceManager serviceManager = IServiceManager.getService();
             ArrayList<IServiceManager.InstanceDebugInfo> dump =
                     serviceManager.debugDump();
-            HashSet<Integer> pids = new HashSet<>();
             for (IServiceManager.InstanceDebugInfo info : dump) {
                 if (info.pid == IServiceManager.PidConstant.NO_PID) {
                     continue;
@@ -532,24 +537,37 @@ public class Watchdog extends Thread {
 
                 pids.add(info.pid);
             }
-            return new ArrayList<Integer>(pids);
         } catch (RemoteException e) {
-            return new ArrayList<Integer>();
+            Log.w(TAG, e);
+        }
+    }
+
+    private static void addInterestingAidlPids(HashSet<Integer> pids) {
+        ServiceDebugInfo[] infos = ServiceManager.getServiceDebugInfo();
+        if (infos == null) return;
+
+        for (ServiceDebugInfo info : infos) {
+            for (String prefix : AIDL_INTERFACE_PREFIXES_OF_INTEREST) {
+                if (info.name.startsWith(prefix)) {
+                    pids.add(info.debugPid);
+                }
+            }
         }
     }
 
     static ArrayList<Integer> getInterestingNativePids() {
-        ArrayList<Integer> pids = getInterestingHalPids();
+        HashSet<Integer> pids = new HashSet<>();
+        addInterestingAidlPids(pids);
+        addInterestingHidlPids(pids);
 
         int[] nativePids = Process.getPidsForCommands(NATIVE_STACKS_OF_INTEREST);
         if (nativePids != null) {
-            pids.ensureCapacity(pids.size() + nativePids.length);
             for (int i : nativePids) {
                 pids.add(i);
             }
         }
 
-        return pids;
+        return new ArrayList<Integer>(pids);
     }
 
     @Override
