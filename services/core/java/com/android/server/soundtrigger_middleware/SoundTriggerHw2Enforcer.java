@@ -21,6 +21,7 @@ import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_3.ModelParameterRange;
 import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
+import android.media.soundtrigger_middleware.RecognitionStatus;
 import android.media.soundtrigger_middleware.Status;
 import android.os.DeadObjectException;
 import android.os.IHwBinder;
@@ -39,10 +40,20 @@ import java.util.Map;
  * The class is thread-safe.
  */
 public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
-    static final String TAG = "SoundTriggerHw2Enforcer";
+    private static final String TAG = "SoundTriggerHw2Enforcer";
 
-    final ISoundTriggerHw2 mUnderlying;
-    Map<Integer, Boolean> mModelStates = new HashMap<>();
+    /** The state of a model. */
+    private enum ModelState {
+        /** Model is loaded, but inactive. */
+        INACTIVE,
+        /** Model is active. */
+        ACTIVE,
+        /** A request to stop is being made, which may or may not have been processed yet. */
+        PENDING_STOP,
+    }
+
+    private final ISoundTriggerHw2 mUnderlying;
+    private final Map<Integer, ModelState> mModelStates = new HashMap<>();
 
     public SoundTriggerHw2Enforcer(
             ISoundTriggerHw2 underlying) {
@@ -59,31 +70,38 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     }
 
     @Override
-    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, Callback callback,
-            int cookie) {
+    public void registerCallback(GlobalCallback callback) {
         try {
-            int handle = mUnderlying.loadSoundModel(soundModel, new CallbackEnforcer(callback),
-                    cookie);
-            synchronized (mModelStates) {
-                mModelStates.put(handle, false);
-            }
-            return handle;
+            mUnderlying.registerCallback(callback);
         } catch (RuntimeException e) {
             throw handleException(e);
         }
     }
 
     @Override
-    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel, Callback callback,
-            int cookie) {
+    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
         try {
-            int handle = mUnderlying.loadPhraseSoundModel(soundModel,
-                    new CallbackEnforcer(callback),
-                    cookie);
             synchronized (mModelStates) {
-                mModelStates.put(handle, false);
+                int handle = mUnderlying.loadSoundModel(soundModel,
+                        new ModelCallbackEnforcer(callback));
+                mModelStates.put(handle, ModelState.INACTIVE);
+                return handle;
             }
-            return handle;
+        } catch (RuntimeException e) {
+            throw handleException(e);
+        }
+    }
+
+    @Override
+    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
+            ModelCallback callback) {
+        try {
+            synchronized (mModelStates) {
+                int handle = mUnderlying.loadPhraseSoundModel(soundModel,
+                        new ModelCallbackEnforcer(callback));
+                mModelStates.put(handle, ModelState.INACTIVE);
+                return handle;
+            }
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -92,8 +110,13 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     @Override
     public void unloadSoundModel(int modelHandle) {
         try {
+            // This call into the HAL may block on callback processing, thus must be done outside
+            // of the critical section. After this call returns we are guaranteed to no longer be
+            // getting unload events for that model.
             mUnderlying.unloadSoundModel(modelHandle);
             synchronized (mModelStates) {
+                // At this point, the model may have already been removed by a HAL callback, but the
+                // remove() method is a no-op in this case, so thus safe.
                 mModelStates.remove(modelHandle);
             }
         } catch (RuntimeException e) {
@@ -104,9 +127,17 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     @Override
     public void stopRecognition(int modelHandle) {
         try {
+            // This call into the HAL may block on callback processing, thus must be done outside
+            // of the critical section. After this call returns we are guaranteed to no longer be
+            // getting stop events for that model.
+            synchronized (mModelStates) {
+                mModelStates.replace(modelHandle, ModelState.PENDING_STOP);
+            }
             mUnderlying.stopRecognition(modelHandle);
             synchronized (mModelStates) {
-                mModelStates.replace(modelHandle, false);
+                // At this point, the model might have been preemptively unloaded, but replace()
+                // do nothing when the entry does not exist, so all good.
+                mModelStates.replace(modelHandle, ModelState.INACTIVE);
             }
         } catch (RuntimeException e) {
             throw handleException(e);
@@ -114,30 +145,12 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     }
 
     @Override
-    public void stopAllRecognitions() {
+    public void startRecognition(int modelHandle, RecognitionConfig config) {
         try {
-            mUnderlying.stopAllRecognitions();
             synchronized (mModelStates) {
-                for (Map.Entry<Integer, Boolean> entry : mModelStates.entrySet()) {
-                    entry.setValue(false);
-                }
+                mUnderlying.startRecognition(modelHandle, config);
+                mModelStates.replace(modelHandle, ModelState.ACTIVE);
             }
-        } catch (RuntimeException e) {
-            throw handleException(e);
-        }
-    }
-
-    @Override
-    public void startRecognition(int modelHandle, RecognitionConfig config, Callback callback,
-            int cookie) {
-        // It is possible that an event will be sent before the HAL returns from the
-        // startRecognition call, thus it is important to set the state to active before the call.
-        synchronized (mModelStates) {
-            mModelStates.replace(modelHandle, true);
-        }
-        try {
-            mUnderlying.startRecognition(modelHandle, config, new CallbackEnforcer(callback),
-                    cookie);
         } catch (RuntimeException e) {
             throw handleException(e);
         }
@@ -210,48 +223,73 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         SystemProperties.set("sys.audio.restart.hal", "1");
     }
 
-    private class CallbackEnforcer implements Callback {
-        private final Callback mUnderlying;
+    private class ModelCallbackEnforcer implements ModelCallback {
+        private final ModelCallback mUnderlying;
 
-        private CallbackEnforcer(
-                Callback underlying) {
+        private ModelCallbackEnforcer(
+                ModelCallback underlying) {
             mUnderlying = underlying;
         }
 
         @Override
-        public void recognitionCallback(ISoundTriggerHwCallback.RecognitionEvent event,
-                int cookie) {
+        public void recognitionCallback(ISoundTriggerHwCallback.RecognitionEvent event) {
             int model = event.header.model;
+            int status = event.header.status;
+
             synchronized (mModelStates) {
-                if (!mModelStates.getOrDefault(model, false)) {
+                ModelState state = mModelStates.get(model);
+                if (state == null || state == ModelState.INACTIVE) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
                     rebootHal();
                     return;
                 }
-                if (event.header.status
-                        != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
-                    mModelStates.replace(model, false);
+                if (status != RecognitionStatus.FORCED) {
+                    mModelStates.replace(model, ModelState.INACTIVE);
                 }
             }
-            mUnderlying.recognitionCallback(event, cookie);
+            // Always invoke the delegate from outside the critical section.
+            mUnderlying.recognitionCallback(event);
         }
 
         @Override
-        public void phraseRecognitionCallback(ISoundTriggerHwCallback.PhraseRecognitionEvent event,
-                int cookie) {
+        public void phraseRecognitionCallback(
+                ISoundTriggerHwCallback.PhraseRecognitionEvent event) {
             int model = event.common.header.model;
+            int status = event.common.header.status;
             synchronized (mModelStates) {
-                if (!mModelStates.getOrDefault(model, false)) {
+                ModelState state = mModelStates.get(model);
+                if (state == null || state == ModelState.INACTIVE) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
                     rebootHal();
                     return;
                 }
-                if (event.common.header.status
-                        != android.media.soundtrigger_middleware.RecognitionStatus.FORCED) {
-                    mModelStates.replace(model, false);
+                if (status != RecognitionStatus.FORCED) {
+                    mModelStates.replace(model, ModelState.INACTIVE);
                 }
             }
-            mUnderlying.phraseRecognitionCallback(event, cookie);
+            // Always invoke the delegate from outside the critical section.
+            mUnderlying.phraseRecognitionCallback(event);
+        }
+
+        @Override
+        public void modelUnloaded(int modelHandle) {
+            synchronized (mModelStates) {
+                ModelState state = mModelStates.get(modelHandle);
+                if (state == null) {
+                    Log.wtfStack(TAG, "Unexpected unload event for model: " + modelHandle);
+                    rebootHal();
+                    return;
+                }
+
+                if (state == ModelState.ACTIVE) {
+                    Log.wtfStack(TAG, "Trying to unload an active model: " + modelHandle);
+                    rebootHal();
+                    return;
+                }
+                mModelStates.remove(modelHandle);
+            }
+            // Always invoke the delegate from outside the critical section.
+            mUnderlying.modelUnloaded(modelHandle);
         }
     }
 }

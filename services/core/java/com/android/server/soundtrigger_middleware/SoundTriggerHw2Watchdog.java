@@ -38,10 +38,8 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
     private static final long TIMEOUT_MS = 3000;
     private static final String TAG = "SoundTriggerHw2Watchdog";
 
-    private final @NonNull
-    ISoundTriggerHw2 mUnderlying;
-    private final @NonNull
-    Timer mTimer;
+    private final @NonNull ISoundTriggerHw2 mUnderlying;
+    private final @NonNull Timer mTimer;
 
     public SoundTriggerHw2Watchdog(@NonNull ISoundTriggerHw2 underlying) {
         mUnderlying = Objects.requireNonNull(underlying);
@@ -56,18 +54,24 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
     }
 
     @Override
-    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, Callback callback,
-            int cookie) {
+    public void registerCallback(GlobalCallback callback) {
         try (Watchdog ignore = new Watchdog()) {
-            return mUnderlying.loadSoundModel(soundModel, callback, cookie);
+            mUnderlying.registerCallback(callback);
         }
     }
 
     @Override
-    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel, Callback callback,
-            int cookie) {
+    public int loadSoundModel(ISoundTriggerHw.SoundModel soundModel, ModelCallback callback) {
         try (Watchdog ignore = new Watchdog()) {
-            return mUnderlying.loadPhraseSoundModel(soundModel, callback, cookie);
+            return mUnderlying.loadSoundModel(soundModel, callback);
+        }
+    }
+
+    @Override
+    public int loadPhraseSoundModel(ISoundTriggerHw.PhraseSoundModel soundModel,
+            ModelCallback callback) {
+        try (Watchdog ignore = new Watchdog()) {
+            return mUnderlying.loadPhraseSoundModel(soundModel, callback);
         }
     }
 
@@ -86,17 +90,9 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
     }
 
     @Override
-    public void stopAllRecognitions() {
+    public void startRecognition(int modelHandle, RecognitionConfig config) {
         try (Watchdog ignore = new Watchdog()) {
-            mUnderlying.stopAllRecognitions();
-        }
-    }
-
-    @Override
-    public void startRecognition(int modelHandle, RecognitionConfig config, Callback callback,
-            int cookie) {
-        try (Watchdog ignore = new Watchdog()) {
-            mUnderlying.startRecognition(modelHandle, config, callback, cookie);
+            mUnderlying.startRecognition(modelHandle, config);
         }
     }
 

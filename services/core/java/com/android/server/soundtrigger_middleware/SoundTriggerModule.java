@@ -88,14 +88,14 @@ import java.util.Set;
  *
  * @hide
  */
-class SoundTriggerModule implements IHwBinder.DeathRecipient {
+class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.GlobalCallback {
     static private final String TAG = "SoundTriggerModule";
-    @NonNull private HalFactory mHalFactory;
+    @NonNull private final HalFactory mHalFactory;
     @NonNull private ISoundTriggerHw2 mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
     private int mNumLoadedModels = 0;
-    private SoundTriggerModuleProperties mProperties;
+    private final SoundTriggerModuleProperties mProperties;
     private boolean mRecognitionAvailable;
 
     /**
@@ -183,7 +183,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
     @Override
     public void serviceDied(long cookie) {
-        Log.w(TAG, String.format("Underlying HAL driver died."));
+        Log.w(TAG, "Underlying HAL driver died.");
         List<ISoundTriggerCallback> callbacks;
         synchronized (this) {
             callbacks = new ArrayList<>(mActiveSessions.size());
@@ -221,6 +221,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                 new SoundTriggerHw2Watchdog(
                         new SoundTriggerHw2Compat(mHalFactory.create())));
         mHalService.linkToDeath(this, 0);
+        mHalService.registerCallback(this);
     }
 
     /**
@@ -230,6 +231,12 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      */
     private void removeSession(@NonNull Session session) {
         mActiveSessions.remove(session);
+    }
+
+    @Override
+    public void tryAgain() {
+        // TODO: Implement
+        throw new RuntimeException("Implement me");
     }
 
     /** State of a single sound model. */
@@ -249,7 +256,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
      */
     private class Session implements ISoundTriggerModule {
         private ISoundTriggerCallback mCallback;
-        private Map<Integer, Model> mLoadedModels = new HashMap<>();
+        private final Map<Integer, Model> mLoadedModels = new HashMap<>();
 
         /**
          * Ctor.
@@ -455,7 +462,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
          *
          * All model-based operations are delegated to this class and implemented here.
          */
-        private class Model implements ISoundTriggerHw2.Callback {
+        private class Model implements ISoundTriggerHw2.ModelCallback {
             public int mHandle;
             private ModelState mState = ModelState.INIT;
             private int mModelType = SoundModelType.UNKNOWN;
@@ -477,7 +484,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                 mSession = audioSession;
                 ISoundTriggerHw.SoundModel hidlModel = ConversionUtil.aidl2hidlSoundModel(model);
 
-                mHandle = mHalService.loadSoundModel(hidlModel, this, 0);
+                mHandle = mHalService.loadSoundModel(hidlModel, this);
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
                 return mHandle;
@@ -490,7 +497,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                 ISoundTriggerHw.PhraseSoundModel hidlModel =
                         ConversionUtil.aidl2hidlPhraseSoundModel(model);
 
-                mHandle = mHalService.loadPhraseSoundModel(hidlModel, this, 0);
+                mHandle = mHalService.loadPhraseSoundModel(hidlModel, this);
 
                 setState(ModelState.LOADED);
                 mLoadedModels.put(mHandle, this);
@@ -518,7 +525,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                         ConversionUtil.aidl2hidlRecognitionConfig(config);
                 hidlConfig.base.header.captureDevice = mSession.mDeviceHandle;
                 hidlConfig.base.header.captureHandle = mSession.mIoHandle;
-                mHalService.startRecognition(mHandle, hidlConfig, this, 0);
+                mHalService.startRecognition(mHandle, hidlConfig);
                 setState(ModelState.ACTIVE);
             }
 
@@ -612,8 +619,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
 
             @Override
             public void recognitionCallback(
-                    @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent,
-                    int cookie) {
+                    @NonNull ISoundTriggerHwCallback.RecognitionEvent recognitionEvent) {
                 RecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlRecognitionEvent(recognitionEvent);
                 aidlEvent.captureSession = mSession.mSessionHandle;
@@ -632,9 +638,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
             }
 
             @Override
-            public void phraseRecognitionCallback(
-                    @NonNull ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent,
-                    int cookie) {
+            public void phraseRecognitionCallback(@NonNull
+                            ISoundTriggerHwCallback.PhraseRecognitionEvent phraseRecognitionEvent) {
                 PhraseRecognitionEvent aidlEvent =
                         ConversionUtil.hidl2aidlPhraseRecognitionEvent(phraseRecognitionEvent);
                 aidlEvent.common.captureSession = mSession.mSessionHandle;
@@ -652,6 +657,12 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                     // We're not expecting any exceptions here.
                     throw e.rethrowAsRuntimeException();
                 }
+            }
+
+            @Override
+            public void modelUnloaded(int modelHandle) {
+                // TODO: Implement
+                throw new RuntimeException("Implement me");
             }
         }
     }
