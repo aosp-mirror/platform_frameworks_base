@@ -31865,6 +31865,8 @@ package android.os.strictmode {
   }
 
   public final class UnsafeIntentLaunchViolation extends android.os.strictmode.Violation {
+    ctor public UnsafeIntentLaunchViolation(@NonNull android.content.Intent);
+    method @Nullable public android.content.Intent getIntent();
   }
 
   public final class UntaggedSocketViolation extends android.os.strictmode.Violation {
