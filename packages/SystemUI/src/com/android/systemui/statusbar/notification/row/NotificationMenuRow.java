@@ -302,8 +302,12 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         } else {
             mMenuContainer = new FrameLayout(mContext);
         }
-        final boolean newFlowHideShelf = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.SHOW_NEW_NOTIF_DISMISS, 1 /* on by default */) == 1;
+        // The setting can win (which is needed for tests) but if not set, then use the flag
+        final int showDismissSetting =  Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_NEW_NOTIF_DISMISS, -1);
+        final boolean newFlowHideShelf = showDismissSetting == -1
+                ? mContext.getResources().getBoolean(R.bool.flag_notif_updates)
+                : showDismissSetting == 1;
         if (newFlowHideShelf) {
             return;
         }
