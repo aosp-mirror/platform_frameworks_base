@@ -489,7 +489,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                     anyInt(),
                     typeIconArg.capture(), dataInArg.capture(), dataOutArg.capture(),
                     any(CharSequence.class), any(CharSequence.class), any(CharSequence.class),
-                    anyBoolean(), anyInt(), anyBoolean());
+                    anyBoolean(), anyInt(), anyBoolean(), anyBoolean());
         IconState iconState = iconArg.getValue();
         int state = SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
                 false);
@@ -523,7 +523,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 typeIconArg.capture(),
                 anyInt(), anyBoolean(), anyBoolean(),
                 any(CharSequence.class), any(CharSequence.class), any(),
-                anyBoolean(), anyInt(), eq(roaming));
+                anyBoolean(), anyInt(), eq(roaming), anyBoolean());
         IconState iconState = iconArg.getValue();
         int state = icon == -1 ? 0
                 : SignalDrawable.getState(icon, CellSignalStrength.getNumSignalStrengthLevels(),
@@ -544,7 +544,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 typeIconArg.capture(),
                 anyInt(), anyBoolean(), anyBoolean(),
                 any(CharSequence.class), any(CharSequence.class), any(),
-                anyBoolean(), anyInt(), anyBoolean());
+                anyBoolean(), anyInt(), anyBoolean(), anyBoolean());
         IconState iconState = iconArg.getValue();
         int state = SignalDrawable.getState(
                 level, CellSignalStrength.getNumSignalStrengthLevels(), !inet);
@@ -591,7 +591,7 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
                 dataOutArg.capture(),
                 typeContentDescriptionArg.capture(),
                 typeContentDescriptionHtmlArg.capture(),
-                any(), anyBoolean(), anyInt(), anyBoolean());
+                any(), anyBoolean(), anyInt(), anyBoolean(), anyBoolean());
 
         IconState iconState = iconArg.getValue();
 

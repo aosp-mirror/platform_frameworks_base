@@ -284,13 +284,15 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     && !mCurrentState.carrierNetworkChangeMode
                     && mCurrentState.activityOut;
             showDataIcon &= mCurrentState.dataSim && mCurrentState.isDefault;
+            boolean showTriangle = showDataIcon && !mCurrentState.airplaneMode;
+            int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
+            showDataIcon |= mCurrentState.roaming;
             IconState statusIcon = new IconState(showDataIcon && !mCurrentState.airplaneMode,
                     getCurrentIconId(), contentDescription);
-            int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
             callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                     activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
                     description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
-                    mCurrentState.roaming);
+                    mCurrentState.roaming, showTriangle);
         } else {
             boolean showDataIcon = mCurrentState.dataConnected || dataDisabled;
             IconState statusIcon = new IconState(
@@ -316,10 +318,11 @@ public class MobileSignalController extends SignalController<MobileState, Mobile
                     && mCurrentState.activityOut;
             showDataIcon &= mCurrentState.isDefault || dataDisabled;
             int typeIcon = (showDataIcon || mConfig.alwaysShowDataRatIcon) ? icons.dataType : 0;
+            boolean showTriangle = mCurrentState.enabled && !mCurrentState.airplaneMode;
             callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                     activityIn, activityOut, dataContentDescription, dataContentDescriptionHtml,
                     description, icons.isWide, mSubscriptionInfo.getSubscriptionId(),
-                    mCurrentState.roaming);
+                    mCurrentState.roaming, showTriangle);
         }
     }
 
