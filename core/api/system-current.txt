@@ -5644,7 +5644,7 @@ package android.media.tv.tuner {
     method public void updateResourcePriority(int, int);
     field public static final int INVALID_AV_SYNC_ID = -1; // 0xffffffff
     field public static final int INVALID_FILTER_ID = -1; // 0xffffffff
-    field public static final long INVALID_FILTER_ID_64BIT = -1L; // 0xffffffffffffffffL
+    field public static final long INVALID_FILTER_ID_LONG = -1L; // 0xffffffffffffffffL
     field public static final int INVALID_FIRST_MACROBLOCK_IN_SLICE = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_ID = -1; // 0xffffffff
     field public static final int INVALID_FRONTEND_SETTING_FREQUENCY = -1; // 0xffffffff
@@ -5825,7 +5825,7 @@ package android.media.tv.tuner.filter {
     method public int getItemFragmentIndex();
     method public int getItemId();
     method public int getLastItemFragmentIndex();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
   }
 
   public class DownloadSettings extends android.media.tv.tuner.filter.Settings {
@@ -5843,7 +5843,7 @@ package android.media.tv.tuner.filter {
     method public int configure(@NonNull android.media.tv.tuner.filter.FilterConfiguration);
     method public int flush();
     method public int getId();
-    method public long getId64Bit();
+    method public long getIdLong();
     method public int read(@NonNull byte[], long, long);
     method public int setDataSource(@Nullable android.media.tv.tuner.filter.Filter);
     method public int setMonitorEventMask(int);
@@ -5934,7 +5934,7 @@ package android.media.tv.tuner.filter {
     method public long getDataLength();
     method @Nullable public android.media.tv.tuner.filter.AudioDescriptor getExtraMetaData();
     method @Nullable public android.media.MediaCodec.LinearBlock getLinearBlock();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
     method public long getOffset();
     method public long getPts();
     method public int getStreamId();
@@ -5959,7 +5959,7 @@ package android.media.tv.tuner.filter {
   public class MmtpRecordEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public long getDataLength();
     method public int getFirstMacroblockInSlice();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
     method public long getPts();
     method public int getScHevcIndexMask();
     method public int getTsIndexMask();
@@ -5967,7 +5967,7 @@ package android.media.tv.tuner.filter {
 
   public class PesEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public int getDataLength();
-    method public int getMpuSequenceNumber();
+    method @IntRange(from=0) public int getMpuSequenceNumber();
     method public int getStreamId();
   }
 
