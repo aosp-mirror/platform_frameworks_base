@@ -20978,7 +20978,7 @@ package android.media {
     method @NonNull public String getDiagnosticInfo();
   }
 
-  public final class MediaCodec {
+  public final class MediaCodec implements android.media.metrics.PlaybackComponent {
     method public void configure(@Nullable android.media.MediaFormat, @Nullable android.view.Surface, @Nullable android.media.MediaCrypto, int);
     method public void configure(@Nullable android.media.MediaFormat, @Nullable android.view.Surface, int, @Nullable android.media.MediaDescrambler);
     method @NonNull public static android.media.MediaCodec createByCodecName(@NonNull String) throws java.io.IOException;
@@ -21004,6 +21004,7 @@ package android.media {
     method @NonNull public android.media.MediaFormat getOutputFormat(int);
     method @NonNull public android.media.MediaCodec.OutputFrame getOutputFrame(int);
     method @Nullable public android.media.Image getOutputImage(int);
+    method public String getPlaybackId();
     method @NonNull public android.media.MediaCodec.QueueRequest getQueueRequest(int);
     method @Nullable public static android.media.Image mapHardwareBuffer(@NonNull android.hardware.HardwareBuffer);
     method public void queueInputBuffer(int, int, int, long, int) throws android.media.MediaCodec.CryptoException;
@@ -21019,6 +21020,7 @@ package android.media {
     method public void setOnFrameRenderedListener(@Nullable android.media.MediaCodec.OnFrameRenderedListener, @Nullable android.os.Handler);
     method public void setOutputSurface(@NonNull android.view.Surface);
     method public void setParameters(@Nullable android.os.Bundle);
+    method public void setPlaybackId(@NonNull String);
     method public void setVideoScalingMode(int);
     method public void signalEndOfInputStream();
     method public void start();
@@ -24108,6 +24110,11 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.NetworkEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
   }
 
+  public interface PlaybackComponent {
+    method @NonNull public String getPlaybackId();
+    method public void setPlaybackId(@NonNull String);
+  }
+
   public final class PlaybackErrorEvent extends android.media.metrics.Event implements android.os.Parcelable {
     method public int describeContents();
     method public int getErrorCode();
@@ -24128,11 +24135,76 @@ package android.media.metrics {
     method @NonNull public android.media.metrics.PlaybackErrorEvent.Builder setTimeSinceCreatedMillis(@IntRange(from=0xffffffff) long);
   }
 
+  public final class PlaybackMetrics implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getAudioUnderrunCount();
+    method public int getContentType();
+    method public int getDrmType();
+    method @NonNull public long[] getExperimentIds();
+    method @IntRange(from=0xffffffff) public long getLocalBytesRead();
+    method @IntRange(from=0xffffffff) public long getMediaDurationMillis();
+    method @IntRange(from=0xffffffff) public long getNetworkBytesRead();
+    method @IntRange(from=0xffffffff) public long getNetworkTransferDurationMillis();
+    method public int getPlaybackType();
+    method @Nullable public String getPlayerName();
+    method @Nullable public String getPlayerVersion();
+    method public int getStreamSource();
+    method public int getStreamType();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getVideoFramesDropped();
+    method @IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) public int getVideoFramesPlayed();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CONTENT_TYPE_AD = 1; // 0x1
+    field public static final int CONTENT_TYPE_MAIN = 0; // 0x0
+    field public static final int CONTENT_TYPE_OTHER = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.media.metrics.PlaybackMetrics> CREATOR;
+    field public static final int DRM_TYPE_CLEARKEY = 6; // 0x6
+    field public static final int DRM_TYPE_NONE = 0; // 0x0
+    field public static final int DRM_TYPE_OTHER = 1; // 0x1
+    field public static final int DRM_TYPE_PLAY_READY = 2; // 0x2
+    field public static final int DRM_TYPE_WIDEVINE_L1 = 3; // 0x3
+    field public static final int DRM_TYPE_WIDEVINE_L3 = 4; // 0x4
+    field public static final int DRM_TYPE_WV_L3_FALLBACK = 5; // 0x5
+    field public static final int PLAYBACK_TYPE_LIVE = 1; // 0x1
+    field public static final int PLAYBACK_TYPE_OTHER = 2; // 0x2
+    field public static final int PLAYBACK_TYPE_VOD = 0; // 0x0
+    field public static final int STREAM_SOURCE_DEVICE = 2; // 0x2
+    field public static final int STREAM_SOURCE_MIXED = 3; // 0x3
+    field public static final int STREAM_SOURCE_NETWORK = 1; // 0x1
+    field public static final int STREAM_SOURCE_UNKNOWN = 0; // 0x0
+    field public static final int STREAM_TYPE_DASH = 3; // 0x3
+    field public static final int STREAM_TYPE_HLS = 4; // 0x4
+    field public static final int STREAM_TYPE_OTHER = 1; // 0x1
+    field public static final int STREAM_TYPE_PROGRESSIVE = 2; // 0x2
+    field public static final int STREAM_TYPE_SS = 5; // 0x5
+    field public static final int STREAM_TYPE_UNKNOWN = 0; // 0x0
+  }
+
+  public static final class PlaybackMetrics.Builder {
+    ctor public PlaybackMetrics.Builder();
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder addExperimentId(long);
+    method @NonNull public android.media.metrics.PlaybackMetrics build();
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setAudioUnderrunCount(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setContentType(int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setDrmType(int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setLocalBytesRead(@IntRange(from=0xffffffff) long);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setMediaDurationMillis(@IntRange(from=0xffffffff) long);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setNetworkBytesRead(@IntRange(from=0xffffffff) long);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setNetworkTransferDurationMillis(@IntRange(from=0xffffffff) long);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setPlaybackType(int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setPlayerName(@NonNull String);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setPlayerVersion(@NonNull String);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setStreamSource(int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setStreamType(int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setVideoFramesDropped(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+    method @NonNull public android.media.metrics.PlaybackMetrics.Builder setVideoFramesPlayed(@IntRange(from=0xffffffff, to=java.lang.Integer.MAX_VALUE) int);
+  }
+
   public final class PlaybackSession implements java.lang.AutoCloseable {
     method public void close();
     method @NonNull public String getId();
     method public void reportNetworkEvent(@NonNull android.media.metrics.NetworkEvent);
     method public void reportPlaybackErrorEvent(@NonNull android.media.metrics.PlaybackErrorEvent);
+    method public void reportPlaybackMetrics(@NonNull android.media.metrics.PlaybackMetrics);
     method public void reportPlaybackStateEvent(@NonNull android.media.metrics.PlaybackStateEvent);
     method public void reportTrackChangeEvent(@NonNull android.media.metrics.TrackChangeEvent);
   }

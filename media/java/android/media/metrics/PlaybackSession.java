@@ -45,7 +45,6 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports playback metrics.
-     * @hide
      */
     public void reportPlaybackMetrics(@NonNull PlaybackMetrics metrics) {
         mManager.reportPlaybackMetrics(mId, metrics);
