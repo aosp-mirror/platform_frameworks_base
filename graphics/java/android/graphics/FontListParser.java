@@ -51,7 +51,8 @@ public class FontListParser {
         XmlPullParser parser = Xml.newPullParser();
         parser.setInput(in, null);
         parser.nextTag();
-        return readFamilies(parser, "/system/fonts/", new FontCustomizationParser.Result(), null);
+        return readFamilies(parser, "/system/fonts/", new FontCustomizationParser.Result(), null,
+                0, 0);
     }
 
     /**
@@ -71,7 +72,9 @@ public class FontListParser {
             @NonNull String systemFontDir,
             @Nullable String oemCustomizationXmlPath,
             @Nullable String productFontDir,
-            @Nullable Map<String, File> updatableFontMap
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion
     ) throws IOException, XmlPullParserException {
         FontCustomizationParser.Result oemCustomization;
         if (oemCustomizationXmlPath != null) {
@@ -90,7 +93,8 @@ public class FontListParser {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(is, null);
             parser.nextTag();
-            return readFamilies(parser, systemFontDir, oemCustomization, updatableFontMap);
+            return readFamilies(parser, systemFontDir, oemCustomization, updatableFontMap,
+                    lastModifiedDate, configVersion);
         }
     }
 
@@ -98,7 +102,9 @@ public class FontListParser {
             @NonNull XmlPullParser parser,
             @NonNull String fontDir,
             @NonNull FontCustomizationParser.Result customization,
-            @Nullable Map<String, File> updatableFontMap)
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion)
             throws XmlPullParserException, IOException {
         List<FontConfig.FontFamily> families = new ArrayList<>();
         List<FontConfig.Alias> aliases = new ArrayList<>(customization.getAdditionalAliases());
@@ -126,7 +132,7 @@ public class FontListParser {
         }
 
         families.addAll(oemNamedFamilies.values());
-        return new FontConfig(families, aliases);
+        return new FontConfig(families, aliases, lastModifiedDate, configVersion);
     }
 
     /**
