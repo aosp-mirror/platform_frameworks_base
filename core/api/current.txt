@@ -24225,7 +24225,8 @@ package android.media.session {
     method public void setCallback(@Nullable android.media.session.MediaSession.Callback, @Nullable android.os.Handler);
     method public void setExtras(@Nullable android.os.Bundle);
     method public void setFlags(int);
-    method public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
+    method public void setMediaButtonBroadcastReceiver(@Nullable android.content.ComponentName);
+    method @Deprecated public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
     method public void setMetadata(@Nullable android.media.MediaMetadata);
     method public void setPlaybackState(@Nullable android.media.session.PlaybackState);
     method public void setPlaybackToLocal(android.media.AudioAttributes);
