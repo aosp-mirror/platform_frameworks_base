@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_ERROR_KEY;
 import static android.service.timezone.TimeZoneProviderService.TEST_COMMAND_RESULT_SUCCESS_KEY;
 
-import static com.android.server.location.timezone.LocationTimeZoneManagerService.warnLog;
+import static com.android.server.timezonedetector.location.LocationTimeZoneManagerService.warnLog;
 
 import android.Manifest;
 import android.annotation.NonNull;
