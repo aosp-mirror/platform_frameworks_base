@@ -5804,6 +5804,7 @@ package android.media.tv.tuner.filter {
 
   public final class RestartEvent extends android.media.tv.tuner.filter.FilterEvent {
     method public int getStartId();
+    field public static final int NEW_FILTER_FIRST_START_ID = 0; // 0x0
   }
 
   public final class ScramblingStatusEvent extends android.media.tv.tuner.filter.FilterEvent {
