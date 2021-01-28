@@ -446,6 +446,7 @@ applications that come with the platform
         <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
         <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
         <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
+        <permission name="android.permission.MODIFY_QUIET_MODE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
