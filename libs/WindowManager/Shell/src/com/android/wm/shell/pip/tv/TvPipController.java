@@ -36,6 +36,7 @@ import android.view.DisplayInfo;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.WindowManagerShellWrapper;
+import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
@@ -138,7 +139,8 @@ public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
         mMainExecutor = mainExecutor;
 
         mPipBoundsState = pipBoundsState;
-        mPipBoundsState.setDisplayInfo(getDisplayInfo());
+        mPipBoundsState.setDisplayId(context.getDisplayId());
+        mPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
         mPipBoundsAlgorithm = pipBoundsAlgorithm;
 
         mPipMediaController = pipMediaController;
