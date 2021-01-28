@@ -300,6 +300,9 @@
     <!-- Permission needed to test mainline permission module rollback -->
     <uses-permission android:name="android.permission.UPGRADE_RUNTIME_PERMISSIONS" />
 
+    <!-- Permission needed to restart WiFi Subsystem -->
+    <uses-permission android:name="android.permission.RESTART_WIFI_SUBSYSTEM" />
+
     <!-- Permission needed to read wifi network credentials for CtsNetTestCases -->
     <uses-permission android:name="android.permission.NETWORK_AIRPLANE_MODE" />
 
