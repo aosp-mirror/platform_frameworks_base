@@ -55,6 +55,7 @@ import android.os.RemoteException;
 import android.util.Log;
 import android.util.Rational;
 import android.util.Size;
+import android.view.Display;
 import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
@@ -324,7 +325,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mPipUiEventLoggerLogger.log(
                 PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_EXPAND_TO_FULLSCREEN);
         final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
-                != mPipBoundsState.getDisplayInfo().rotation;
+                != mPipBoundsState.getDisplayLayout().rotation();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
         final int direction = syncWithSplitScreenBounds(destinationBounds)
@@ -437,7 +438,7 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
 
         // If the displayId of the task is different than what PipBoundsHandler has, then update
         // it. This is possible if we entered PiP on an external display.
-        if (info.displayId != mPipBoundsState.getDisplayInfo().displayId
+        if (info.displayId != mPipBoundsState.getDisplayId()
                 && mOnDisplayIdChangeCallback != null) {
             mOnDisplayIdChangeCallback.accept(info.displayId);
         }
@@ -605,6 +606,10 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         mState = State.UNDEFINED;
         mPipUiEventLoggerLogger.setTaskInfo(null);
         mPipMenuController.detach();
+
+        if (info.displayId != Display.DEFAULT_DISPLAY && mOnDisplayIdChangeCallback != null) {
+            mOnDisplayIdChangeCallback.accept(Display.DEFAULT_DISPLAY);
+        }
     }
 
     @Override
