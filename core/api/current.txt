@@ -30191,6 +30191,8 @@ package android.os {
     field @Deprecated public static final String RADIO;
     field @Deprecated public static final String SERIAL;
     field @NonNull public static final String SKU;
+    field @NonNull public static final String SOC_MANUFACTURER;
+    field @NonNull public static final String SOC_MODEL;
     field public static final String[] SUPPORTED_32_BIT_ABIS;
     field public static final String[] SUPPORTED_64_BIT_ABIS;
     field public static final String[] SUPPORTED_ABIS;
