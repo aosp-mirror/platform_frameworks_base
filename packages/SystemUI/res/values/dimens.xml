@@ -155,7 +155,7 @@
     <dimen name="notification_max_heads_up_height_increased">188dp</dimen>
 
     <!-- Side padding on the lockscreen on the side of notifications -->
-    <dimen name="notification_side_paddings">16dp</dimen>
+    <dimen name="notification_side_paddings">4dp</dimen>
 
     <!-- padding between the heads up and the statusbar -->
     <dimen name="heads_up_status_bar_padding">8dp</dimen>
@@ -177,7 +177,10 @@
     <dimen name="notification_min_interaction_height">40dp</dimen>
 
     <!-- Radius for notifications corners without adjacent notifications -->
-    <dimen name="notification_corner_radius">28dp</dimen>
+    <dimen name="notification_corner_radius">8dp</dimen>
+
+    <!-- Radius for notifications corners with adjacent notifications -->
+    <dimen name="notification_corner_radius_small">0dp</dimen>
 
     <!-- the padding of the shelf icon container -->
     <dimen name="shelf_icon_container_padding">13dp</dimen>
@@ -619,7 +622,7 @@
     <dimen name="z_distance_between_notifications">0.5dp</dimen>
 
     <!-- The height of the divider between the individual notifications. -->
-    <dimen name="notification_divider_height">2dp</dimen>
+    <dimen name="notification_divider_height">1dp</dimen>
 
     <!-- The corner radius of the shadow behind the notification. -->
     <dimen name="notification_shadow_radius">0dp</dimen>
@@ -632,7 +635,7 @@
     <dimen name="notification_children_container_divider_height">0.5dp</dimen>
 
     <!-- The horizontal margin of the content in the notification shade -->
-    <dimen name="notification_shade_content_margin_horizontal">16dp</dimen>
+    <dimen name="notification_shade_content_margin_horizontal">4dp</dimen>
 
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">
