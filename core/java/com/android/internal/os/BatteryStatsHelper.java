@@ -23,7 +23,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
-import android.net.ConnectivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.Uid;
 import android.os.Build;
@@ -37,6 +36,7 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -148,12 +148,11 @@ public class BatteryStatsHelper {
     boolean mHasBluetoothPowerReporting = false;
 
     public static boolean checkWifiOnly(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        if (cm == null) {
+        final TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        if (tm == null) {
             return false;
         }
-        return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        return !tm.isDataCapable();
     }
 
     public static boolean checkHasWifiPowerReporting(BatteryStats stats, PowerProfile profile) {
