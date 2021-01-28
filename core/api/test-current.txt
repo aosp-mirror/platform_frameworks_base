@@ -748,6 +748,65 @@ package android.content.pm {
     ctor public ShortcutManager(android.content.Context);
   }
 
+  public class UserInfo implements android.os.Parcelable {
+    ctor public UserInfo(int, String, int);
+    ctor public UserInfo(int, String, String, int);
+    ctor public UserInfo(int, String, String, int, String);
+    ctor @Deprecated public UserInfo();
+    ctor public UserInfo(android.content.pm.UserInfo);
+    method public boolean canHaveProfile();
+    method public int describeContents();
+    method public android.os.UserHandle getUserHandle();
+    method public boolean isAdmin();
+    method public boolean isDemo();
+    method public boolean isEnabled();
+    method public boolean isEphemeral();
+    method public boolean isFull();
+    method public boolean isGuest();
+    method public boolean isInitialized();
+    method public boolean isManagedProfile();
+    method public boolean isPrimary();
+    method public boolean isProfile();
+    method public boolean isQuietModeEnabled();
+    method public boolean isRestricted();
+    method public boolean isSystemOnly();
+    method public static boolean isSystemOnly(int);
+    method public boolean supportsSwitchTo();
+    method public boolean supportsSwitchToByUser();
+    method public void writeToParcel(android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.content.pm.UserInfo> CREATOR;
+    field public static final int FLAG_ADMIN = 2; // 0x2
+    field @Deprecated public static final int FLAG_DEMO = 512; // 0x200
+    field public static final int FLAG_DISABLED = 64; // 0x40
+    field public static final int FLAG_EPHEMERAL = 256; // 0x100
+    field public static final int FLAG_FULL = 1024; // 0x400
+    field @Deprecated public static final int FLAG_GUEST = 4; // 0x4
+    field public static final int FLAG_INITIALIZED = 16; // 0x10
+    field @Deprecated public static final int FLAG_MANAGED_PROFILE = 32; // 0x20
+    field public static final int FLAG_PRIMARY = 1; // 0x1
+    field public static final int FLAG_PROFILE = 4096; // 0x1000
+    field public static final int FLAG_QUIET_MODE = 128; // 0x80
+    field @Deprecated public static final int FLAG_RESTRICTED = 8; // 0x8
+    field public static final int FLAG_SYSTEM = 2048; // 0x800
+    field public static final int NO_PROFILE_GROUP_ID = -10000; // 0xffffd8f0
+    field public boolean convertedFromPreCreated;
+    field public long creationTime;
+    field public int flags;
+    field public boolean guestToRemove;
+    field public String iconPath;
+    field public int id;
+    field public String lastLoggedInFingerprint;
+    field public long lastLoggedInTime;
+    field public String name;
+    field public boolean partial;
+    field public boolean preCreated;
+    field public int profileBadge;
+    field public int profileGroupId;
+    field public int restrictedProfileParentId;
+    field public int serialNumber;
+    field public String userType;
+  }
+
 }
 
 package android.content.res {
@@ -1511,8 +1570,15 @@ package android.os {
   }
 
   public class UserManager {
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo createProfileForUser(@Nullable String, @NonNull String, int, int, @Nullable String[]);
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo createRestrictedProfile(@Nullable String);
+    method @Nullable @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo createUser(@Nullable String, @NonNull String, int);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public String getUserType();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public java.util.List<android.content.pm.UserInfo> getUsers(boolean, boolean, boolean);
     method @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public boolean hasBaseUserRestriction(@NonNull String, @NonNull android.os.UserHandle);
+    method public static boolean isGuestUserEphemeral();
     method public static boolean isSplitSystemUser();
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.MANAGE_USERS, android.Manifest.permission.CREATE_USERS}) public android.content.pm.UserInfo preCreateUser(@NonNull String) throws android.os.UserManager.UserOperationException;
   }
 
   public final class VibrationAttributes implements android.os.Parcelable {
