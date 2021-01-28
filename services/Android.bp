@@ -141,7 +141,7 @@ droidstubs {
         last_released: {
             api_file: ":android.api.system-server.latest",
             removed_api_file: ":removed.api.system-server.latest",
-            baseline_file: ":system-server-api-incompatibilities-with-last-released"
+            baseline_file: ":android-incompatibilities.api.system-server.latest"
         },
         api_lint: {
             enabled: true,
