@@ -179,6 +179,7 @@ class ProcessRecord implements WindowProcessListener {
     int reqCompactAction;       // The most recent compaction action requested for this app.
     int lastCompactAction;      // The most recent compaction action performed for this app.
     boolean frozen;             // True when the process is frozen.
+    boolean freezerOverride;     // An override on the freeze state is in progress.
     long freezeUnfreezeTime;    // Last time the app was (un)frozen, 0 for never
     boolean shouldNotFreeze;    // True if a process has a WPRI binding from an unfrozen process
     private int mCurSchedGroup; // Currently desired scheduling class
