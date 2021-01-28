@@ -19,19 +19,17 @@ package com.android.server.locksettings;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.security.GeneralSecurityException;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * atest FrameworksServicesTests:RebootEscrowDataTest
@@ -41,22 +39,18 @@ public class RebootEscrowDataTest {
     private RebootEscrowKey mKey;
     private SecretKey mKeyStoreEncryptionKey;
 
-    private SecretKey generateNewRebootEscrowEncryptionKey() throws GeneralSecurityException {
-        KeyGenerator generator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
-        generator.init(new KeyGenParameterSpec.Builder(
-                "reboot_escrow_data_test_key",
-                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
-                .setKeySize(256)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .build());
-        return generator.generateKey();
-    }
+    // Hex encoding of a randomly generated AES key for test.
+    private static final byte[] TEST_AES_KEY = new byte[] {
+            0x44, 0x74, 0x61, 0x54, 0x29, 0x74, 0x37, 0x61,
+            0x48, 0x19, 0x12, 0x54, 0x13, 0x13, 0x52, 0x31,
+            0x70, 0x70, 0x75, 0x25, 0x27, 0x31, 0x49, 0x09,
+            0x26, 0x52, 0x72, 0x63, 0x63, 0x61, 0x78, 0x23,
+    };
 
     @Before
     public void generateKey() throws Exception {
         mKey = RebootEscrowKey.generate();
-        mKeyStoreEncryptionKey = generateNewRebootEscrowEncryptionKey();
+        mKeyStoreEncryptionKey = new SecretKeySpec(TEST_AES_KEY, "AES");
     }
 
     private static byte[] getTestSp() {
@@ -114,4 +108,23 @@ public class RebootEscrowDataTest {
         assertThat(decrypted, is(testSp));
     }
 
+    @Test
+    public void fromEncryptedData_legacyVersion_success() throws Exception {
+        byte[] testSp = getTestSp();
+        byte[] ksEncryptedBlob = AesEncryptionUtil.encrypt(mKey.getKey(), testSp);
+
+        // Write a legacy blob encrypted only by k_s.
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(bos);
+        dos.writeInt(1);
+        dos.writeByte(3);
+        dos.write(ksEncryptedBlob);
+        byte[] legacyBlob = bos.toByteArray();
+
+        RebootEscrowData actual = RebootEscrowData.fromEncryptedData(mKey, legacyBlob, null);
+
+        assertThat(actual.getSpVersion(), is((byte) 3));
+        assertThat(actual.getKey().getKeyBytes(), is(mKey.getKeyBytes()));
+        assertThat(actual.getSyntheticPassword(), is(testSp));
+    }
 }
