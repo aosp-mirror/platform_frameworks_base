@@ -64,6 +64,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_PARTIAL_CONNECTIVITY;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_RCS;
@@ -7326,36 +7327,66 @@ public class ConnectivityServiceTest {
         b2.expectBroadcast();
     }
 
+    /**
+     * Test mutable and requestable network capabilities such as
+     * {@link NetworkCapabilities#NET_CAPABILITY_TRUSTED} and
+     * {@link NetworkCapabilities#NET_CAPABILITY_NOT_VCN_MANAGED}. Verify that the
+     * {@code ConnectivityService} re-assign the networks accordingly.
+     */
     @Test
-    public final void testLoseTrusted() throws Exception {
-        final NetworkRequest trustedRequest = new NetworkRequest.Builder()
-                .addCapability(NET_CAPABILITY_TRUSTED)
-                .build();
-        final TestNetworkCallback trustedCallback = new TestNetworkCallback();
-        mCm.requestNetwork(trustedRequest, trustedCallback);
+    public final void testLoseMutableAndRequestableCaps() throws Exception {
+        final int[] testCaps = new int [] {
+                NET_CAPABILITY_TRUSTED,
+                NET_CAPABILITY_NOT_VCN_MANAGED
+        };
+        for (final int testCap : testCaps) {
+            // Create requests with and without the testing capability.
+            final TestNetworkCallback callbackWithCap = new TestNetworkCallback();
+            final TestNetworkCallback callbackWithoutCap = new TestNetworkCallback();
+            mCm.requestNetwork(new NetworkRequest.Builder().addCapability(testCap).build(),
+                    callbackWithCap);
+            mCm.requestNetwork(new NetworkRequest.Builder().removeCapability(testCap).build(),
+                    callbackWithoutCap);
 
-        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
-        mCellNetworkAgent.connect(true);
-        trustedCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-        verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
-        reset(mMockNetd);
+            // Setup networks with testing capability and verify the default network changes.
+            mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+            mCellNetworkAgent.addCapability(testCap);
+            mCellNetworkAgent.connect(true);
+            callbackWithCap.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+            callbackWithoutCap.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+            verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
+            reset(mMockNetd);
 
-        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
-        mWiFiNetworkAgent.connect(true);
-        trustedCallback.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
-        verify(mMockNetd).networkSetDefault(eq(mWiFiNetworkAgent.getNetwork().netId));
-        reset(mMockNetd);
+            mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
+            mWiFiNetworkAgent.addCapability(testCap);
+            mWiFiNetworkAgent.connect(true);
+            callbackWithCap.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+            callbackWithoutCap.expectAvailableDoubleValidatedCallbacks(mWiFiNetworkAgent);
+            verify(mMockNetd).networkSetDefault(eq(mWiFiNetworkAgent.getNetwork().netId));
+            reset(mMockNetd);
 
-        mWiFiNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
-        trustedCallback.expectAvailableCallbacksValidated(mCellNetworkAgent);
-        verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
-        reset(mMockNetd);
+            // Remove the testing capability on wifi, verify the callback and default network
+            // changes back to cellular.
+            mWiFiNetworkAgent.removeCapability(testCap);
+            callbackWithCap.expectAvailableCallbacksValidated(mCellNetworkAgent);
+            callbackWithoutCap.expectCapabilitiesWithout(testCap, mWiFiNetworkAgent);
+            // TODO: Test default network changes for NOT_VCN_MANAGED once the default request has
+            //  it.
+            if (testCap == NET_CAPABILITY_TRUSTED) {
+                verify(mMockNetd).networkSetDefault(eq(mCellNetworkAgent.getNetwork().netId));
+                reset(mMockNetd);
+            }
 
-        mCellNetworkAgent.removeCapability(NET_CAPABILITY_TRUSTED);
-        trustedCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
-        verify(mMockNetd).networkClearDefault();
+            mCellNetworkAgent.removeCapability(testCap);
+            callbackWithCap.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+            callbackWithoutCap.assertNoCallback();
+            if (testCap == NET_CAPABILITY_TRUSTED) {
+                verify(mMockNetd).networkClearDefault();
+            }
 
-        mCm.unregisterNetworkCallback(trustedCallback);
+            mCm.unregisterNetworkCallback(callbackWithCap);
+            mCm.unregisterNetworkCallback(callbackWithoutCap);
+        }
     }
 
     @Test
