@@ -22,13 +22,13 @@ import static com.android.server.om.OverlayManagerService.TAG;
 import android.annotation.NonNull;
 import android.content.om.OverlayInfo;
 import android.content.om.OverlayableInfo;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageInfo;
 import android.os.Build.VERSION_CODES;
 import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
 import android.text.TextUtils;
 import android.util.Slog;
+
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.IOException;
 
@@ -74,14 +74,14 @@ final class IdmapManager {
      * Creates the idmap for the target/overlay combination and returns whether the idmap file was
      * modified.
      */
-    boolean createIdmap(@NonNull final PackageInfo targetPackage,
-            @NonNull final PackageInfo overlayPackage, int userId) {
+    boolean createIdmap(@NonNull final AndroidPackage targetPackage,
+            @NonNull final AndroidPackage overlayPackage, int userId) {
         if (DEBUG) {
-            Slog.d(TAG, "create idmap for " + targetPackage.packageName + " and "
-                    + overlayPackage.packageName);
+            Slog.d(TAG, "create idmap for " + targetPackage.getPackageName() + " and "
+                    + overlayPackage.getPackageName());
         }
-        final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
-        final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
+        final String targetPath = targetPackage.getBaseApkPath();
+        final String overlayPath = overlayPackage.getBaseApkPath();
         try {
             int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
             boolean enforce = enforceOverlayable(overlayPackage);
@@ -113,22 +113,17 @@ final class IdmapManager {
         return mIdmapDaemon.idmapExists(oi.baseCodePath, oi.userId);
     }
 
-    boolean idmapExists(@NonNull final PackageInfo overlayPackage, final int userId) {
-        return mIdmapDaemon.idmapExists(overlayPackage.applicationInfo.getBaseCodePath(), userId);
-    }
-
     /**
      * Checks if overlayable and policies should be enforced on the specified overlay for backwards
      * compatibility with pre-Q overlays.
      */
-    private boolean enforceOverlayable(@NonNull final PackageInfo overlayPackage) {
-        final ApplicationInfo ai = overlayPackage.applicationInfo;
-        if (ai.targetSdkVersion >= VERSION_CODES.Q) {
+    private boolean enforceOverlayable(@NonNull final AndroidPackage overlayPackage) {
+        if (overlayPackage.getTargetSdkVersion() >= VERSION_CODES.Q) {
             // Always enforce policies for overlays targeting Q+.
             return true;
         }
 
-        if (ai.isVendor()) {
+        if (overlayPackage.isVendor()) {
             // If the overlay is on a pre-Q vendor partition, do not enforce overlayable
             // restrictions on this overlay because the pre-Q platform has no understanding of
             // overlayable.
@@ -137,20 +132,19 @@ final class IdmapManager {
 
         // Do not enforce overlayable restrictions on pre-Q overlays that are signed with the
         // platform signature or that are preinstalled.
-        return !(ai.isSystemApp() || ai.isSignedWithPlatformKey());
+        return !(overlayPackage.isSystem() || overlayPackage.isSignedWithPlatformKey());
     }
 
     /**
      * Retrieves a bitmask for idmap2 that represents the policies the overlay fulfills.
      */
-    private int calculateFulfilledPolicies(@NonNull final PackageInfo targetPackage,
-            @NonNull final PackageInfo overlayPackage, int userId)  {
-        final ApplicationInfo ai = overlayPackage.applicationInfo;
+    private int calculateFulfilledPolicies(@NonNull final AndroidPackage targetPackage,
+            @NonNull final AndroidPackage overlayPackage, int userId)  {
         int fulfilledPolicies = OverlayablePolicy.PUBLIC;
 
         // Overlay matches target signature
-        if (mPackageManager.signaturesMatching(targetPackage.packageName,
-                overlayPackage.packageName, userId)) {
+        if (mPackageManager.signaturesMatching(targetPackage.getPackageName(),
+                overlayPackage.getPackageName(), userId)) {
             fulfilledPolicies |= OverlayablePolicy.SIGNATURE;
         }
 
@@ -164,52 +158,52 @@ final class IdmapManager {
         // preinstalled package, check if overlay matches its signature.
         if (!TextUtils.isEmpty(mConfigSignaturePackage)
                 && mPackageManager.signaturesMatching(mConfigSignaturePackage,
-                                                           overlayPackage.packageName,
+                                                           overlayPackage.getPackageName(),
                                                            userId)) {
             fulfilledPolicies |= OverlayablePolicy.CONFIG_SIGNATURE;
         }
 
         // Vendor partition (/vendor)
-        if (ai.isVendor()) {
+        if (overlayPackage.isVendor()) {
             return fulfilledPolicies | OverlayablePolicy.VENDOR_PARTITION;
         }
 
         // Product partition (/product)
-        if (ai.isProduct()) {
+        if (overlayPackage.isProduct()) {
             return fulfilledPolicies | OverlayablePolicy.PRODUCT_PARTITION;
         }
 
         // Odm partition (/odm)
-        if (ai.isOdm()) {
+        if (overlayPackage.isOdm()) {
             return fulfilledPolicies | OverlayablePolicy.ODM_PARTITION;
         }
 
         // Oem partition (/oem)
-        if (ai.isOem()) {
+        if (overlayPackage.isOem()) {
             return fulfilledPolicies | OverlayablePolicy.OEM_PARTITION;
         }
 
         // System_ext partition (/system_ext) is considered as system
         // Check this last since every partition except for data is scanned as system in the PMS.
-        if (ai.isSystemApp() || ai.isSystemExt()) {
+        if (overlayPackage.isSystem() || overlayPackage.isSystemExt()) {
             return fulfilledPolicies | OverlayablePolicy.SYSTEM_PARTITION;
         }
 
         return fulfilledPolicies;
     }
 
-    private boolean matchesActorSignature(@NonNull PackageInfo targetPackage,
-            @NonNull PackageInfo overlayPackage, int userId) {
-        String targetOverlayableName = overlayPackage.targetOverlayableName;
+    private boolean matchesActorSignature(@NonNull AndroidPackage targetPackage,
+            @NonNull AndroidPackage overlayPackage, int userId) {
+        String targetOverlayableName = overlayPackage.getOverlayTargetName();
         if (targetOverlayableName != null) {
             try {
                 OverlayableInfo overlayableInfo = mPackageManager.getOverlayableForTarget(
-                        targetPackage.packageName, targetOverlayableName, userId);
+                        targetPackage.getPackageName(), targetOverlayableName, userId);
                 if (overlayableInfo != null && overlayableInfo.actor != null) {
                     String actorPackageName = OverlayActorEnforcer.getPackageNameForActor(
                             overlayableInfo.actor, mPackageManager.getNamedActors()).first;
                     if (mPackageManager.signaturesMatching(actorPackageName,
-                            overlayPackage.packageName, userId)) {
+                            overlayPackage.getPackageName(), userId)) {
                         return true;
                     }
                 }

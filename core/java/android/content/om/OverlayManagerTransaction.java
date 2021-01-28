@@ -60,12 +60,12 @@ public class OverlayManagerTransaction
 
     private OverlayManagerTransaction(@NonNull final Parcel source) {
         final int size = source.readInt();
-        mRequests = new ArrayList<Request>(size);
+        mRequests = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             final int request = source.readInt();
-            final String packageName = source.readString();
+            final OverlayIdentifier overlay = source.readParcelable(null);
             final int userId = source.readInt();
-            mRequests.add(new Request(request, packageName, userId));
+            mRequests.add(new Request(request, overlay, userId));
         }
     }
 
@@ -97,20 +97,20 @@ public class OverlayManagerTransaction
         public static final int TYPE_SET_DISABLED = 1;
 
         @RequestType public final int type;
-        public final String packageName;
+        public final OverlayIdentifier overlay;
         public final int userId;
 
-        public Request(@RequestType final int type, @NonNull final String packageName,
+        public Request(@RequestType final int type, @NonNull final OverlayIdentifier overlay,
                 final int userId) {
             this.type = type;
-            this.packageName = packageName;
+            this.overlay = overlay;
             this.userId = userId;
         }
 
         @Override
         public String toString() {
-            return String.format("Request{type=0x%02x (%s), packageName=%s, userId=%d}",
-                    type, typeToString(), packageName, userId);
+            return String.format("Request{type=0x%02x (%s), overlay=%s, userId=%d}",
+                    type, typeToString(), overlay, userId);
         }
 
         /**
@@ -152,22 +152,22 @@ public class OverlayManagerTransaction
          * longer affect the resources of the target package. If the target is
          * currently running, its outdated resources will be replaced by new ones.
          *
-         * @param packageName The name of the overlay package.
+         * @param overlay The name of the overlay package.
          * @param enable true to enable the overlay, false to disable it.
          * @return this Builder object, so you can chain additional requests
          */
-        public Builder setEnabled(@NonNull String packageName, boolean enable) {
-            return setEnabled(packageName, enable, UserHandle.myUserId());
+        public Builder setEnabled(@NonNull OverlayIdentifier overlay, boolean enable) {
+            return setEnabled(overlay, enable, UserHandle.myUserId());
         }
 
         /**
          * @hide
          */
-        public Builder setEnabled(@NonNull String packageName, boolean enable, int userId) {
-            checkNotNull(packageName);
+        public Builder setEnabled(@NonNull OverlayIdentifier overlay, boolean enable, int userId) {
+            checkNotNull(overlay);
             @Request.RequestType final int type =
                 enable ? Request.TYPE_SET_ENABLED : Request.TYPE_SET_DISABLED;
-            mRequests.add(new Request(type, packageName, userId));
+            mRequests.add(new Request(type, overlay, userId));
             return this;
         }
 
@@ -195,7 +195,7 @@ public class OverlayManagerTransaction
         for (int i = 0; i < size; i++) {
             final Request req = mRequests.get(i);
             dest.writeInt(req.type);
-            dest.writeString(req.packageName);
+            dest.writeParcelable(req.overlay, flags);
             dest.writeInt(req.userId);
         }
     }
