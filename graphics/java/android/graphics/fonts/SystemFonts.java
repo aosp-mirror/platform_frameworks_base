@@ -240,10 +240,12 @@ public final class SystemFonts {
      * @hide
      */
     public static @NonNull FontConfig getSystemFontConfig(
-            @Nullable Map<String, File> updatableFontMap
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion
     ) {
         return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR,
-                updatableFontMap);
+                updatableFontMap, lastModifiedDate, configVersion);
     }
 
     /**
@@ -251,7 +253,8 @@ public final class SystemFonts {
      * @hide
      */
     public static @NonNull FontConfig getSystemPreinstalledFontConfig() {
-        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null);
+        return getSystemFontConfigInternal(FONTS_XML, SYSTEM_FONT_DIR, OEM_XML, OEM_FONT_DIR, null,
+                0, 0);
     }
 
     /* package */ static @NonNull FontConfig getSystemFontConfigInternal(
@@ -259,17 +262,19 @@ public final class SystemFonts {
             @NonNull String systemFontDir,
             @Nullable String oemXml,
             @Nullable String productFontDir,
-            @Nullable Map<String, File> updatableFontMap
+            @Nullable Map<String, File> updatableFontMap,
+            long lastModifiedDate,
+            int configVersion
     ) {
         try {
             return FontListParser.parse(fontsXml, systemFontDir, oemXml, productFontDir,
-                                                updatableFontMap);
+                                                updatableFontMap, lastModifiedDate, configVersion);
         } catch (IOException e) {
             Log.e(TAG, "Failed to open/read system font configurations.", e);
-            return new FontConfig(Collections.emptyList(), Collections.emptyList());
+            return new FontConfig(Collections.emptyList(), Collections.emptyList(), 0, 0);
         } catch (XmlPullParserException e) {
             Log.e(TAG, "Failed to parse the system font configuration.", e);
-            return new FontConfig(Collections.emptyList(), Collections.emptyList());
+            return new FontConfig(Collections.emptyList(), Collections.emptyList(), 0, 0);
         }
     }
 
