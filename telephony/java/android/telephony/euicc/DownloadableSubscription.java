@@ -121,25 +121,21 @@ public final class DownloadableSubscription implements Parcelable {
         }
 
         public Builder(@NonNull String encodedActivationCode) {
-            Preconditions.checkNotNull(encodedActivationCode, "Activation code may not be null");
             this.encodedActivationCode = encodedActivationCode;
         }
 
         /**
-         * Builds a {@link DownloadableSubscription} object. If the encoded activation code is
-         * {@code null}, a {@link NullPointerException} will be thrown.
+         * Builds a {@link DownloadableSubscription} object.
          * @return a non-null {@link DownloadableSubscription} object.
          */
         @NonNull
         public DownloadableSubscription build() {
-            Preconditions.checkNotNull(encodedActivationCode, "Activation code may not be null");
             return new DownloadableSubscription(encodedActivationCode, confirmationCode,
                     carrierName, accessRules);
         }
 
         /**
-         * Sets the encoded activation code. If the encoded activation code is {@code null}, a
-         * {@link NullPointerException} will be thrown.
+         * Sets the encoded activation code.
          * @param value the activation code to use. An activation code can be parsed from a user
          *              scanned QR code. The format of activation code is defined in SGP.22. For
          *              example, "1$SMDP.GSMA.COM$04386-AGYFT-A74Y8-3F815$1.3.6.1.4.1.31746". For
@@ -147,7 +143,6 @@ public final class DownloadableSubscription implements Parcelable {
          */
         @NonNull
         public Builder setEncodedActivationCode(@NonNull String value) {
-            Preconditions.checkNotNull(encodedActivationCode, "Activation code may not be null");
             encodedActivationCode = value;
             return this;
         }
