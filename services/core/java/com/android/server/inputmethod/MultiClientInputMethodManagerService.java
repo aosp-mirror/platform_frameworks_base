@@ -1502,14 +1502,17 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void removeImeSurface() {
+        public void removeImeSurface(IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
-        public void removeImeSurfaceFromWindow(IBinder windowToken) {
+        public void removeImeSurfaceFromWindow(IBinder windowToken,
+                IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
@@ -1815,8 +1818,10 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
+        public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes,
+                IVoidResultCallback resultCallback) {
             reportNotSupported();
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
