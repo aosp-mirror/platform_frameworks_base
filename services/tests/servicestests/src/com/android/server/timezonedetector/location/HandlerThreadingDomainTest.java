@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.location.timezone;
+package com.android.server.timezonedetector.location;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -24,7 +24,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.location.timezone.ThreadingDomain.SingleRunnableQueue;
+import com.android.server.timezonedetector.location.ThreadingDomain.SingleRunnableQueue;
 
 import org.junit.After;
 import org.junit.Before;
