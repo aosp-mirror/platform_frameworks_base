@@ -77,7 +77,7 @@ public class ResourcesManagerPerfTest {
     }
 
     private void getResourcesForPath(String path) {
-        ResourcesManager.getInstance().getResources(null, path, null, null, null,
+        ResourcesManager.getInstance().getResources(null, path, null, null, null, null,
                 Display.DEFAULT_DISPLAY, null, sContext.getResources().getCompatibilityInfo(),
                 null, null);
     }

@@ -31,6 +31,7 @@ import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.Signature;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.overlay.OverlayPaths;
 import android.os.PersistableBundle;
 import android.os.incremental.IncrementalManager;
 import android.service.pm.PackageProto;
@@ -44,7 +45,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -327,21 +327,20 @@ public abstract class PackageSettingBase extends SettingBase {
         modifyUserState(userId).uninstallReason = uninstallReason;
     }
 
-    void setOverlayPaths(List<String> overlayPaths, int userId) {
-        modifyUserState(userId).setOverlayPaths(overlayPaths == null ? null :
-            overlayPaths.toArray(new String[overlayPaths.size()]));
+    boolean setOverlayPaths(OverlayPaths overlayPaths, int userId) {
+        return modifyUserState(userId).setOverlayPaths(overlayPaths);
     }
 
-    String[] getOverlayPaths(int userId) {
+    OverlayPaths getOverlayPaths(int userId) {
         return readUserState(userId).getOverlayPaths();
     }
 
-    void setOverlayPathsForLibrary(String libName, List<String> overlayPaths, int userId) {
-        modifyUserState(userId).setSharedLibraryOverlayPaths(libName,
-                overlayPaths == null ? null : overlayPaths.toArray(new String[0]));
+    boolean setOverlayPathsForLibrary(String libName, OverlayPaths overlayPaths,
+            int userId) {
+        return modifyUserState(userId).setSharedLibraryOverlayPaths(libName, overlayPaths);
     }
 
-    Map<String, String[]> getOverlayPathsForLibrary(int userId) {
+    Map<String, OverlayPaths> getOverlayPathsForLibrary(int userId) {
         return readUserState(userId).getSharedLibraryOverlayPaths();
     }
 
