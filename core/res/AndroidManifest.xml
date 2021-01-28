@@ -1676,6 +1676,12 @@
     <permission android:name="android.permission.REQUEST_NETWORK_SCORES"
         android:protectionLevel="signature|setup" />
 
+    <!-- Allows applications to restart the Wi-Fi subsystem.
+     @SystemApi
+     <p>Not for use by third-party applications. @hide -->
+    <permission android:name="android.permission.RESTART_WIFI_SUBSYSTEM"
+                android:protectionLevel="signature|setup" />
+
     <!-- @SystemApi @hide Allows applications to toggle airplane mode.
          <p>Not for use by third-party or privileged applications.
     -->
