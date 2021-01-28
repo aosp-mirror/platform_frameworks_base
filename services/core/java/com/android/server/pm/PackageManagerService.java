@@ -3845,6 +3845,8 @@ public class PackageManagerService extends IPackageManager.Stub
             final boolean isCallerInstantApp = getInstantAppPackageName(callingUid) != null;
             final int userId = UserHandle.getUserId(uid);
             final int appId = UserHandle.getAppId(uid);
+            enforceCrossUserPermission(callingUid, userId,
+                    /* requireFullPermission */ false, /* checkShell */ false, "getPackagesForUid");
             return getPackagesForUidInternalBody(callingUid, userId, appId, isCallerInstantApp);
         }
 
