@@ -314,11 +314,23 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
 
         mIconController.removeAllIconsForSlot(mSlotMobile);
         mMobileStates.clear();
+        List<NoCallingIconState> noCallingStates = new ArrayList<NoCallingIconState>();
+        noCallingStates.addAll(mNoCallingStates);
         mNoCallingStates.clear();
         final int n = subs.size();
         for (int i = 0; i < n; i++) {
             mMobileStates.add(new MobileIconState(subs.get(i).getSubscriptionId()));
-            mNoCallingStates.add(new NoCallingIconState(subs.get(i).getSubscriptionId()));
+            boolean isNewSub = true;
+            for (NoCallingIconState state : noCallingStates) {
+                if (state.subId == subs.get(i).getSubscriptionId()) {
+                    mNoCallingStates.add(state);
+                    isNewSub = false;
+                    break;
+                }
+            }
+            if (isNewSub) {
+                mNoCallingStates.add(new NoCallingIconState(subs.get(i).getSubscriptionId()));
+            }
         }
     }
 
