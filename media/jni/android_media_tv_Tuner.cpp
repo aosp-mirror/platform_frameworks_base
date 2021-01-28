@@ -169,8 +169,9 @@ static fields_t gFields;
 static int IP_V4_LENGTH = 4;
 static int IP_V6_LENGTH = 16;
 
-void DestroyCallback(const C2Buffer * /* buf */, void *arg) {
+void DestroyCallback(const C2Buffer * buf, void *arg) {
     android::sp<android::MediaEvent> event = (android::MediaEvent *)arg;
+    android::Mutex::Autolock autoLock(event->mLock);
     if (event->mLinearBlockObj != NULL) {
         JNIEnv *env = android::AndroidRuntime::getJNIEnv();
         env->DeleteWeakGlobalRef(event->mLinearBlockObj);
@@ -179,6 +180,7 @@ void DestroyCallback(const C2Buffer * /* buf */, void *arg) {
 
     event->mAvHandleRefCnt--;
     event->finalize();
+    event->decStrong(buf);
 }
 
 namespace android {
@@ -369,6 +371,7 @@ jobject MediaEvent::getLinearBlock() {
             pC2Buffer->setInfo(info);
         }
         pC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
+        incStrong(pC2Buffer.get());
         jobject linearBlock =
                 env->NewObject(
                         env->FindClass("android/media/MediaCodec$LinearBlock"),
@@ -3646,6 +3649,7 @@ static jobject android_media_tv_Tuner_media_event_get_linear_block(
         ALOGD("Failed get MediaEvent");
         return NULL;
     }
+    android::Mutex::Autolock autoLock(mediaEventSp->mLock);
 
     return mediaEventSp->getLinearBlock();
 }
