@@ -36325,6 +36325,7 @@ package android.security.keystore {
     field public static final int ORIGIN_IMPORTED = 2; // 0x2
     field public static final int ORIGIN_SECURELY_IMPORTED = 8; // 0x8
     field public static final int ORIGIN_UNKNOWN = 4; // 0x4
+    field public static final int PURPOSE_AGREE_KEY = 64; // 0x40
     field public static final int PURPOSE_DECRYPT = 2; // 0x2
     field public static final int PURPOSE_ENCRYPT = 1; // 0x1
     field public static final int PURPOSE_SIGN = 4; // 0x4
