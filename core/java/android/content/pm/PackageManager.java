@@ -3385,6 +3385,7 @@ public abstract class PackageManager {
      * {@link #hasSystemFeature}: This device supports HDMI-CEC.
      * @hide
      */
+    @TestApi
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_HDMI_CEC = "android.hardware.hdmi.cec";
 
