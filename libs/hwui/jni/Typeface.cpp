@@ -25,11 +25,16 @@
 #include <hwui/Typeface.h>
 #include <minikin/FontCollection.h>
 #include <minikin/FontFamily.h>
+#include <minikin/FontFileParser.h>
 #include <minikin/SystemFonts.h>
 #include <utils/TraceUtils.h>
 
 #include <mutex>
 #include <unordered_map>
+
+#ifdef __ANDROID__
+#include <sys/stat.h>
+#endif
 
 using namespace android;
 using android::uirenderer::TraceUtils;
@@ -155,12 +160,43 @@ static void Typeface_registerGenericFamily(JNIEnv *env, jobject, jstring familyN
                                            toTypeface(ptr)->fFontCollection);
 }
 
-static sk_sp<SkData> makeSkDataCached(const std::string& path) {
+#ifdef __ANDROID__
+
+static bool getVerity(const std::string& path) {
+    struct statx out = {};
+    if (statx(AT_FDCWD, path.c_str(), 0 /* flags */, STATX_ALL, &out) != 0) {
+        ALOGE("statx failed for %s, errno = %d", path.c_str(), errno);
+        return false;
+    }
+
+    // Validity check.
+    if ((out.stx_attributes_mask & STATX_ATTR_VERITY) == 0) {
+        // STATX_ATTR_VERITY not supported by kernel.
+        return false;
+    }
+
+    return (out.stx_attributes & STATX_ATTR_VERITY) != 0;
+}
+
+#else
+
+static bool getVerity(const std::string&) {
+    // verity check is not enabled on desktop.
+    return false;
+}
+
+#endif  // __ANDROID__
+
+static sk_sp<SkData> makeSkDataCached(const std::string& path, bool hasVerity) {
     // We don't clear cache as Typeface objects created by Typeface_readTypefaces() will be stored
     // in a static field and will not be garbage collected.
     static std::unordered_map<std::string, sk_sp<SkData>> cache;
     static std::mutex mutex;
     ALOG_ASSERT(!path.empty());
+    if (hasVerity && !getVerity(path)) {
+        LOG_ALWAYS_FATAL("verity bit was removed from %s", path.c_str());
+        return nullptr;
+    }
     std::lock_guard lock{mutex};
     sk_sp<SkData>& entry = cache[path];
     if (entry.get() == nullptr) {
@@ -171,15 +207,34 @@ static sk_sp<SkData> makeSkDataCached(const std::string& path) {
 
 static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSkia(
         minikin::BufferReader* reader) {
-    std::string_view fontPath = reader->readString();
-    int fontIndex = reader->read<int>();
-    const minikin::FontVariation* axesPtr;
-    uint32_t axesCount;
-    std::tie(axesPtr, axesCount) = reader->readArray<minikin::FontVariation>();
-    return [fontPath, fontIndex, axesPtr, axesCount]() -> std::shared_ptr<minikin::MinikinFont> {
+    const void* buffer = reader->data();
+    size_t pos = reader->pos();
+    // Advance reader's position.
+    reader->skipString(); // fontPath
+    reader->skip<int>(); // fontIndex
+    reader->skipArray<minikin::FontVariation>(); // axesPtr, axesCount
+    bool hasVerity = static_cast<bool>(reader->read<int8_t>());
+    if (hasVerity) {
+        reader->skip<uint32_t>(); // expectedFontRevision
+        reader->skipString(); // expectedPostScriptName
+    }
+    return [buffer, pos]() -> std::shared_ptr<minikin::MinikinFont> {
+        minikin::BufferReader fontReader(buffer, pos);
+        std::string_view fontPath = fontReader.readString();
         std::string path(fontPath.data(), fontPath.size());
         ATRACE_FORMAT("Loading font %s", path.c_str());
-        sk_sp<SkData> data = makeSkDataCached(path);
+        int fontIndex = fontReader.read<int>();
+        const minikin::FontVariation* axesPtr;
+        uint32_t axesCount;
+        std::tie(axesPtr, axesCount) = fontReader.readArray<minikin::FontVariation>();
+        bool hasVerity = static_cast<bool>(fontReader.read<int8_t>());
+        uint32_t expectedFontRevision;
+        std::string_view expectedPostScriptName;
+        if (hasVerity) {
+            expectedFontRevision = fontReader.read<uint32_t>();
+            expectedPostScriptName = fontReader.readString();
+        }
+        sk_sp<SkData> data = makeSkDataCached(path, hasVerity);
         if (data.get() == nullptr) {
             // This may happen if:
             // 1. When the process failed to open the file (e.g. invalid path or permission).
@@ -189,6 +244,20 @@ static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSki
         }
         const void* fontPtr = data->data();
         size_t fontSize = data->size();
+        if (hasVerity) {
+            // Verify font metadata if verity is enabled.
+            minikin::FontFileParser parser(fontPtr, fontSize, fontIndex);
+            std::optional<uint32_t> revision = parser.getFontRevision();
+            if (!revision.has_value() || revision.value() != expectedFontRevision) {
+              LOG_ALWAYS_FATAL("Wrong font revision: %s", path.c_str());
+              return nullptr;
+            }
+            std::optional<std::string> psName = parser.getPostScriptName();
+            if (!psName.has_value() || psName.value() != expectedPostScriptName) {
+              LOG_ALWAYS_FATAL("Wrong PostScript name: %s", path.c_str());
+              return nullptr;
+            }
+        }
         std::vector<minikin::FontVariation> axes(axesPtr, axesPtr + axesCount);
         std::shared_ptr<minikin::MinikinFont> minikinFont =
                 fonts::createMinikinFontSkia(std::move(data), fontPath, fontPtr, fontSize,
@@ -203,10 +272,24 @@ static std::function<std::shared_ptr<minikin::MinikinFont>()> readMinikinFontSki
 
 static void writeMinikinFontSkia(minikin::BufferWriter* writer,
         const minikin::MinikinFont* typeface) {
-    writer->writeString(typeface->GetFontPath());
+    const std::string& path = typeface->GetFontPath();
+    writer->writeString(path);
     writer->write<int>(typeface->GetFontIndex());
     const std::vector<minikin::FontVariation>& axes = typeface->GetAxes();
     writer->writeArray<minikin::FontVariation>(axes.data(), axes.size());
+    bool hasVerity = getVerity(path);
+    writer->write<int8_t>(static_cast<int8_t>(hasVerity));
+    if (hasVerity) {
+        // Write font metadata for verification only when verity is enabled.
+        minikin::FontFileParser parser(typeface->GetFontData(), typeface->GetFontSize(),
+                                       typeface->GetFontIndex());
+        std::optional<uint32_t> revision = parser.getFontRevision();
+        LOG_ALWAYS_FATAL_IF(!revision.has_value());
+        writer->write<uint32_t>(revision.value());
+        std::optional<std::string> psName = parser.getPostScriptName();
+        LOG_ALWAYS_FATAL_IF(!psName.has_value());
+        writer->writeString(psName.value());
+    }
 }
 
 static jint Typeface_writeTypefaces(JNIEnv *env, jobject, jobject buffer, jlongArray faceHandles) {
