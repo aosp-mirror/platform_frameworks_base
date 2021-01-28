@@ -469,6 +469,11 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper()
                             .alpha(tx, leash, 1f)
                             .round(tx, leash, shouldApplyCornerRadius());
+                    // TODO(b/178632364): this is a work around for the black background when
+                    // entering PiP in buttion navigation mode.
+                    if (isInPipDirection(direction)) {
+                        tx.setWindowCrop(leash, getStartValue());
+                    }
                     tx.show(leash);
                     tx.apply();
                 }
