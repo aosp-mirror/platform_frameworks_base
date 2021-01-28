@@ -307,6 +307,7 @@ message TaskProto {
     optional bool animating_bounds = 26 [deprecated = true];
     optional float minimize_amount = 27;
     optional bool created_by_organizer = 28;
+    optional string affinity = 29;
 }
 
 /* represents ActivityRecordProto */
