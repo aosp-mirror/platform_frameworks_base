@@ -212,7 +212,6 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -648,14 +647,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     /**
-     * The insets state of sources provided by windows above the current window.
+     * Indicates if this window is behind IME. Only windows behind IME can get insets from IME.
      */
-    InsetsState mAboveInsetsState = new InsetsState();
-
-    /**
-     * The insets sources provided by this window.
-     */
-    ArrayMap<Integer, InsetsSource> mProvidedInsetsSources = new ArrayMap<>();
+    boolean mBehindIme = false;
 
     /**
      * Surface insets from the previous call to relayout(), used to track
