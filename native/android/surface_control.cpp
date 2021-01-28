@@ -26,14 +26,13 @@
 #include <gui/SurfaceComposerClient.h>
 #include <gui/SurfaceControl.h>
 
-#include <ui/HdrCapabilities.h>
+#include <ui/DynamicDisplayInfo.h>
 
 #include <utils/Timers.h>
 
 using namespace android::hardware::configstore;
 using namespace android::hardware::configstore::V1_0;
 using namespace android;
-using android::hardware::configstore::V1_0::ISurfaceFlingerConfigs;
 
 using Transaction = SurfaceComposerClient::Transaction;
 
@@ -71,14 +70,13 @@ static bool getHdrSupport(const sp<SurfaceControl>& surfaceControl) {
         return false;
     }
 
-    HdrCapabilities hdrCapabilities;
-    status_t err = client->getHdrCapabilities(display, &hdrCapabilities);
-    if (err) {
+    ui::DynamicDisplayInfo info;
+    if (status_t err = client->getDynamicDisplayInfo(display, &info); err != NO_ERROR) {
         ALOGE("unable to get hdr capabilities");
-        return false;
+        return err;
     }
 
-    return !hdrCapabilities.getSupportedHdrTypes().empty();
+    return !info.hdrCapabilities.getSupportedHdrTypes().empty();
 }
 
 static bool isDataSpaceValid(const sp<SurfaceControl>& surfaceControl, ADataSpace dataSpace) {

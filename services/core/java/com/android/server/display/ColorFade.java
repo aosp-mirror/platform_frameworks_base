@@ -165,7 +165,7 @@ final class ColorFade {
                     "Failed to take screenshot because internal display is disconnected");
             return false;
         }
-        boolean isWideColor = SurfaceControl.getActiveColorMode(token)
+        boolean isWideColor = SurfaceControl.getDynamicDisplayInfo(token).activeColorMode
                 == Display.COLOR_MODE_DISPLAY_P3;
 
         // Set mPrepared here so if initialization fails, resources can be cleaned up.
