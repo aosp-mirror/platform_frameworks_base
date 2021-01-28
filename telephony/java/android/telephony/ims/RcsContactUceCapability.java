@@ -19,6 +19,7 @@ package android.telephony.ims;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,6 +34,7 @@ import java.util.List;
  * Contains the User Capability Exchange capabilities corresponding to a contact's URI.
  * @hide
  */
+@SystemApi
 public final class RcsContactUceCapability implements Parcelable {
 
     /** Contains presence information associated with the contact */
@@ -70,52 +72,46 @@ public final class RcsContactUceCapability implements Parcelable {
     public @interface SourceType {}
 
     /**
+     * Capability information for the requested contact has expired and can not be refreshed due to
+     * a temporary network error. This is a temporary error and the capabilities of the contact
+     * should be queried again at a later time.
+     */
+    public static final int REQUEST_RESULT_UNKNOWN = 0;
+
+    /**
      * The requested contact was found to be offline when queried. This is only applicable to
      * contact capabilities that were queried via OPTIONS requests and the network returned a
      * 408/480 response.
      */
-    public static final int REQUEST_RESULT_NOT_ONLINE = 0;
+    public static final int REQUEST_RESULT_NOT_ONLINE = 1;
 
     /**
      * Capability information for the requested contact was not found. The contact should not be
      * considered an RCS user.
      */
-    public static final int REQUEST_RESULT_NOT_FOUND = 1;
+    public static final int REQUEST_RESULT_NOT_FOUND = 2;
 
     /**
      * Capability information for the requested contact was found successfully.
      */
-    public static final int REQUEST_RESULT_FOUND = 2;
-
-    /**
-     * Capability information for the requested contact has expired and can not be refreshed due to
-     * a temporary network error. This is a temporary error and the capabilities of the contact
-     * should be queried again at a later time.
-     */
-    public static final int REQUEST_RESULT_UNKNOWN = 3;
+    public static final int REQUEST_RESULT_FOUND = 3;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = "REQUEST_RESULT_", value = {
+        REQUEST_RESULT_UNKNOWN,
         REQUEST_RESULT_NOT_ONLINE,
         REQUEST_RESULT_NOT_FOUND,
-        REQUEST_RESULT_FOUND,
-        REQUEST_RESULT_UNKNOWN
+        REQUEST_RESULT_FOUND
     })
     public @interface RequestResult {}
 
     /**
-     * The base class of {@link OptionsBuilder} and {@link PresenceBuilder}
-     */
-    public static abstract class RcsUcsCapabilityBuilder {
-        public abstract @NonNull RcsContactUceCapability build();
-    }
-
-    /**
      * Builder to help construct {@link RcsContactUceCapability} instances when capabilities were
      * queried through SIP OPTIONS.
+     * @hide
      */
-    public static class OptionsBuilder extends RcsUcsCapabilityBuilder {
+    public static final class OptionsBuilder {
 
         private final RcsContactUceCapability mCapabilities;
 
@@ -162,7 +158,6 @@ public final class RcsContactUceCapability implements Parcelable {
         /**
          * @return the constructed instance.
          */
-        @Override
         public @NonNull RcsContactUceCapability build() {
             return mCapabilities;
         }
@@ -172,7 +167,7 @@ public final class RcsContactUceCapability implements Parcelable {
      * Builder to help construct {@link RcsContactUceCapability} instances when capabilities were
      * queried through a presence server.
      */
-    public static class PresenceBuilder extends RcsUcsCapabilityBuilder {
+    public static final class PresenceBuilder {
 
         private final RcsContactUceCapability mCapabilities;
 
@@ -214,7 +209,6 @@ public final class RcsContactUceCapability implements Parcelable {
         /**
          * @return the RcsContactUceCapability instance.
          */
-        @Override
         public @NonNull RcsContactUceCapability build() {
             return mCapabilities;
         }
@@ -284,6 +278,7 @@ public final class RcsContactUceCapability implements Parcelable {
      * <p>
      * Note: this is only populated if {@link #getCapabilityMechanism} is
      * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_OPTIONS}
+     * @hide
      */
     public @NonNull List<String> getOptionsFeatureTags() {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_OPTIONS) {
@@ -299,7 +294,7 @@ public final class RcsContactUceCapability implements Parcelable {
      * Note: this is only populated if {@link #getCapabilityMechanism} is
      * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_PRESENCE}
      */
-    public @NonNull List<RcsContactPresenceTuple> getPresenceTuples() {
+    public @NonNull List<RcsContactPresenceTuple> getCapabilityTuples() {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_PRESENCE) {
             return Collections.emptyList();
         }
@@ -309,13 +304,14 @@ public final class RcsContactUceCapability implements Parcelable {
     /**
      * Get the RcsContactPresenceTuple associated with the given service id.
      * @param serviceId The service id to get the presence tuple.
-     * @return The RcsContactPresenceTuple which has the given service id.
+     * @return The RcsContactPresenceTuple which has the given service id or {@code null} if the
+     * service id does not exist in the list of presence tuples returned from the network.
      *
      * <p>
      * Note: this is only populated if {@link #getCapabilityMechanism} is
      * {@link RcsContactUceCapability#CAPABILITY_MECHANISM_PRESENCE}
      */
-    public @Nullable RcsContactPresenceTuple getPresenceTuple(@NonNull String serviceId) {
+    public @Nullable RcsContactPresenceTuple getCapabilityTuple(@NonNull String serviceId) {
         if (mCapabilityMechanism != CAPABILITY_MECHANISM_PRESENCE) {
             return null;
         }

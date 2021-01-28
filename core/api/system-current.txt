@@ -12964,11 +12964,100 @@ package android.telephony.ims {
     field public static final String RCS_PROFILE_2_3 = "UP_2.3";
   }
 
+  public final class RcsContactPresenceTuple implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.net.Uri getContactUri();
+    method @Nullable public android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities getServiceCapabilities();
+    method @Nullable public String getServiceDescription();
+    method @NonNull public String getServiceId();
+    method @NonNull public String getServiceVersion();
+    method @NonNull public String getStatus();
+    method @Nullable public String getTimestamp();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsContactPresenceTuple> CREATOR;
+    field public static final String SERVICE_ID_CALL_COMPOSER = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.callcomposer";
+    field public static final String SERVICE_ID_CHATBOT = "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.chatbot";
+    field public static final String SERVICE_ID_CHATBOT_ROLE = "org.gsma.rcs.isbot";
+    field public static final String SERVICE_ID_CHATBOT_STANDALONE = " org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.chatbot.sa";
+    field public static final String SERVICE_ID_CHAT_V1 = "org.openmobilealliance:IM-session";
+    field public static final String SERVICE_ID_CHAT_V2 = "org.openmobilealliance:ChatSession";
+    field public static final String SERVICE_ID_FT = "org.openmobilealliance:File-Transfer-HTTP";
+    field public static final String SERVICE_ID_FT_OVER_SMS = "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.ftsms";
+    field public static final String SERVICE_ID_GEO_PUSH = "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.geopush";
+    field public static final String SERVICE_ID_GEO_PUSH_VIA_SMS = "org.3gpp.urn:urn-7:3gpp-application.ims.iari.rcs.geosms";
+    field public static final String SERVICE_ID_MMTEL = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.mmtel";
+    field public static final String SERVICE_ID_POST_CALL = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.callunanswered";
+    field public static final String SERVICE_ID_SHARED_MAP = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.sharedmap";
+    field public static final String SERVICE_ID_SHARED_SKETCH = "org.3gpp.urn:urn-7:3gpp-service.ims.icsi.gsma.sharedsketch";
+    field public static final String TUPLE_BASIC_STATUS_CLOSED = "closed";
+    field public static final String TUPLE_BASIC_STATUS_OPEN = "open";
+  }
+
+  public static final class RcsContactPresenceTuple.Builder {
+    ctor public RcsContactPresenceTuple.Builder(@NonNull String, @NonNull String, @NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple build();
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.Builder setContactUri(@NonNull android.net.Uri);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.Builder setServiceCapabilities(@NonNull android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.Builder setServiceDescription(@NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.Builder setTimestamp(@NonNull String);
+  }
+
+  public static final class RcsContactPresenceTuple.ServiceCapabilities implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<java.lang.String> getSupportedDuplexModes();
+    method @NonNull public java.util.List<java.lang.String> getUnsupportedDuplexModes();
+    method public boolean isAudioCapable();
+    method public boolean isVideoCapable();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities> CREATOR;
+    field public static final String DUPLEX_MODE_FULL = "full";
+    field public static final String DUPLEX_MODE_HALF = "half";
+    field public static final String DUPLEX_MODE_RECEIVE_ONLY = "receive-only";
+    field public static final String DUPLEX_MODE_SEND_ONLY = "send-only";
+  }
+
+  public static final class RcsContactPresenceTuple.ServiceCapabilities.Builder {
+    ctor public RcsContactPresenceTuple.ServiceCapabilities.Builder(boolean, boolean);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities.Builder addSupportedDuplexMode(@NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities.Builder addUnsupportedDuplexMode(@NonNull String);
+    method @NonNull public android.telephony.ims.RcsContactPresenceTuple.ServiceCapabilities build();
+  }
+
+  public final class RcsContactUceCapability implements android.os.Parcelable {
+    method public int describeContents();
+    method public int getCapabilityMechanism();
+    method @Nullable public android.telephony.ims.RcsContactPresenceTuple getCapabilityTuple(@NonNull String);
+    method @NonNull public java.util.List<android.telephony.ims.RcsContactPresenceTuple> getCapabilityTuples();
+    method @NonNull public android.net.Uri getContactUri();
+    method public int getRequestResult();
+    method public int getSourceType();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field public static final int CAPABILITY_MECHANISM_OPTIONS = 2; // 0x2
+    field public static final int CAPABILITY_MECHANISM_PRESENCE = 1; // 0x1
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.ims.RcsContactUceCapability> CREATOR;
+    field public static final int REQUEST_RESULT_FOUND = 3; // 0x3
+    field public static final int REQUEST_RESULT_NOT_FOUND = 2; // 0x2
+    field public static final int REQUEST_RESULT_NOT_ONLINE = 1; // 0x1
+    field public static final int REQUEST_RESULT_UNKNOWN = 0; // 0x0
+    field public static final int SOURCE_TYPE_CACHED = 1; // 0x1
+    field public static final int SOURCE_TYPE_NETWORK = 0; // 0x0
+  }
+
+  public static final class RcsContactUceCapability.PresenceBuilder {
+    ctor public RcsContactUceCapability.PresenceBuilder(@NonNull android.net.Uri, int, int);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder addCapabilityTuple(@NonNull android.telephony.ims.RcsContactPresenceTuple);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability.PresenceBuilder addCapabilityTuples(@NonNull java.util.List<android.telephony.ims.RcsContactPresenceTuple>);
+    method @NonNull public android.telephony.ims.RcsContactUceCapability build();
+  }
+
   public class RcsUceAdapter {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void addOnPublishStateChangedListener(@NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RcsUceAdapter.OnPublishStateChangedListener) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getUcePublishState() throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void removeOnPublishStateChangedListener(@NonNull android.telephony.ims.RcsUceAdapter.OnPublishStateChangedListener) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void requestAvailability(@NonNull android.net.Uri, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RcsUceAdapter.CapabilitiesCallback) throws android.telephony.ims.ImsException;
+    method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public void requestCapabilities(@NonNull java.util.List<android.net.Uri>, @NonNull java.util.concurrent.Executor, @NonNull android.telephony.ims.RcsUceAdapter.CapabilitiesCallback) throws android.telephony.ims.ImsException;
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUceSettingEnabled(boolean) throws android.telephony.ims.ImsException;
+    field public static final int CAPABILITY_TYPE_PRESENCE_UCE = 2; // 0x2
     field public static final int CAPABILITY_UPDATE_TRIGGER_ETAG_EXPIRED = 1; // 0x1
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_2G = 7; // 0x7
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_3G = 6; // 0x6
@@ -12981,12 +13070,30 @@ package android.telephony.ims {
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_NR5G_VOPS_ENABLED = 11; // 0xb
     field public static final int CAPABILITY_UPDATE_TRIGGER_MOVE_TO_WLAN = 8; // 0x8
     field public static final int CAPABILITY_UPDATE_TRIGGER_UNKNOWN = 0; // 0x0
+    field public static final int ERROR_FORBIDDEN = 6; // 0x6
+    field public static final int ERROR_GENERIC_FAILURE = 1; // 0x1
+    field public static final int ERROR_INSUFFICIENT_MEMORY = 10; // 0xa
+    field public static final int ERROR_LOST_NETWORK = 11; // 0xb
+    field public static final int ERROR_NOT_AUTHORIZED = 5; // 0x5
+    field public static final int ERROR_NOT_AVAILABLE = 3; // 0x3
+    field public static final int ERROR_NOT_ENABLED = 2; // 0x2
+    field public static final int ERROR_NOT_FOUND = 7; // 0x7
+    field public static final int ERROR_NOT_REGISTERED = 4; // 0x4
+    field public static final int ERROR_REQUEST_TIMEOUT = 9; // 0x9
+    field public static final int ERROR_REQUEST_TOO_LARGE = 8; // 0x8
+    field public static final int ERROR_SERVER_UNAVAILABLE = 12; // 0xc
     field public static final int PUBLISH_STATE_NOT_PUBLISHED = 2; // 0x2
     field public static final int PUBLISH_STATE_OK = 1; // 0x1
     field public static final int PUBLISH_STATE_OTHER_ERROR = 6; // 0x6
     field public static final int PUBLISH_STATE_RCS_PROVISION_ERROR = 4; // 0x4
     field public static final int PUBLISH_STATE_REQUEST_TIMEOUT = 5; // 0x5
     field public static final int PUBLISH_STATE_VOICE_PROVISION_ERROR = 3; // 0x3
+  }
+
+  public static interface RcsUceAdapter.CapabilitiesCallback {
+    method public void onCapabilitiesReceived(@NonNull java.util.List<android.telephony.ims.RcsContactUceCapability>);
+    method public void onComplete();
+    method public void onError(int, long);
   }
 
   public static interface RcsUceAdapter.OnPublishStateChangedListener {
@@ -13400,6 +13507,7 @@ package android.telephony.ims.stub {
   public class RcsCapabilityExchangeImplBase {
     ctor public RcsCapabilityExchangeImplBase(@NonNull java.util.concurrent.Executor);
     method public void publishCapabilities(@NonNull String, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseCallback);
+    method public void subscribeForCapabilities(@NonNull java.util.List<android.net.Uri>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.SubscribeResponseCallback);
     field public static final int COMMAND_CODE_FETCH_ERROR = 3; // 0x3
     field public static final int COMMAND_CODE_GENERIC_FAILURE = 1; // 0x1
     field public static final int COMMAND_CODE_INSUFFICIENT_MEMORY = 5; // 0x5
@@ -13416,6 +13524,14 @@ package android.telephony.ims.stub {
   public static interface RcsCapabilityExchangeImplBase.PublishResponseCallback {
     method public void onCommandError(int) throws android.telephony.ims.ImsException;
     method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+  }
+
+  public static interface RcsCapabilityExchangeImplBase.SubscribeResponseCallback {
+    method public void onCommandError(int) throws android.telephony.ims.ImsException;
+    method public void onNetworkResponse(@IntRange(from=100, to=699) int, @NonNull String) throws android.telephony.ims.ImsException;
+    method public void onNotifyCapabilitiesUpdate(@NonNull java.util.List<java.lang.String>) throws android.telephony.ims.ImsException;
+    method public void onResourceTerminated(@NonNull java.util.List<android.util.Pair<android.net.Uri,java.lang.String>>) throws android.telephony.ims.ImsException;
+    method public void onTerminated(@NonNull String, long) throws android.telephony.ims.ImsException;
   }
 
   public interface SipDelegate {
