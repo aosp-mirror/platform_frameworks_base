@@ -4070,6 +4070,12 @@
         <attr name="hand_hour" format="reference"/>
         <attr name="hand_minute" format="reference"/>
         <attr name="hand_second" format="reference"/>
+        <!-- Specifies the time zone to use. When this attribute is specified, the
+             TextClock will ignore the time zone of the system. To use the user's
+             time zone, do not specify this attribute. The default value is the
+             user's time zone. Please refer to {@link java.util.TimeZone} for more
+             information about time zone ids. -->
+        <attr name="timeZone" format="string"/>
     </declare-styleable>
     <declare-styleable name="Button">
     </declare-styleable>
