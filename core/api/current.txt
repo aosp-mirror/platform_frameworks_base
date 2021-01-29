@@ -722,6 +722,7 @@ package android {
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
     field public static final int hand_minute = 16843012; // 0x1010104
+    field public static final int hand_second = 16844323; // 0x1010623
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -53058,6 +53059,10 @@ package android.widget {
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
+    method @Deprecated public void setDial(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setHourHand(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setMinuteHand(@NonNull android.graphics.drawable.Icon);
+    method @Deprecated public void setSecondHand(@Nullable android.graphics.drawable.Icon);
   }
 
   public class ArrayAdapter<T> extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.ThemedSpinnerAdapter {
