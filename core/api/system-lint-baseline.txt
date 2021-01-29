@@ -6,9 +6,11 @@ ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
 BuilderSetStyle: android.net.IpSecTransform.Builder#buildTunnelModeTransform(java.net.InetAddress, android.net.IpSecManager.SecurityParameterIndex):
     Builder methods names should use setFoo() / addFoo() / clearFoo() style: method android.net.IpSecTransform.Builder.buildTunnelModeTransform(java.net.InetAddress,android.net.IpSecManager.SecurityParameterIndex)
 
+
 ExecutorRegistration: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
     Registration methods should have overload that accepts delivery Executor: `setOnRtpRxNoticeListener`
-    
+
+
 GenericException: android.app.prediction.AppPredictor#finalize():
     
 GenericException: android.hardware.location.ContextHubClient#finalize():
@@ -21,6 +23,8 @@ GenericException: android.service.autofill.augmented.FillWindow#finalize():
 
 IntentBuilderName: android.app.search.SearchAction#getIntent():
     
+IntentBuilderName: android.app.smartspace.SmartspaceAction#getIntent():
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `getIntent`
 
 
 KotlinKeyword: android.app.Notification#when:
@@ -81,6 +85,10 @@ MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(
     
 MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
     
+
+
+OnNameExpected: android.service.smartspace.SmartspaceService#notifySmartspaceEvent(android.app.smartspace.SmartspaceSessionId, android.app.smartspace.SmartspaceTargetEvent):
+    Methods implemented by developers should follow the on<Something> style, was `notifySmartspaceEvent`
 
 
 ProtectedMember: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context):
@@ -187,11 +195,10 @@ SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallb
     
 SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
-SamShouldBeLast: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
-    SAM-compatible parameters (such as parameter 2, "listener", in android.media.MediaPlayer.setOnRtpRxNoticeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
-    
 SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
+SamShouldBeLast: android.media.MediaPlayer#setOnRtpRxNoticeListener(android.content.Context, android.media.MediaPlayer.OnRtpRxNoticeListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 2, "listener", in android.media.MediaPlayer.setOnRtpRxNoticeListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
 SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
     
 SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
@@ -258,3 +265,5 @@ UserHandleName: android.app.search.SearchAction.Builder#setUserHandle(android.os
     Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `setUserHandle`
 UserHandleName: android.app.search.SearchTarget.Builder#setUserHandle(android.os.UserHandle):
     
+UserHandleName: android.app.smartspace.SmartspaceAction.Builder#setUserHandle(android.os.UserHandle):
+    Method taking UserHandle should be named `doFooAsUser` or `queryFooForUser`, was `setUserHandle`
