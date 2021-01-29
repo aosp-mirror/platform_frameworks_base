@@ -56,12 +56,4 @@ public class ViewRootImplCompat {
                     });
         }
     }
-
-    public void mergeWithNextTransaction(SurfaceControl.Transaction t, long frame) {
-        if (mViewRoot != null) {
-            mViewRoot.mergeWithNextTransaction(t, frame);
-        } else {
-            t.apply();
-        }
-    }
 }
