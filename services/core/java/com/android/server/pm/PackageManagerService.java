@@ -2153,6 +2153,10 @@ public class PackageManagerService extends IPackageManager.Stub
         void enforceCrossUserPermission(int callingUid, @UserIdInt int userId,
                 boolean requireFullPermission, boolean checkShell,
                 boolean requirePermissionWhenSameUser, String message);
+        SigningDetails getSigningDetails(@NonNull String packageName);
+        SigningDetails getSigningDetails(int uid);
+        boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId);
+        boolean filterAppAccess(String packageName, int callingUid, int userId);
     }
 
     /**
@@ -4578,6 +4582,40 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new SecurityException(errorMessage);
         }
 
+        public SigningDetails getSigningDetails(@NonNull String packageName) {
+            AndroidPackage p = mPackages.get(packageName);
+            if (p == null) {
+                return null;
+            }
+            return p.getSigningDetails();
+        }
+
+        public SigningDetails getSigningDetails(int uid) {
+            final int appId = UserHandle.getAppId(uid);
+            final Object obj = mSettings.getSettingLPr(appId);
+            if (obj != null) {
+                if (obj instanceof SharedUserSetting) {
+                    return ((SharedUserSetting) obj).signatures.mSigningDetails;
+                } else if (obj instanceof PackageSetting) {
+                    final PackageSetting ps = (PackageSetting) obj;
+                    return ps.signatures.mSigningDetails;
+                }
+            }
+            return SigningDetails.UNKNOWN;
+        }
+
+        public boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId) {
+            PackageSetting ps = getPackageSetting(pkg.getPackageName());
+            return shouldFilterApplicationLocked(ps, callingUid,
+                    userId);
+        }
+
+        public boolean filterAppAccess(String packageName, int callingUid, int userId) {
+            PackageSetting ps = getPackageSetting(packageName);
+            return shouldFilterApplicationLocked(ps, callingUid,
+                    userId);
+        }
+
     }
 
     /**
@@ -4726,6 +4764,26 @@ public class PackageManagerService extends IPackageManager.Stub
                 int callingUid) {
             synchronized (mLock) {
                 return super.getPackageUidInternal(packageName, flags, userId, callingUid);
+            }
+        }
+        public SigningDetails getSigningDetails(@NonNull String packageName) {
+            synchronized (mLock) {
+                return super.getSigningDetails(packageName);
+            }
+        }
+        public SigningDetails getSigningDetails(int uid) {
+            synchronized (mLock) {
+                return super.getSigningDetails(uid);
+            }
+        }
+        public boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId) {
+            synchronized (mLock) {
+                return super.filterAppAccess(pkg, callingUid, userId);
+            }
+        }
+        public boolean filterAppAccess(String packageName, int callingUid, int userId) {
+            synchronized (mLock) {
+                return super.filterAppAccess(packageName, callingUid, userId);
             }
         }
     }
@@ -26560,6 +26618,22 @@ public class PackageManagerService extends IPackageManager.Stub
         return snapshotComputer().getPackage(uid);
     }
 
+    private SigningDetails getSigningDetails(@NonNull String packageName) {
+        return snapshotComputer().getSigningDetails(packageName);
+    }
+
+    private SigningDetails getSigningDetails(int uid) {
+        return snapshotComputer().getSigningDetails(uid);
+    }
+
+    private boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId) {
+        return snapshotComputer().filterAppAccess(pkg, callingUid, userId);
+    }
+
+    private boolean filterAppAccess(String packageName, int callingUid, int userId) {
+        return snapshotComputer().filterAppAccess(packageName, callingUid, userId);
+    }
+
     private class PackageManagerInternalImpl extends PackageManagerInternal {
         @Override
         public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
@@ -26615,29 +26689,11 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         private SigningDetails getSigningDetails(@NonNull String packageName) {
-            synchronized (mLock) {
-                AndroidPackage p = mPackages.get(packageName);
-                if (p == null) {
-                    return null;
-                }
-                return p.getSigningDetails();
-            }
+            return PackageManagerService.this.getSigningDetails(packageName);
         }
 
         private SigningDetails getSigningDetails(int uid) {
-            synchronized (mLock) {
-                final int appId = UserHandle.getAppId(uid);
-                final Object obj = mSettings.getSettingLPr(appId);
-                if (obj != null) {
-                    if (obj instanceof SharedUserSetting) {
-                        return ((SharedUserSetting) obj).signatures.mSigningDetails;
-                    } else if (obj instanceof PackageSetting) {
-                        final PackageSetting ps = (PackageSetting) obj;
-                        return ps.signatures.mSigningDetails;
-                    }
-                }
-                return SigningDetails.UNKNOWN;
-            }
+            return PackageManagerService.this.getSigningDetails(uid);
         }
 
         @Override
@@ -26652,20 +26708,12 @@ public class PackageManagerService extends IPackageManager.Stub
 
         @Override
         public boolean filterAppAccess(AndroidPackage pkg, int callingUid, int userId) {
-            synchronized (mLock) {
-                PackageSetting ps = getPackageSetting(pkg.getPackageName());
-                return PackageManagerService.this.shouldFilterApplicationLocked(ps, callingUid,
-                        userId);
-            }
+            return PackageManagerService.this.filterAppAccess(pkg, callingUid, userId);
         }
 
         @Override
         public boolean filterAppAccess(String packageName, int callingUid, int userId) {
-            synchronized (mLock) {
-                PackageSetting ps = getPackageSetting(packageName);
-                return PackageManagerService.this.shouldFilterApplicationLocked(ps, callingUid,
-                        userId);
-            }
+            return PackageManagerService.this.filterAppAccess(packageName, callingUid, userId);
         }
 
         @Override
