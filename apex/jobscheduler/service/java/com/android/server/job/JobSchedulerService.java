@@ -380,7 +380,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                         default:
                             if (name.startsWith(JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY)
                                     && !concurrencyUpdated) {
-                                mConstants.updateConcurrencyConstantsLocked();
                                 mConcurrencyManager.updateConfigLocked();
                                 concurrencyUpdated = true;
                             } else {
@@ -406,119 +405,6 @@ public class JobSchedulerService extends com.android.server.SystemService
         mQuotaTracker.setCountLimit(QUOTA_TRACKER_CATEGORY_SCHEDULE_PERSISTED,
                 mConstants.API_QUOTA_SCHEDULE_COUNT,
                 mConstants.API_QUOTA_SCHEDULE_WINDOW_MS);
-    }
-
-    static class MaxJobCounts {
-        private final int mTotalDefault;
-        private final String mTotalKey;
-        private final int mMaxBgDefault;
-        private final String mMaxBgKey;
-        private final int mMinBgDefault;
-        private final String mMinBgKey;
-        private int mTotal;
-        private int mMaxBg;
-        private int mMinBg;
-
-        MaxJobCounts(int totalDefault, String totalKey,
-                int maxBgDefault, String maxBgKey, int minBgDefault, String minBgKey) {
-            mTotalKey = totalKey;
-            mTotal = mTotalDefault = totalDefault;
-            mMaxBgKey = maxBgKey;
-            mMaxBg = mMaxBgDefault = maxBgDefault;
-            mMinBgKey = minBgKey;
-            mMinBg = mMinBgDefault = minBgDefault;
-        }
-
-        public void update() {
-            mTotal = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                    mTotalKey, mTotalDefault);
-            mMaxBg = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                    mMaxBgKey, mMaxBgDefault);
-            mMinBg = DeviceConfig.getInt(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
-                    mMinBgKey, mMinBgDefault);
-
-            // Ensure total in the range [1, MAX_JOB_CONTEXTS_COUNT].
-            mTotal = Math.min(Math.max(1, mTotal), MAX_JOB_CONTEXTS_COUNT);
-
-            // Ensure maxBg in the range [1, total].
-            mMaxBg = Math.min(Math.max(1, mMaxBg), mTotal);
-
-            // Ensure minBg in the range [0, min(maxBg, total - 1)]
-            mMinBg = Math.min(Math.max(0, mMinBg), Math.min(mMaxBg, mTotal - 1));
-        }
-
-        /** Total number of jobs to run simultaneously. */
-        public int getMaxTotal() {
-            return mTotal;
-        }
-
-        /** Max number of BG (== owned by non-TOP apps) jobs to run simultaneously. */
-        public int getMaxBg() {
-            return mMaxBg;
-        }
-
-        /**
-         * We try to run at least this many BG (== owned by non-TOP apps) jobs, when there are any
-         * pending, rather than always running the TOTAL number of FG jobs.
-         */
-        public int getMinBg() {
-            return mMinBg;
-        }
-
-        public void dump(PrintWriter pw, String prefix) {
-            pw.print(prefix);
-            pw.print(mTotalKey);
-            pw.print("=");
-            pw.print(mTotal);
-            pw.println();
-
-            pw.print(prefix);
-            pw.print(mMaxBgKey);
-            pw.print("=");
-            pw.print(mMaxBg);
-            pw.println();
-
-            pw.print(prefix);
-            pw.print(mMinBgKey);
-            pw.print("=");
-            pw.print(mMinBg);
-            pw.println();
-        }
-
-        public void dumpProto(ProtoOutputStream proto, long fieldId) {
-            final long token = proto.start(fieldId);
-            proto.write(MaxJobCountsProto.TOTAL_JOBS, mTotal);
-            proto.write(MaxJobCountsProto.MAX_BG, mMaxBg);
-            proto.write(MaxJobCountsProto.MIN_BG, mMinBg);
-            proto.end(token);
-        }
-    }
-
-    /** {@link MaxJobCounts} for each memory trim level. */
-    static class MaxJobCountsPerMemoryTrimLevel {
-        public final MaxJobCounts normal;
-        public final MaxJobCounts moderate;
-        public final MaxJobCounts low;
-        public final MaxJobCounts critical;
-
-        MaxJobCountsPerMemoryTrimLevel(
-                MaxJobCounts normal,
-                MaxJobCounts moderate, MaxJobCounts low,
-                MaxJobCounts critical) {
-            this.normal = normal;
-            this.moderate = moderate;
-            this.low = low;
-            this.critical = critical;
-        }
-
-        public void dumpProto(ProtoOutputStream proto, long fieldId) {
-            final long token = proto.start(fieldId);
-            normal.dumpProto(proto, MaxJobCountsPerMemoryTrimLevelProto.NORMAL);
-            moderate.dumpProto(proto, MaxJobCountsPerMemoryTrimLevelProto.MODERATE);
-            low.dumpProto(proto, MaxJobCountsPerMemoryTrimLevelProto.LOW);
-            critical.dumpProto(proto, MaxJobCountsPerMemoryTrimLevelProto.CRITICAL);
-            proto.end(token);
-        }
     }
 
     /**
@@ -579,49 +465,6 @@ public class JobSchedulerService extends com.android.server.SystemService
          * This is the job execution factor that is considered to be moderate use of the system.
          */
         float MODERATE_USE_FACTOR = DEFAULT_MODERATE_USE_FACTOR;
-
-        /** Prefix for all of the max_job constants. */
-        private static final String KEY_PREFIX_MAX_JOB =
-                JobConcurrencyManager.CONFIG_KEY_PREFIX_CONCURRENCY + "max_job_";
-
-        // Max job counts for screen on / off, for each memory trim level.
-        final MaxJobCountsPerMemoryTrimLevel MAX_JOB_COUNTS_SCREEN_ON =
-                new MaxJobCountsPerMemoryTrimLevel(
-                        new MaxJobCounts(
-                                8, KEY_PREFIX_MAX_JOB + "total_on_normal",
-                                6, KEY_PREFIX_MAX_JOB + "max_bg_on_normal",
-                                2, KEY_PREFIX_MAX_JOB + "min_bg_on_normal"),
-                        new MaxJobCounts(
-                                8, KEY_PREFIX_MAX_JOB + "total_on_moderate",
-                                4, KEY_PREFIX_MAX_JOB + "max_bg_on_moderate",
-                                2, KEY_PREFIX_MAX_JOB + "min_bg_on_moderate"),
-                        new MaxJobCounts(
-                                5, KEY_PREFIX_MAX_JOB + "total_on_low",
-                                1, KEY_PREFIX_MAX_JOB + "max_bg_on_low",
-                                1, KEY_PREFIX_MAX_JOB + "min_bg_on_low"),
-                        new MaxJobCounts(
-                                5, KEY_PREFIX_MAX_JOB + "total_on_critical",
-                                1, KEY_PREFIX_MAX_JOB + "max_bg_on_critical",
-                                1, KEY_PREFIX_MAX_JOB + "min_bg_on_critical"));
-
-        final MaxJobCountsPerMemoryTrimLevel MAX_JOB_COUNTS_SCREEN_OFF =
-                new MaxJobCountsPerMemoryTrimLevel(
-                        new MaxJobCounts(
-                                10, KEY_PREFIX_MAX_JOB + "total_off_normal",
-                                6, KEY_PREFIX_MAX_JOB + "max_bg_off_normal",
-                                2, KEY_PREFIX_MAX_JOB + "min_bg_off_normal"),
-                        new MaxJobCounts(
-                                10, KEY_PREFIX_MAX_JOB + "total_off_moderate",
-                                4, KEY_PREFIX_MAX_JOB + "max_bg_off_moderate",
-                                2, KEY_PREFIX_MAX_JOB + "min_bg_off_moderate"),
-                        new MaxJobCounts(
-                                5, KEY_PREFIX_MAX_JOB + "total_off_low",
-                                1, KEY_PREFIX_MAX_JOB + "max_bg_off_low",
-                                1, KEY_PREFIX_MAX_JOB + "min_bg_off_low"),
-                        new MaxJobCounts(
-                                5, KEY_PREFIX_MAX_JOB + "total_off_critical",
-                                1, KEY_PREFIX_MAX_JOB + "max_bg_off_critical",
-                                1, KEY_PREFIX_MAX_JOB + "min_bg_off_critical"));
 
         /**
          * The minimum backoff time to allow for linear backoff.
@@ -686,18 +529,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     DEFAULT_MODERATE_USE_FACTOR);
         }
 
-        void updateConcurrencyConstantsLocked() {
-            MAX_JOB_COUNTS_SCREEN_ON.normal.update();
-            MAX_JOB_COUNTS_SCREEN_ON.moderate.update();
-            MAX_JOB_COUNTS_SCREEN_ON.low.update();
-            MAX_JOB_COUNTS_SCREEN_ON.critical.update();
-
-            MAX_JOB_COUNTS_SCREEN_OFF.normal.update();
-            MAX_JOB_COUNTS_SCREEN_OFF.moderate.update();
-            MAX_JOB_COUNTS_SCREEN_OFF.low.update();
-            MAX_JOB_COUNTS_SCREEN_OFF.critical.update();
-        }
-
         private void updateBackoffConstantsLocked() {
             MIN_LINEAR_BACKOFF_TIME_MS = DeviceConfig.getLong(DeviceConfig.NAMESPACE_JOB_SCHEDULER,
                     KEY_MIN_LINEAR_BACKOFF_TIME_MS,
@@ -747,16 +578,6 @@ public class JobSchedulerService extends com.android.server.SystemService
             pw.print(KEY_HEAVY_USE_FACTOR, HEAVY_USE_FACTOR).println();
             pw.print(KEY_MODERATE_USE_FACTOR, MODERATE_USE_FACTOR).println();
 
-            MAX_JOB_COUNTS_SCREEN_ON.normal.dump(pw, "");
-            MAX_JOB_COUNTS_SCREEN_ON.moderate.dump(pw, "");
-            MAX_JOB_COUNTS_SCREEN_ON.low.dump(pw, "");
-            MAX_JOB_COUNTS_SCREEN_ON.critical.dump(pw, "");
-
-            MAX_JOB_COUNTS_SCREEN_OFF.normal.dump(pw, "");
-            MAX_JOB_COUNTS_SCREEN_OFF.moderate.dump(pw, "");
-            MAX_JOB_COUNTS_SCREEN_OFF.low.dump(pw, "");
-            MAX_JOB_COUNTS_SCREEN_OFF.critical.dump(pw, "");
-
             pw.print(KEY_MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS).println();
             pw.print(KEY_MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS).println();
             pw.print(KEY_CONN_CONGESTION_DELAY_FRAC, CONN_CONGESTION_DELAY_FRAC).println();
@@ -780,9 +601,6 @@ public class JobSchedulerService extends com.android.server.SystemService
                     MAX_NON_ACTIVE_JOB_BATCH_DELAY_MS);
             proto.write(ConstantsProto.HEAVY_USE_FACTOR, HEAVY_USE_FACTOR);
             proto.write(ConstantsProto.MODERATE_USE_FACTOR, MODERATE_USE_FACTOR);
-
-            MAX_JOB_COUNTS_SCREEN_ON.dumpProto(proto, ConstantsProto.MAX_JOB_COUNTS_SCREEN_ON);
-            MAX_JOB_COUNTS_SCREEN_OFF.dumpProto(proto, ConstantsProto.MAX_JOB_COUNTS_SCREEN_OFF);
 
             proto.write(ConstantsProto.MIN_LINEAR_BACKOFF_TIME_MS, MIN_LINEAR_BACKOFF_TIME_MS);
             proto.write(ConstantsProto.MIN_EXP_BACKOFF_TIME_MS, MIN_EXP_BACKOFF_TIME_MS);
