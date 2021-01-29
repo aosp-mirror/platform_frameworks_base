@@ -2331,11 +2331,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && mStatusBarWindowState != state) {
             mStatusBarWindowState = state;
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Status bar " + windowStateToString(state));
-            if (!showing && mState == StatusBarState.SHADE) {
-                mStatusBarView.collapsePanel(false /* animate */, false /* delayed */,
-                        1.0f /* speedUpFactor */);
-            }
             if (mStatusBarView != null) {
+                if (!showing && mState == StatusBarState.SHADE) {
+                    mStatusBarView.collapsePanel(false /* animate */, false /* delayed */,
+                            1.0f /* speedUpFactor */);
+                }
                 mStatusBarWindowHidden = state == WINDOW_STATE_HIDDEN;
                 updateHideIconsForBouncer(false /* animate */);
             }
