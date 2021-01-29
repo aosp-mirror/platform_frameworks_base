@@ -8750,7 +8750,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 }
             }
             if (getResources().getConfiguration().orientation == ORIENTATION_PORTRAIT) {
-                outAttrs.internalImeOptions |= EditorInfo.IME_FLAG_APP_WINDOW_PORTRAIT;
+                outAttrs.internalImeOptions |= EditorInfo.IME_INTERNAL_FLAG_APP_WINDOW_PORTRAIT;
             }
             if (isMultilineInputType(outAttrs.inputType)) {
                 // Multi-line text editors should always show an enter key.
