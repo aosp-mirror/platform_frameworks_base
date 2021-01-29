@@ -19,6 +19,7 @@ package com.google.android.mms.pdu;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.Uri;
+import android.os.Build;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -164,7 +165,7 @@ public class PduPart {
     /**
      * @return The length of the data, if this object have data, else 0.
      */
-     @UnsupportedAppUsage
+     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
      public int getDataLength() {
          if(mPartData != null){
              return mPartData.length;

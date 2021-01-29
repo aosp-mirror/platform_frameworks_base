@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -98,7 +99,7 @@ public final class IpConfiguration implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public IpConfiguration(IpAssignment ipAssignment,
                            ProxySettings proxySettings,
                            StaticIpConfiguration staticIpConfiguration,

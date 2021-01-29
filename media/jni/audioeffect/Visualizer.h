@@ -78,7 +78,8 @@ public:
                     void* user = NULL,
                     audio_session_t sessionId = AUDIO_SESSION_OUTPUT_MIX,
                     audio_io_handle_t io = AUDIO_IO_HANDLE_NONE,
-                    const AudioDeviceTypeAddr& device = {});
+                    const AudioDeviceTypeAddr& device = {},
+                    bool probe = false);
 
     // Declared 'final' because we call this in ~Visualizer().
     status_t    setEnabled(bool enabled) final;

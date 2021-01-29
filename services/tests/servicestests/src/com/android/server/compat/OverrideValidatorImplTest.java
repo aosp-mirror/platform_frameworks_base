@@ -17,6 +17,7 @@
 package com.android.server.compat;
 
 import static com.android.internal.compat.OverrideAllowedState.ALLOWED;
+import static com.android.internal.compat.OverrideAllowedState.DEFERRED_VERIFICATION;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NON_TARGET_SDK;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NOT_DEBUGGABLE;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_TARGET_SDK_TOO_HIGH;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -87,9 +89,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_debugBuildAnyChangeDebugApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
-                    .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                    .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                    .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                     .addEnabledChangeWithId(4)
                     .addDisabledChangeWithId(5)
                     .addLoggingOnlyChangeWithId(6).build();
@@ -131,9 +133,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_debugBuildAnyChangeReleaseApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
-                    .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                    .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                    .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                    .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                     .addEnabledChangeWithId(4)
                     .addDisabledChangeWithId(5)
                     .addLoggingOnlyChangeWithId(6).build();
@@ -174,9 +176,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_betaBuildTargetSdkChangeDebugApp_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(betaBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                         .addDisabledChangeWithId(4).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
@@ -245,9 +247,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_betaBuildAnyChangeReleaseApp_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(betaBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                         .addEnabledChangeWithId(4)
                         .addDisabledChangeWithId(5)
                         .addLoggingOnlyChangeWithId(6).build();
@@ -288,8 +290,8 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildTargetSdkChangeDebugAppOptin_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2).build();
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
@@ -313,7 +315,7 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildTargetSdkChangeDebugAppOptout_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1).build();
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
@@ -371,9 +373,9 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildAnyChangeReleaseApp_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
                         .addEnabledChangeWithId(4)
                         .addDisabledChangeWithId(5)
                         .addLoggingOnlyChangeWithId(6).build();
@@ -406,6 +408,218 @@ public class OverrideValidatorImplTest {
                 .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
         assertThat(stateDisabledChange)
                 .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
+        assertThat(stateDLoggingOnlyChange)
+                .isEqualTo(new OverrideAllowedState(LOGGING_ONLY_CHANGE, -1, -1));
+    }
+    @Test
+    public void getOverrideAllowedState_finalBuildAnyChangeNotInstalledApp_deferOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnabledChangeWithId(4)
+                        .addDisabledChangeWithId(5)
+                        .addLoggingOnlyChangeWithId(6).build();
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        OverrideAllowedState stateTargetSdkLessChange =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkEqualChange =
+                overrideValidator.getOverrideAllowedState(2, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkAfterChange =
+                overrideValidator.getOverrideAllowedState(3, PACKAGE_NAME);
+        OverrideAllowedState stateEnabledChange =
+                overrideValidator.getOverrideAllowedState(4, PACKAGE_NAME);
+        OverrideAllowedState stateDisabledChange =
+                overrideValidator.getOverrideAllowedState(5, PACKAGE_NAME);
+        OverrideAllowedState stateDLoggingOnlyChange =
+                overrideValidator.getOverrideAllowedState(6, PACKAGE_NAME);
+
+        assertThat(stateTargetSdkLessChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateTargetSdkEqualChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateTargetSdkAfterChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateEnabledChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateDisabledChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateDLoggingOnlyChange)
+                .isEqualTo(new OverrideAllowedState(LOGGING_ONLY_CHANGE, -1, -1));
+    }
+
+    @Test
+    public void getOverrideAllowedState_forceFinalBuildTargetSdkChangeDebugAppOptin_allowOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2).build();
+        config.forceNonDebuggableFinalForTest(true);
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                        .debuggable()
+                        .withTargetSdk(TARGET_SDK)
+                        .withPackageName(PACKAGE_NAME).build());
+
+        OverrideAllowedState stateTargetSdkGreaterChange =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkEqualChange =
+                overrideValidator.getOverrideAllowedState(2, PACKAGE_NAME);
+
+        assertThat(stateTargetSdkGreaterChange)
+                .isEqualTo(new OverrideAllowedState(ALLOWED, TARGET_SDK, TARGET_SDK_AFTER));
+
+        assertThat(stateTargetSdkEqualChange)
+                .isEqualTo(new OverrideAllowedState(ALLOWED, TARGET_SDK, TARGET_SDK));
+    }
+
+    @Test
+    public void getOverrideAllowedState_forceFinalBldTargetSdkChangeDebugAppOptout_rejectOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1).build();
+        config.forceNonDebuggableFinalForTest(true);
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                        .withPackageName(PACKAGE_NAME)
+                        .withTargetSdk(TARGET_SDK)
+                        .debuggable()
+                        .build());
+
+        OverrideAllowedState stateTargetSdkLessChange =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+
+        assertThat(stateTargetSdkLessChange).isEqualTo(
+                new OverrideAllowedState(DISABLED_TARGET_SDK_TOO_HIGH, TARGET_SDK,
+                                         TARGET_SDK_BEFORE));
+    }
+
+    @Test
+    public void getOverrideAllowedState_forceFinalBuildEnabledChangeDebugApp_rejectOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
+                        .addEnabledChangeWithId(1).build();
+        config.forceNonDebuggableFinalForTest(true);
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                        .withPackageName(PACKAGE_NAME)
+                        .debuggable().build());
+
+        OverrideAllowedState allowedState =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+
+        assertThat(allowedState)
+                .isEqualTo(new OverrideAllowedState(DISABLED_NON_TARGET_SDK, -1, -1));
+    }
+
+    @Test
+    public void getOverrideAllowedState_forceFinalBuildDisabledChangeDebugApp_allowOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
+                .addDisabledChangeWithId(1).build();
+        config.forceNonDebuggableFinalForTest(true);
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                        .withPackageName(PACKAGE_NAME)
+                        .withTargetSdk(TARGET_SDK)
+                        .debuggable().build());
+
+        OverrideAllowedState allowedState =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+
+        assertThat(allowedState)
+                .isEqualTo(new OverrideAllowedState(ALLOWED, TARGET_SDK, -1));
+    }
+
+    @Test
+    public void getOverrideAllowedState_forceFinalBuildAnyChangeReleaseApp_rejectOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnabledChangeWithId(4)
+                        .addDisabledChangeWithId(5)
+                        .addLoggingOnlyChangeWithId(6).build();
+        config.forceNonDebuggableFinalForTest(true);
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenReturn(ApplicationInfoBuilder.create()
+                        .withPackageName(PACKAGE_NAME)
+                        .withTargetSdk(TARGET_SDK).build());
+
+        OverrideAllowedState stateTargetSdkLessChange =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkEqualChange =
+                overrideValidator.getOverrideAllowedState(2, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkAfterChange =
+                overrideValidator.getOverrideAllowedState(3, PACKAGE_NAME);
+        OverrideAllowedState stateEnabledChange =
+                overrideValidator.getOverrideAllowedState(4, PACKAGE_NAME);
+        OverrideAllowedState stateDisabledChange =
+                overrideValidator.getOverrideAllowedState(5, PACKAGE_NAME);
+        OverrideAllowedState stateDLoggingOnlyChange =
+                overrideValidator.getOverrideAllowedState(6, PACKAGE_NAME);
+
+        assertThat(stateTargetSdkLessChange)
+                .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
+        assertThat(stateTargetSdkEqualChange)
+                .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
+        assertThat(stateTargetSdkAfterChange)
+                .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
+        assertThat(stateEnabledChange)
+                .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
+        assertThat(stateDisabledChange)
+                .isEqualTo(new OverrideAllowedState(DISABLED_NOT_DEBUGGABLE, -1, -1));
+        assertThat(stateDLoggingOnlyChange)
+                .isEqualTo(new OverrideAllowedState(LOGGING_ONLY_CHANGE, -1, -1));
+    }
+    @Test
+    public void getOverrideAllowedState_forceFinalBuildAnyChangeNotInstalledApp_deferOverride()
+            throws Exception {
+        CompatConfig config = CompatConfigBuilder.create(debuggableBuild(), mContext)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_BEFORE, 1)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK, 2)
+                        .addEnableAfterSdkChangeWithId(TARGET_SDK_AFTER, 3)
+                        .addEnabledChangeWithId(4)
+                        .addDisabledChangeWithId(5)
+                        .addLoggingOnlyChangeWithId(6).build();
+        config.forceNonDebuggableFinalForTest(true);
+        IOverrideValidator overrideValidator = config.getOverrideValidator();
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+                .thenThrow(new NameNotFoundException());
+
+        OverrideAllowedState stateTargetSdkLessChange =
+                overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkEqualChange =
+                overrideValidator.getOverrideAllowedState(2, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkAfterChange =
+                overrideValidator.getOverrideAllowedState(3, PACKAGE_NAME);
+        OverrideAllowedState stateEnabledChange =
+                overrideValidator.getOverrideAllowedState(4, PACKAGE_NAME);
+        OverrideAllowedState stateDisabledChange =
+                overrideValidator.getOverrideAllowedState(5, PACKAGE_NAME);
+        OverrideAllowedState stateDLoggingOnlyChange =
+                overrideValidator.getOverrideAllowedState(6, PACKAGE_NAME);
+
+        assertThat(stateTargetSdkLessChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateTargetSdkEqualChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateTargetSdkAfterChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateEnabledChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
+        assertThat(stateDisabledChange)
+                .isEqualTo(new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1));
         assertThat(stateDLoggingOnlyChange)
                 .isEqualTo(new OverrideAllowedState(LOGGING_ONLY_CHANGE, -1, -1));
     }

@@ -17,6 +17,7 @@
 package android.media;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 
 
@@ -895,6 +896,6 @@ public class ToneGenerator
     protected void finalize() { native_finalize(); }
 
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private long mNativeContext; // accessed by native methods
 }

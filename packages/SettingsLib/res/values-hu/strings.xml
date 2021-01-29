@@ -145,7 +145,7 @@
     <string name="data_usage_ota" msgid="7984667793701597001">"Rendszerfrissítések"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB-megosztás"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Hordozható hotspot"</string>
-    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth megosztása"</string>
+    <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth-megosztás"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Megosztás"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Megosztás és hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Összes munkaalkalmazás"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Név nélküli Bluetooth-eszközök megjelenítése"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Abszolút hangerő funkció letiltása"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"A Gabeldorsche engedélyezése"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Enhanced Connectivity"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"A Bluetooth AVRCP-verziója"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"A Bluetooth AVRCP-verziójának kiválasztása"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"A Bluetooth MAP-verziója"</string>

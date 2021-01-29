@@ -41,11 +41,15 @@ import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.IDisplayWindowInsetsController;
 import android.view.IWindow;
+import android.view.InsetsSourceControl;
+import android.view.InsetsState;
 import android.view.SurfaceControl.Transaction;
 import android.view.View;
 import android.view.WindowManager;
@@ -123,7 +127,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
             mChildAppWindowBelow = createCommonWindow(mAppWindow,
                     TYPE_APPLICATION_MEDIA_OVERLAY,
                     "mChildAppWindowBelow");
-            mDisplayContent.getDisplayPolicy().setForceShowSystemBars(false);
+            mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(false);
 
             // Adding a display will cause freezing the display. Make sure to wait until it's
             // unfrozen to not run into race conditions with the tests.
@@ -342,6 +346,32 @@ class WindowTestsBase extends SystemServiceTestsBase {
         displayInfo.type = Display.TYPE_VIRTUAL;
         displayInfo.ownerUid = SYSTEM_UID;
         return createNewDisplay(displayInfo, false /* supportIme */);
+    }
+
+    IDisplayWindowInsetsController createDisplayWindowInsetsController() {
+        return new IDisplayWindowInsetsController.Stub() {
+
+            @Override
+            public void insetsChanged(InsetsState insetsState) throws RemoteException {
+            }
+
+            @Override
+            public void insetsControlChanged(InsetsState insetsState,
+                    InsetsSourceControl[] insetsSourceControls) throws RemoteException {
+            }
+
+            @Override
+            public void showInsets(int i, boolean b) throws RemoteException {
+            }
+
+            @Override
+            public void hideInsets(int i, boolean b) throws RemoteException {
+            }
+
+            @Override
+            public void topFocusedWindowChanged(String packageName) {
+            }
+        };
     }
 
     /** Sets the default minimum task size to 1 so that tests can use small task sizes */

@@ -108,7 +108,7 @@ public class MediaRecorder implements AudioRouting,
     private long mNativeContext;
 
     @SuppressWarnings("unused")
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private Surface mSurface;
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -401,6 +401,32 @@ public class MediaRecorder implements AudioRouting,
             return false;
         default:
             return true;
+        }
+    }
+
+    /**
+     * @hide
+     * @param source An audio source to test
+     * @return true if the source is a valid one
+     */
+    public static boolean isValidAudioSource(int source) {
+        switch(source) {
+            case AudioSource.MIC:
+            case AudioSource.VOICE_UPLINK:
+            case AudioSource.VOICE_DOWNLINK:
+            case AudioSource.VOICE_CALL:
+            case AudioSource.CAMCORDER:
+            case AudioSource.VOICE_RECOGNITION:
+            case AudioSource.VOICE_COMMUNICATION:
+            case AudioSource.REMOTE_SUBMIX:
+            case AudioSource.UNPROCESSED:
+            case AudioSource.VOICE_PERFORMANCE:
+            case AudioSource.ECHO_REFERENCE:
+            case AudioSource.RADIO_TUNER:
+            case AudioSource.HOTWORD:
+                return true;
+            default:
+                return false;
         }
     }
 

@@ -33,7 +33,7 @@ public final class FontVariationAxis {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int mTag;
     private final String mTagString;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private final float mStyleValue;
 
     /**

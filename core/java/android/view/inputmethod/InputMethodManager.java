@@ -611,7 +611,8 @@ public final class InputMethodManager {
         @Override
         public void startInputAsyncOnWindowFocusGain(View focusedView,
                 @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
-            final int startInputFlags = getStartInputFlags(focusedView, 0);
+            int startInputFlags = getStartInputFlags(focusedView, 0);
+            startInputFlags |= StartInputFlags.WINDOW_GAINED_FOCUS;
 
             final ImeFocusController controller = getFocusController();
             if (controller == null) {
@@ -2282,7 +2283,7 @@ public final class InputMethodManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isCursorAnchorInfoEnabled() {
         synchronized (mH) {
             final boolean isImmediate = (mRequestUpdateCursorAnchorInfoMonitorMode &
@@ -2298,7 +2299,7 @@ public final class InputMethodManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setUpdateCursorAnchorInfoMode(int flags) {
         synchronized (mH) {
             mRequestUpdateCursorAnchorInfoMonitorMode = flags;

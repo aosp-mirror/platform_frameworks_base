@@ -23,6 +23,7 @@
 #include <jni.h>
 #include <nativehelper/JNIHelp.h>
 
+#include <android/hidl/manager/1.2/IServiceManager.h>
 #include <binder/IServiceManager.h>
 #include <hidl/HidlTransportSupport.h>
 #include <incremental_service.h>
@@ -64,6 +65,7 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
     using ::android::frameworks::stats::V1_0::IStats;
     using ::android::frameworks::stats::V1_0::implementation::StatsHal;
     using ::android::hardware::configureRpcThreadpool;
+    using ::android::hidl::manager::V1_0::IServiceManager;
 
     status_t err;
 
@@ -74,15 +76,22 @@ static void android_server_SystemServer_startHidlServices(JNIEnv* env, jobject /
 
     sp<ISensorManager> sensorService = new SensorManager(vm);
     err = sensorService->registerAsService();
-    ALOGE_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
+    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", ISensorManager::descriptor, err);
 
     sp<ISchedulingPolicyService> schedulingService = new SchedulingPolicyService();
-    err = schedulingService->registerAsService();
-    ALOGE_IF(err != OK, "Cannot register %s: %d", ISchedulingPolicyService::descriptor, err);
+    if (IServiceManager::Transport::HWBINDER ==
+        hardware::defaultServiceManager1_2()->getTransport(ISchedulingPolicyService::descriptor,
+                                                           "default")) {
+        err = schedulingService->registerAsService("default");
+        LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d",
+                            ISchedulingPolicyService::descriptor, err);
+    } else {
+        ALOGW("%s is deprecated. Skipping registration.", ISchedulingPolicyService::descriptor);
+    }
 
     sp<IStats> statsHal = new StatsHal();
     err = statsHal->registerAsService();
-    ALOGE_IF(err != OK, "Cannot register %s: %d", IStats::descriptor, err);
+    LOG_ALWAYS_FATAL_IF(err != OK, "Cannot register %s: %d", IStats::descriptor, err);
 }
 
 static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* env */,
@@ -90,47 +99,17 @@ static void android_server_SystemServer_initZygoteChildHeapProfiling(JNIEnv* /* 
     android_mallopt(M_INIT_ZYGOTE_CHILD_PROFILING, nullptr, 0);
 }
 
-static int get_current_max_fd() {
-    // Not actually guaranteed to be the max, but close enough for our purposes.
-    int fd = open("/dev/null", O_RDONLY | O_CLOEXEC);
-    LOG_ALWAYS_FATAL_IF(fd == -1, "failed to open /dev/null: %s", strerror(errno));
-    close(fd);
-    return fd;
-}
+static void android_server_SystemServer_fdtrackAbort(JNIEnv*, jobject) {
+    raise(BIONIC_SIGNAL_FDTRACK);
 
-static const char kFdLeakEnableThresholdProperty[] = "persist.sys.debug.fdtrack_enable_threshold";
-static const char kFdLeakAbortThresholdProperty[] = "persist.sys.debug.fdtrack_abort_threshold";
-static const char kFdLeakCheckIntervalProperty[] = "persist.sys.debug.fdtrack_interval";
+    // Wait for a bit to allow fdtrack to dump backtraces to logcat.
+    std::this_thread::sleep_for(5s);
 
-static void android_server_SystemServer_spawnFdLeakCheckThread(JNIEnv*, jobject) {
+    // Abort on a different thread to avoid ART dumping runtime stacks.
     std::thread([]() {
-        pthread_setname_np(pthread_self(), "FdLeakCheckThread");
-        bool loaded = false;
-        while (true) {
-            const int enable_threshold = GetIntProperty(kFdLeakEnableThresholdProperty, 1024);
-            const int abort_threshold = GetIntProperty(kFdLeakAbortThresholdProperty, 2048);
-            const int check_interval = GetIntProperty(kFdLeakCheckIntervalProperty, 120);
-            int max_fd = get_current_max_fd();
-            if (max_fd > enable_threshold && !loaded) {
-                loaded = true;
-                ALOGE("fd count above threshold of %d, starting fd backtraces", enable_threshold);
-                if (dlopen("libfdtrack.so", RTLD_GLOBAL) == nullptr) {
-                    ALOGE("failed to load libfdtrack.so: %s", dlerror());
-                }
-            } else if (max_fd > abort_threshold) {
-                raise(BIONIC_SIGNAL_FDTRACK);
-
-                // Wait for a bit to allow fdtrack to dump backtraces to logcat.
-                std::this_thread::sleep_for(5s);
-
-                LOG_ALWAYS_FATAL(
-                    "b/140703823: aborting due to fd leak: check logs for fd "
-                    "backtraces");
-            }
-
-            std::this_thread::sleep_for(std::chrono::seconds(check_interval));
-        }
-    }).detach();
+        LOG_ALWAYS_FATAL("b/140703823: aborting due to fd leak: check logs for fd "
+                         "backtraces");
+    }).join();
 }
 
 static jlong android_server_SystemServer_startIncrementalService(JNIEnv* env, jclass klass,
@@ -152,8 +131,7 @@ static const JNINativeMethod gMethods[] = {
         {"startHidlServices", "()V", (void*)android_server_SystemServer_startHidlServices},
         {"initZygoteChildHeapProfiling", "()V",
          (void*)android_server_SystemServer_initZygoteChildHeapProfiling},
-        {"spawnFdLeakCheckThread", "()V",
-         (void*)android_server_SystemServer_spawnFdLeakCheckThread},
+        {"fdtrackAbort", "()V", (void*)android_server_SystemServer_fdtrackAbort},
         {"startIncrementalService", "()J",
          (void*)android_server_SystemServer_startIncrementalService},
         {"setIncrementalServiceSystemReady", "(J)V",

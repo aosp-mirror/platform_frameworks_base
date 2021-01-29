@@ -74,7 +74,7 @@ public class RegisterStatusBarResultTest {
         assertThat(copy.mImeBackDisposition).isEqualTo(original.mImeBackDisposition);
         assertThat(copy.mShowImeSwitcher).isEqualTo(original.mShowImeSwitcher);
         assertThat(copy.mDisabledFlags2).isEqualTo(original.mDisabledFlags2);
-        assertThat(copy.mImeToken).isSameAs(original.mImeToken);
+        assertThat(copy.mImeToken).isSameInstanceAs(original.mImeToken);
         assertThat(copy.mNavbarColorManagedByIme).isEqualTo(original.mNavbarColorManagedByIme);
         assertThat(copy.mAppFullscreen).isEqualTo(original.mAppFullscreen);
         assertThat(copy.mAppImmersive).isEqualTo(original.mAppImmersive);

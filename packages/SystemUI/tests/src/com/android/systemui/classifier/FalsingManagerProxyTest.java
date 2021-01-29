@@ -29,8 +29,8 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.keyguard.KeyguardUpdateMonitor;
-import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.brightline.BrightLineFalsingManager;
+import com.android.systemui.classifier.brightline.FalsingDataProvider;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.dock.DockManagerFake;
 import com.android.systemui.dump.DumpManager;
@@ -42,6 +42,8 @@ import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.sensors.ProximitySensor;
 import com.android.systemui.util.time.FakeSystemClock;
+import com.android.systemui.utils.leaks.FakeBatteryController;
+import com.android.systemui.utils.leaks.LeakCheckedTest;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,7 +54,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-public class FalsingManagerProxyTest extends SysuiTestCase {
+public class FalsingManagerProxyTest extends LeakCheckedTest {
     @Mock(stubOnly = true)
     PluginManager mPluginManager;
     @Mock(stubOnly = true)
@@ -62,7 +64,7 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
     @Mock DumpManager mDumpManager;
     private FalsingManagerProxy mProxy;
     private DeviceConfigProxy mDeviceConfig;
-    private DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    private FalsingDataProvider mFalsingDataProvider;
     private FakeExecutor mExecutor = new FakeExecutor(new FakeSystemClock());
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
     private DockManager mDockManager = new DockManagerFake();
@@ -75,6 +77,8 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
         mDeviceConfig = new DeviceConfigProxyFake();
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "false", false);
+        mFalsingDataProvider = new FalsingDataProvider(
+                new DisplayMetrics(), new FakeBatteryController(getLeakCheck()));
     }
 
     @After
@@ -86,9 +90,9 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
 
     @Test
     public void test_brightLineFalsingManagerDisabled() {
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                mDumpManager, mUiBgExecutor, mStatusBarStateController);
+                mDumpManager, mUiBgExecutor, mStatusBarStateController, mFalsingDataProvider);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
     }
 
@@ -97,17 +101,17 @@ public class FalsingManagerProxyTest extends SysuiTestCase {
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 BRIGHTLINE_FALSING_MANAGER_ENABLED, "true", false);
         mExecutor.runAllReady();
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                mDumpManager, mUiBgExecutor, mStatusBarStateController);
+                mDumpManager, mUiBgExecutor, mStatusBarStateController, mFalsingDataProvider);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(BrightLineFalsingManager.class));
     }
 
     @Test
     public void test_brightLineFalsingManagerToggled() throws InterruptedException {
-        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor, mDisplayMetrics,
+        mProxy = new FalsingManagerProxy(getContext(), mPluginManager, mExecutor,
                 mProximitySensor, mDeviceConfig, mDockManager, mKeyguardUpdateMonitor,
-                mDumpManager, mUiBgExecutor, mStatusBarStateController);
+                mDumpManager, mUiBgExecutor, mStatusBarStateController, mFalsingDataProvider);
         assertThat(mProxy.getInternalFalsingManager(), instanceOf(FalsingManagerImpl.class));
 
         mDeviceConfig.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,

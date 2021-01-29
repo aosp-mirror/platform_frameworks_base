@@ -66,7 +66,6 @@ import java.util.concurrent.TimeUnit;
  * </pre>
  * @hide
  */
-@TestApi
 @SystemApi
 public abstract class ExplicitHealthCheckService extends Service {
 
@@ -195,7 +194,6 @@ public abstract class ExplicitHealthCheckService extends Service {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public static final class PackageConfig implements Parcelable {
         private static final long DEFAULT_HEALTH_CHECK_TIMEOUT_MILLIS = TimeUnit.HOURS.toMillis(1);

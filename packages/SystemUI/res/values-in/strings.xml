@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Lanjutkan"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Batal"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Bagikan"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Hapus"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Rekaman layar dibatalkan"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Rekaman layar disimpan, ketuk untuk melihat"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Rekaman layar dihapus"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Error saat menghapus rekaman layar"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Gagal mendapatkan izin"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Terjadi error saat memulai perekaman layar"</string>
@@ -599,7 +597,7 @@
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Ringkasan untuk melepas pin."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ini akan terus ditampilkan sampai Anda melepas pin. Sentuh lama tombol Beranda untuk melepas pin."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Data pribadi dapat diakses (seperti kontak dan konten email)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikasi yang dipasangi pin dapat membuka aplikasi lain."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplikasi yang disematkan dapat membuka aplikasi lain."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Untuk melepas pin aplikasi ini, sentuh &amp; lama tombol Kembali dan Ringkasan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Untuk melepas pin aplikasi ini, sentuh &amp; lama tombol Kembali dan Layar utama"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Untuk melepas pin aplikasi ini, geser ke atas &amp; tahan"</string>
@@ -856,7 +854,7 @@
     <string name="left_icon" msgid="5036278531966897006">"Ikon kiri"</string>
     <string name="right_icon" msgid="1103955040645237425">"Ikon kanan"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Tahan dan tarik untuk menambahkan kartu"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tahan dan tarik untuk mengatur ulang kartu"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Tahan dan tarik untuk menata ulang kartu"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Tarik ke sini untuk menghapus"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Anda membutuhkan setidaknya <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> kartu"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Edit"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Atas 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Atas 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Layar penuh di bawah"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Ketuk dua kali untuk mengedit."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Ketuk dua kali untuk menambahkan."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Pindahkan <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Hapus <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Tambahkan <xliff:g id="TILE_NAME">%1$s</xliff:g> ke posisi <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Pindahkan <xliff:g id="TILE_NAME">%1$s</xliff:g> ke posisi <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"menghapus kartu"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"menambahkan kartu ke akhir"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Pindahkan kartu"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Tambahkan kartu"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Pindahkan ke <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Tambahkan ke posisi <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posisi <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor setelan cepat."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notifikasi <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Aplikasi mungkin tidak berfungsi dengan layar terpisah."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Lewati ke sebelumnya"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ubah ukuran"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ponsel dimatikan karena panas"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ponsel kini berfungsi normal"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ponsel kini berfungsi normal.\nKetuk untuk info selengkapnya"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ponsel menjadi terlalu panas, jadi dimatikan untuk mendinginkan. Ponsel kini berfungsi normal.\n\nPonsel dapat menjadi terlalu panas jika Anda:\n	• Menggunakan aplikasi yang menggunakan sumber daya secara intensif (seperti aplikasi game, video, atau navigasi)\n	• Mendownload atau mengupload file besar\n	• Menggunakan ponsel dalam suhu tinggi"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Ponsel menjadi hangat"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Beberapa fitur dibatasi saat ponsel mendingin"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Beberapa fitur dibatasi saat ponsel mendingin.\nKetuk untuk info selengkapnya"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ponsel akan otomatis mencoba mendingin. Anda tetap dapat menggunakan ponsel, tetapi mungkin berjalan lebih lambat.\n\nSetelah dingin, ponsel akan berjalan seperti biasa."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Lihat langkah-langkah perawatan"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Cabut pengisi daya"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Ada masalah saat mengisi daya perangkat ini. Cabut adaptor daya dan berhati-hatilah karena kabelnya mungkin panas."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Lihat langkah-langkah perawatan"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Setelan"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Oke"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Hapus Heap SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> menggunakan <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikasi menggunakan <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" dan "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"lokasi"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensor nonaktif"</string>
     <string name="device_services" msgid="1549944177856658705">"Layanan Perangkat"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Tanpa judul"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Memuat rekomendasi"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Menyembunyikan sesi saat ini."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Sembunyikan"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Tutup"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Lanjutkan"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setelan"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nonaktif, periksa aplikasi"</string>

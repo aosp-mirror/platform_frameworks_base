@@ -74,7 +74,7 @@ import java.util.ArrayList;
 public class DynamicSystemInstallationService extends Service
         implements InstallationAsyncTask.ProgressListener {
 
-    private static final String TAG = "DynSystemInstallationService";
+    private static final String TAG = "DynamicSystemInstallationService";
 
     // TODO (b/131866826): This is currently for test only. Will move this to System API.
     static final String KEY_ENABLE_WHEN_COMPLETED = "KEY_ENABLE_WHEN_COMPLETED";
@@ -211,10 +211,10 @@ public class DynamicSystemInstallationService extends Service
 
     @Override
     public void onProgressUpdate(InstallationAsyncTask.Progress progress) {
-        mCurrentPartitionName = progress.mPartitionName;
-        mCurrentPartitionSize = progress.mPartitionSize;
-        mCurrentPartitionInstalledSize = progress.mInstalledSize;
-        mNumInstalledPartitions = progress.mNumInstalledPartitions;
+        mCurrentPartitionName = progress.partitionName;
+        mCurrentPartitionSize = progress.partitionSize;
+        mCurrentPartitionInstalledSize = progress.installedSize;
+        mNumInstalledPartitions = progress.numInstalledPartitions;
 
         postStatus(STATUS_IN_PROGRESS, CAUSE_NOT_SPECIFIED, null);
     }
@@ -321,6 +321,9 @@ public class DynamicSystemInstallationService extends Service
 
         if (!isDynamicSystemInstalled() && (getStatus() != STATUS_READY)) {
             Log.e(TAG, "Trying to discard AOT while there is no complete installation");
+            // Stop foreground state and dismiss stale notification.
+            stopForeground(STOP_FOREGROUND_REMOVE);
+            resetTaskAndStop();
             return;
         }
 
@@ -372,8 +375,17 @@ public class DynamicSystemInstallationService extends Service
             return;
         }
 
-        // Per current design, we don't have disable() API. AOT is disabled on next reboot.
-        // TODO: Use better status query when b/125079548 is done.
+        if (!mDynSystem.setEnable(/* enable = */ false, /* oneShot = */ false)) {
+            Log.e(TAG, "Failed to disable DynamicSystem.");
+
+            // Dismiss status bar and show a toast.
+            sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+            Toast.makeText(this,
+                    getString(R.string.toast_failed_to_disable_dynsystem),
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         if (powerManager != null) {
@@ -419,7 +431,7 @@ public class DynamicSystemInstallationService extends Service
     private PendingIntent createPendingIntent(String action) {
         Intent intent = new Intent(this, DynamicSystemInstallationService.class);
         intent.setAction(action);
-        return PendingIntent.getService(this, 0, intent, 0);
+        return PendingIntent.getService(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     private Notification buildNotification(int status, int cause) {

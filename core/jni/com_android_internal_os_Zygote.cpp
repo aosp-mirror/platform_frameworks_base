@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-/*
- * Disable optimization of this file if we are compiling with the address
- * sanitizer.  This is a mitigation for b/122921367 and can be removed once the
- * bug is fixed.
- */
-#if __has_feature(address_sanitizer)
-#pragma clang optimize off
-#endif
-
 #define LOG_TAG "Zygote"
 #define ATRACE_TAG ATRACE_TAG_DALVIK
 
@@ -78,8 +69,8 @@
 #include <android-base/unique_fd.h>
 #include <bionic/malloc.h>
 #include <bionic/mte.h>
-#include <bionic/mte_kernel.h>
 #include <cutils/fs.h>
+#include <cutils/memory.h>
 #include <cutils/multiuser.h>
 #include <cutils/sockets.h>
 #include <private/android_filesystem_config.h>
@@ -647,6 +638,13 @@ static void PreApplicationInit() {
 
   // Set the jemalloc decay time to 1.
   mallopt(M_DECAY_TIME, 1);
+
+  // Avoid potentially expensive memory mitigations, mostly meant for system
+  // processes, in apps. These may cause app compat problems, use more memory,
+  // or reduce performance. While it would be nice to have them for apps,
+  // we will have to wait until they are proven out, have more efficient
+  // hardware, and/or apply them only to new applications.
+  process_disable_memory_mitigations();
 }
 
 static void SetUpSeccompFilter(uid_t uid, bool is_child_zygote) {
@@ -796,10 +794,14 @@ static void PrepareDirIfNotPresent(const std::string& dir, mode_t mode, uid_t ui
   PrepareDir(dir, mode, uid, gid, fail_fn);
 }
 
+static bool BindMount(const std::string& source_dir, const std::string& target_dir) {
+  return !(TEMP_FAILURE_RETRY(mount(source_dir.c_str(), target_dir.c_str(), nullptr,
+                                    MS_BIND | MS_REC, nullptr)) == -1);
+}
+
 static void BindMount(const std::string& source_dir, const std::string& target_dir,
                       fail_fn_t fail_fn) {
-  if (TEMP_FAILURE_RETRY(mount(source_dir.c_str(), target_dir.c_str(), nullptr,
-                               MS_BIND | MS_REC, nullptr)) == -1) {
+  if (!BindMount(source_dir, target_dir)) {
     fail_fn(CREATE_ERROR("Failed to mount %s to %s: %s",
                          source_dir.c_str(), target_dir.c_str(), strerror(errno)));
   }
@@ -1186,9 +1188,9 @@ static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
 
 // Create an app data directory over tmpfs overlayed CE / DE storage, and bind mount it
 // from the actual app data directory in data mirror.
-static void createAndMountAppData(std::string_view package_name,
+static bool createAndMountAppData(std::string_view package_name,
     std::string_view mirror_pkg_dir_name, std::string_view mirror_data_path,
-    std::string_view actual_data_path, fail_fn_t fail_fn) {
+    std::string_view actual_data_path, fail_fn_t fail_fn, bool call_fail_fn) {
 
   char mirrorAppDataPath[PATH_MAX];
   char actualAppDataPath[PATH_MAX];
@@ -1197,6 +1199,29 @@ static void createAndMountAppData(std::string_view package_name,
   snprintf(actualAppDataPath, PATH_MAX, "%s/%s", actual_data_path.data(), package_name.data());
 
   PrepareDir(actualAppDataPath, 0700, AID_ROOT, AID_ROOT, fail_fn);
+
+  // Bind mount from original app data directory in mirror.
+  if (call_fail_fn) {
+    BindMount(mirrorAppDataPath, actualAppDataPath, fail_fn);
+  } else if(!BindMount(mirrorAppDataPath, actualAppDataPath)) {
+    ALOGW("Failed to mount %s to %s: %s",
+          mirrorAppDataPath, actualAppDataPath, strerror(errno));
+    return false;
+  }
+  return true;
+}
+
+// There is an app data directory over tmpfs overlaid CE / DE storage
+// bind mount it from the actual app data directory in data mirror.
+static void mountAppData(std::string_view package_name,
+    std::string_view mirror_pkg_dir_name, std::string_view mirror_data_path,
+    std::string_view actual_data_path, fail_fn_t fail_fn) {
+
+  char mirrorAppDataPath[PATH_MAX];
+  char actualAppDataPath[PATH_MAX];
+  snprintf(mirrorAppDataPath, PATH_MAX, "%s/%s", mirror_data_path.data(),
+      mirror_pkg_dir_name.data());
+  snprintf(actualAppDataPath, PATH_MAX, "%s/%s", actual_data_path.data(), package_name.data());
 
   // Bind mount from original app data directory in mirror.
   BindMount(mirrorAppDataPath, actualAppDataPath, fail_fn);
@@ -1276,10 +1301,17 @@ static void isolateAppDataPerPackage(int userId, std::string_view package_name,
   snprintf(mirrorCePath, PATH_MAX, "%s/%d", mirrorCeParent, userId);
   snprintf(mirrorDePath, PATH_MAX, "/data_mirror/data_de/%s/%d", volume_uuid.data(), userId);
 
-  createAndMountAppData(package_name, package_name, mirrorDePath, actualDePath, fail_fn);
+  createAndMountAppData(package_name, package_name, mirrorDePath, actualDePath, fail_fn,
+                        true /*call_fail_fn*/);
 
   std::string ce_data_path = getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
-  createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
+  if (!createAndMountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn,
+                             false /*call_fail_fn*/)) {
+    // CE might unlocks and the name is decrypted
+    // get the name and mount again
+    ce_data_path=getAppDataDirName(mirrorCePath, package_name, ce_data_inode, fail_fn);
+    mountAppData(package_name, ce_data_path, mirrorCePath, actualCePath, fail_fn);
+  }
 }
 
 // Relabel directory
@@ -1527,7 +1559,6 @@ static void isolateAppData(JNIEnv* env, jobjectArray pkg_data_info_list,
     jobjectArray whitelisted_data_info_list, uid_t uid, const char* process_name,
     jstring managed_nice_name, fail_fn_t fail_fn) {
 
-  ensureInAppMountNamespace(fail_fn);
   std::vector<std::string> merged_data_info_list;
   insertPackagesToMergedList(env, merged_data_info_list, pkg_data_info_list,
           process_name, managed_nice_name, fail_fn);
@@ -1634,28 +1665,6 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
   }
 }
 
-#ifdef ANDROID_EXPERIMENTAL_MTE
-static void SetTagCheckingLevel(int level) {
-#ifdef __aarch64__
-  if (!(getauxval(AT_HWCAP2) & HWCAP2_MTE)) {
-    return;
-  }
-
-  int tagged_addr_ctrl = prctl(PR_GET_TAGGED_ADDR_CTRL, 0, 0, 0, 0);
-  if (tagged_addr_ctrl < 0) {
-    ALOGE("prctl(PR_GET_TAGGED_ADDR_CTRL) failed: %s", strerror(errno));
-    return;
-  }
-
-  tagged_addr_ctrl = (tagged_addr_ctrl & ~PR_MTE_TCF_MASK) | level;
-  if (prctl(PR_SET_TAGGED_ADDR_CTRL, tagged_addr_ctrl, 0, 0, 0) < 0) {
-    ALOGE("prctl(PR_SET_TAGGED_ADDR_CTRL, %d) failed: %s", tagged_addr_ctrl,
-          strerror(errno));
-  }
-#endif
-}
-#endif
-
 // Utility routine to specialize a zygote child process.
 static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
                              jint runtime_flags, jobjectArray rlimits,
@@ -1696,10 +1705,11 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
 
   MountEmulatedStorage(uid, mount_external, need_pre_initialize_native_bridge, fail_fn);
 
-  // System services, isolated process, webview/app zygote, old target sdk app, should
-  // give a null in same_uid_pkgs and private_volumes so they don't need app data isolation.
-  // Isolated process / webview / app zygote should be gated by SELinux and file permission
-  // so they can't even traverse CE / DE directories.
+  // Make sure app is running in its own mount namespace before isolating its data directories.
+  ensureInAppMountNamespace(fail_fn);
+
+  // Sandbox data and jit profile directories by overlaying a tmpfs on those dirs and bind
+  // mount all related packages separately.
   if (mount_data_dirs) {
     isolateAppData(env, pkg_data_info_list, whitelisted_data_info_list,
             uid, process_name, managed_nice_name, fail_fn);
@@ -1791,24 +1801,16 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_TBI;
       break;
     case RuntimeFlags::MEMORY_TAG_LEVEL_ASYNC:
-#ifdef ANDROID_EXPERIMENTAL_MTE
-      SetTagCheckingLevel(PR_MTE_TCF_ASYNC);
-#endif
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_ASYNC;
       break;
     case RuntimeFlags::MEMORY_TAG_LEVEL_SYNC:
-#ifdef ANDROID_EXPERIMENTAL_MTE
-      SetTagCheckingLevel(PR_MTE_TCF_SYNC);
-#endif
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_SYNC;
       break;
     default:
-#ifdef ANDROID_EXPERIMENTAL_MTE
-      SetTagCheckingLevel(PR_MTE_TCF_NONE);
-#endif
       heap_tagging_level = M_HEAP_TAGGING_LEVEL_NONE;
+      break;
   }
-  android_mallopt(M_SET_HEAP_TAGGING_LEVEL, &heap_tagging_level, sizeof(heap_tagging_level));
+  mallopt(M_BIONIC_SET_HEAP_TAGGING_LEVEL, heap_tagging_level);
   // Now that we've used the flag, clear it so that we don't pass unknown flags to the ART runtime.
   runtime_flags &= ~RuntimeFlags::MEMORY_TAG_LEVEL_MASK;
 

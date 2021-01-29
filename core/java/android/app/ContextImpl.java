@@ -1428,6 +1428,45 @@ class ContextImpl extends Context {
         }
     }
 
+    /**
+     * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
+     * Intent you are sending stays around after the broadcast is complete,
+     * so that others can quickly retrieve that data through the return
+     * value of {@link #registerReceiver(BroadcastReceiver, IntentFilter)}.  In
+     * all other ways, this behaves the same as
+     * {@link #sendBroadcast(Intent)}.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     * Intent will receive the broadcast, and the Intent will be held to
+     * be re-broadcast to future receivers.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see #sendBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    @Override
+    @Deprecated
+    public void sendStickyBroadcast(@NonNull Intent intent, @Nullable Bundle options) {
+        warnIfCallingFromSystemProcess();
+        String resolvedType = intent.resolveTypeIfNeeded(getContentResolver());
+        try {
+            intent.prepareToLeaveProcess(this);
+            ActivityManager.getService().broadcastIntentWithFeature(
+                    mMainThread.getApplicationThread(), getAttributionTag(), intent, resolvedType,
+                    null, Activity.RESULT_OK, null, null, null, AppOpsManager.OP_NONE, options,
+                    false, true, getUserId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     @Deprecated
     public void sendStickyOrderedBroadcast(Intent intent,
@@ -1901,10 +1940,8 @@ class ContextImpl extends Context {
     @Override
     public Object getSystemService(String name) {
         if (vmIncorrectContextUseEnabled()) {
-            // We may override this API from outer context.
-            final boolean isUiContext = isUiContext() || isOuterUiContext();
             // Check incorrect Context usage.
-            if (isUiComponent(name) && !isUiContext) {
+            if (isUiComponent(name) && !isSelfOrOuterUiContext()) {
                 final String errorMessage = "Tried to access visual service "
                         + SystemServiceRegistry.getSystemServiceClassName(name)
                         + " from a non-visual Context:" + getOuterContext();
@@ -1921,13 +1958,15 @@ class ContextImpl extends Context {
         return SystemServiceRegistry.getSystemService(this, name);
     }
 
-    private boolean isOuterUiContext() {
-        return getOuterContext() != null && getOuterContext().isUiContext();
-    }
-
     @Override
     public String getSystemServiceName(Class<?> serviceClass) {
         return SystemServiceRegistry.getSystemServiceName(serviceClass);
+    }
+
+    // TODO(b/149463653): check if we still need this method after migrating IMS to WindowContext.
+    private boolean isSelfOrOuterUiContext() {
+        // We may override outer context's isUiContext
+        return isUiContext() || getOuterContext() != null && getOuterContext().isUiContext();
     }
 
     /** @hide */
@@ -2376,7 +2415,6 @@ class ContextImpl extends Context {
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
                 mResources.getLoaders()));
-        context.mIsUiContext = isUiContext() || isOuterUiContext();
         return context;
     }
 
@@ -2396,6 +2434,11 @@ class ContextImpl extends Context {
                 mResources.getLoaders()));
         context.mDisplay = display;
         context.mIsAssociatedWithDisplay = true;
+        // Note that even if a display context is derived from an UI context, it should not be
+        // treated as UI context because it does not handle configuration changes from the server
+        // side. If the context does need to handle configuration changes, please use
+        // Context#createWindowContext(int, Bundle).
+        context.mIsUiContext = false;
         return context;
     }
 
@@ -2481,9 +2524,9 @@ class ContextImpl extends Context {
 
     @Override
     public Display getDisplay() {
-        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay) {
+        if (!mIsSystemOrSystemUiContext && !mIsAssociatedWithDisplay && !isSelfOrOuterUiContext()) {
             throw new UnsupportedOperationException("Tried to obtain display from a Context not "
-                    + "associated with  one. Only visual Contexts (such as Activity or one created "
+                    + "associated with one. Only visual Contexts (such as Activity or one created "
                     + "with Context#createWindowContext) or ones created with "
                     + "Context#createDisplayContext are associated with displays. Other types of "
                     + "Contexts are typically related to background entities and may return an "
@@ -2661,7 +2704,7 @@ class ContextImpl extends Context {
         return context;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static ContextImpl createActivityContext(ActivityThread mainThread,
             LoadedApk packageInfo, ActivityInfo activityInfo, IBinder activityToken, int displayId,
             Configuration overrideConfiguration) {
@@ -2757,6 +2800,7 @@ class ContextImpl extends Context {
             mDisplay = container.mDisplay;
             mIsAssociatedWithDisplay = container.mIsAssociatedWithDisplay;
             mIsSystemOrSystemUiContext = container.mIsSystemOrSystemUiContext;
+            mIsUiContext = container.isSelfOrOuterUiContext();
         } else {
             mBasePackageName = packageInfo.mPackageName;
             ApplicationInfo ainfo = packageInfo.getApplicationInfo();

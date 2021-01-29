@@ -21,7 +21,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.io.FileDescriptor;
 import java.util.concurrent.Executor;
 
 /** @hide */
@@ -54,8 +53,7 @@ final class TcpSocketKeepalive extends SocketKeepalive {
     void startImpl(int intervalSec) {
         mExecutor.execute(() -> {
             try {
-                final FileDescriptor fd = mPfd.getFileDescriptor();
-                mService.startTcpKeepalive(mNetwork, fd, intervalSec, mCallback);
+                mService.startTcpKeepalive(mNetwork, mPfd, intervalSec, mCallback);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error starting packet keepalive: ", e);
                 throw e.rethrowFromSystemServer();

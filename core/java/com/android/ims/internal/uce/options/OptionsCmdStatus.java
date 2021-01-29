@@ -17,6 +17,7 @@
 package com.android.ims.internal.uce.options;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -42,7 +43,7 @@ public class OptionsCmdStatus implements Parcelable {
      * Sets the command ID.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCmdId(OptionsCmdId cmdId) {
         this.mCmdId = cmdId;
     }
@@ -58,7 +59,7 @@ public class OptionsCmdStatus implements Parcelable {
     /**
        Sets the user data.
        @hide  */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setUserData(int userData) {
         this.mUserData = userData;
     }
@@ -75,7 +76,7 @@ public class OptionsCmdStatus implements Parcelable {
      * Sets the status code.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setStatus(StatusCode status) {
         this.mStatus = status;
     }
@@ -84,7 +85,7 @@ public class OptionsCmdStatus implements Parcelable {
      * Constructor for the OptionsCmdStatus class.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public OptionsCmdStatus() {
         mStatus = new StatusCode();
         mCapInfo = new CapInfo();
@@ -101,7 +102,7 @@ public class OptionsCmdStatus implements Parcelable {
      * Sets the CapInfo
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setCapInfo(CapInfo capInfo) {
         this.mCapInfo = capInfo;
     }

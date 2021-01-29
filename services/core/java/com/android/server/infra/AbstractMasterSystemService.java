@@ -948,7 +948,7 @@ public abstract class AbstractMasterSystemService<M extends AbstractMasterSystem
                         if (debug) {
                             Slog.d(mTag, "Eagerly recreating service for user " + userId);
                         }
-                        getServiceForUserLocked(userId);
+                        updateCachedServiceLocked(userId);
                     }
                 }
                 onServicePackageRestartedLocked(userId);

@@ -19,13 +19,17 @@ package com.android.server.om;
 import static android.content.om.OverlayInfo.STATE_DISABLED;
 import static android.content.om.OverlayInfo.STATE_ENABLED;
 import static android.content.om.OverlayInfo.STATE_MISSING_TARGET;
+import static android.os.OverlayablePolicy.CONFIG_SIGNATURE;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.testng.Assert.assertThrows;
 
 import android.content.om.OverlayInfo;
+import android.util.Pair;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -34,12 +38,13 @@ import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTestsBase {
 
-    private static final String OVERLAY = "com.dummy.overlay";
-    private static final String TARGET = "com.dummy.target";
+    private static final String OVERLAY = "com.test.overlay";
+    private static final String TARGET = "com.test.target";
     private static final int USER = 0;
 
     private static final String OVERLAY2 = OVERLAY + "2";
@@ -49,8 +54,12 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     private static final String OVERLAY3 = OVERLAY + "3";
     private static final int USER3 = USER2 + 1;
 
+    private static final String CONFIG_SIGNATURE_REFERENCE_PKG = "com.test.ref";
+    private static final String CERT_CONFIG_OK = "config_certificate_ok";
+    private static final String CERT_CONFIG_NOK = "config_certificate_nok";
+
     @Test
-    public void testGetOverlayInfo() {
+    public void testGetOverlayInfo() throws Exception {
         installNewPackage(overlay(OVERLAY, TARGET), USER);
 
         final OverlayManagerServiceImpl impl = getImpl();
@@ -62,7 +71,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     }
 
     @Test
-    public void testGetOverlayInfosForTarget() {
+    public void testGetOverlayInfosForTarget() throws Exception {
         installNewPackage(overlay(OVERLAY, TARGET), USER);
         installNewPackage(overlay(OVERLAY2, TARGET), USER);
         installNewPackage(overlay(OVERLAY3, TARGET), USER2);
@@ -87,7 +96,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     }
 
     @Test
-    public void testGetOverlayInfosForUser() {
+    public void testGetOverlayInfosForUser() throws Exception {
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
         installNewPackage(overlay(OVERLAY2, TARGET), USER);
@@ -114,7 +123,7 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     }
 
     @Test
-    public void testPriority() {
+    public void testPriority() throws Exception {
         installNewPackage(overlay(OVERLAY, TARGET), USER);
         installNewPackage(overlay(OVERLAY2, TARGET), USER);
         installNewPackage(overlay(OVERLAY3, TARGET), USER);
@@ -126,29 +135,33 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
 
         assertOverlayInfoForTarget(TARGET, USER, o1, o2, o3);
 
-        assertTrue(impl.setLowestPriority(OVERLAY3, USER));
+        assertEquals(impl.setLowestPriority(OVERLAY3, USER),
+                Optional.of(new PackageAndUser(TARGET, USER)));
         assertOverlayInfoForTarget(TARGET, USER, o3, o1, o2);
 
-        assertTrue(impl.setHighestPriority(OVERLAY3, USER));
+        assertEquals(impl.setHighestPriority(OVERLAY3, USER),
+                Optional.of(new PackageAndUser(TARGET, USER)));
         assertOverlayInfoForTarget(TARGET, USER, o1, o2, o3);
 
-        assertTrue(impl.setPriority(OVERLAY, OVERLAY2, USER));
+        assertEquals(impl.setPriority(OVERLAY, OVERLAY2, USER),
+                Optional.of(new PackageAndUser(TARGET, USER)));
         assertOverlayInfoForTarget(TARGET, USER, o2, o1, o3);
     }
 
     @Test
-    public void testOverlayInfoStateTransitions() {
+    public void testOverlayInfoStateTransitions() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
         assertNull(impl.getOverlayInfo(OVERLAY, USER));
 
         installNewPackage(overlay(OVERLAY, TARGET), USER);
         assertState(STATE_MISSING_TARGET, OVERLAY, USER);
 
-        final DummyDeviceState.PackageBuilder target = target(TARGET);
+        final FakeDeviceState.PackageBuilder target = target(TARGET);
         installNewPackage(target, USER);
         assertState(STATE_DISABLED, OVERLAY, USER);
 
-        impl.setEnabled(OVERLAY, true, USER);
+        assertEquals(impl.setEnabled(OVERLAY, true, USER),
+                Optional.of(new PackageAndUser(TARGET, USER)));
         assertState(STATE_ENABLED, OVERLAY, USER);
 
         // target upgrades do not change the state of the overlay
@@ -163,45 +176,118 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
     }
 
     @Test
-    public void testOnOverlayPackageUpgraded() {
-        final DummyListener listener = getListener();
-        final DummyDeviceState.PackageBuilder target = target(TARGET);
-        final DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET);
+    public void testOnOverlayPackageUpgraded() throws Exception {
+        final FakeDeviceState.PackageBuilder target = target(TARGET);
+        final FakeDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET);
         installNewPackage(target, USER);
         installNewPackage(overlay, USER);
-        listener.count = 0;
         upgradePackage(overlay, USER);
-        assertEquals(2, listener.count);
 
         // upgrade to a version where the overlay has changed its target
-        // expect once for the old target package, once for the new target package
-        listener.count = 0;
-        final DummyDeviceState.PackageBuilder overlay2 = overlay(OVERLAY, "some.other.target");
-        upgradePackage(overlay2, USER);
-        assertEquals(3, listener.count);
-
-        listener.count = 0;
-        upgradePackage(overlay2, USER);
-        assertEquals(2, listener.count);
+        final FakeDeviceState.PackageBuilder overlay2 = overlay(OVERLAY, "some.other.target");
+        final Pair<Optional<PackageAndUser>, Optional<PackageAndUser>> pair =
+                upgradePackage(overlay2, USER);
+        assertEquals(pair.first, Optional.of(new PackageAndUser(TARGET, USER)));
+        assertEquals(pair.second, Optional.of(new PackageAndUser("some.other.target", USER)));
     }
 
     @Test
-    public void testListener() {
+    public void testSetEnabledAtVariousConditions() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
-        final DummyListener listener = getListener();
-        installNewPackage(overlay(OVERLAY, TARGET), USER);
-        assertEquals(1, listener.count);
-        listener.count = 0;
+        assertThrows(OverlayManagerServiceImpl.OperationFailedException.class,
+                () -> impl.setEnabled(OVERLAY, true, USER));
 
+        // request succeeded, and there was a change that needs to be
+        // propagated to the rest of the system
         installNewPackage(target(TARGET), USER);
-        assertEquals(1, listener.count);
-        listener.count = 0;
+        installNewPackage(overlay(OVERLAY, TARGET), USER);
+        assertEquals(impl.setEnabled(OVERLAY, true, USER),
+                Optional.of(new PackageAndUser(TARGET, USER)));
 
-        impl.setEnabled(OVERLAY, true, USER);
-        assertEquals(1, listener.count);
-        listener.count = 0;
+        // request succeeded, but nothing changed
+        assertFalse(impl.setEnabled(OVERLAY, true, USER).isPresent());
+    }
 
-        impl.setEnabled(OVERLAY, true, USER);
-        assertEquals(0, listener.count);
+    @Test
+    public void testConfigSignaturePolicyOk() throws Exception {
+        setConfigSignaturePackageName(CONFIG_SIGNATURE_REFERENCE_PKG);
+        reinitializeImpl();
+
+        addPackage(target(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_OK), USER);
+
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == CONFIG_SIGNATURE);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyCertNok() throws Exception {
+        setConfigSignaturePackageName(CONFIG_SIGNATURE_REFERENCE_PKG);
+        reinitializeImpl();
+
+        addPackage(target(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyNoConfig() throws Exception {
+        addPackage(target(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyNoRefPkg() throws Exception {
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
+    }
+
+    @Test
+    public void testConfigSignaturePolicyRefPkgNotSystem() throws Exception {
+        setConfigSignaturePackageName(CONFIG_SIGNATURE_REFERENCE_PKG);
+        reinitializeImpl();
+
+        addPackage(app(CONFIG_SIGNATURE_REFERENCE_PKG).setCertificate(CERT_CONFIG_OK), USER);
+        installNewPackage(target(TARGET), USER);
+        installNewPackage(overlay(OVERLAY, TARGET).setCertificate(CERT_CONFIG_NOK), USER);
+
+        final FakeIdmapDaemon idmapd = getIdmapd();
+        final FakeDeviceState state = getState();
+        String overlayPath = state.select(OVERLAY, USER).apkPath;
+        assertTrue(idmapd.idmapExists(overlayPath, USER));
+
+        FakeIdmapDaemon.IdmapHeader idmap = idmapd.getIdmap(overlayPath);
+        assertTrue((CONFIG_SIGNATURE & idmap.policies) == 0);
     }
 }

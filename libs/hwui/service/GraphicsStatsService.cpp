@@ -559,6 +559,7 @@ void GraphicsStatsService::finishDumpInMemory(Dump* dump, AStatsEventList* data,
         AStatsEvent_writeBool(event, !lastFullDay);
         AStatsEvent_build(event);
     }
+    delete dump;
 }
 
 

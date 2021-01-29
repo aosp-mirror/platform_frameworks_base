@@ -1175,9 +1175,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         };
 
-        private Runnable mTryToRebindRunnable = () -> {
-            tryToRebind();
-        };
+        private Runnable mTryToRebindRunnable = this::tryToRebind;
 
         WallpaperConnection(WallpaperInfo info, WallpaperData wallpaper, int clientUid) {
             mInfo = info;
@@ -1310,14 +1308,14 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     // a short time in the future, specifically to allow any pending package
                     // update message on this same looper thread to be processed.
                     if (!mWallpaper.wallpaperUpdating) {
-                        mContext.getMainThreadHandler().postDelayed(() -> processDisconnect(this),
+                        mContext.getMainThreadHandler().postDelayed(mDisconnectRunnable,
                                 1000);
                     }
                 }
             }
         }
 
-        public void scheduleTimeoutLocked() {
+        private void scheduleTimeoutLocked() {
             // If we didn't reset it right away, do so after we couldn't connect to
             // it for an extended amount of time to avoid having a black wallpaper.
             final Handler fgHandler = FgThread.getHandler();
@@ -1357,11 +1355,11 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
             }
         }
 
-        private void processDisconnect(final ServiceConnection connection) {
+        private Runnable mDisconnectRunnable = () -> {
             synchronized (mLock) {
                 // The wallpaper disappeared.  If this isn't a system-default one, track
                 // crashes and fall back to default if it continues to misbehave.
-                if (connection == mWallpaper.connection) {
+                if (this == mWallpaper.connection) {
                     final ComponentName wpService = mWallpaper.wallpaperComponent;
                     if (!mWallpaper.wallpaperUpdating
                             && mWallpaper.userId == mCurrentUserId
@@ -1389,7 +1387,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     }
                 }
             }
-        }
+        };
 
         /**
          * Called by a live wallpaper if its colors have changed.
@@ -2801,6 +2799,13 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
                     WallpaperConnection.DisplayConnector::disconnectLocked);
             wallpaper.connection.mService = null;
             wallpaper.connection.mDisplayConnector.clear();
+
+            FgThread.getHandler().removeCallbacks(wallpaper.connection.mResetRunnable);
+            mContext.getMainThreadHandler().removeCallbacks(
+                    wallpaper.connection.mDisconnectRunnable);
+            mContext.getMainThreadHandler().removeCallbacks(
+                    wallpaper.connection.mTryToRebindRunnable);
+
             wallpaper.connection = null;
             if (wallpaper == mLastWallpaper) mLastWallpaper = null;
         }

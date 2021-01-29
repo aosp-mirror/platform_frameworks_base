@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2019 The Android Open Source Project
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<!-- This defines the format of the XML file used to store compat config overrides in
+  ~ /data/misc/appcompat/compat_framework_overrides.xml
+-->
+<xs:schema version="2.0" elementFormDefault="qualified"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+
+    <xs:complexType name="override-value">
+        <xs:attribute type="xs:string" name="packageName" use="required" />
+        <xs:attribute type="xs:boolean" name="enabled" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="change-overrides">
+        <xs:attribute type="xs:long" name="changeId" use="required"/>
+        <xs:element name="validated">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="override-value" type="override-value" maxOccurs="unbounded" minOccurs="0" />
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
+        <xs:element name="deferred">
+            <xs:complexType>
+                <xs:sequence>
+                    <xs:element name="override-value" type="override-value" maxOccurs="unbounded" minOccurs="0" />
+                </xs:sequence>
+            </xs:complexType>
+        </xs:element>
+    </xs:complexType>
+
+    <xs:element name="overrides">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="change-overrides" type="change-overrides" maxOccurs="unbounded" minOccurs="0" />
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>

@@ -26,6 +26,7 @@ import android.app.ActivityThread;
 import android.app.Application;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.sysprop.SocProperties;
 import android.sysprop.TelephonyProperties;
 import android.text.TextUtils;
 import android.util.Slog;
@@ -87,6 +88,14 @@ public class Build {
     /** The end-user-visible name for the end product. */
     public static final String MODEL = getString("ro.product.model");
 
+    /** The manufacturer of the device's primary system-on-chip. */
+    @NonNull
+    public static final String SOC_MANUFACTURER = SocProperties.soc_manufacturer().orElse(UNKNOWN);
+
+    /** The model name of the device's primary system-on-chip. */
+    @NonNull
+    public static final String SOC_MODEL = SocProperties.soc_model().orElse(UNKNOWN);
+
     /** The system bootloader version number. */
     public static final String BOOTLOADER = getString("ro.bootloader");
 
@@ -106,10 +115,22 @@ public class Build {
     public static final String HARDWARE = getString("ro.hardware");
 
     /**
-     * The hardware variant (SKU), if available.
+     * The SKU of the hardware (from the kernel command line). The SKU is reported by the bootloader
+     * to configure system software features.
      */
     @NonNull
     public static final String SKU = getString("ro.boot.hardware.sku");
+
+    /**
+     * The SKU of the device as set by the original design manufacturer (ODM). This is a
+     * runtime-initialized property set during startup to configure device services.
+     *
+     * <p>The ODM SKU may have multiple variants for the same system SKU in case a manufacturer
+     * produces variants of the same design. For example, the same build may be released with
+     * variations in physical keyboard and/or display hardware, each with a different ODM SKU.
+     */
+    @NonNull
+    public static final String ODM_SKU = getString("ro.boot.product.hardware.sku");
 
     /**
      * Whether this build was for an emulator device.
@@ -305,6 +326,7 @@ public class Build {
          * @see #SDK_INT
          * @hide
          */
+        @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
         @TestApi
         public static final int FIRST_SDK_INT = SystemProperties
                 .getInt("ro.product.first_api_level", 0);
@@ -1012,17 +1034,40 @@ public class Build {
 
         /**
          * Q.
-         * <p>
-         * <em>Why? Why, to give you a taste of your future, a preview of things
-         * to come. Con permiso, Capitan. The hall is rented, the orchestra
-         * engaged. It's now time to see if you can dance.</em>
+         *
+         * <p>Applications targeting this or a later release will get these new changes in behavior.
+         * For more information about this release, see the
+         * <a href="/about/versions/10">Android 10 overview</a>.</p>
+         * <ul>
+         * <li><a href="/about/versions/10/behavior-changes-all">Behavior changes: all apps</a></li>
+         * <li><a href="/about/versions/10/behavior-changes-10">Behavior changes: apps targeting API
+         * 29+</a></li>
+         * </ul>
+         *
          */
         public static final int Q = 29;
 
         /**
          * R.
+         *
+         * <p>Applications targeting this or a later release will get these new changes in behavior.
+         * For more information about this release, see the
+         * <a href="/about/versions/11">Android 11 overview</a>.</p>
+         * <ul>
+         * <li><a href="/about/versions/11/behavior-changes-all">Behavior changes: all apps</a></li>
+         * <li><a href="/about/versions/11/behavior-changes-11">Behavior changes: Apps targeting
+         * Android 11</a></li>
+         * <li><a href="/about/versions/11/non-sdk-11">Updates to non-SDK interface restrictions
+         * in Android 11</a></li>
+         * </ul>
+         *
          */
         public static final int R = 30;
+
+        /**
+         * S.
+         */
+        public static final int S = CUR_DEVELOPMENT;
     }
 
     /** The type of build, like "user" or "eng". */

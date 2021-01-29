@@ -34,6 +34,7 @@ import android.app.prediction.IPredictionManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.os.Binder;
+import android.os.IBinder;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.util.Slog;
@@ -108,9 +109,9 @@ public class AppPredictionManagerService extends
 
         @Override
         public void createPredictionSession(@NonNull AppPredictionContext context,
-                @NonNull AppPredictionSessionId sessionId) {
-            runForUserLocked("createPredictionSession", sessionId,
-                    (service) -> service.onCreatePredictionSessionLocked(context, sessionId));
+                @NonNull AppPredictionSessionId sessionId, @NonNull IBinder token) {
+            runForUserLocked("createPredictionSession", sessionId, (service) ->
+                    service.onCreatePredictionSessionLocked(context, sessionId, token));
         }
 
         @Override

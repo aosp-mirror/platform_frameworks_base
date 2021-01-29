@@ -732,6 +732,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         final ActivityStack stack = task.getStack();
 
         beginDeferResume();
+        // The LaunchActivityItem also contains process configuration, so the configuration change
+        // from WindowProcessController#setProcess can be deferred. The major reason is that if
+        // the activity has FixedRotationAdjustments, it needs to be applied with configuration.
+        // In general, this reduces a binder transaction if process configuration is changed.
+        proc.pauseConfigurationDispatch();
 
         try {
             r.startFreezingScreenLocked(proc, 0);
@@ -826,9 +831,9 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
                 // we have to always create a new Configuration here.
-
+                final Configuration procConfig = proc.prepareConfigurationForLaunchingActivity();
                 final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                        proc.getConfiguration(), r.getMergedOverrideConfiguration());
+                        procConfig, r.getMergedOverrideConfiguration());
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.getSavedState());
@@ -862,6 +867,11 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
 
+                if (procConfig.seq > mRootWindowContainer.getConfiguration().seq) {
+                    // If the seq is increased, there should be something changed (e.g. registered
+                    // activity configuration).
+                    proc.setLastReportedConfiguration(procConfig);
+                }
                 if ((proc.mInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mHasHeavyWeightFeature) {
                     // This may be a heavy-weight process! Note that the package manager will ensure
@@ -896,6 +906,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
             }
         } finally {
             endDeferResume();
+            proc.resumeConfigurationDispatch();
         }
 
         r.launchFailed = false;

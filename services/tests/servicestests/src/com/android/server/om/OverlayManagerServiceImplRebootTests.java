@@ -35,8 +35,8 @@ import java.util.function.BiConsumer;
 @RunWith(AndroidJUnit4.class)
 public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceImplTestsBase {
 
-    private static final String OVERLAY = "com.dummy.overlay";
-    private static final String TARGET = "com.dummy.target";
+    private static final String OVERLAY = "com.test.overlay";
+    private static final String TARGET = "com.test.target";
     private static final int USER = 0;
 
     private static final String OVERLAY2 = OVERLAY + "2";
@@ -44,9 +44,9 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     @Test
     public void testUpdateOverlaysForUser() {
         final OverlayManagerServiceImpl impl = getImpl();
-        addSystemPackage(target(TARGET), USER);
-        addSystemPackage(target("some.other.target"), USER);;
-        addSystemPackage(overlay(OVERLAY, TARGET), USER);
+        addPackage(target(TARGET), USER);
+        addPackage(target("some.other.target"), USER);
+        addPackage(overlay(OVERLAY, TARGET), USER);
 
         // do nothing, expect no change
         final List<String> a = impl.updateOverlaysForUser(USER);
@@ -54,7 +54,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         assertTrue(a.contains(TARGET));
 
         // upgrade overlay, keep target
-        addSystemPackage(overlay(OVERLAY, TARGET), USER);
+        addPackage(overlay(OVERLAY, TARGET), USER);
 
         final List<String> b = impl.updateOverlaysForUser(USER);
         assertEquals(1, b.size());
@@ -66,7 +66,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
         assertTrue(c.contains(TARGET));
 
         // upgrade overlay, switch to new target
-        addSystemPackage(overlay(OVERLAY, "some.other.target"), USER);
+        addPackage(overlay(OVERLAY, "some.other.target"), USER);
         final List<String> d = impl.updateOverlaysForUser(USER);
         assertEquals(2, d.size());
         assertTrue(d.containsAll(Arrays.asList(TARGET, "some.other.target")));
@@ -78,7 +78,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testImmutableEnabledChange() {
+    public void testImmutableEnabledChange() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -106,7 +106,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutableEnabledChangeHasNoEffect() {
+    public void testMutableEnabledChangeHasNoEffect() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -134,7 +134,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutableEnabledToImmutableEnabled() {
+    public void testMutableEnabledToImmutableEnabled() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -178,7 +178,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testMutablePriorityChange() {
+    public void testMutablePriorityChange() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);
@@ -218,7 +218,7 @@ public class OverlayManagerServiceImplRebootTests extends OverlayManagerServiceI
     }
 
     @Test
-    public void testImmutablePriorityChange() {
+    public void testImmutablePriorityChange() throws Exception {
         final OverlayManagerServiceImpl impl = getImpl();
         installNewPackage(target(TARGET), USER);
         installNewPackage(overlay(OVERLAY, TARGET), USER);

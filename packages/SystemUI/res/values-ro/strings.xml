@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Reluați"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Anulați"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Trimiteți"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Ștergeți"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Înregistrarea ecranului a fost anulată"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Înregistrarea ecranului a fost salvată. Atingeți pentru vizualizare"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Înregistrarea ecranului a fost ștearsă."</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Eroare la ștergerea înregistrării ecranului"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Nu s-au obținut permisiunile"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Eroare la începerea înregistrării ecranului"</string>
@@ -889,12 +887,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Partea de sus: 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Partea de sus: 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Partea de jos pe ecran complet"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Poziția <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Atingeți de două ori pentru a edita."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Atingeți de două ori pentru a adăuga."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Mutați <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Eliminați <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Adăugați <xliff:g id="TILE_NAME">%1$s</xliff:g> pe poziția <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Mutați <xliff:g id="TILE_NAME">%1$s</xliff:g> pe poziția <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"eliminați cardul"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"adăugați cardul la sfârșit"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mutați cardul"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Adăugați un card"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mutați pe poziția <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Adăugați pe poziția <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Poziția <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editorul pentru setări rapide."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificare <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Este posibil ca aplicația să nu funcționeze cu ecranul împărțit."</string>
@@ -927,11 +926,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Treceți la cel anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Redimensionați"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefonul s-a oprit din cauza încălzirii"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Acum telefonul funcționează normal"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Acum telefonul funcționează normal.\nAtingeți pentru mai multe informații"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonul se încălzise prea mult și s-a oprit pentru a se răci. Acum telefonul funcționează normal.\n\nTelefonul s-ar putea încălzi prea mult dacă:\n	• folosiți aplicații care consumă multe resurse (de ex., jocuri, aplicații video/de navigare);\n	• descărcați/încărcați fișiere mari;\n	• folosiți telefonul la temperaturi ridicate."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Vedeți pașii pentru îngrijire"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Telefonul se încălzește"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Anumite funcții sunt limitate în timp ce telefonul se răcește"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Anumite funcții sunt limitate în timp ce telefonul se răcește.\nAtingeți pentru mai multe informații"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Telefonul va încerca automat să se răcească. Puteți folosi telefonul în continuare, dar este posibil să funcționeze mai lent.\n\nDupă ce se răcește, telefonul va funcționa normal."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Vedeți pașii pentru îngrijire"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Deconectați încărcătorul"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Există o problemă la încărcarea acestui dispozitiv. Deconectați adaptorul de curent și aveți grijă, deoarece cablul poate fi cald."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Vedeți pașii pentru îngrijire"</string>
@@ -993,6 +994,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Setări"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"OK"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Extrageți memoria SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> folosește <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplicațiile folosesc <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" și "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"cameră foto"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"locație"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"microfon"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Senzori dezactivați"</string>
     <string name="device_services" msgid="1549944177856658705">"Servicii pentru dispozitiv"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Fără titlu"</string>
@@ -1072,7 +1080,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Se încarcă recomandările"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Media"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ascunde sesiunea actuală."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ascunde"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Închideți"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Setări"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>

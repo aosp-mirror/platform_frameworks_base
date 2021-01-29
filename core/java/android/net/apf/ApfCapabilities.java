@@ -19,7 +19,6 @@ package android.net.apf;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -36,7 +35,6 @@ import com.android.internal.R;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ApfCapabilities implements Parcelable {
     /**
      * Version of APF instruction set supported for packet filtering. 0 indicates no support for

@@ -345,7 +345,6 @@ public final class SmsManager {
      * where this operation may fail.
      * </p>
      *
-     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
      *  the current default SMSC
@@ -357,7 +356,6 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -408,6 +406,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -470,7 +471,6 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
      *  <code>RESULT_ERROR_SHORT_CODE_NOT_ALLOWED</code><br>
@@ -520,6 +520,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -550,7 +553,7 @@ public final class SmsManager {
      * @throws IllegalArgumentException if destinationAddress or text are empty
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void sendTextMessage(
             String destinationAddress, String scAddress, String text,
             PendingIntent sentIntent, PendingIntent deliveryIntent,
@@ -856,21 +859,19 @@ public final class SmsManager {
      * where this operation may fail.
      * </p>
      *
-     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
-     *   the current default SMSC
+     *  the current default SMSC
      * @param parts an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
+     *  comprise the original message
      * @param sentIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been sent.
-     *   The result code will be <code>Activity.RESULT_OK</code> for success,
-     *   or one of these errors:<br>
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been sent.
+     *  The result code will be <code>Activity.RESULT_OK</code> for success,
+     *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -921,17 +922,20 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
-     *   The per-application based SMS control checks sentIntent. If sentIntent
-     *   is NULL the caller will be checked against all unknown applications,
-     *   which cause smaller number of SMS to be sent in checking period.
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applications,
+     *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been delivered
-     *   to the recipient.  The raw pdu of the status report is in the
-     *   extended data ("pdu").
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been delivered
+     *  to the recipient.  The raw pdu of the status report is in the
+     *  extended data ("pdu").
      *
      * @throws IllegalArgumentException if destinationAddress or data are empty
      */
@@ -1114,21 +1118,20 @@ public final class SmsManager {
      * boolean value {@code true}. See {@link #getDefault()} for more information on the conditions
      * where this operation may fail.
      * </p>
-
+     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
-     *   the current default SMSC
+     *  the current default SMSC
      * @param parts an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
+     *  comprise the original message
      * @param sentIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been sent.
-     *   The result code will be <code>Activity.RESULT_OK</code> for success,
-     *   or one of these errors:<br>
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been sent.
+     *  The result code will be <code>Activity.RESULT_OK</code> for success,
+     *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -1179,17 +1182,20 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
-     *   The per-application based SMS control checks sentIntent. If sentIntent
-     *   is NULL the caller will be checked against all unknown applications,
-     *   which cause smaller number of SMS to be sent in checking period.
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applications,
+     *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been delivered
-     *   to the recipient.  The raw pdu of the status report is in the
-     *   extended data ("pdu").
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been delivered
+     *  to the recipient.  The raw pdu of the status report is in the
+     *  extended data ("pdu").
      * @param priority Priority level of the message
      *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
      *  ---------------------------------
@@ -1328,7 +1334,6 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
      *  <code>RESULT_ERROR_SHORT_CODE_NOT_ALLOWED</code><br>
@@ -1378,6 +1383,9 @@ public final class SmsManager {
      *  <code>RESULT_RIL_NO_RESOURCES</code><br>
      *  <code>RESULT_RIL_CANCELLED</code><br>
      *  <code>RESULT_RIL_SIM_ABSENT</code><br>
+     *  <code>RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED</code><br>
+     *  <code>RESULT_RIL_ACCESS_BARRED</code><br>
+     *  <code>RESULT_RIL_BLOCKED_DUE_TO_CALL</code><br>
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
@@ -1721,6 +1729,7 @@ public final class SmsManager {
      *
      * {@hide}
      */
+    @UnsupportedAppUsage
     @RequiresPermission(Manifest.permission.ACCESS_MESSAGES_ON_ICC)
     public boolean deleteMessageFromIcc(int messageIndex) {
         boolean success = false;
@@ -2091,17 +2100,25 @@ public final class SmsManager {
     }
 
     /**
-     * Gets the total capacity of SMS storage on RUIM and SIM cards
-     * <p>
-     * This is the number of 176 byte EF-SMS records which can be stored on the RUIM or SIM card.
-     * <p>
-     * See 3GPP TS 31.102 - 4.2.25 - EF-SMS for more information
+     * Gets the total capacity of SMS storage on the SIM card.
      *
-     * @return the total number of SMS records which can be stored on the RUIM or SIM cards.
-     * @hide
+     * <p>
+     * This is the number of 176 byte EF-SMS records which can be stored on the SIM card.
+     * See 3GPP TS 31.102 - 4.2.25 - EF-SMS for more information.
+     * </p>
+     *
+     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
+     * dialog. If this method is called on a device that has multiple active subscriptions, this
+     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
+     * default subscription is defined, the subscription ID associated with this method will be
+     * INVALID, which will result in the operation being completed on the subscription associated
+     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the operation
+     * is performed on the correct subscription.
+     * </p>
+     *
+     * @return the total number of SMS records which can be stored on the SIM card.
      */
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
     public int getSmsCapacityOnIcc() {
         int ret = 0;
         try {
@@ -2110,7 +2127,7 @@ public final class SmsManager {
                 ret = iccISms.getSmsCapacityOnIccForSubscriber(getSubscriptionId());
             }
         } catch (RemoteException ex) {
-            //ignore it
+            throw new RuntimeException(ex);
         }
         return ret;
     }
@@ -2199,7 +2216,10 @@ public final class SmsManager {
             RESULT_RIL_OPERATION_NOT_ALLOWED,
             RESULT_RIL_NO_RESOURCES,
             RESULT_RIL_CANCELLED,
-            RESULT_RIL_SIM_ABSENT
+            RESULT_RIL_SIM_ABSENT,
+            RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED,
+            RESULT_RIL_ACCESS_BARRED,
+            RESULT_RIL_BLOCKED_DUE_TO_CALL
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Result {}
@@ -2464,6 +2484,21 @@ public final class SmsManager {
      */
     public static final int RESULT_RIL_SIM_ABSENT = 120;
 
+    /**
+     * 1X voice and SMS are not allowed simulteneously.
+     */
+    public static final int RESULT_RIL_SIMULTANEOUS_SMS_AND_CALL_NOT_ALLOWED = 121;
+
+    /**
+     * Access is barred.
+     */
+    public static final int RESULT_RIL_ACCESS_BARRED = 122;
+
+    /**
+     * SMS is blocked due to call control, e.g., resource unavailable in the SMR entity.
+     */
+    public static final int RESULT_RIL_BLOCKED_DUE_TO_CALL = 123;
+
     // SMS receiving results sent as a "result" extra in {@link Intents.SMS_REJECTED_ACTION}
 
     /**
@@ -2506,13 +2541,12 @@ public final class SmsManager {
     /**
      * Send an MMS message
      *
-     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
-     * dialog. If this method is called on a device that has multiple active subscriptions, this
-     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
-     * default subscription is defined, the subscription ID associated with this message will be
-     * INVALID, which will result in the operation being completed on the subscription associated
-     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
-     * operation is performed on the correct subscription.
+     * <p class="note"><strong>Note:</strong> If {@link #getDefault()} is used to instantiate this
+     * manager on a multi-SIM device, this operation may fail sending the MMS message because no
+     * suitable default subscription could be found. In this case, if {@code sentIntent} is
+     * non-null, then the {@link PendingIntent} will be sent with an error code
+     * {@code RESULT_NO_DEFAULT_SMS_APP}. See {@link #getDefault()} for more information on the
+     * conditions where this operation may fail.
      * </p>
      *
      * @param context application context
@@ -2531,21 +2565,30 @@ public final class SmsManager {
         }
         MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
         if (m != null) {
-            m.sendMultimediaMessage(getSubscriptionId(), contentUri, locationUrl, configOverrides,
-                    sentIntent, 0L /* messageId */);
+            resolveSubscriptionForOperation(new SubscriptionResolverResult() {
+                @Override
+                public void onSuccess(int subId) {
+                    m.sendMultimediaMessage(subId, contentUri, locationUrl, configOverrides,
+                            sentIntent, 0L /* messageId */);
+                }
+
+                @Override
+                public void onFailure() {
+                    notifySmsError(sentIntent, RESULT_NO_DEFAULT_SMS_APP);
+                }
+            });
         }
     }
 
     /**
      * Download an MMS message from carrier by a given location URL
      *
-     * <p class="note"><strong>Note:</strong> This method will never trigger an SMS disambiguation
-     * dialog. If this method is called on a device that has multiple active subscriptions, this
-     * {@link SmsManager} instance has been created with {@link #getDefault()}, and no user-defined
-     * default subscription is defined, the subscription ID associated with this message will be
-     * INVALID, which will result in the operation being completed on the subscription associated
-     * with logical slot 0. Use {@link #getSmsManagerForSubscriptionId(int)} to ensure the
-     * operation is performed on the correct subscription.
+     * <p class="note"><strong>Note:</strong> If {@link #getDefault()} is used to instantiate this
+     * manager on a multi-SIM device, this operation may fail downloading the MMS message because no
+     * suitable default subscription could be found. In this case, if {@code downloadedIntent} is
+     * non-null, then the {@link PendingIntent} will be sent with an error code
+     * {@code RESULT_NO_DEFAULT_SMS_APP}. See {@link #getDefault()} for more information on the
+     * conditions where this operation may fail.
      * </p>
      *
      * @param context application context
@@ -2568,8 +2611,18 @@ public final class SmsManager {
         }
         MmsManager m = (MmsManager) context.getSystemService(Context.MMS_SERVICE);
         if (m != null) {
-            m.downloadMultimediaMessage(getSubscriptionId(), locationUrl, contentUri,
-                    configOverrides, downloadedIntent, 0L /* messageId */);
+            resolveSubscriptionForOperation(new SubscriptionResolverResult() {
+                @Override
+                public void onSuccess(int subId) {
+                    m.downloadMultimediaMessage(subId, locationUrl, contentUri, configOverrides,
+                            downloadedIntent, 0L /* messageId */);
+                }
+
+                @Override
+                public void onFailure() {
+                    notifySmsError(downloadedIntent, RESULT_NO_DEFAULT_SMS_APP);
+                }
+            });
         }
     }
 

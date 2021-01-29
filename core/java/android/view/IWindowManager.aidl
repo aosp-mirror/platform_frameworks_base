@@ -187,7 +187,7 @@ interface IWindowManager
       * Used by system ui to report that recents has shown itself.
       * @deprecated to be removed once prebuilts are updated
       */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void endProlongedAnimations();
 
     void startFreezingScreen(int exitAnim, int enterAnim);
@@ -201,7 +201,7 @@ interface IWindowManager
     void exitKeyguardSecurely(IOnKeyguardExitResult callback);
     @UnsupportedAppUsage
     boolean isKeyguardLocked();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     boolean isKeyguardSecure(int userId);
     void dismissKeyguard(IKeyguardDismissCallback callback, CharSequence message);
 
@@ -213,11 +213,11 @@ interface IWindowManager
     // These can only be called with the SET_ANIMATON_SCALE permission.
     @UnsupportedAppUsage
     float getAnimationScale(int which);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     float[] getAnimationScales();
     @UnsupportedAppUsage
     void setAnimationScale(int which, float scale);
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setAnimationScales(in float[] scales);
 
     float getCurrentAnimatorScale();
@@ -238,7 +238,7 @@ interface IWindowManager
     // should be enabled.  The 'enabled' value is null or blank for
     // the system default (differs per build variant) or any valid
     // boolean string as parsed by SystemProperties.getBoolean().
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void setStrictModeVisualIndicatorPreference(String enabled);
 
     /**
@@ -388,16 +388,6 @@ interface IWindowManager
     oneway void hideTransientBars(int displayId);
 
     /**
-    * When set to {@code true} the system bars will always be shown. This is true even if an app
-    * requests to be fullscreen by setting the system ui visibility flags. The
-    * functionality was added for the automotive case as a way to guarantee required content stays
-    * on screen at all times.
-    *
-    * @hide
-    */
-    oneway void setForceShowSystemBars(boolean show);
-
-    /**
      * Called by System UI to notify of changes to the visibility of Recents.
      */
     oneway void setRecentsVisibility(boolean visible);
@@ -429,7 +419,7 @@ interface IWindowManager
     /**
      * Lock the device immediately with the specified options (can be null).
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void lockNow(in Bundle options);
 
     /**

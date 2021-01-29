@@ -19,11 +19,12 @@ package android.app;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Intent;
 import android.content.pm.IPackageDeleteObserver2;
+import android.os.Build;
 
 /** {@hide} */
 public class PackageDeleteObserver {
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public PackageDeleteObserver() {
     }
 

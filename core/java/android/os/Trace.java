@@ -52,7 +52,7 @@ public final class Trace {
     /** @hide */
     public static final long TRACE_TAG_INPUT = 1L << 2;
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final long TRACE_TAG_VIEW = 1L << 3;
     /** @hide */
     public static final long TRACE_TAG_WEBVIEW = 1L << 4;

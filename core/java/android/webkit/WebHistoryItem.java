@@ -35,6 +35,7 @@ public abstract class WebHistoryItem implements Cloneable {
      * @deprecated This method is now obsolete.
      * @hide Since API level {@link android.os.Build.VERSION_CODES#JELLY_BEAN_MR1}
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @SystemApi
     @Deprecated
     public abstract int getId();

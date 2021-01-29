@@ -219,6 +219,11 @@ final class InputMonitor {
 
     WindowManagerPolicy.InputConsumer createInputConsumer(Looper looper, String name,
             InputEventReceiver.Factory inputEventReceiverFactory) {
+        if (!name.contentEquals(INPUT_CONSUMER_NAVIGATION)) {
+            throw new IllegalArgumentException("Illegal input consumer : " + name
+                    + ", display: " + mDisplayId);
+        }
+
         if (mInputConsumers.containsKey(name)) {
             throw new IllegalStateException("Existing input consumer found with name: " + name
                     + ", display: " + mDisplayId);
@@ -248,6 +253,11 @@ final class InputMonitor {
                 // stack, and we need FLAG_NOT_TOUCH_MODAL to ensure other events fall through
                 consumer.mWindowHandle.layoutParamsFlags |= FLAG_NOT_TOUCH_MODAL;
                 break;
+            case INPUT_CONSUMER_RECENTS_ANIMATION:
+                break;
+            default:
+                throw new IllegalArgumentException("Illegal input consumer : " + name
+                        + ", display: " + mDisplayId);
         }
         addInputConsumer(name, consumer);
     }
@@ -258,6 +268,8 @@ final class InputMonitor {
             final boolean hasFocus, final boolean hasWallpaper) {
         // Add a window to our list of input windows.
         inputWindowHandle.name = child.toString();
+        inputWindowHandle.inputApplicationHandle = child.mActivityRecord != null
+                ? child.mActivityRecord.getInputApplicationHandle(false /* update */) : null;
         flags = child.getSurfaceTouchableRegion(inputWindowHandle, flags);
         inputWindowHandle.layoutParamsFlags = flags;
         inputWindowHandle.layoutParamsType = type;
@@ -376,15 +388,8 @@ final class InputMonitor {
 
     public void setFocusedAppLw(ActivityRecord newApp) {
         // Focused app has changed.
-        if (newApp == null) {
-            mService.mInputManager.setFocusedApplication(mDisplayId, null);
-        } else {
-            final InputApplicationHandle handle = newApp.mInputApplicationHandle;
-            handle.name = newApp.toString();
-            handle.dispatchingTimeoutNanos = newApp.mInputDispatchingTimeoutNanos;
-
-            mService.mInputManager.setFocusedApplication(mDisplayId, handle);
-        }
+        mService.mInputManager.setFocusedApplication(mDisplayId,
+                newApp != null ? newApp.getInputApplicationHandle(true /* update */) : null);
     }
 
     public void pauseDispatchingLw(WindowToken window) {
@@ -459,9 +464,6 @@ final class InputMonitor {
             mDisplayContent.forAllWindows(this,
                     true /* traverseTopToBottom */);
 
-            if (mAddWallpaperInputConsumerHandle) {
-                mWallpaperInputConsumer.show(mInputTransaction, 0);
-            }
             if (!mUpdateInputWindowsImmediately) {
                 mDisplayContent.getPendingTransaction().merge(mInputTransaction);
                 mDisplayContent.scheduleAnimation();

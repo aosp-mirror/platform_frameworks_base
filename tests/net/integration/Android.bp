@@ -32,6 +32,7 @@ android_test {
         "kotlin-reflect",
         "mockito-target-extended-minus-junit4",
         "net-tests-utils",
+        "service-connectivity",
         "services.core",
         "services.net",
         "testables",
@@ -59,6 +60,7 @@ java_library {
         "net-tests-utils",
     ],
     libs: [
+        "service-connectivity",
         "services.core",
         "services.net",
     ],

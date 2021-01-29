@@ -18,6 +18,7 @@ package android.bluetooth;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.LocalSocket;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -111,7 +112,7 @@ public final class BluetoothSocket implements Closeable {
     public static final int TYPE_L2CAP_LE = 4;
 
     /*package*/ static final int EBADFD = 77;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     /*package*/ static final int EADDRINUSE = 98;
 
     /*package*/ static final int SEC_FLAG_ENCRYPT = 1;

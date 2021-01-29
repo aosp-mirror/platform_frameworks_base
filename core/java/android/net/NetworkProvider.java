@@ -30,7 +30,7 @@ import android.util.Log;
 
 /**
  * Base class for network providers such as telephony or Wi-Fi. NetworkProviders connect the device
- * to networks and makes them available to to the core network stack by creating
+ * to networks and makes them available to the core network stack by creating
  * {@link NetworkAgent}s. The networks can then provide connectivity to apps and can be interacted
  * with via networking APIs such as {@link ConnectivityManager}.
  *
@@ -51,13 +51,6 @@ public class NetworkProvider {
     public static final int ID_NONE = -1;
 
     /**
-     * A hardcoded ID for NetworkAgents representing VPNs. These agents are not created by any
-     * provider, so they use this constant for clarity instead of NONE.
-     * @hide only used by ConnectivityService.
-     */
-    public static final int ID_VPN = -2;
-
-    /**
      * The first providerId value that will be allocated.
      * @hide only used by ConnectivityService.
      */
@@ -70,7 +63,7 @@ public class NetworkProvider {
 
     private final Messenger mMessenger;
     private final String mName;
-    private final ConnectivityManager mCm;
+    private final Context mContext;
 
     private int mProviderId = ID_NONE;
 
@@ -85,8 +78,6 @@ public class NetworkProvider {
      */
     @SystemApi
     public NetworkProvider(@NonNull Context context, @NonNull Looper looper, @NonNull String name) {
-        mCm = ConnectivityManager.from(context);
-
         Handler handler = new Handler(looper) {
             @Override
             public void handleMessage(Message m) {
@@ -102,6 +93,7 @@ public class NetworkProvider {
                 }
             }
         };
+        mContext = context;
         mMessenger = new Messenger(handler);
         mName = name;
     }
@@ -165,6 +157,6 @@ public class NetworkProvider {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.NETWORK_FACTORY)
     public void declareNetworkRequestUnfulfillable(@NonNull NetworkRequest request) {
-        mCm.declareNetworkRequestUnfulfillable(request);
+        ConnectivityManager.from(mContext).declareNetworkRequestUnfulfillable(request);
     }
 }

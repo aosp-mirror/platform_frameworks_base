@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.inputmethodservice.InputMethodService;
+import android.view.InsetsState;
 import android.view.WindowInsets.Type.InsetsType;
 
 /**
@@ -35,6 +36,13 @@ interface InsetsControlTarget {
      */
     default WindowState getWindow() {
         return null;
+    }
+
+    /**
+     * @return The requested {@link InsetsState} of this target.
+     */
+    default InsetsState getRequestedInsetsState() {
+        return InsetsState.EMPTY;
     }
 
     /**

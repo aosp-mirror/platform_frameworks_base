@@ -17,12 +17,13 @@
 package android.telephony.ims.stub;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsEcbmListener;
+
+import java.util.Objects;
 
 /**
  * Base implementation of ImsEcbm, which implements stub versions of the methods
@@ -34,15 +35,30 @@ import com.android.ims.internal.IImsEcbmListener;
  * @hide
  */
 @SystemApi
-@TestApi
 public class ImsEcbmImplBase {
     private static final String TAG = "ImsEcbmImplBase";
 
+    private final Object mLock = new Object();
     private IImsEcbmListener mListener;
-    private IImsEcbm mImsEcbm = new IImsEcbm.Stub() {
+    private final IImsEcbm mImsEcbm = new IImsEcbm.Stub() {
         @Override
         public void setListener(IImsEcbmListener listener) {
-            mListener = listener;
+            synchronized (mLock) {
+                if (mImsEcbm != null && listener != null && Objects.equals(
+                        mImsEcbm.asBinder(), listener.asBinder())) {
+                    return;
+                }
+                if (listener == null) {
+                    mListener = null;
+                } else if (listener != null && mListener == null) {
+                    mListener = listener;
+                } else {
+                    // Fail fast here instead of silently overwriting the listener to another
+                    // listener due to another connection connecting.
+                    throw new IllegalStateException("ImsEcbmImplBase: Listener already set by "
+                            + "another connection.");
+                }
+            }
         }
 
         @Override
@@ -71,9 +87,13 @@ public class ImsEcbmImplBase {
      */
     public final void enteredEcbm() {
         Log.d(TAG, "Entered ECBM.");
-        if (mListener != null) {
+        IImsEcbmListener listener;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+        if (listener != null) {
             try {
-                mListener.enteredECBM();
+                listener.enteredECBM();
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -87,9 +107,13 @@ public class ImsEcbmImplBase {
      */
     public final void exitedEcbm() {
         Log.d(TAG, "Exited ECBM.");
-        if (mListener != null) {
+        IImsEcbmListener listener;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+        if (listener != null) {
             try {
-                mListener.exitedECBM();
+                listener.exitedECBM();
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }

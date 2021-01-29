@@ -19,3 +19,11 @@ sysprop_library {
     api_packages: ["android.sysprop"],
     vendor_available: false,
 }
+
+sysprop_library {
+    name: "com.android.sysprop.watchdog",
+    srcs: ["WatchdogProperties.sysprop"],
+    property_owner: "Platform",
+    api_packages: ["android.sysprop"],
+    vendor_available: false,
+}

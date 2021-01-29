@@ -618,16 +618,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             return false;
         }
         if (DEBUG) Log.d(TAG, "onStateChanged: " + state);
-        updateState(state);
-
-        boolean localStateChanged = !mState.equals(mLastDispatchedState,
-                true /* excludingCaptionInsets */, true /* excludeInvisibleIme */);
         mLastDispatchedState.set(state, true /* copySources */);
 
+        final InsetsState lastState = new InsetsState(mState, true /* copySources */);
+        updateState(state);
         applyLocalVisibilityOverride();
-        if (localStateChanged) {
-            if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged, send state to WM: " + mState);
+
+        if (!mState.equals(lastState, true /* excludingCaptionInsets */,
+                true /* excludeInvisibleIme */)) {
+            if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
             mHost.notifyInsetsChanged();
+        }
+        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */,
+                true /* excludeInvisibleIme */)) {
+            if (DEBUG) Log.d(TAG, "onStateChanged, send state to WM: " + mState);
             updateRequestedState();
         }
         return true;
@@ -1134,21 +1138,24 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (invokeCallback) {
             control.cancel();
         }
+        boolean stateChanged = false;
         for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
             RunningAnimation runningAnimation = mRunningAnimations.get(i);
             if (runningAnimation.runner == control) {
                 mRunningAnimations.remove(i);
                 ArraySet<Integer> types = toInternalType(control.getTypes());
                 for (int j = types.size() - 1; j >= 0; j--) {
-                    if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
-                        mHost.notifyInsetsChanged();
-                    }
+                    stateChanged |= getSourceConsumer(types.valueAt(j)).notifyAnimationFinished();
                 }
                 if (invokeCallback && runningAnimation.startDispatched) {
                     dispatchAnimationEnd(runningAnimation.runner.getAnimation());
                 }
                 break;
             }
+        }
+        if (stateChanged) {
+            mHost.notifyInsetsChanged();
+            updateRequestedState();
         }
     }
 

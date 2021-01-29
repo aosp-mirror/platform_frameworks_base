@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.os.IVold;
 import android.os.Parcel;
@@ -179,7 +180,7 @@ public class VolumeInfo implements Parcelable {
         this.partGuid = partGuid;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public VolumeInfo(Parcel parcel) {
         id = parcel.readString8();
         type = parcel.readInt();
@@ -197,6 +198,21 @@ public class VolumeInfo implements Parcelable {
         fsLabel = parcel.readString8();
         path = parcel.readString8();
         internalPath = parcel.readString8();
+    }
+
+    public VolumeInfo(VolumeInfo volumeInfo) {
+        this.id = volumeInfo.id;
+        this.type = volumeInfo.type;
+        this.disk = volumeInfo.disk;
+        this.partGuid = volumeInfo.partGuid;
+        this.mountFlags = volumeInfo.mountFlags;
+        this.mountUserId = volumeInfo.mountUserId;
+        this.state = volumeInfo.state;
+        this.fsType = volumeInfo.fsType;
+        this.fsUuid = volumeInfo.fsUuid;
+        this.fsLabel = volumeInfo.fsLabel;
+        this.path = volumeInfo.path;
+        this.internalPath = volumeInfo.internalPath;
     }
 
     @UnsupportedAppUsage
@@ -312,7 +328,7 @@ public class VolumeInfo implements Parcelable {
      * Returns {@code true} if this volume is the primary emulated volume for {@code userId},
      * {@code false} otherwise.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isPrimaryEmulatedForUser(int userId) {
         return id.equals(ID_EMULATED_INTERNAL + ";" + userId);
     }
@@ -321,7 +337,7 @@ public class VolumeInfo implements Parcelable {
         return isVisibleForUser(userId);
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isVisibleForWrite(int userId) {
         return isVisibleForUser(userId);
     }
@@ -331,7 +347,7 @@ public class VolumeInfo implements Parcelable {
         return (path != null) ? new File(path) : null;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public File getInternalPath() {
         return (internalPath != null) ? new File(internalPath) : null;
     }
@@ -533,7 +549,7 @@ public class VolumeInfo implements Parcelable {
         return id.hashCode();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final @android.annotation.NonNull Creator<VolumeInfo> CREATOR = new Creator<VolumeInfo>() {
         @Override
         public VolumeInfo createFromParcel(Parcel in) {

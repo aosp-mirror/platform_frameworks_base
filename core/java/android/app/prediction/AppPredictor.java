@@ -70,7 +70,6 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class AppPredictor {
 
     private static final String TAG = AppPredictor.class.getSimpleName();
@@ -82,6 +81,8 @@ public final class AppPredictor {
 
     private final AppPredictionSessionId mSessionId;
     private final ArrayMap<Callback, CallbackWrapper> mRegisteredCallbacks = new ArrayMap<>();
+
+    private final IBinder mToken = new Binder();
 
     /**
      * Creates a new Prediction client.
@@ -98,7 +99,7 @@ public final class AppPredictor {
         mSessionId = new AppPredictionSessionId(
                 context.getPackageName() + ":" + UUID.randomUUID().toString(), context.getUserId());
         try {
-            mPredictionManager.createPredictionSession(predictionContext, mSessionId);
+            mPredictionManager.createPredictionSession(predictionContext, mSessionId, mToken);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to create predictor", e);
             e.rethrowAsRuntimeException();

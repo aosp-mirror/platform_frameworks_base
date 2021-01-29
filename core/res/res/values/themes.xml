@@ -887,7 +887,7 @@ please see themes_device_defaults.xml.
     </style>
 
     <!-- @hide Special theme for the default system Activity-based Alert dialogs. -->
-    <style name="Theme.Dialog.Confirmation" parent="Theme.DeviceDefault.Light.Dialog.Alert" />
+    <style name="Theme.Dialog.Confirmation" parent="Theme.DeviceDefault.Dialog.Alert.DayNight" />
 
     <!-- Theme for a window that looks like a toast. -->
     <style name="Theme.Toast" parent="Theme.DeviceDefault.Dialog">

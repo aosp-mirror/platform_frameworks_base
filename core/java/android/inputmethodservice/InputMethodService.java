@@ -1097,7 +1097,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mService.getContentResolver().unregisterContentObserver(this);
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private boolean shouldShowImeWithHardKeyboard() {
             // Lazily initialize as needed.
             if (mShowImeWithHardKeyboard == ShowImeWithHardKeyboardType.UNKNOWN) {
@@ -1137,7 +1137,7 @@ public class InputMethodService extends AbstractInputMethodService {
             return "SettingsObserver{mShowImeWithHardKeyboard=" + mShowImeWithHardKeyboard  + "}";
         }
     }
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private SettingsObserver mSettingsObserver;
 
     /**
@@ -1208,15 +1208,19 @@ public class InputMethodService extends AbstractInputMethodService {
         mWindow.getWindow().getAttributes().setFitInsetsIgnoringVisibility(true);
 
         // IME layout should always be inset by navigation bar, no matter its current visibility,
-        // unless automotive requests it, since automotive may hide the navigation bar.
+        // unless automotive requests it. Automotive devices may request the navigation bar to be
+        // hidden when the IME shows up (controlled via config_automotiveHideNavBarForKeyboard)
+        // in order to maximize the visible screen real estate. When this happens, the IME window
+        // should animate from the bottom of the screen to reduce the jank that happens from the
+        // lack of synchronization between the bottom system window and the IME window.
+        if (mIsAutomotive && mAutomotiveHideNavBarForKeyboard) {
+            mWindow.getWindow().setDecorFitsSystemWindows(false);
+        }
         mWindow.getWindow().getDecorView().setOnApplyWindowInsetsListener(
                 (v, insets) -> v.onApplyWindowInsets(
                         new WindowInsets.Builder(insets).setInsets(
                                 navigationBars(),
-                                mIsAutomotive && mAutomotiveHideNavBarForKeyboard
-                                        ? android.graphics.Insets.NONE
-                                        : insets.getInsetsIgnoringVisibility(navigationBars())
-                                )
+                                insets.getInsetsIgnoringVisibility(navigationBars()))
                                 .build()));
 
         // For ColorView in DecorView to work, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS needs to be set

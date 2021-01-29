@@ -45,11 +45,9 @@ class RawPrintVisitor : public Visitor {
   void print(uint16_t value, const char* fmt, ...);
   void print(uint32_t value, const char* fmt, ...);
   void print(const std::string& value, size_t encoded_size, const char* fmt, ...);
-  void print_raw(uint32_t length, const char* fmt, ...);
 
   std::ostream& stream_;
-  std::unique_ptr<const ApkAssets> target_apk_;
-  std::unique_ptr<const ApkAssets> overlay_apk_;
+  std::vector<std::unique_ptr<const ApkAssets>> apk_assets_;
   AssetManager2 target_am_;
   AssetManager2 overlay_am_;
   size_t offset_;

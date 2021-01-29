@@ -19,6 +19,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.view.WindowManager.ScreenshotSource.SCREENSHOT_GLOBAL_ACTIONS;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
+import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_2BUTTON;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
@@ -148,6 +149,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /**
  * Helper to show the global actions dialog.  Each item is an {@link Action} that may show depending
@@ -401,7 +403,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         if (mDialog != null) {
                             if (!mDialog.isShowingControls() && shouldShowControls()) {
                                 mDialog.showControls(mControlsUiControllerOptional.get());
-                            } else if (shouldShowLockMessage()) {
+                            } else if (shouldShowLockMessage(mDialog)) {
                                 mDialog.showLockMessage();
                             }
                         }
@@ -547,7 +549,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         if (!mDeviceProvisioned && !action.showBeforeProvisioning()) {
             return false;
         }
-        return true;
+        return action.shouldShow();
     }
 
     /**
@@ -698,19 +700,17 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mPowerAdapter = new MyPowerOptionsAdapter();
 
         mDepthController.setShowingHomeControls(true);
-        GlobalActionsPanelPlugin.PanelViewController walletViewController =
-                getWalletViewController();
         ControlsUiController uiController = null;
         if (mControlsUiControllerOptional.isPresent() && shouldShowControls()) {
             uiController = mControlsUiControllerOptional.get();
         }
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mOverflowAdapter,
-                walletViewController, mDepthController, mSysuiColorExtractor,
+                this::getWalletViewController, mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 controlsAvailable(), uiController,
                 mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter);
 
-        if (shouldShowLockMessage()) {
+        if (shouldShowLockMessage(dialog)) {
             dialog.showLockMessage();
         }
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
@@ -962,6 +962,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     @VisibleForTesting
     class ScreenshotAction extends SinglePressAction implements LongPressAction {
+        final String KEY_SYSTEM_NAV_2BUTTONS = "system_nav_2buttons";
+
         public ScreenshotAction() {
             super(R.drawable.ic_screenshot, R.string.global_action_screenshot);
         }
@@ -992,6 +994,19 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public boolean showBeforeProvisioning() {
             return false;
         }
+
+        @Override
+        public boolean shouldShow() {
+          // Include screenshot in power menu for legacy nav because it is not accessible
+          // through Recents in that mode
+            return is2ButtonNavigationEnabled();
+        }
+
+        boolean is2ButtonNavigationEnabled() {
+            return NAV_BAR_MODE_2BUTTON == mContext.getResources().getInteger(
+                    com.android.internal.R.integer.config_navBarInteractionMode);
+        }
+
 
         @Override
         public boolean onLongPress() {
@@ -1616,6 +1631,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
          * @return
          */
         CharSequence getMessage();
+
+        default boolean shouldShow() {
+            return true;
+        }
     }
 
     /**
@@ -2124,12 +2143,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private MultiListLayout mGlobalActionsLayout;
         private Drawable mBackgroundDrawable;
         private final SysuiColorExtractor mColorExtractor;
-        private final GlobalActionsPanelPlugin.PanelViewController mWalletViewController;
+        private final Provider<GlobalActionsPanelPlugin.PanelViewController> mWalletFactory;
+        @Nullable private GlobalActionsPanelPlugin.PanelViewController mWalletViewController;
         private boolean mKeyguardShowing;
         private boolean mShowing;
         private float mScrimAlpha;
         private ResetOrientationData mResetOrientationData;
-        private boolean mHadTopUi;
         private final NotificationShadeWindowController mNotificationShadeWindowController;
         private final NotificationShadeDepthController mDepthController;
         private final SysUiState mSysUiState;
@@ -2145,7 +2164,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private TextView mLockMessage;
 
         ActionsDialog(Context context, MyAdapter adapter, MyOverflowAdapter overflowAdapter,
-                GlobalActionsPanelPlugin.PanelViewController walletViewController,
+                Provider<GlobalActionsPanelPlugin.PanelViewController> walletFactory,
                 NotificationShadeDepthController depthController,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
@@ -2166,6 +2185,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mSysUiState = sysuiState;
             mOnRotateCallback = onRotateCallback;
             mKeyguardShowing = keyguardShowing;
+            mWalletFactory = walletFactory;
 
             // Window initialization
             Window window = getWindow();
@@ -2188,7 +2208,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             window.getAttributes().setFitInsetsTypes(0 /* types */);
             setTitle(R.string.global_actions);
 
-            mWalletViewController = walletViewController;
             initializeLayout();
         }
 
@@ -2201,8 +2220,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mControlsUiController.show(mControlsView, this::dismissForControlsActivity);
         }
 
+        private boolean isWalletViewAvailable() {
+            return mWalletViewController != null && mWalletViewController.getPanelContent() != null;
+        }
+
         private void initializeWalletView() {
-            if (mWalletViewController == null || mWalletViewController.getPanelContent() == null) {
+            mWalletViewController = mWalletFactory.get();
+            if (!isWalletViewAvailable()) {
                 return;
             }
 
@@ -2397,8 +2421,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public void show() {
             super.show();
             mShowing = true;
-            mHadTopUi = mNotificationShadeWindowController.getForceHasTopUi();
-            mNotificationShadeWindowController.setForceHasTopUi(true);
+            mNotificationShadeWindowController.setRequestTopUi(true, TAG);
             mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, true)
                     .commitUpdate(mContext.getDisplayId());
 
@@ -2499,7 +2522,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             dismissOverflow(true);
             dismissPowerOptions(true);
             if (mControlsUiController != null) mControlsUiController.hide();
-            mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
+            mNotificationShadeWindowController.setRequestTopUi(false, TAG);
             mDepthController.updateGlobalDialogVisibility(0, null /* view */);
             mSysUiState.setFlag(SYSUI_STATE_GLOBAL_ACTIONS_SHOWING, false)
                     .commitUpdate(mContext.getDisplayId());
@@ -2509,6 +2532,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private void dismissWallet() {
             if (mWalletViewController != null) {
                 mWalletViewController.onDismissed();
+                // The wallet controller should not be re-used after being dismissed.
+                mWalletViewController = null;
             }
         }
 
@@ -2650,18 +2675,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 && !mControlsServiceInfos.isEmpty();
     }
 
-    private boolean walletViewAvailable() {
-        GlobalActionsPanelPlugin.PanelViewController walletViewController =
-                getWalletViewController();
-        return walletViewController != null && walletViewController.getPanelContent() != null;
-    }
-
-    private boolean shouldShowLockMessage() {
+    private boolean shouldShowLockMessage(ActionsDialog dialog) {
         boolean isLockedAfterBoot = mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
                 == STRONG_AUTH_REQUIRED_AFTER_BOOT;
         return !mKeyguardStateController.isUnlocked()
                 && (!mShowLockScreenCardsAndControls || isLockedAfterBoot)
-                && (controlsAvailable() || walletViewAvailable());
+                && (controlsAvailable() || dialog.isWalletViewAvailable());
     }
 
     private void onPowerMenuLockScreenSettingsChanged() {

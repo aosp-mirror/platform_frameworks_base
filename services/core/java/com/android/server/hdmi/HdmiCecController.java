@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.tv.cec.V1_0.CecMessage;
 import android.hardware.tv.cec.V1_0.HotplugEvent;
@@ -24,6 +26,8 @@ import android.hardware.tv.cec.V1_0.IHdmiCec.getPhysicalAddressCallback;
 import android.hardware.tv.cec.V1_0.IHdmiCecCallback;
 import android.hardware.tv.cec.V1_0.Result;
 import android.hardware.tv.cec.V1_0.SendMessageResult;
+import android.icu.util.IllformedLocaleException;
+import android.icu.util.ULocale;
 import android.os.Handler;
 import android.os.IHwBinder;
 import android.os.Looper;
@@ -31,6 +35,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.HdmiAnnotations.IoThreadOnly;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -45,8 +50,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.Predicate;
-
-import sun.util.locale.LanguageTag;
 
 /**
  * Manages HDMI-CEC command and behaviors. It converts user's command into CEC command
@@ -367,10 +370,28 @@ final class HdmiCecController {
     @ServiceThreadOnly
     void setLanguage(String language) {
         assertRunOnServiceThread();
-        if (!LanguageTag.isLanguage(language)) {
+        if (!isLanguage(language)) {
             return;
         }
         mNativeWrapperImpl.nativeSetLanguage(language);
+    }
+
+    /**
+     * Returns true if the language code is well-formed.
+     */
+    @VisibleForTesting static boolean isLanguage(String language) {
+        // Handle null and empty string because because ULocale.Builder#setLanguage accepts them.
+        if (language == null || language.isEmpty()) {
+            return false;
+        }
+
+        ULocale.Builder builder = new ULocale.Builder();
+        try {
+            builder.setLanguage(language);
+            return true;
+        } catch (IllformedLocaleException e) {
+            return false;
+        }
     }
 
     /**
@@ -725,6 +746,7 @@ final class HdmiCecController {
         private IHdmiCec mHdmiCec;
         private final Object mLock = new Object();
         private int mPhysicalAddress = INVALID_PHYSICAL_ADDRESS;
+        @Nullable private HdmiCecCallback mCallback;
 
         @Override
         public String nativeInit() {
@@ -733,7 +755,7 @@ final class HdmiCecController {
 
         boolean connectToHal() {
             try {
-                mHdmiCec = IHdmiCec.getService();
+                mHdmiCec = IHdmiCec.getService(true);
                 try {
                     mHdmiCec.linkToDeath(this, HDMI_CEC_HAL_DEATH_COOKIE);
                 } catch (RemoteException e) {
@@ -747,7 +769,8 @@ final class HdmiCecController {
         }
 
         @Override
-        public void setCallback(HdmiCecCallback callback) {
+        public void setCallback(@NonNull HdmiCecCallback callback) {
+            mCallback = callback;
             try {
                 mHdmiCec.setCallback(callback);
             } catch (RemoteException e) {
@@ -887,6 +910,10 @@ final class HdmiCecController {
             if (cookie == HDMI_CEC_HAL_DEATH_COOKIE) {
                 HdmiLogger.error(TAG, "Service died cokkie : " + cookie + "; reconnecting");
                 connectToHal();
+                // Reconnect the callback
+                if (mCallback != null) {
+                    setCallback(mCallback);
+                }
             }
         }
 

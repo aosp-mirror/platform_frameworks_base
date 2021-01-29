@@ -50,6 +50,7 @@ android_test {
     platform_apis: true,
     test_suites: ["device-tests"],
     certificate: "platform",
+    jarjar_rules: "jarjar-rules.txt",
     static_libs: [
         "androidx.test.rules",
         "FrameworksNetCommonTests",
@@ -59,6 +60,7 @@ android_test {
         "mockito-target-minus-junit4",
         "net-tests-utils",
         "platform-test-annotations",
+        "service-connectivity",
         "services.core",
         "services.net",
     ],
@@ -67,5 +69,8 @@ android_test {
         "android.test.runner",
         "android.test.base",
         "android.test.mock",
+    ],
+    jni_libs: [
+        "libservice-connectivity",
     ],
 }

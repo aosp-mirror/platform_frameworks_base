@@ -81,7 +81,7 @@
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"Trái: Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Phải: Mức pin <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_active_no_battery_level" msgid="4155462233006205630">"Đang hoạt động"</string>
-    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Âm thanh của phương tiện"</string>
+    <string name="bluetooth_profile_a2dp" msgid="4632426382762851724">"Âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_profile_headset" msgid="5395952236133499331">"Cuộc gọi điện thoại"</string>
     <string name="bluetooth_profile_opp" msgid="6692618568149493430">"Chuyển tệp"</string>
     <string name="bluetooth_profile_hid" msgid="2969922922664315866">"Thiết bị đầu vào"</string>
@@ -95,7 +95,7 @@
     <string name="bluetooth_profile_a2dp_high_quality_unknown_codec" msgid="2477639096903834374">"Âm thanh HD"</string>
     <string name="bluetooth_profile_hearing_aid" msgid="58154575573984914">"Thiết bị trợ thính"</string>
     <string name="bluetooth_hearing_aid_profile_summary_connected" msgid="8191273236809964030">"Đã kết nối với Thiết bị trợ thính"</string>
-    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Đã kết nối với âm thanh phương tiện"</string>
+    <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Đã kết nối với âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Đã kết nối với âm thanh điện thoại"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Đã kết nối với máy chủ chuyển tệp"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Đã kết nối với bản đồ"</string>
@@ -107,7 +107,7 @@
     <string name="bluetooth_pan_profile_summary_use_for" msgid="7422039765025340313">"Sử dụng để truy cập Internet"</string>
     <string name="bluetooth_map_profile_summary_use_for" msgid="4453622103977592583">"Sử dụng cho bản đồ"</string>
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Sử dụng để truy cập SIM"</string>
-    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Sử dụng cho âm thanh phương tiện"</string>
+    <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Sử dụng cho âm thanh nội dung nghe nhìn"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Sử dụng cho âm thanh điện thoại"</string>
     <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Sử dụng để chuyển tệp"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Sử dụng để nhập"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Hiển thị các thiết bị Bluetooth không có tên"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Vô hiệu hóa âm lượng tuyệt đối"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Bật tính năng Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Kết nối nâng cao"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Phiên bản Bluetooth AVRCP"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Chọn phiên bản Bluetooth AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Phiên bản Bluetooth MAP"</string>
@@ -306,7 +305,7 @@
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Tính năng gỡ lỗi qua Wi-Fi chỉ dành cho mục đích phát triển. Hãy sử dụng tính năng này để sao chép dữ liệu giữa máy tính và thiết bị của bạn, cài đặt ứng dụng trên thiết bị mà không thông báo và đọc dữ liệu nhật ký."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Thu hồi quyền truy cập gỡ lỗi USB từ tất cả máy tính mà bạn đã ủy quyền trước đó?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Cho phép cài đặt phát triển?"</string>
-    <string name="dev_settings_warning_message" msgid="37741686486073668">"Những cài đặt này chỉ dành cho mục đích phát triển. Chúng có thể làm cho thiết bị và ứng dụng trên thiết bị của bạn bị lỗi và hoạt động sai."</string>
+    <string name="dev_settings_warning_message" msgid="37741686486073668">"Những tùy chọn cài đặt này chỉ dành cho mục đích phát triển. Chúng có thể làm cho thiết bị và ứng dụng trên thiết bị của bạn bị lỗi và hoạt động không đúng cách."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Xác minh ứng dụng qua USB"</string>
     <string name="verify_apps_over_usb_summary" msgid="1317933737581167839">"Kiểm tra các ứng dụng được cài đặt qua ADB/ADT để xem có hoạt động gây hại hay không."</string>
     <string name="bluetooth_show_devices_without_names_summary" msgid="780964354377854507">"Các thiết bị Bluetooth không có tên (chỉ có địa chỉ MAC) sẽ được hiển thị"</string>

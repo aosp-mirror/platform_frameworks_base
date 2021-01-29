@@ -33,6 +33,6 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
  * {@hide}
  */
 interface ITimeZoneDetectorService {
-  void suggestManualTimeZone(in ManualTimeZoneSuggestion timeZoneSuggestion);
+  boolean suggestManualTimeZone(in ManualTimeZoneSuggestion timeZoneSuggestion);
   void suggestTelephonyTimeZone(in TelephonyTimeZoneSuggestion timeZoneSuggestion);
 }

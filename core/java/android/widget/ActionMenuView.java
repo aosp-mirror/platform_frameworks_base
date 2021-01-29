@@ -22,6 +22,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -719,7 +720,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
      * @hide Private LinearLayout (superclass) API. Un-hide if LinearLayout API is made public.
      */
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     protected boolean hasDividerBeforeChildAt(int childIndex) {
         if (childIndex == 0) {
             return false;
@@ -790,7 +791,7 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
 
     /** @hide */
     public interface ActionMenuChildView {
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean needsDividerBefore();
         public boolean needsDividerAfter();
     }
@@ -798,31 +799,31 @@ public class ActionMenuView extends LinearLayout implements MenuBuilder.ItemInvo
     public static class LayoutParams extends LinearLayout.LayoutParams {
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean isOverflowButton;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int cellsUsed;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int extraPixels;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean expandable;
 
         /** @hide */
         @ViewDebug.ExportedProperty(category = "layout")
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean preventEdgeOffset;
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public boolean expanded;
 
         public LayoutParams(Context c, AttributeSet attrs) {

@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Улантуу"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Жокко чыгаруу"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Бөлүшүү"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Ооба"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Экранды жаздыруу жокко чыгарылды"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Экранды жаздыруу сакталды, көрүү үчүн таптап коюңуз"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Экранды жаздыруу өчүрүлдү"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Экранды жаздырууну өчүрүүдө ката кетти"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Уруксаттар алынбай калды"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Экранды жаздырууну баштоодо ката кетти"</string>
@@ -716,7 +714,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефондун жөндөөлөрүнө жараша шыңгырап же дирилдеши мүмкүн. <xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосундагы жазышуулар демейки жөндөө боюнча калкып чыкма билдирмелер түрүндө көрүнөт."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Калкыма ыкчам баскыч менен көңүлүңүздү бул мазмунга буруп турат."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Жазышуу бөлүмүнүн жогорку жагында калкып чыкма билдирме түрүндө көрүнүп, профиль сүрөтү кулпуланган экрандан чагылдырылат"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Жазышуулар тизмесинин өйдө жагында калкып чыкма билдирме түрүндө көрүнүп, профиль сүрөтү кулпуланган экрандан чагылдырылат"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Жөндөөлөр"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маанилүүлүгү"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> жазышуу функцияларын колдоого албайт"</string>
@@ -856,7 +854,7 @@
     <string name="left_icon" msgid="5036278531966897006">"¨Солго¨ сүрөтчөсү"</string>
     <string name="right_icon" msgid="1103955040645237425">"¨Оңго¨ сүрөтчөсү"</string>
     <string name="drag_to_add_tiles" msgid="8933270127508303672">"Керектүү элементтерди сүйрөп келиңиз"</string>
-    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн, кармап туруп, сүйрөңүз"</string>
+    <string name="drag_to_rearrange_tiles" msgid="2143204300089638620">"Элементтердин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
     <string name="drag_to_remove_tiles" msgid="4682194717573850385">"Алып салуу үчүн бул жерге сүйрөңүз"</string>
     <string name="drag_to_remove_disabled" msgid="933046987838658850">"Сизге жок дегенде <xliff:g id="MIN_NUM_TILES">%1$d</xliff:g> мозаика керек"</string>
     <string name="qs_edit" msgid="5583565172803472437">"Түзөтүү"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Үстүнкү экранды 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Үстүнкү экранды 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Ылдыйкы экранды толук экран режимине өткөрүү"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Орду - <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Түзөтүү үчүн эки жолу таптаңыз."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Кошуу үчүн эки жолу таптаңыз."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"<xliff:g id="TILE_NAME">%1$s</xliff:g> дегенди жылдыруу"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"<xliff:g id="TILE_NAME">%1$s</xliff:g> дегенди алып салуу"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"<xliff:g id="TILE_NAME">%1$s</xliff:g> плиткасы <xliff:g id="POSITION">%2$d</xliff:g>-позицияга кошулсун"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"<xliff:g id="TILE_NAME">%1$s</xliff:g> плиткасы <xliff:g id="POSITION">%2$d</xliff:g>-позицияга кошулсун"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ыкчам баскычты өчүрүү"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ыкчам баскычты аягына кошуу"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Ыкчам баскычты жылдыруу"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Ыкчам баскыч кошуу"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Төмөнкүгө жылдыруу: <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g>-позицияга кошуу"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"<xliff:g id="POSITION">%1$d</xliff:g>-позиция"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Ыкчам жөндөөлөр түзөткүчү."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> эскертмеси: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Колдонмодо экран бөлүнбөшү мүмкүн."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Мурункусуна өткөрүп жиберүү"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Өлчөмүн өзгөртүү"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон ысыгандыктан өчүрүлдү"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефонуңуз кадимкидей иштеп жатат"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Телефонуңуз кадимкидей иштеп жатат.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонуңуз өтө ысып кеткендиктен, аны муздатуу үчүн өчүрүлдү. Эми телефонуңуз кадимкидей иштеп жатат.\n\nТелефонуңуз төмөнкү шарттарда ысып кетиши мүмкүн:\n	• Ашыкча ресурс короткон колдонмолорду (оюндар, видео же чабыттоо колдонмолору) пайдалансаңыз \n	• Ири көлөмдөгү файлдарды жүктөп алсаңыз же берсеңиз\n	• Телефонуңузду жогорку температураларда пайдалансаңыз"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Телефонуңуз ысып баратат"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Телефон сууганча айрым элементтердин иши чектелген"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Телефон сууганча айрым элементтердин иши чектелген.\nКеңири маалымат алуу үчүн таптап коюңуз"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Телефонуңуз автоматтык түрдө сууйт. Аны колдоно берсеңиз болот, бирок ал жайыраак иштеп калат.\n\nТелефонуңуз суугандан кийин адаттагыдай эле иштеп баштайт."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Тейлөө кадамдарын көрүңүз"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Кубаттагычты сууруңуз"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Бул түзмөктү кубаттоодо маселе келип чыкты. Кабель ысып кетиши мүмкүн, андыктан кубаттагыч адаптерин сууруп коюңуз."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Тейлөө кадамдарын көрүңүз"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Жөндөөлөр"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Түшүндүм"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"<xliff:g id="APP">%1$s</xliff:g> төмөнкүлөрдү колдонуп жатат: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Колдонмолор төмөнкүлөрдү пайдаланып жатышат: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" жана "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"жайгашкан жер"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"микрофон"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Сенсорлорду өчүрүү"</string>
     <string name="device_services" msgid="1549944177856658705">"Түзмөк кызматтары"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Аталышы жок"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Сунуштар жүктөлүүдө"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Медиа"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Учурдагы сеансты жашыруу."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Жашыруу"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Жабуу"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Улантуу"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Жөндөөлөр"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Жигерсиз. Колдонмону текшериңиз"</string>

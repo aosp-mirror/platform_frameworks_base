@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.os.Binder;
@@ -60,7 +61,7 @@ public abstract class MediaKeyDispatcher {
 
     private Map<Integer, Integer> mOverriddenKeyEvents;
 
-    public MediaKeyDispatcher() {
+    public MediaKeyDispatcher(Context context) {
         // Constructor used for reflection
         mOverriddenKeyEvents = new HashMap<>();
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_PLAY, 0);

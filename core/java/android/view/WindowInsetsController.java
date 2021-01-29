@@ -33,7 +33,6 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Interface to control windows that generate insets.
  *
- * TODO(118118435): Needs more information and examples once the API is more baked.
  */
 public interface WindowInsetsController {
 

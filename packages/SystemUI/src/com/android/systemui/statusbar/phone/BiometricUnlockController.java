@@ -152,6 +152,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     private final Context mContext;
     private final int mWakeUpDelay;
     private int mMode;
+    private BiometricSourceType mBiometricType;
     private KeyguardViewController mKeyguardViewController;
     private DozeScrimController mDozeScrimController;
     private KeyguardViewMediator mKeyguardViewMediator;
@@ -340,6 +341,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
             Trace.endSection();
             return;
         }
+        mBiometricType = biometricSourceType;
         mMetricsLogger.write(new LogMaker(MetricsEvent.BIOMETRIC_AUTH)
                 .setType(MetricsEvent.TYPE_SUCCESS).setSubtype(toSubtype(biometricSourceType)));
         Optional.ofNullable(BiometricUiEvent.SUCCESS_EVENT_BY_SOURCE_TYPE.get(biometricSourceType))
@@ -615,6 +617,7 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
 
     private void resetMode() {
         mMode = MODE_NONE;
+        mBiometricType = null;
         mNotificationShadeWindowController.setForceDozeBrightness(false);
         if (mStatusBar.getNavigationBarView() != null) {
             mStatusBar.getNavigationBarView().setWakeAndUnlocking(false);
@@ -680,8 +683,8 @@ public class BiometricUnlockController extends KeyguardUpdateMonitorCallback imp
     /**
      * Successful authentication with fingerprint, face, or iris when the lockscreen fades away
      */
-    public boolean isUnlockFading() {
-        return mMode == MODE_UNLOCK_FADING;
+    public BiometricSourceType getBiometricType() {
+        return mBiometricType;
     }
 
     /**

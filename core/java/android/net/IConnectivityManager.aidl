@@ -20,26 +20,30 @@ import android.app.PendingIntent;
 import android.net.ConnectionInfo;
 import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
+import android.net.IQosCallback;
+import android.net.ISocketKeepaliveCallback;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
-import android.net.NetworkQuotaInfo;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
-import android.net.ISocketKeepaliveCallback;
 import android.net.ProxyInfo;
+import android.net.UidRange;
+import android.net.VpnInfo;
+import android.net.QosSocketInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.INetworkActivityListener;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
 import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 
+import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 
 /**
@@ -73,10 +77,9 @@ interface IConnectivityManager
 
     NetworkCapabilities getNetworkCapabilities(in Network network, String callingPackageName);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkState[] getAllNetworkState();
 
-    NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
 
     boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress,
@@ -134,7 +137,7 @@ interface IConnectivityManager
 
     VpnConfig getVpnConfig(int userId);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void startLegacyVpn(in VpnProfile profile);
 
     LegacyVpnInfo getLegacyVpnInfo(int userId);
@@ -146,10 +149,7 @@ interface IConnectivityManager
     String getAlwaysOnVpnPackage(int userId);
     boolean isVpnLockdownEnabled(int userId);
     List<String> getVpnLockdownWhitelist(int userId);
-
-    int checkMobileProvisioning(int suggestedTimeOutMs);
-
-    String getMobileProvisioningUrl();
+    void setRequireVpnForUids(boolean requireVpn, in UidRange[] ranges);
 
     void setProvisioningNotificationVisible(boolean visible, int networkType, in String action);
 
@@ -165,11 +165,11 @@ interface IConnectivityManager
 
     void declareNetworkRequestUnfulfillable(in NetworkRequest request);
 
-    Network registerNetworkAgent(in Messenger messenger, in NetworkInfo ni, in LinkProperties lp,
+    Network registerNetworkAgent(in INetworkAgent na, in NetworkInfo ni, in LinkProperties lp,
             in NetworkCapabilities nc, int score, in NetworkAgentConfig config,
             in int factorySerialNumber);
 
-    NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
+    NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities, int reqType,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
             String callingPackageName, String callingAttributionTag);
 
@@ -208,11 +208,11 @@ interface IConnectivityManager
     void startNattKeepalive(in Network network, int intervalSeconds,
             in ISocketKeepaliveCallback cb, String srcAddr, int srcPort, String dstAddr);
 
-    void startNattKeepaliveWithFd(in Network network, in FileDescriptor fd, int resourceId,
+    void startNattKeepaliveWithFd(in Network network, in ParcelFileDescriptor pfd, int resourceId,
             int intervalSeconds, in ISocketKeepaliveCallback cb, String srcAddr,
             String dstAddr);
 
-    void startTcpKeepalive(in Network network, in FileDescriptor fd, int intervalSeconds,
+    void startTcpKeepalive(in Network network, in ParcelFileDescriptor pfd, int intervalSeconds,
             in ISocketKeepaliveCallback cb);
 
     void stopKeepalive(in Network network, int slot);
@@ -233,4 +233,15 @@ interface IConnectivityManager
 
     void simulateDataStall(int detectionMethod, long timestampMillis, in Network network,
                 in PersistableBundle extras);
+
+    void systemReady();
+
+    void registerNetworkActivityListener(in INetworkActivityListener l);
+
+    void unregisterNetworkActivityListener(in INetworkActivityListener l);
+
+    boolean isDefaultNetworkActive();
+
+    void registerQosSocketCallback(in QosSocketInfo socketInfo, in IQosCallback callback);
+    void unregisterQosCallback(in IQosCallback callback);
 }

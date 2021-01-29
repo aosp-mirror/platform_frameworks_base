@@ -21,6 +21,7 @@ import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsServiceControllerListener;
+import android.telephony.ims.aidl.ISipTransport;
 import android.telephony.ims.stub.ImsFeatureConfiguration;
 
 import com.android.ims.internal.IImsFeatureStatusCallback;
@@ -34,6 +35,7 @@ interface IImsServiceController {
     IImsMmTelFeature createMmTelFeature(int slotId);
     IImsRcsFeature createRcsFeature(int slotId);
     ImsFeatureConfiguration querySupportedImsFeatures();
+    long getImsServiceCapabilities();
     void addFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
     void removeFeatureStatusCallback(int slotId, int featureType, in IImsFeatureStatusCallback c);
     // Synchronous call to ensure the ImsService is ready before continuing with feature creation.
@@ -41,6 +43,7 @@ interface IImsServiceController {
     void removeImsFeature(int slotId, int featureType);
     IImsConfig getConfig(int slotId);
     IImsRegistration getRegistration(int slotId);
+    ISipTransport getSipTransport(int slotId);
     oneway void enableIms(int slotId);
     oneway void disableIms(int slotId);
 }

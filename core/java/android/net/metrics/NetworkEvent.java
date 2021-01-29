@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.SparseArray;
@@ -32,9 +31,12 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * {@hide}
+ * @deprecated The event may not be sent in Android S and above. The events
+ * are logged by a single caller in the system using signature permissions
+ * and that caller is migrating to statsd.
  */
+@Deprecated
 @SystemApi
-@TestApi
 public final class NetworkEvent implements IpConnectivityLog.Event {
 
     public static final int NETWORK_CONNECTED            = 1;

@@ -20,7 +20,10 @@
 #ifndef _LIBS_UTILS_RESOURCE_TYPES_H
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
+#include <android-base/expected.h>
+
 #include <androidfw/Asset.h>
+#include <androidfw/Errors.h>
 #include <androidfw/LocaleData.h>
 #include <androidfw/StringPiece.h>
 #include <utils/Errors.h>
@@ -41,7 +44,7 @@
 namespace android {
 
 constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const static uint32_t kIdmapCurrentVersion = 0x00000004u;
+constexpr const static uint32_t kIdmapCurrentVersion = 0x00000005u;
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
@@ -497,7 +500,7 @@ public:
     virtual ~ResStringPool();
 
     void setToEmpty();
-    status_t setTo(const void* data, size_t size, bool copyData=false);
+    status_t setTo(incfs::map_ptr<void> data, size_t size, bool copyData=false);
 
     status_t getError() const;
 
@@ -505,48 +508,49 @@ public:
 
     // Return string entry as UTF16; if the pool is UTF8, the string will
     // be converted before returning.
-    inline const char16_t* stringAt(const ResStringPool_ref& ref, size_t* outLen) const {
-        return stringAt(ref.index, outLen);
+    inline base::expected<StringPiece16, NullOrIOError> stringAt(
+            const ResStringPool_ref& ref) const {
+        return stringAt(ref.index);
     }
-    virtual const char16_t* stringAt(size_t idx, size_t* outLen) const;
+    virtual base::expected<StringPiece16, NullOrIOError> stringAt(size_t idx) const;
 
     // Note: returns null if the string pool is not UTF8.
-    virtual const char* string8At(size_t idx, size_t* outLen) const;
+    virtual base::expected<StringPiece, NullOrIOError> string8At(size_t idx) const;
 
     // Return string whether the pool is UTF8 or UTF16.  Does not allow you
     // to distinguish null.
-    const String8 string8ObjectAt(size_t idx) const;
+    base::expected<String8, IOError> string8ObjectAt(size_t idx) const;
 
-    const ResStringPool_span* styleAt(const ResStringPool_ref& ref) const;
-    const ResStringPool_span* styleAt(size_t idx) const;
+    base::expected<incfs::map_ptr<ResStringPool_span>, NullOrIOError> styleAt(
+        const ResStringPool_ref& ref) const;
+    base::expected<incfs::map_ptr<ResStringPool_span>, NullOrIOError> styleAt(size_t idx) const;
 
-    ssize_t indexOfString(const char16_t* str, size_t strLen) const;
+    base::expected<size_t, NullOrIOError> indexOfString(const char16_t* str, size_t strLen) const;
 
     virtual size_t size() const;
     size_t styleCount() const;
     size_t bytes() const;
-    const void* data() const;
-
+    incfs::map_ptr<void> data() const;
 
     bool isSorted() const;
     bool isUTF8() const;
 
 private:
-    status_t                    mError;
-    void*                       mOwnedData;
-    const ResStringPool_header* mHeader;
-    size_t                      mSize;
-    mutable Mutex               mDecodeLock;
-    const uint32_t*             mEntries;
-    const uint32_t*             mEntryStyles;
-    const void*                 mStrings;
-    char16_t mutable**          mCache;
-    uint32_t                    mStringPoolSize;    // number of uint16_t
-    const uint32_t*             mStyles;
-    uint32_t                    mStylePoolSize;    // number of uint32_t
+    status_t                                      mError;
+    void*                                         mOwnedData;
+    incfs::verified_map_ptr<ResStringPool_header> mHeader;
+    size_t                                        mSize;
+    mutable Mutex                                 mDecodeLock;
+    incfs::map_ptr<uint32_t>                      mEntries;
+    incfs::map_ptr<uint32_t>                      mEntryStyles;
+    incfs::map_ptr<void>                          mStrings;
+    char16_t mutable**                            mCache;
+    uint32_t                                      mStringPoolSize;    // number of uint16_t
+    incfs::map_ptr<uint32_t>                      mStyles;
+    uint32_t                                      mStylePoolSize;    // number of uint32_t
 
-    const char* stringDecodeAt(size_t idx, const uint8_t* str, const size_t encLen,
-                               size_t* outLen) const;
+    base::expected<StringPiece, NullOrIOError> stringDecodeAt(
+        size_t idx, incfs::map_ptr<uint8_t> str, size_t encLen) const;
 };
 
 /**
@@ -558,8 +562,8 @@ public:
  StringPoolRef() = default;
  StringPoolRef(const ResStringPool* pool, uint32_t index);
 
- const char* string8(size_t* outLen) const;
- const char16_t* string16(size_t* outLen) const;
+ base::expected<StringPiece, NullOrIOError> string8() const;
+ base::expected<StringPiece16, NullOrIOError> string16() const;
 
 private:
  const ResStringPool* mPool = nullptr;
@@ -1476,7 +1480,7 @@ struct ResTable_entry
         // If set, this is a weak resource and may be overriden by strong
         // resources of the same name/type. This is only useful during
         // linking with other resource tables.
-        FLAG_WEAK = 0x0004
+        FLAG_WEAK = 0x0004,
     };
     uint16_t flags;
     
@@ -1586,50 +1590,6 @@ struct ResTable_map
     Res_value value;
 };
 
-
-// A ResTable_entry variant that either holds an unmanaged pointer to a constant ResTable_entry or
-// holds a ResTable_entry which is tied to the lifetime of the handle.
-class ResTable_entry_handle {
- public:
-    ResTable_entry_handle() = default;
-
-    ResTable_entry_handle(const ResTable_entry_handle& handle) {
-      entry_ = handle.entry_;
-    }
-
-    ResTable_entry_handle(ResTable_entry_handle&& handle) noexcept {
-      entry_ = handle.entry_;
-    }
-
-    inline static ResTable_entry_handle managed(ResTable_entry* entry, void (*deleter)(void *)) {
-      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry, deleter));
-    }
-
-    inline static ResTable_entry_handle unmanaged(const ResTable_entry* entry)  {
-      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry, [](auto /*p */){}));
-    }
-
-    inline ResTable_entry_handle& operator=(const ResTable_entry_handle& handle) noexcept {
-      entry_ = handle.entry_;
-      return *this;
-    }
-
-    inline ResTable_entry_handle& operator=(ResTable_entry_handle&& handle) noexcept {
-      entry_ = handle.entry_;
-      return *this;
-    }
-
-    inline const ResTable_entry* operator*() & {
-      return entry_.get();
-    }
-
- private:
-    explicit ResTable_entry_handle(std::shared_ptr<const ResTable_entry> entry)
-        : entry_(std::move(entry)) { }
-
-    std::shared_ptr<const ResTable_entry> entry_;
-};
-
 /**
  * A package-id to package name mapping for any shared libraries used
  * in this resource table. The package-id's encoded in this resource
@@ -1717,6 +1677,10 @@ struct ResTable_overlayable_policy_header
     // The overlay must be signed with the same signature as the actor declared for the target
     // resource
     ACTOR_SIGNATURE = 0x00000080,
+
+    // The overlay must be signed with the same signature as the reference package declared
+    // in the SystemConfig
+    CONFIG_SIGNATURE = 0x00000100,
   };
 
   using PolicyBitmask = uint32_t;
@@ -1736,7 +1700,6 @@ inline ResTable_overlayable_policy_header::PolicyFlags& operator |=(
   return first;
 }
 
-#pragma pack(push, 1)
 struct Idmap_header {
   // Always 0x504D4449 ('IDMP')
   uint32_t magic;
@@ -1747,7 +1710,7 @@ struct Idmap_header {
   uint32_t overlay_crc32;
 
   uint32_t fulfilled_policies;
-  uint8_t enforce_overlayable;
+  uint32_t enforce_overlayable;
 
   uint8_t target_path[256];
   uint8_t overlay_path[256];
@@ -1761,23 +1724,31 @@ struct Idmap_header {
 struct Idmap_data_header {
   uint8_t target_package_id;
   uint8_t overlay_package_id;
+
+  // Padding to ensure 4 byte alignment for target_entry_count
+  uint16_t p0;
+
   uint32_t target_entry_count;
+  uint32_t target_inline_entry_count;
   uint32_t overlay_entry_count;
+
   uint32_t string_pool_index_offset;
-  uint32_t string_pool_length;
 };
 
 struct Idmap_target_entry {
   uint32_t target_id;
-  uint8_t type;
-  uint32_t value;
+  uint32_t overlay_id;
+};
+
+struct Idmap_target_entry_inline {
+  uint32_t target_id;
+  Res_value value;
 };
 
 struct Idmap_overlay_entry {
   uint32_t overlay_id;
   uint32_t target_id;
 };
-#pragma pack(pop)
 
 class AssetManager2;
 
@@ -1829,6 +1800,16 @@ private:
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);
+
+template<typename TChar, typename E>
+static const TChar* UnpackOptionalString(base::expected<BasicStringPiece<TChar>, E>&& result,
+                                         size_t* outLen) {
+  if (result.has_value()) {
+    *outLen = result->size();
+    return result->data();
+  }
+  return NULL;
+}
 
 /**
  * Convenience class for accessing data in a ResTable resource.

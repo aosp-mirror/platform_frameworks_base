@@ -82,7 +82,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int EFFECT_THUD = Effect.THUD;
 
@@ -91,7 +91,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(int)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int EFFECT_POP = Effect.POP;
 
@@ -132,7 +132,7 @@ public abstract class VibrationEffect implements Parcelable {
      * @see #get(Uri, Context)
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final int[] RINGTONES = {
         Effect.RINGTONE_1,
@@ -518,7 +518,7 @@ public abstract class VibrationEffect implements Parcelable {
             out.writeInt(mAmplitude);
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public static final @android.annotation.NonNull Parcelable.Creator<OneShot> CREATOR =
             new Parcelable.Creator<OneShot>() {
                 @Override
@@ -1083,8 +1083,7 @@ public abstract class VibrationEffect implements Parcelable {
          *
          * @param primitiveId The primitive to add
          * @param scale The scale to apply to the intensity of the primitive.
-         * @param delay The amount of time, in milliseconds, to wait between playing the prior
-         *              primitive and this one
+         * @param delay The amount of time in milliseconds to wait before playing this primitive
          * @return The {@link Composition} object to enable adding multiple primitives in one chain.
          */
         @NonNull

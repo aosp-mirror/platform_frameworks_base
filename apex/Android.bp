@@ -96,6 +96,10 @@ java_defaults {
         sdk_version: "module_current",
     },
 
+    // installable implies we'll create a non-apex (platform) variant, which
+    // we shouldn't ordinarily need (and it can create issues), so disable that.
+    installable: false,
+
     // Configure framework module specific metalava options.
     droiddoc_options: [mainline_stubs_args],
 
@@ -107,10 +111,12 @@ java_defaults {
 
     // Hide impl library and stub sources
     impl_library_visibility: [
-        ":__package__",
+        ":__pkg__",
         "//frameworks/base", // For framework-all
     ],
     stubs_source_visibility: ["//visibility:private"],
+
+    defaults_visibility: ["//visibility:private"],
 
     // Collates API usages from each module for further analysis.
     plugins: ["java_api_finder"],
@@ -144,141 +150,6 @@ java_defaults {
         enabled: true,
         sdk_version: "module_current",
     },
-}
-
-stubs_defaults {
-    name: "framework-module-stubs-defaults-publicapi",
-    args: mainline_framework_stubs_args,
-    installable: false,
-    sdk_version: "module_current",
-    annotations_enabled: true,
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    filter_packages: framework_packages_to_document,
-    check_api: {
-        current: {
-            api_file: "api/current.txt",
-            removed_api_file: "api/removed.txt",
-        },
-        api_lint: {
-            enabled: true,
-        },
-    },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/public/api",
-    },
-}
-
-stubs_defaults {
-    name: "framework-module-stubs-defaults-systemapi",
-    args: mainline_framework_stubs_args + priv_apps,
-    libs: ["framework-annotations-lib"],
-    installable: false,
-    sdk_version: "module_current",
-    annotations_enabled: true,
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    filter_packages: framework_packages_to_document,
-    check_api: {
-        current: {
-            api_file: "api/system-current.txt",
-            removed_api_file: "api/system-removed.txt",
-        },
-        api_lint: {
-            enabled: true,
-        },
-    },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/system/api",
-    },
-}
-
-java_defaults {
-    name: "framework-module-stubs-lib-defaults-publicapi",
-    installable: false,
-    sdk_version: "module_current",
-    libs: [ "stub-annotations" ],
-    java_version: "1.8",
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/public",
-    },
-}
-
-java_defaults {
-    name: "framework-module-stubs-lib-defaults-systemapi",
-    installable: false,
-    sdk_version: "module_current",
-    libs: [ "stub-annotations" ],
-    java_version: "1.8",
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/system",
-    },
-}
-
-java_defaults {
-    name: "framework-module-stubs-lib-defaults-module_libs_api",
-    installable: false,
-    sdk_version: "module_current",
-    libs: [ "stub-annotations" ],
-    java_version: "1.8",
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/module-lib",
-    },
-}
-
-// The defaults for module_libs comes in two parts - defaults for API checks
-// and defaults for stub generation. This is because we want the API txt
-// files to *only* include the module_libs_api, but the stubs to include
-// module_libs_api as well as priv_apps.
-
-stubs_defaults {
-    name: "framework-module-api-defaults-module_libs_api",
-    args: mainline_framework_stubs_args + module_libs,
-    libs: ["framework-annotations-lib"],
-    installable: false,
-    sdk_version: "module_current",
-    annotations_enabled: true,
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    filter_packages: framework_packages_to_document,
-
-    // Do not generate stubs as they are not needed
-    generate_stubs: false,
-
-    check_api: {
-        current: {
-            api_file: "api/module-lib-current.txt",
-            removed_api_file: "api/module-lib-removed.txt",
-        },
-        api_lint: {
-            enabled: true,
-        },
-    },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/module-lib/api",
-    },
-}
-
-stubs_defaults {
-    name: "framework-module-stubs-defaults-module_libs_api",
-    args: mainline_framework_stubs_args + module_libs + priv_apps,
-    libs: ["framework-annotations-lib"],
-    installable: false,
-    sdk_version: "module_current",
-    annotations_enabled: true,
-    merge_annotations_dirs: [
-        "metalava-manual",
-    ],
-    filter_packages: framework_packages_to_document,
 }
 
 stubs_defaults {

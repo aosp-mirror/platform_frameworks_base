@@ -16,12 +16,15 @@
 
 package android.net;
 
+import android.annotation.SystemApi;
+
 /**
  * Corresponds to C's {@code struct tcp_repair_window} from
  * include/uapi/linux/tcp.h
  *
  * @hide
  */
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TcpRepairWindow {
     public final int sndWl1;
     public final int sndWnd;

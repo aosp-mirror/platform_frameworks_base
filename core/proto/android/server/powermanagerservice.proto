@@ -19,16 +19,16 @@ package com.android.server.power;
 
 option java_multiple_files = true;
 
-import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/content/intent.proto";
-import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/os/looper.proto";
 import "frameworks/base/core/proto/android/os/powermanager.proto";
 import "frameworks/base/core/proto/android/os/worksource.proto";
 import "frameworks/base/core/proto/android/providers/settings.proto";
 import "frameworks/base/core/proto/android/server/wirelesschargerdetector.proto";
-import "frameworks/base/core/proto/android/view/enums.proto";
 import "frameworks/base/core/proto/android/privacy.proto";
+import "frameworks/proto_logging/stats/enums/app/enums.proto";
+import "frameworks/proto_logging/stats/enums/os/enums.proto";
+import "frameworks/proto_logging/stats/enums/view/enums.proto";
 
 message PowerManagerServiceDumpProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;

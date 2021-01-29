@@ -314,7 +314,7 @@ public final class SurfaceControl implements Parcelable {
      * Surface creation flag: Surface is created hidden
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int HIDDEN = 0x00000004;
 
     /**
@@ -2679,7 +2679,7 @@ public final class SurfaceControl implements Parcelable {
          * @return Itself.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Transaction setCornerRadius(SurfaceControl sc, float cornerRadius) {
             checkPreconditions(sc);
             nativeSetCornerRadius(mNativeObject, sc.mNativeObject, cornerRadius);

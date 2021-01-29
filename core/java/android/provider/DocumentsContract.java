@@ -22,7 +22,6 @@ import static com.android.internal.util.Preconditions.checkCollectionNotEmpty;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
@@ -842,7 +841,7 @@ public final class DocumentsContract {
     public static final String EXTRA_RESULT = "result";
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String METHOD_CREATE_DOCUMENT = "android:createDocument";
     /** {@hide} */
     public static final String METHOD_RENAME_DOCUMENT = "android:renameDocument";
@@ -877,11 +876,11 @@ public final class DocumentsContract {
 
     private static final String PATH_ROOT = "root";
     private static final String PATH_RECENT = "recent";
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final String PATH_DOCUMENT = "document";
     private static final String PATH_CHILDREN = "children";
     private static final String PATH_SEARCH = "search";
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private static final String PATH_TREE = "tree";
 
     private static final String PARAM_QUERY = "query";
@@ -1303,7 +1302,6 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
-    @TestApi
     public static @NonNull Uri setManageMode(@NonNull Uri uri) {
         Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.buildUpon().appendQueryParameter(PARAM_MANAGE, "true").build();
@@ -1315,7 +1313,6 @@ public final class DocumentsContract {
      * {@hide}
      */
     @SystemApi
-    @TestApi
     public static boolean isManageMode(@NonNull Uri uri) {
         Preconditions.checkNotNull(uri, "uri can not be null");
         return uri.getBooleanQueryParameter(PARAM_MANAGE, false);

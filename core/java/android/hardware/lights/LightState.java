@@ -19,7 +19,6 @@ package android.hardware.lights;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -36,7 +35,6 @@ import android.os.Parcelable;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class LightState implements Parcelable {
     private final int mColor;
 

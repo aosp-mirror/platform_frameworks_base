@@ -199,6 +199,12 @@ public class DozeMachine {
         requestState(State.DOZE_REQUEST_PULSE, pulseReason);
     }
 
+    void onScreenState(int state) {
+        for (Part part : mParts) {
+            part.onScreenState(state);
+        }
+    }
+
     private void requestState(State requestedState, int pulseReason) {
         Assert.isMainThread();
         if (DEBUG) {
@@ -423,6 +429,13 @@ public class DozeMachine {
 
         /** Give the Part a chance to clean itself up. */
         default void destroy() {}
+
+        /**
+         *  Alerts that the screenstate is being changed.
+         *  Note: This may be called from within a call to transitionTo, so local DozeState may not
+         *  be accurate nor match with the new displayState.
+         */
+        default void onScreenState(int displayState) {}
     }
 
     /** A wrapper interface for {@link android.service.dreams.DreamService} */

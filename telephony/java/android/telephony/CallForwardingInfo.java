@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -33,50 +34,14 @@ import java.util.Objects;
  * Defines the call forwarding information.
  * @hide
  */
+@SystemApi
 public final class CallForwardingInfo implements Parcelable {
     private static final String TAG = "CallForwardingInfo";
 
     /**
-     * Indicates the call forwarding status is inactive.
-     *
-     * @hide
-     */
-    public static final int STATUS_INACTIVE = 0;
-
-    /**
-     * Indicates the call forwarding status is active.
-     *
-     * @hide
-     */
-    public static final int STATUS_ACTIVE = 1;
-
-    /**
-     * Indicates the call forwarding could not be enabled because the recipient is not on
-     * Fixed Dialing Number (FDN) list.
-     *
-     * @hide
-     */
-    public static final int STATUS_FDN_CHECK_FAILURE = 2;
-
-    /**
-     * Indicates the call forwarding status is with an unknown error.
-     *
-     * @hide
-     */
-    public static final int STATUS_UNKNOWN_ERROR = 3;
-
-    /**
-     * Indicates the call forwarding is not supported (e.g. called via CDMA).
-     *
-     * @hide
-     */
-    public static final int STATUS_NOT_SUPPORTED = 4;
-
-    /**
-     * Indicates the call forwarding reason is "unconditional".
+     * Indicates that call forwarding reason is "unconditional".
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
-     * @hide
      */
     public static final int REASON_UNCONDITIONAL = 0;
 
@@ -84,7 +49,6 @@ public final class CallForwardingInfo implements Parcelable {
      * Indicates the call forwarding status is "busy".
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
-     * @hide
      */
     public static final int REASON_BUSY = 1;
 
@@ -92,7 +56,6 @@ public final class CallForwardingInfo implements Parcelable {
      * Indicates the call forwarding reason is "no reply".
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
-     * @hide
      */
     public static final int REASON_NO_REPLY = 2;
 
@@ -100,7 +63,6 @@ public final class CallForwardingInfo implements Parcelable {
      * Indicates the call forwarding reason is "not reachable".
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
-     * @hide
      */
     public static final int REASON_NOT_REACHABLE = 3;
 
@@ -109,7 +71,6 @@ public final class CallForwardingInfo implements Parcelable {
      * simultaneously (unconditional, busy, no reply, and not reachable).
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
-     * @hide
      */
     public static final int REASON_ALL = 4;
 
@@ -118,28 +79,14 @@ public final class CallForwardingInfo implements Parcelable {
      * forwarding reasons simultaneously (busy, no reply, and not reachable).
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10 - 7.11 Call forwarding number
      *            and conditions +CCFC
-     * @hide
      */
     public static final int REASON_ALL_CONDITIONAL = 5;
 
     /**
-     * Call forwarding function status
-     */
-    @IntDef(prefix = { "STATUS_" }, value = {
-        STATUS_ACTIVE,
-        STATUS_INACTIVE,
-        STATUS_UNKNOWN_ERROR,
-        STATUS_NOT_SUPPORTED,
-        STATUS_FDN_CHECK_FAILURE
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface CallForwardingStatus {
-    }
-
-    /**
      * Call forwarding reason types
+     * @hide
      */
-    @IntDef(flag = true, prefix = { "REASON_" }, value = {
+    @IntDef(prefix = { "REASON_" }, value = {
         REASON_UNCONDITIONAL,
         REASON_BUSY,
         REASON_NO_REPLY,
@@ -152,9 +99,9 @@ public final class CallForwardingInfo implements Parcelable {
     }
 
     /**
-     * The call forwarding status.
+     * Whether call forwarding is enabled for this reason.
      */
-    private int mStatus;
+    private boolean mEnabled;
 
     /**
      * The call forwarding reason indicates the condition under which calls will be forwarded.
@@ -178,39 +125,35 @@ public final class CallForwardingInfo implements Parcelable {
     /**
      * Construct a CallForwardingInfo.
      *
-     * @param status the call forwarding status
+     * @param enabled Whether to enable call forwarding for the reason specified
+     *                in {@link #getReason()}.
      * @param reason the call forwarding reason
      * @param number the phone number to which calls will be forwarded
      * @param timeSeconds the timeout (in seconds) before the forwarding is attempted
-     * @hide
      */
-    public CallForwardingInfo(@CallForwardingStatus int status, @CallForwardingReason int reason,
+    public CallForwardingInfo(boolean enabled, @CallForwardingReason int reason,
             @Nullable String number, int timeSeconds) {
-        mStatus = status;
+        mEnabled = enabled;
         mReason = reason;
         mNumber = number;
         mTimeSeconds = timeSeconds;
     }
 
     /**
-     * Returns the call forwarding status.
+     * Whether call forwarding is enabled for the reason from {@link #getReason()}.
      *
-     * @return the call forwarding status.
-     *
-     * @hide
+     * @return {@code true} if enabled, {@code false} otherwise.
      */
-    public @CallForwardingStatus int getStatus() {
-        return mStatus;
+    public boolean isEnabled() {
+        return mEnabled;
     }
 
     /**
      * Returns the call forwarding reason. The call forwarding reason indicates the condition
-     * under which calls will be forwarded.  For example, {@link #REASON_NO_REPLY} indicates
-     * that calls will be forward to {@link #getNumber()} when the user fails to answer the call.
+     * under which calls will be forwarded. For example, {@link #REASON_NO_REPLY} indicates
+     * that calls will be forwarded when the user fails to answer the call.
      *
      * @return the call forwarding reason.
-     *
-     * @hide
      */
     public @CallForwardingReason int getReason() {
         return mReason;
@@ -220,9 +163,7 @@ public final class CallForwardingInfo implements Parcelable {
      * Returns the phone number to which calls will be forwarded.
      *
      * @return the number calls will be forwarded to, or {@code null} if call forwarding
-     * is being disabled.
-     *
-     * @hide
+     *         is disabled.
      */
     @Nullable
     public String getNumber() {
@@ -230,16 +171,14 @@ public final class CallForwardingInfo implements Parcelable {
     }
 
     /**
-     * Gets the timeout (in seconds) before the forwarding is attempted. For example,
+     * Gets the timeout (in seconds) before forwarding is attempted. For example,
      * if {@link #REASON_NO_REPLY} is the call forwarding reason, the device will wait this
-     * duration of time before forwarding the call to {@link #getNumber()}.
+     * duration of time before forwarding the call to the number returned by {@link #getNumber()}.
      *
      * Reference: 3GPP TS 27.007 version 10.3.0 Release 10
      *            7.11 Call forwarding number and conditions +CCFC
      *
      * @return the timeout (in seconds) before the forwarding is attempted.
-     *
-     * @hide
      */
     @SuppressLint("MethodNameUnits")
     public int getTimeoutSeconds() {
@@ -257,14 +196,14 @@ public final class CallForwardingInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel out, int flags) {
         out.writeString(mNumber);
-        out.writeInt(mStatus);
+        out.writeBoolean(mEnabled);
         out.writeInt(mReason);
         out.writeInt(mTimeSeconds);
     }
 
     private CallForwardingInfo(Parcel in) {
         mNumber = in.readString();
-        mStatus = in.readInt();
+        mEnabled = in.readBoolean();
         mReason = in.readInt();
         mTimeSeconds = in.readInt();
     }
@@ -281,7 +220,7 @@ public final class CallForwardingInfo implements Parcelable {
         }
 
         CallForwardingInfo other = (CallForwardingInfo) o;
-        return mStatus == other.mStatus
+        return mEnabled == other.mEnabled
                 && mNumber == other.mNumber
                 && mReason == other.mReason
                 && mTimeSeconds == other.mTimeSeconds;
@@ -292,7 +231,7 @@ public final class CallForwardingInfo implements Parcelable {
      */
     @Override
     public int hashCode() {
-        return Objects.hash(mStatus, mNumber, mReason, mTimeSeconds);
+        return Objects.hash(mEnabled, mNumber, mReason, mTimeSeconds);
     }
 
     public static final @NonNull Parcelable.Creator<CallForwardingInfo> CREATOR =
@@ -313,7 +252,7 @@ public final class CallForwardingInfo implements Parcelable {
      */
     @Override
     public String toString() {
-        return "[CallForwardingInfo: status=" + mStatus
+        return "[CallForwardingInfo: enabled=" + mEnabled
                 + ", reason= " + mReason
                 + ", timeSec= " + mTimeSeconds + " seconds"
                 + ", number=" + Rlog.pii(TAG, mNumber) + "]";

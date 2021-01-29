@@ -88,7 +88,7 @@ import java.util.concurrent.ExecutionException;
 public final class PermissionPolicyService extends SystemService {
     private static final String LOG_TAG = PermissionPolicyService.class.getSimpleName();
     private static final boolean DEBUG = false;
-    private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 10000;
+    private static final long USER_SENSITIVE_UPDATE_DELAY_MS = 60000;
 
     private final Object mLock = new Object();
 
@@ -282,6 +282,11 @@ public final class PermissionPolicyService extends SystemService {
                 manager.updateUserSensitiveForApp(uid);
             }
         }, UserHandle.ALL, intentFilter, null, null);
+
+        PermissionControllerManager manager = new PermissionControllerManager(
+                getUserContext(getContext(), Process.myUserHandle()), FgThread.getHandler());
+        FgThread.getHandler().postDelayed(manager::updateUserSensitive,
+                USER_SENSITIVE_UPDATE_DELAY_MS);
     }
 
     /**
@@ -420,8 +425,7 @@ public final class PermissionPolicyService extends SystemService {
                 throw new IllegalStateException(e);
             }
 
-            FgThread.getHandler().postDelayed(permissionControllerManager::updateUserSensitive,
-                    USER_SENSITIVE_UPDATE_DELAY_MS);
+            permissionControllerManager.updateUserSensitive();
 
             packageManagerInternal.updateRuntimePermissionsFingerprint(userId);
         }

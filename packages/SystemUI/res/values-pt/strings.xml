@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Retomar"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Cancelar"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Compartilhar"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Excluir"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Gravação de tela cancelada"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Gravação de tela salva, toque para ver"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Gravação de tela excluída"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Erro ao excluir a gravação de tela"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Não foi possível acessar as permissões"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Erro ao iniciar a gravação de tela"</string>
@@ -713,12 +711,12 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bolha"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Som e vibração desativados"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"O som e a vibração estão desativados, e o balão aparece na parte inferior da seção de conversa"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Pode vibrar ou tocar com base nas configurações do smartphone"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Podem vibrar ou tocar com base nas configurações do smartphone"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Pode vibrar ou tocar com base nas configurações do smartphone. As conversas do app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem em balões por padrão."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém sua atenção com um atalho flutuante para esse conteúdo."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece na parte superior de uma seção de conversa, em forma de balão, mostrando a foto do perfil na tela de bloqueio"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparecem na parte superior de uma seção de conversa, em forma de balões, mostrando a foto do perfil na tela de bloqueio"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configurações"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"Prioritárias"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"O app <xliff:g id="APP_NAME">%1$s</xliff:g> não é compatível com recursos de conversa"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nenhum balão recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Os balões recentes e dispensados aparecerão aqui"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Parte superior a 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Parte superior a 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Parte inferior em tela cheia"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Posição <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Toque duas vezes para editar."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Toque duas vezes para adicionar."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Move <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Remove <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Adicionar <xliff:g id="TILE_NAME">%1$s</xliff:g> à posição <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Mover <xliff:g id="TILE_NAME">%1$s</xliff:g> para a posição <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"remover o bloco"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"adicionar o bloco ao final"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Mover bloco"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Adicionar bloco"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Mover para <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Adicionar à posição <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Posição <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Editor de configurações rápidas."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Notificação do <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"É possível que o app não funcione com o recurso de divisão de tela."</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Pular para a anterior"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Redimensionar"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"O smartphone foi desligado devido ao aquecimento"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"O smartphone está sendo executado normalmente agora"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"O smartphone está funcionando normalmente agora.\nToque para saber mais"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"O smartphone estava muito quente e foi desligado para resfriar. Agora, ele está sendo executado normalmente.\n\nO smartphone pode ficar quente demais se você:\n	• usar apps que consomem muitos recursos (como apps de jogos, vídeos ou navegação);\n	• fizer o download ou upload de arquivos grandes;\n	• usar o smartphone em temperaturas altas."</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Ver etapas de cuidado"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"O smartphone está esquentando"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Alguns recursos ficam limitados enquanto o smartphone é resfriado"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Alguns recursos ficam limitados enquanto o smartphone é resfriado.\nToque para saber mais"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Seu smartphone tentará se resfriar automaticamente. Você ainda poderá usá-lo, mas talvez ele fique mais lento.\n\nQuando o smartphone estiver resfriado, ele voltará ao normal."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Ver etapas de cuidado"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Desconecte o carregador"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Ocorreu um problema com o carregamento deste dispositivo. Desconecte o adaptador de energia com cuidado, já que o cabo pode estar quente."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Ver etapas de cuidado"</string>
@@ -988,6 +989,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Configurações"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Ok"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Despejar heap SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"O app <xliff:g id="APP">%1$s</xliff:g> está usando <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplicativos estão usando <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"câmera"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"localização"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"microfone"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Sensores desativados"</string>
     <string name="device_services" msgid="1549944177856658705">"Serviços do dispositivo"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Sem título"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Carregando recomendações"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Mídia"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Ocultar a sessão atual."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Ocultar"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Dispensar"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Configurações"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>

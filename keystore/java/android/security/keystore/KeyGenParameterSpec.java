@@ -27,7 +27,6 @@ import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Build;
 import android.security.GateKeeper;
-import android.security.KeyStore;
 import android.text.TextUtils;
 
 import java.math.BigInteger;
@@ -246,7 +245,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
     private static final Date DEFAULT_CERT_NOT_AFTER = new Date(2461449600000L); // Jan 1 2048
 
     private final String mKeystoreAlias;
-    private final int mUid;
+    private final int mNamespace;
     private final int mKeySize;
     private final AlgorithmParameterSpec mSpec;
     private final X500Principal mCertificateSubject;
@@ -286,7 +285,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      */
     public KeyGenParameterSpec(
             String keyStoreAlias,
-            int uid,
+            int namespace,
             int keySize,
             AlgorithmParameterSpec spec,
             X500Principal certificateSubject,
@@ -337,7 +336,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         }
 
         mKeystoreAlias = keyStoreAlias;
-        mUid = uid;
+        mNamespace = namespace;
         mKeySize = keySize;
         mSpec = spec;
         mCertificateSubject = certificateSubject;
@@ -382,11 +381,43 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
      * Returns the UID which will own the key. {@code -1} is an alias for the UID of the current
      * process.
      *
+     * @deprecated See deprecation message on {@link KeyGenParameterSpec.Builder#setUid(int)}.
+     *             Known namespaces will be translated to their legacy UIDs. Unknown
+     *             Namespaces will yield {@link IllegalStateException}.
+     *
      * @hide
      */
     @UnsupportedAppUsage
+    @Deprecated
     public int getUid() {
-        return mUid;
+        if (!AndroidKeyStoreProvider.isKeystore2Enabled()) {
+            // If Keystore2 has not been enabled we have to behave as if mNamespace is actually
+            // a UID, because we are still being used with the old Keystore SPI.
+            // TODO This if statement and body can be removed when the Keystore 2 migration is
+            //      complete. b/171563717
+            return mNamespace;
+        }
+        try {
+            return KeyProperties.namespaceToLegacyUid(mNamespace);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalStateException("getUid called on KeyGenParameterSpec with non legacy"
+                    + " keystore namespace.", e);
+        }
+    }
+
+    /**
+     * Returns the target namespace for the key.
+     * See {@link KeyGenParameterSpec.Builder#setNamespace(int)}.
+     *
+     * @return The numeric namespace as configured in the keystore2_key_contexts files of Android's
+     *         SEPolicy.
+     *         TODO b/171806779 link to public Keystore 2.0 documentation.
+     *              See bug for more details for now.
+     * @hide
+     */
+    @SystemApi
+    public int getNamespace() {
+        return mNamespace;
     }
 
     /**
@@ -767,7 +798,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         private final String mKeystoreAlias;
         private @KeyProperties.PurposeEnum int mPurposes;
 
-        private int mUid = KeyStore.UID_SELF;
+        private int mNamespace = KeyProperties.NAMESPACE_APPLICATION;
         private int mKeySize = -1;
         private AlgorithmParameterSpec mSpec;
         private X500Principal mCertificateSubject;
@@ -830,7 +861,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          */
         public Builder(@NonNull KeyGenParameterSpec sourceSpec) {
             this(sourceSpec.getKeystoreAlias(), sourceSpec.getPurposes());
-            mUid = sourceSpec.getUid();
+            mNamespace = sourceSpec.getNamespace();
             mKeySize = sourceSpec.getKeySize();
             mSpec = sourceSpec.getAlgorithmParameterSpec();
             mCertificateSubject = sourceSpec.getCertificateSubject();
@@ -873,12 +904,51 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
          *
          * @param uid UID or {@code -1} for the UID of the current process.
          *
+         * @deprecated Setting the UID of the target namespace is based on a hardcoded
+         * hack in the Keystore service. This is no longer supported with Keystore 2.0/Android S.
+         * Instead, dedicated non UID based namespaces can be configured in SEPolicy using
+         * the keystore2_key_contexts files. The functionality of this method will be supported
+         * by mapping knows special UIDs, such as WIFI, to the newly configured SELinux based
+         * namespaces. Unknown UIDs will yield {@link IllegalArgumentException}.
+         *
          * @hide
          */
         @SystemApi
         @NonNull
+        @Deprecated
         public Builder setUid(int uid) {
-            mUid = uid;
+            if (!AndroidKeyStoreProvider.isKeystore2Enabled()) {
+                // If Keystore2 has not been enabled we have to behave as if mNamespace is actually
+                // a UID, because we are still being used with the old Keystore SPI.
+                // TODO This if statement and body can be removed when the Keystore 2 migration is
+                //      complete. b/171563717
+                mNamespace = uid;
+                return this;
+            }
+            mNamespace = KeyProperties.legacyUidToNamespace(uid);
+            return this;
+        }
+
+        /**
+         * Set the designated SELinux namespace that the key shall live in. The caller must
+         * have sufficient permissions to install a key in the given namespace. Namespaces
+         * can be created using SEPolicy. The keystore2_key_contexts files map numeric
+         * namespaces to SELinux labels, and SEPolicy can be used to grant access to these
+         * namespaces to the desired target context. This is the preferred way to share
+         * keys between system and vendor components, e.g., WIFI settings and WPA supplicant.
+         *
+         * @param namespace Numeric SELinux namespace as configured in keystore2_key_contexts
+         *                  of Android's SEPolicy.
+         *                  TODO b/171806779 link to public Keystore 2.0 documentation.
+         *                       See bug for more details for now.
+         * @return this Builder object.
+         *
+         * @hide
+         */
+        @SystemApi
+        @NonNull
+        public Builder setNamespace(int namespace) {
+            mNamespace = namespace;
             return this;
         }
 
@@ -1489,7 +1559,7 @@ public final class KeyGenParameterSpec implements AlgorithmParameterSpec, UserAu
         public KeyGenParameterSpec build() {
             return new KeyGenParameterSpec(
                     mKeystoreAlias,
-                    mUid,
+                    mNamespace,
                     mKeySize,
                     mSpec,
                     mCertificateSubject,

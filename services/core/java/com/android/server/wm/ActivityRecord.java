@@ -416,7 +416,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     // mOccludesParent field.
     final boolean hasWallpaper;
     // Input application handle used by the input dispatcher.
-    final InputApplicationHandle mInputApplicationHandle;
+    private InputApplicationHandle mInputApplicationHandle;
 
     final int launchedFromPid; // always the pid who started the activity.
     final int launchedFromUid; // always the uid who started the activity.
@@ -1501,7 +1501,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         info = aInfo;
         mUserId = UserHandle.getUserId(info.applicationInfo.uid);
         packageName = info.applicationInfo.packageName;
-        mInputApplicationHandle = new InputApplicationHandle(appToken);
         intent = _intent;
 
         // If the class name in the intent doesn't match that of the target, this is probably an
@@ -1671,7 +1670,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     static int getLockTaskLaunchMode(ActivityInfo aInfo, @Nullable ActivityOptions options) {
         int lockTaskLaunchMode = aInfo.lockTaskLaunchMode;
-        if (aInfo.applicationInfo.isPrivilegedApp()
+        // Non-priv apps are not allowed to use always or never, fall back to default
+        if (!aInfo.applicationInfo.isPrivilegedApp()
                 && (lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_ALWAYS
                 || lockTaskLaunchMode == LOCK_TASK_LAUNCH_MODE_NEVER)) {
             lockTaskLaunchMode = LOCK_TASK_LAUNCH_MODE_DEFAULT;
@@ -1683,6 +1683,21 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
         }
         return lockTaskLaunchMode;
+    }
+
+    @NonNull InputApplicationHandle getInputApplicationHandle(boolean update) {
+        if (mInputApplicationHandle == null) {
+            mInputApplicationHandle = new InputApplicationHandle(appToken, toString(),
+                    mInputDispatchingTimeoutNanos);
+        } else if (update) {
+            final String name = toString();
+            if (mInputDispatchingTimeoutNanos != mInputApplicationHandle.dispatchingTimeoutNanos
+                    || !name.equals(mInputApplicationHandle.name)) {
+                mInputApplicationHandle = new InputApplicationHandle(appToken, name,
+                        mInputDispatchingTimeoutNanos);
+            }
+        }
+        return mInputApplicationHandle;
     }
 
     @Override
@@ -2543,7 +2558,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         final ActivityStack stack = getRootTask();
         final boolean mayAdjustTop = (isState(RESUMED) || stack.mResumedActivity == null)
-                && stack.isFocusedStackOnDisplay();
+                && stack.isFocusedStackOnDisplay()
+                // Do not adjust focus task because the task will be reused to launch new activity.
+                && !task.isClearingToReuseTask();
         final boolean shouldAdjustGlobalFocus = mayAdjustTop
                 // It must be checked before {@link #makeFinishingLocked} is called, because a stack
                 // is not visible if it only contains finishing activities.
@@ -4578,15 +4595,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
 
-        // Check if the activity is on a sleeping display, and if it can turn it ON.
-        if (getDisplay().isSleeping()) {
-            final boolean canTurnScreenOn = !mSetToSleep || canTurnScreenOn()
-                    || canShowWhenLocked() || containsDismissKeyguardWindow();
-            if (!canTurnScreenOn) {
-                return false;
-            }
-        }
-
         // Now check whether it's really visible depending on Keyguard state, and update
         // {@link ActivityStack} internal states.
         // Inform the method if this activity is the top activity of this stack, but exclude the
@@ -4596,6 +4604,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 && stack.getDisplayArea().isTopNotPinnedStack(stack);
         final boolean visibleIgnoringDisplayStatus = stack.checkKeyguardVisibility(this,
                 visibleIgnoringKeyguard, isTop && isTopNotPinnedStack);
+
+        // Check if the activity is on a sleeping display, and if it can turn it ON.
+        // TODO(b/163993448): Do not make activity visible before display awake.
+        if (visibleIgnoringDisplayStatus && getDisplay().isSleeping()) {
+            return !mSetToSleep || canTurnScreenOn();
+        }
 
         return visibleIgnoringDisplayStatus;
     }
@@ -4735,6 +4749,15 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 Slog.v(TAG_VISIBILITY, "Start visible activity, " + this);
             }
             setState(STARTED, "makeActiveIfNeeded");
+
+            // Update process info while making an activity from invisible to visible, to make
+            // sure the process state is updated to foreground.
+            if (app != null) {
+                app.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                        true /* activityChange */, true /* updateOomAdj */,
+                        true /* addPendingTopUid */);
+            }
+
             try {
                 mAtmService.getLifecycleManager().scheduleTransaction(app.getThread(), appToken,
                         StartActivityItem.obtain());

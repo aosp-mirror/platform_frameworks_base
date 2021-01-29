@@ -17,55 +17,46 @@
 package com.android.systemui.media
 
 import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
- * Combines updates from [MediaDataManager] with [MediaDeviceManager].
+ * Combines [MediaDataManager.Listener] events with [MediaDeviceManager.Listener] events.
  */
-@Singleton
-class MediaDataCombineLatest @Inject constructor(
-    private val dataSource: MediaDataManager,
-    private val deviceSource: MediaDeviceManager
-) {
+class MediaDataCombineLatest @Inject constructor() : MediaDataManager.Listener,
+        MediaDeviceManager.Listener {
+
     private val listeners: MutableSet<MediaDataManager.Listener> = mutableSetOf()
     private val entries: MutableMap<String, Pair<MediaData?, MediaDeviceData?>> = mutableMapOf()
 
-    init {
-        dataSource.addListener(object : MediaDataManager.Listener {
-            override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-                if (oldKey != null && !oldKey.equals(key)) {
-                    val s = entries[oldKey]?.second
-                    entries[key] = data to entries[oldKey]?.second
-                    entries.remove(oldKey)
-                } else {
-                    entries[key] = data to entries[key]?.second
-                }
-                update(key, oldKey)
-            }
-            override fun onMediaDataRemoved(key: String) {
-                remove(key)
-            }
-        })
-        deviceSource.addListener(object : MediaDeviceManager.Listener {
-            override fun onMediaDeviceChanged(key: String, data: MediaDeviceData?) {
-                entries[key] = entries[key]?.first to data
-                update(key, key)
-            }
-            override fun onKeyRemoved(key: String) {
-                remove(key)
-            }
-        })
+    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+        if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
+            entries[key] = data to entries.remove(oldKey)?.second
+            update(key, oldKey)
+        } else {
+            entries[key] = data to entries[key]?.second
+            update(key, key)
+        }
     }
 
-    /**
-     * Get a map of all non-null data entries
-     */
-    fun getData(): Map<String, MediaData> {
-        return entries.filter {
-            (key, pair) -> pair.first != null && pair.second != null
-        }.mapValues {
-            (key, pair) -> pair.first!!.copy(device = pair.second)
+    override fun onMediaDataRemoved(key: String) {
+        remove(key)
+    }
+
+    override fun onMediaDeviceChanged(
+        key: String,
+        oldKey: String?,
+        data: MediaDeviceData?
+    ) {
+        if (oldKey != null && oldKey != key && entries.contains(oldKey)) {
+            entries[key] = entries.remove(oldKey)?.first to data
+            update(key, oldKey)
+        } else {
+            entries[key] = entries[key]?.first to data
+            update(key, key)
         }
+    }
+
+    override fun onKeyRemoved(key: String) {
+        remove(key)
     }
 
     /**

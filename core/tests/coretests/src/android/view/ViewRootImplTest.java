@@ -24,6 +24,7 @@ import static android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
 import static android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_BARS_BY_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
@@ -117,7 +118,15 @@ public class ViewRootImplTest {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
         ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
 
-        // A window which fits system bars must fit IME, unless its type is toast or system alert.
+        assertEquals(Type.systemBars(), attrs.getFitInsetsTypes());
+    }
+
+    @Test
+    public void adjustLayoutParamsForCompatibility_fitSystemBarsAndIme() {
+        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(TYPE_APPLICATION);
+        attrs.softInputMode |= SOFT_INPUT_ADJUST_RESIZE;
+        ViewRootImpl.adjustLayoutParamsForCompatibility(attrs);
+
         assertEquals(Type.systemBars() | Type.ime(), attrs.getFitInsetsTypes());
     }
 

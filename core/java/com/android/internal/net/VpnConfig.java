@@ -70,7 +70,8 @@ public class VpnConfig implements Parcelable {
         intent.setClassName(DIALOGS_PACKAGE, DIALOGS_PACKAGE + ".ManageDialog");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY |
                 Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-        return PendingIntent.getActivityAsUser(context, 0, intent, 0, null, UserHandle.CURRENT);
+        return PendingIntent.getActivityAsUser(context, 0 /* requestCode */, intent,
+                PendingIntent.FLAG_IMMUTABLE, null /* options */, UserHandle.CURRENT);
     }
 
     public static CharSequence getVpnLabel(Context context, String packageName)
@@ -128,7 +129,7 @@ public class VpnConfig implements Parcelable {
         String[] routes = routesStr.trim().split(" ");
         for (String route : routes) {
             //each route is ip/prefix
-            RouteInfo info = new RouteInfo(new IpPrefix(route), null);
+            RouteInfo info = new RouteInfo(new IpPrefix(route), null, null, RouteInfo.RTN_UNICAST);
             this.routes.add(info);
             updateAllowedFamilies(info.getDestination().getAddress());
         }

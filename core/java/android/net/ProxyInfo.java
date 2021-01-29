@@ -127,7 +127,7 @@ public class ProxyInfo implements Parcelable {
     }
 
     /**
-     * Only used in PacManager after Local Proxy is bound.
+     * Only used in PacProxyInstaller after Local Proxy is bound.
      * @hide
      */
     public ProxyInfo(@NonNull Uri pacFileUrl, int localProxyPort) {
@@ -355,7 +355,7 @@ public class ProxyInfo implements Parcelable {
                     port = in.readInt();
                 }
                 String exclList = in.readString();
-                String[] parsedExclList = in.readStringArray();
+                String[] parsedExclList = in.createStringArray();
                 ProxyInfo proxyProperties = new ProxyInfo(host, port, exclList, parsedExclList);
                 return proxyProperties;
             }

@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -294,7 +295,7 @@ public abstract class AbsActionBarView extends ViewGroup {
         return isOverflowReserved() && getVisibility() == VISIBLE;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void dismissPopupMenus() {
         if (mActionMenuPresenter != null) {
             mActionMenuPresenter.dismissPopupMenus();

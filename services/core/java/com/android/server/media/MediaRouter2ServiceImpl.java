@@ -16,6 +16,7 @@
 
 package com.android.server.media;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
 import static android.media.MediaRouter2Utils.getOriginalId;
 import static android.media.MediaRouter2Utils.getProviderId;
@@ -73,10 +74,12 @@ class MediaRouter2ServiceImpl {
     // TODO: (In Android S or later) if we add callback methods for generic failures
     //       in MediaRouter2, remove this constant and replace the usages with the real request IDs.
     private static final long DUMMY_REQUEST_ID = -1;
+    private static final int PACKAGE_IMPORTANCE_FOR_DISCOVERY = IMPORTANCE_FOREGROUND;
 
     private final Context mContext;
     private final Object mLock = new Object();
     final AtomicInteger mNextRouterOrManagerId = new AtomicInteger(1);
+    final ActivityManager mActivityManager;
 
     @GuardedBy("mLock")
     private final SparseArray<UserRecord> mUserRecords = new SparseArray<>();
@@ -87,8 +90,21 @@ class MediaRouter2ServiceImpl {
     @GuardedBy("mLock")
     private int mCurrentUserId = -1;
 
+    private final ActivityManager.OnUidImportanceListener mOnUidImportanceListener =
+            (uid, importance) -> {
+                synchronized (mLock) {
+                    final int count = mUserRecords.size();
+                    for (int i = 0; i < count; i++) {
+                        mUserRecords.valueAt(i).mHandler.maybeUpdateDiscoveryPreferenceForUid(uid);
+                    }
+                }
+            };
+
     MediaRouter2ServiceImpl(Context context) {
         mContext = context;
+        mActivityManager = mContext.getSystemService(ActivityManager.class);
+        mActivityManager.addOnUidImportanceListener(mOnUidImportanceListener,
+                PACKAGE_IMPORTANCE_FOR_DISCOVERY);
     }
 
     ////////////////////////////////////////////////////////////////
@@ -382,6 +398,30 @@ class MediaRouter2ServiceImpl {
         try {
             synchronized (mLock) {
                 unregisterManagerLocked(manager, false);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void startScan(IMediaRouter2Manager manager) {
+        Objects.requireNonNull(manager, "manager must not be null");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                startScanLocked(manager);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    public void stopScan(IMediaRouter2Manager manager) {
+        Objects.requireNonNull(manager, "manager must not be null");
+        final long token = Binder.clearCallingIdentity();
+        try {
+            synchronized (mLock) {
+                stopScanLocked(manager);
             }
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -839,6 +879,24 @@ class MediaRouter2ServiceImpl {
         disposeUserIfNeededLocked(userRecord); // since manager removed from user
     }
 
+    private void startScanLocked(@NonNull IMediaRouter2Manager manager) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+        if (managerRecord == null) {
+            return;
+        }
+        managerRecord.startScan();
+    }
+
+    private void stopScanLocked(@NonNull IMediaRouter2Manager manager) {
+        final IBinder binder = manager.asBinder();
+        ManagerRecord managerRecord = mAllManagerRecords.get(binder);
+        if (managerRecord == null) {
+            return;
+        }
+        managerRecord.stopScan();
+    }
+
     private void setRouteVolumeWithManagerLocked(int requestId,
             @NonNull IMediaRouter2Manager manager,
             @NonNull MediaRoute2Info route, int volume) {
@@ -1122,6 +1180,7 @@ class MediaRouter2ServiceImpl {
         public final String mPackageName;
         public final int mManagerId;
         public SessionCreationRequest mLastSessionCreationRequest;
+        public boolean mIsScanning;
 
         ManagerRecord(UserRecord userRecord, IMediaRouter2Manager manager,
                 int uid, int pid, String packageName) {
@@ -1144,6 +1203,24 @@ class MediaRouter2ServiceImpl {
 
         public void dump(PrintWriter pw, String prefix) {
             pw.println(prefix + this);
+        }
+
+        public void startScan() {
+            if (mIsScanning) {
+                return;
+            }
+            mIsScanning = true;
+            mUserRecord.mHandler.sendMessage(PooledLambda.obtainMessage(
+                    UserHandler::updateDiscoveryPreferenceOnHandler, mUserRecord.mHandler));
+        }
+
+        public void stopScan() {
+            if (!mIsScanning) {
+                return;
+            }
+            mIsScanning = false;
+            mUserRecord.mHandler.sendMessage(PooledLambda.obtainMessage(
+                    UserHandler::updateDiscoveryPreferenceOnHandler, mUserRecord.mHandler));
         }
 
         @Override
@@ -1176,7 +1253,8 @@ class MediaRouter2ServiceImpl {
             super(Looper.getMainLooper(), null, true);
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
-            mSystemProvider = new SystemMediaRoute2Provider(service.mContext);
+            mSystemProvider = new SystemMediaRoute2Provider(service.mContext,
+                    UserHandle.of(userRecord.mUserId));
             mRouteProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);
@@ -1259,6 +1337,24 @@ class MediaRouter2ServiceImpl {
                 }
             }
             return null;
+        }
+
+        public void maybeUpdateDiscoveryPreferenceForUid(int uid) {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return;
+            }
+            boolean isUidRelevant;
+            synchronized (service.mLock) {
+                isUidRelevant = mUserRecord.mRouterRecords.stream().anyMatch(
+                        router -> router.mUid == uid)
+                        | mUserRecord.mManagerRecords.stream().anyMatch(
+                            manager -> manager.mUid == uid);
+            }
+            if (isUidRelevant) {
+                sendMessage(PooledLambda.obtainMessage(
+                        UserHandler::updateDiscoveryPreferenceOnHandler, this));
+            }
         }
 
         private void onProviderStateChangedOnHandler(@NonNull MediaRoute2Provider provider) {
@@ -1766,6 +1862,16 @@ class MediaRouter2ServiceImpl {
             return managers;
         }
 
+        private List<RouterRecord> getRouterRecords() {
+            MediaRouter2ServiceImpl service = mServiceRef.get();
+            if (service == null) {
+                return Collections.emptyList();
+            }
+            synchronized (service.mLock) {
+                return new ArrayList<>(mUserRecord.mRouterRecords);
+            }
+        }
+
         private List<ManagerRecord> getManagerRecords() {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
@@ -2000,13 +2106,28 @@ class MediaRouter2ServiceImpl {
                 return;
             }
             List<RouteDiscoveryPreference> discoveryPreferences = new ArrayList<>();
-            synchronized (service.mLock) {
-                for (RouterRecord routerRecord : mUserRecord.mRouterRecords) {
+            List<RouterRecord> routerRecords = getRouterRecords();
+            List<ManagerRecord> managerRecords = getManagerRecords();
+            boolean isAnyManagerScanning =
+                    managerRecords.stream().anyMatch(manager -> manager.mIsScanning
+                    && service.mActivityManager.getPackageImportance(manager.mPackageName)
+                    <= PACKAGE_IMPORTANCE_FOR_DISCOVERY);
+
+            for (RouterRecord routerRecord : routerRecords) {
+                if (isAnyManagerScanning
+                        || service.mActivityManager.getPackageImportance(routerRecord.mPackageName)
+                        <= PACKAGE_IMPORTANCE_FOR_DISCOVERY) {
                     discoveryPreferences.add(routerRecord.mDiscoveryPreference);
                 }
-                mUserRecord.mCompositeDiscoveryPreference =
-                        new RouteDiscoveryPreference.Builder(discoveryPreferences)
-                                .build();
+            }
+
+            synchronized (service.mLock) {
+                RouteDiscoveryPreference newPreference =
+                        new RouteDiscoveryPreference.Builder(discoveryPreferences).build();
+                if (newPreference.equals(mUserRecord.mCompositeDiscoveryPreference)) {
+                    return;
+                }
+                mUserRecord.mCompositeDiscoveryPreference = newPreference;
             }
             for (MediaRoute2Provider provider : mRouteProviders) {
                 provider.updateDiscoveryPreference(mUserRecord.mCompositeDiscoveryPreference);

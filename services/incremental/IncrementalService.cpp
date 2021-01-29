@@ -476,6 +476,9 @@ StorageId IncrementalService::createStorage(std::string_view mountPoint,
         if (!mkdirOrLog(path::join(backing, ".index"), 0777)) {
             return kInvalidStorageId;
         }
+        if (!mkdirOrLog(path::join(backing, ".incomplete"), 0777)) {
+            return kInvalidStorageId;
+        }
         auto status = mVold->mountIncFs(backing, mountTarget, 0, &controlParcel);
         if (!status.isOk()) {
             LOG(ERROR) << "Vold::mountIncFs() failed: " << status.toString8();

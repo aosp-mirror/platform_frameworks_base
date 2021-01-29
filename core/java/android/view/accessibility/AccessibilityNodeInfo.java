@@ -726,7 +726,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int getAccessibilityViewId(long accessibilityNodeId) {
         return (int) accessibilityNodeId;
     }
@@ -740,7 +740,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static int getVirtualDescendantId(long accessibilityNodeId) {
         return (int) ((accessibilityNodeId & VIRTUAL_DESCENDANT_ID_MASK)
                 >> VIRTUAL_DESCENDANT_ID_SHIFT);
@@ -768,7 +768,7 @@ public class AccessibilityNodeInfo implements Parcelable {
 
     private static final AccessibilityNodeInfo DEFAULT = new AccessibilityNodeInfo();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private boolean mSealed;
 
     // Data.
@@ -988,7 +988,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean refresh(Bundle arguments, boolean bypassCache) {
         enforceSealed();
         if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
@@ -1768,7 +1768,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   <strong>Note:</strong> The primary usage of this API is for UI test automation
      *   and in order to report the fully qualified view id if an {@link AccessibilityNodeInfo}
      *   the client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
-     *   flag when configuring his {@link android.accessibilityservice.AccessibilityService}.
+     *   flag when configuring the {@link android.accessibilityservice.AccessibilityService}.
      * </p>
      * <p>
      * <strong>Note:</strong> If this view hierarchy has a {@link SurfaceView} embedding another
@@ -3206,7 +3206,7 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   <strong>Note:</strong> The primary usage of this API is for UI test automation
      *   and in order to report the source view id of an {@link AccessibilityNodeInfo} the
      *   client has to set the {@link AccessibilityServiceInfo#FLAG_REPORT_VIEW_IDS}
-     *   flag when configuring his {@link android.accessibilityservice.AccessibilityService}.
+     *   flag when configuring the {@link android.accessibilityservice.AccessibilityService}.
      * </p>
 
      * @return The id resource name.

@@ -210,7 +210,7 @@ public class JobInfo implements Parcelable {
     public static final int PRIORITY_BOUND_FOREGROUND_SERVICE = 30;
 
     /** @hide For backward compatibility. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PRIORITY_FOREGROUND_APP = PRIORITY_BOUND_FOREGROUND_SERVICE;
 
     /**
@@ -218,7 +218,7 @@ public class JobInfo implements Parcelable {
      * JobInfo priority if it is smaller).
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int PRIORITY_FOREGROUND_SERVICE = 35;
 
     /**
@@ -257,7 +257,7 @@ public class JobInfo implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int FLAG_WILL_BE_FOREGROUND = 1 << 0;
 
     /**
@@ -462,11 +462,11 @@ public class JobInfo implements Parcelable {
     public @NetworkType int getNetworkType() {
         if (networkRequest == null) {
             return NETWORK_TYPE_NONE;
-        } else if (networkRequest.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+        } else if (networkRequest.hasCapability(NET_CAPABILITY_NOT_METERED)) {
             return NETWORK_TYPE_UNMETERED;
-        } else if (networkRequest.networkCapabilities.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
+        } else if (networkRequest.hasCapability(NET_CAPABILITY_NOT_ROAMING)) {
             return NETWORK_TYPE_NOT_ROAMING;
-        } else if (networkRequest.networkCapabilities.hasTransport(TRANSPORT_CELLULAR)) {
+        } else if (networkRequest.hasTransport(TRANSPORT_CELLULAR)) {
             return NETWORK_TYPE_CELLULAR;
         } else {
             return NETWORK_TYPE_ANY;
@@ -1007,14 +1007,14 @@ public class JobInfo implements Parcelable {
         }
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Builder setPriority(int priority) {
             mPriority = priority;
             return this;
         }
 
         /** @hide */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public Builder setFlags(int flags) {
             mFlags = flags;
             return this;
@@ -1513,7 +1513,7 @@ public class JobInfo implements Parcelable {
             }
             // We can't serialize network specifiers
             if (mIsPersisted && mNetworkRequest != null
-                    && mNetworkRequest.networkCapabilities.getNetworkSpecifier() != null) {
+                    && mNetworkRequest.getNetworkSpecifier() != null) {
                 throw new IllegalArgumentException(
                         "Network specifiers aren't supported for persistent jobs");
             }

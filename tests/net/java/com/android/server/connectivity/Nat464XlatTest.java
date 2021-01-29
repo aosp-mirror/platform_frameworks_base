@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 import android.net.ConnectivityManager;
 import android.net.IDnsResolver;
 import android.net.INetd;
-import android.net.InterfaceConfiguration;
+import android.net.InterfaceConfigurationParcel;
 import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
@@ -68,7 +68,6 @@ public class Nat464XlatTest {
     @Mock IDnsResolver mDnsResolver;
     @Mock INetd mNetd;
     @Mock INetworkManagementService mNms;
-    @Mock InterfaceConfiguration mConfig;
     @Mock NetworkAgentInfo mNai;
 
     TestLooper mLooper;
@@ -106,9 +105,10 @@ public class Nat464XlatTest {
         when(mNai.connService()).thenReturn(mConnectivity);
         when(mNai.netAgentConfig()).thenReturn(mAgentConfig);
         when(mNai.handler()).thenReturn(mHandler);
-
-        when(mNms.getInterfaceConfig(eq(STACKED_IFACE))).thenReturn(mConfig);
-        when(mConfig.getLinkAddress()).thenReturn(ADDR);
+        final InterfaceConfigurationParcel mConfig = new InterfaceConfigurationParcel();
+        when(mNetd.interfaceGetCfg(eq(STACKED_IFACE))).thenReturn(mConfig);
+        mConfig.ipv4Addr = ADDR.getAddress().getHostAddress();
+        mConfig.prefixLength =  ADDR.getPrefixLength();
     }
 
     private void assertRequiresClat(boolean expected, NetworkAgentInfo nai) {
@@ -213,7 +213,7 @@ public class Nat464XlatTest {
         nat.interfaceLinkStateChanged(STACKED_IFACE, true);
         mLooper.dispatchNext();
 
-        verify(mNms).getInterfaceConfig(eq(STACKED_IFACE));
+        verify(mNetd).interfaceGetCfg(eq(STACKED_IFACE));
         verify(mConnectivity).handleUpdateLinkProperties(eq(mNai), c.capture());
         assertFalse(c.getValue().getStackedLinks().isEmpty());
         assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));
@@ -353,7 +353,7 @@ public class Nat464XlatTest {
         nat.interfaceLinkStateChanged(STACKED_IFACE, true);
         mLooper.dispatchNext();
 
-        verify(mNms).getInterfaceConfig(eq(STACKED_IFACE));
+        verify(mNetd).interfaceGetCfg(eq(STACKED_IFACE));
         verify(mConnectivity, times(1)).handleUpdateLinkProperties(eq(mNai), c.capture());
         assertFalse(c.getValue().getStackedLinks().isEmpty());
         assertTrue(c.getValue().getAllInterfaceNames().contains(STACKED_IFACE));

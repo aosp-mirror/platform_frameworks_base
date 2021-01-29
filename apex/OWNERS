@@ -1,7 +1,8 @@
-# Shared module build rule owners
-per-file *.bp=hansson@google.com
-per-file *.bp=jiyong@google.com
+# Mainline modularization team
 
-# This file, and all other OWNERS files
-per-file OWNERS=dariofreni@google.com
-per-file OWNERS=hansson@google.com
+andreionea@google.com
+dariofreni@google.com
+hansson@google.com
+mathewi@google.com
+pedroql@google.com
+satayev@google.com

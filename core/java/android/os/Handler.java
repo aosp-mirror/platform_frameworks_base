@@ -189,7 +189,7 @@ public class Handler {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public Handler(boolean async) {
         this(null, async);
     }
@@ -297,7 +297,7 @@ public class Handler {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @NonNull
     public static Handler getMain() {
         if (MAIN_THREAD_HANDLER == null) {

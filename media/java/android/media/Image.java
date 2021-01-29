@@ -17,6 +17,7 @@
 package android.media;
 
 import android.annotation.Nullable;
+import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -58,6 +59,7 @@ public abstract class Image implements AutoCloseable {
      * @hide
      */
     @UnsupportedAppUsage
+    @TestApi
     protected Image() {
     }
 
@@ -198,6 +200,7 @@ public abstract class Image implements AutoCloseable {
      * @return The window transformation that needs to be applied for this frame.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract int getTransform();
 
     /**
@@ -205,6 +208,7 @@ public abstract class Image implements AutoCloseable {
      * @return The scaling mode that needs to be applied for this frame.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract int getScalingMode();
 
     /**
@@ -387,6 +391,7 @@ public abstract class Image implements AutoCloseable {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
         protected Plane() {
         }
 

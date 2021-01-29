@@ -36,6 +36,7 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dumpable;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
@@ -189,6 +190,8 @@ public class NotificationEntryManager implements
         }
     }
 
+    private final Lazy<BubbleController> mBubbleControllerLazy;
+
     /**
      * Injected constructor. See {@link NotificationsModule}.
      */
@@ -201,6 +204,7 @@ public class NotificationEntryManager implements
             Lazy<NotificationRowBinder> notificationRowBinderLazy,
             Lazy<NotificationRemoteInputManager> notificationRemoteInputManagerLazy,
             LeakDetector leakDetector,
+            Lazy<BubbleController> bubbleController,
             ForegroundServiceDismissalFeatureController fgsFeatureController) {
         mLogger = logger;
         mGroupManager = groupManager;
@@ -211,6 +215,7 @@ public class NotificationEntryManager implements
         mRemoteInputManagerLazy = notificationRemoteInputManagerLazy;
         mLeakDetector = leakDetector;
         mFgsFeatureController = fgsFeatureController;
+        mBubbleControllerLazy = bubbleController;
     }
 
     /** Once called, the NEM will start processing notification events from system server. */
@@ -920,8 +925,20 @@ public class NotificationEntryManager implements
     /**
      * @return {@code true} if there is at least one notification that should be visible right now
      */
-    public boolean hasActiveNotifications() {
-        return mReadOnlyNotifications.size() != 0;
+    public boolean hasVisibleNotifications() {
+        if (mReadOnlyNotifications.size() == 0) {
+            return false;
+        }
+
+        // Filter out suppressed notifications, which are active notifications backing a bubble
+        // but are not present in the shade
+        for (NotificationEntry e : mSortedAndFiltered) {
+            if (!mBubbleControllerLazy.get().isBubbleNotificationSuppressedFromShade(e)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

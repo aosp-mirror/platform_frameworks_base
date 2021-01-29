@@ -21,6 +21,7 @@ cc_library_shared {
 
     shared_libs: [
         "libdrmframework",
+        "libdrmframeworkcommon",
         "liblog",
         "libutils",
         "libandroid_runtime",

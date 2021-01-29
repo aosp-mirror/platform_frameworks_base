@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.CustomIconCache
 import com.android.systemui.controls.controller.ControlsControllerImpl
 import com.android.systemui.controls.controller.StructureInfo
 import com.android.systemui.globalactions.GlobalActionsComponent
@@ -42,7 +43,8 @@ import javax.inject.Inject
 class ControlsEditingActivity @Inject constructor(
     private val controller: ControlsControllerImpl,
     broadcastDispatcher: BroadcastDispatcher,
-    private val globalActionsComponent: GlobalActionsComponent
+    private val globalActionsComponent: GlobalActionsComponent,
+    private val customIconCache: CustomIconCache
 ) : LifecycleActivity() {
 
     companion object {
@@ -170,7 +172,7 @@ class ControlsEditingActivity @Inject constructor(
 
     private fun setUpList() {
         val controls = controller.getFavoritesForStructure(component, structure)
-        model = FavoritesModel(component, controls, favoritesModelCallback)
+        model = FavoritesModel(customIconCache, component, controls, favoritesModelCallback)
         val elevation = resources.getFloat(R.dimen.control_card_elevation)
         val recyclerView = requireViewById<RecyclerView>(R.id.list)
         recyclerView.alpha = 0.0f

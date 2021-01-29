@@ -550,7 +550,7 @@ public class SensorEvent {
      *   <h4>{@link android.hardware.Sensor#TYPE_HEART_BEAT
      * Sensor.TYPE_HEART_BEAT}:</h4>
      *
-     * A sensor of this type returns an event everytime a hear beat peak is
+     * A sensor of this type returns an event everytime a heart beat peak is
      * detected.
      *
      * Peak here ideally corresponds to the positive peak in the QRS complex of

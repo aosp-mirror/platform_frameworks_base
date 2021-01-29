@@ -1,1 +1,7 @@
 per-file PointerLocationView.java = michaelwr@google.com, svv@google.com
+
+# LockSettings related
+per-file *LockPattern* = file:/services/core/java/com/android/server/locksettings/OWNERS
+per-file *LockScreen* = file:/services/core/java/com/android/server/locksettings/OWNERS
+per-file *Lockscreen* = file:/services/core/java/com/android/server/locksettings/OWNERS
+per-file *LockSettings* = file:/services/core/java/com/android/server/locksettings/OWNERS

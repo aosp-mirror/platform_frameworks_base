@@ -1066,18 +1066,18 @@ public class VibratorService extends IVibratorService.Stub
         return attrs.isFlagSet(VibrationAttributes.FLAG_BYPASS_INTERRUPTION_POLICY);
     }
 
-    private int getAppOpMode(Vibration vib) {
+    private int getAppOpMode(int uid, String packageName, VibrationAttributes attrs) {
         int mode = mAppOps.checkAudioOpNoThrow(AppOpsManager.OP_VIBRATE,
-                vib.attrs.getAudioAttributes().getUsage(), vib.uid, vib.opPkg);
+                attrs.getAudioAttributes().getUsage(), uid, packageName);
         if (mode == AppOpsManager.MODE_ALLOWED) {
-            mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, vib.uid, vib.opPkg);
+            mode = mAppOps.startOpNoThrow(AppOpsManager.OP_VIBRATE, uid, packageName);
         }
 
-        if (mode == AppOpsManager.MODE_IGNORED && shouldBypassDnd(vib.attrs)) {
+        if (mode == AppOpsManager.MODE_IGNORED && shouldBypassDnd(attrs)) {
             // If we're just ignoring the vibration op then this is set by DND and we should ignore
             // if we're asked to bypass. AppOps won't be able to record this operation, so make
             // sure we at least note it in the logs for debugging.
-            Slog.d(TAG, "Bypassing DND for vibration: " + vib);
+            Slog.d(TAG, "Bypassing DND for vibrate from uid " + uid);
             mode = AppOpsManager.MODE_ALLOWED;
         }
         return mode;
@@ -1099,7 +1099,7 @@ public class VibratorService extends IVibratorService.Stub
             return false;
         }
 
-        final int mode = getAppOpMode(vib);
+        final int mode = getAppOpMode(vib.uid, vib.opPkg, vib.attrs);
         if (mode != AppOpsManager.MODE_ALLOWED) {
             if (mode == AppOpsManager.MODE_ERRORED) {
                 // We might be getting calls from within system_server, so we don't actually
@@ -1589,25 +1589,20 @@ public class VibratorService extends IVibratorService.Stub
             mWakeLock.setWorkSource(mTmpWorkSource);
         }
 
-        private long delayLocked(long duration) {
+        private void delayLocked(long wakeUpTime) {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "delayLocked");
             try {
-                long durationRemaining = duration;
-                if (duration > 0) {
-                    final long bedtime = duration + SystemClock.uptimeMillis();
-                    do {
-                        try {
-                            this.wait(durationRemaining);
-                        }
-                        catch (InterruptedException e) { }
-                        if (mForceStop) {
-                            break;
-                        }
-                        durationRemaining = bedtime - SystemClock.uptimeMillis();
-                    } while (durationRemaining > 0);
-                    return duration - durationRemaining;
+                long durationRemaining = wakeUpTime - SystemClock.uptimeMillis();
+                while (durationRemaining > 0) {
+                    try {
+                        this.wait(durationRemaining);
+                    }
+                    catch (InterruptedException e) { }
+                    if (mForceStop) {
+                        break;
+                    }
+                    durationRemaining = wakeUpTime - SystemClock.uptimeMillis();
                 }
-                return 0;
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
             }
@@ -1641,7 +1636,8 @@ public class VibratorService extends IVibratorService.Stub
                     final int repeat = mWaveform.getRepeatIndex();
 
                     int index = 0;
-                    long onDuration = 0;
+                    long nextStepStartTime = SystemClock.uptimeMillis();
+                    long nextVibratorStopTime = 0;
                     while (!mForceStop) {
                         if (index < len) {
                             final int amplitude = amplitudes[index];
@@ -1650,25 +1646,35 @@ public class VibratorService extends IVibratorService.Stub
                                 continue;
                             }
                             if (amplitude != 0) {
-                                if (onDuration <= 0) {
+                                long now = SystemClock.uptimeMillis();
+                                if (nextVibratorStopTime <= now) {
                                     // Telling the vibrator to start multiple times usually causes
                                     // effects to feel "choppy" because the motor resets at every on
                                     // command.  Instead we figure out how long our next "on" period
                                     // is going to be, tell the motor to stay on for the full
                                     // duration, and then wake up to change the amplitude at the
                                     // appropriate intervals.
-                                    onDuration = getTotalOnDuration(timings, amplitudes, index - 1,
-                                            repeat);
+                                    long onDuration = getTotalOnDuration(
+                                            timings, amplitudes, index - 1, repeat);
                                     doVibratorOn(onDuration, amplitude, mUid, mAttrs);
+                                    nextVibratorStopTime = now + onDuration;
                                 } else {
+                                    // Vibrator is already ON, so just change its amplitude.
                                     doVibratorSetAmplitude(amplitude);
                                 }
+                            } else {
+                                // Previous vibration should have already finished, but we make sure
+                                // the vibrator will be off for the next step when amplitude is 0.
+                                doVibratorOff();
                             }
 
-                            long waitTime = delayLocked(duration);
-                            if (amplitude != 0) {
-                                onDuration -= waitTime;
-                            }
+                            // We wait until the time this waveform step was supposed to end,
+                            // calculated from the time it was supposed to start. All start times
+                            // are calculated from the waveform original start time by adding the
+                            // input durations. Any scheduling or processing delay should not affect
+                            // this step's perceived total duration. They will be amortized here.
+                            nextStepStartTime += duration;
+                            delayLocked(nextStepStartTime);
                         } else if (repeat < 0) {
                             break;
                         } else {
@@ -1774,11 +1780,19 @@ public class VibratorService extends IVibratorService.Stub
                 return SCALE_MUTE;
             }
             if (ActivityManager.checkComponentPermission(android.Manifest.permission.VIBRATE,
-                        vib.getUid(), -1 /*owningUid*/, true /*exported*/)
+                    vib.getUid(), -1 /*owningUid*/, true /*exported*/)
                     != PackageManager.PERMISSION_GRANTED) {
                 Slog.w(TAG, "pkg=" + vib.getPackage() + ", uid=" + vib.getUid()
                         + " tried to play externally controlled vibration"
                         + " without VIBRATE permission, ignoring.");
+                return SCALE_MUTE;
+            }
+
+            int mode = getAppOpMode(vib.getUid(), vib.getPackage(), vib.getVibrationAttributes());
+            if (mode != AppOpsManager.MODE_ALLOWED) {
+                if (mode == AppOpsManager.MODE_ERRORED) {
+                    Slog.w(TAG, "Would be an error: external vibrate from uid " + vib.getUid());
+                }
                 return SCALE_MUTE;
             }
 

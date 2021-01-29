@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"Узнавіць"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"Скасаваць"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"Абагуліць"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"Выдаліць"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"Запіс экрана скасаваны"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"Запіс экрана захаваны. Націсніце, каб прагледзець"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"Запіс экрана выдалены"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"Памылка выдалення запісу экрана"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"Не ўдалося атрымаць дазволы"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"Памылка пачатку запісу экрана"</string>
@@ -722,7 +720,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"У залежнасці ад налад тэлефона магчымы званок або вібрацыя. Размовы ў праграме \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" стандартна паяўляюцца ў выглядзе ўсплывальных апавяшчэнняў."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Прыцягвае ўвагу да гэтага змесціва ўсплывальнай кнопкай."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў у выглядзе ўсплывальнага апавяшчэння, а на экране блакіроўкі – у выглядзе відарыса профілю"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Паказваецца ўверсе раздзела размоў, як усплывальнае апавяшчэнне, паказвае фота профілю на экране блакіроўкі"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налады"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Прыярытэт"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не падтрымлівае функцыі размовы"</string>
@@ -894,12 +892,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"Верхні экран – 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"Верхні экран – 30%"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"Ніжні экран – поўнаэкранны рэжым"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"Месца: <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. Краніце двойчы, каб рэдагаваць."</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>. Краніце двойчы, каб дадаць."</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"Перамясціць <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"Выдаліць <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"Дадаць \"<xliff:g id="TILE_NAME">%1$s</xliff:g>\" у наступнае месца: <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"Перамясціць \"<xliff:g id="TILE_NAME">%1$s</xliff:g>\" у наступнае месца: <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"выдаліць плітку"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"дадаць плітку ў канец"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Перамясціць плітку"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Дадаць плітку"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Перамясціць на пазіцыю <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Дадаць на пазіцыю <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"Пазіцыя <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"Рэдактар хуткіх налад."</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"Апавяшчэнне <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"Праграма можа не працаваць у рэжыме дзялення экрана."</string>
@@ -932,11 +931,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Перайсці да папярэдняга"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Змяніць памер"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"З-за перагрэву тэл. выключыўся"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"Тэлефон працуе нармальна"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"Ваш тэлефон працуе нармальна.\nНацісніце, каб даведацца больш"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ваш тэлефон пераграваўся, таму ён выключыўся, каб астыць. Зараз тэлефон працуе нармальна.\n\nТэлефон можа перагравацца пры:\n	• Выкарыстанні рэсурсаёмістых праграм (напрыклад, гульняў, відэа або праграм навігацыі)\n	• Спампоўцы або запампоўцы вялікіх файлаў\n	• Выкарыстанні тэлефона пры высокіх тэмпературах"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Глядзець паэтапную дапамогу"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"Тэлефон награваецца"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"Некаторыя функцыі абмежаваны, пакуль тэлефон астывае"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"Некаторыя функцыі абмежаваны, пакуль тэлефон не астыне.\nНацісніце, каб даведацца больш"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"Ваш тэлефон аўтаматычна паспрабуе астыць. Вы можаце па-ранейшаму карыстацца сваім тэлефонам, але ён можа працаваць больш павольна.\n\nПасля таго як ваш тэлефон астыне, ён будзе працаваць у звычайным рэжыме."</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Глядзець паэтапную дапамогу"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"Адключыце зарадную прыладу"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"Узнікла праблема з зарадкай гэтай прылады. Адключыце адаптар сілкавання і праверце, ці не нагрэўся кабель."</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"Глядзець паэтапную дапамогу"</string>
@@ -998,6 +999,13 @@
     <string name="open_saver_setting_action" msgid="2111461909782935190">"Налады"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"Зразумела"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"Праграма \"<xliff:g id="APP">%1$s</xliff:g>\" выкарыстоўвае: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Праграмы выкарыстоўваюць: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" і "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"камера"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"геалакацыя"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"мікрафон"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"Датчыкі выкл."</string>
     <string name="device_services" msgid="1549944177856658705">"Сэрвісы прылады"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"Без назвы"</string>
@@ -1078,7 +1086,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Загружаюцца рэкамендацыі"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"Мультымедыя"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"Схаваць цяперашні сеанс."</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Схаваць"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"Адхіліць"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Узнавіць"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"Налады"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактыўна, праверце праграму"</string>

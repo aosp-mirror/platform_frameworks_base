@@ -16,6 +16,7 @@
 
 package android.net;
 
+import static android.net.ConnectivityManager.TYPE_NONE;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_CBS;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_DUN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_FOTA;
@@ -31,16 +32,21 @@ import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.NetworkRequest.Type.REQUEST;
+import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -49,9 +55,7 @@ import static org.mockito.Mockito.when;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.NetworkCallback;
-import android.net.NetworkCapabilities;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
@@ -213,9 +217,8 @@ public class ConnectivityManagerTest {
         ArgumentCaptor<Messenger> captor = ArgumentCaptor.forClass(Messenger.class);
 
         // register callback
-        when(mService.requestNetwork(
-                any(), captor.capture(), anyInt(), any(), anyInt(), any(), nullable(String.class)))
-                .thenReturn(request);
+        when(mService.requestNetwork(any(), anyInt(), captor.capture(), anyInt(), any(), anyInt(),
+                any(), nullable(String.class))).thenReturn(request);
         manager.requestNetwork(request, callback, handler);
 
         // callback triggers
@@ -242,9 +245,8 @@ public class ConnectivityManagerTest {
         ArgumentCaptor<Messenger> captor = ArgumentCaptor.forClass(Messenger.class);
 
         // register callback
-        when(mService.requestNetwork(
-                any(), captor.capture(), anyInt(), any(), anyInt(), any(), nullable(String.class)))
-                .thenReturn(req1);
+        when(mService.requestNetwork(any(), anyInt(), captor.capture(), anyInt(), any(), anyInt(),
+                any(), nullable(String.class))).thenReturn(req1);
         manager.requestNetwork(req1, callback, handler);
 
         // callback triggers
@@ -261,9 +263,8 @@ public class ConnectivityManagerTest {
         verify(callback, timeout(100).times(0)).onLosing(any(), anyInt());
 
         // callback can be registered again
-        when(mService.requestNetwork(
-                any(), captor.capture(), anyInt(), any(), anyInt(), any(), nullable(String.class)))
-                .thenReturn(req2);
+        when(mService.requestNetwork(any(), anyInt(), captor.capture(), anyInt(), any(), anyInt(),
+                any(), nullable(String.class))).thenReturn(req2);
         manager.requestNetwork(req2, callback, handler);
 
         // callback triggers
@@ -286,7 +287,7 @@ public class ConnectivityManagerTest {
         info.targetSdkVersion = VERSION_CODES.N_MR1 + 1;
 
         when(mCtx.getApplicationInfo()).thenReturn(info);
-        when(mService.requestNetwork(any(), any(), anyInt(), any(), anyInt(), any(),
+        when(mService.requestNetwork(any(), anyInt(), any(), anyInt(), any(), anyInt(), any(),
                 nullable(String.class))).thenReturn(request);
 
         Handler handler = new Handler(Looper.getMainLooper());
@@ -338,6 +339,35 @@ public class ConnectivityManagerTest {
             fail();
         } catch (Exception expected) {
         }
+    }
+
+    @Test
+    public void testRequestType() throws Exception {
+        final String testPkgName = "MyPackage";
+        final ConnectivityManager manager = new ConnectivityManager(mCtx, mService);
+        when(mCtx.getOpPackageName()).thenReturn(testPkgName);
+        final NetworkRequest request = makeRequest(1);
+        final NetworkCallback callback = new ConnectivityManager.NetworkCallback();
+
+        manager.requestNetwork(request, callback);
+        verify(mService).requestNetwork(eq(request.networkCapabilities),
+                eq(REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(testPkgName), eq(null));
+        reset(mService);
+
+        // Verify that register network callback does not calls requestNetwork at all.
+        manager.registerNetworkCallback(request, callback);
+        verify(mService, never()).requestNetwork(any(), anyInt(), any(), anyInt(), any(),
+                anyInt(), any(), any());
+        verify(mService).listenForNetwork(eq(request.networkCapabilities), any(), any(),
+                eq(testPkgName));
+        reset(mService);
+
+        manager.registerDefaultNetworkCallback(callback);
+        verify(mService).requestNetwork(eq(null),
+                eq(TRACK_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(testPkgName), eq(null));
+        reset(mService);
     }
 
     static Message makeMessage(NetworkRequest req, int messageType) {
