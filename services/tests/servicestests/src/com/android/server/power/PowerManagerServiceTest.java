@@ -877,6 +877,22 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    public void testQuiescentBoot_WakeKeyBeforeBootCompleted_AwakeAfterBootCompleted()
+            throws Exception {
+        when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), any())).thenReturn("1");
+        createService();
+        mService.systemReady(null);
+
+        mService.getBinderServiceInstance().wakeUp(mClock.now(),
+                PowerManager.WAKE_REASON_UNKNOWN, "testing IPowerManager.wakeUp()", "pkg.name");
+
+        mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        assertThat(mService.getWakefulnessLocked()).isEqualTo(WAKEFULNESS_AWAKE);
+        assertThat(mService.getDesiredScreenPolicyLocked()).isEqualTo(
+                DisplayPowerRequest.POLICY_BRIGHT);
+    }
+
+    @Test
     public void testIsAmbientDisplayAvailable_available() throws Exception {
         createService();
         when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(true);

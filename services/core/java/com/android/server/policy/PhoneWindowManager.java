@@ -3491,15 +3491,27 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     /** {@inheritDoc} */
     @Override
     public int interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
+        final int keyCode = event.getKeyCode();
+        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+        boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
+                || event.isWakeKey();
+
         if (!mSystemBooted) {
             // If we have not yet booted, don't let key events do anything.
+            // Exception: Wake and power key events are forwarded to PowerManager to allow it to
+            // wake from quiescent mode during boot.
+            if (down && (keyCode == KeyEvent.KEYCODE_POWER
+                    || keyCode == KeyEvent.KEYCODE_TV_POWER)) {
+                wakeUpFromPowerKey(event.getDownTime());
+            } else if (down && (isWakeKey || keyCode == KeyEvent.KEYCODE_WAKEUP)
+                    && isWakeKeyWhenScreenOff(keyCode)) {
+                wakeUpFromWakeKey(event);
+            }
             return 0;
         }
 
         final boolean interactive = (policyFlags & FLAG_INTERACTIVE) != 0;
-        final boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
         final boolean canceled = event.isCanceled();
-        final int keyCode = event.getKeyCode();
         final int displayId = event.getDisplayId();
         final boolean isInjected = (policyFlags & WindowManagerPolicy.FLAG_INJECTED) != 0;
 
@@ -3518,8 +3530,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         // Basic policy based on interactive state.
         int result;
-        boolean isWakeKey = (policyFlags & WindowManagerPolicy.FLAG_WAKE) != 0
-                || event.isWakeKey();
         if (interactive || (isInjected && !isWakeKey)) {
             // When the device is interactive or the key is injected pass the
             // key to the application.
@@ -4740,7 +4750,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
         startedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
         finishedWakingUp(PowerManager.WAKE_REASON_UNKNOWN);
-        screenTurningOn(DEFAULT_DISPLAY, null);
+        screenTurningOn(DEFAULT_DISPLAY, mDefaultDisplayPolicy.getScreenOnListener());
         screenTurnedOn(DEFAULT_DISPLAY);
     }
 
