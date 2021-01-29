@@ -2291,9 +2291,10 @@ public final class ActivityThread extends ClientTransactionHandler {
      * Resources if one has already been created.
      */
     Resources getTopLevelResources(String resDir, String[] splitResDirs, String[] overlayDirs,
-            String[] libDirs, LoadedApk pkgInfo) {
+            String[] libDirs, LoadedApk pkgInfo, Configuration overrideConfig) {
         return mResourcesManager.getResources(null, resDir, splitResDirs, overlayDirs, libDirs,
-                null, null, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader(), null);
+                null, overrideConfig, pkgInfo.getCompatibilityInfo(), pkgInfo.getClassLoader(),
+                null);
     }
 
     @UnsupportedAppUsage
