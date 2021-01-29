@@ -106,7 +106,8 @@ public class WifiSignalController extends
         IconState statusIcon = new IconState(wifiVisible, getCurrentIconId(), contentDescription);
         if (mProviderModel) {
             IconState qsIcon = null;
-            if (mCurrentState.isDefault) {
+            if (mCurrentState.isDefault || (!mNetworkController.isRadioOn()
+                    && !mNetworkController.isEthernetDefault())) {
                 qsIcon = new IconState(mCurrentState.connected,
                         mWifiTracker.isCaptivePortal ? R.drawable.ic_qs_wifi_disconnected
                                 : getQsCurrentIconId(), contentDescription);
