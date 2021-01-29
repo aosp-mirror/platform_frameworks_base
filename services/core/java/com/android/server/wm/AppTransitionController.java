@@ -712,8 +712,7 @@ public class AppTransitionController {
         final AccessibilityController accessibilityController =
                 mDisplayContent.mWmService.mAccessibilityController;
         if (accessibilityController != null) {
-            accessibilityController.onAppWindowTransitionLocked(
-                    mDisplayContent.getDisplayId(), transit);
+            accessibilityController.onAppWindowTransition(mDisplayContent.getDisplayId(), transit);
         }
     }
 

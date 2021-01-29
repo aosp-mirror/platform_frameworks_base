@@ -2021,7 +2021,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 final int winTransit = TRANSIT_EXIT;
                 mWinAnimator.applyAnimationLocked(winTransit, false /* isEntrance */);
                 if (accessibilityController != null) {
-                    accessibilityController.onWindowTransitionLocked(this, winTransit);
+                    accessibilityController.onWindowTransition(this, winTransit);
                 }
             }
             setDisplayLayoutNeeded();
@@ -2035,7 +2035,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (isVisibleNow()) {
             mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
             if (mWmService.mAccessibilityController != null) {
-                mWmService.mAccessibilityController.onWindowTransitionLocked(this, TRANSIT_EXIT);
+                mWmService.mAccessibilityController.onWindowTransition(this, TRANSIT_EXIT);
             }
             changed = true;
             if (displayContent != null) {
@@ -2113,7 +2113,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         if (mWmService.mAccessibilityController != null) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(getDisplayId());
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
         }
         updateLocationInParentDisplayIfNeeded();
 
@@ -2347,7 +2347,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.requestTraversal();
                     }
                     if (mWmService.mAccessibilityController != null) {
-                        mWmService.mAccessibilityController.onWindowTransitionLocked(this, transit);
+                        mWmService.mAccessibilityController.onWindowTransition(this, transit);
                     }
                 }
                 final boolean isAnimating = mAnimatingExit || isAnimating(TRANSITION | PARENTS,
@@ -3679,7 +3679,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     displayId);
 
             if (mWmService.mAccessibilityController != null) {
-                mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(displayId);
+                mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(displayId);
             }
             updateLocationInParentDisplayIfNeeded();
         } catch (RemoteException e) {
@@ -4782,7 +4782,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return;
         }
         if (mWmService.mAccessibilityController != null) {
-            mWmService.mAccessibilityController.onSomeWindowResizedOrMovedLocked(getDisplayId());
+            mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(getDisplayId());
         }
 
         if (!isSelfOrAncestorWindowAnimatingExit()) {
