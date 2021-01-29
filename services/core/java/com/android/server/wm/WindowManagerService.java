@@ -1012,6 +1012,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // ignored.
     private float mTaskLetterboxAspectRatio;
 
+    // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
+    private int mLetterboxActivityCornersRadius;
+
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
@@ -1239,6 +1242,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
         mTaskLetterboxAspectRatio = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
+        mLetterboxActivityCornersRadius = context.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
@@ -3930,6 +3935,60 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized (mGlobalLock) {
                 return mTaskLetterboxAspectRatio;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
+     * both it and a value of {@link
+     * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
+     * and corners of the activity won't be rounded.
+     */
+    void setLetterboxActivityCornersRadius(int cornersRadius) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mLetterboxActivityCornersRadius = cornersRadius;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Resets corners raidus for activities presented in the letterbox mode to {@link
+     * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
+     */
+    void resetLetterboxActivityCornersRadius() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_letterboxActivityCornersRadius);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Whether corners of letterboxed activities are rounded.
+     */
+    boolean isLetterboxActivityCornersRounded() {
+        return getLetterboxActivityCornersRadius() > 0;
+    }
+
+    /**
+     * Gets corners raidus for activities presented in the letterbox mode.
+     */
+    int getLetterboxActivityCornersRadius() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mLetterboxActivityCornersRadius;
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
