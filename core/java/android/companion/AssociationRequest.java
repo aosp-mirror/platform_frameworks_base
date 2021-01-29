@@ -55,6 +55,8 @@ import java.util.Objects;
         genBuilder = false)
 public final class AssociationRequest implements Parcelable {
 
+    private static final String LOG_TAG = AssociationRequest.class.getSimpleName();
+
     /**
      * Device profile: watch.
      *
@@ -113,13 +115,6 @@ public final class AssociationRequest implements Parcelable {
     /** @hide */
     public void setDeviceProfilePrivilegesDescription(@NonNull String desc) {
         mDeviceProfilePrivilegesDescription = desc;
-    }
-
-    private void onConstructed() {
-        if (mDeviceProfile != null
-                && !Objects.equals(mDeviceProfile, DEVICE_PROFILE_WATCH)) {
-            throw new IllegalArgumentException("Invalid device profile: " + mDeviceProfile);
-        }
     }
 
     /** @hide */
@@ -252,7 +247,7 @@ public final class AssociationRequest implements Parcelable {
         this.mCallingPackage = callingPackage;
         this.mDeviceProfilePrivilegesDescription = deviceProfilePrivilegesDescription;
 
-        onConstructed();
+        // onConstructed(); // You can define this method to get a callback
     }
 
     /**
@@ -386,7 +381,7 @@ public final class AssociationRequest implements Parcelable {
         this.mCallingPackage = callingPackage;
         this.mDeviceProfilePrivilegesDescription = deviceProfilePrivilegesDescription;
 
-        onConstructed();
+        // onConstructed(); // You can define this method to get a callback
     }
 
     @DataClass.Generated.Member
@@ -404,10 +399,10 @@ public final class AssociationRequest implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1610132130920L,
+            time = 1611692924843L,
             codegenVersion = "1.0.22",
             sourceFile = "frameworks/base/core/java/android/companion/AssociationRequest.java",
-            inputSignatures = "public static final  java.lang.String DEVICE_PROFILE_WATCH\nprivate  boolean mSingleDevice\nprivate @com.android.internal.util.DataClass.PluralOf(\"deviceFilter\") @android.annotation.NonNull java.util.List<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String mDeviceProfile\nprivate @android.annotation.Nullable java.lang.String mCallingPackage\nprivate @android.annotation.Nullable java.lang.String mDeviceProfilePrivilegesDescription\npublic  void setCallingPackage(java.lang.String)\npublic  void setDeviceProfilePrivilegesDescription(java.lang.String)\nprivate  void onConstructed()\npublic @android.compat.annotation.UnsupportedAppUsage boolean isSingleDevice()\npublic @android.annotation.NonNull @android.compat.annotation.UnsupportedAppUsage java.util.List<android.companion.DeviceFilter<?>> getDeviceFilters()\nclass AssociationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mSingleDevice\nprivate @android.annotation.Nullable java.util.ArrayList<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable java.lang.String mDeviceProfile\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setSingleDevice(boolean)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder addDeviceFilter(android.companion.DeviceFilter<?>)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDeviceProfile(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override android.companion.AssociationRequest build()\nclass Builder extends android.provider.OneTimeUseBuilder<android.companion.AssociationRequest> implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true, genHiddenGetters=true, genParcelable=true, genHiddenConstructor=true, genBuilder=false)")
+            inputSignatures = "private static final  java.lang.String LOG_TAG\npublic static final  java.lang.String DEVICE_PROFILE_WATCH\nprivate  boolean mSingleDevice\nprivate @com.android.internal.util.DataClass.PluralOf(\"deviceFilter\") @android.annotation.NonNull java.util.List<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable @android.companion.AssociationRequest.DeviceProfile java.lang.String mDeviceProfile\nprivate @android.annotation.Nullable java.lang.String mCallingPackage\nprivate @android.annotation.Nullable java.lang.String mDeviceProfilePrivilegesDescription\npublic  void setCallingPackage(java.lang.String)\npublic  void setDeviceProfilePrivilegesDescription(java.lang.String)\npublic @android.compat.annotation.UnsupportedAppUsage boolean isSingleDevice()\npublic @android.annotation.NonNull @android.compat.annotation.UnsupportedAppUsage java.util.List<android.companion.DeviceFilter<?>> getDeviceFilters()\nclass AssociationRequest extends java.lang.Object implements [android.os.Parcelable]\nprivate  boolean mSingleDevice\nprivate @android.annotation.Nullable java.util.ArrayList<android.companion.DeviceFilter<?>> mDeviceFilters\nprivate @android.annotation.Nullable java.lang.String mDeviceProfile\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setSingleDevice(boolean)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder addDeviceFilter(android.companion.DeviceFilter<?>)\npublic @android.annotation.NonNull android.companion.AssociationRequest.Builder setDeviceProfile(java.lang.String)\npublic @android.annotation.NonNull @java.lang.Override android.companion.AssociationRequest build()\nclass Builder extends android.provider.OneTimeUseBuilder<android.companion.AssociationRequest> implements []\n@com.android.internal.util.DataClass(genToString=true, genEqualsHashCode=true, genHiddenGetters=true, genParcelable=true, genHiddenConstructor=true, genBuilder=false)")
     @Deprecated
     private void __metadata() {}
 
