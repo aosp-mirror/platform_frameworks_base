@@ -114,13 +114,10 @@ public class SyncRtSurfaceTransactionApplierCompat {
                 for (int i = params.length - 1; i >= 0; i--) {
                     SyncRtSurfaceTransactionApplierCompat.SurfaceParams surfaceParams =
                             params[i];
+                    t.deferTransactionUntil(surfaceParams.surface, mBarrierSurfaceControl, frame);
                     surfaceParams.applyTo(t);
                 }
-                if (mTargetViewRootImpl != null) {
-                    mTargetViewRootImpl.mergeWithNextTransaction(t, frame);
-                } else {
-                    t.apply();
-                }
+                t.apply();
                 Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                 Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)
                         .sendToTarget();
