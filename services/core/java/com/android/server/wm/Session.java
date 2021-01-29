@@ -103,6 +103,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     private final ArraySet<WindowSurfaceController> mAlertWindowSurfaces = new ArraySet<>();
     private final DragDropController mDragDropController;
     final boolean mCanAddInternalSystemWindow;
+    private final boolean mCanStartTasksFromRecents;
+
     // If non-system overlays from this process can be hidden by the user or app using
     // HIDE_NON_SYSTEM_OVERLAY_WINDOWS.
     final boolean mOverlaysCanBeHidden;
@@ -134,6 +136,8 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mCanCreateSystemApplicationOverlay =
                 service.mContext.checkCallingOrSelfPermission(SYSTEM_APPLICATION_OVERLAY)
                         == PERMISSION_GRANTED;
+        mCanStartTasksFromRecents = service.mContext.checkCallingOrSelfPermission(
+                START_TASKS_FROM_RECENTS) == PERMISSION_GRANTED;
         mOverlaysCanBeHidden = !mCanAddInternalSystemWindow
                 && !mService.mAtmInternal.isCallerRecents(mUid);
         mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)
@@ -374,8 +378,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         } else if (hasShortcut) {
             // Restrict who can start a shortcut drag since it will start the shortcut as the
             // target shortcut package
-            mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
-                    "performDrag");
+            if (!mCanStartTasksFromRecents) {
+                throw new SecurityException("Requires START_TASKS_FROM_RECENTS permission");
+            }
             for (int i = 0; i < data.getItemCount(); i++) {
                 final ClipData.Item item = data.getItemAt(i);
                 final Intent intent = item.getIntent();
@@ -403,8 +408,9 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
             }
         } else if (hasTask) {
             // TODO(b/169894807): Consider opening this up for tasks from the same app as the caller
-            mService.mAtmService.enforceCallerIsRecentsOrHasPermission(START_TASKS_FROM_RECENTS,
-                    "performDrag");
+            if (!mCanStartTasksFromRecents) {
+                throw new SecurityException("Requires START_TASKS_FROM_RECENTS permission");
+            }
             for (int i = 0; i < data.getItemCount(); i++) {
                 final ClipData.Item item = data.getItemAt(i);
                 final Intent intent = item.getIntent();
