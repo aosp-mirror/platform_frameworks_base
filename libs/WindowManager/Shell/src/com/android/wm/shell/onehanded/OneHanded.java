@@ -16,12 +16,10 @@
 
 package com.android.wm.shell.onehanded;
 
-import androidx.annotation.NonNull;
+import android.content.res.Configuration;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler.OneHandedGestureEventCallback;
-
-import java.io.PrintWriter;
 
 /**
  * Interface to engage one handed feature.
@@ -69,4 +67,9 @@ public interface OneHanded {
      * 3 button navigation mode only
      */
     void registerGestureCallback(OneHandedGestureEventCallback callback);
+
+    /**
+     * Receive onConfigurationChanged() events
+     */
+    void onConfigChanged(Configuration newConfig);
 }
