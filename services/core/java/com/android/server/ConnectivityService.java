@@ -5746,6 +5746,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 throw new SecurityException("Insufficient permissions to specify legacy type");
             }
         }
+        final NetworkCapabilities defaultNc = mDefaultRequest.mRequests.get(0).networkCapabilities;
         final int callingUid = mDeps.getCallingUid();
         final NetworkRequest.Type reqType;
         try {
@@ -5756,10 +5757,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
         switch (reqType) {
             case TRACK_DEFAULT:
                 // If the request type is TRACK_DEFAULT, the passed {@code networkCapabilities}
-                // is unused and will be replaced by the one from the default network request.
-                // This allows callers to keep track of the system default network.
+                // is unused and will be replaced by ones appropriate for the caller.
+                // This allows callers to keep track of the default network for their app.
                 networkCapabilities = createDefaultNetworkCapabilitiesForUid(callingUid);
                 enforceAccessPermission();
+                break;
+            case TRACK_SYSTEM_DEFAULT:
+                enforceSettingsPermission();
+                networkCapabilities = new NetworkCapabilities(defaultNc);
                 break;
             case BACKGROUND_REQUEST:
                 enforceNetworkStackOrSettingsPermission();
@@ -5779,6 +5784,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         ensureRequestableCapabilities(networkCapabilities);
         ensureSufficientPermissionsForRequest(networkCapabilities,
                 Binder.getCallingPid(), callingUid, callingPackageName);
+
         // Set the UID range for this request to the single UID of the requester, or to an empty
         // set of UIDs if the caller has the appropriate permission and UIDs have not been set.
         // This will overwrite any allowed UIDs in the requested capabilities. Though there
@@ -5797,6 +5803,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
         NetworkRequestInfo nri =
                 new NetworkRequestInfo(messenger, networkRequest, binder, callingAttributionTag);
         if (DBG) log("requestNetwork for " + nri);
+
+        // For TRACK_SYSTEM_DEFAULT callbacks, the capabilities have been modified since they were
+        // copied from the default request above. (This is necessary to ensure, for example, that
+        // the callback does not leak sensitive information to unprivileged apps.) Check that the
+        // changes don't alter request matching.
+        if (reqType == NetworkRequest.Type.TRACK_SYSTEM_DEFAULT &&
+                (!networkCapabilities.equalRequestableCapabilities(defaultNc))) {
+            Log.wtf(TAG, "TRACK_SYSTEM_DEFAULT capabilities don't match default request: "
+                    + networkCapabilities + " vs. " + defaultNc);
+        }
 
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_REQUEST, nri));
         if (timeoutMs > 0) {
