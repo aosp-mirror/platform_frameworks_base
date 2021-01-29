@@ -4945,7 +4945,7 @@ public abstract class PackageManager {
      *
      * @hide
      */
-    @SuppressWarnings("HiddenAbstractMethod")
+    @SuppressWarnings({"HiddenAbstractMethod", "NullableCollection"})
     @TestApi
     public abstract @Nullable String[] getNamesForUids(int[] uids);
 
