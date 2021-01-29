@@ -16,6 +16,7 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.RESTRICTED_INDEX;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 
@@ -124,9 +125,12 @@ public final class JobServiceContext implements ServiceConnection {
      *
      * Any reads (dereferences) not done from the handler thread must be synchronized on
      * {@link #mLock}.
-     * Writes can only be done from the handler thread, or {@link #executeRunnableJob(JobStatus)}.
+     * Writes can only be done from the handler thread,
+     * or {@link #executeRunnableJob(JobStatus, int)}.
      */
     private JobStatus mRunningJob;
+    @JobConcurrencyManager.WorkType
+    private int mRunningJobWorkType;
     private JobCallback mRunningCallback;
     /** Used to store next job to run when current job is to be preempted. */
     private int mPreferredUid;
@@ -181,30 +185,26 @@ public final class JobServiceContext implements ServiceConnection {
 
     JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats,
             JobPackageTracker tracker, Looper looper) {
-        this(service.getContext(), service.getLock(), batteryStats, tracker, service, looper);
-    }
-
-    @VisibleForTesting
-    JobServiceContext(Context context, Object lock, IBatteryStats batteryStats,
-            JobPackageTracker tracker, JobCompletedListener completedListener, Looper looper) {
-        mContext = context;
-        mLock = lock;
+        mContext = service.getContext();
+        mLock = service.getLock();
         mBatteryStats = batteryStats;
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
-        mCompletedListener = completedListener;
+        mCompletedListener = service;
         mAvailable = true;
         mVerb = VERB_FINISHED;
         mPreferredUid = NO_PREFERRED_UID;
     }
 
     /**
-     * Give a job to this context for execution. Callers must first check {@link #getRunningJobLocked()}
+     * Give a job to this context for execution. Callers must first check {@link
+     * #getRunningJobLocked()}
      * and ensure it is null to make sure this is a valid context.
+     *
      * @param job The status of the job that we are going to run.
      * @return True if the job is valid and is running. False if the job cannot be executed.
      */
-    boolean executeRunnableJob(JobStatus job) {
+    boolean executeRunnableJob(JobStatus job, @JobConcurrencyManager.WorkType int workType) {
         synchronized (mLock) {
             if (!mAvailable) {
                 Slog.e(TAG, "Starting new runnable but context is unavailable > Error.");
@@ -214,6 +214,7 @@ public final class JobServiceContext implements ServiceConnection {
             mPreferredUid = NO_PREFERRED_UID;
 
             mRunningJob = job;
+            mRunningJobWorkType = workType;
             mRunningCallback = new JobCallback();
             final boolean isDeadlineExpired =
                     job.hasDeadlineConstraint() &&
@@ -282,6 +283,7 @@ public final class JobServiceContext implements ServiceConnection {
                     Slog.d(TAG, job.getServiceComponent().getShortClassName() + " unavailable.");
                 }
                 mRunningJob = null;
+                mRunningJobWorkType = WORK_TYPE_NONE;
                 mRunningCallback = null;
                 mParams = null;
                 mExecutionStartTimeElapsed = 0L;
@@ -324,6 +326,11 @@ public final class JobServiceContext implements ServiceConnection {
      */
     JobStatus getRunningJobLocked() {
         return mRunningJob;
+    }
+
+    @JobConcurrencyManager.WorkType
+    int getRunningJobWorkType() {
+        return mRunningJobWorkType;
     }
 
     /**
@@ -831,6 +838,7 @@ public final class JobServiceContext implements ServiceConnection {
         mContext.unbindService(JobServiceContext.this);
         mWakeLock = null;
         mRunningJob = null;
+        mRunningJobWorkType = WORK_TYPE_NONE;
         mRunningCallback = null;
         mParams = null;
         mVerb = VERB_FINISHED;
