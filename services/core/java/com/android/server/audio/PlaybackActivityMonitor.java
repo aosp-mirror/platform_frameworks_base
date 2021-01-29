@@ -197,6 +197,28 @@ public final class PlaybackActivityMonitor
         }
     }
 
+    /**
+     * Update player session ID
+     * @param piid Player id to update
+     * @param sessionId The new audio session ID
+     * @param binderUid Calling binder uid
+     */
+    public void playerSessionId(int piid, int sessionId, int binderUid) {
+        final boolean change;
+        synchronized (mPlayerLock) {
+            final AudioPlaybackConfiguration apc = mPlayers.get(new Integer(piid));
+            if (checkConfigurationCaller(piid, apc, binderUid)) {
+                change = apc.handleSessionIdEvent(sessionId);
+            } else {
+                Log.e(TAG, "Error updating audio session");
+                change = false;
+            }
+        }
+        if (change) {
+            dispatchPlaybackChange(false);
+        }
+    }
+
     private static final int FLAGS_FOR_SILENCE_OVERRIDE =
             AudioAttributes.FLAG_BYPASS_INTERRUPTION_POLICY |
             AudioAttributes.FLAG_BYPASS_MUTE;
@@ -921,6 +943,7 @@ public final class PlaybackActivityMonitor
         private final int mClientUid;
         private final int mClientPid;
         private final AudioAttributes mPlayerAttr;
+        private final int mSessionId;
 
         NewPlayerEvent(AudioPlaybackConfiguration apc) {
             mPlayerIId = apc.getPlayerInterfaceId();
@@ -928,6 +951,7 @@ public final class PlaybackActivityMonitor
             mClientUid = apc.getClientUid();
             mClientPid = apc.getClientPid();
             mPlayerAttr = apc.getAudioAttributes();
+            mSessionId = apc.getSessionId();
         }
 
         @Override
@@ -935,7 +959,8 @@ public final class PlaybackActivityMonitor
             return new String("new player piid:" + mPlayerIId + " uid/pid:" + mClientUid + "/"
                     + mClientPid + " type:"
                     + AudioPlaybackConfiguration.toLogFriendlyPlayerType(mPlayerType)
-                    + " attr:" + mPlayerAttr);
+                    + " attr:" + mPlayerAttr
+                    + " session:" + mSessionId);
         }
     }
 

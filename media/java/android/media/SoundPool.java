@@ -155,7 +155,8 @@ public class SoundPool extends PlayerBase {
         }
         mAttributes = attributes;
 
-        baseRegisterPlayer();
+        // FIXME: b/174876164 implement session id for soundpool
+        baseRegisterPlayer(AudioSystem.AUDIO_SESSION_ALLOCATE);
     }
 
     /**

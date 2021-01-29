@@ -9088,6 +9088,18 @@ public class AudioService extends IAudioService.Stub
     }
 
     /**
+     * Update player session ID
+     * @param piid Player id to update
+     * @param sessionId The new audio session ID
+     */
+    public void playerSessionId(int piid, int sessionId) {
+        if (sessionId <= AudioSystem.AUDIO_SESSION_ALLOCATE) {
+            throw new IllegalArgumentException("invalid session Id " + sessionId);
+        }
+        mPlaybackMonitor.playerSessionId(piid, sessionId, Binder.getCallingUid());
+    }
+
+    /**
      * Update player event
      * @param piid Player id to update
      * @param event The new player event
