@@ -17,6 +17,7 @@
 package android.app.people;
 
 import android.app.people.ConversationStatus;
+import android.app.people.ConversationChannel;
 import android.content.pm.ParceledListSlice;
 import android.net.Uri;
 import android.os.IBinder;
@@ -26,6 +27,13 @@ import android.os.IBinder;
  * {@hide}
  */
 interface IPeopleManager {
+
+    /**
+    * Returns the specified conversation from the conversations list. If the conversation can't be
+    * found, returns null.
+    */
+    ConversationChannel getConversation(in String packageName, int userId, in String shortcutId);
+
     /**
      * Returns the recent conversations. The conversations that have customized notification
      * settings are excluded from the returned list.
