@@ -23,6 +23,7 @@ import android.hardware.biometrics.BiometricFaceConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.common.ICancellationSignal;
 import android.hardware.biometrics.face.EnrollmentType;
+import android.hardware.biometrics.face.Feature;
 import android.hardware.biometrics.face.IFace;
 import android.hardware.biometrics.face.ISession;
 import android.hardware.face.Face;
@@ -55,12 +56,14 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
     @Nullable private ICancellationSignal mCancellationSignal;
     @Nullable private android.hardware.common.NativeHandle mPreviewSurface;
     private final int mMaxTemplatesPerUser;
+    private final boolean mDebugConsent;
 
     FaceEnrollClient(@NonNull Context context, @NonNull LazyDaemon<ISession> lazyDaemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, @NonNull String opPackageName,
             @NonNull BiometricUtils<Face> utils, @NonNull int[] disabledFeatures, int timeoutSec,
-            @Nullable NativeHandle previewSurface, int sensorId, int maxTemplatesPerUser) {
+            @Nullable NativeHandle previewSurface, int sensorId, int maxTemplatesPerUser,
+            boolean debugConsent) {
         super(context, lazyDaemon, token, listener, userId, hardwareAuthToken, opPackageName, utils,
                 timeoutSec, BiometricsProtoEnums.MODALITY_FACE, sensorId,
                 false /* shouldVibrate */);
@@ -69,6 +72,7 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
         mEnrollIgnoreListVendor = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_vendor_enroll_ignorelist);
         mMaxTemplatesPerUser = maxTemplatesPerUser;
+        mDebugConsent = debugConsent;
         try {
             // We must manually close the duplicate handle after it's no longer needed.
             // The caller is responsible for closing the original handle.
@@ -116,9 +120,17 @@ public class FaceEnrollClient extends EnrollClient<ISession> {
         try {
             // TODO(b/172593978): Pass features.
             // TODO(b/174619156): Handle accessibility enrollment.
+            byte[] features;
+            if (mDebugConsent) {
+                features = new byte[1];
+                features[0] = Feature.DEBUG;
+            } else {
+                features = new byte[0];
+            }
+
             mCancellationSignal = getFreshDaemon().enroll(mSequentialId,
                     HardwareAuthTokenUtils.toHardwareAuthToken(mHardwareAuthToken),
-                    EnrollmentType.DEFAULT, new byte[0], mPreviewSurface);
+                    EnrollmentType.DEFAULT, features, mPreviewSurface);
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when requesting enroll", e);
             onError(BiometricFaceConstants.FACE_ERROR_UNABLE_TO_PROCESS, 0 /* vendorCode */);
