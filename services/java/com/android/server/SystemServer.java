@@ -1708,15 +1708,6 @@ public final class SystemServer implements Dumpable {
             }
             t.traceEnd();
 
-            t.traceBegin("StartVcnManagementService");
-            try {
-                vcnManagement = VcnManagementService.create(context);
-                ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
-            } catch (Throwable e) {
-                reportWtf("starting VCN Management Service", e);
-            }
-            t.traceEnd();
-
             t.traceBegin("StartFontManagerService");
             mSystemServiceManager.startService(FontManagerService.Lifecycle.class);
             t.traceEnd();
@@ -1816,6 +1807,15 @@ public final class SystemServer implements Dumpable {
                     ServiceManager.getService(Context.CONNECTIVITY_SERVICE));
             // TODO: Use ConnectivityManager instead of ConnectivityService.
             networkPolicy.bindConnectivityManager(connectivity);
+            t.traceEnd();
+
+            t.traceBegin("StartVcnManagementService");
+            try {
+                vcnManagement = VcnManagementService.create(context);
+                ServiceManager.addService(Context.VCN_MANAGEMENT_SERVICE, vcnManagement);
+            } catch (Throwable e) {
+                reportWtf("starting VCN Management Service", e);
+            }
             t.traceEnd();
 
             t.traceBegin("StartNsdService");
@@ -2639,15 +2639,6 @@ public final class SystemServer implements Dumpable {
                 reportWtf("making IpSec Service ready", e);
             }
             t.traceEnd();
-            t.traceBegin("MakeVcnManagementServiceReady");
-            try {
-                if (vcnManagementF != null) {
-                    vcnManagementF.systemReady();
-                }
-            } catch (Throwable e) {
-                reportWtf("making VcnManagementService ready", e);
-            }
-            t.traceEnd();
             t.traceBegin("MakeNetworkStatsServiceReady");
             try {
                 if (networkStatsF != null) {
@@ -2664,6 +2655,15 @@ public final class SystemServer implements Dumpable {
                 }
             } catch (Throwable e) {
                 reportWtf("making Connectivity Service ready", e);
+            }
+            t.traceEnd();
+            t.traceBegin("MakeVcnManagementServiceReady");
+            try {
+                if (vcnManagementF != null) {
+                    vcnManagementF.systemReady();
+                }
+            } catch (Throwable e) {
+                reportWtf("making VcnManagementService ready", e);
             }
             t.traceEnd();
             t.traceBegin("MakeNetworkPolicyServiceReady");
