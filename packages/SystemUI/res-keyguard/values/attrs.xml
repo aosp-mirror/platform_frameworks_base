@@ -40,8 +40,6 @@
 
     <attr name="passwordStyle" format="reference" />
 
-    <attr name="numPadKeyStyle" format="reference" />
-
     <declare-styleable name="AnimatableClockView">
         <attr name="dozeWeight" format="integer" />
         <attr name="lockScreenWeight" format="integer" />

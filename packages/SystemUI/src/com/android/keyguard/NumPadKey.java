@@ -18,10 +18,11 @@ package com.android.keyguard;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.HapticFeedbackConstants;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -46,8 +47,6 @@ public class NumPadKey extends ViewGroup {
     private int mDigit = -1;
     private int mTextViewResId;
     private PasswordTextView mTextView;
-
-    private final NumPadAnimator mAnimator;
 
     private View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -74,7 +73,7 @@ public class NumPadKey extends ViewGroup {
     }
 
     public NumPadKey(Context context, AttributeSet attrs) {
-        this(context, attrs, R.attr.numPadKeyStyle);
+        this(context, attrs, 0);
     }
 
     public NumPadKey(Context context, AttributeSet attrs, int defStyle) {
@@ -85,8 +84,7 @@ public class NumPadKey extends ViewGroup {
         super(context, attrs, defStyle);
         setFocusable(true);
 
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey, defStyle,
-                contentResource);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.NumPadKey);
 
         try {
             mDigit = a.getInt(R.styleable.NumPadKey_digit, mDigit);
@@ -118,16 +116,20 @@ public class NumPadKey extends ViewGroup {
                 final int len = klondike.length();
                 if (len > 0) {
                     mKlondikeText.setText(klondike);
-                } else if (mKlondikeText.getVisibility() != View.GONE) {
+                } else {
                     mKlondikeText.setVisibility(View.INVISIBLE);
                 }
             }
         }
 
+        a = context.obtainStyledAttributes(attrs, android.R.styleable.View);
+        if (!a.hasValueOrEmpty(android.R.styleable.View_background)) {
+            Drawable rippleDrawable = new ContextThemeWrapper(mContext,
+                    R.style.Widget_TextView_NumPadKey).getDrawable(R.drawable.ripple_drawable_pin);
+            setBackground(rippleDrawable);
+        }
+        a.recycle();
         setContentDescription(mDigitText.getText().toString());
-
-        mAnimator = new NumPadAnimator(context, (GradientDrawable) getBackground(),
-                R.style.NumPadKey);
     }
 
     /**
@@ -140,8 +142,9 @@ public class NumPadKey extends ViewGroup {
                 .getDefaultColor();
         mDigitText.setTextColor(textColor);
         mKlondikeText.setTextColor(klondikeColor);
-
-        mAnimator.reloadColors(getContext());
+        Drawable rippleDrawable = new ContextThemeWrapper(mContext,
+                R.style.Widget_TextView_NumPadKey).getDrawable(R.drawable.ripple_drawable_pin);
+        setBackground(rippleDrawable);
     }
 
     @Override
@@ -149,26 +152,13 @@ public class NumPadKey extends ViewGroup {
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             doHapticKeyClick();
         }
-
-        mAnimator.start();
-
         return super.onTouchEvent(event);
-    }
-
-    @Override
-    public void setLayoutParams(ViewGroup.LayoutParams params) {
-        mAnimator.updateMargin((ViewGroup.MarginLayoutParams) params);
-
-        super.setLayoutParams(params);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         measureChildren(widthMeasureSpec, heightMeasureSpec);
-
-        // Set width/height to the same value to ensure a smooth circle for the bg
-        setMeasuredDimension(getMeasuredWidth(), getMeasuredWidth());
     }
 
     @Override
@@ -186,8 +176,6 @@ public class NumPadKey extends ViewGroup {
 
         left = centerX - mKlondikeText.getMeasuredWidth() / 2;
         mKlondikeText.layout(left, top, left + mKlondikeText.getMeasuredWidth(), bottom);
-
-        mAnimator.onLayout(b - t);
     }
 
     @Override
