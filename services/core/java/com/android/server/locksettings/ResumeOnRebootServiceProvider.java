@@ -106,6 +106,8 @@ public class ResumeOnRebootServiceProvider {
         private final Context mContext;
         private final ComponentName mComponentName;
         private IResumeOnRebootService mBinder;
+        @Nullable
+        ServiceConnection mServiceConnection;
 
         private ResumeOnRebootServiceConnection(Context context,
                 @NonNull ComponentName componentName) {
@@ -115,17 +117,9 @@ public class ResumeOnRebootServiceProvider {
 
         /** Unbind from the service */
         public void unbindService() {
-            mContext.unbindService(new ServiceConnection() {
-                @Override
-                public void onServiceConnected(ComponentName name, IBinder service) {
-                }
-
-                @Override
-                public void onServiceDisconnected(ComponentName name) {
-                    mBinder = null;
-
-                }
-            });
+            if (mServiceConnection != null) {
+                mContext.unbindService(mServiceConnection);
+            }
         }
 
         /** Bind to the service */
@@ -134,17 +128,19 @@ public class ResumeOnRebootServiceProvider {
                 CountDownLatch connectionLatch = new CountDownLatch(1);
                 Intent intent = new Intent();
                 intent.setComponent(mComponentName);
-                final boolean success = mContext.bindServiceAsUser(intent, new ServiceConnection() {
-                            @Override
-                            public void onServiceConnected(ComponentName name, IBinder service) {
-                                mBinder = IResumeOnRebootService.Stub.asInterface(service);
-                                connectionLatch.countDown();
-                            }
+                mServiceConnection = new ServiceConnection() {
+                    @Override
+                    public void onServiceConnected(ComponentName name, IBinder service) {
+                        mBinder = IResumeOnRebootService.Stub.asInterface(service);
+                        connectionLatch.countDown();
+                    }
 
-                            @Override
-                            public void onServiceDisconnected(ComponentName name) {
-                            }
-                        },
+                    @Override
+                    public void onServiceDisconnected(ComponentName name) {
+                        mBinder = null;
+                    }
+                };
+                final boolean success = mContext.bindServiceAsUser(intent, mServiceConnection,
                         Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
                         BackgroundThread.getHandler(), UserHandle.SYSTEM);
 
