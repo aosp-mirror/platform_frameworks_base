@@ -4632,6 +4632,10 @@
          maximum screen area that can be occupied by the app in the letterbox mode. -->
     <item name="config_taskLetterboxAspectRatio" format="float" type="dimen">0.0</item>
 
+    <!-- Corners radius for activity presented the letterbox mode. Values < 0 will be ignored and
+         corners of the activity won't be rounded. -->
+    <integer name="config_letterboxActivityCornersRadius">0</integer>
+
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 
