@@ -5418,6 +5418,16 @@ public abstract class Context {
     public static final String SPEECH_RECOGNITION_SERVICE = "speech_recognition";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.graphics.GameManager}.
+     *
+     * @see #getSystemService(String)
+     *
+     * @hide
+     */
+    public static final String GAME_SERVICE = "game";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
