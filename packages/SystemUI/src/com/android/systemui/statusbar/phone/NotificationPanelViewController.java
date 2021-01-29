@@ -120,6 +120,7 @@ import com.android.systemui.statusbar.notification.collection.render.ShadeViewMa
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -552,10 +553,12 @@ public class NotificationPanelViewController extends PanelViewController {
             AuthController authController,
             QSDetailDisplayer qsDetailDisplayer,
             ScrimController scrimController,
-            MediaDataManager mediaDataManager) {
+            MediaDataManager mediaDataManager,
+            AmbientState ambientState) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
-                latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager);
+                latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager,
+                ambientState);
         mView = view;
         mMetricsLogger = metricsLogger;
         mActivityManager = activityManager;
@@ -2408,11 +2411,6 @@ public class NotificationPanelViewController extends PanelViewController {
     public void expand(boolean animate) {
         super.expand(animate);
         setListening(true);
-    }
-
-    @Override
-    protected void setIsShadeOpening(boolean isOpening) {
-        mNotificationStackScrollLayoutController.setIsShadeOpening(isOpening);
     }
 
     @Override

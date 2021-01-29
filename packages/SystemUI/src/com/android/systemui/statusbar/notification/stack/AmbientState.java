@@ -22,6 +22,7 @@ import android.content.Context;
 import android.util.MathUtils;
 
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -30,9 +31,12 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm.SectionProvider;
 
+import javax.inject.Inject;
+
 /**
  * A global state to track all input states for the algorithm.
  */
+@SysUISingleton
 public class AmbientState {
 
     private static final float MAX_PULSE_HEIGHT = 100000f;
@@ -83,6 +87,7 @@ public class AmbientState {
     /** Tracks the state from AlertingNotificationManager#hasNotifications() */
     private boolean mHasAlertEntries;
 
+    @Inject
     public AmbientState(
             Context context,
             @NonNull SectionProvider sectionProvider) {
@@ -98,7 +103,7 @@ public class AmbientState {
         mBaseZHeight = getBaseHeight(mZDistanceBetweenElements);
     }
 
-    void setIsShadeOpening(boolean isOpening) {
+    public void setIsShadeOpening(boolean isOpening) {
         mIsShadeOpening = isOpening;
     }
 
