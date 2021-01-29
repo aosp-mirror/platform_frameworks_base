@@ -35,6 +35,7 @@ import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
@@ -1877,6 +1878,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
+                if (isInLockTaskMode() && windowingMode != WINDOWING_MODE_FULLSCREEN) {
+                    Slog.w(TAG, "setTaskWindowingMode: Is in lock task mode="
+                            + getLockTaskModeState());
+                    return false;
+                }
+
                 if (WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
                     return setTaskWindowingModeSplitScreen(taskId, windowingMode, toTop);
                 }
@@ -2140,11 +2147,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         if (!WindowConfiguration.isSplitScreenWindowingMode(windowingMode)) {
             throw new IllegalArgumentException("Calling setTaskWindowingModeSplitScreen with non"
                     + "split-screen mode: " + windowingMode);
-        }
-        if (isInLockTaskMode()) {
-            Slog.w(TAG, "setTaskWindowingModeSplitScreen: Is in lock task mode="
-                    + getLockTaskModeState());
-            return false;
         }
 
         final Task task = mRootWindowContainer.anyTaskForId(taskId,
