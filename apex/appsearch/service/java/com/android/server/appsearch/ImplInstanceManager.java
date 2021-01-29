@@ -41,14 +41,33 @@ import java.io.File;
 public final class ImplInstanceManager {
     private static final String APP_SEARCH_DIR = "appSearch";
 
-    private static final SparseArray<AppSearchImpl> sInstances = new SparseArray<>();
+    private static ImplInstanceManager sImplInstanceManager;
 
-    private final Context mContext;
+    private final SparseArray<AppSearchImpl> mInstances = new SparseArray<>();
     private final String mGlobalQuerierPackage;
 
-    public ImplInstanceManager(@NonNull Context context) {
-        mContext = context;
-        mGlobalQuerierPackage = getGlobalAppSearchDataQuerierPackageName(mContext);
+    private ImplInstanceManager(@NonNull String globalQuerierPackage) {
+        mGlobalQuerierPackage = globalQuerierPackage;
+    }
+
+    /**
+     * Gets an instance of ImplInstanceManager to be used.
+     *
+     * <p>If no instance has been initialized yet, a new one will be created. Otherwise, the
+     * existing instance will be returned.
+     */
+    @NonNull
+    public static ImplInstanceManager getInstance(@NonNull Context context) {
+        if (sImplInstanceManager == null) {
+            synchronized (ImplInstanceManager.class) {
+                if (sImplInstanceManager == null) {
+                    sImplInstanceManager =
+                            new ImplInstanceManager(
+                                    getGlobalAppSearchDataQuerierPackageName(context));
+                }
+            }
+        }
+        return sImplInstanceManager;
     }
 
     /**
@@ -57,30 +76,30 @@ public final class ImplInstanceManager {
      * <p>If no AppSearchImpl instance exists for this user, Icing will be initialized and one will
      * be created.
      *
+     * @param context The context
      * @param userId The multi-user userId of the device user calling AppSearch
      * @return An initialized {@link AppSearchImpl} for this user
      */
     @NonNull
-    public AppSearchImpl getInstance(@UserIdInt int userId)
+    public AppSearchImpl getAppSearchImpl(@NonNull Context context, @UserIdInt int userId)
             throws AppSearchException {
-        AppSearchImpl instance = sInstances.get(userId);
+        AppSearchImpl instance = mInstances.get(userId);
         if (instance == null) {
             synchronized (ImplInstanceManager.class) {
-                instance = sInstances.get(userId);
+                instance = mInstances.get(userId);
                 if (instance == null) {
-                    instance = createImpl(userId);
-                    sInstances.put(userId, instance);
+                    instance = createImpl(context, userId);
+                    mInstances.put(userId, instance);
                 }
             }
         }
         return instance;
     }
 
-    private AppSearchImpl createImpl(@UserIdInt int userId)
+    private AppSearchImpl createImpl(@NonNull Context context, @UserIdInt int userId)
             throws AppSearchException {
-        File appSearchDir = getAppSearchDir(mContext, userId);
-        return AppSearchImpl.create(
-                appSearchDir, mContext, userId, mGlobalQuerierPackage);
+        File appSearchDir = getAppSearchDir(context, userId);
+        return AppSearchImpl.create(appSearchDir, context, userId, mGlobalQuerierPackage);
     }
 
     private static File getAppSearchDir(@NonNull Context context, @UserIdInt int userId) {
@@ -96,7 +115,8 @@ public final class ImplInstanceManager {
      *
      * @param context Context of the system service.
      */
-    private static String getGlobalAppSearchDataQuerierPackageName(Context context) {
+    @NonNull
+    private static String getGlobalAppSearchDataQuerierPackageName(@NonNull Context context) {
         String globalAppSearchDataQuerierPackage =
                 context.getString(R.string.config_globalAppSearchDataQuerierPackage);
         try {
