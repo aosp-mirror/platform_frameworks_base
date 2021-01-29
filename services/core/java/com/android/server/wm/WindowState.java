@@ -729,8 +729,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private InsetsState mFrozenInsetsState;
 
-    @Nullable InsetsSourceProvider mPendingPositionChanged;
-
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
     private KeyInterceptionInfo mKeyInterceptionInfo;
 
@@ -775,6 +773,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
         updateSurfacePosition(t);
+    };
+
+    private final Consumer<SurfaceControl.Transaction> mSetSurfacePositionConsumer = t -> {
+        if (mSurfaceControl != null && mSurfaceControl.isValid()) {
+            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+        }
     };
 
     /**
@@ -2142,6 +2146,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 : getTask().getWindowConfiguration().hasMovementAnimations();
         if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
+                && !mWindowFrames.didFrameSizeChange()
+                && !surfaceInsetsChanging()
                 && !isDragResizing()
                 && hasMovementAnimation
                 && !mWinAnimator.mLastHidden
@@ -5391,13 +5397,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // prior to the rotation.
         if (!mSurfaceAnimator.hasLeash() && mPendingSeamlessRotate == null
                 && !mLastSurfacePosition.equals(mSurfacePosition)) {
-            t.setPosition(mSurfaceControl, mSurfacePosition.x, mSurfacePosition.y);
+            final boolean frameSizeChanged = mWindowFrames.isFrameSizeChangeReported();
+            final boolean surfaceInsetsChanged = surfaceInsetsChanging();
+            final boolean surfaceSizeChanged = frameSizeChanged || surfaceInsetsChanged;
             mLastSurfacePosition.set(mSurfacePosition.x, mSurfacePosition.y);
-            if (surfaceInsetsChanging() && mWinAnimator.hasSurface()) {
+            if (surfaceInsetsChanged) {
                 mLastSurfaceInsets.set(mAttrs.surfaceInsets);
-                t.deferTransactionUntil(mSurfaceControl,
-                        mWinAnimator.mSurfaceController.mSurfaceControl,
-                        getFrameNumber());
+            }
+            if (surfaceSizeChanged) {
+                applyWithNextDraw(mSetSurfacePositionConsumer);
+            } else {
+                mSetSurfacePositionConsumer.accept(t);
             }
         }
     }
