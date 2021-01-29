@@ -31,7 +31,6 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.ProxyInfo;
 import android.net.UidRange;
-import android.net.VpnInfo;
 import android.net.QosSocketInfo;
 import android.os.Bundle;
 import android.os.IBinder;
