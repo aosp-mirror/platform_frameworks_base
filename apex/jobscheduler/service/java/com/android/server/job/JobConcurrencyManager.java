@@ -25,6 +25,7 @@ import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.provider.DeviceConfig;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -35,7 +36,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.util.StatLogger;
 import com.android.server.JobSchedulerBackgroundThread;
-import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.JobSchedulerService.MaxJobCountsPerMemoryTrimLevel;
 import com.android.server.job.controllers.JobStatus;
 import com.android.server.job.controllers.StateController;
@@ -50,6 +50,11 @@ import java.util.List;
 class JobConcurrencyManager {
     private static final String TAG = JobSchedulerService.TAG;
     private static final boolean DEBUG = JobSchedulerService.DEBUG;
+
+    static final String CONFIG_KEY_PREFIX_CONCURRENCY = "concurrency_";
+    private static final String KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS =
+            CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
+    private static final long DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS = 30_000;
 
     private final Object mLock;
     private final JobSchedulerService mService;
@@ -83,6 +88,9 @@ class JobConcurrencyManager {
     private JobSchedulerService.MaxJobCounts mMaxJobCounts;
 
     private final JobCountTracker mJobCountTracker = new JobCountTracker();
+
+    /** Wait for this long after screen off before adjusting the job concurrency. */
+    private long mScreenOffAdjustmentDelayMs = DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS;
 
     /** Current memory trim level. */
     private int mLastMemoryTrimLevel;
@@ -165,8 +173,7 @@ class JobConcurrencyManager {
 
                 // Note: we can't directly do postDelayed(this::rampUpForScreenOn), because
                 // we need the exact same instance for removeCallbacks().
-                mHandler.postDelayed(mRampUpForScreenOff,
-                        mConstants.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS);
+                mHandler.postDelayed(mRampUpForScreenOff, mScreenOffAdjustmentDelayMs);
             }
         }
     }
@@ -174,7 +181,7 @@ class JobConcurrencyManager {
     private final Runnable mRampUpForScreenOff = this::rampUpForScreenOff;
 
     /**
-     * Called in {@link Constants#SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS} after
+     * Called in {@link #mScreenOffAdjustmentDelayMs} after
      * the screen turns off, in order to increase concurrency.
      */
     private void rampUpForScreenOff() {
@@ -188,9 +195,7 @@ class JobConcurrencyManager {
                 return;
             }
             final long now = JobSchedulerService.sElapsedRealtimeClock.millis();
-            if ((mLastScreenOffRealtime
-                    + mConstants.SCREEN_OFF_JOB_CONCURRENCY_INCREASE_DELAY_MS)
-                    > now) {
+            if ((mLastScreenOffRealtime + mScreenOffAdjustmentDelayMs) > now) {
                 return;
             }
 
@@ -473,12 +478,24 @@ class JobConcurrencyManager {
         return s.toString();
     }
 
+    void updateConfigLocked() {
+        DeviceConfig.Properties properties =
+                DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER);
+
+        mScreenOffAdjustmentDelayMs = properties.getLong(
+                KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS);
+    }
 
     public void dumpLocked(IndentingPrintWriter pw, long now, long nowRealtime) {
         pw.println("Concurrency:");
 
         pw.increaseIndent();
         try {
+            pw.print("Configuration:");
+            pw.increaseIndent();
+            pw.print(KEY_SCREEN_OFF_ADJUSTMENT_DELAY_MS, mScreenOffAdjustmentDelayMs).println();
+            pw.decreaseIndent();
+
             pw.print("Screen state: current ");
             pw.print(mCurrentInteractiveState ? "ON" : "OFF");
             pw.print("  effective ");
