@@ -114,7 +114,8 @@ class CloseImeWindowToHomeTest(
                                 enabled = !configuration.startRotation.isRotated())
                             navBarLayerIsAlwaysVisible()
                             statusBarLayerIsAlwaysVisible()
-                            visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+                            visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE),
+                                enabled = false)
 
                             imeLayerBecomesInvisible()
                             imeAppLayerBecomesInvisible(testApp)
