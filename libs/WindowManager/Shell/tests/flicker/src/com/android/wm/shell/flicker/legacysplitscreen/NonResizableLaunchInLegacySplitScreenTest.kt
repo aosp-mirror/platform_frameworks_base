@@ -72,7 +72,7 @@ class NonResizableLaunchInLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("nonResizeableAppWindowIsVisible") {
                         isVisible(nonResizeableApp.defaultWindowName)
                             .isInvisible(splitScreenApp.defaultWindowName)
                     }

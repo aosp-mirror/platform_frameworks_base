@@ -105,7 +105,7 @@ class RotateTwoLaunchedAppTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                             .isVisible(secondaryApp.defaultWindowName)
                     }
@@ -143,7 +143,7 @@ class RotateTwoLaunchedAppTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                                 .isVisible(secondaryApp.defaultWindowName)
                     }
