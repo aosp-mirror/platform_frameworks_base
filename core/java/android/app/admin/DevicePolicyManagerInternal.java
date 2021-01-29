@@ -18,6 +18,7 @@ package android.app.admin;
 
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.admin.DevicePolicyManager.OperationSafetyReason;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.os.UserHandle;
@@ -255,4 +256,14 @@ public abstract class DevicePolicyManagerInternal {
      * {@link #supportsResetOp(int)} is true.
      */
     public abstract void resetOp(int op, String packageName, @UserIdInt int userId);
+
+    /**
+     * Notifies the system that an unsafe operation reason has changed.
+     *
+     * @throws IllegalArgumentException if {@code checker} is not the same as set on
+     *         {@code DevicePolicyManagerService}.
+     */
+    public abstract void notifyUnsafeOperationStateChanged(DevicePolicySafetyChecker checker,
+            @OperationSafetyReason int reason, boolean isSafe);
+
 }
