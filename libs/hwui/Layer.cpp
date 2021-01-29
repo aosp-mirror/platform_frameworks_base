@@ -127,10 +127,11 @@ void Layer::draw(SkCanvas* canvas) {
         const SkMatrix& totalMatrix = canvas->getTotalMatrix();
 
         SkRect imageRect = SkRect::MakeIWH(layerImage->width(), layerImage->height());
+        SkSamplingOptions sampling;
         if (getForceFilter() || shouldFilterRect(totalMatrix, imageRect, imageRect)) {
-            paint.setFilterQuality(kLow_SkFilterQuality);
+            sampling = SkSamplingOptions(SkFilterMode::kLinear);
         }
-        canvas->drawImage(layerImage.get(), 0, 0, &paint);
+        canvas->drawImage(layerImage.get(), 0, 0, sampling, &paint);
         // restore the original matrix
         if (nonIdentityMatrix) {
             canvas->restore();

@@ -169,7 +169,6 @@ void RenderNodeDrawable::forceDraw(SkCanvas* canvas) const {
 
 static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultiplier,
                             SkPaint* paint) {
-    paint->setFilterQuality(kLow_SkFilterQuality);
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
         properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr ||
         properties.getImageFilter() != nullptr) {
@@ -226,6 +225,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
             SkASSERT(properties.effectiveLayerType() == LayerType::RenderLayer);
             SkPaint paint;
             layerNeedsPaint(layerProperties, alphaMultiplier, &paint);
+            SkSamplingOptions sampling(SkFilterMode::kLinear);
 
             // surfaces for layers are created on LAYER_SIZE boundaries (which are >= layer size) so
             // we need to restrict the portion of the surface drawn to the size of the renderNode.
@@ -239,7 +239,7 @@ void RenderNodeDrawable::drawContent(SkCanvas* canvas) const {
                     "SurfaceID|%" PRId64, renderNode->uniqueId()).c_str(), nullptr);
             }
             canvas->drawImageRect(renderNode->getLayerSurface()->makeImageSnapshot(), bounds,
-                                  bounds, &paint);
+                                  bounds, sampling, &paint, SkCanvas::kStrict_SrcRectConstraint);
 
             if (!renderNode->getSkiaLayer()->hasRenderedSinceRepaint) {
                 renderNode->getSkiaLayer()->hasRenderedSinceRepaint = true;

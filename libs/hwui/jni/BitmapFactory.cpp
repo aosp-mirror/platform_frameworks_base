@@ -457,11 +457,12 @@ static jobject doDecode(JNIEnv* env, std::unique_ptr<SkStreamRewindable> stream,
         // outputBitmap.  Otherwise we would blend by default, which is not
         // what we want.
         paint.setBlendMode(SkBlendMode::kSrc);
-        paint.setFilterQuality(kLow_SkFilterQuality); // bilinear filtering
 
         SkCanvas canvas(outputBitmap, SkCanvas::ColorBehavior::kLegacy);
         canvas.scale(scaleX, scaleY);
-        canvas.drawBitmap(decodingBitmap, 0.0f, 0.0f, &paint);
+        decodingBitmap.setImmutable(); // so .asImage() doesn't make a copy
+        canvas.drawImage(decodingBitmap.asImage(), 0.0f, 0.0f,
+                         SkSamplingOptions(SkFilterMode::kLinear), &paint);
     } else {
         outputBitmap.swap(decodingBitmap);
     }

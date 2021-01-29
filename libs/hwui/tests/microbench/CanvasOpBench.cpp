@@ -85,6 +85,7 @@ void BM_CanvasOpBuffer_record_simpleBitmapView(benchmark::State& benchState) {
                     iconBitmap,
                     0,
                     0,
+                    SkFilterMode::kNearest,
                     SkPaint{}
             });
             canvas.restore();
