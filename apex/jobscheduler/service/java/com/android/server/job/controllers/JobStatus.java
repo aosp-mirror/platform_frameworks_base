@@ -305,6 +305,7 @@ public final class JobStatus {
     public Network network;
     public ServiceInfo serviceInfo;
 
+    /** The evaluated priority of the job when it started running. */
     public int lastEvaluatedPriority;
 
     // If non-null, this is work that has been enqueued for the job.
