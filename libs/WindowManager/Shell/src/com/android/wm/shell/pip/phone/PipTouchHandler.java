@@ -19,6 +19,7 @@ package com.android.wm.shell.pip.phone;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASHING;
 import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.PIP_STASH_MINIMUM_VELOCITY_THRESHOLD;
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
+import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_NONE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_CLOSE;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_FULL;
 import static com.android.wm.shell.pip.phone.PhonePipMenuController.MENU_STATE_NONE;
@@ -31,7 +32,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Size;
@@ -178,9 +178,17 @@ public class PipTouchHandler {
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
-                () -> mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
-                        mPipBoundsState.getBounds(), true /* allowMenuTimeout */, willResizeMenu(),
-                        shouldShowResizeHandle()),
+                () -> {
+                    if (mPipBoundsState.isStashed()) {
+                        animateToUnStashedState();
+                        mPipBoundsState.setStashed(STASH_TYPE_NONE);
+                    } else {
+                        mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
+                                mPipBoundsState.getBounds(), true /* allowMenuTimeout */,
+                                willResizeMenu(),
+                                shouldShowResizeHandle());
+                    }
+                },
                 menuController::hideMenu,
                 mainExecutor);
 
@@ -725,6 +733,17 @@ public class PipTouchHandler {
         mSavedSnapFraction = -1f;
     }
 
+    private void animateToUnStashedState() {
+        final Rect pipBounds = mPipBoundsState.getBounds();
+        final boolean onLeftEdge = pipBounds.left < mPipBoundsState.getDisplayBounds().left;
+        final Rect unStashedBounds = new Rect(0, pipBounds.top, 0, pipBounds.bottom);
+        unStashedBounds.left = onLeftEdge ? mInsetBounds.left
+                : mInsetBounds.right - pipBounds.width();
+        unStashedBounds.right = onLeftEdge ? mInsetBounds.left + pipBounds.width()
+                : mInsetBounds.right;
+        mMotionHelper.animateToUnStashedBounds(unStashedBounds);
+    }
+
     /**
      * @return the motion helper.
      */
@@ -788,7 +807,7 @@ public class PipTouchHandler {
             }
 
             if (touchState.startedDragging()) {
-                mPipBoundsState.setStashed(PipBoundsState.STASH_TYPE_NONE);
+                mPipBoundsState.setStashed(STASH_TYPE_NONE);
                 mSavedSnapFraction = -1f;
                 mPipDismissTargetHandler.showDismissTargetMaybe();
             }
@@ -867,13 +886,18 @@ public class PipTouchHandler {
                     setTouchEnabled(false);
                     mMotionHelper.expandLeavePip();
                 }
-            } else if (mMenuState != MENU_STATE_FULL && !mPipBoundsState.isStashed()) {
+            } else if (mMenuState != MENU_STATE_FULL) {
                 if (!mTouchState.isWaitingForDoubleTap()) {
-                    // User has stalled long enough for this not to be a drag or a double tap, just
-                    // expand the menu
-                    mMenuController.showMenu(MENU_STATE_FULL, mPipBoundsState.getBounds(),
-                            true /* allowMenuTimeout */, willResizeMenu(),
-                            shouldShowResizeHandle());
+                    if (mPipBoundsState.isStashed()) {
+                        animateToUnStashedState();
+                        mPipBoundsState.setStashed(STASH_TYPE_NONE);
+                    } else {
+                        // User has stalled long enough for this not to be a drag or a double tap,
+                        // just expand the menu
+                        mMenuController.showMenu(MENU_STATE_FULL, mPipBoundsState.getBounds(),
+                                true /* allowMenuTimeout */, willResizeMenu(),
+                                shouldShowResizeHandle());
+                    }
                 } else {
                     // Next touch event _may_ be the second tap for the double-tap, schedule a
                     // fallback runnable to trigger the menu if no touch event occurs before the
