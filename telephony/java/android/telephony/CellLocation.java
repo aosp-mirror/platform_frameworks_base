@@ -98,12 +98,14 @@ public abstract class CellLocation {
     /**
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract void fillInNotifierBundle(Bundle bundle);
 
     /**
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     @UnsupportedAppUsage
     public abstract boolean isEmpty();
 
@@ -111,6 +113,7 @@ public abstract class CellLocation {
      * Invalidate this object.  The location area code and the cell id are set to -1.
      * @hide
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract void setStateInvalid();
 
     /**

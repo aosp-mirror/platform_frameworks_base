@@ -1322,6 +1322,13 @@ public final class ImsReasonInfo implements Parcelable {
      */
     public static final int EXTRA_CODE_CALL_RETRY_BY_SETTINGS = 3;
 
+    /**
+     * An extra that may be populated when the {@link #CODE_LOCAL_CALL_CS_RETRY_REQUIRED} result has
+     * been returned.
+     * <p>
+     * Try to connect the call using CS as emergency
+     */
+    public static final int EXTRA_CODE_CALL_RETRY_EMERGENCY = 4;
 
     // For main reason code
     /** @hide */
@@ -1353,7 +1360,7 @@ public final class ImsReasonInfo implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ImsReasonInfo(int code, int extraCode) {
         mCode = code;
         mExtraCode = extraCode;

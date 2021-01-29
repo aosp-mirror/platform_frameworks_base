@@ -51,7 +51,7 @@ public final class NattSocketKeepalive extends SocketKeepalive {
     void startImpl(int intervalSec) {
         mExecutor.execute(() -> {
             try {
-                mService.startNattKeepaliveWithFd(mNetwork, mPfd.getFileDescriptor(), mResourceId,
+                mService.startNattKeepaliveWithFd(mNetwork, mPfd, mResourceId,
                         intervalSec, mCallback,
                         mSource.getHostAddress(), mDestination.getHostAddress());
             } catch (RemoteException e) {

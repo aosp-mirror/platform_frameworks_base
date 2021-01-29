@@ -463,7 +463,7 @@ android_glDrawRangeElements__IIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, indices, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)indices - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -516,7 +516,7 @@ android_glTexImage3D__IIIIIIIIILjava_nio_Buffer_2
         (GLvoid *)pixels
     );
     if (_array) {
-        releasePointer(_env, _array, pixels, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)pixels - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -580,7 +580,7 @@ android_glTexSubImage3D__IIIIIIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, pixels, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)pixels - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -660,7 +660,7 @@ android_glCompressedTexImage3D__IIIIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -723,7 +723,7 @@ android_glCompressedTexSubImage3D__IIIIIIIIIILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, data, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)data - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);
@@ -5445,7 +5445,8 @@ android_glGetProgramBinary__II_3II_3IILjava_nio_Buffer_2
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, binary, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _array, (void *)((char *)binary - _bufferOffset),
+                       _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (binaryFormat_base) {
         _env->ReleaseIntArrayElements(binaryFormat_ref, (jint*)binaryFormat_base,
@@ -5519,7 +5520,8 @@ android_glGetProgramBinary__IILjava_nio_IntBuffer_2Ljava_nio_IntBuffer_2Ljava_ni
 
 exit:
     if (_binaryArray) {
-        releasePointer(_env, _binaryArray, binary, _exception ? JNI_FALSE : JNI_TRUE);
+        releasePointer(_env, _binaryArray, (void *)((char *)binary - _binaryBufferOffset),
+                       _exception ? JNI_FALSE : JNI_TRUE);
     }
     if (_binaryFormatArray) {
         _env->ReleaseIntArrayElements(_binaryFormatArray, (jint*)binaryFormat, _exception ? JNI_ABORT : 0);
@@ -5564,7 +5566,7 @@ android_glProgramBinary__IILjava_nio_Buffer_2I
 
 exit:
     if (_array) {
-        releasePointer(_env, _array, binary, JNI_FALSE);
+        releasePointer(_env, _array, (void *)((char *)binary - _bufferOffset), JNI_FALSE);
     }
     if (_exception) {
         jniThrowException(_env, _exceptionType, _exceptionMessage);

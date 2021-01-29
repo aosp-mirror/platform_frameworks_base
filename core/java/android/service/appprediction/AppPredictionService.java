@@ -22,7 +22,6 @@ import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.app.Service;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionSessionId;
@@ -52,7 +51,6 @@ import java.util.function.Consumer;
  * @hide
  */
 @SystemApi
-@TestApi
 public abstract class AppPredictionService extends Service {
 
     private static final String TAG = "AppPredictionService";

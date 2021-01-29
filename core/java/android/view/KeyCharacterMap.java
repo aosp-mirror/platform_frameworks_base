@@ -18,6 +18,7 @@ package android.view;
 
 import android.compat.annotation.UnsupportedAppUsage;
 import android.hardware.input.InputManager;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.method.MetaKeyKeyListener;
@@ -308,7 +309,7 @@ public class KeyCharacterMap implements Parcelable {
     }
 
     // Called from native
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private KeyCharacterMap(long ptr) {
         mPtr = ptr;
     }
@@ -750,9 +751,9 @@ public class KeyCharacterMap implements Parcelable {
 
         private FallbackAction next;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int keyCode;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public int metaState;
 
         private FallbackAction() {

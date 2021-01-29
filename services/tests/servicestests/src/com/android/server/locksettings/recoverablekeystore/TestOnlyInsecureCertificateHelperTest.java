@@ -71,7 +71,7 @@ public class TestOnlyInsecureCertificateHelperTest {
         Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
-        assertThat(filteredKeys.entrySet()).containsAllIn(rawKeys.entrySet());
+        assertThat(filteredKeys.entrySet()).containsAtLeastElementsIn(rawKeys.entrySet());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class TestOnlyInsecureCertificateHelperTest {
         Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
-        assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());
+        assertThat(rawKeys.entrySet()).containsAtLeastElementsIn(filteredKeys.entrySet());
     }
 
     @Test
@@ -100,7 +100,7 @@ public class TestOnlyInsecureCertificateHelperTest {
         Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
-        assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());
+        assertThat(rawKeys.entrySet()).containsAtLeastElementsIn(filteredKeys.entrySet());
     }
 
     @Test
@@ -122,7 +122,7 @@ public class TestOnlyInsecureCertificateHelperTest {
         Map<String, Pair<SecretKey, byte[]>> filteredKeys =
                 mHelper.keepOnlyWhitelistedInsecureKeys(rawKeys);
         assertThat(filteredKeys.entrySet()).containsExactlyElementsIn(expectedResult.entrySet());
-        assertThat(rawKeys.entrySet()).containsAllIn(filteredKeys.entrySet());
+        assertThat(rawKeys.entrySet()).containsAtLeastElementsIn(filteredKeys.entrySet());
     }
 
     @Test

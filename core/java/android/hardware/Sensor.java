@@ -509,7 +509,7 @@ public final class Sensor {
      *
      * @hide Expected to be used internally for always on display.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int TYPE_PICK_UP_GESTURE = 25;
 
     /**
@@ -549,7 +549,7 @@ public final class Sensor {
      * @hide Expected to be used internally for auto-rotate and speaker rotation.
      *
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final int TYPE_DEVICE_ORIENTATION = 27;
 
     /**
@@ -616,7 +616,7 @@ public final class Sensor {
     public static final String STRING_TYPE_MOTION_DETECT = "android.sensor.motion_detect";
 
     /**
-     * A constant describing a motion detect sensor.
+     * A constant describing a heart beat sensor.
      *
      * See {@link android.hardware.SensorEvent#values SensorEvent.values} for more details.
      *

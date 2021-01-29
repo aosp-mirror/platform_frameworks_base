@@ -96,7 +96,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * System implementation of MediaSessionManager
@@ -152,7 +151,6 @@ public class MediaSessionService extends SystemService implements Monitor {
 
     private SessionPolicyProvider mCustomSessionPolicyProvider;
     private MediaKeyDispatcher mCustomMediaKeyDispatcher;
-    private Map<Integer, Integer> mOverriddenKeyEventsMap;
 
     public MediaSessionService(Context context) {
         super(context);
@@ -771,7 +769,6 @@ public class MediaSessionService extends SystemService implements Monitor {
     private void instantiateCustomDispatcher(String nameFromTesting) {
         synchronized (mLock) {
             mCustomMediaKeyDispatcher = null;
-            mOverriddenKeyEventsMap = null;
 
             String customDispatcherClassName = (nameFromTesting == null)
                     ? mContext.getResources().getString(R.string.config_customMediaKeyDispatcher)
@@ -779,9 +776,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 if (!TextUtils.isEmpty(customDispatcherClassName)) {
                     Class customDispatcherClass = Class.forName(customDispatcherClassName);
-                    Constructor constructor = customDispatcherClass.getDeclaredConstructor();
-                    mCustomMediaKeyDispatcher = (MediaKeyDispatcher) constructor.newInstance();
-                    mOverriddenKeyEventsMap = mCustomMediaKeyDispatcher.getOverriddenKeyEvents();
+                    Constructor constructor =
+                            customDispatcherClass.getDeclaredConstructor(Context.class);
+                    mCustomMediaKeyDispatcher =
+                            (MediaKeyDispatcher) constructor.newInstance(mContext);
                 }
             } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
@@ -801,9 +799,10 @@ public class MediaSessionService extends SystemService implements Monitor {
             try {
                 if (!TextUtils.isEmpty(customProviderClassName)) {
                     Class customProviderClass = Class.forName(customProviderClassName);
-                    Constructor constructor = customProviderClass.getDeclaredConstructor();
+                    Constructor constructor =
+                            customProviderClass.getDeclaredConstructor(Context.class);
                     mCustomSessionPolicyProvider =
-                            (SessionPolicyProvider) constructor.newInstance();
+                            (SessionPolicyProvider) constructor.newInstance(mContext);
                 }
             } catch (ClassNotFoundException | InstantiationException | InvocationTargetException
                     | IllegalAccessException | NoSuchMethodException e) {
@@ -1937,7 +1936,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                 // Context#getPackageName() for getting package name that matches with the PID/UID,
                 // but it doesn't tell which package has created the MediaController, so useless.
                 return hasMediaControlPermission(controllerPid, controllerUid)
-                        || hasEnabledNotificationListener(userId, controllerPackageName);
+                        || hasEnabledNotificationListener(
+                                userId, controllerPackageName, controllerUid);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -2001,29 +2001,29 @@ public class MediaSessionService extends SystemService implements Monitor {
             return resolvedUserId;
         }
 
-        private boolean hasEnabledNotificationListener(int resolvedUserId, String packageName)
-                throws RemoteException {
-            // You may not access another user's content as an enabled listener.
-            final int userId = UserHandle.getUserId(resolvedUserId);
-            if (resolvedUserId != userId) {
+        private boolean hasEnabledNotificationListener(int callingUserId,
+                String controllerPackageName, int controllerUid) throws RemoteException {
+            int controllerUserId = UserHandle.getUserHandleForUid(controllerUid).getIdentifier();
+            if (callingUserId != controllerUserId) {
+                // Enabled notification listener only works within the same user.
                 return false;
             }
 
             // TODO(jaewan): (Post-P) Propose NotificationManager#hasEnabledNotificationListener(
             //               String pkgName) to notification team for optimization
             final List<ComponentName> enabledNotificationListeners =
-                    mNotificationManager.getEnabledNotificationListeners(userId);
+                    mNotificationManager.getEnabledNotificationListeners(controllerUserId);
             if (enabledNotificationListeners != null) {
                 for (int i = 0; i < enabledNotificationListeners.size(); i++) {
-                    if (TextUtils.equals(packageName,
+                    if (TextUtils.equals(controllerPackageName,
                             enabledNotificationListeners.get(i).getPackageName())) {
                         return true;
                     }
                 }
             }
             if (DEBUG) {
-                Log.d(TAG, packageName + " (uid=" + resolvedUserId + ") doesn't have an enabled "
-                        + "notification listener");
+                Log.d(TAG, controllerPackageName + " (uid=" + controllerUid
+                        + ") doesn't have an enabled notification listener");
             }
             return false;
         }
@@ -2398,9 +2398,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                     return;
                 }
 
-                int overriddenKeyEvents = (mCustomMediaKeyDispatcher == null) ? 0
-                        : mCustomMediaKeyDispatcher.getOverriddenKeyEvents()
-                                .get(keyEvent.getKeyCode());
+                int overriddenKeyEvents = 0;
+                if (mCustomMediaKeyDispatcher != null
+                        && mCustomMediaKeyDispatcher.getOverriddenKeyEvents() != null) {
+                    overriddenKeyEvents = mCustomMediaKeyDispatcher.getOverriddenKeyEvents()
+                            .get(keyEvent.getKeyCode());
+                }
                 cancelTrackingIfNeeded(packageName, pid, uid, asSystemService, keyEvent,
                         needWakeLock, opPackageName, stream, musicOnly, overriddenKeyEvents);
                 if (!needTracking(keyEvent, overriddenKeyEvents)) {

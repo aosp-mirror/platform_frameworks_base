@@ -314,7 +314,6 @@ public class UiModeManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.ENTER_CAR_MODE_PRIORITIZED)
     public void enableCarMode(@IntRange(from = 0) int priority, @EnableCarMode int flags) {
         if (mService != null) {
@@ -510,6 +509,9 @@ public class UiModeManager {
     }
 
     /**
+     * Activating night mode for the current user
+     *
+     * @return {@code true} if the change is successful
      * @hide
      */
     public boolean setNightModeActivated(boolean active) {

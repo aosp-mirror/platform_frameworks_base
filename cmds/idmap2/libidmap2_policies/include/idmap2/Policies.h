@@ -37,16 +37,18 @@ constexpr const char* kPolicyOdm = "odm";
 constexpr const char* kPolicyOem = "oem";
 constexpr const char* kPolicyProduct = "product";
 constexpr const char* kPolicyPublic = "public";
+constexpr const char* kPolicyConfigSignature = "config_signature";
 constexpr const char* kPolicySignature = "signature";
 constexpr const char* kPolicySystem = "system";
 constexpr const char* kPolicyVendor = "vendor";
 
-inline static const std::array<std::pair<StringPiece, PolicyFlags>, 8> kPolicyStringToFlag = {
+inline static const std::array<std::pair<StringPiece, PolicyFlags>, 9> kPolicyStringToFlag = {
     std::pair{kPolicyActor, PolicyFlags::ACTOR_SIGNATURE},
     {kPolicyOdm, PolicyFlags::ODM_PARTITION},
     {kPolicyOem, PolicyFlags::OEM_PARTITION},
     {kPolicyProduct, PolicyFlags::PRODUCT_PARTITION},
     {kPolicyPublic, PolicyFlags::PUBLIC},
+    {kPolicyConfigSignature, PolicyFlags::CONFIG_SIGNATURE},
     {kPolicySignature, PolicyFlags::SIGNATURE},
     {kPolicySystem, PolicyFlags::SYSTEM_PARTITION},
     {kPolicyVendor, PolicyFlags::VENDOR_PARTITION},

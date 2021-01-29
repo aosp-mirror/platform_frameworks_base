@@ -17,6 +17,7 @@
 package android.renderscript;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 
 /**
@@ -308,7 +309,7 @@ public class ProgramStore extends BaseObj {
     *
     *  @param rs Context to which the program will belong.
     **/
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static ProgramStore BLEND_ALPHA_DEPTH_NONE(RenderScript rs) {
         if(rs.mProgramStore_BLEND_ALPHA_DEPTH_NO_DEPTH == null) {
             ProgramStore.Builder builder = new ProgramStore.Builder(rs);

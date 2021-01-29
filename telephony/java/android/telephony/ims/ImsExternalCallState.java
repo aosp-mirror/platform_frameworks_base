@@ -20,7 +20,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -35,7 +34,6 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ImsExternalCallState implements Parcelable {
 
     private static final String TAG = "ImsExternalCallState";
@@ -51,8 +49,7 @@ public final class ImsExternalCallState implements Parcelable {
     public static final int CALL_STATE_TERMINATED = 2;
 
     /**@hide*/
-    @IntDef(flag = true,
-            value = {
+    @IntDef(value = {
                     CALL_STATE_CONFIRMED,
                     CALL_STATE_TERMINATED
             },
@@ -61,8 +58,7 @@ public final class ImsExternalCallState implements Parcelable {
     public @interface ExternalCallState {}
 
     /**@hide*/
-    @IntDef(flag = true,
-            value = {
+    @IntDef(value = {
                     ImsCallProfile.CALL_TYPE_VOICE,
                     ImsCallProfile.CALL_TYPE_VT_TX,
                     ImsCallProfile.CALL_TYPE_VT_RX,

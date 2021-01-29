@@ -271,7 +271,7 @@ public class StatusIconContainer extends AlphaOptimizedLinearLayout {
         float contentStart = getPaddingStart();
         int childCount = getChildCount();
         // Underflow === don't show content until that index
-        if (DEBUG) android.util.Log.d(TAG, "calculateIconTranslations: start=" + translationX
+        if (DEBUG) Log.d(TAG, "calculateIconTranslations: start=" + translationX
                 + " width=" + width + " underflow=" + mNeedsUnderflow);
 
         // Collect all of the states which want to be visible

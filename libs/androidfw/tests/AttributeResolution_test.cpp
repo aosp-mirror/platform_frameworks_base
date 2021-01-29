@@ -77,9 +77,9 @@ TEST(AttributeResolutionLibraryTest, ApplyStyleWithDefaultStyleResId) {
       {fix_package_id(R::attr::attr_one, 0x02), fix_package_id(R::attr::attr_two, 0x02)}};
   std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
   std::array<uint32_t, attrs.size() + 1> indices;
-  ApplyStyle(theme.get(), nullptr /*xml_parser*/, 0u /*def_style_attr*/,
-             fix_package_id(R::style::StyleOne, 0x02), attrs.data(), attrs.size(), values.data(),
-             indices.data());
+  ASSERT_TRUE(ApplyStyle(theme.get(), nullptr /*xml_parser*/, 0u /*def_style_attr*/,
+                         fix_package_id(R::style::StyleOne, 0x02), attrs.data(), attrs.size(),
+                         values.data(), indices.data()).has_value());
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
@@ -102,7 +102,7 @@ TEST(AttributeResolutionLibraryTest, ApplyStyleWithDefaultStyleResId) {
 
 TEST_F(AttributeResolutionTest, Theme) {
   std::unique_ptr<Theme> theme = assetmanager_.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(R::style::StyleTwo));
+  ASSERT_TRUE(theme->ApplyStyle(R::style::StyleTwo).has_value());
 
   std::array<uint32_t, 5> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
                                  R::attr::attr_four, R::attr::attr_empty}};
@@ -110,7 +110,7 @@ TEST_F(AttributeResolutionTest, Theme) {
 
   ASSERT_TRUE(ResolveAttrs(theme.get(), 0u /*def_style_attr*/, 0u /*def_style_res*/,
                            nullptr /*src_values*/, 0 /*src_values_length*/, attrs.data(),
-                           attrs.size(), values.data(), nullptr /*out_indices*/));
+                           attrs.size(), values.data(), nullptr /*out_indices*/).has_value());
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 
@@ -162,7 +162,7 @@ TEST_F(AttributeResolutionXmlTest, XmlParser) {
   std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
 
   ASSERT_TRUE(RetrieveAttributes(&assetmanager_, &xml_parser_, attrs.data(), attrs.size(),
-                                 values.data(), nullptr /*out_indices*/));
+                                 values.data(), nullptr /*out_indices*/).has_value());
 
   uint32_t* values_cursor = values.data();
   EXPECT_EQ(Res_value::TYPE_NULL, values_cursor[STYLE_TYPE]);
@@ -207,15 +207,15 @@ TEST_F(AttributeResolutionXmlTest, XmlParser) {
 
 TEST_F(AttributeResolutionXmlTest, ThemeAndXmlParser) {
   std::unique_ptr<Theme> theme = assetmanager_.NewTheme();
-  ASSERT_TRUE(theme->ApplyStyle(R::style::StyleTwo));
+  ASSERT_TRUE(theme->ApplyStyle(R::style::StyleTwo).has_value());
 
   std::array<uint32_t, 6> attrs{{R::attr::attr_one, R::attr::attr_two, R::attr::attr_three,
                                  R::attr::attr_four, R::attr::attr_five, R::attr::attr_empty}};
   std::array<uint32_t, attrs.size() * STYLE_NUM_ENTRIES> values;
   std::array<uint32_t, attrs.size() + 1> indices;
 
-  ApplyStyle(theme.get(), &xml_parser_, 0u /*def_style_attr*/, 0u /*def_style_res*/, attrs.data(),
-             attrs.size(), values.data(), indices.data());
+  ASSERT_TRUE(ApplyStyle(theme.get(), &xml_parser_, 0u /*def_style_attr*/, 0u /*def_style_res*/,
+                         attrs.data(), attrs.size(), values.data(), indices.data()).has_value());
 
   const uint32_t public_flag = ResTable_typeSpec::SPEC_PUBLIC;
 

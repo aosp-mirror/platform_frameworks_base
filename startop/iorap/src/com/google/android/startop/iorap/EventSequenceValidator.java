@@ -96,7 +96,8 @@ import java.io.PrintWriter;
  */
 public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   static final String TAG = "EventSequenceValidator";
-
+  /** $> adb shell 'setprop log.tag.EventSequenceValidator VERBOSE' */
+  public static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
   private State state = State.INIT;
   private long accIntentStartedEvents = 0;
 
@@ -255,9 +256,11 @@ public class EventSequenceValidator implements ActivityMetricsLaunchObserver {
   }
 
   private void logWarningWithStackTrace(String log) {
-    StringWriter sw = new StringWriter();
-    PrintWriter pw = new PrintWriter(sw);
-    new Throwable("EventSequenceValidator#getStackTrace").printStackTrace(pw);
-    Log.d(TAG, String.format("%s\n%s", log, sw));
+    if (DEBUG) {
+      StringWriter sw = new StringWriter();
+      PrintWriter pw = new PrintWriter(sw);
+      new Throwable("EventSequenceValidator#getStackTrace").printStackTrace(pw);
+      Log.wtf(TAG, String.format("%s\n%s", log, sw));
+    }
   }
 }

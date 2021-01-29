@@ -514,7 +514,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(WRITE_SECURE_SETTINGS)
     public void setLocationEnabledForUser(boolean enabled, @NonNull UserHandle userHandle) {
         try {
@@ -708,7 +707,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void getCurrentLocation(@NonNull LocationRequest locationRequest,
             @Nullable CancellationSignal cancellationSignal,
@@ -726,16 +724,15 @@ public class LocationManager {
             cancellationSignal.throwIfCanceled();
         }
 
-        ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
-
         try {
-            if (mService.getCurrentLocation(currentLocationRequest, remoteCancellationSignal,
-                    transport, mContext.getPackageName(), mContext.getAttributionTag(),
-                    transport.getListenerId())) {
+            ICancellationSignal cancelRemote = mService.getCurrentLocation(
+                    currentLocationRequest, transport, mContext.getPackageName(),
+                    mContext.getAttributionTag(), transport.getListenerId());
+            if (cancelRemote != null) {
                 transport.register(mContext.getSystemService(AlarmManager.class),
-                        remoteCancellationSignal);
+                        cancellationSignal, cancelRemote);
                 if (cancellationSignal != null) {
-                    cancellationSignal.setOnCancelListener(transport::cancel);
+                    cancellationSignal.setRemote(cancelRemote);
                 }
             } else {
                 transport.fail();
@@ -1130,7 +1127,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
@@ -1158,7 +1154,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
@@ -1209,7 +1204,6 @@ public class LocationManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void requestLocationUpdates(
             @Nullable LocationRequest locationRequest,
@@ -2540,7 +2534,7 @@ public class LocationManager {
     }
 
     private static class GetCurrentLocationTransport extends ILocationListener.Stub implements
-            AlarmManager.OnAlarmListener {
+            AlarmManager.OnAlarmListener, CancellationSignal.OnCancelListener {
 
         @GuardedBy("this")
         @Nullable
@@ -2572,6 +2566,7 @@ public class LocationManager {
         }
 
         public synchronized void register(AlarmManager alarmManager,
+                CancellationSignal cancellationSignal,
                 ICancellationSignal remoteCancellationSignal) {
             if (mConsumer == null) {
                 return;
@@ -2585,10 +2580,18 @@ public class LocationManager {
                     this,
                     null);
 
+            if (cancellationSignal != null) {
+                cancellationSignal.setOnCancelListener(this);
+            }
+
             mRemoteCancellationSignal = remoteCancellationSignal;
         }
 
-        public void cancel() {
+        @Override
+        public void onCancel() {
+            synchronized (this) {
+                mRemoteCancellationSignal = null;
+            }
             remove();
         }
 
@@ -2637,11 +2640,6 @@ public class LocationManager {
 
         @Override
         public void onLocationChanged(Location location) {
-            synchronized (this) {
-                // save ourselves a pointless x-process call to cancel the location request
-                mRemoteCancellationSignal = null;
-            }
-
             deliverResult(location);
         }
 
@@ -3039,7 +3037,7 @@ public class LocationManager {
         protected GnssRequest merge(@NonNull List<GnssRequest> requests) {
             Preconditions.checkArgument(!requests.isEmpty());
             for (GnssRequest request : requests) {
-                if (request.isFullTracking()) {
+                if (request != null && request.isFullTracking()) {
                     return request;
                 }
             }

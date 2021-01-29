@@ -153,6 +153,7 @@ public abstract class SliceProvider extends ContentProvider {
      */
     public static final String EXTRA_PKG = "pkg";
     /**
+     * @Deprecated provider pkg is now being extracted in SlicePermissionActivity
      * @hide
      */
     public static final String EXTRA_PROVIDER_PKG = "provider_pkg";

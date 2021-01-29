@@ -29,13 +29,12 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_begin="@dimen/headsup_scrim_height"/>
 
-    <!-- Include a FocusParkingView at the beginning or end. The rotary controller "parks" the
-         focus here when the user navigates to another window. This is also used to prevent
-         wrap-around which is why it must be first or last in Tab order. -->
+    <!-- Include a FocusParkingView at the beginning. The rotary controller "parks" the focus here
+         when the user navigates to another window. This is also used to prevent wrap-around. -->
     <com.android.car.ui.FocusParkingView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <View

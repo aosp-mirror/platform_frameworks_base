@@ -23,11 +23,11 @@ import android.net.NetworkState;
 import android.net.NetworkStats;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
+import android.net.VpnInfo;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.os.IBinder;
 import android.os.Messenger;
-import com.android.internal.net.VpnInfo;
 
 /** {@hide} */
 interface INetworkStatsService {
@@ -42,7 +42,7 @@ interface INetworkStatsService {
      *  PACKAGE_USAGE_STATS permission is always checked. If PACKAGE_USAGE_STATS is not granted
      *  READ_NETWORK_USAGE_STATS is checked for.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     INetworkStatsSession openSessionForUsageStats(int flags, String callingPackage);
 
     /** Return data layer snapshot of UID network usage. */

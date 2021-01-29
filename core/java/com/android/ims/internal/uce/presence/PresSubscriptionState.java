@@ -17,6 +17,7 @@
 package com.android.ims.internal.uce.presence;
 
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -78,7 +79,7 @@ public class PresSubscriptionState implements Parcelable {
      * Constructor for the PresSubscriptionState class.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public PresSubscriptionState() {    };
 
     /**
@@ -94,7 +95,7 @@ public class PresSubscriptionState implements Parcelable {
      * Sets the Presence subscription state.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setPresSubscriptionState(int nPresSubscriptionState) {
         this.mPresSubscriptionState = nPresSubscriptionState;
     }

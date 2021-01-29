@@ -24,6 +24,10 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
+
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,10 +101,14 @@ public class LowpanManager {
      *
      * @param context the application context
      * @param service the Binder interface
-     * @param looper the default Looper to run callbacks on
      * @hide - hide this because it takes in a parameter of type ILowpanManager, which is a system
      *     private class.
      */
+    public LowpanManager(Context context, ILowpanManager service) {
+        this(context, service, BackgroundThread.get().getLooper());
+    }
+
+    @VisibleForTesting
     public LowpanManager(Context context, ILowpanManager service, Looper looper) {
         mContext = context;
         mService = service;

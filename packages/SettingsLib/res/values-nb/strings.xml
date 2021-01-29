@@ -34,7 +34,7 @@
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Sjekk passordet og prøv igjen"</string>
     <string name="wifi_not_in_range" msgid="1541760821805777772">"Utenfor område"</string>
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"Kobler ikke til automatisk"</string>
-    <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen Internett-tilgang"</string>
+    <string name="wifi_no_internet" msgid="1774198889176926299">"Ingen internettilgang"</string>
     <string name="saved_network" msgid="7143698034077223645">"Lagret av <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Automatisk tilkoblet via %1$s"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Automatisk tilkoblet via leverandør av nettverksvurdering"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Vis Bluetooth-enheter uten navn"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Slå av funksjonen for absolutt volum"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Aktiver Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Forbedret tilkobling"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Velg Bluetooth AVRCP-versjon"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP-versjon"</string>

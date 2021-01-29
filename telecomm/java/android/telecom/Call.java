@@ -966,6 +966,32 @@ public final class Call {
         /**
          * Gets the verification status for the phone number of an incoming call as identified in
          * ATIS-1000082.
+         * <p>
+         * For incoming calls, the number verification status indicates whether the device was
+         * able to verify the authenticity of the calling number using the STIR process outlined
+         * in ATIS-1000082.  {@link Connection#VERIFICATION_STATUS_NOT_VERIFIED} indicates that
+         * the network was not able to use STIR to verify the caller's number (i.e. nothing is
+         * known regarding the authenticity of the number.
+         * {@link Connection#VERIFICATION_STATUS_PASSED} indicates that the network was able to
+         * use STIR to verify the caller's number.  This indicates that the network has a high
+         * degree of confidence that the incoming call actually originated from the indicated
+         * number.  {@link Connection#VERIFICATION_STATUS_FAILED} indicates that the network's
+         * STIR verification did not pass.  This indicates that the incoming call may not
+         * actually be from the indicated number.  This could occur if, for example, the caller
+         * is using an impersonated phone number.
+         * <p>
+         * A {@link CallScreeningService} can use this information to help determine if an
+         * incoming call is potentially an unwanted call.  A verification status of
+         * {@link Connection#VERIFICATION_STATUS_FAILED} indicates that an incoming call may not
+         * actually be from the number indicated on the call (i.e. impersonated number) and that it
+         * should potentially be blocked.  Likewise,
+         * {@link Connection#VERIFICATION_STATUS_PASSED} can be used as a positive signal to
+         * help clarify that the incoming call is originating from the indicated number and it
+         * is less likely to be an undesirable call.
+         * <p>
+         * An {@link InCallService} can use this information to provide a visual indicator to the
+         * user regarding the verification status of a call and to help identify calls from
+         * potentially impersonated numbers.
          * @return the verification status.
          */
         public @Connection.VerificationStatus int getCallerNumberVerificationStatus() {
@@ -1442,8 +1468,11 @@ public final class Call {
 
         /**
          * Writes the string {@param input} into the outgoing text stream for this RTT call. Since
-         * RTT transmits text in real-time, this method should be called once for each character
-         * the user enters into the device.
+         * RTT transmits text in real-time, this method should be called once for each user action.
+         * For example, when the user enters text as discrete characters using the keyboard, this
+         * method should be called once for each character. However, if the user enters text by
+         * pasting or autocomplete, the entire contents of the pasted or autocompleted text should
+         * be sent in one call to this method.
          *
          * This method is not thread-safe -- calling it from multiple threads simultaneously may
          * lead to interleaved text.
@@ -1657,7 +1686,6 @@ public final class Call {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void enterBackgroundAudioProcessing() {
         if (mState != STATE_ACTIVE && mState != STATE_RINGING) {
             throw new IllegalStateException("Call must be active or ringing");
@@ -1678,7 +1706,6 @@ public final class Call {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void exitBackgroundAudioProcessing(boolean shouldRing) {
         if (mState != STATE_AUDIO_PROCESSING) {
             throw new IllegalStateException("Call must in the audio processing state");
@@ -2111,7 +2138,13 @@ public final class Call {
 
     /**
      * Obtains a list of canned, pre-configured message responses to present to the user as
-     * ways of rejecting this {@code Call} using via a text message.
+     * ways of rejecting an incoming {@code Call} using via a text message.
+     * <p>
+     * <em>Note:</em> Since canned responses may be loaded from the file system, they are not
+     * guaranteed to be present when this {@link Call} is first added to the {@link InCallService}
+     * via {@link InCallService#onCallAdded(Call)}.  The callback
+     * {@link Call.Callback#onCannedTextResponsesLoaded(Call, List)} will be called when/if canned
+     * responses for the call become available.
      *
      * @see #reject(boolean, String)
      *

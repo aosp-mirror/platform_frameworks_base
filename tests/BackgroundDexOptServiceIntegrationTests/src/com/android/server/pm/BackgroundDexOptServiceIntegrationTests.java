@@ -264,9 +264,9 @@ public final class BackgroundDexOptServiceIntegrationTests {
             // Set time to future.
             setTimeFutureDays(deltaDays);
 
-            // Set filter to quicken.
-            compilePackageWithFilter(PACKAGE_NAME, "quicken");
-            Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
+            // Set filter to verify.
+            compilePackageWithFilter(PACKAGE_NAME, "verify");
+            Assert.assertEquals("verify", getCompilerFilter(PACKAGE_NAME));
 
             // Fill up storage to trigger low storage threshold.
             fillUpToLowStorage();
@@ -290,9 +290,9 @@ public final class BackgroundDexOptServiceIntegrationTests {
             // Set time to future.
             setTimeFutureDays(deltaDays);
 
-            // Set filter to quicken.
-            compilePackageWithFilter(PACKAGE_NAME, "quicken");
-            Assert.assertEquals("quicken", getCompilerFilter(PACKAGE_NAME));
+            // Set filter to speed-profile.
+            compilePackageWithFilter(PACKAGE_NAME, "speed-profile");
+            Assert.assertEquals("speed-profile", getCompilerFilter(PACKAGE_NAME));
 
             // Fill up storage to trigger low storage threshold.
             fillUpToLowStorage();

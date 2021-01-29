@@ -18,7 +18,6 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -38,7 +37,6 @@ import java.util.Set;
  * @hide
  */
 @SystemApi
-@TestApi
 public final class ImsConferenceState implements Parcelable {
     private static final String TAG = "ImsConferenceState";
     /**

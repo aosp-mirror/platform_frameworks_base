@@ -190,6 +190,7 @@ import android.app.usage.UsageEvents.Event;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
 import android.appwidget.AppWidgetManager;
+import android.compat.Compatibility;
 import android.content.AutofillOptions;
 import android.content.BroadcastReceiver;
 import android.content.ComponentCallbacks2;
@@ -318,6 +319,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.ProcessMap;
 import com.android.internal.app.SystemUserHomeActivity;
 import com.android.internal.app.procstats.ProcessStats;
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.content.PackageHelper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
@@ -2214,17 +2216,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "meminfo", pw)) return;
                 PriorityDump.dump(mPriorityDumper, fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -2238,17 +2236,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "gfxinfo", pw)) return;
                 mActivityManagerService.dumpGraphicsHardwareUsage(fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -2262,17 +2256,13 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "dbinfo", pw)) return;
                 mActivityManagerService.dumpDbInfo(fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -2318,9 +2308,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
             try {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(false);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 if (!DumpUtils.checkDumpAndUsageStatsPermission(mActivityManagerService.mContext,
                         "cacheinfo", pw)) {
@@ -2329,9 +2317,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 mActivityManagerService.dumpBinderCacheContents(fd, pw, args);
             } finally {
-                if (mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.useFreezer()) {
-                    Process.enableFreezer(true);
-                }
+                mActivityManagerService.mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
             }
         }
     }
@@ -3318,6 +3304,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     @Override
     public boolean setProcessMemoryTrimLevel(String process, int userId, int level)
             throws RemoteException {
+        if (!isCallerShell()) {
+            EventLog.writeEvent(0x534e4554, 160390416, Binder.getCallingUid(), "");
+            throw new SecurityException("Only shell can call it");
+        }
         synchronized (this) {
             final ProcessRecord app = findProcessLocked(process, userId, "setProcessMemoryTrimLevel");
             if (app == null) {
@@ -9493,6 +9483,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         final long waitForNetworkTimeoutMs = Settings.Global.getLong(resolver,
                 NETWORK_ACCESS_TIMEOUT_MS, NETWORK_ACCESS_TIMEOUT_DEFAULT_MS);
         mHiddenApiBlacklist.registerObserver();
+        mPlatformCompat.registerContentObserver();
 
         final long pssDeferralMs = DeviceConfig.getLong(DeviceConfig.NAMESPACE_ACTIVITY_MANAGER,
                 ACTIVITY_START_PSS_DEFER_CONFIG, 0L);
@@ -10471,12 +10462,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
-        if (uid == Process.INVALID_UID) {
-            return Process.INVALID_UID;
-        }
+        // If the uid is Process.INVALID_UID, the below 'if' check will be always true
         if (UserHandle.getAppId(uid) != UserHandle.getAppId(callingUid)) {
             // Requires the DUMP permission if the target package doesn't belong
-            // to the caller.
+            // to the caller or it doesn't exist.
             enforceCallingPermission(android.Manifest.permission.DUMP, function);
         }
         return uid;
@@ -10526,7 +10515,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private void dumpEverything(FileDescriptor fd, PrintWriter pw, String[] args, int opti,
             boolean dumpAll, String dumpPackage, boolean dumpClient, boolean dumpNormalPriority,
-            int dumpAppId) {
+            int dumpAppId, boolean dumpProxies) {
 
         ActiveServices.ServiceDumper sdumper;
 
@@ -10585,7 +10574,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             sdumper.dumpWithClient();
         }
-        if (dumpPackage == null) {
+        if (dumpPackage == null && dumpProxies) {
             // Intentionally dropping the lock for this, because dumpBinderProxies() will make many
             // outgoing binder calls to retrieve interface descriptors; while that is system code,
             // there is nothing preventing an app from overriding this implementation by talking to
@@ -10994,13 +10983,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // dumpEverything() will take the lock when needed, and momentarily drop
                 // it for dumping client state.
                 dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
-                        dumpNormalPriority, dumpAppId);
+                        dumpNormalPriority, dumpAppId, true /* dumpProxies */);
             } else {
                 // Take the lock here, so we get a consistent state for the entire dump;
-                // dumpEverything() will take the lock as well, but that is fine.
+                // dumpEverything() will take the lock as well, which is fine for everything
+                // except dumping proxies, which can take a long time; exclude them.
                 synchronized(this) {
                     dumpEverything(fd, pw, args, opti, dumpAll, dumpPackage, dumpClient,
-                            dumpNormalPriority, dumpAppId);
+                            dumpNormalPriority, dumpAppId, false /* dumpProxies */);
                 }
             }
         }
@@ -13755,6 +13745,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
                 kernelUsed += ionHeap;
             }
+            final long gpuUsage = Debug.getGpuTotalUsageKb();
+            if (gpuUsage >= 0) {
+                pw.print("      GPU: "); pw.println(stringifyKBSize(gpuUsage));
+            }
             final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     - kernelUsed - memInfo.getZramTotalSizeKb();
@@ -14562,6 +14556,12 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
             // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
             kernelUsed += ionHeap;
+        }
+        final long gpuUsage = Debug.getGpuTotalUsageKb();
+        if (gpuUsage >= 0) {
+            memInfoBuilder.append("       GPU: ");
+            memInfoBuilder.append(stringifyKBSize(gpuUsage));
+            memInfoBuilder.append("\n");
         }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
@@ -16946,6 +16946,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (disableHiddenApiChecks || disableTestApiChecks) {
                 enforceCallingPermission(android.Manifest.permission.DISABLE_HIDDEN_API_CHECKS,
                         "disable hidden API checks");
+
+                enableTestApiAccess(ii.packageName);
             }
 
             // TODO(b/158750470): remove
@@ -17085,6 +17087,25 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         forceStopPackageLocked(app.info.packageName, -1, false, false, true, true, false, app.userId,
                 "finished inst");
+
+        disableTestApiAccess(app.info.packageName);
+    }
+
+    private void enableTestApiAccess(String packageName) {
+        if (mPlatformCompat != null) {
+            Compatibility.ChangeConfig config = new Compatibility.ChangeConfig(
+                    Collections.singleton(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */),
+                    Collections.emptySet());
+            CompatibilityChangeConfig override = new CompatibilityChangeConfig(config);
+            mPlatformCompat.setOverridesForTest(override, packageName);
+        }
+    }
+
+    private void disableTestApiAccess(String packageName) {
+        if (mPlatformCompat != null) {
+            mPlatformCompat.clearOverrideForTest(166236554L /* VMRuntime.ALLOW_TEST_API_ACCESS */,
+                    packageName);
+        }
     }
 
     public void finishInstrumentation(IApplicationThread target,
@@ -18600,14 +18621,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                Process.enableFreezer(false);
+                mOomAdjuster.mCachedAppOptimizer.enableFreezer(false);
 
                 final RemoteCallback intermediateCallback = new RemoteCallback(
                         new RemoteCallback.OnResultListener() {
                         @Override
                         public void onResult(Bundle result) {
                             finishCallback.sendResult(result);
-                            Process.enableFreezer(true);
+                            mOomAdjuster.mCachedAppOptimizer.enableFreezer(true);
                         }
                     }, null);
 
@@ -20367,6 +20388,18 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mOomAdjuster.mCachedAppOptimizer.isFreezerSupported();
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public boolean enableAppFreezer(boolean enable) {
+        int callerUid = Binder.getCallingUid();
+
+        // Only system can toggle the freezer state
+        if (callerUid == SYSTEM_UID) {
+            return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
+        } else {
+            throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");
         }
     }
 }

@@ -16,33 +16,49 @@
 
 package android.net;
 
+import static android.net.IpSecAlgorithm.ALGO_TO_REQUIRED_FIRST_SDK;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.util.CollectionUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 /** Unit tests for {@link IpSecAlgorithm}. */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class IpSecAlgorithmTest {
-
     private static final byte[] KEY_MATERIAL;
+
+    private final Resources mMockResources = mock(Resources.class);
 
     static {
         KEY_MATERIAL = new byte[128];
         new Random().nextBytes(KEY_MATERIAL);
     };
+
+    private static byte[] generateKey(int keyLenInBits) {
+        return Arrays.copyOf(KEY_MATERIAL, keyLenInBits / 8);
+    }
 
     @Test
     public void testNoTruncLen() throws Exception {
@@ -53,7 +69,7 @@ public class IpSecAlgorithmTest {
                     new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA256, 256),
                     new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA384, 384),
                     new SimpleEntry<>(IpSecAlgorithm.AUTH_HMAC_SHA512, 512),
-                    new SimpleEntry<>(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, 224)
+                    new SimpleEntry<>(IpSecAlgorithm.AUTH_CRYPT_AES_GCM, 224),
                 };
 
         // Expect auth and aead algorithms to throw errors if trunclen is omitted.
@@ -68,6 +84,52 @@ public class IpSecAlgorithmTest {
 
         // Ensure crypt works with no truncation length supplied.
         new IpSecAlgorithm(IpSecAlgorithm.CRYPT_AES_CBC, Arrays.copyOf(KEY_MATERIAL, 256 / 8));
+    }
+
+    private void checkAuthKeyAndTruncLenValidation(String algoName, int keyLen, int truncLen)
+            throws Exception {
+        new IpSecAlgorithm(algoName, generateKey(keyLen), truncLen);
+
+        try {
+            new IpSecAlgorithm(algoName, generateKey(keyLen));
+            fail("Expected exception on unprovided auth trunclen");
+        } catch (IllegalArgumentException pass) {
+        }
+
+        try {
+            new IpSecAlgorithm(algoName, generateKey(keyLen + 8), truncLen);
+            fail("Invalid key length not validated");
+        } catch (IllegalArgumentException pass) {
+        }
+
+        try {
+            new IpSecAlgorithm(algoName, generateKey(keyLen), truncLen + 1);
+            fail("Invalid truncation length not validated");
+        } catch (IllegalArgumentException pass) {
+        }
+    }
+
+    private void checkCryptKeyLenValidation(String algoName, int keyLen) throws Exception {
+        new IpSecAlgorithm(algoName, generateKey(keyLen));
+
+        try {
+            new IpSecAlgorithm(algoName, generateKey(keyLen + 8));
+            fail("Invalid key length not validated");
+        } catch (IllegalArgumentException pass) {
+        }
+    }
+
+    @Test
+    public void testValidationForAlgosAddedInS() throws Exception {
+        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.R) {
+            return;
+        }
+
+        for (int len : new int[] {160, 224, 288}) {
+            checkCryptKeyLenValidation(IpSecAlgorithm.CRYPT_AES_CTR, len);
+        }
+        checkAuthKeyAndTruncLenValidation(IpSecAlgorithm.AUTH_AES_XCBC, 128, 96);
+        checkAuthKeyAndTruncLenValidation(IpSecAlgorithm.AUTH_CRYPT_CHACHA20_POLY1305, 288, 128);
     }
 
     @Test
@@ -126,5 +188,38 @@ public class IpSecAlgorithmTest {
         IpSecAlgorithm fin = IpSecAlgorithm.CREATOR.createFromParcel(p);
         assertTrue("Parcel/Unparcel failed!", IpSecAlgorithm.equals(init, fin));
         p.recycle();
+    }
+
+    private static Set<String> getMandatoryAlgos() {
+        return CollectionUtils.filter(
+                ALGO_TO_REQUIRED_FIRST_SDK.keySet(),
+                i -> Build.VERSION.FIRST_SDK_INT >= ALGO_TO_REQUIRED_FIRST_SDK.get(i));
+    }
+
+    private static Set<String> getOptionalAlgos() {
+        return CollectionUtils.filter(
+                ALGO_TO_REQUIRED_FIRST_SDK.keySet(),
+                i -> Build.VERSION.FIRST_SDK_INT < ALGO_TO_REQUIRED_FIRST_SDK.get(i));
+    }
+
+    @Test
+    public void testGetSupportedAlgorithms() throws Exception {
+        assertTrue(IpSecAlgorithm.getSupportedAlgorithms().containsAll(getMandatoryAlgos()));
+        assertTrue(ALGO_TO_REQUIRED_FIRST_SDK.keySet().containsAll(
+                IpSecAlgorithm.getSupportedAlgorithms()));
+    }
+
+    @Test
+    public void testLoadAlgos() throws Exception {
+        final Set<String> optionalAlgoSet = getOptionalAlgos();
+        final String[] optionalAlgos = optionalAlgoSet.toArray(new String[0]);
+
+        doReturn(optionalAlgos).when(mMockResources)
+                .getStringArray(com.android.internal.R.array.config_optionalIpSecAlgorithms);
+
+        final Set<String> enabledAlgos = new HashSet<>(IpSecAlgorithm.loadAlgos(mMockResources));
+        final Set<String> expectedAlgos = ALGO_TO_REQUIRED_FIRST_SDK.keySet();
+
+        assertEquals(expectedAlgos, enabledAlgos);
     }
 }

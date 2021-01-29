@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemProperties;
@@ -523,7 +524,7 @@ public class SecurityLog {
          * Constructor used by native classes to generate SecurityEvent instances.
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ SecurityEvent(byte[] data) {
             this(0, data);
         }

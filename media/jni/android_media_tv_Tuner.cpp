@@ -169,10 +169,18 @@ static fields_t gFields;
 static int IP_V4_LENGTH = 4;
 static int IP_V6_LENGTH = 16;
 
-void DestroyCallback(const C2Buffer * /* buf */, void *arg) {
+void DestroyCallback(const C2Buffer * buf, void *arg) {
     android::sp<android::MediaEvent> event = (android::MediaEvent *)arg;
+    android::Mutex::Autolock autoLock(event->mLock);
+    if (event->mLinearBlockObj != NULL) {
+        JNIEnv *env = android::AndroidRuntime::getJNIEnv();
+        env->DeleteWeakGlobalRef(event->mLinearBlockObj);
+        event->mLinearBlockObj = NULL;
+    }
+
     event->mAvHandleRefCnt--;
     event->finalize();
+    event->decStrong(buf);
 }
 
 namespace android {
@@ -180,6 +188,12 @@ namespace android {
 LnbCallback::LnbCallback(jobject lnbObj, LnbId id) : mId(id) {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     mLnb = env->NewWeakGlobalRef(lnbObj);
+}
+
+LnbCallback::~LnbCallback() {
+    JNIEnv *env = AndroidRuntime::getJNIEnv();
+    env->DeleteWeakGlobalRef(mLnb);
+    mLnb = NULL;
 }
 
 Return<void> LnbCallback::onEvent(LnbEventType lnbEventType) {
@@ -291,8 +305,9 @@ MQ& Dvr::getDvrMQ() {
 C2DataIdInfo::C2DataIdInfo(uint32_t index, uint64_t value) : C2Param(kParamSize, index) {
     CHECK(isGlobal());
     CHECK_EQ(C2Param::INFO, kind());
-    DummyInfo info{value};
-    memcpy(this + 1, static_cast<C2Param *>(&info) + 1, kParamSize - sizeof(C2Param));
+    mInfo = StubInfo(value);
+    memcpy(static_cast<C2Param *>(this) + 1, static_cast<C2Param *>(&mInfo) + 1,
+            kParamSize - sizeof(C2Param));
 }
 
 /////////////// MediaEvent ///////////////////////
@@ -304,6 +319,7 @@ MediaEvent::MediaEvent(sp<IFilter> iFilter, hidl_handle avHandle,
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     mMediaEventObj = env->NewWeakGlobalRef(obj);
     mAvHandle = native_handle_clone(avHandle.getNativeHandle());
+    mLinearBlockObj = NULL;
 }
 
 MediaEvent::~MediaEvent() {
@@ -337,33 +353,45 @@ jobject MediaEvent::getLinearBlock() {
     }
     mIonHandle = new C2HandleIon(dup(mAvHandle->data[0]), mDataLength);
     std::shared_ptr<C2LinearBlock> block = _C2BlockFactory::CreateLinearBlock(mIonHandle);
-
-    JNIEnv *env = AndroidRuntime::getJNIEnv();
-    std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
-    context->mBlock = block;
-    std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, mDataLength);
-    context->mBuffer = pC2Buffer;
-    mC2Buffer = pC2Buffer;
-    if (mAvHandle->numInts > 0) {
-        // use first int in the native_handle as the index
-        int index = mAvHandle->data[mAvHandle->numFds];
-        std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(index, mDataId);
-        std::shared_ptr<C2Info> info(std::static_pointer_cast<C2Info>(c2param));
-        pC2Buffer->setInfo(info);
+    if (block != nullptr) {
+        // CreateLinearBlock delete mIonHandle after it create block successfully.
+        // ToDo: coordinate who is response to delete mIonHandle
+        mIonHandle = NULL;
+        JNIEnv *env = AndroidRuntime::getJNIEnv();
+        std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
+        context->mBlock = block;
+        std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, mDataLength);
+        context->mBuffer = pC2Buffer;
+        mC2Buffer = pC2Buffer;
+        if (mAvHandle->numInts > 0) {
+            // use first int in the native_handle as the index
+            int index = mAvHandle->data[mAvHandle->numFds];
+            std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(index, mDataId);
+            std::shared_ptr<C2Info> info(std::static_pointer_cast<C2Info>(c2param));
+            pC2Buffer->setInfo(info);
+        }
+        pC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
+        incStrong(pC2Buffer.get());
+        jobject linearBlock =
+                env->NewObject(
+                        env->FindClass("android/media/MediaCodec$LinearBlock"),
+                        gFields.linearBlockInitID);
+        env->CallVoidMethod(
+                linearBlock,
+                gFields.linearBlockSetInternalStateID,
+                (jlong)context.release(),
+                true);
+        mLinearBlockObj = env->NewWeakGlobalRef(linearBlock);
+        mAvHandleRefCnt++;
+        return linearBlock;
+    } else {
+        native_handle_close(const_cast<native_handle_t*>(
+                    reinterpret_cast<const native_handle_t*>(mIonHandle)));
+        native_handle_delete(const_cast<native_handle_t*>(
+                    reinterpret_cast<const native_handle_t*>(mIonHandle)));
+        mIonHandle = NULL;
+        return NULL;
     }
-    pC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
-    jobject linearBlock =
-            env->NewObject(
-                    env->FindClass("android/media/MediaCodec$LinearBlock"),
-                    gFields.linearBlockInitID);
-    env->CallVoidMethod(
-            linearBlock,
-            gFields.linearBlockSetInternalStateID,
-            (jlong)context.release(),
-            true);
-    mLinearBlockObj = env->NewWeakGlobalRef(linearBlock);
-    mAvHandleRefCnt++;
-    return mLinearBlockObj;
 }
 
 uint64_t MediaEvent::getAudioHandle() {
@@ -447,7 +475,7 @@ jobjectArray FilterCallback::getMediaEvent(
         if (mediaEvent.avMemory.getNativeHandle() != NULL || mediaEvent.avDataId != 0) {
             sp<MediaEvent> mediaEventSp =
                            new MediaEvent(mIFilter, mediaEvent.avMemory,
-                               mediaEvent.avDataId, dataLength, obj);
+                               mediaEvent.avDataId, dataLength + offset, obj);
             mediaEventSp->mAvHandleRefCnt++;
             env->SetLongField(obj, eventContext, (jlong) mediaEventSp.get());
             mediaEventSp->incStrong(obj);
@@ -2048,7 +2076,7 @@ static FrontendSettings getDvbcFrontendSettings(JNIEnv *env, const jobject& sett
                     env->GetIntField(settings, env->GetFieldID(clazz, "mModulation", "I")));
     FrontendInnerFec innerFec =
             static_cast<FrontendInnerFec>(
-                    env->GetLongField(settings, env->GetFieldID(clazz, "mFec", "J")));
+                    env->GetLongField(settings, env->GetFieldID(clazz, "mInnerFec", "J")));
     uint32_t symbolRate =
             static_cast<uint32_t>(
                     env->GetIntField(settings, env->GetFieldID(clazz, "mSymbolRate", "I")));
@@ -2057,7 +2085,7 @@ static FrontendSettings getDvbcFrontendSettings(JNIEnv *env, const jobject& sett
                     env->GetIntField(settings, env->GetFieldID(clazz, "mOuterFec", "I")));
     FrontendDvbcAnnex annex =
             static_cast<FrontendDvbcAnnex>(
-                    env->GetByteField(settings, env->GetFieldID(clazz, "mAnnex", "B")));
+                    env->GetIntField(settings, env->GetFieldID(clazz, "mAnnex", "I")));
     FrontendDvbcSpectralInversion spectralInversion =
             static_cast<FrontendDvbcSpectralInversion>(
                     env->GetIntField(
@@ -3497,6 +3525,10 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
     } else {
         ALOGE("dvrMq.beginWrite failed");
     }
+
+    if (ret > 0) {
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_READY));
+    }
     return (jlong) ret;
 }
 
@@ -3524,7 +3556,7 @@ static jlong android_media_tv_Tuner_read_dvr_from_array(
 
     if (dvrSp->mDvrMQ->write(reinterpret_cast<unsigned char*>(src) + offset, size)) {
         env->ReleaseByteArrayElements(buffer, src, 0);
-        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_READY));
     } else {
         ALOGD("Failed to write FMQ");
         env->ReleaseByteArrayElements(buffer, src, 0);
@@ -3585,6 +3617,9 @@ static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong si
     } else {
         ALOGE("dvrMq.beginRead failed");
     }
+    if (ret > 0) {
+        dvrSp->mDvrMQEventFlag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
+    }
 
     return (jlong) ret;
 }
@@ -3614,6 +3649,7 @@ static jobject android_media_tv_Tuner_media_event_get_linear_block(
         ALOGD("Failed get MediaEvent");
         return NULL;
     }
+    android::Mutex::Autolock autoLock(mediaEventSp->mLock);
 
     return mediaEventSp->getLinearBlock();
 }

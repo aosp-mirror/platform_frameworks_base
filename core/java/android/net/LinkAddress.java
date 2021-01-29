@@ -30,7 +30,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -158,7 +157,6 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv6.
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isIpv6() {
         return address instanceof Inet6Address;
@@ -180,7 +178,6 @@ public class LinkAddress implements Parcelable {
      * @return true if the address is IPv4 or is a mapped IPv4 address.
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isIpv4() {
         return address instanceof Inet4Address;
@@ -243,7 +240,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public LinkAddress(@NonNull InetAddress address, @IntRange(from = 0, to = 128) int prefixLength,
             int flags, int scope) {
         init(address, prefixLength, flags, scope, LIFETIME_UNKNOWN, LIFETIME_UNKNOWN);
@@ -275,7 +271,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public LinkAddress(@NonNull InetAddress address, @IntRange(from = 0, to = 128) int prefixLength,
                        int flags, int scope, long deprecationTime, long expirationTime) {
         init(address, prefixLength, flags, scope, deprecationTime, expirationTime);
@@ -289,7 +284,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public LinkAddress(@NonNull InetAddress address,
             @IntRange(from = 0, to = 128) int prefixLength) {
         this(address, prefixLength, 0, 0);
@@ -314,7 +308,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public LinkAddress(@NonNull String address) {
         this(address, 0, 0);
         this.scope = scopeForUnicastAddress(this.address);
@@ -329,7 +322,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public LinkAddress(@NonNull String address, int flags, int scope) {
         // This may throw an IllegalArgumentException; catching it is the caller's responsibility.
         // TODO: consider rejecting mapped IPv4 addresses such as "::ffff:192.0.2.5/24".
@@ -389,7 +381,6 @@ public class LinkAddress implements Parcelable {
      * otherwise.
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isSameAddressAs(@Nullable LinkAddress other) {
         if (other == null) {
@@ -469,7 +460,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public long getDeprecationTime() {
         return deprecationTime;
     }
@@ -485,7 +475,6 @@ public class LinkAddress implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public long getExpirationTime() {
         return expirationTime;
     }
@@ -496,7 +485,6 @@ public class LinkAddress implements Parcelable {
      *
      * @hide
      */
-    @TestApi
     @SystemApi
     public boolean isGlobalPreferred() {
         /**

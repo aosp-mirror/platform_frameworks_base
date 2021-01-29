@@ -118,7 +118,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 171933273)
     public static final String ACTION_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.a2dp.profile.action.ACTIVE_DEVICE_CHANGED";
 
@@ -139,7 +139,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public static final String ACTION_CODEC_CONFIG_CHANGED =
             "android.bluetooth.a2dp.profile.action.CODEC_CONFIG_CHANGED";
 
@@ -224,6 +224,39 @@ public final class BluetoothA2dp implements BluetoothProfile {
      */
     @SystemApi
     public static final int OPTIONAL_CODECS_PREF_ENABLED = 1;
+
+    /** @hide */
+    @IntDef(prefix = "DYNAMIC_BUFFER_SUPPORT_", value = {
+            DYNAMIC_BUFFER_SUPPORT_NONE,
+            DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD,
+            DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Type {}
+
+    /**
+     * Indicates the supported type of Dynamic Audio Buffer is not supported.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DYNAMIC_BUFFER_SUPPORT_NONE = 0;
+
+    /**
+     * Indicates the supported type of Dynamic Audio Buffer is A2DP offload.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD = 1;
+
+    /**
+     * Indicates the supported type of Dynamic Audio Buffer is A2DP software encoding.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING = 2;
 
     private BluetoothAdapter mAdapter;
     private final BluetoothProfileConnector<IBluetoothA2dp> mProfileConnector =
@@ -409,7 +442,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @hide
      */
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 171933273)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) log("setActiveDevice(" + device + ")");
         try {
@@ -433,7 +466,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * is active
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 171933273)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothDevice getActiveDevice() {
@@ -651,7 +684,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @return the current codec status
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothCodecStatus getCodecStatus(@NonNull BluetoothDevice device) {
@@ -680,7 +713,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * @param codecConfig the codec configuration preference
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void setCodecConfigPreference(@NonNull BluetoothDevice device,
                                          @NonNull BluetoothCodecConfig codecConfig) {
@@ -710,7 +743,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * active A2DP Bluetooth device.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void enableOptionalCodecs(@NonNull BluetoothDevice device) {
         if (DBG) Log.d(TAG, "enableOptionalCodecs(" + device + ")");
@@ -725,7 +758,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * active A2DP Bluetooth device.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public void disableOptionalCodecs(@NonNull BluetoothDevice device) {
         if (DBG) Log.d(TAG, "disableOptionalCodecs(" + device + ")");
@@ -766,7 +799,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_SUPPORTED.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     @OptionalCodecsSupportStatus
     public int isOptionalCodecsSupported(@NonNull BluetoothDevice device) {
@@ -792,7 +825,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_PREF_DISABLED.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     @OptionalCodecsPreferenceStatus
     public int isOptionalCodecsEnabled(@NonNull BluetoothDevice device) {
@@ -819,7 +852,7 @@ public final class BluetoothA2dp implements BluetoothProfile {
      * OPTIONAL_CODECS_PREF_DISABLED.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @RequiresPermission(Manifest.permission.BLUETOOTH_ADMIN)
     public void setOptionalCodecsEnabled(@NonNull BluetoothDevice device,
             @OptionalCodecsPreferenceStatus int value) {
@@ -841,6 +874,87 @@ public final class BluetoothA2dp implements BluetoothProfile {
         } catch (RemoteException e) {
             Log.e(TAG, "Stack:" + Log.getStackTraceString(new Throwable()));
             return;
+        }
+    }
+
+    /**
+     * Get the supported type of the Dynamic Audio Buffer.
+     * <p>Possible return values are
+     * {@link #DYNAMIC_BUFFER_SUPPORT_NONE},
+     * {@link #DYNAMIC_BUFFER_SUPPORT_A2DP_OFFLOAD},
+     * {@link #DYNAMIC_BUFFER_SUPPORT_A2DP_SOFTWARE_ENCODING}.
+     *
+     * @return supported type of Dynamic Audio Buffer feature
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @Type int getDynamicBufferSupport() {
+        if (VDBG) log("getDynamicBufferSupport()");
+        try {
+            final IBluetoothA2dp service = getService();
+            if (service != null && isEnabled()) {
+                return service.getDynamicBufferSupport();
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return DYNAMIC_BUFFER_SUPPORT_NONE;
+        } catch (RemoteException e) {
+            Log.e(TAG, "failed to get getDynamicBufferSupport, error: ", e);
+            return DYNAMIC_BUFFER_SUPPORT_NONE;
+        }
+    }
+
+    /**
+     * Return the record of {@link BufferConstraints} object that
+     * has the default/maximum/minimum audio buffer. This can be used to inform what the controller
+     * has support for the audio buffer.
+     *
+     * @return a record with {@link BufferConstraints} or null if report is unavailable
+     * or unsupported
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public @Nullable BufferConstraints getBufferConstraints() {
+        if (VDBG) log("getBufferConstraints()");
+        try {
+            final IBluetoothA2dp service = getService();
+            if (service != null && isEnabled()) {
+                return service.getBufferConstraints();
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return null;
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return null;
+        }
+    }
+
+    /**
+     * Set Dynamic Audio Buffer Size.
+     *
+     * @param codec audio codec
+     * @param value buffer millis
+     * @return true to indicate success, or false on immediate error
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
+    public boolean setBufferMillis(@BluetoothCodecConfig.SourceCodecType int codec, int value) {
+        if (VDBG) log("setBufferMillis(" + codec + ", " + value + ")");
+        try {
+            final IBluetoothA2dp service = getService();
+            if (service != null && isEnabled()) {
+                return service.setBufferMillis(codec, value);
+            }
+            if (service == null) Log.w(TAG, "Proxy not attached to service");
+            return false;
+        } catch (RemoteException e) {
+            Log.e(TAG, "", e);
+            return false;
         }
     }
 

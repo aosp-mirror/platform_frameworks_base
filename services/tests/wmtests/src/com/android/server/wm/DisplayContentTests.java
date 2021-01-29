@@ -28,6 +28,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.os.Build.VERSION_CODES.P;
 import static android.os.Build.VERSION_CODES.Q;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.FLAG_PRIVATE;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
@@ -95,14 +96,12 @@ import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
+import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
-import android.view.InsetsSourceControl;
-import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
@@ -934,28 +933,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
     }
 
-    private IDisplayWindowInsetsController createDisplayWindowInsetsController() {
-        return new IDisplayWindowInsetsController.Stub() {
-
-            @Override
-            public void insetsChanged(InsetsState insetsState) throws RemoteException {
-            }
-
-            @Override
-            public void insetsControlChanged(InsetsState insetsState,
-                    InsetsSourceControl[] insetsSourceControls) throws RemoteException {
-            }
-
-            @Override
-            public void showInsets(int i, boolean b) throws RemoteException {
-            }
-
-            @Override
-            public void hideInsets(int i, boolean b) throws RemoteException {
-            }
-        };
-    }
-
     @Test
     public void testUpdateSystemGestureExclusion() throws Exception {
         final DisplayContent dc = createNewDisplay();
@@ -1172,8 +1149,10 @@ public class DisplayContentTests extends WindowTestsBase {
         verify(t, never()).setPosition(any(), eq(0), eq(0));
 
         // Launch another activity before the transition is finished.
-        final ActivityRecord app2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
-                .setDisplay(mDisplayContent).build().getTopMostActivity();
+        final ActivityStack stack2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).build();
+        final ActivityRecord app2 = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setStack(stack2).setUseProcess(app.app).build();
         app2.setVisible(false);
         mDisplayContent.mOpeningApps.add(app2);
         app2.setRequestedOrientation(newOrientation);
@@ -1182,6 +1161,12 @@ public class DisplayContentTests extends WindowTestsBase {
         // should also be the fixed rotation launching app because it is the latest top.
         assertTrue(app.hasFixedRotationTransform(app2));
         assertTrue(mDisplayContent.isFixedRotationLaunchingApp(app2));
+
+        final Configuration expectedProcConfig = new Configuration(app2.app.getConfiguration());
+        expectedProcConfig.windowConfiguration.setActivityType(
+                WindowConfiguration.ACTIVITY_TYPE_UNDEFINED);
+        assertEquals("The process should receive rotated configuration for compatibility",
+                expectedProcConfig, app2.app.getConfiguration());
 
         // The fixed rotation transform can only be finished when all animation finished.
         doReturn(false).when(app2).isAnimating(anyInt(), anyInt());
@@ -1291,6 +1276,27 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testNoFixedRotationOnResumedScheduledApp() {
+        final ActivityRecord app = new ActivityTestsBase.StackBuilder(mWm.mRoot)
+                .setDisplay(mDisplayContent).build().getTopMostActivity();
+        app.setVisible(false);
+        app.setState(ActivityStack.ActivityState.RESUMED, "test");
+        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
+                false /* alwaysKeepCurrent */);
+        mDisplayContent.mOpeningApps.add(app);
+        final int newOrientation = getRotatedOrientation(mDisplayContent);
+        app.setRequestedOrientation(newOrientation);
+
+        // The condition should reject using fixed rotation because the resumed client in real case
+        // might get display info immediately. And the fixed rotation adjustments haven't arrived
+        // client side so the info may be inconsistent with the requested orientation.
+        verify(mDisplayContent).handleTopActivityLaunchingInDifferentOrientation(eq(app),
+                eq(true) /* checkOpening */);
+        assertFalse(app.isFixedRotationTransforming());
+        assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
+    }
+
+    @Test
     public void testRecentsNotRotatingWithFixedRotation() {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
         doCallRealMethod().when(displayRotation).updateRotationUnchecked(anyBoolean());
@@ -1307,7 +1313,7 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(displayRotation.updateRotationUnchecked(false));
 
         // Rotation can be updated if the recents animation is finished.
-        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation(false);
+        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation();
         assertTrue(displayRotation.updateRotationUnchecked(false));
 
         // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
@@ -1462,6 +1468,29 @@ public class DisplayContentTests extends WindowTestsBase {
         }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean());
 
         mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
+    }
+
+    @Test
+    public void testForceDesktopMode() {
+        mWm.mForceDesktopModeOnExternalDisplays = true;
+        // Not applicable for default display
+        final DisplayContent defaultDisplay = mWm.mRoot.getDefaultDisplay();
+        assertFalse(defaultDisplay.forceDesktopMode());
+
+        // Not applicable for private secondary display.
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.flags = FLAG_PRIVATE;
+        final DisplayContent privateDc = createNewDisplay(displayInfo);
+        assertFalse(privateDc.forceDesktopMode());
+
+        // Applicable for public secondary display.
+        final DisplayContent publicDc = createNewDisplay();
+        assertTrue(publicDc.forceDesktopMode());
+
+        // Make sure forceDesktopMode() is false when the force config is disabled.
+        mWm.mForceDesktopModeOnExternalDisplays = false;
+        assertFalse(publicDc.forceDesktopMode());
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {

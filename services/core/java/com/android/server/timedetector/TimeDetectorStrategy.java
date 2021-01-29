@@ -16,14 +16,18 @@
 
 package com.android.server.timedetector;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
 import android.app.timedetector.TelephonyTimeSuggestion;
 import android.os.TimestampedValue;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * The interface for the class that implements the time detection algorithm used by the
@@ -37,57 +41,48 @@ import java.io.PrintWriter;
  */
 public interface TimeDetectorStrategy {
 
-    /**
-     * The interface used by the strategy to interact with the surrounding service.
-     *
-     * <p>Note: Because the system properties-derived value {@link #isAutoTimeDetectionEnabled()}
-     * can be modified independently and from different threads (and processes!). its use is prone
-     * to race conditions. That will be true until the responsibility for setting their values is
-     * moved to {@link TimeDetectorStrategy}. There are similar issues with
-     * {@link #systemClockMillis()} while any process can modify the system clock.
-     */
-    interface Callback {
+    @IntDef({ ORIGIN_TELEPHONY, ORIGIN_MANUAL, ORIGIN_NETWORK, ORIGIN_GNSS })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface Origin {}
 
-        /**
-         * The absolute threshold below which the system clock need not be updated. i.e. if setting
-         * the system clock would adjust it by less than this (either backwards or forwards) then it
-         * need not be set.
-         */
-        int systemClockUpdateThresholdMillis();
+    /** Used when a time value originated from a telephony signal. */
+    @Origin
+    int ORIGIN_TELEPHONY = 1;
 
-        /** Returns true if automatic time detection is enabled. */
-        boolean isAutoTimeDetectionEnabled();
+    /** Used when a time value originated from a user / manual settings. */
+    @Origin
+    int ORIGIN_MANUAL = 2;
 
-        /** Acquire a suitable wake lock. Must be followed by {@link #releaseWakeLock()} */
-        void acquireWakeLock();
+    /** Used when a time value originated from a network signal. */
+    @Origin
+    int ORIGIN_NETWORK = 3;
 
-        /** Returns the elapsedRealtimeMillis clock value. */
-        long elapsedRealtimeMillis();
+    /** Used when a time value originated from a gnss signal. */
+    @Origin
+    int ORIGIN_GNSS = 4;
 
-        /** Returns the system clock value. */
-        long systemClockMillis();
-
-        /** Sets the device system clock. The WakeLock must be held. */
-        void setSystemClock(long newTimeMillis);
-
-        /** Release the wake lock acquired by a call to {@link #acquireWakeLock()}. */
-        void releaseWakeLock();
-    }
-
-    /** Initialize the strategy. */
-    void initialize(@NonNull Callback callback);
-
-    /** Process the suggested time from telephony sources. */
+    /** Processes the suggested time from telephony sources. */
     void suggestTelephonyTime(@NonNull TelephonyTimeSuggestion timeSuggestion);
 
-    /** Process the suggested manually entered time. */
-    void suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
+    /**
+     * Processes the suggested manually entered time. Returns {@code false} if the suggestion was
+     * invalid, or the device configuration prevented the suggestion being used, {@code true} if the
+     * suggestion was accepted. A suggestion that is valid but does not change the time because it
+     * matches the current device time is considered accepted.
+     */
+    boolean suggestManualTime(@NonNull ManualTimeSuggestion timeSuggestion);
 
-    /** Process the suggested time from network sources. */
+    /** Processes the suggested time from network sources. */
     void suggestNetworkTime(@NonNull NetworkTimeSuggestion timeSuggestion);
 
-    /** Handle the auto-time setting being toggled on or off. */
-    void handleAutoTimeDetectionChanged();
+    /** Processes the suggested time from gnss sources. */
+    void suggestGnssTime(@NonNull GnssTimeSuggestion timeSuggestion);
+
+    /**
+     * Handles the auto-time configuration changing For example, when the auto-time setting is
+     * toggled on or off.
+     */
+    void handleAutoTimeConfigChanged();
 
     /** Dump debug information. */
     void dump(@NonNull PrintWriter pw, @Nullable String[] args);
@@ -101,5 +96,43 @@ public interface TimeDetectorStrategy {
     static long getTimeAt(@NonNull TimestampedValue<Long> timeValue, long referenceClockMillisNow) {
         return (referenceClockMillisNow - timeValue.getReferenceTimeMillis())
                 + timeValue.getValue();
+    }
+
+    /**
+     * Converts one of the {@code ORIGIN_} constants to a human readable string suitable for config
+     * and debug usage. Throws an {@link IllegalArgumentException} if the value is unrecognized.
+     */
+    static String originToString(@Origin int origin) {
+        switch (origin) {
+            case ORIGIN_MANUAL:
+                return "manual";
+            case ORIGIN_NETWORK:
+                return "network";
+            case ORIGIN_TELEPHONY:
+                return "telephony";
+            case ORIGIN_GNSS:
+                return "gnss";
+            default:
+                throw new IllegalArgumentException("origin=" + origin);
+        }
+    }
+
+    /**
+     * Converts a human readable config string to one of the {@code ORIGIN_} constants.
+     * Throws an {@link IllegalArgumentException} if the value is unrecognized.
+     */
+    static @Origin int stringToOrigin(String originString) {
+        switch (originString) {
+            case "manual":
+                return ORIGIN_MANUAL;
+            case "network":
+                return ORIGIN_NETWORK;
+            case "telephony":
+                return ORIGIN_TELEPHONY;
+            case "gnss":
+                return ORIGIN_GNSS;
+            default:
+                throw new IllegalArgumentException("originString=" + originString);
+        }
     }
 }

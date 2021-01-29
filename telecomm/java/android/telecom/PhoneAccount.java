@@ -21,13 +21,13 @@ import static android.Manifest.permission.MODIFY_PHONE_STATE;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
@@ -48,12 +48,20 @@ import java.util.Objects;
 public final class PhoneAccount implements Parcelable {
 
     /**
-     * String extra which determines the order in which {@link PhoneAccount}s are sorted
+     * Integer extra which determines the order in which {@link PhoneAccount}s are sorted
      *
      * This is an extras key set via {@link Builder#setExtras} which determines the order in which
      * {@link PhoneAccount}s from the same {@link ConnectionService} are sorted. The accounts
-     * are sorted by this key via standard lexicographical order, and this ordering is used to
+     * are sorted in ascending order by this key, and this ordering is used to
      * determine priority when a call can be placed via multiple accounts.
+     *
+     * When multiple {@link PhoneAccount}s are supplied with the same sort order key, no ordering is
+     * guaranteed between those {@link PhoneAccount}s. Additionally, no ordering is guaranteed
+     * between {@link PhoneAccount}s that do not supply this extra, and all such accounts
+     * will be sorted after the accounts that do supply this extra.
+     *
+     * An example of a sort order key is slot index (see {@link TelephonyManager#getSlotIndex()}),
+     * which is the one used by the cell Telephony stack.
      * @hide
      */
     @SystemApi
@@ -353,7 +361,13 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_ADHOC_CONFERENCE_CALLING = 0x4000;
 
-    /* NEXT CAPABILITY: 0x8000 */
+    /**
+     * Flag indicating whether this {@link PhoneAccount} is capable of supporting the call composer
+     * functionality for enriched calls.
+     */
+    public static final int CAPABILITY_CALL_COMPOSER = 0x8000;
+
+    /* NEXT CAPABILITY: 0x10000 */
 
     /**
      * URI scheme for telephone number URIs.
@@ -626,7 +640,6 @@ public final class PhoneAccount implements Parcelable {
          * @hide
          */
         @SystemApi
-        @TestApi
         @RequiresPermission(MODIFY_PHONE_STATE)
         public @NonNull Builder setGroupId(@NonNull String groupId) {
             if (groupId != null) {
@@ -1080,6 +1093,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_ADHOC_CONFERENCE_CALLING)) {
             sb.append("AdhocConf");
+        }
+        if (hasCapabilities(CAPABILITY_CALL_COMPOSER)) {
+            sb.append("CallComposer ");
         }
         return sb.toString();
     }

@@ -332,7 +332,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @hide Only used by AutoCompleteTextView under special conditions.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void setDropDownAlwaysVisible(boolean dropDownAlwaysVisible) {
         mDropDownAlwaysVisible = dropDownAlwaysVisible;
     }
@@ -342,7 +342,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @hide Only used by AutoCompleteTextView under special conditions.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean isDropDownAlwaysVisible() {
         return mDropDownAlwaysVisible;
     }
@@ -933,7 +933,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @param max Max number of items that can be visible and still allow the list to expand.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void setListItemExpandMax(int max) {
         mListItemExpandMaximum = max;
     }
@@ -1130,7 +1130,7 @@ public class ListPopupWindow implements ShowableListMenu {
      *
      * @return the content's height or -1 if content already exists
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int buildDropDown() {
         ViewGroup dropDownView;
         int otherHeights = 0;

@@ -187,38 +187,54 @@ public abstract class SocketKeepalive implements AutoCloseable {
         mCallback = new ISocketKeepaliveCallback.Stub() {
             @Override
             public void onStarted(int slot) {
-                Binder.withCleanCallingIdentity(() ->
-                        mExecutor.execute(() -> {
-                            mSlot = slot;
-                            callback.onStarted();
-                        }));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    mExecutor.execute(() -> {
+                        mSlot = slot;
+                        callback.onStarted();
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
 
             @Override
             public void onStopped() {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() -> {
-                            mSlot = null;
-                            callback.onStopped();
-                        }));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        mSlot = null;
+                        callback.onStopped();
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
 
             @Override
             public void onError(int error) {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() -> {
-                            mSlot = null;
-                            callback.onError(error);
-                        }));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        mSlot = null;
+                        callback.onError(error);
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
 
             @Override
             public void onDataReceived() {
-                Binder.withCleanCallingIdentity(() ->
-                        executor.execute(() -> {
-                            mSlot = null;
-                            callback.onDataReceived();
-                        }));
+                final long token = Binder.clearCallingIdentity();
+                try {
+                    executor.execute(() -> {
+                        mSlot = null;
+                        callback.onDataReceived();
+                    });
+                } finally {
+                    Binder.restoreCallingIdentity(token);
+                }
             }
         };
     }

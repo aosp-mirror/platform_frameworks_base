@@ -257,6 +257,7 @@ public abstract class RadioTuner {
      * @throws IllegalArgumentException if id==0
      * @hide This API is not thoroughly elaborated yet
      */
+    @SuppressWarnings("HiddenAbstractMethod")
     public abstract @Nullable Bitmap getMetadataImage(int id);
 
     /**

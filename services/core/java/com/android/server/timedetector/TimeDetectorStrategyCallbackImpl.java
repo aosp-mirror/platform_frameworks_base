@@ -16,26 +16,50 @@
 
 package com.android.server.timedetector;
 
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_NETWORK;
+import static com.android.server.timedetector.TimeDetectorStrategy.ORIGIN_TELEPHONY;
+import static com.android.server.timedetector.TimeDetectorStrategy.stringToOrigin;
+
 import android.annotation.NonNull;
 import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.os.Build;
+import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.R;
+import com.android.server.timedetector.TimeDetectorStrategy.Origin;
+
+import java.time.Instant;
 import java.util.Objects;
 
 /**
- * The real implementation of {@link TimeDetectorStrategy.Callback} used on device.
+ * The real implementation of {@link TimeDetectorStrategyImpl.Callback} used on device.
  */
-public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategy.Callback {
+public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategyImpl.Callback {
 
     private final static String TAG = "timedetector.TimeDetectorStrategyCallbackImpl";
 
     private static final int SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT = 2 * 1000;
+
+    /**
+     * Time in the past. If automatic time suggestion is before this point, it's
+     * incorrect for sure.
+     */
+    private static final Instant TIME_LOWER_BOUND = Instant.ofEpochMilli(
+            Long.max(Environment.getRootDirectory().lastModified(), Build.TIME));
+
+    /**
+     * By default telephony and network only suggestions are accepted and telephony takes
+     * precedence over network.
+     */
+    private static final @Origin int[] DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES =
+            { ORIGIN_TELEPHONY, ORIGIN_NETWORK };
 
     /**
      * If a newly calculated system clock time and the current system clock time differs by this or
@@ -48,6 +72,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     @NonNull private final ContentResolver mContentResolver;
     @NonNull private final PowerManager.WakeLock mWakeLock;
     @NonNull private final AlarmManager mAlarmManager;
+    @NonNull private final int[] mOriginPriorities;
 
     public TimeDetectorStrategyCallbackImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
@@ -62,6 +87,8 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
         mSystemClockUpdateThresholdMillis =
                 SystemProperties.getInt("ro.sys.time_detector_update_diff",
                         SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT);
+
+        mOriginPriorities = getOriginPriorities(context);
     }
 
     @Override
@@ -76,6 +103,16 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
         } catch (Settings.SettingNotFoundException snfe) {
             return true;
         }
+    }
+
+    @Override
+    public Instant autoTimeLowerBound() {
+        return TIME_LOWER_BOUND;
+    }
+
+    @Override
+    public int[] autoOriginPriorities() {
+        return mOriginPriorities;
     }
 
     @Override
@@ -111,6 +148,22 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     private void checkWakeLockHeld() {
         if (!mWakeLock.isHeld()) {
             Slog.wtf(TAG, "WakeLock " + mWakeLock + " not held");
+        }
+    }
+
+    private static int[] getOriginPriorities(@NonNull Context context) {
+        String[] originStrings =
+                context.getResources().getStringArray(R.array.config_autoTimeSourcesPriority);
+        if (originStrings.length == 0) {
+            return DEFAULT_AUTOMATIC_TIME_ORIGIN_PRIORITIES;
+        } else {
+            int[] origins = new int[originStrings.length];
+            for (int i = 0; i < originStrings.length; i++) {
+                int origin = stringToOrigin(originStrings[i]);
+                origins[i] = origin;
+            }
+
+            return origins;
         }
     }
 }

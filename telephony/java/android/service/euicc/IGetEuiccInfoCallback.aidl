@@ -20,6 +20,6 @@ import android.telephony.euicc.EuiccInfo;
 
 /** @hide */
 oneway interface IGetEuiccInfoCallback {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void onSuccess(in EuiccInfo euiccInfo);
 }

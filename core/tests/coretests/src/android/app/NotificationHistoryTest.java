@@ -117,8 +117,8 @@ public class NotificationHistoryTest {
         history.addNotificationToWrite(n);
 
         assertThat(history.getNotificationsToWrite().size()).isEqualTo(2);
-        assertThat(history.getNotificationsToWrite().get(0)).isSameAs(n2);
-        assertThat(history.getNotificationsToWrite().get(1)).isSameAs(n);
+        assertThat(history.getNotificationsToWrite().get(0)).isSameInstanceAs(n2);
+        assertThat(history.getNotificationsToWrite().get(1)).isSameInstanceAs(n);
         assertThat(history.getHistoryCount()).isEqualTo(2);
     }
 
@@ -141,11 +141,11 @@ public class NotificationHistoryTest {
         history.addNotificationsToWrite(secondHistory);
 
         assertThat(history.getNotificationsToWrite().size()).isEqualTo(5);
-        assertThat(history.getNotificationsToWrite().get(0)).isSameAs(n3);
-        assertThat(history.getNotificationsToWrite().get(1)).isSameAs(n);
-        assertThat(history.getNotificationsToWrite().get(2)).isSameAs(n4);
-        assertThat(history.getNotificationsToWrite().get(3)).isSameAs(n2);
-        assertThat(history.getNotificationsToWrite().get(4)).isSameAs(n5);
+        assertThat(history.getNotificationsToWrite().get(0)).isSameInstanceAs(n3);
+        assertThat(history.getNotificationsToWrite().get(1)).isSameInstanceAs(n);
+        assertThat(history.getNotificationsToWrite().get(2)).isSameInstanceAs(n4);
+        assertThat(history.getNotificationsToWrite().get(3)).isSameInstanceAs(n2);
+        assertThat(history.getNotificationsToWrite().get(4)).isSameInstanceAs(n5);
         assertThat(history.getHistoryCount()).isEqualTo(5);
 
         assertThat(history.getPooledStringsToWrite()).asList().contains(n2.getChannelName());

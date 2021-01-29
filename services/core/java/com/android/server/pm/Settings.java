@@ -476,6 +476,10 @@ public final class Settings {
         return mRenamedPackages.put(pkgName, origPkgName);
     }
 
+    void removeRenamedPackageLPw(String pkgName) {
+        mRenamedPackages.remove(pkgName);
+    }
+
     public boolean canPropagatePermissionToInstantApp(String permName) {
         return mPermissions.canPropagatePermissionToInstantApp(permName);
     }
@@ -1406,8 +1410,7 @@ public final class Settings {
                 PreferredActivity pa = new PreferredActivity(parser);
                 if (pa.mPref.getParseError() == null) {
                     final PreferredIntentResolver resolver = editPreferredActivitiesLPw(userId);
-                    ArrayList<PreferredActivity> pal = resolver.findFilters(pa);
-                    if (pal == null || pal.size() == 0 || pa.mPref.mAlways) {
+                    if (resolver.shouldAddPreferredActivity(pa)) {
                         resolver.addFilter(pa);
                     }
                 } else {
@@ -1613,6 +1616,7 @@ public final class Settings {
                     return;
                 }
                 str = new FileInputStream(userPackagesStateFile);
+                if (DEBUG_MU) Log.i(TAG, "Reading " + userPackagesStateFile);
             }
             final XmlPullParser parser = Xml.newPullParser();
             parser.setInput(str, StandardCharsets.UTF_8.name());
@@ -2057,9 +2061,13 @@ public final class Settings {
 
             serializer.startTag(null, TAG_PACKAGE_RESTRICTIONS);
 
+            if (DEBUG_MU) Log.i(TAG, "Writing " + userPackagesStateFile);
             for (final PackageSetting pkg : mPackages.values()) {
                 final PackageUserState ustate = pkg.readUserState(userId);
-                if (DEBUG_MU) Log.i(TAG, "  pkg=" + pkg.name + ", state=" + ustate.enabled);
+                if (DEBUG_MU) {
+                    Log.i(TAG, "  pkg=" + pkg.name + ", installed=" + ustate.installed
+                            + ", state=" + ustate.enabled);
+                }
 
                 serializer.startTag(null, TAG_PACKAGE);
                 serializer.attribute(null, ATTR_NAME, pkg.name);

@@ -44,7 +44,7 @@ interface IAccessibilityManager {
 
     List<AccessibilityServiceInfo> getInstalledAccessibilityServiceList(int userId);
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     List<AccessibilityServiceInfo> getEnabledAccessibilityServiceList(int feedbackType, int userId);
 
     int addAccessibilityInteractionConnection(IWindow windowToken, IBinder leashToken,

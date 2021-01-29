@@ -108,27 +108,20 @@ static void BM_ApplyStyleFramework(benchmark::State& state) {
   device_config.screenHeightDp = 1024;
   device_config.sdkVersion = 27;
 
-  Res_value value;
-  ResTable_config config;
-  uint32_t flags = 0u;
-  ApkAssetsCookie cookie =
-      assetmanager.GetResource(basic::R::layout::layoutt, false /*may_be_bag*/,
-                               0u /*density_override*/, &value, &config, &flags);
-  if (cookie == kInvalidCookie) {
+  auto value = assetmanager.GetResource(basic::R::layout::layoutt);
+  if (!value.has_value()) {
     state.SkipWithError("failed to find R.layout.layout");
     return;
   }
 
-  size_t len = 0u;
-  const char* layout_path =
-      assetmanager.GetStringPoolForCookie(cookie)->string8At(value.data, &len);
-  if (layout_path == nullptr || len == 0u) {
+  auto layout_path = assetmanager.GetStringPoolForCookie(value->cookie)->string8At(value->data);
+  if (!layout_path.has_value()) {
     state.SkipWithError("failed to lookup layout path");
     return;
   }
 
-  std::unique_ptr<Asset> asset = assetmanager.OpenNonAsset(
-      StringPiece(layout_path, len).to_string(), cookie, Asset::ACCESS_BUFFER);
+  std::unique_ptr<Asset> asset = assetmanager.OpenNonAsset(layout_path->to_string(), value->cookie,
+                                                           Asset::ACCESS_BUFFER);
   if (asset == nullptr) {
     state.SkipWithError("failed to load layout");
     return;

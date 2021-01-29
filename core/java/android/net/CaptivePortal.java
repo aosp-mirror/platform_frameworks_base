@@ -15,17 +15,13 @@
  */
 package android.net;
 
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
-
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 /**
  * A class allowing apps handling the {@link ConnectivityManager#ACTION_CAPTIVE_PORTAL_SIGN_IN}
@@ -42,7 +38,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_RETURN_DISMISSED    = 0;
     /**
      * Response code from the captive portal application, indicating that the user did not login and
@@ -52,7 +47,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_RETURN_UNWANTED     = 1;
     /**
      * Response code from the captive portal application, indicating that the user does not wish to
@@ -62,7 +56,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_RETURN_WANTED_AS_IS = 2;
     /** Event offset of request codes from captive portal application. */
     private static final int APP_REQUEST_BASE = 100;
@@ -74,21 +67,9 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public static final int APP_REQUEST_REEVALUATION_REQUIRED = APP_REQUEST_BASE + 0;
 
     private final IBinder mBinder;
-
-    /** @hide */
-    @IntDef(value = {
-        MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_ACTIVITY,
-        MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_DISMISSED,
-        MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_UNWANTED,
-        MetricsEvent.ACTION_CAPTIVE_PORTAL_LOGIN_RESULT_WANTED_AS_IS,
-        MetricsEvent.CAPTIVE_PORTAL_LOGIN_ACTIVITY_SSL_ERROR,
-    })
-    public @interface EventId {
-    }
 
     /** @hide */
     public CaptivePortal(@NonNull IBinder binder) {
@@ -154,7 +135,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     public void useNetwork() {
         try {
             ICaptivePortal.Stub.asInterface(mBinder).appResponse(APP_RETURN_WANTED_AS_IS);
@@ -167,7 +147,6 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.NETWORK_STACK)
     public void reevaluateNetwork() {
         try {
@@ -183,8 +162,7 @@ public class CaptivePortal implements Parcelable {
      * @hide
      */
     @SystemApi
-    @TestApi
-    public void logEvent(@EventId int eventId, @NonNull String packageName) {
+    public void logEvent(int eventId, @NonNull String packageName) {
         try {
             ICaptivePortal.Stub.asInterface(mBinder).logEvent(eventId, packageName);
         } catch (RemoteException e) {

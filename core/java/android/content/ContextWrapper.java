@@ -35,6 +35,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -616,6 +617,35 @@ public class ContextWrapper extends Context {
         mBase.sendStickyBroadcast(intent);
     }
 
+    /**
+     * <p>Perform a {@link #sendBroadcast(Intent)} that is "sticky," meaning the
+     * Intent you are sending stays around after the broadcast is complete,
+     * so that others can quickly retrieve that data through the return
+     * value of {@link #registerReceiver(BroadcastReceiver, IntentFilter)}.  In
+     * all other ways, this behaves the same as
+     * {@link #sendBroadcast(Intent)}.
+     *
+     * @deprecated Sticky broadcasts should not be used.  They provide no security (anyone
+     * can access them), no protection (anyone can modify them), and many other problems.
+     * The recommended pattern is to use a non-sticky broadcast to report that <em>something</em>
+     * has changed, with another mechanism for apps to retrieve the current value whenever
+     * desired.
+     *
+     * @param intent The Intent to broadcast; all receivers matching this
+     * Intent will receive the broadcast, and the Intent will be held to
+     * be re-broadcast to future receivers.
+     * @param options (optional) Additional sending options, generated from a
+     * {@link android.app.BroadcastOptions}.
+     *
+     * @see #sendBroadcast(Intent)
+     * @see #sendStickyOrderedBroadcast(Intent, BroadcastReceiver, Handler, int, String, Bundle)
+     */
+    @Override
+    @Deprecated
+    public void sendStickyBroadcast(@NonNull Intent intent, @Nullable Bundle options) {
+        mBase.sendStickyBroadcast(intent, options);
+    }
+
     @Override
     @Deprecated
     public void sendStickyOrderedBroadcast(
@@ -739,7 +769,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ComponentName startForegroundServiceAsUser(Intent service, UserHandle user) {
         return mBase.startForegroundServiceAsUser(service, user);
     }
@@ -942,7 +972,7 @@ public class ContextWrapper extends Context {
 
     /** @hide */
     @Override
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(trackingBug = 175981568)
     public Context createApplicationContext(ApplicationInfo application,
             int flags) throws PackageManager.NameNotFoundException {
         return mBase.createApplicationContext(application, flags);

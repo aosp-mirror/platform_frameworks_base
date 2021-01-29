@@ -108,10 +108,8 @@
     <string name="screenrecord_resume_label" msgid="4972223043729555575">"繼續"</string>
     <string name="screenrecord_cancel_label" msgid="7850926573274483294">"取消"</string>
     <string name="screenrecord_share_label" msgid="5025590804030086930">"分享"</string>
-    <string name="screenrecord_delete_label" msgid="1376347010553987058">"刪除"</string>
     <string name="screenrecord_cancel_success" msgid="1775448688137393901">"已取消錄製螢幕畫面"</string>
     <string name="screenrecord_save_message" msgid="490522052388998226">"已儲存螢幕畫面錄製內容，輕觸即可查看"</string>
-    <string name="screenrecord_delete_description" msgid="1604522770162810570">"已刪除螢幕畫面錄製內容"</string>
     <string name="screenrecord_delete_error" msgid="2870506119743013588">"刪除螢幕畫面錄製內容時發生錯誤"</string>
     <string name="screenrecord_permission_error" msgid="7856841237023137686">"無法取得權限"</string>
     <string name="screenrecord_start_error" msgid="2200660692479682368">"開始錄製螢幕畫面時發生錯誤"</string>
@@ -712,7 +710,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"預設"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"泡泡"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"不震動或發出聲音"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並顯示在對話部分的下方"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不震動或發出聲音，並調整排序到其他對話下方"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"根據手機的設定響鈴或震動"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能會根據手機的設定響鈴或震動。根據預設，來自「<xliff:g id="APP_NAME">%1$s</xliff:g>」的對話會以對話框形式顯示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"利用浮動式捷徑快速存取這項內容。"</string>
@@ -884,12 +882,13 @@
     <string name="accessibility_action_divider_top_50" msgid="6275211443706497621">"以 50% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_top_30" msgid="5780597635887574916">"以 30% 的螢幕空間顯示頂端畫面"</string>
     <string name="accessibility_action_divider_bottom_full" msgid="7352434720610115395">"以全螢幕顯示底部畫面"</string>
-    <string name="accessibility_qs_edit_tile_label" msgid="9079791448815232967">"位置 <xliff:g id="POSITION">%1$d</xliff:g>，<xliff:g id="TILE_NAME">%2$s</xliff:g>。輕觸兩下即可編輯。"</string>
-    <string name="accessibility_qs_edit_add_tile_label" msgid="8292218072049068613">"<xliff:g id="TILE_NAME">%1$s</xliff:g>。輕觸兩下即可新增。"</string>
-    <string name="accessibility_qs_edit_move_tile" msgid="6027997446473163426">"移動 <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_remove_tile" msgid="3406781901949899624">"移除 <xliff:g id="TILE_NAME">%1$s</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_add" msgid="6289879620154587233">"將 <xliff:g id="TILE_NAME">%1$s</xliff:g> 新增到位置 <xliff:g id="POSITION">%2$d</xliff:g>"</string>
-    <string name="accessibility_qs_edit_tile_move" msgid="4841770637244326837">"將 <xliff:g id="TILE_NAME">%1$s</xliff:g> 移到位置 <xliff:g id="POSITION">%2$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"移除圖塊"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"將圖塊加到結尾處"</string>
+    <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"移動圖塊"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"新增圖塊"</string>
+    <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"移至 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"新增到位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
+    <string name="accessibility_qs_edit_position" msgid="4509277359815711830">"位置 <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="741658939453595297">"快速設定編輯器。"</string>
     <string name="accessibility_desc_notification_icon" msgid="7331265967584178674">"<xliff:g id="ID_1">%1$s</xliff:g> 通知：<xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="4689301323912928801">"應用程式可能無法在分割畫面中運作。"</string>
@@ -922,11 +921,13 @@
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"跳到上一個"</string>
     <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"調整大小"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手機先前過熱，因此關閉電源"</string>
-    <string name="thermal_shutdown_message" msgid="7432744214105003895">"手機現在已恢復正常運作"</string>
+    <string name="thermal_shutdown_message" msgid="6142269839066172984">"手機現在已恢復正常運作。\n輕觸即可瞭解詳情"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"手機先前的溫度過高，因此關閉了電源以進行降溫。手機現在已恢復正常運作。\n\n以下情況可能會導致你的手機溫度過高：\n	• 使用需要密集處理資料的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上傳大型檔案\n	• 在高溫環境下使用手機"</string>
+    <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"查看處理步驟"</string>
     <string name="high_temp_title" msgid="2218333576838496100">"手機變熱"</string>
-    <string name="high_temp_notif_message" msgid="163928048626045592">"手機降溫時，部分功能會受限"</string>
+    <string name="high_temp_notif_message" msgid="1277346543068257549">"手機降溫時，某些功能會受限。\n輕觸即可瞭解詳情"</string>
     <string name="high_temp_dialog_message" msgid="3793606072661253968">"手機會自動嘗試降溫。你仍可繼續使用手機，但是手機的運作速度可能會較慢。\n\n手機降溫完畢後，就會恢復正常的運作速度。"</string>
+    <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"查看處理步驟"</string>
     <string name="high_temp_alarm_title" msgid="2359958549570161495">"拔除充電器"</string>
     <string name="high_temp_alarm_notify_message" msgid="7186272817783835089">"為這個裝置充電時發生問題。這可能是因為傳輸線過熱所致，請拔除電源變壓器並採取處理措施。"</string>
     <string name="high_temp_alarm_help_care_steps" msgid="5017002218341329566">"查看處理步驟"</string>
@@ -987,7 +988,14 @@
     <string name="auto_saver_enabled_text" msgid="7889491183116752719">"省電模式會在電量低於 <xliff:g id="PERCENTAGE">%d</xliff:g>%% 時自動開啟。"</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"設定"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"我知道了"</string>
-    <string name="heap_dump_tile_name" msgid="2464189856478823046">"傾印 SysUI 記憶體快照"</string>
+    <string name="heap_dump_tile_name" msgid="2464189856478823046">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="2969750601815230385">"「<xliff:g id="APP">%1$s</xliff:g>」正在使用<xliff:g id="TYPES_LIST">%2$s</xliff:g>。"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"有多個應用程式正在使用<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
+    <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
+    <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 和 "</string>
+    <string name="privacy_type_camera" msgid="7974051382167078332">"相機"</string>
+    <string name="privacy_type_location" msgid="7991481648444066703">"位置"</string>
+    <string name="privacy_type_microphone" msgid="9136763906797732428">"麥克風"</string>
     <string name="sensor_privacy_mode" msgid="4462866919026513692">"已關閉感應器"</string>
     <string name="device_services" msgid="1549944177856658705">"裝置服務"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"無標題"</string>
@@ -1066,7 +1074,7 @@
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在載入建議控制項"</string>
     <string name="controls_media_title" msgid="1746947284862928133">"媒體"</string>
     <string name="controls_media_close_session" msgid="3957093425905475065">"隱藏目前的工作階段。"</string>
-    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"隱藏"</string>
+    <string name="controls_media_dismiss_button" msgid="9081375542265132213">"關閉"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"繼續播放"</string>
     <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無效，請查看應用程式"</string>

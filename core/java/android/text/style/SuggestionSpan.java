@@ -23,6 +23,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -125,9 +126,9 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
     private final String mLanguageTag;
     private final int mHashCode;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private float mEasyCorrectUnderlineThickness;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mEasyCorrectUnderlineColor;
 
     private float mMisspelledUnderlineThickness;
@@ -402,7 +403,7 @@ public class SuggestionSpan extends CharacterStyle implements ParcelableSpan {
      * @deprecated this is deprecated in {@link android.os.Build.VERSION_CODES#Q}.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @Deprecated
     public void notifySelection(Context context, String original, int index) {
         Log.w(TAG, "notifySelection() is deprecated.  Does nothing.");

@@ -24,6 +24,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.text.LineBreaker;
+import android.os.Build;
 import android.text.method.TextKeyListener;
 import android.text.style.AlignmentSpan;
 import android.text.style.LeadingMarginSpan;
@@ -414,7 +415,7 @@ public abstract class Layout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void drawText(Canvas canvas, int firstLine, int lastLine) {
         int previousLineBottom = getLineTop(firstLine);
         int previousLineEnd = getLineStart(firstLine);
@@ -583,7 +584,7 @@ public abstract class Layout {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public void drawBackground(Canvas canvas, Path highlight, Paint highlightPaint,
             int cursorOffsetVertical, int firstLine, int lastLine) {
         // First, draw LineBackgroundSpans.
@@ -664,7 +665,7 @@ public abstract class Layout {
      * @return The range of lines that need to be drawn, possibly empty.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public long getLineRangeForDraw(Canvas canvas) {
         int dtop, dbottom;
 
@@ -1154,7 +1155,7 @@ public abstract class Layout {
      * optionally clamp it so that it doesn't exceed the width of the layout.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public float getPrimaryHorizontal(int offset, boolean clamped) {
         boolean trailing = primaryIsTrailingPrevious(offset);
         return getHorizontal(offset, trailing, clamped);
@@ -1174,7 +1175,7 @@ public abstract class Layout {
      * optionally clamp it so that it doesn't exceed the width of the layout.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public float getSecondaryHorizontal(int offset, boolean clamped) {
         boolean trailing = primaryIsTrailingPrevious(offset);
         return getHorizontal(offset, !trailing, clamped);
@@ -1849,7 +1850,7 @@ public abstract class Layout {
      * only robust for left-aligned displays.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public boolean shouldClampCursor(int line) {
         // Only clamp cursor position in left-aligned displays.
         switch (getParagraphAlignment(line)) {

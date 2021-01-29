@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"이름이 없는 블루투스 기기 표시"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"절대 볼륨 사용 안함"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche 사용 설정"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"향상된 연결"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"블루투스 AVRCP 버전"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"블루투스 AVRCP 버전 선택"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"블루투스 MAP 버전"</string>
@@ -539,7 +538,7 @@
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"지금 설정"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"나중에"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"추가"</string>
-    <string name="user_new_user_name" msgid="60979820612818840">"새 사용자"</string>
+    <string name="user_new_user_name" msgid="60979820612818840">"신규 사용자"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"새 프로필"</string>
     <string name="user_info_settings_title" msgid="6351390762733279907">"사용자 정보"</string>
     <string name="profile_info_settings_title" msgid="105699672534365099">"프로필 정보"</string>

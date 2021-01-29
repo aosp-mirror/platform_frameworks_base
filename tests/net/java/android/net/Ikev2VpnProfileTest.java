@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.net.VpnProfile;
+import com.android.net.module.util.ProxyUtils;
 import com.android.org.bouncycastle.x509.X509V1CertificateGenerator;
 
 import org.junit.Before;
@@ -67,7 +68,8 @@ public class Ikev2VpnProfileTest {
                     return "fooPackage";
                 }
             };
-    private final ProxyInfo mProxy = new ProxyInfo(SERVER_ADDR_STRING, -1, EXCL_LIST);
+    private final ProxyInfo mProxy = ProxyInfo.buildDirectProxy(
+            SERVER_ADDR_STRING, -1, ProxyUtils.exclusionStringAsList(EXCL_LIST));
 
     private X509Certificate mUserCert;
     private X509Certificate mServerRootCa;

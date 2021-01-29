@@ -21,8 +21,8 @@ import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StrictMode;
 import android.os.SystemClock;
-import android.system.suspend.ISuspendControlService;
-import android.system.suspend.WakeLockInfo;
+import android.system.suspend.internal.ISuspendControlServiceInternal;
+import android.system.suspend.internal.WakeLockInfo;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -66,7 +66,7 @@ public class KernelWakelockReader {
 
     private final String[] mProcWakelocksName = new String[3];
     private final long[] mProcWakelocksData = new long[3];
-    private ISuspendControlService mSuspendControlService = null;
+    private ISuspendControlServiceInternal mSuspendControlService = null;
     private byte[] mKernelWakelockBuffer = new byte[32 * 1024];
 
     /**
@@ -78,13 +78,16 @@ public class KernelWakelockReader {
         boolean useSystemSuspend = (new File(sSysClassWakeupDir)).exists();
 
         if (useSystemSuspend) {
-            // Get both kernel and native wakelock stats from SystemSuspend
-            updateVersion(staleStats);
-            if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
-                Slog.w(TAG, "Failed to get wakelock stats from SystemSuspend");
-                return null;
+            // static read/write lock protection for sKernelWakelockUpdateVersion
+            synchronized (KernelWakelockReader.class) {
+                // Get both kernel and native wakelock stats from SystemSuspend
+                updateVersion(staleStats);
+                if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
+                    Slog.w(TAG, "Failed to get wakelock stats from SystemSuspend");
+                    return null;
+                }
+                return removeOldStats(staleStats);
             }
-            return removeOldStats(staleStats);
         } else {
             Arrays.fill(mKernelWakelockBuffer, (byte) 0);
             int len = 0;
@@ -141,25 +144,29 @@ public class KernelWakelockReader {
                 }
             }
 
-            updateVersion(staleStats);
-            // Get native wakelock stats from SystemSuspend
-            if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
-                Slog.w(TAG, "Failed to get Native wakelock stats from SystemSuspend");
+            // static read/write lock protection for sKernelWakelockUpdateVersion
+            synchronized (KernelWakelockReader.class) {
+                updateVersion(staleStats);
+                // Get native wakelock stats from SystemSuspend
+                if (getWakelockStatsFromSystemSuspend(staleStats) == null) {
+                    Slog.w(TAG, "Failed to get Native wakelock stats from SystemSuspend");
+                }
+                // Get kernel wakelock stats
+                parseProcWakelocks(mKernelWakelockBuffer, len, wakeup_sources, staleStats);
+                return removeOldStats(staleStats);
             }
-            // Get kernel wakelock stats
-            parseProcWakelocks(mKernelWakelockBuffer, len, wakeup_sources, staleStats);
-            return removeOldStats(staleStats);
         }
     }
 
     /**
      * Attempt to wait for suspend_control service if not immediately available.
      */
-    private ISuspendControlService waitForSuspendControlService() throws ServiceNotFoundException {
-        final String name = "suspend_control";
+    private ISuspendControlServiceInternal waitForSuspendControlService()
+            throws ServiceNotFoundException {
+        final String name = "suspend_control_internal";
         final int numRetries = 5;
         for (int i = 0; i < numRetries; i++) {
-            mSuspendControlService = ISuspendControlService.Stub.asInterface(
+            mSuspendControlService = ISuspendControlServiceInternal.Stub.asInterface(
                                         ServiceManager.getService(name));
             if (mSuspendControlService != null) {
                 return mSuspendControlService;

@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"ਅਨਾਮ ਬਲੂਟੁੱਥ ਡੀਵਾਈਸਾਂ ਦਿਖਾਓ"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ਪੂਰਨ ਅਵਾਜ਼ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ਨੂੰ ਚਾਲੂ ਕਰੋ"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"ਵਿਸਤ੍ਰਿਤ ਕਨੈਕਟੀਵਿਟੀ"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ਬਲੂਟੁੱਥ AVRCP ਵਰਜਨ ਚੁਣੋ"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP ਵਰਜਨ"</string>

@@ -83,7 +83,7 @@ interface IWallpaperManager {
      * information about that wallpaper.  Otherwise, if it is a static image,
      * simply return null.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     WallpaperInfo getWallpaperInfo(int userId);
 
     /**

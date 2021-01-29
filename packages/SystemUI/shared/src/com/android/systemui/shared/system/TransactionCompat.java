@@ -114,6 +114,11 @@ public class TransactionCompat {
         t.deferTransactionUntil(surfaceControl, barrier, frameNumber);
     }
 
+    public static void setRelativeLayer(Transaction t, SurfaceControl surfaceControl,
+            SurfaceControl relativeTo, int z) {
+        t.setRelativeLayer(surfaceControl, relativeTo, z);
+    }
+
     @Deprecated
     public static void setEarlyWakeup(Transaction t) {
     }

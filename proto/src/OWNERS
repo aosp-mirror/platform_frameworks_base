@@ -1,0 +1,3 @@
+per-file gnss.proto = file:/services/core/java/com/android/server/location/OWNERS
+per-file wifi.proto = file:/wifi/OWNERS
+per-file camera.proto = file:/services/core/java/com/android/server/camera/OWNERS

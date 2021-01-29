@@ -88,6 +88,7 @@ class LockSettingsStorage {
     private static final String CHILD_PROFILE_LOCK_FILE = "gatekeeper.profile.key";
 
     private static final String REBOOT_ESCROW_FILE = "reboot.escrow.key";
+    private static final String REBOOT_ESCROW_SERVER_BLOB = "reboot.escrow.server.blob.key";
 
     private static final String SYNTHETIC_PASSWORD_DIRECTORY = "spblob/";
 
@@ -317,6 +318,22 @@ class LockSettingsStorage {
         deleteFile(getRebootEscrowFile(userId));
     }
 
+    public void writeRebootEscrowServerBlob(byte[] serverBlob) {
+        writeFile(getRebootEscrowServerBlob(), serverBlob);
+    }
+
+    public byte[] readRebootEscrowServerBlob() {
+        return readFile(getRebootEscrowServerBlob());
+    }
+
+    public boolean hasRebootEscrowServerBlob() {
+        return hasFile(getRebootEscrowServerBlob());
+    }
+
+    public void removeRebootEscrowServerBlob() {
+        deleteFile(getRebootEscrowServerBlob());
+    }
+
     public boolean hasPassword(int userId) {
         return hasFile(getLockPasswordFilename(userId));
     }
@@ -443,6 +460,12 @@ class LockSettingsStorage {
     @VisibleForTesting
     String getRebootEscrowFile(int userId) {
         return getLockCredentialFilePathForUser(userId, REBOOT_ESCROW_FILE);
+    }
+
+    @VisibleForTesting
+    String getRebootEscrowServerBlob() {
+        // There is a single copy of server blob for all users.
+        return getLockCredentialFilePathForUser(UserHandle.USER_SYSTEM, REBOOT_ESCROW_SERVER_BLOB);
     }
 
     private String getLockCredentialFilePathForUser(int userId, String basename) {

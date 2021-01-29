@@ -207,7 +207,7 @@ public class Notification implements Parcelable
      * <p>
      * Avoids spamming the system with overly large strings such as full e-mails.
      */
-    private static final int MAX_CHARSEQUENCE_LENGTH = 5 * 1024;
+    private static final int MAX_CHARSEQUENCE_LENGTH = 1024;
 
     /**
      * Maximum entries of reply text that are accepted by Builder and friends.
@@ -4801,7 +4801,6 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.time, View.GONE);
             contentView.setImageViewIcon(R.id.profile_badge, null);
             contentView.setViewVisibility(R.id.profile_badge, View.GONE);
-            contentView.setViewVisibility(R.id.alerted_icon, View.GONE);
             mN.mUsesStandardHeader = false;
         }
 
@@ -5233,7 +5232,7 @@ public class Notification implements Parcelable
         /**
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         public String loadHeaderAppName() {
             CharSequence name = null;
             final PackageManager pm = mContext.getPackageManager();
@@ -7830,7 +7829,7 @@ public class Notification implements Parcelable
              */
             public Message(@NonNull CharSequence text, long timestamp, @Nullable Person sender,
                     boolean remoteInputHistory) {
-                mText = text;
+                mText = safeCharSequence(text);
                 mTimestamp = timestamp;
                 mSender = sender;
                 mRemoteInputHistory = remoteInputHistory;
@@ -7944,7 +7943,7 @@ public class Notification implements Parcelable
                 bundle.putLong(KEY_TIMESTAMP, mTimestamp);
                 if (mSender != null) {
                     // Legacy listeners need this
-                    bundle.putCharSequence(KEY_SENDER, mSender.getName());
+                    bundle.putCharSequence(KEY_SENDER, safeCharSequence(mSender.getName()));
                     bundle.putParcelable(KEY_SENDER_PERSON, mSender);
                 }
                 if (mDataMimeType != null) {

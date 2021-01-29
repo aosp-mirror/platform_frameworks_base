@@ -562,7 +562,7 @@ public class IntentFilter implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final void setAutoVerify(boolean autoVerify) {
         mVerifyState &= ~STATE_VERIFY_AUTO;
         if (autoVerify) mVerifyState |= STATE_VERIFY_AUTO;
@@ -942,7 +942,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final boolean hasExactDataType(String type) {
         return mDataTypes != null && mDataTypes.contains(type);
     }
@@ -1287,7 +1287,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final boolean hasDataSchemeSpecificPart(PatternMatcher ssp) {
         if (mDataSchemeSpecificParts == null) {
             return false;
@@ -1371,7 +1371,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final boolean hasDataAuthority(AuthorityEntry auth) {
         if (mDataAuthorities == null) {
             return false;
@@ -1480,7 +1480,7 @@ public class IntentFilter implements Parcelable {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final boolean hasDataPath(PatternMatcher path) {
         if (mDataPaths == null) {
             return false;

@@ -16,20 +16,38 @@
 
 package com.android.server.biometrics;
 
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 import static android.hardware.biometrics.BiometricManager.Authenticators;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
+
+import android.annotation.NonNull;
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricPrompt.AuthenticationResultType;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Slog;
 
+import com.android.internal.R;
+import com.android.internal.widget.LockPatternUtils;
+
+import java.util.List;
+
 public class Utils {
+    private static final String TAG = "BiometricUtils";
+
     public static boolean isDebugEnabled(Context context, int targetUserId) {
         if (targetUserId == UserHandle.USER_NULL) {
             return false;
@@ -255,5 +273,51 @@ public class Utils {
             default:
                 throw new IllegalArgumentException("Unsupported dismissal reason: " + reason);
         }
+    }
+
+    public static boolean isForeground(int callingUid, int callingPid) {
+        try {
+            final List<ActivityManager.RunningAppProcessInfo> procs =
+                    ActivityManager.getService().getRunningAppProcesses();
+            if (procs == null) {
+                Slog.e(TAG, "No running app processes found, defaulting to true");
+                return true;
+            }
+
+            for (int i = 0; i < procs.size(); i++) {
+                ActivityManager.RunningAppProcessInfo proc = procs.get(i);
+                if (proc.pid == callingPid && proc.uid == callingUid
+                        && proc.importance <= IMPORTANCE_FOREGROUND_SERVICE) {
+                    return true;
+                }
+            }
+        } catch (RemoteException e) {
+            Slog.w(TAG, "am.getRunningAppProcesses() failed");
+        }
+        return false;
+    }
+
+    public static boolean isKeyguard(Context context, String clientPackage) {
+        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
+
+        final ComponentName keyguardComponent = ComponentName.unflattenFromString(
+                context.getResources().getString(R.string.config_keyguardComponent));
+        final String keyguardPackage = keyguardComponent != null
+                ? keyguardComponent.getPackageName() : null;
+        return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
+    }
+
+    private static boolean containsFlag(int haystack, int needle) {
+        return (haystack & needle) != 0;
+    }
+
+    public static boolean isUserEncryptedOrLockdown(@NonNull LockPatternUtils lpu, int user) {
+        final int strongAuth = lpu.getStrongAuthForUser(user);
+        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
+        final boolean isLockDown = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        Slog.d(TAG, "isEncrypted: " + isEncrypted + " isLockdown: " + isLockDown);
+        return isEncrypted || isLockDown;
     }
 }

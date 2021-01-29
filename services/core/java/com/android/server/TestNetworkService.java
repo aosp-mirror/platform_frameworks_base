@@ -29,9 +29,9 @@ import android.net.IpPrefix;
 import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.NetworkAgent;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkInfo.DetailedState;
+import android.net.NetworkProvider;
 import android.net.RouteInfo;
 import android.net.StringNetworkSpecifier;
 import android.net.TestNetworkInterface;
@@ -61,8 +61,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** @hide */
 class TestNetworkService extends ITestNetworkManager.Stub {
-    @NonNull private static final String TAG = TestNetworkService.class.getSimpleName();
-    @NonNull private static final String TEST_NETWORK_TYPE = "TEST_NETWORK";
+    @NonNull private static final String TEST_NETWORK_LOGTAG = "TestNetworkAgent";
+    @NonNull private static final String TEST_NETWORK_PROVIDER_NAME = "TestNetworkProvider";
     @NonNull private static final AtomicInteger sTestTunIndex = new AtomicInteger();
 
     @NonNull private final Context mContext;
@@ -71,6 +71,9 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
     @NonNull private final HandlerThread mHandlerThread;
     @NonNull private final Handler mHandler;
+
+    @NonNull private final ConnectivityManager mCm;
+    @NonNull private final NetworkProvider mNetworkProvider;
 
     // Native method stubs
     private static native int jniCreateTunTap(boolean isTun, @NonNull String iface);
@@ -85,6 +88,10 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         mContext = Objects.requireNonNull(context, "missing Context");
         mNMS = Objects.requireNonNull(netManager, "missing INetworkManagementService");
         mNetd = Objects.requireNonNull(NetdService.getInstance(), "could not get netd instance");
+        mCm = mContext.getSystemService(ConnectivityManager.class);
+        mNetworkProvider = new NetworkProvider(mContext, mHandler.getLooper(),
+                TEST_NETWORK_PROVIDER_NAME);
+        mCm.registerNetworkProvider(mNetworkProvider);
     }
 
     /**
@@ -100,23 +107,23 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
         String ifacePrefix = isTun ? TEST_TUN_PREFIX : TEST_TAP_PREFIX;
         String iface = ifacePrefix + sTestTunIndex.getAndIncrement();
-        return Binder.withCleanCallingIdentity(
-                () -> {
-                    try {
-                        ParcelFileDescriptor tunIntf =
-                                ParcelFileDescriptor.adoptFd(jniCreateTunTap(isTun, iface));
-                        for (LinkAddress addr : linkAddrs) {
-                            mNetd.interfaceAddAddress(
-                                    iface,
-                                    addr.getAddress().getHostAddress(),
-                                    addr.getPrefixLength());
-                        }
+        final long token = Binder.clearCallingIdentity();
+        try {
+            ParcelFileDescriptor tunIntf =
+                    ParcelFileDescriptor.adoptFd(jniCreateTunTap(isTun, iface));
+            for (LinkAddress addr : linkAddrs) {
+                mNetd.interfaceAddAddress(
+                        iface,
+                        addr.getAddress().getHostAddress(),
+                        addr.getPrefixLength());
+            }
 
-                        return new TestNetworkInterface(tunIntf, iface);
-                    } catch (RemoteException e) {
-                        throw e.rethrowFromSystemServer();
-                    }
-                });
+            return new TestNetworkInterface(tunIntf, iface);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /**
@@ -150,9 +157,6 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         private static final int NETWORK_SCORE = 1; // Use a low, non-zero score.
 
         private final int mUid;
-        @NonNull private final NetworkInfo mNi;
-        @NonNull private final NetworkCapabilities mNc;
-        @NonNull private final LinkProperties mLp;
 
         @GuardedBy("mBinderLock")
         @NonNull
@@ -161,21 +165,17 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         @NonNull private final Object mBinderLock = new Object();
 
         private TestNetworkAgent(
-                @NonNull Looper looper,
                 @NonNull Context context,
-                @NonNull NetworkInfo ni,
+                @NonNull Looper looper,
                 @NonNull NetworkCapabilities nc,
                 @NonNull LinkProperties lp,
+                @NonNull NetworkAgentConfig config,
                 int uid,
-                @NonNull IBinder binder)
+                @NonNull IBinder binder,
+                @NonNull NetworkProvider np)
                 throws RemoteException {
-            super(looper, context, TEST_NETWORK_TYPE, ni, nc, lp, NETWORK_SCORE);
-
+            super(context, looper, TEST_NETWORK_LOGTAG, nc, lp, NETWORK_SCORE, config, np);
             mUid = uid;
-            mNi = ni;
-            mNc = nc;
-            mLp = lp;
-
             synchronized (mBinderLock) {
                 mBinder = binder; // Binder null-checks in create()
 
@@ -203,9 +203,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         }
 
         private void teardown() {
-            mNi.setDetailedState(DetailedState.DISCONNECTED, null, null);
-            mNi.setIsAvailable(false);
-            sendNetworkInfo(mNi);
+            unregister();
 
             // Synchronize on mBinderLock to ensure that unlinkToDeath is never called more than
             // once (otherwise it could throw an exception)
@@ -219,7 +217,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             // Has to be in TestNetworkAgent to ensure all teardown codepaths properly clean up
             // resources, even for binder death or unwanted calls.
             synchronized (mTestNetworkTracker) {
-                mTestNetworkTracker.remove(getNetwork().netId);
+                mTestNetworkTracker.remove(getNetwork().getNetId());
             }
         }
     }
@@ -238,17 +236,13 @@ class TestNetworkService extends ITestNetworkManager.Stub {
         Objects.requireNonNull(context, "missing Context");
         // iface and binder validity checked by caller
 
-        // Build network info with special testing type
-        NetworkInfo ni = new NetworkInfo(ConnectivityManager.TYPE_TEST, 0, TEST_NETWORK_TYPE, "");
-        ni.setDetailedState(DetailedState.CONNECTED, null, null);
-        ni.setIsAvailable(true);
-
         // Build narrow set of NetworkCapabilities, useful only for testing
         NetworkCapabilities nc = new NetworkCapabilities();
         nc.clearAll(); // Remove default capabilities.
         nc.addTransportType(NetworkCapabilities.TRANSPORT_TEST);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED);
         nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED);
+        nc.addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
         nc.setNetworkSpecifier(new StringNetworkSpecifier(iface));
         nc.setAdministratorUids(administratorUids);
         if (!isMetered) {
@@ -290,7 +284,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
             lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), null, iface));
         }
 
-        return new TestNetworkAgent(looper, context, ni, nc, lp, callingUid, binder);
+        final TestNetworkAgent agent = new TestNetworkAgent(context, looper, nc, lp,
+                new NetworkAgentConfig.Builder().build(), callingUid, binder,
+                mNetworkProvider);
+        agent.register();
+        agent.markConnected();
+        return agent;
     }
 
     /**
@@ -319,7 +318,12 @@ class TestNetworkService extends ITestNetworkManager.Stub {
 
         try {
             // This requires NETWORK_STACK privileges.
-            Binder.withCleanCallingIdentity(() -> mNMS.setInterfaceUp(iface));
+            final long token = Binder.clearCallingIdentity();
+            try {
+                mNMS.setInterfaceUp(iface);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
 
             // Synchronize all accesses to mTestNetworkTracker to prevent the case where:
             // 1. TestNetworkAgent successfully binds to death of binder
@@ -338,7 +342,7 @@ class TestNetworkService extends ITestNetworkManager.Stub {
                                 administratorUids,
                                 binder);
 
-                mTestNetworkTracker.put(agent.getNetwork().netId, agent);
+                mTestNetworkTracker.put(agent.getNetwork().getNetId(), agent);
             }
         } catch (SocketException e) {
             throw new UncheckedIOException(e);

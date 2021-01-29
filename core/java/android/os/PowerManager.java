@@ -27,7 +27,6 @@ import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.app.PropertyInvalidatedCache;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -66,7 +65,7 @@ public final class PowerManager {
     /* NOTE: Wake lock levels were previously defined as a bit field, except that only a few
      * combinations were actually supported so the bit field was removed.  This explains
      * why the numbering scheme is so odd.  If adding a new wake lock level, any unused
-     * value (in frameworks/base/core/proto/android/os/enums.proto) can be used.
+     * value (in frameworks/proto_logging/stats/enums/os/enums.proto) can be used.
      */
 
     /**
@@ -1014,7 +1013,7 @@ public final class PowerManager {
      * Gets a float screen brightness setting.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public float getBrightnessConstraint(int constraint) {
         try {
             return mService.getBrightnessConstraint(constraint);
@@ -1565,7 +1564,6 @@ public final class PowerManager {
      * @see #isPowerSaveMode()
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(anyOf = {
             android.Manifest.permission.DEVICE_POWER,
             android.Manifest.permission.POWER_SAVER
@@ -1610,7 +1608,6 @@ public final class PowerManager {
      * @hide
      */
     @SystemApi
-    @TestApi
     @RequiresPermission(permission.POWER_SAVER)
     public boolean setDynamicPowerSaveHint(boolean powerSaveHint, int disableThreshold) {
         try {
@@ -1670,7 +1667,6 @@ public final class PowerManager {
      *  @hide
      */
     @SystemApi
-    @TestApi
     public static final int POWER_SAVE_MODE_TRIGGER_PERCENTAGE = 0;
 
     /**
@@ -1683,7 +1679,6 @@ public final class PowerManager {
      *  @hide
      */
     @SystemApi
-    @TestApi
     public static final int POWER_SAVE_MODE_TRIGGER_DYNAMIC = 1;
 
     /** @hide */
@@ -1708,7 +1703,6 @@ public final class PowerManager {
      */
     @AutoPowerSaveModeTriggers
     @SystemApi
-    @TestApi
     @RequiresPermission(android.Manifest.permission.POWER_SAVER)
     public int getPowerSaveModeTrigger() {
         try {
@@ -2213,7 +2207,7 @@ public final class PowerManager {
      * This broadcast is only sent to registered receivers.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @SdkConstant(SdkConstant.SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_LIGHT_DEVICE_IDLE_MODE_CHANGED
             = "android.os.action.LIGHT_DEVICE_IDLE_MODE_CHANGED";

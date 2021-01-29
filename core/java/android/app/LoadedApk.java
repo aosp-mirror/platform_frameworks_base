@@ -103,7 +103,6 @@ final class ServiceConnectionLeaked extends AndroidRuntimeException {
 public final class LoadedApk {
     static final String TAG = "LoadedApk";
     static final boolean DEBUG = false;
-    private static final String PROPERTY_NAME_APPEND_NATIVE = "pi.append_native_lib_paths";
 
     @UnsupportedAppUsage
     private final ActivityThread mActivityThread;
@@ -118,7 +117,7 @@ public final class LoadedApk {
     private String[] mOverlayDirs;
     @UnsupportedAppUsage
     private String mDataDir;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private String mLibDir;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private File mDataDirFile;
@@ -802,12 +801,9 @@ public final class LoadedApk {
 
         makePaths(mActivityThread, isBundledApp, mApplicationInfo, zipPaths, libPaths);
 
-        String libraryPermittedPath = mDataDir;
-        if (mActivityThread == null) {
-            // In a zygote context where mActivityThread is null we can't access the app data dir
-            // and including this in libraryPermittedPath would cause SELinux denials.
-            libraryPermittedPath = "";
-        }
+        // Including an inaccessible dir in libraryPermittedPath would cause SELinux denials
+        // when the loader attempts to canonicalise the path. so we don't.
+        String libraryPermittedPath = canAccessDataDir() ? mDataDir : "";
 
         if (isBundledApp) {
             // For bundled apps, add the base directory of the app (e.g.,
@@ -909,7 +905,7 @@ public final class LoadedApk {
             needToSetupJitProfiles = true;
         }
 
-        if (!libPaths.isEmpty() && SystemProperties.getBoolean(PROPERTY_NAME_APPEND_NATIVE, true)) {
+        if (!libPaths.isEmpty()) {
             // Temporarily disable logging of disk reads on the Looper thread as this is necessary
             StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
             try {
@@ -948,6 +944,33 @@ public final class LoadedApk {
         if (mClassLoader == null) {
             mClassLoader = mAppComponentFactory.instantiateClassLoader(mDefaultClassLoader,
                     new ApplicationInfo(mApplicationInfo));
+        }
+    }
+
+    /**
+     * Return whether we can access the package's private data directory in order to be able to
+     * load code from it.
+     */
+    private boolean canAccessDataDir() {
+        // In a zygote context where mActivityThread is null we can't access the app data dir.
+        if (mActivityThread == null) {
+            return false;
+        }
+
+        // A package can access its own data directory (the common case, so short-circuit it).
+        if (Objects.equals(mPackageName, ActivityThread.currentPackageName())) {
+            return true;
+        }
+
+        // Temporarily disable logging of disk reads on the Looper thread as this is necessary -
+        // and the loader will access the directory anyway if we don't check it.
+        StrictMode.ThreadPolicy oldPolicy = allowThreadDiskReads();
+        try {
+            // We are constructing a classloader for a different package. It is likely,
+            // but not certain, that we can't acccess its app data dir - so check.
+            return new File(mDataDir).canExecute();
+        } finally {
+            setThreadPolicy(oldPolicy);
         }
     }
 
@@ -1695,7 +1718,7 @@ public final class LoadedApk {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public IServiceConnection lookupServiceDispatcher(ServiceConnection c,
             Context context) {
         synchronized (mServices) {
@@ -1761,7 +1784,7 @@ public final class LoadedApk {
 
     static final class ServiceDispatcher {
         private final ServiceDispatcher.InnerConnection mIServiceConnection;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final ServiceConnection mConnection;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private final Context mContext;
@@ -1780,7 +1803,7 @@ public final class LoadedApk {
         }
 
         private static class InnerConnection extends IServiceConnection.Stub {
-            @UnsupportedAppUsage
+            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
             final WeakReference<LoadedApk.ServiceDispatcher> mDispatcher;
 
             InnerConnection(LoadedApk.ServiceDispatcher sd) {
@@ -1799,7 +1822,7 @@ public final class LoadedApk {
         private final ArrayMap<ComponentName, ServiceDispatcher.ConnectionInfo> mActiveConnections
             = new ArrayMap<ComponentName, ServiceDispatcher.ConnectionInfo>();
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         ServiceDispatcher(ServiceConnection conn,
                 Context context, Handler activityThread, int flags) {
             mIServiceConnection = new InnerConnection(this);
@@ -1864,7 +1887,7 @@ public final class LoadedApk {
             return mConnection;
         }
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         IServiceConnection getIServiceConnection() {
             return mIServiceConnection;
         }

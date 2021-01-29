@@ -147,6 +147,36 @@ public final class MediaRouter2Manager {
     }
 
     /**
+     * Starts scanning remote routes.
+     * @see #stopScan(String)
+     */
+    public void startScan() {
+        Client client = getOrCreateClient();
+        if (client != null) {
+            try {
+                mMediaRouterService.startScan(client);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+            }
+        }
+    }
+
+    /**
+     * Stops scanning remote routes to reduce resource consumption.
+     * @see #startScan(String)
+     */
+    public void stopScan() {
+        Client client = getOrCreateClient();
+        if (client != null) {
+            try {
+                mMediaRouterService.stopScan(client);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "Unable to get sessions. Service probably died.", ex);
+            }
+        }
+    }
+
+    /**
      * Gets a {@link android.media.session.MediaController} associated with the
      * given routing session.
      * If there is no matching media session, {@code null} is returned.

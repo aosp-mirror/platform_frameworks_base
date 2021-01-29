@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INPUT_CONSUMER;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
@@ -1476,9 +1477,14 @@ public class WindowManagerService extends IWindowManager.Stub
                         rootType, attrs.token, attrs.packageName)) {
                     return WindowManagerGlobal.ADD_BAD_APP_TOKEN;
                 }
-                final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
-                token = new WindowToken(this, binder, type, false, displayContent,
-                        session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                if (hasParent) {
+                    // Use existing parent window token for child windows.
+                    token = parentWindow.mToken;
+                } else {
+                    final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
+                    token = new WindowToken(this, binder, type, false, displayContent,
+                            session.mCanAddInternalSystemWindow, isRoundedCornerOverlay);
+                }
             } else if (rootType >= FIRST_APPLICATION_WINDOW
                     && rootType <= LAST_APPLICATION_WINDOW) {
                 activity = token.asActivityRecord();
@@ -2162,6 +2168,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (win.mAttrs.type != attrs.type) {
                     throw new IllegalArgumentException(
                             "Window type can not be changed after the window is added.");
+                }
+                if (!Arrays.equals(win.mAttrs.providesInsetsTypes, attrs.providesInsetsTypes)) {
+                    throw new IllegalArgumentException(
+                            "Insets types can not be changed after the window is added.");
                 }
 
                 // Odd choice but less odd than embedding in copyFrom()
@@ -5827,27 +5837,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public void setForceShowSystemBars(boolean show) {
-        boolean isAutomotive = mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE);
-        if (!isAutomotive) {
-            throw new UnsupportedOperationException("Force showing system bars is only supported"
-                    + "for Automotive use cases.");
-        }
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
-        synchronized (mGlobalLock) {
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    DisplayPolicy::setForceShowSystemBars, PooledLambda.__(), show);
-            mRoot.forAllDisplayPolicies(c);
-            c.recycle();
-        }
-    }
-
     public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -5886,6 +5875,11 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void createInputConsumer(IBinder token, String name, int displayId,
             InputChannel inputChannel) {
+        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+                && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
+            throw new SecurityException("createInputConsumer requires INPUT_CONSUMER permission");
+        }
+
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
@@ -5897,6 +5891,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public boolean destroyInputConsumer(String name, int displayId) {
+        if (!mAtmInternal.isCallerRecents(Binder.getCallingUid())
+                && mContext.checkCallingOrSelfPermission(INPUT_CONSUMER) != PERMISSION_GRANTED) {
+            throw new SecurityException("destroyInputConsumer requires INPUT_CONSUMER permission");
+        }
+
         synchronized (mGlobalLock) {
             DisplayContent display = mRoot.getDisplayContent(displayId);
             if (display != null) {
@@ -6188,7 +6187,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             if (inputMethodControlTarget != null) {
                 pw.print("  inputMethodControlTarget in display# "); pw.print(displayId);
-                pw.print(' '); pw.println(inputMethodControlTarget.getWindow());
+                pw.print(' '); pw.println(inputMethodControlTarget);
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);

@@ -32,7 +32,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.net.LinkProperties.ProvisioningChange;
-import android.net.util.LinkPropertiesUtils.CompareResult;
 import android.os.Build;
 import android.system.OsConstants;
 import android.util.ArraySet;
@@ -41,6 +40,7 @@ import androidx.core.os.BuildCompat;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.net.module.util.LinkPropertiesUtils.CompareResult;
 import com.android.testutils.DevSdkIgnoreRule;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreAfter;
 import com.android.testutils.DevSdkIgnoreRule.IgnoreUpTo;
@@ -52,7 +52,6 @@ import org.junit.runner.RunWith;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -447,23 +446,21 @@ public class LinkPropertiesTest {
         assertEquals(3, lp.getRoutes().size());
         assertAllRoutesHaveInterface("wlan0", lp);
 
-        // Check comparisons work.
+        // Check routes are updated correctly when calling setInterfaceName.
         LinkProperties lp2 = new LinkProperties(lp);
         assertAllRoutesHaveInterface("wlan0", lp2);
-        // LinkProperties#compareAllRoutes exists both in R and before R, but the return type
-        // changed in R, so a test compiled with the R version of LinkProperties cannot run on Q.
-        if (isAtLeastR()) {
-            assertEquals(0, lp.compareAllRoutes(lp2).added.size());
-            assertEquals(0, lp.compareAllRoutes(lp2).removed.size());
-        }
+        final CompareResult<RouteInfo> cr1 =
+                new CompareResult<>(lp.getAllRoutes(), lp2.getAllRoutes());
+        assertEquals(0, cr1.added.size());
+        assertEquals(0, cr1.removed.size());
 
         lp2.setInterfaceName("p2p0");
         assertAllRoutesHaveInterface("p2p0", lp2);
         assertAllRoutesNotHaveInterface("wlan0", lp2);
-        if (isAtLeastR()) {
-            assertEquals(3, lp.compareAllRoutes(lp2).added.size());
-            assertEquals(3, lp.compareAllRoutes(lp2).removed.size());
-        }
+        final CompareResult<RouteInfo> cr2 =
+                new CompareResult<>(lp.getAllRoutes(), lp2.getAllRoutes());
+        assertEquals(3, cr2.added.size());
+        assertEquals(3, cr2.removed.size());
 
         // Remove route with incorrect interface, no route removed.
         lp.removeRoute(new RouteInfo(prefix2, null, null));
@@ -954,28 +951,6 @@ public class LinkPropertiesTest {
         assertTrue(rmnet3.getAllRoutes().isEmpty());
         rmnet3.ensureDirectlyConnectedRoutes();
         assertEqualRoutes(Collections.singletonList(directRoute3), rmnet3.getAllRoutes());
-
-    }
-
-    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
-    public void testCompareResult() {
-        // Either adding or removing items
-        compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(1),
-                Arrays.asList(2, 3, 4), new ArrayList<>());
-        compareResult(Arrays.asList(1, 2), Arrays.asList(3, 2, 1, 4),
-                new ArrayList<>(), Arrays.asList(3, 4));
-
-
-        // adding and removing items at the same time
-        compareResult(Arrays.asList(1, 2, 3, 4), Arrays.asList(2, 3, 4, 5),
-                Arrays.asList(1), Arrays.asList(5));
-        compareResult(Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6),
-                Arrays.asList(1, 2, 3), Arrays.asList(4, 5, 6));
-
-        // null cases
-        compareResult(Arrays.asList(1, 2, 3), null, Arrays.asList(1, 2, 3), new ArrayList<>());
-        compareResult(null, Arrays.asList(3, 2, 1), new ArrayList<>(), Arrays.asList(1, 2, 3));
-        compareResult(null, null, new ArrayList<>(), new ArrayList<>());
     }
 
     private void assertEqualRoutes(Collection<RouteInfo> expected, Collection<RouteInfo> actual) {
@@ -985,13 +960,6 @@ public class LinkPropertiesTest {
         assertEquals(actual.size(), actualSet.size());
 
         assertEquals(expectedSet, actualSet);
-    }
-
-    private <T> void compareResult(List<T> oldItems, List<T> newItems, List<T> expectRemoved,
-            List<T> expectAdded) {
-        CompareResult<T> result = new CompareResult<>(oldItems, newItems);
-        assertEquals(new ArraySet<>(expectAdded), new ArraySet<>(result.added));
-        assertEquals(new ArraySet<>(expectRemoved), (new ArraySet<>(result.removed)));
     }
 
     private static LinkProperties makeLinkPropertiesForParceling() {

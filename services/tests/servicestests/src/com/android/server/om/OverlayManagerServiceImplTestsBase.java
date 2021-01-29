@@ -16,6 +16,8 @@
 
 package com.android.server.om;
 
+import static com.android.server.om.OverlayManagerServiceImpl.OperationFailedException;
+
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -27,8 +29,10 @@ import android.content.om.OverlayInfo.State;
 import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Pair;
 
 import androidx.annotation.Nullable;
 
@@ -42,23 +46,23 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /** Base class for creating {@link OverlayManagerServiceImplTests} tests. */
 class OverlayManagerServiceImplTestsBase {
     private OverlayManagerServiceImpl mImpl;
-    private DummyDeviceState mState;
-    private DummyListener mListener;
-    private DummyPackageManagerHelper mPackageManager;
-    private DummyIdmapDaemon mIdmapDaemon;
+    private FakeDeviceState mState;
+    private FakePackageManagerHelper mPackageManager;
+    private FakeIdmapDaemon mIdmapDaemon;
     private OverlayConfig mOverlayConfig;
+    private String mConfigSignaturePackageName;
 
     @Before
     public void setUp() {
-        mState = new DummyDeviceState();
-        mListener = new DummyListener();
-        mPackageManager = new DummyPackageManagerHelper(mState);
-        mIdmapDaemon = new DummyIdmapDaemon(mState);
+        mState = new FakeDeviceState();
+        mPackageManager = new FakePackageManagerHelper(mState);
+        mIdmapDaemon = new FakeIdmapDaemon(mState);
         mOverlayConfig = mock(OverlayConfig.class);
         when(mOverlayConfig.getPriority(any())).thenReturn(OverlayConfig.DEFAULT_PRIORITY);
         when(mOverlayConfig.isEnabled(any())).thenReturn(false);
@@ -71,16 +75,23 @@ class OverlayManagerServiceImplTestsBase {
                 new IdmapManager(mIdmapDaemon, mPackageManager),
                 new OverlayManagerSettings(),
                 mOverlayConfig,
-                new String[0],
-                mListener);
+                new String[0]);
     }
 
     OverlayManagerServiceImpl getImpl() {
         return mImpl;
     }
 
-    DummyListener getListener() {
-        return mListener;
+    FakeIdmapDaemon getIdmapd() {
+        return mIdmapDaemon;
+    }
+
+    FakeDeviceState getState() {
+        return mState;
+    }
+
+    void setConfigSignaturePackageName(String packageName) {
+        mConfigSignaturePackageName = packageName;
     }
 
     void assertState(@State int expected, final String overlayPackageName, int userId) {
@@ -102,22 +113,27 @@ class OverlayManagerServiceImplTestsBase {
         assertEquals(expected, actual);
     }
 
-    DummyDeviceState.PackageBuilder target(String packageName) {
-        return new DummyDeviceState.PackageBuilder(packageName, null /* targetPackageName */,
-                null /* targetOverlayableName */);
+    FakeDeviceState.PackageBuilder app(String packageName) {
+        return new FakeDeviceState.PackageBuilder(packageName, null /* targetPackageName */,
+                null /* targetOverlayableName */, "data");
     }
 
-    DummyDeviceState.PackageBuilder overlay(String packageName, String targetPackageName) {
+    FakeDeviceState.PackageBuilder target(String packageName) {
+        return new FakeDeviceState.PackageBuilder(packageName, null /* targetPackageName */,
+                null /* targetOverlayableName */, "");
+    }
+
+    FakeDeviceState.PackageBuilder overlay(String packageName, String targetPackageName) {
         return overlay(packageName, targetPackageName, null /* targetOverlayableName */);
     }
 
-    DummyDeviceState.PackageBuilder overlay(String packageName, String targetPackageName,
+    FakeDeviceState.PackageBuilder overlay(String packageName, String targetPackageName,
             String targetOverlayableName) {
-        return new DummyDeviceState.PackageBuilder(packageName, targetPackageName,
-                targetOverlayableName);
+        return new FakeDeviceState.PackageBuilder(packageName, targetPackageName,
+                targetOverlayableName, "");
     }
 
-    void addSystemPackage(DummyDeviceState.PackageBuilder pkg, int userId) {
+    void addPackage(FakeDeviceState.PackageBuilder pkg, int userId) {
         mState.add(pkg, userId);
     }
 
@@ -136,7 +152,8 @@ class OverlayManagerServiceImplTestsBase {
      *
      * @throws IllegalStateException if the package is currently installed
      */
-    void installNewPackage(DummyDeviceState.PackageBuilder pkg, int userId) {
+    void installNewPackage(FakeDeviceState.PackageBuilder pkg, int userId)
+            throws OperationFailedException {
         if (mState.select(pkg.packageName, userId) != null) {
             throw new IllegalStateException("package " + pkg.packageName + " already installed");
         }
@@ -157,23 +174,30 @@ class OverlayManagerServiceImplTestsBase {
      * {@link android.content.Intent#ACTION_PACKAGE_ADDED} broadcast with the
      * {@link android.content.Intent#EXTRA_REPLACING} extra.
      *
+     * @return the two Optional<PackageAndUser> objects from starting and finishing the upgrade
+     *
      * @throws IllegalStateException if the package is not currently installed
      */
-    void upgradePackage(DummyDeviceState.PackageBuilder pkg, int userId) {
-        final DummyDeviceState.Package replacedPackage = mState.select(pkg.packageName, userId);
+    Pair<Optional<PackageAndUser>, Optional<PackageAndUser>> upgradePackage(
+            FakeDeviceState.PackageBuilder pkg, int userId) throws OperationFailedException {
+        final FakeDeviceState.Package replacedPackage = mState.select(pkg.packageName, userId);
         if (replacedPackage == null) {
             throw new IllegalStateException("package " + pkg.packageName + " not installed");
         }
+        Optional<PackageAndUser> opt1 = Optional.empty();
         if (replacedPackage.targetPackageName != null) {
-            mImpl.onOverlayPackageReplacing(pkg.packageName, userId);
+            opt1 = mImpl.onOverlayPackageReplacing(pkg.packageName, userId);
         }
 
         mState.add(pkg, userId);
+        Optional<PackageAndUser> opt2;
         if (pkg.targetPackage == null) {
-            mImpl.onTargetPackageReplaced(pkg.packageName, userId);
+            opt2 = mImpl.onTargetPackageReplaced(pkg.packageName, userId);
         } else {
-            mImpl.onOverlayPackageReplaced(pkg.packageName, userId);
+            opt2 = mImpl.onOverlayPackageReplaced(pkg.packageName, userId);
         }
+
+        return Pair.create(opt1, opt2);
     }
 
     /**
@@ -184,8 +208,8 @@ class OverlayManagerServiceImplTestsBase {
      *
      * @throws IllegalStateException if the package is not currently installed
      */
-    void uninstallPackage(String packageName, int userId) {
-        final DummyDeviceState.Package pkg = mState.select(packageName, userId);
+    void uninstallPackage(String packageName, int userId) throws OperationFailedException {
+        final FakeDeviceState.Package pkg = mState.select(packageName, userId);
         if (pkg == null) {
             throw new IllegalStateException("package " + packageName+ " not installed");
         }
@@ -198,7 +222,7 @@ class OverlayManagerServiceImplTestsBase {
     }
 
     /** Represents the state of packages installed on a fake device. */
-    static class DummyDeviceState {
+    static class FakeDeviceState {
         private ArrayMap<String, Package> mPackages = new ArrayMap<>();
 
         void add(PackageBuilder pkgBuilder, int userId) {
@@ -242,15 +266,17 @@ class OverlayManagerServiceImplTestsBase {
             private String packageName;
             private String targetPackage;
             private String certificate = "[default]";
+            private String partition;
             private int version = 0;
             private ArrayList<String> overlayableNames = new ArrayList<>();
             private String targetOverlayableName;
 
             private PackageBuilder(String packageName, String targetPackage,
-                    String targetOverlayableName) {
+                    String targetOverlayableName, String partition) {
                 this.packageName = packageName;
                 this.targetPackage = targetPackage;
                 this.targetOverlayableName = targetOverlayableName;
+                this.partition = partition;
             }
 
             PackageBuilder setCertificate(String certificate) {
@@ -269,9 +295,19 @@ class OverlayManagerServiceImplTestsBase {
             }
 
             Package build() {
-                final String apkPath = String.format("%s/%s/base.apk",
-                        targetPackage == null ? "/system/app/:" : "/vendor/overlay/:",
-                        packageName);
+                String path = "";
+                if (TextUtils.isEmpty(partition)) {
+                    if (targetPackage == null) {
+                        path = "/system/app";
+                    } else {
+                        path = "/vendor/overlay";
+                    }
+                } else {
+                    String type = targetPackage == null ? "app" : "overlay";
+                    path = String.format("%s/%s", partition, type);
+                }
+
+                final String apkPath = String.format("%s/%s/base.apk", path, packageName);
                 final Package newPackage = new Package(packageName, targetPackage,
                         targetOverlayableName, version, apkPath, certificate);
                 newPackage.overlayableNames.addAll(overlayableNames);
@@ -302,17 +338,16 @@ class OverlayManagerServiceImplTestsBase {
         }
     }
 
-    static final class DummyPackageManagerHelper implements PackageManagerHelper,
-            OverlayableInfoCallback {
-        private final DummyDeviceState mState;
+    final class FakePackageManagerHelper implements PackageManagerHelper {
+        private final FakeDeviceState mState;
 
-        private DummyPackageManagerHelper(DummyDeviceState state) {
+        private FakePackageManagerHelper(FakeDeviceState state) {
             mState = state;
         }
 
         @Override
         public PackageInfo getPackageInfo(@NonNull String packageName, int userId) {
-            final DummyDeviceState.Package pkg = mState.select(packageName, userId);
+            final FakeDeviceState.Package pkg = mState.select(packageName, userId);
             if (pkg == null) {
                 return null;
             }
@@ -323,15 +358,15 @@ class OverlayManagerServiceImplTestsBase {
             pi.packageName = pkg.packageName;
             pi.overlayTarget = pkg.targetPackageName;
             pi.targetOverlayableName = pkg.targetOverlayableName;
-            pi.overlayCategory = "dummy-category-" + pkg.targetPackageName;
+            pi.overlayCategory = "Fake-category-" + pkg.targetPackageName;
             return pi;
         }
 
         @Override
         public boolean signaturesMatching(@NonNull String packageName1,
                 @NonNull String packageName2, int userId) {
-            final DummyDeviceState.Package pkg1 = mState.select(packageName1, userId);
-            final DummyDeviceState.Package pkg2 = mState.select(packageName2, userId);
+            final FakeDeviceState.Package pkg1 = mState.select(packageName1, userId);
+            final FakeDeviceState.Package pkg2 = mState.select(packageName2, userId);
             return pkg1 != null && pkg2 != null && pkg1.certificate.equals(pkg2.certificate);
         }
 
@@ -343,11 +378,16 @@ class OverlayManagerServiceImplTestsBase {
                     .collect(Collectors.toList());
         }
 
+        @Override
+        public @NonNull String getConfigSignaturePackage() {
+            return mConfigSignaturePackageName;
+        }
+
         @Nullable
         @Override
         public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
                 @NonNull String targetOverlayableName, int userId) {
-            final DummyDeviceState.Package pkg = mState.select(packageName, userId);
+            final FakeDeviceState.Package pkg = mState.select(packageName, userId);
             if (pkg == null || !pkg.overlayableNames.contains(targetOverlayableName)) {
                 return null;
             }
@@ -368,7 +408,7 @@ class OverlayManagerServiceImplTestsBase {
 
         @Override
         public boolean doesTargetDefineOverlayable(String targetPackageName, int userId) {
-            final DummyDeviceState.Package pkg = mState.select(targetPackageName, userId);
+            final FakeDeviceState.Package pkg = mState.select(targetPackageName, userId);
             return pkg != null && pkg.overlayableNames.contains(targetPackageName);
         }
 
@@ -378,16 +418,16 @@ class OverlayManagerServiceImplTestsBase {
         }
     }
 
-    static class DummyIdmapDaemon extends IdmapDaemon {
-        private final DummyDeviceState mState;
+    static class FakeIdmapDaemon extends IdmapDaemon {
+        private final FakeDeviceState mState;
         private final ArrayMap<String, IdmapHeader> mIdmapFiles = new ArrayMap<>();
 
-        DummyIdmapDaemon(DummyDeviceState state) {
+        FakeIdmapDaemon(FakeDeviceState state) {
             this.mState = state;
         }
 
         private int getCrc(@NonNull final String path) {
-            final DummyDeviceState.Package pkg = mState.selectFromPath(path);
+            final FakeDeviceState.Package pkg = mState.selectFromPath(path);
             Assert.assertNotNull(pkg);
             return pkg.versionCode;
         }
@@ -448,14 +488,6 @@ class OverlayManagerServiceImplTestsBase {
                         && expectedTargetPath.equals(targetPath) && expectedPolicies == policies
                         && expectedEnforceOverlayable == enforceOverlayable;
             }
-        }
-    }
-
-    static class DummyListener implements OverlayManagerServiceImpl.OverlayChangeListener {
-        public int count;
-
-        public void onOverlaysChanged(@NonNull String targetPackage, int userId) {
-            count++;
         }
     }
 }

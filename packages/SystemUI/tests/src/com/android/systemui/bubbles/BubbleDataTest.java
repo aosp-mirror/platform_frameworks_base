@@ -19,6 +19,7 @@ package com.android.systemui.bubbles;
 import static com.android.systemui.statusbar.NotificationEntryHelper.modifyRanking;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -513,6 +514,26 @@ public class BubbleDataTest extends SysuiTestCase {
     }
 
     /**
+     * Verifies that when a non visually interruptive update occurs, that the selection does not
+     * change.
+     */
+    @Test
+    public void test_notVisuallyInterruptive_updateBubble_selectionDoesntChange() {
+        // Setup
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        sendUpdatedEntryAtTime(mEntryB1, 2000);
+        sendUpdatedEntryAtTime(mEntryB2, 3000);
+        sendUpdatedEntryAtTime(mEntryA2, 4000); // [A2, B2, B1, A1]
+        mBubbleData.setListener(mListener);
+
+        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA2);
+
+        // Test
+        sendUpdatedEntryAtTime(mEntryB1, 5000, false /* isVisuallyInterruptive */);
+        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(mBubbleA2);
+    }
+
+    /**
      * Verifies that a request to expand the stack has no effect if there are no bubbles.
      */
     @Test
@@ -793,47 +814,48 @@ public class BubbleDataTest extends SysuiTestCase {
 
     private void assertBubbleAdded(Bubble expected) {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.addedBubble).named("addedBubble").isEqualTo(expected);
+        assertWithMessage("addedBubble").that(update.addedBubble).isEqualTo(expected);
     }
 
     private void assertBubbleRemoved(Bubble expected, @BubbleController.DismissReason int reason) {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.removedBubbles).named("removedBubbles")
+        assertWithMessage("removedBubbles").that(update.removedBubbles)
                 .isEqualTo(ImmutableList.of(Pair.create(expected, reason)));
     }
 
     private void assertOrderNotChanged() {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.orderChanged).named("orderChanged").isFalse();
+        assertWithMessage("orderChanged").that(update.orderChanged).isFalse();
     }
 
     private void assertOrderChangedTo(Bubble... order) {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.orderChanged).named("orderChanged").isTrue();
-        assertThat(update.bubbles).named("bubble order").isEqualTo(ImmutableList.copyOf(order));
+        assertWithMessage("orderChanged").that(update.orderChanged).isTrue();
+        assertWithMessage("bubble order").that(update.bubbles)
+                .isEqualTo(ImmutableList.copyOf(order));
     }
 
     private void assertSelectionNotChanged() {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.selectionChanged).named("selectionChanged").isFalse();
+        assertWithMessage("selectionChanged").that(update.selectionChanged).isFalse();
     }
 
     private void assertSelectionChangedTo(Bubble bubble) {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.selectionChanged).named("selectionChanged").isTrue();
-        assertThat(update.selectedBubble).named("selectedBubble").isEqualTo(bubble);
+        assertWithMessage("selectionChanged").that(update.selectionChanged).isTrue();
+        assertWithMessage("selectedBubble").that(update.selectedBubble).isEqualTo(bubble);
     }
 
     private void assertSelectionCleared() {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.selectionChanged).named("selectionChanged").isTrue();
-        assertThat(update.selectedBubble).named("selectedBubble").isNull();
+        assertWithMessage("selectionChanged").that(update.selectionChanged).isTrue();
+        assertWithMessage("selectedBubble").that(update.selectedBubble).isNull();
     }
 
     private void assertExpandedChangedTo(boolean expected) {
         BubbleData.Update update = mUpdateCaptor.getValue();
-        assertThat(update.expandedChanged).named("expandedChanged").isTrue();
-        assertThat(update.expanded).named("expanded").isEqualTo(expected);
+        assertWithMessage("expandedChanged").that(update.expandedChanged).isTrue();
+        assertWithMessage("expanded").that(update.expanded).isEqualTo(expected);
     }
 
     private void assertOverflowChangedTo(ImmutableList<Bubble> bubbles) {
@@ -883,9 +905,15 @@ public class BubbleDataTest extends SysuiTestCase {
     }
 
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
+        sendUpdatedEntryAtTime(entry, postTime, true /* visuallyInterruptive */);
+    }
+
+    private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime,
+            boolean visuallyInterruptive) {
         setPostTime(entry, postTime);
         // BubbleController calls this:
         Bubble b = mBubbleData.getOrCreateBubble(entry, null /* persistedBubble */);
+        b.setVisuallyInterruptiveForTest(visuallyInterruptive);
         // And then this
         mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/,
                 true /* showInShade */);

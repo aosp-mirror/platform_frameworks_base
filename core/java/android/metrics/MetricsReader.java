@@ -16,7 +16,6 @@
 package android.metrics;
 
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.util.EventLog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -36,7 +35,6 @@ import java.util.concurrent.TimeUnit;
  * @hide
  */
 @SystemApi
-@TestApi
 public class MetricsReader {
     private Queue<LogMaker> mPendingQueue = new LinkedList<>();
     private Queue<LogMaker> mSeenQueue = new LinkedList<>();

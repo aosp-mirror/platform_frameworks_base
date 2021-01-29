@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -174,7 +175,7 @@ public final class OverlayInfo implements Parcelable {
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public final @State int state;
 
     /**

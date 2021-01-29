@@ -34,6 +34,7 @@ import android.hardware.hdmi.HdmiDeviceInfo;
 import android.media.PlaybackParams;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -385,7 +386,7 @@ public abstract class TvInputService extends Service {
         private OverlayViewCleanUpTask mOverlayViewCleanUpTask;
         private boolean mOverlayViewEnabled;
         private IBinder mWindowToken;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private Rect mOverlayFrame;
         private long mStartPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
         private long mCurrentPositionMs = TvInputManager.TIME_SHIFT_INVALID_TIME;
@@ -1851,6 +1852,28 @@ public abstract class TvInputService extends Service {
 
 
         /**
+         * Called when the application requests to pause TV program recording. Recording must pause
+         * immediately when this method is called.
+         *
+         * If the pause request cannot be fulfilled, the session must call
+         * {@link #notifyError(int)}.
+         *
+         * @param params Domain-specific data for recording request.
+         */
+        public void onPauseRecording(@NonNull Bundle params) { }
+
+        /**
+         * Called when the application requests to resume TV program recording. Recording must
+         * resume immediately when this method is called.
+         *
+         * If the resume request cannot be fulfilled, the session must call
+         * {@link #notifyError(int)}.
+         *
+         * @param params Domain-specific data for recording request.
+         */
+        public void onResumeRecording(@NonNull Bundle params) { }
+
+        /**
          * Called when the application requests to release all the resources held by this recording
          * session.
          */
@@ -1899,6 +1922,22 @@ public abstract class TvInputService extends Service {
          */
         void stopRecording() {
             onStopRecording();
+        }
+
+        /**
+         * Calls {@link #onPauseRecording(Bundle)}.
+         *
+         */
+        void pauseRecording(@NonNull Bundle params) {
+            onPauseRecording(params);
+        }
+
+        /**
+         * Calls {@link #onResumeRecording(Bundle)}.
+         *
+         */
+        void resumeRecording(@NonNull Bundle params) {
+            onResumeRecording(params);
         }
 
         /**

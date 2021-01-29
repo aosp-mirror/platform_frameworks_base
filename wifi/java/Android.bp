@@ -1,0 +1,35 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// This directory contains framework Wifi APIs that are not part of the Wifi module (i.e. not
+// updatable), and are generally only called by the Wifi module.
+
+// necessary since we only want the `path` property to only refer to these files
+filegroup {
+    name: "framework-wifi-non-updatable-sources-internal",
+    srcs: ["src/**/*.java"],
+    path: "src",
+    visibility: ["//visibility:private"],
+}
+
+filegroup {
+    name: "framework-wifi-non-updatable-sources",
+    srcs: [
+        // TODO(b/146011398) package android.net.wifi is now split amongst 2 jars: framework.jar and
+        // framework-wifi.jar. This is not a good idea, should move WifiNetworkScoreCache
+        // to a separate package.
+        ":framework-wifi-non-updatable-sources-internal",
+        ":libwificond_ipc_aidl",
+    ],
+}

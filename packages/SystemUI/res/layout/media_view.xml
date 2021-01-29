@@ -166,8 +166,7 @@
         android:layout_height="wrap_content"
         android:clickable="true"
         android:maxHeight="@dimen/qs_media_enabled_seekbar_height"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
+        android:paddingVertical="@dimen/qs_media_enabled_seekbar_vertical_padding"
         android:thumbTint="@color/media_primary_text"
         android:progressTint="@color/media_seekbar_progress"
         android:progressBackgroundTint="@color/media_disabled"
@@ -210,8 +209,98 @@
         android:layout_width="@dimen/qs_media_icon_size"
         android:layout_height="@dimen/qs_media_icon_size" />
 
-    <!-- Buttons to remove this view when no longer needed -->
-    <include
-        layout="@layout/qs_media_panel_options"
-        android:visibility="gone" />
+    <!-- Constraints are set here as they are the same regardless of host -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/qs_media_panel_outer_padding"
+        android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
+        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+        android:id="@+id/media_text"
+        android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+        android:textColor="@color/media_primary_text"
+        android:text="@string/controls_media_title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/remove_text"
+        app:layout_constraintVertical_chainStyle="spread_inside"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
+        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+        android:id="@+id/remove_text"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:singleLine="true"
+        android:textColor="@color/media_primary_text"
+        android:text="@string/controls_media_close_session"
+        app:layout_constraintTop_toBottomOf="@id/media_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/settings"/>
+
+    <FrameLayout
+        android:id="@+id/settings"
+        android:background="@drawable/qs_media_light_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/qs_media_panel_outer_padding"
+        android:paddingBottom="@dimen/qs_media_panel_outer_padding"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/remove_text">
+
+        <TextView
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:textColor="@android:color/white"
+            android:text="@string/controls_media_settings_button" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/cancel"
+        android:background="@drawable/qs_media_light_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+        android:paddingBottom="@dimen/qs_media_panel_outer_padding"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/dismiss" >
+
+        <TextView
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:textColor="@android:color/white"
+            android:text="@string/cancel" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/dismiss"
+        android:background="@drawable/qs_media_light_source"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+        android:paddingBottom="@dimen/qs_media_panel_outer_padding"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
+            android:textColor="@android:color/white"
+            android:text="@string/controls_media_dismiss_button"
+        />
+    </FrameLayout>
 </com.android.systemui.util.animation.TransitionLayout>

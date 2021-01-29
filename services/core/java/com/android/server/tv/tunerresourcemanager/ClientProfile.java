@@ -68,6 +68,11 @@ public final class ClientProfile {
     private Set<Integer> mUsingFrontendIds = new HashSet<>();
 
     /**
+     * List of the client ids that share frontend with the current client.
+     */
+    private Set<Integer> mShareFeClientIds = new HashSet<>();
+
+    /**
      * List of the Lnb ids that are used by the current client.
      */
     private Set<Integer> mUsingLnbIds = new HashSet<>();
@@ -113,11 +118,7 @@ public final class ClientProfile {
     }
 
     public int getPriority() {
-        return mPriority;
-    }
-
-    public int getNiceValue() {
-        return mNiceValue;
+        return mPriority - mNiceValue;
     }
 
     public void setGroupId(int groupId) {
@@ -141,17 +142,38 @@ public final class ClientProfile {
         mUsingFrontendIds.add(frontendId);
     }
 
+    /**
+     * Update the set of client that share frontend with the current client.
+     *
+     * @param clientId the client to share the fe with the current client.
+     */
+    public void shareFrontend(int clientId) {
+        mShareFeClientIds.add(clientId);
+    }
+
+    /**
+     * Remove the given client id from the share frontend client id set.
+     *
+     * @param clientId the client to stop sharing the fe with the current client.
+     */
+    public void stopSharingFrontend(int clientId) {
+        mShareFeClientIds.remove(clientId);
+    }
+
     public Set<Integer> getInUseFrontendIds() {
         return mUsingFrontendIds;
     }
 
+    public Set<Integer> getShareFeClientIds() {
+        return mShareFeClientIds;
+    }
+
     /**
      * Called when the client released a frontend.
-     *
-     * @param frontendId being released.
      */
-    public void releaseFrontend(int frontendId) {
-        mUsingFrontendIds.remove(frontendId);
+    public void releaseFrontend() {
+        mUsingFrontendIds.clear();
+        mShareFeClientIds.clear();
     }
 
     /**
@@ -201,6 +223,7 @@ public final class ClientProfile {
      */
     public void reclaimAllResources() {
         mUsingFrontendIds.clear();
+        mShareFeClientIds.clear();
         mUsingLnbIds.clear();
         mUsingCasSystemId = INVALID_RESOURCE_ID;
     }

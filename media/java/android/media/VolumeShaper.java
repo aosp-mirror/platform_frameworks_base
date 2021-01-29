@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -413,23 +414,23 @@ public final class VolumeShaper implements AutoCloseable {
          */
 
         // type of VolumeShaper
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final int mType;
 
         // valid when mType is TYPE_ID
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final int mId;
 
         // valid when mType is TYPE_SCALE
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final int mOptionFlags;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final double mDurationMs;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final int mInterpolatorType;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final float[] mTimes;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final float[] mVolumes;
 
         @Override
@@ -572,7 +573,7 @@ public final class VolumeShaper implements AutoCloseable {
          * Direct constructor for VolumeShaper.
          * Use the Builder instead.
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private Configuration(@Type int type,
                 int id,
                 @OptionFlag int optionFlags,
@@ -1132,11 +1133,11 @@ public final class VolumeShaper implements AutoCloseable {
 
         private static final int FLAG_PUBLIC_ALL = FLAG_REVERSE | FLAG_TERMINATE;
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final int mFlags;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final int mReplaceId;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private final float mXOffset;
 
         @Override
@@ -1198,7 +1199,7 @@ public final class VolumeShaper implements AutoCloseable {
             }
         };
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private Operation(@Flag int flags, int replaceId, float xOffset) {
             mFlags = flags;
             mReplaceId = replaceId;
@@ -1358,9 +1359,9 @@ public final class VolumeShaper implements AutoCloseable {
      *  Not for public use.
      */
     public static final class State implements Parcelable {
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private float mVolume;
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         private float mXOffset;
 
         @Override
@@ -1411,7 +1412,7 @@ public final class VolumeShaper implements AutoCloseable {
             }
         };
 
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
         /* package */ State(float volume, float xOffset) {
             mVolume = volume;
             mXOffset = xOffset;

@@ -72,21 +72,21 @@ StringPiece DataTypeToString(uint8_t data_type) {
 }
 
 Result<std::string> ResToTypeEntryName(const AssetManager2& am, uint32_t resid) {
-  AssetManager2::ResourceName name;
-  if (!am.GetResourceName(resid, &name)) {
+  const auto name = am.GetResourceName(resid);
+  if (!name.has_value()) {
     return Error("no resource 0x%08x in asset manager", resid);
   }
   std::string out;
-  if (name.type != nullptr) {
-    out.append(name.type, name.type_len);
+  if (name->type != nullptr) {
+    out.append(name->type, name->type_len);
   } else {
-    out += Utf16ToUtf8(StringPiece16(name.type16, name.type_len));
+    out += Utf16ToUtf8(StringPiece16(name->type16, name->type_len));
   }
   out.append("/");
-  if (name.entry != nullptr) {
-    out.append(name.entry, name.entry_len);
+  if (name->entry != nullptr) {
+    out.append(name->entry, name->entry_len);
   } else {
-    out += Utf16ToUtf8(StringPiece16(name.entry16, name.entry_len));
+    out += Utf16ToUtf8(StringPiece16(name->entry16, name->entry_len));
   }
   return out;
 }

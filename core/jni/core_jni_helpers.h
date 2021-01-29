@@ -47,7 +47,7 @@ static inline jclass FindClassOrDie(JNIEnv* env, const char* class_name) {
 static inline jfieldID GetFieldIDOrDie(JNIEnv* env, jclass clazz, const char* field_name,
                                        const char* field_signature) {
     jfieldID res = env->GetFieldID(clazz, field_name, field_signature);
-    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find static field %s with signature %s", field_name,
+    LOG_ALWAYS_FATAL_IF(res == NULL, "Unable to find field %s with signature %s", field_name,
                         field_signature);
     return res;
 }

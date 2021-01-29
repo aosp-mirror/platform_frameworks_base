@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class TaskInfo {
      * The id of the user the task was running as.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public int userId;
 
     /**
@@ -176,6 +177,13 @@ public class TaskInfo {
      */
     public boolean isResizeable;
 
+    /**
+     * Screen orientation set by {@link #baseActivity} via
+     * {@link Activity#setRequestedOrientation(int)}.
+     * @hide
+     */
+    public @ActivityInfo.ScreenOrientation int requestedOrientation;
+
     TaskInfo() {
         // Do nothing
     }
@@ -247,6 +255,7 @@ public class TaskInfo {
                 ? ActivityInfo.CREATOR.createFromParcel(source)
                 : null;
         isResizeable = source.readBoolean();
+        requestedOrientation = source.readInt();
     }
 
     /**
@@ -297,6 +306,7 @@ public class TaskInfo {
             topActivityInfo.writeToParcel(dest, flags);
         }
         dest.writeBoolean(isResizeable);
+        dest.writeInt(requestedOrientation);
     }
 
     @Override
@@ -315,6 +325,7 @@ public class TaskInfo {
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
-                + " topActivityInfo=" + topActivityInfo;
+                + " topActivityInfo=" + topActivityInfo
+                + " requestedOrientation=" + requestedOrientation;
     }
 }

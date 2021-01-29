@@ -15,7 +15,8 @@
  */
 package android.net;
 
-import android.annotation.TestApi;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -25,9 +26,11 @@ import android.os.Parcelable;
  *
  * @hide
  */
-@TestApi
+@SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
 public final class TestNetworkInterface implements Parcelable {
+    @NonNull
     private final ParcelFileDescriptor mFileDescriptor;
+    @NonNull
     private final String mInterfaceName;
 
     @Override
@@ -36,29 +39,32 @@ public final class TestNetworkInterface implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel out, int flags) {
+    public void writeToParcel(@NonNull Parcel out, int flags) {
         out.writeParcelable(mFileDescriptor, PARCELABLE_WRITE_RETURN_VALUE);
         out.writeString(mInterfaceName);
     }
 
-    public TestNetworkInterface(ParcelFileDescriptor pfd, String intf) {
+    public TestNetworkInterface(@NonNull ParcelFileDescriptor pfd, @NonNull String intf) {
         mFileDescriptor = pfd;
         mInterfaceName = intf;
     }
 
-    private TestNetworkInterface(Parcel in) {
+    private TestNetworkInterface(@NonNull Parcel in) {
         mFileDescriptor = in.readParcelable(ParcelFileDescriptor.class.getClassLoader());
         mInterfaceName = in.readString();
     }
 
+    @NonNull
     public ParcelFileDescriptor getFileDescriptor() {
         return mFileDescriptor;
     }
 
+    @NonNull
     public String getInterfaceName() {
         return mInterfaceName;
     }
 
+    @NonNull
     public static final Parcelable.Creator<TestNetworkInterface> CREATOR =
             new Parcelable.Creator<TestNetworkInterface>() {
                 public TestNetworkInterface createFromParcel(Parcel in) {

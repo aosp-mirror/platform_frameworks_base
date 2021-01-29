@@ -120,7 +120,6 @@ public class DisplayModeDirector {
     public void start(SensorManager sensorManager) {
         mSettingsObserver.observe();
         mDisplayObserver.observe();
-        mSettingsObserver.observe();
         mBrightnessObserver.observe(sensorManager);
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and

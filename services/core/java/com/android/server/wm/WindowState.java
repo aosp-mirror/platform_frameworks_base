@@ -725,7 +725,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * @return The insets state as requested by the client, i.e. the dispatched insets state
      *         for which the visibilities are overridden with what the client requested.
      */
-    InsetsState getRequestedInsetsState() {
+    @Override
+    public InsetsState getRequestedInsetsState() {
         return mRequestedInsetsState;
     }
 
@@ -942,7 +943,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedHeight = 0;
         mLayer = 0;
         mInputWindowHandle = new InputWindowHandle(
-                mActivityRecord != null ? mActivityRecord.mInputApplicationHandle : null,
+                mActivityRecord != null ?
+                        mActivityRecord.getInputApplicationHandle(false /* update */) : null,
                     getDisplayId());
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
@@ -2051,10 +2053,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // animating... let's do something.
         final int left = mWindowFrames.mFrame.left;
         final int top = mWindowFrames.mFrame.top;
+
+        // During the transition from pip to fullscreen, the activity windowing mode is set to
+        // fullscreen at the beginning while the task is kept in pinned mode. Skip the move
+        // animation in such case since the transition is handled in SysUI.
+        final boolean hasMovementAnimation = getTask() == null
+                ? getWindowConfiguration().hasMovementAnimations()
+                : getTask().getWindowConfiguration().hasMovementAnimations();
         if (mToken.okToAnimate()
                 && (mAttrs.privateFlags & PRIVATE_FLAG_NO_MOVE_ANIMATION) == 0
                 && !isDragResizing()
-                && getWindowConfiguration().hasMovementAnimations()
+                && hasMovementAnimation
                 && !mWinAnimator.mLastHidden
                 && !mSeamlesslyRotated) {
             startMoveAnimation(left, top);

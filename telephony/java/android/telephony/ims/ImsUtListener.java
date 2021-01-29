@@ -18,7 +18,6 @@ package android.telephony.ims;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.annotation.TestApi;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.telephony.ims.stub.ImsUtImplBase;
@@ -34,7 +33,6 @@ import com.android.ims.internal.IImsUtListener;
 // DO NOT remove or change the existing APIs, only add new ones to this Base implementation or you
 // will break other implementations of ImsUt maintained by other ImsServices.
 @SystemApi
-@TestApi
 public class ImsUtListener {
 
     /**
@@ -179,5 +177,12 @@ public class ImsUtListener {
      */
     public ImsUtListener(IImsUtListener serviceInterface) {
         mServiceInterface = serviceInterface;
+    }
+
+    /**
+     * @hide
+     */
+    public IImsUtListener getListenerInterface() {
+        return mServiceInterface;
     }
 }

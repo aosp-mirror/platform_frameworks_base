@@ -267,6 +267,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     /** Uid of the creator of this session. */
     private final int mOriginalInstallerUid;
 
+    /** Package name of the app that created the installation session. */
+    private final String mOriginalInstallerPackageName;
+
     /** Uid of the owner of the installer session */
     @GuardedBy("mLock")
     private int mInstallerUid;
@@ -556,6 +559,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         mOriginalInstallerUid = installerUid;
         mInstallerUid = installerUid;
         mInstallSource = Objects.requireNonNull(installSource);
+        mOriginalInstallerPackageName = mInstallSource.installerPackageName;
         this.params = params;
         this.createdMillis = createdMillis;
         this.updatedMillis = createdMillis;
@@ -665,6 +669,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
             info.mode = params.mode;
             info.installReason = params.installReason;
+            info.installScenario = params.installScenario;
             info.sizeBytes = params.sizeBytes;
             info.appPackageName = params.appPackageName;
             if (includeIcon) {
@@ -943,6 +948,23 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private ParcelFileDescriptor openTargetInternal(String path, int flags, int mode)
+            throws IOException, ErrnoException {
+        // TODO: this should delegate to DCS so the system process avoids
+        // holding open FDs into containers.
+        final FileDescriptor fd = Os.open(path, flags, mode);
+        return new ParcelFileDescriptor(fd);
+    }
+
+    private ParcelFileDescriptor createRevocableFdInternal(RevocableFileDescriptor fd,
+            ParcelFileDescriptor pfd) throws IOException {
+        int releasedFdInt = pfd.detachFd();
+        FileDescriptor releasedFd = new FileDescriptor();
+        releasedFd.setInt$(releasedFdInt);
+        fd.init(mContext, releasedFd);
+        return fd.getRevocableFileDescriptor();
+    }
+
     private ParcelFileDescriptor doWriteInternal(String name, long offsetBytes, long lengthBytes,
             ParcelFileDescriptor incomingFd) throws IOException {
         // Quick sanity check of state, and allocate a pipe for ourselves. We
@@ -975,21 +997,20 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 Binder.restoreCallingIdentity(identity);
             }
 
-            // TODO: this should delegate to DCS so the system process avoids
-            // holding open FDs into containers.
-            final FileDescriptor targetFd = Os.open(target.getAbsolutePath(),
+            ParcelFileDescriptor targetPfd = openTargetInternal(target.getAbsolutePath(),
                     O_CREAT | O_WRONLY, 0644);
             Os.chmod(target.getAbsolutePath(), 0644);
 
             // If caller specified a total length, allocate it for them. Free up
             // cache space to grow, if needed.
             if (stageDir != null && lengthBytes > 0) {
-                mContext.getSystemService(StorageManager.class).allocateBytes(targetFd, lengthBytes,
+                mContext.getSystemService(StorageManager.class).allocateBytes(
+                        targetPfd.getFileDescriptor(), lengthBytes,
                         PackageHelper.translateAllocateFlags(params.installFlags));
             }
 
             if (offsetBytes > 0) {
-                Os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
+                Os.lseek(targetPfd.getFileDescriptor(), offsetBytes, OsConstants.SEEK_SET);
             }
 
             if (incomingFd != null) {
@@ -999,8 +1020,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 // inserted above to hold the session active.
                 try {
                     final Int64Ref last = new Int64Ref(0);
-                    FileUtils.copy(incomingFd.getFileDescriptor(), targetFd, lengthBytes, null,
-                            Runnable::run, (long progress) -> {
+                    FileUtils.copy(incomingFd.getFileDescriptor(), targetPfd.getFileDescriptor(),
+                            lengthBytes, null, Runnable::run,
+                            (long progress) -> {
                                 if (params.sizeBytes > 0) {
                                     final long delta = progress - last.value;
                                     last.value = progress;
@@ -1011,7 +1033,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                                 }
                             });
                 } finally {
-                    IoUtils.closeQuietly(targetFd);
+                    IoUtils.closeQuietly(targetPfd);
                     IoUtils.closeQuietly(incomingFd);
 
                     // We're done here, so remove the "bridge" that was holding
@@ -1027,12 +1049,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 }
                 return null;
             } else if (PackageInstaller.ENABLE_REVOCABLE_FD) {
-                fd.init(mContext, targetFd);
-                return fd.getRevocableFileDescriptor();
+                return createRevocableFdInternal(fd, targetPfd);
             } else {
-                bridge.setTargetFile(targetFd);
+                bridge.setTargetFile(targetPfd);
                 bridge.start();
-                return new ParcelFileDescriptor(bridge.getClientSocket());
+                return bridge.getClientSocket();
             }
 
         } catch (ErrnoException e) {
@@ -1666,11 +1687,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 throw new IllegalArgumentException("Package is not valid", e);
             }
 
-            if (!mPackageName.equals(mInstallSource.installerPackageName)) {
-                throw new SecurityException("Can only transfer sessions that update the original "
-                        + "installer");
-            }
-
             mInstallerUid = newOwnerAppInfo.uid;
             mInstallSource = InstallSource.create(packageName, null, packageName);
         }
@@ -2154,6 +2170,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                     throw new PackageManagerException(INSTALL_FAILED_INVALID_APK,
                             "Couldn't obtain signatures from base APK");
                 }
+            }
+        }
+
+        if (mInstallerUid != mOriginalInstallerUid) {
+            // Session has been transferred, check package name.
+            if (TextUtils.isEmpty(mPackageName) || !mPackageName.equals(
+                    mOriginalInstallerPackageName)) {
+                throw new PackageManagerException(PackageManager.INSTALL_FAILED_PACKAGE_CHANGED,
+                        "Can only transfer sessions that update the original installer");
             }
         }
 
@@ -3182,6 +3207,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         pw.printPair("userId", userId);
         pw.printPair("mOriginalInstallerUid", mOriginalInstallerUid);
+        pw.printPair("mOriginalInstallerPackageName", mOriginalInstallerPackageName);
         pw.printPair("installerPackageName", mInstallSource.installerPackageName);
         pw.printPair("installInitiatingPackageName", mInstallSource.initiatingPackageName);
         pw.printPair("installOriginatingPackageName", mInstallSource.originatingPackageName);

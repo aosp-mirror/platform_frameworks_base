@@ -46,6 +46,7 @@ import android.database.CursorWrapper;
 import android.database.DatabaseUtils;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.Build;
 import android.os.RemoteException;
 import android.telecom.PhoneAccountHandle;
 import android.text.TextUtils;
@@ -129,7 +130,7 @@ public final class ContactsContract {
      * Prefix for column names that are not visible to client apps.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     @TestApi
     public static final String HIDDEN_COLUMN_PREFIX = "x_";
 
@@ -4304,13 +4305,23 @@ public final class ContactsContract {
          * <P>
          * Type: INTEGER (A bitmask of CARRIER_PRESENCE_* fields)
          * </P>
+         *
+         * @deprecated The contacts database will only show presence
+         * information on devices where
+         * {@link android.telephony.CarrierConfigManager#KEY_USE_RCS_PRESENCE_BOOL} is true,
+         * otherwise use {@link android.telephony.ims.RcsUceAdapter}.
          */
+        @Deprecated
         public static final String CARRIER_PRESENCE = "carrier_presence";
 
         /**
          * Indicates that the entry is Video Telephony (VT) capable on the
          * current carrier. An allowed bitmask of {@link #CARRIER_PRESENCE}.
+         *
+         * @deprecated Same as {@link DataColumns#CARRIER_PRESENCE}.
+         *
          */
+        @Deprecated
         public static final int CARRIER_PRESENCE_VT_CAPABLE = 0x01;
 
         /**
@@ -6140,7 +6151,7 @@ public final class ContactsContract {
             *
             * @hide
             */
-            @UnsupportedAppUsage
+            @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
             @TestApi
             public static final Uri ENTERPRISE_CONTENT_URI =
                     Uri.withAppendedPath(Data.ENTERPRISE_CONTENT_URI, "phones");
