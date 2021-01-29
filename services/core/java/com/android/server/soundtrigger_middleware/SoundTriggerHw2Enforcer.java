@@ -208,6 +208,9 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
     }
 
     private static RuntimeException handleException(RuntimeException e) {
+        if (e instanceof RecoverableException) {
+            throw e;
+        }
         if (e.getCause() instanceof DeadObjectException) {
             // Server is dead, no need to reboot.
             Log.e(TAG, "HAL died");

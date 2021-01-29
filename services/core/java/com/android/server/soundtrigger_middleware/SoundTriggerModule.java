@@ -218,8 +218,7 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
      */
     private void attachToHal() {
         mHalService = new SoundTriggerHw2Enforcer(
-                new SoundTriggerHw2Watchdog(
-                        new SoundTriggerHw2Compat(mHalFactory.create())));
+                new SoundTriggerHw2Watchdog(mHalFactory.create()));
         mHalService.linkToDeath(this, 0);
         mHalService.registerCallback(this);
     }

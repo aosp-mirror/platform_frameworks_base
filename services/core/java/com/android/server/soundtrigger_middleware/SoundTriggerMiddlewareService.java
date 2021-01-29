@@ -235,7 +235,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             HalFactory[] factories = new HalFactory[]{() -> {
                 try {
                     Log.d(TAG, "Connecting to default ISoundTriggerHw");
-                    return ISoundTriggerHw.getService(true);
+                    return new SoundTriggerHw2Compat(ISoundTriggerHw.getService(true));
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
