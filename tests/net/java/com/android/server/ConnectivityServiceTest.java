@@ -7160,6 +7160,13 @@ public class ConnectivityServiceTest {
         when(mKeyStore.get(Credentials.VPN + profileName)).thenReturn(encodedProfile);
     }
 
+    private void establishLegacyLockdownVpn() throws Exception {
+        // The legacy lockdown VPN only supports userId 0.
+        final Set<UidRange> ranges = Collections.singleton(UidRange.createForUser(PRIMARY_USER));
+        mMockVpn.registerAgent(ranges);
+        mMockVpn.connect(true);
+    }
+
     @Test
     public void testLegacyLockdownVpn() throws Exception {
         mServiceContext.setPermission(
@@ -7254,22 +7261,30 @@ public class ConnectivityServiceTest {
         mMockVpn.expectStartLegacyVpnRunner();
         b1 = expectConnectivityAction(TYPE_VPN, DetailedState.CONNECTED);
         ExpectedBroadcast b2 = expectConnectivityAction(TYPE_MOBILE, DetailedState.CONNECTED);
-        mMockVpn.establishForMyUid();
+        establishLegacyLockdownVpn();
         callback.expectAvailableThenValidatedCallbacks(mMockVpn);
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
+        NetworkCapabilities vpnNc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
         b1.expectBroadcast();
         b2.expectBroadcast();
         assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
+        assertTrue(vpnNc.hasTransport(TRANSPORT_VPN));
+        assertTrue(vpnNc.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(vpnNc.hasTransport(TRANSPORT_WIFI));
+        assertFalse(vpnNc.hasCapability(NET_CAPABILITY_NOT_METERED));
 
         // Switch default network from cell to wifi. Expect VPN to disconnect and reconnect.
         final LinkProperties wifiLp = new LinkProperties();
         wifiLp.setInterfaceName("wlan0");
         wifiLp.addLinkAddress(new LinkAddress("192.0.2.163/25"));
         wifiLp.addRoute(new RouteInfo(new IpPrefix("0.0.0.0/0"), null, "wlan0"));
-        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, wifiLp);
+        final NetworkCapabilities wifiNc = new NetworkCapabilities();
+        wifiNc.addTransportType(TRANSPORT_WIFI);
+        wifiNc.addCapability(NET_CAPABILITY_NOT_METERED);
+        mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, wifiLp, wifiNc);
 
         b1 = expectConnectivityAction(TYPE_MOBILE, DetailedState.DISCONNECTED);
         // Wifi is CONNECTING because the VPN isn't up yet.
@@ -7302,16 +7317,20 @@ public class ConnectivityServiceTest {
         // The VPN comes up again on wifi.
         b1 = expectConnectivityAction(TYPE_VPN, DetailedState.CONNECTED);
         b2 = expectConnectivityAction(TYPE_WIFI, DetailedState.CONNECTED);
-        mMockVpn.establishForMyUid();
+        establishLegacyLockdownVpn();
         callback.expectAvailableThenValidatedCallbacks(mMockVpn);
         defaultCallback.expectAvailableThenValidatedCallbacks(mMockVpn);
         b1.expectBroadcast();
         b2.expectBroadcast();
-
         assertActiveNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_MOBILE, DetailedState.DISCONNECTED);
         assertNetworkInfo(TYPE_WIFI, DetailedState.CONNECTED);
         assertNetworkInfo(TYPE_VPN, DetailedState.CONNECTED);
+        vpnNc = mCm.getNetworkCapabilities(mMockVpn.getNetwork());
+        assertTrue(vpnNc.hasTransport(TRANSPORT_VPN));
+        assertTrue(vpnNc.hasTransport(TRANSPORT_WIFI));
+        assertFalse(vpnNc.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(vpnNc.hasCapability(NET_CAPABILITY_NOT_METERED));
 
         // Disconnect cell. Nothing much happens since it's not the default network.
         // Whenever LockdownVpnTracker is connected, it will send a connected broadcast any time any
