@@ -420,6 +420,12 @@ public final class SystemUiDeviceConfigFlags {
     public static final String PIP_STASHING = "pip_stashing";
 
     /**
+     * (float) The threshold velocity to cause PiP to be stashed when flinging from one edge to the
+     * other.
+     */
+    public static final String PIP_STASH_MINIMUM_VELOCITY_THRESHOLD = "pip_velocity_threshold";
+
+    /**
      * (float) Bottom height in DP for Back Gesture.
      */
     public static final String BACK_GESTURE_BOTTOM_HEIGHT = "back_gesture_bottom_height";
