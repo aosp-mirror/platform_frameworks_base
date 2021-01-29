@@ -301,7 +301,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
             EnrollmentCallback callback, int[] disabledFeatures) {
-        enroll(userId, hardwareAuthToken, cancel, callback, disabledFeatures, null /* surface */);
+        enroll(userId, hardwareAuthToken, cancel, callback, disabledFeatures, null /* surface */,
+                false /* debugConsent */);
     }
 
     /**
@@ -313,18 +314,20 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * which point the object is no longer valid. The operation can be canceled by using the
      * provided cancel object.
      *
-     * @param token    a unique token provided by a recent creation or verification of device
-     *                 credentials (e.g. pin, pattern or password).
-     * @param cancel   an object that can be used to cancel enrollment
-     * @param userId   the user to whom this face will belong to
-     * @param callback an object to receive enrollment events
-     * @param surface  optional camera preview surface for a single-camera device. Must be null if
-     *                 not used.
+     * @param hardwareAuthToken a unique token provided by a recent creation or
+     *                          verification of device credentials (e.g. pin, pattern or password).
+     * @param cancel            an object that can be used to cancel enrollment
+     * @param userId            the user to whom this face will belong to
+     * @param callback          an object to receive enrollment events
+     * @param surface           optional camera preview surface for a single-camera device.
+     *                          Must be null if not used.
+     * @param debugConsent      a feature flag that the user has consented to debug.
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
     public void enroll(int userId, byte[] hardwareAuthToken, CancellationSignal cancel,
-            EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface surface) {
+            EnrollmentCallback callback, int[] disabledFeatures, @Nullable Surface surface,
+            boolean debugConsent) {
         if (callback == null) {
             throw new IllegalArgumentException("Must supply an enrollment callback");
         }
@@ -343,7 +346,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
                 mEnrollmentCallback = callback;
                 Trace.beginSection("FaceManager#enroll");
                 mService.enroll(userId, mToken, hardwareAuthToken, mServiceReceiver,
-                        mContext.getOpPackageName(), disabledFeatures, surface);
+                        mContext.getOpPackageName(), disabledFeatures, surface, debugConsent);
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception in enroll: ", e);
                 // Though this may not be a hardware issue, it will cause apps to give up or
