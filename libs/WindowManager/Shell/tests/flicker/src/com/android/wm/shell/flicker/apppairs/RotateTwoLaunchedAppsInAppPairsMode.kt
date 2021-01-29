@@ -66,7 +66,7 @@ class RotateTwoLaunchedAppsInAppPairsMode(
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
-                    buildTestTag("testRotateAndEnterAppPairsMode", configuration)
+                    buildTestTag("testRotateTwoLaunchedAppsInAppPairsMode", configuration)
                 }
                 transitions {
                     executeShellCommand(composePairsCommand(
@@ -88,7 +88,7 @@ class RotateTwoLaunchedAppsInAppPairsMode(
                     windowManagerTrace {
                         navBarWindowIsAlwaysVisible()
                         statusBarWindowIsAlwaysVisible()
-                        end {
+                        end("bothAppWindowsVisible") {
                             isVisible(primaryApp.defaultWindowName)
                                 .isVisible(secondaryApp.defaultWindowName)
                         }

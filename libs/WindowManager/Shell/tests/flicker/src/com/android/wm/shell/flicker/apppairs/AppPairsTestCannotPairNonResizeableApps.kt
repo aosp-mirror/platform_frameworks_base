@@ -54,7 +54,7 @@ class AppPairsTestCannotPairNonResizeableApps(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
-            val testTag = "testAppPairs_unpairPrimaryAndSecondaryApps"
+            val testTag = "testAppPairs_cannotPairNonResizeableApps"
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
                     buildTestTag(testTag, configuration)
@@ -71,7 +71,7 @@ class AppPairsTestCannotPairNonResizeableApps(
                         appPairsDividerIsInvisible()
                     }
                     windowManagerTrace {
-                        end {
+                        end("onlyResizeableAppWindowVisible") {
                             val nonResizeableApp = nonResizeableApp
                             require(nonResizeableApp != null) {
                                 "Non resizeable app not initialized"

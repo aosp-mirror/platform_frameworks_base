@@ -131,7 +131,7 @@ class PipKeyboardTest(
             }
             assertions {
                 windowManagerTrace {
-                    end {
+                    end("imeWindowAboveApp") {
                         isAboveWindow(IME_WINDOW_NAME, testApp.defaultWindowName)
                     }
                 }
