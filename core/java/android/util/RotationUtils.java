@@ -21,7 +21,9 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import android.annotation.Dimension;
 import android.graphics.Insets;
+import android.graphics.Matrix;
 import android.view.Surface.Rotation;
 
 /**
@@ -68,5 +70,35 @@ public class RotationUtils {
                 throw new IllegalArgumentException("unknown rotation: " + rotation);
         }
         return rotated;
+    }
+
+    /**
+     * Sets a matrix such that given a rotation, it transforms physical display
+     * coordinates to that rotation's logical coordinates.
+     *
+     * @param rotation the rotation to which the matrix should transform
+     * @param out the matrix to be set
+     */
+    public static void transformPhysicalToLogicalCoordinates(@Rotation int rotation,
+            @Dimension int physicalWidth, @Dimension int physicalHeight, Matrix out) {
+        switch (rotation) {
+            case ROTATION_0:
+                out.reset();
+                break;
+            case ROTATION_90:
+                out.setRotate(270);
+                out.postTranslate(0, physicalWidth);
+                break;
+            case ROTATION_180:
+                out.setRotate(180);
+                out.postTranslate(physicalWidth, physicalHeight);
+                break;
+            case ROTATION_270:
+                out.setRotate(90);
+                out.postTranslate(physicalHeight, 0);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown rotation: " + rotation);
+        }
     }
 }
