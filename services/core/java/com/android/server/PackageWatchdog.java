@@ -994,7 +994,8 @@ public class PackageWatchdog {
      * Health check is enabled or disabled after reading the flags
      * from DeviceConfig.
      */
-    private void updateConfigs() {
+    @VisibleForTesting
+    void updateConfigs() {
         synchronized (mLock) {
             mTriggerFailureCount = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_ROLLBACK,

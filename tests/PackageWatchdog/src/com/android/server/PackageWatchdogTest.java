@@ -98,6 +98,8 @@ public class PackageWatchdogTest {
     private final TestClock mTestClock = new TestClock();
     private TestLooper mTestLooper;
     private Context mSpyContext;
+    // Keep track of all created watchdogs to apply device config changes
+    private List<PackageWatchdog> mAllocatedWatchdogs;
     @Mock
     private ConnectivityModuleConnector mConnectivityModuleConnector;
     @Mock
@@ -166,12 +168,15 @@ public class PackageWatchdogTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT), false);
+
+        mAllocatedWatchdogs = new ArrayList<>();
     }
 
     @After
     public void tearDown() throws Exception {
         dropShellPermissions();
         mSession.finishMocking();
+        mAllocatedWatchdogs.clear();
     }
 
     @Test
@@ -1295,11 +1300,9 @@ public class PackageWatchdogTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
                 Boolean.toString(enabled), /*makeDefault*/false);
-        //give time for DeviceConfig to broadcast the property value change
-        try {
-            Thread.sleep(SHORT_DURATION);
-        } catch (InterruptedException e) {
-            fail("Thread.sleep unexpectedly failed!");
+        // Call updateConfigs() so device config changes take effect immediately
+        for (PackageWatchdog watchdog : mAllocatedWatchdogs) {
+            watchdog.updateConfigs();
         }
     }
 
@@ -1348,6 +1351,7 @@ public class PackageWatchdogTest {
             verify(mConnectivityModuleConnector).registerHealthListener(
                     mConnectivityModuleCallbackCaptor.capture());
         }
+        mAllocatedWatchdogs.add(watchdog);
         return watchdog;
     }
 
