@@ -15,7 +15,9 @@
  */
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
+import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
@@ -28,6 +30,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.PendingIntent;
@@ -4963,5 +4966,93 @@ public class ConnectivityManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Request a network to satisfy a set of {@link android.net.NetworkCapabilities}, but
+     * does not cause any networks to retain the NET_CAPABILITY_FOREGROUND capability. This can
+     * be used to request that the system provide a network without causing the network to be
+     * in the foreground.
+     *
+     * <p>This method will attempt to find the best network that matches the passed
+     * {@link NetworkRequest}, and to bring up one that does if none currently satisfies the
+     * criteria. The platform will evaluate which network is the best at its own discretion.
+     * Throughput, latency, cost per byte, policy, user preference and other considerations
+     * may be factored in the decision of what is considered the best network.
+     *
+     * <p>As long as this request is outstanding, the platform will try to maintain the best network
+     * matching this request, while always attempting to match the request to a better network if
+     * possible. If a better match is found, the platform will switch this request to the now-best
+     * network and inform the app of the newly best network by invoking
+     * {@link NetworkCallback#onAvailable(Network)} on the provided callback. Note that the platform
+     * will not try to maintain any other network than the best one currently matching the request:
+     * a network not matching any network request may be disconnected at any time.
+     *
+     * <p>For example, an application could use this method to obtain a connected cellular network
+     * even if the device currently has a data connection over Ethernet. This may cause the cellular
+     * radio to consume additional power. Or, an application could inform the system that it wants
+     * a network supporting sending MMSes and have the system let it know about the currently best
+     * MMS-supporting network through the provided {@link NetworkCallback}.
+     *
+     * <p>The status of the request can be followed by listening to the various callbacks described
+     * in {@link NetworkCallback}. The {@link Network} object passed to the callback methods can be
+     * used to direct traffic to the network (although accessing some networks may be subject to
+     * holding specific permissions). Callers will learn about the specific characteristics of the
+     * network through
+     * {@link NetworkCallback#onCapabilitiesChanged(Network, NetworkCapabilities)} and
+     * {@link NetworkCallback#onLinkPropertiesChanged(Network, LinkProperties)}. The methods of the
+     * provided {@link NetworkCallback} will only be invoked due to changes in the best network
+     * matching the request at any given time; therefore when a better network matching the request
+     * becomes available, the {@link NetworkCallback#onAvailable(Network)} method is called
+     * with the new network after which no further updates are given about the previously-best
+     * network, unless it becomes the best again at some later time. All callbacks are invoked
+     * in order on the same thread, which by default is a thread created by the framework running
+     * in the app.
+     *
+     * <p>This{@link NetworkRequest} will live until released via
+     * {@link #unregisterNetworkCallback(NetworkCallback)} or the calling application exits, at
+     * which point the system may let go of the network at any time.
+     *
+     * <p>It is presently unsupported to request a network with mutable
+     * {@link NetworkCapabilities} such as
+     * {@link NetworkCapabilities#NET_CAPABILITY_VALIDATED} or
+     * {@link NetworkCapabilities#NET_CAPABILITY_CAPTIVE_PORTAL}
+     * as these {@code NetworkCapabilities} represent states that a particular
+     * network may never attain, and whether a network will attain these states
+     * is unknown prior to bringing up the network so the framework does not
+     * know how to go about satisfying a request with these capabilities.
+     *
+     * <p>To avoid performance issues due to apps leaking callbacks, the system will limit the
+     * number of outstanding requests to 100 per app (identified by their UID), shared with
+     * all variants of this method, of {@link #registerNetworkCallback} as well as
+     * {@link ConnectivityDiagnosticsManager#registerConnectivityDiagnosticsCallback}.
+     * Requesting a network with this method will count toward this limit. If this limit is
+     * exceeded, an exception will be thrown. To avoid hitting this issue and to conserve resources,
+     * make sure to unregister the callbacks with
+     * {@link #unregisterNetworkCallback(NetworkCallback)}.
+     *
+     * @param request {@link NetworkRequest} describing this request.
+     * @param handler {@link Handler} to specify the thread upon which the callback will be invoked.
+     *                If null, the callback is invoked on the default internal Handler.
+     * @param networkCallback The {@link NetworkCallback} to be utilized for this request. Note
+     *                        the callback must not be shared - it uniquely specifies this request.
+     * @throws IllegalArgumentException if {@code request} contains invalid network capabilities.
+     * @throws SecurityException if missing the appropriate permissions.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     *
+     * @hide
+     */
+    @SystemApi(client = MODULE_LIBRARIES)
+    @SuppressLint("ExecutorRegistration")
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_STACK,
+            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK
+    })
+    public void requestBackgroundNetwork(@NonNull NetworkRequest request,
+            @Nullable Handler handler, @NonNull NetworkCallback networkCallback) {
+        final NetworkCapabilities nc = request.networkCapabilities;
+        sendRequestForNetwork(nc, networkCallback, 0, BACKGROUND_REQUEST,
+                TYPE_NONE, handler == null ? getDefaultHandler() : new CallbackHandler(handler));
     }
 }
