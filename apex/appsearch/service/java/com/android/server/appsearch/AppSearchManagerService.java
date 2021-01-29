@@ -64,7 +64,7 @@ public class AppSearchManagerService extends SystemService {
     public void onStart() {
         publishBinderService(Context.APP_SEARCH_SERVICE, new Stub());
         mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
-        mImplInstanceManager = new ImplInstanceManager(getContext());
+        mImplInstanceManager = ImplInstanceManager.getInstance(getContext());
     }
 
     private class Stub extends IAppSearchManager.Stub {
@@ -102,7 +102,8 @@ public class AppSearchManagerService extends SystemService {
                     }
                     schemasPackageAccessible.put(entry.getKey(), packageIdentifiers);
                 }
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 impl.setSchema(
                         packageName,
                         databaseName,
@@ -133,7 +134,8 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 verifyCallingPackage(callingUid, packageName);
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 List<AppSearchSchema> schemas = impl.getSchema(packageName, databaseName);
                 List<Bundle> schemaBundles = new ArrayList<>(schemas.size());
                 for (int i = 0; i < schemas.size(); i++) {
@@ -166,7 +168,8 @@ public class AppSearchManagerService extends SystemService {
                 verifyCallingPackage(callingUid, packageName);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 for (int i = 0; i < documentBundles.size(); i++) {
                     GenericDocument document = new GenericDocument(documentBundles.get(i));
                     try {
@@ -207,12 +210,18 @@ public class AppSearchManagerService extends SystemService {
                 verifyCallingPackage(callingUid, packageName);
                 AppSearchBatchResult.Builder<String, Bundle> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
-                        GenericDocument document = impl.getDocument(packageName, databaseName,
-                                namespace, uri, typePropertyPaths);
+                        GenericDocument document =
+                                impl.getDocument(
+                                        packageName,
+                                        databaseName,
+                                        namespace,
+                                        uri,
+                                        typePropertyPaths);
                         resultBuilder.setSuccess(uri, document.getBundle());
                     } catch (Throwable t) {
                         resultBuilder.setResult(uri, throwableToFailedResult(t));
@@ -245,7 +254,8 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 verifyCallingPackage(callingUid, packageName);
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 SearchResultPage searchResultPage =
                         impl.query(
                                 packageName,
@@ -278,12 +288,14 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 verifyCallingPackage(callingUid, packageName);
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
-                SearchResultPage searchResultPage = impl.globalQuery(
-                        queryExpression,
-                        new SearchSpec(searchSpecBundle),
-                        packageName,
-                        callingUid);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
+                SearchResultPage searchResultPage =
+                        impl.globalQuery(
+                                queryExpression,
+                                new SearchSpec(searchSpecBundle),
+                                packageName,
+                                callingUid);
                 invokeCallbackOnResult(
                         callback,
                         AppSearchResult.newSuccessfulResult(searchResultPage.getBundle()));
@@ -306,7 +318,8 @@ public class AppSearchManagerService extends SystemService {
             // TODO(b/162450968) check nextPageToken is being advanced by the same uid as originally
             // opened it
             try {
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 SearchResultPage searchResultPage = impl.getNextPage(nextPageToken);
                 invokeCallbackOnResult(
                         callback,
@@ -324,7 +337,8 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 impl.invalidateNextPageToken(nextPageToken);
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to invalidate the query page token", t);
@@ -350,15 +364,11 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
-                impl.reportUsage(
-                        packageName,
-                        databaseName,
-                        namespace,
-                        uri,
-                        usageTimeMillis);
-                invokeCallbackOnResult(callback,
-                        AppSearchResult.newSuccessfulResult(/*result=*/ null));
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
+                impl.reportUsage(packageName, databaseName, namespace, uri, usageTimeMillis);
+                invokeCallbackOnResult(
+                        callback, AppSearchResult.newSuccessfulResult(/*result=*/ null));
             } catch (Throwable t) {
                 invokeCallbackOnError(callback, t);
             } finally {
@@ -385,7 +395,8 @@ public class AppSearchManagerService extends SystemService {
                 verifyCallingPackage(callingUid, packageName);
                 AppSearchBatchResult.Builder<String, Void> resultBuilder =
                         new AppSearchBatchResult.Builder<>();
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 for (int i = 0; i < uris.size(); i++) {
                     String uri = uris.get(i);
                     try {
@@ -421,7 +432,8 @@ public class AppSearchManagerService extends SystemService {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 verifyCallingPackage(callingUid, packageName);
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 impl.removeByQuery(
                         packageName,
                         databaseName,
@@ -441,7 +453,8 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                AppSearchImpl impl = mImplInstanceManager.getInstance(callingUserId);
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 impl.persistToDisk();
             } catch (Throwable t) {
                 Log.e(TAG, "Unable to persist the data to disk", t);
@@ -457,7 +470,7 @@ public class AppSearchManagerService extends SystemService {
             int callingUserId = handleIncomingUser(userId, callingUid);
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
-                mImplInstanceManager.getInstance(callingUserId);
+                mImplInstanceManager.getAppSearchImpl(getContext(), callingUserId);
                 invokeCallbackOnResult(callback, AppSearchResult.newSuccessfulResult(null));
             } catch (Throwable t) {
                 invokeCallbackOnError(callback, t);
