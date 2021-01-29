@@ -225,8 +225,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         mTaskOrganizer.applyTransaction(wct);
         // TODO(b/151449487): Only call callback once we enable synchronization
         if (mListener != null) {
+            final int taskId = mTaskInfo.taskId;
             mListenerExecutor.execute(() -> {
-                mListener.onTaskVisibilityChanged(mTaskInfo.taskId, mSurfaceCreated);
+                mListener.onTaskVisibilityChanged(taskId, mSurfaceCreated);
             });
         }
     }
@@ -256,8 +257,10 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         }
 
         if (mListener != null) {
+            final int taskId = taskInfo.taskId;
+            final ComponentName baseActivity = taskInfo.baseActivity;
             mListenerExecutor.execute(() -> {
-                mListener.onTaskCreated(taskInfo.taskId, taskInfo.baseActivity);
+                mListener.onTaskCreated(taskId, baseActivity);
             });
         }
     }
@@ -267,8 +270,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
         if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
 
         if (mListener != null) {
+            final int taskId = taskInfo.taskId;
             mListenerExecutor.execute(() -> {
-                mListener.onTaskRemovalStarted(taskInfo.taskId);
+                mListener.onTaskRemovalStarted(taskId);
             });
         }
         mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
@@ -289,8 +293,9 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         if (mTaskToken == null || !mTaskToken.equals(taskInfo.token)) return;
         if (mListener != null) {
+            final int taskId = taskInfo.taskId;
             mListenerExecutor.execute(() -> {
-                mListener.onBackPressedOnTaskRoot(taskInfo.taskId);
+                mListener.onBackPressedOnTaskRoot(taskId);
             });
         }
     }
