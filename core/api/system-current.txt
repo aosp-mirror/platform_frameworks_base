@@ -7758,11 +7758,13 @@ package android.net.wifi.nl80211 {
     method public boolean setupInterfaceForSoftApMode(@NonNull String);
     method @Nullable public android.net.wifi.nl80211.WifiNl80211Manager.SignalPollResult signalPoll(@NonNull String);
     method public boolean startPnoScan(@NonNull String, @NonNull android.net.wifi.nl80211.PnoSettings, @NonNull java.util.concurrent.Executor, @NonNull android.net.wifi.nl80211.WifiNl80211Manager.PnoScanRequestCallback);
-    method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
+    method @Deprecated public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>);
+    method public boolean startScan(@NonNull String, int, @Nullable java.util.Set<java.lang.Integer>, @Nullable java.util.List<byte[]>, @Nullable android.os.Bundle);
     method public boolean stopPnoScan(@NonNull String);
     method public boolean tearDownClientInterface(@NonNull String);
     method public boolean tearDownInterfaces();
     method public boolean tearDownSoftApInterface(@NonNull String);
+    field public static final String SCANNING_PARAM_ENABLE_6GHZ_RNR = "android.net.wifi.nl80211.SCANNING_PARAM_ENABLE_6GHZ_RNR";
     field public static final int SCAN_TYPE_PNO_SCAN = 1; // 0x1
     field public static final int SCAN_TYPE_SINGLE_SCAN = 0; // 0x0
     field public static final int SEND_MGMT_FRAME_ERROR_ALREADY_STARTED = 5; // 0x5
