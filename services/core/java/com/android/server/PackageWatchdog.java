@@ -372,10 +372,12 @@ public class PackageWatchdog {
      * even from a previous boot.
      */
     public void unregisterHealthObserver(PackageHealthObserver observer) {
-        synchronized (mLock) {
-            mAllObservers.remove(observer.getName());
-        }
-        syncState("unregistering observer: " + observer.getName());
+        mLongTaskHandler.post(() -> {
+            synchronized (mLock) {
+                mAllObservers.remove(observer.getName());
+            }
+            syncState("unregistering observer: " + observer.getName());
+        });
     }
 
     /**
