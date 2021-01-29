@@ -25,7 +25,6 @@ import android.app.AlarmManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.os.Build;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.os.SystemClock;
 import android.os.SystemProperties;
@@ -39,11 +38,11 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * The real implementation of {@link TimeDetectorStrategyImpl.Callback} used on device.
+ * The real implementation of {@link TimeDetectorStrategyImpl.Environment} used on device.
  */
-public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrategyImpl.Callback {
+public final class EnvironmentImpl implements TimeDetectorStrategyImpl.Environment {
 
-    private final static String TAG = "timedetector.TimeDetectorStrategyCallbackImpl";
+    private static final String TAG = TimeDetectorService.TAG;
 
     private static final int SYSTEM_CLOCK_UPDATE_THRESHOLD_MILLIS_DEFAULT = 2 * 1000;
 
@@ -52,7 +51,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
      * incorrect for sure.
      */
     private static final Instant TIME_LOWER_BOUND = Instant.ofEpochMilli(
-            Long.max(Environment.getRootDirectory().lastModified(), Build.TIME));
+            Long.max(android.os.Environment.getRootDirectory().lastModified(), Build.TIME));
 
     /**
      * By default telephony and network only suggestions are accepted and telephony takes
@@ -74,7 +73,7 @@ public final class TimeDetectorStrategyCallbackImpl implements TimeDetectorStrat
     @NonNull private final AlarmManager mAlarmManager;
     @NonNull private final int[] mOriginPriorities;
 
-    public TimeDetectorStrategyCallbackImpl(@NonNull Context context) {
+    public EnvironmentImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
         mContentResolver = Objects.requireNonNull(context.getContentResolver());
 
