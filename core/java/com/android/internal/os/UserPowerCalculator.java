@@ -17,9 +17,14 @@
 package com.android.internal.os;
 
 import android.os.BatteryStats;
+import android.os.BatteryUsageStats;
+import android.os.BatteryUsageStatsQuery;
 import android.os.Process;
+import android.os.UidBatteryConsumer;
 import android.os.UserHandle;
 import android.util.SparseArray;
+
+import com.android.internal.util.ArrayUtils;
 
 import java.util.List;
 
@@ -27,6 +32,33 @@ import java.util.List;
  * Computes power consumed by Users
  */
 public class UserPowerCalculator extends PowerCalculator {
+
+    @Override
+    public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
+        final int[] userIds = query.getUserIds();
+        if (ArrayUtils.contains(userIds, UserHandle.USER_ALL)) {
+            return;
+        }
+
+        SparseArray<UidBatteryConsumer.Builder> uidBatteryConsumerBuilders =
+                builder.getUidBatteryConsumerBuilders();
+
+        for (int i = uidBatteryConsumerBuilders.size() - 1; i >= 0; i--) {
+            UidBatteryConsumer.Builder uidBuilder = uidBatteryConsumerBuilders.valueAt(i);
+            final int uid = uidBuilder.getUid();
+            if (UserHandle.getAppId(uid) < Process.FIRST_APPLICATION_UID) {
+                continue;
+            }
+
+            final int userId = UserHandle.getUserId(uid);
+            if (!ArrayUtils.contains(userIds, userId)) {
+                uidBuilder.excludeFromBatteryUsageStats();
+                builder.getOrCreateUserBatteryConsumerBuilder(userId)
+                        .addUidBatteryConsumer(uidBuilder);
+            }
+        }
+    }
 
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,

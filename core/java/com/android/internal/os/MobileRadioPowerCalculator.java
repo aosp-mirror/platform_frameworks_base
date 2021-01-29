@@ -85,8 +85,7 @@ public class MobileRadioPowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
 
         PowerAndDuration total = new PowerAndDuration();
 

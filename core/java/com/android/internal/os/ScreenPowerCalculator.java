@@ -51,8 +51,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
 
     @Override
     public void calculate(BatteryUsageStats.Builder builder, BatteryStats batteryStats,
-            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query,
-            SparseArray<UserHandle> asUsers) {
+            long rawRealtimeUs, long rawUptimeUs, BatteryUsageStatsQuery query) {
         final long durationMs = computeDuration(batteryStats, rawRealtimeUs,
                 BatteryStats.STATS_SINCE_CHARGED);
         final double powerMah = computePower(batteryStats, rawRealtimeUs,
