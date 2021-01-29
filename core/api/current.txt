@@ -46182,6 +46182,7 @@ package android.view {
     method @NonNull public android.graphics.Rect getBoundingRectRight();
     method @NonNull public android.graphics.Rect getBoundingRectTop();
     method @NonNull public java.util.List<android.graphics.Rect> getBoundingRects();
+    method @Nullable public android.graphics.Path getCutoutPath();
     method public int getSafeInsetBottom();
     method public int getSafeInsetLeft();
     method public int getSafeInsetRight();
