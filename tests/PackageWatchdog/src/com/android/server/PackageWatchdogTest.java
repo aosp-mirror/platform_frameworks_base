@@ -850,7 +850,6 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -862,7 +861,6 @@ public class PackageWatchdogTest {
 
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS - 1);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -933,11 +931,9 @@ public class PackageWatchdogTest {
         // Raise 2 failures at t=0 and t=900 respectively
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(900);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
 
         // Raise 2 failures at t=1100
         moveTimeForwardAndDispatch(200);
@@ -1312,6 +1308,8 @@ public class PackageWatchdogTest {
     }
 
     private void moveTimeForwardAndDispatch(long milliSeconds) {
+        // Exhaust all due runnables now which shouldn't be executed after time-leap
+        mTestLooper.dispatchAll();
         mTestClock.moveTimeForward(milliSeconds);
         mTestLooper.moveTimeForward(milliSeconds);
         mTestLooper.dispatchAll();
