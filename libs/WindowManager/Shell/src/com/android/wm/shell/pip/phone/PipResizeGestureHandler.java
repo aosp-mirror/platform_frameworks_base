@@ -212,8 +212,14 @@ public class PipResizeGestureHandler {
             // Register input event receiver
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "pip-resize", mDisplayId);
-            mInputEventReceiver = new PipResizeInputEventReceiver(
-                    mInputMonitor.getInputChannel(), mMainExecutor.getLooper());
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    mInputEventReceiver = new PipResizeInputEventReceiver(
+                            mInputMonitor.getInputChannel(), Looper.myLooper());
+                });
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to create input event receiver", e);
+            }
         }
     }
 

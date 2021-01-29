@@ -47,6 +47,11 @@ public class HandlerExecutor implements ShellExecutor {
     }
 
     @Override
+    public void removeAllCallbacks() {
+        mHandler.removeCallbacksAndMessages(null);
+    }
+
+    @Override
     public void removeCallbacks(@NonNull Runnable r) {
         mHandler.removeCallbacks(r);
     }
@@ -54,10 +59,5 @@ public class HandlerExecutor implements ShellExecutor {
     @Override
     public boolean hasCallback(Runnable r) {
         return mHandler.hasCallbacks(r);
-    }
-
-    @Override
-    public Looper getLooper() {
-        return mHandler.getLooper();
     }
 }
