@@ -72,6 +72,7 @@ import android.content.res.Resources;
 import android.content.rollback.RollbackManagerFrameworkInitializer;
 import android.debug.AdbManager;
 import android.debug.IAdbManager;
+import android.graphics.GameManager;
 import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
@@ -1425,6 +1426,16 @@ public final class SystemServiceRegistry {
                                 IMediaMetricsManager.Stub.asInterface(iBinder);
                         return new MediaMetricsManager(service, ctx.getUserId());
                     }});
+
+        registerService(Context.GAME_SERVICE, GameManager.class,
+                new CachedServiceFetcher<GameManager>() {
+                    @Override
+                    public GameManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new GameManager(ctx.getOuterContext(),
+                                ctx.mMainThread.getHandler());
+                    }
+                });
 
         sInitializing = true;
         try {
