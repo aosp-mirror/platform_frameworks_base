@@ -537,6 +537,7 @@ public class PackageWatchdog {
         synchronized (mLock) {
             mIsHealthCheckEnabled = enabled;
             mHealthCheckController.setEnabled(enabled);
+            mSyncRequired = true;
             // Prune to update internal state whenever health check is enabled/disabled
             syncState("health check state " + (enabled ? "enabled" : "disabled"));
         }
