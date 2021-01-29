@@ -22,7 +22,6 @@ import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.content.pm.DataLoaderParams;
-import android.content.pm.IDataLoaderStatusListener;
 import android.content.pm.IPackageLoadingProgressCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
@@ -95,32 +94,20 @@ public final class IncrementalManager {
      * @param params              IncrementalDataLoaderParams object to configure data loading.
      * @param createMode          Mode for opening an old Incremental File System mount or creating
      *                            a new mount.
-     * @param autoStartDataLoader Set true to immediately start data loader after creating storage.
      * @return IncrementalStorage object corresponding to the mounted directory.
      */
     @Nullable
     public IncrementalStorage createStorage(@NonNull String path,
             @NonNull DataLoaderParams params,
-            @CreateMode int createMode,
-            boolean autoStartDataLoader,
-            @Nullable IDataLoaderStatusListener statusListener,
-            @Nullable StorageHealthCheckParams healthCheckParams,
-            @Nullable IStorageHealthListener healthListener,
-            @NonNull PerUidReadTimeouts[] perUidReadTimeouts) {
+            @CreateMode int createMode) {
         Objects.requireNonNull(path);
         Objects.requireNonNull(params);
-        Objects.requireNonNull(perUidReadTimeouts);
         try {
-            final int id = mService.createStorage(path, params.getData(), createMode,
-                    statusListener, healthCheckParams, healthListener, perUidReadTimeouts);
+            final int id = mService.createStorage(path, params.getData(), createMode);
             if (id < 0) {
                 return null;
             }
-            final IncrementalStorage storage = new IncrementalStorage(mService, id);
-            if (autoStartDataLoader) {
-                storage.startLoading();
-            }
-            return storage;
+            return new IncrementalStorage(mService, id);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -281,15 +268,18 @@ public final class IncrementalManager {
      * Unbinds the target dir and deletes the corresponding storage instance.
      * Deletes the package name and associated storage id from maps.
      */
-    public void onPackageRemoved(@NonNull String codePath) {
+    public void onPackageRemoved(@NonNull File codeFile) {
         try {
+            final String codePath = codeFile.getAbsolutePath();
             final IncrementalStorage storage = openStorage(codePath);
             if (storage == null) {
                 return;
             }
             mLoadingProgressCallbacks.cleanUpCallbacks(storage);
             unregisterHealthListener(codePath);
-            mService.deleteStorage(storage.getId());
+
+            // Parent since we bind-mount a folder one level above.
+            mService.deleteBindMount(storage.getId(), codeFile.getParent());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
