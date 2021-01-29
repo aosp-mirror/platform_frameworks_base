@@ -4057,4 +4057,6 @@
   <java-symbol type="array" name="config_notificationMsgPkgsAllowedAsConvos" />
 
   <java-symbol type="array" name="config_keep_warming_services" />
+
+  <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
 </resources>
