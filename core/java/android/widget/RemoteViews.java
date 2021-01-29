@@ -985,37 +985,37 @@ public class RemoteViews implements Parcelable, Filter {
 
     private static Class<?> getParameterType(int type) {
         switch (type) {
-            case ReflectionAction.BOOLEAN:
+            case BaseReflectionAction.BOOLEAN:
                 return boolean.class;
-            case ReflectionAction.BYTE:
+            case BaseReflectionAction.BYTE:
                 return byte.class;
-            case ReflectionAction.SHORT:
+            case BaseReflectionAction.SHORT:
                 return short.class;
-            case ReflectionAction.INT:
+            case BaseReflectionAction.INT:
                 return int.class;
-            case ReflectionAction.LONG:
+            case BaseReflectionAction.LONG:
                 return long.class;
-            case ReflectionAction.FLOAT:
+            case BaseReflectionAction.FLOAT:
                 return float.class;
-            case ReflectionAction.DOUBLE:
+            case BaseReflectionAction.DOUBLE:
                 return double.class;
-            case ReflectionAction.CHAR:
+            case BaseReflectionAction.CHAR:
                 return char.class;
-            case ReflectionAction.STRING:
+            case BaseReflectionAction.STRING:
                 return String.class;
-            case ReflectionAction.CHAR_SEQUENCE:
+            case BaseReflectionAction.CHAR_SEQUENCE:
                 return CharSequence.class;
-            case ReflectionAction.URI:
+            case BaseReflectionAction.URI:
                 return Uri.class;
-            case ReflectionAction.BITMAP:
+            case BaseReflectionAction.BITMAP:
                 return Bitmap.class;
-            case ReflectionAction.BUNDLE:
+            case BaseReflectionAction.BUNDLE:
                 return Bundle.class;
-            case ReflectionAction.INTENT:
+            case BaseReflectionAction.INTENT:
                 return Intent.class;
-            case ReflectionAction.COLOR_STATE_LIST:
+            case BaseReflectionAction.COLOR_STATE_LIST:
                 return ColorStateList.class;
-            case ReflectionAction.ICON:
+            case BaseReflectionAction.ICON:
                 return Icon.class;
             default:
                 return null;
@@ -1324,7 +1324,8 @@ public class RemoteViews implements Parcelable, Filter {
         @Override
         public void apply(View root, ViewGroup rootParent,
                 OnClickHandler handler) throws ActionException {
-            ReflectionAction ra = new ReflectionAction(viewId, methodName, ReflectionAction.BITMAP,
+            ReflectionAction ra = new ReflectionAction(viewId, methodName,
+                    BaseReflectionAction.BITMAP,
                     bitmap);
             ra.apply(root, rootParent, handler);
         }
@@ -1343,7 +1344,7 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Base class for the reflection actions.
      */
-    private final class ReflectionAction extends Action {
+    private abstract class BaseReflectionAction extends Action {
         static final int BOOLEAN = 1;
         static final int BYTE = 2;
         static final int SHORT = 3;
@@ -1366,17 +1367,14 @@ public class RemoteViews implements Parcelable, Filter {
         @UnsupportedAppUsage
         String methodName;
         int type;
-        @UnsupportedAppUsage
-        Object value;
 
-        ReflectionAction(@IdRes int viewId, String methodName, int type, Object value) {
+        BaseReflectionAction(@IdRes int viewId, String methodName, int type) {
             this.viewId = viewId;
             this.methodName = methodName;
             this.type = type;
-            this.value = value;
         }
 
-        ReflectionAction(Parcel in) {
+        BaseReflectionAction(Parcel in) {
             this.viewId = in.readInt();
             this.methodName = in.readString8();
             this.type = in.readInt();
@@ -1385,7 +1383,125 @@ public class RemoteViews implements Parcelable, Filter {
                 Log.d(LOG_TAG, "read viewId=0x" + Integer.toHexString(this.viewId)
                         + " methodName=" + this.methodName + " type=" + this.type);
             }
+        }
 
+        public void writeToParcel(Parcel out, int flags) {
+            out.writeInt(this.viewId);
+            out.writeString8(this.methodName);
+            out.writeInt(this.type);
+        }
+
+        /**
+         * Returns the value to use as parameter for the method.
+         *
+         * The view might be passed as {@code null} if the parameter value is requested outside of
+         * inflation. If the parameter cannot be determined at that time, the method should return
+         * {@code null} but not raise any exception.
+         */
+        @Nullable
+        protected abstract Object getParameterValue(@Nullable View view) throws ActionException;
+
+        @Override
+        public final void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
+            final View view = root.findViewById(viewId);
+            if (view == null) return;
+
+            Class<?> param = getParameterType(this.type);
+            if (param == null) {
+                throw new ActionException("bad type: " + this.type);
+            }
+            Object value = getParameterValue(view);
+            try {
+                getMethod(view, this.methodName, param, false /* async */).invoke(view, value);
+            } catch (Throwable ex) {
+                throw new ActionException(ex);
+            }
+        }
+
+        @Override
+        public final Action initActionAsync(ViewTree root, ViewGroup rootParent,
+                OnClickHandler handler) {
+            final View view = root.findViewById(viewId);
+            if (view == null) return ACTION_NOOP;
+
+            Class<?> param = getParameterType(this.type);
+            if (param == null) {
+                throw new ActionException("bad type: " + this.type);
+            }
+
+            Object value = getParameterValue(view);
+            try {
+                MethodHandle method = getMethod(view, this.methodName, param, true /* async */);
+
+                if (method != null) {
+                    Runnable endAction = (Runnable) method.invoke(view, value);
+                    if (endAction == null) {
+                        return ACTION_NOOP;
+                    }
+                    // Special case view stub
+                    if (endAction instanceof ViewStub.ViewReplaceRunnable) {
+                        root.createTree();
+                        // Replace child tree
+                        root.findViewTreeById(viewId).replaceView(
+                                ((ViewStub.ViewReplaceRunnable) endAction).view);
+                    }
+                    return new RunnableAction(endAction);
+                }
+            } catch (Throwable ex) {
+                throw new ActionException(ex);
+            }
+
+            return this;
+        }
+
+        public final int mergeBehavior() {
+            // smoothScrollBy is cumulative, everything else overwites.
+            if (methodName.equals("smoothScrollBy")) {
+                return MERGE_APPEND;
+            } else {
+                return MERGE_REPLACE;
+            }
+        }
+
+        @Override
+        public final String getUniqueKey() {
+            // Each type of reflection action corresponds to a setter, so each should be seen as
+            // unique from the standpoint of merging.
+            return super.getUniqueKey() + this.methodName + this.type;
+        }
+
+        @Override
+        public final boolean prefersAsyncApply() {
+            return this.type == URI || this.type == ICON;
+        }
+
+        @Override
+        public final void visitUris(@NonNull Consumer<Uri> visitor) {
+            switch (this.type) {
+                case URI:
+                    final Uri uri = (Uri) getParameterValue(null);
+                    if (uri != null) visitor.accept(uri);
+                    break;
+                case ICON:
+                    final Icon icon = (Icon) getParameterValue(null);
+                    if (icon != null) visitIconUri(icon, visitor);
+                    break;
+            }
+        }
+    }
+
+    /** Class for the reflection actions. */
+    private final class ReflectionAction extends BaseReflectionAction {
+        @UnsupportedAppUsage
+        Object value;
+
+        ReflectionAction(@IdRes int viewId, String methodName, int type, Object value) {
+            super(viewId, methodName, type);
+            this.value = value;
+        }
+
+        ReflectionAction(Parcel in) {
+            super(in);
             // For some values that may have been null, we first check a flag to see if they were
             // written to the parcel.
             switch (this.type) {
@@ -1396,7 +1512,7 @@ public class RemoteViews implements Parcelable, Filter {
                     this.value = in.readByte();
                     break;
                 case SHORT:
-                    this.value = (short)in.readInt();
+                    this.value = (short) in.readInt();
                     break;
                 case INT:
                     this.value = in.readInt();
@@ -1411,7 +1527,7 @@ public class RemoteViews implements Parcelable, Filter {
                     this.value = in.readDouble();
                     break;
                 case CHAR:
-                    this.value = (char)in.readInt();
+                    this.value = (char) in.readInt();
                     break;
                 case STRING:
                     this.value = in.readString8();
@@ -1442,15 +1558,7 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         public void writeToParcel(Parcel out, int flags) {
-            out.writeInt(this.viewId);
-            out.writeString8(this.methodName);
-            out.writeInt(this.type);
-            //noinspection ConstantIfStatement
-            if (false) {
-                Log.d(LOG_TAG, "write viewId=0x" + Integer.toHexString(this.viewId)
-                        + " methodName=" + this.methodName + " type=" + this.type);
-            }
-
+            super.writeToParcel(out, flags);
             // For some values which are null, we record an integer flag to indicate whether
             // we have written a valid value to the parcel.
             switch (this.type) {
@@ -1476,13 +1584,13 @@ public class RemoteViews implements Parcelable, Filter {
                     out.writeDouble((Double) this.value);
                     break;
                 case CHAR:
-                    out.writeInt((int)((Character)this.value).charValue());
+                    out.writeInt((int) ((Character) this.value).charValue());
                     break;
                 case STRING:
-                    out.writeString8((String)this.value);
+                    out.writeString8((String) this.value);
                     break;
                 case CHAR_SEQUENCE:
-                    TextUtils.writeToParcel((CharSequence)this.value, out, flags);
+                    TextUtils.writeToParcel((CharSequence) this.value, out, flags);
                     break;
                 case BUNDLE:
                     out.writeBundle((Bundle) this.value);
@@ -1500,153 +1608,65 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         @Override
-        public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
-            final View view = root.findViewById(viewId);
-            if (view == null) return;
-
-            Class<?> param = getParameterType(this.type);
-            if (param == null) {
-                throw new ActionException("bad type: " + this.type);
-            }
-            try {
-                getMethod(view, this.methodName, param, false /* async */).invoke(view, this.value);
-            } catch (Throwable ex) {
-                throw new ActionException(ex);
-            }
-        }
-
-        @Override
-        public Action initActionAsync(ViewTree root, ViewGroup rootParent, OnClickHandler handler) {
-            final View view = root.findViewById(viewId);
-            if (view == null) return ACTION_NOOP;
-
-            Class<?> param = getParameterType(this.type);
-            if (param == null) {
-                throw new ActionException("bad type: " + this.type);
-            }
-
-            try {
-                MethodHandle method = getMethod(view, this.methodName, param, true /* async */);
-
-                if (method != null) {
-                    Runnable endAction = (Runnable) method.invoke(view, this.value);
-                    if (endAction == null) {
-                        return ACTION_NOOP;
-                    } else {
-                        // Special case view stub
-                        if (endAction instanceof ViewStub.ViewReplaceRunnable) {
-                            root.createTree();
-                            // Replace child tree
-                            root.findViewTreeById(viewId).replaceView(
-                                    ((ViewStub.ViewReplaceRunnable) endAction).view);
-                        }
-                        return new RunnableAction(endAction);
-                    }
-                }
-            } catch (Throwable ex) {
-                throw new ActionException(ex);
-            }
-
-            return this;
-        }
-
-        public int mergeBehavior() {
-            // smoothScrollBy is cumulative, everything else overwites.
-            if (methodName.equals("smoothScrollBy")) {
-                return MERGE_APPEND;
-            } else {
-                return MERGE_REPLACE;
-            }
+        protected Object getParameterValue(View view) throws ActionException {
+            return this.value;
         }
 
         @Override
         public int getActionTag() {
             return REFLECTION_ACTION_TAG;
         }
-
-        @Override
-        public String getUniqueKey() {
-            // Each type of reflection action corresponds to a setter, so each should be seen as
-            // unique from the standpoint of merging.
-            return super.getUniqueKey() + this.methodName + this.type;
-        }
-
-        @Override
-        public boolean prefersAsyncApply() {
-            return this.type == URI || this.type == ICON;
-        }
-
-        @Override
-        public void visitUris(@NonNull Consumer<Uri> visitor) {
-            switch (this.type) {
-                case URI:
-                    final Uri uri = (Uri) this.value;
-                    visitor.accept(uri);
-                    break;
-                case ICON:
-                    final Icon icon = (Icon) this.value;
-                    visitIconUri(icon, visitor);
-                    break;
-            }
-        }
     }
 
-    private final class ResourceReflectionAction extends Action {
+    private final class ResourceReflectionAction extends BaseReflectionAction {
 
         static final int DIMEN_RESOURCE = 1;
         static final int COLOR_RESOURCE = 2;
         static final int STRING_RESOURCE = 3;
 
-        private final String mMethodName;
-        private final int mParameterType;
         private final int mResourceType;
         private final int mResId;
 
         ResourceReflectionAction(@IdRes int viewId, String methodName, int parameterType,
                 int resourceType, int resId) {
-            this.viewId = viewId;
-            this.mMethodName = methodName;
-            this.mParameterType = parameterType;
+            super(viewId, methodName, parameterType);
             this.mResourceType = resourceType;
             this.mResId = resId;
         }
 
         ResourceReflectionAction(Parcel in) {
-            this.viewId = in.readInt();
-            this.mMethodName = in.readString8();
-            this.mParameterType = in.readInt();
+            super(in);
             this.mResourceType = in.readInt();
             this.mResId = in.readInt();
         }
 
         @Override
         public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(this.viewId);
-            dest.writeString8(this.mMethodName);
-            dest.writeInt(this.mParameterType);
+            super.writeToParcel(dest, flags);
             dest.writeInt(this.mResourceType);
             dest.writeInt(this.mResId);
         }
 
-        private @NonNull Object getResourceValue(View view) throws ActionException {
+        @Override
+        protected @NonNull Object getParameterValue(View view) throws ActionException {
             Resources resources = view.getContext().getResources();
             try {
                 switch (this.mResourceType) {
                     case DIMEN_RESOURCE:
-                        if (this.mParameterType == ReflectionAction.INT) {
+                        if (this.type == BaseReflectionAction.INT) {
                             return resources.getDimensionPixelSize(this.mResId);
                         }
                         return resources.getDimension(this.mResId);
                     case COLOR_RESOURCE:
-                        switch(this.mParameterType) {
-                            case ReflectionAction.INT:
+                        switch(this.type) {
+                            case BaseReflectionAction.INT:
                                 return view.getContext().getColor(this.mResId);
-                            case ReflectionAction.COLOR_STATE_LIST:
+                            case BaseReflectionAction.COLOR_STATE_LIST:
                                 return view.getContext().getColorStateList(this.mResId);
                             default:
                                 throw new ActionException(
                                         "color resources must be used as int or ColorStateList, "
-                                                + "not " + this.mParameterType);
+                                                + "not " + this.type);
                         }
                     case STRING_RESOURCE:
                         return resources.getText(this.mResId);
@@ -1656,60 +1676,6 @@ public class RemoteViews implements Parcelable, Filter {
             } catch (Throwable t) {
                 throw new ActionException(t);
             }
-        }
-
-        @Override
-        public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
-                throws ActionException {
-            final View view = root.findViewById(viewId);
-            if (view == null) return;
-            Object value = getResourceValue(view);
-            Class<?> param = getParameterType(this.mParameterType);
-            if (param == null) {
-                throw new ActionException("bad type: " + this.mParameterType);
-            }
-            try {
-                getMethod(view, this.mMethodName, param, false /* async */).invoke(view, value);
-            } catch (Throwable ex) {
-                throw new ActionException(ex);
-            }
-        }
-
-        @Override
-        public Action initActionAsync(ViewTree root, ViewGroup rootParent, OnClickHandler handler) {
-            final View view = root.findViewById(viewId);
-            if (view == null) return ACTION_NOOP;
-
-            Class<?> param = getParameterType(this.mParameterType);
-            if (param == null) {
-                throw new ActionException("bad type: " + this.mParameterType);
-            }
-
-            Object value = getResourceValue(view);
-
-            try {
-                MethodHandle method = getMethod(view, this.mMethodName, param, true /* async */);
-
-                if (method != null) {
-                    Runnable endAction = (Runnable) method.invoke(view, value);
-                    if (endAction == null) {
-                        return ACTION_NOOP;
-                    } else {
-                        // Special case view stub
-                        if (endAction instanceof ViewStub.ViewReplaceRunnable) {
-                            root.createTree();
-                            // Replace child tree
-                            root.findViewTreeById(viewId).replaceView(
-                                    ((ViewStub.ViewReplaceRunnable) endAction).view);
-                        }
-                        return new RunnableAction(endAction);
-                    }
-                }
-            } catch (Throwable ex) {
-                throw new ActionException(ex);
-            }
-
-            return this;
         }
 
         @Override
@@ -3245,7 +3211,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setProgressTintList(@IdRes int viewId, ColorStateList tint) {
         addAction(new ReflectionAction(viewId, "setProgressTintList",
-                ReflectionAction.COLOR_STATE_LIST, tint));
+                BaseReflectionAction.COLOR_STATE_LIST, tint));
     }
 
     /**
@@ -3257,7 +3223,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setProgressBackgroundTintList(@IdRes int viewId, ColorStateList tint) {
         addAction(new ReflectionAction(viewId, "setProgressBackgroundTintList",
-                ReflectionAction.COLOR_STATE_LIST, tint));
+                BaseReflectionAction.COLOR_STATE_LIST, tint));
     }
 
     /**
@@ -3269,7 +3235,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setProgressIndeterminateTintList(@IdRes int viewId, ColorStateList tint) {
         addAction(new ReflectionAction(viewId, "setIndeterminateTintList",
-                ReflectionAction.COLOR_STATE_LIST, tint));
+                BaseReflectionAction.COLOR_STATE_LIST, tint));
     }
 
     /**
@@ -3291,8 +3257,8 @@ public class RemoteViews implements Parcelable, Filter {
      * @param colors the text colors to set
      */
     public void setTextColor(@IdRes int viewId, ColorStateList colors) {
-        addAction(new ReflectionAction(viewId, "setTextColor", ReflectionAction.COLOR_STATE_LIST,
-                colors));
+        addAction(new ReflectionAction(viewId, "setTextColor",
+                BaseReflectionAction.COLOR_STATE_LIST, colors));
     }
 
     /**
@@ -3485,7 +3451,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setBoolean(@IdRes int viewId, String methodName, boolean value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BOOLEAN, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.BOOLEAN, value));
     }
 
     /**
@@ -3496,7 +3462,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setByte(@IdRes int viewId, String methodName, byte value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BYTE, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.BYTE, value));
     }
 
     /**
@@ -3507,7 +3473,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setShort(@IdRes int viewId, String methodName, short value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.SHORT, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.SHORT, value));
     }
 
     /**
@@ -3518,7 +3484,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setInt(@IdRes int viewId, String methodName, int value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INT, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.INT, value));
     }
 
     /**
@@ -3533,7 +3499,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setIntDimen(@IdRes int viewId, @NonNull String methodName,
             @DimenRes int dimenResource) {
-        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.INT,
+        addAction(new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.INT,
                 ResourceReflectionAction.DIMEN_RESOURCE, dimenResource));
     }
 
@@ -3548,7 +3514,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setColor(@IdRes int viewId, @NonNull String methodName,
             @ColorRes int colorResource) {
-        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.INT,
+        addAction(new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.INT,
                 ResourceReflectionAction.COLOR_RESOURCE, colorResource));
     }
 
@@ -3563,7 +3529,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @hide
      */
     public void setColorStateList(@IdRes int viewId, String methodName, ColorStateList value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.COLOR_STATE_LIST,
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.COLOR_STATE_LIST,
                 value));
     }
 
@@ -3578,9 +3544,9 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setColorStateList(@IdRes int viewId, @NonNull String methodName,
             @ColorRes int colorResource) {
-        addAction(
-                new ResourceReflectionAction(viewId, methodName, ReflectionAction.COLOR_STATE_LIST,
-                        ResourceReflectionAction.COLOR_RESOURCE, colorResource));
+        addAction(new ResourceReflectionAction(viewId, methodName,
+                BaseReflectionAction.COLOR_STATE_LIST, ResourceReflectionAction.COLOR_RESOURCE,
+                colorResource));
     }
 
     /**
@@ -3591,7 +3557,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setLong(@IdRes int viewId, String methodName, long value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.LONG, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.LONG, value));
     }
 
     /**
@@ -3602,7 +3568,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setFloat(@IdRes int viewId, String methodName, float value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.FLOAT, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.FLOAT, value));
     }
 
     /**
@@ -3617,7 +3583,7 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setFloatDimen(@IdRes int viewId, @NonNull String methodName,
             @DimenRes int dimenResource) {
-        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.FLOAT,
+        addAction(new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.FLOAT,
                 ResourceReflectionAction.DIMEN_RESOURCE, dimenResource));
     }
 
@@ -3629,7 +3595,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setDouble(@IdRes int viewId, String methodName, double value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.DOUBLE, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.DOUBLE, value));
     }
 
     /**
@@ -3640,7 +3606,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setChar(@IdRes int viewId, String methodName, char value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.CHAR, value));
     }
 
     /**
@@ -3651,7 +3617,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setString(@IdRes int viewId, String methodName, String value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.STRING, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.STRING, value));
     }
 
     /**
@@ -3662,7 +3628,8 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setCharSequence(@IdRes int viewId, String methodName, CharSequence value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR_SEQUENCE, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.CHAR_SEQUENCE,
+                value));
     }
 
     /**
@@ -3676,8 +3643,9 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setCharSequence(@IdRes int viewId, @NonNull String methodName,
             @StringRes int stringResource) {
-        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.CHAR_SEQUENCE,
-                ResourceReflectionAction.STRING_RESOURCE, stringResource));
+        addAction(
+                new ResourceReflectionAction(viewId, methodName, BaseReflectionAction.CHAR_SEQUENCE,
+                        ResourceReflectionAction.STRING_RESOURCE, stringResource));
     }
 
     /**
@@ -3695,7 +3663,7 @@ public class RemoteViews implements Parcelable, Filter {
                 value.checkFileUriExposed("RemoteViews.setUri()");
             }
         }
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.URI, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.URI, value));
     }
 
     /**
@@ -3720,7 +3688,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The value to pass to the method.
      */
     public void setBundle(@IdRes int viewId, String methodName, Bundle value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.BUNDLE, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.BUNDLE, value));
     }
 
     /**
@@ -3731,7 +3699,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The {@link android.content.Intent} to pass the method.
      */
     public void setIntent(@IdRes int viewId, String methodName, Intent value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.INTENT, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.INTENT, value));
     }
 
     /**
@@ -3742,7 +3710,7 @@ public class RemoteViews implements Parcelable, Filter {
      * @param value The {@link android.graphics.drawable.Icon} to pass the method.
      */
     public void setIcon(@IdRes int viewId, String methodName, Icon value) {
-        addAction(new ReflectionAction(viewId, methodName, ReflectionAction.ICON, value));
+        addAction(new ReflectionAction(viewId, methodName, BaseReflectionAction.ICON, value));
     }
 
     /**
