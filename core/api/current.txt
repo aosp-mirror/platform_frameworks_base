@@ -31849,6 +31849,10 @@ package android.os.strictmode {
   public final class ImplicitDirectBootViolation extends android.os.strictmode.Violation {
   }
 
+  public final class IncorrectContextUseViolation extends android.os.strictmode.Violation {
+    ctor public IncorrectContextUseViolation(@NonNull String, @NonNull Throwable);
+  }
+
   public class InstanceCountViolation extends android.os.strictmode.Violation {
     method public long getNumberOfInstances();
   }
