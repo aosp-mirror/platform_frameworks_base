@@ -982,7 +982,11 @@ public class PackageWatchdog {
                     if (!DeviceConfig.NAMESPACE_ROLLBACK.equals(properties.getNamespace())) {
                         return;
                     }
-                    updateConfigs();
+                    try {
+                        updateConfigs();
+                    } catch (Exception ignore) {
+                        Slog.w(TAG, "Failed to reload device config changes");
+                    }
                 });
     }
 
