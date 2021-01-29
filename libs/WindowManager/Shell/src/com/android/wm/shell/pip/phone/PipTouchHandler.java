@@ -32,6 +32,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.provider.DeviceConfig;
+import android.util.Log;
 import android.util.Size;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -176,7 +177,7 @@ public class PipTouchHandler {
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
                 mMotionHelper, mainExecutor);
         mTouchState = new PipTouchState(ViewConfiguration.get(context),
-                () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL,
+                () -> mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
                         mPipBoundsState.getBounds(), true /* allowMenuTimeout */, willResizeMenu(),
                         shouldShowResizeHandle()),
                 menuController::hideMenu,
@@ -925,16 +926,21 @@ public class PipTouchHandler {
     }
 
     /**
-     * @return whether the menu will resize as a part of showing the full menu.
+     * @return {@code true} if the menu should be resized on tap because app explicitly specifies
+     * PiP window size that is too small to hold all the actions.
      */
     private boolean willResizeMenu() {
         if (!mEnableResize) {
             return false;
         }
-        return mPipBoundsState.getExpandedBounds().width()
-                != mPipBoundsState.getNormalBounds().width()
-                || mPipBoundsState.getExpandedBounds().height()
-                != mPipBoundsState.getNormalBounds().height();
+        final Size estimatedMenuSize = mMenuController.getEstimatedMenuSize();
+        if (estimatedMenuSize == null) {
+            Log.wtf(TAG, "Failed to get estimated menu size");
+            return false;
+        }
+        final Rect currentBounds = mPipBoundsState.getBounds();
+        return currentBounds.width() < estimatedMenuSize.getWidth()
+                || currentBounds.height() < estimatedMenuSize.getHeight();
     }
 
     /**
