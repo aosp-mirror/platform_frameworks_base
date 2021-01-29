@@ -8068,7 +8068,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         int user = UserHandle.getUserId(mDeps.getCallingUid());
         final boolean success;
         synchronized (mVpns) {
-            throwIfLockdownEnabled();
             success = mVpns.get(user).setUnderlyingNetworks(networks);
         }
         return success;
