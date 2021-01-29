@@ -116,7 +116,7 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
@@ -151,7 +151,7 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                             .isVisible(secondaryApp.defaultWindowName)
                     }
@@ -187,7 +187,7 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("appWindowIsVisible") {
                         isInvisible(nonResizeableApp.defaultWindowName)
                     }
                     visibleWindowsShownMoreThanOneConsecutiveEntry(
