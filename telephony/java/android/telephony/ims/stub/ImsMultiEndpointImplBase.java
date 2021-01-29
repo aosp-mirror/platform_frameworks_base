@@ -25,6 +25,7 @@ import com.android.ims.internal.IImsExternalCallStateListener;
 import com.android.ims.internal.IImsMultiEndpoint;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Base implementation of ImsMultiEndpoint, which implements stub versions of the methods
@@ -41,10 +42,28 @@ public class ImsMultiEndpointImplBase {
     private static final String TAG = "MultiEndpointImplBase";
 
     private IImsExternalCallStateListener mListener;
-    private IImsMultiEndpoint mImsMultiEndpoint = new IImsMultiEndpoint.Stub() {
+    private final Object mLock = new Object();
+    private final IImsMultiEndpoint mImsMultiEndpoint = new IImsMultiEndpoint.Stub() {
+
         @Override
         public void setListener(IImsExternalCallStateListener listener) throws RemoteException {
-            mListener = listener;
+            synchronized (mLock) {
+                if (mListener != null && listener != null && Objects.equals(
+                        mListener.asBinder(), listener.asBinder())) {
+                    return;
+                }
+
+                if (listener == null) {
+                    mListener = null;
+                } else if (listener != null && mListener == null) {
+                    mListener = listener;
+                } else {
+                    // Fail fast here instead of silently overwriting the listener to another
+                    // listener due to another connection connecting.
+                    throw new IllegalStateException("ImsMultiEndpointImplBase: Listener already"
+                            + " set by another connection.");
+                }
+            }
         }
 
         @Override
@@ -65,9 +84,13 @@ public class ImsMultiEndpointImplBase {
      */
     public final void onImsExternalCallStateUpdate(List<ImsExternalCallState> externalCallDialogs) {
         Log.d(TAG, "ims external call state update triggered.");
-        if (mListener != null) {
+        IImsExternalCallStateListener listener;
+        synchronized (mLock) {
+            listener = mListener;
+        }
+        if (listener != null) {
             try {
-                mListener.onImsExternalCallStateUpdate(externalCallDialogs);
+                listener.onImsExternalCallStateUpdate(externalCallDialogs);
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
