@@ -1371,7 +1371,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             final Rect spaceToFill = transformedBounds != null
                     ? transformedBounds
                     : inMultiWindowMode()
-                            ? task.getBounds()
+                            ? getRootTask().getBounds()
                             : getRootTask().getParent().getBounds();
             mLetterbox.layout(spaceToFill, w.getFrame(), mTmpPoint);
         } else if (mLetterbox != null) {
@@ -6589,8 +6589,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // which point, the activity type is still undefined if it will be standard.
                 // For other non-standard types, the type is set in the constructor, so this should
                 // not be a problem.
-                && isActivityTypeStandardOrUndefined()
-                && !mAtmService.mForceResizableActivities;
+                && isActivityTypeStandardOrUndefined();
     }
 
     @Override
