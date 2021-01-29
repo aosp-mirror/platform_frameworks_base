@@ -3880,6 +3880,7 @@ public class UserManagerService extends IUserManager.Stub {
      */
     @Override
     public boolean removeUser(@UserIdInt int userId) {
+        Slog.i(LOG_TAG, "removeUser u" + userId);
         checkManageOrCreateUsersPermission("Only the system can remove users");
 
         final String restriction = getUserRemovalRestriction(userId);
