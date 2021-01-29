@@ -85,13 +85,12 @@ public class SyncRtSurfaceTransactionApplier {
         for (int i = params.length - 1; i >= 0; i--) {
             SurfaceParams surfaceParams = params[i];
             SurfaceControl surface = surfaceParams.surface;
+            if (frame > 0) {
+                t.deferTransactionUntil(surface, mTargetSc, frame);
+            }
             applyParams(t, surfaceParams, mTmpFloat9);
         }
-        if (mTargetViewRootImpl != null) {
-            mTargetViewRootImpl.mergeWithNextTransaction(t, frame);
-        } else {
-            t.apply();
-        }
+        t.apply();
     }
 
     public static void applyParams(Transaction t, SurfaceParams params, float[] tmpFloat9) {
