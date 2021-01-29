@@ -38,8 +38,6 @@ import android.util.Slog;
 import android.view.accessibility.AccessibilityEvent;
 
 import com.android.internal.util.ArrayUtils;
-import com.android.server.LocalServices;
-import com.android.server.wm.ActivityTaskManagerInternal;
 
 import libcore.util.EmptyArray;
 
@@ -88,7 +86,6 @@ public class AccessibilitySecurityPolicy {
 
     private final AccessibilityUserManager mAccessibilityUserManager;
     private AccessibilityWindowManager mAccessibilityWindowManager;
-    private final ActivityTaskManagerInternal mAtmInternal;
 
     /**
      * Constructor for AccessibilityManagerService.
@@ -100,7 +97,6 @@ public class AccessibilitySecurityPolicy {
         mPackageManager = mContext.getPackageManager();
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mAppOpsManager = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
     /**
@@ -571,14 +567,5 @@ public class AccessibilitySecurityPolicy {
             throw new SecurityException("Caller does not hold permission "
                     + permission);
         }
-    }
-
-    /**
-     * Enforcing permission check to IPC caller or grant it if it's recents.
-     *
-     * @param permission The permission to check
-     */
-    public void enforceCallerIsRecentsOrHasPermission(@NonNull String permission, String func) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(permission, func);
     }
 }

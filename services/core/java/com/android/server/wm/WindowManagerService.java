@@ -3997,8 +3997,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(
-                android.Manifest.permission.SET_ORIENTATION, "setIgnoreOrientationRequest()");
+        if (!checkCallingPermission(
+                android.Manifest.permission.SET_ORIENTATION, "setIgnoreOrientationRequest()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
 
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -6061,8 +6063,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setRecentsVisibility(boolean visible) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
-                "setRecentsVisibility()");
+        if (!checkCallingPermission(
+                android.Manifest.permission.STATUS_BAR, "setRecentsVisibility()")) {
+            throw new SecurityException("Requires STATUS_BAR permission");
+        }
         synchronized (mGlobalLock) {
             mPolicy.setRecentsVisibilityLw(visible);
         }
@@ -6070,8 +6074,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void hideTransientBars(int displayId) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
-                "hideTransientBars()");
+        if (!checkCallingPermission(
+                android.Manifest.permission.STATUS_BAR, "hideTransientBars()")) {
+            throw new SecurityException("Requires STATUS_BAR permission");
+        }
+
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent != null) {
@@ -8373,8 +8380,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Return whether layer tracing is enabled */
     public boolean isLayerTracing() {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
-                "isLayerTracing");
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "isLayerTracing()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
@@ -8406,8 +8416,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Enable or disable layer tracing */
     public void setLayerTracing(boolean enabled) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
-                "setLayerTracing");
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "setLayerTracing()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
@@ -8433,8 +8446,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Set layer tracing flags. */
     public void setLayerTracingFlags(int flags) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
-                "setLayerTracingFlags");
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "setLayerTracingFlags")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
