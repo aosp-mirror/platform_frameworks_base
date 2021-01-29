@@ -16,15 +16,16 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
-import static android.view.SurfaceProto.ROTATION_180;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -35,6 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.DisplayContent.IME_TARGET_LAYERING;
 import static com.android.server.wm.Task.ActivityState.STOPPED;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -903,6 +905,57 @@ public class SizeCompatTests extends WindowTestsBase {
         assertFalse(mActivity.inSizeCompatMode());
         assertEquals(2400, activityBounds.width());
         assertEquals(1000, activityBounds.height());
+    }
+
+    @Test
+    public void testSupportsNonResizableInSplitScreen() {
+        // Support non resizable in multi window
+        mAtm.mSupportsNonResizableMultiWindow = true;
+        setUpDisplaySizeWithApp(1000, 2800);
+        final TestSplitOrganizer organizer =
+                new TestSplitOrganizer(mAtm, mActivity.getDisplayContent());
+
+        // Non-resizable landscape activity
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
+        final Rect originalBounds = new Rect(mActivity.getBounds());
+
+        // Move activity to split screen
+        mTask.reparent(organizer.mPrimary, POSITION_TOP,
+                false /*moveParents*/, "test");
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, mTask.getWindowingMode());
+        assertEquals(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, mActivity.getWindowingMode());
+
+        // Non-resizable activity in size compat mode
+        assertScaled();
+        assertEquals(originalBounds,
+                mActivity.getConfiguration().windowConfiguration.getBounds());
+
+        // Recompute the natural configuration of the non-resizable activity and the split screen.
+        mActivity.clearSizeCompatMode();
+
+        // Draw letterbox.
+        mActivity.setVisible(false);
+        mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_OPEN);
+        mActivity.mDisplayContent.mOpeningApps.add(mActivity);
+        addWindowToActivity(mActivity);
+        mActivity.mRootWindowContainer.performSurfacePlacement();
+
+        // Split screen is also in portrait [1000,1400], so Task should be in letterbox, and
+        // activity fills task.
+        assertEquals(ORIENTATION_LANDSCAPE, mTask.getConfiguration().orientation);
+        assertEquals(ORIENTATION_LANDSCAPE, mActivity.getConfiguration().orientation);
+        assertFitted();
+        assertTrue(mTask.isTaskLetterboxed());
+
+        // Letterbox should fill the gap between the split screen and the letterboxed task.
+        final Rect primarySplitBounds = new Rect(organizer.mPrimary.getBounds());
+        final Rect letterboxedTaskBounds = new Rect(mTask.getBounds());
+        assertTrue(primarySplitBounds.contains(letterboxedTaskBounds));
+        assertEquals(new Rect(letterboxedTaskBounds.left - primarySplitBounds.left,
+                letterboxedTaskBounds.top - primarySplitBounds.top,
+                primarySplitBounds.right - letterboxedTaskBounds.right,
+                primarySplitBounds.bottom - letterboxedTaskBounds.bottom),
+                mActivity.getLetterboxInsets());
     }
 
     private static WindowState addWindowToActivity(ActivityRecord activity) {
