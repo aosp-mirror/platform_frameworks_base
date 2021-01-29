@@ -4192,12 +4192,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInsetsStateController.getImeSourceProvider().checkShowImePostLayout();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
-        mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
-                mLastHasContent,
-                mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
-                mTmpApplySurfaceChangesTransactionState.preferredModeId,
-                mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
-                true /* inTraversal, must call performTraversalInTrans... below */);
+        if (!mWmService.mDisplayFrozen) {
+            mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
+                    mLastHasContent,
+                    mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
+                    mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                    mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
+                    true /* inTraversal, must call performTraversalInTrans... below */);
+        }
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
         if (wallpaperVisible != mLastWallpaperVisible) {
