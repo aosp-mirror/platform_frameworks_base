@@ -565,7 +565,8 @@ void SkiaCanvas::drawVertices(const SkVertices* vertices, SkBlendMode mode, cons
 void SkiaCanvas::drawBitmap(Bitmap& bitmap, float left, float top, const Paint* paint) {
     auto image = bitmap.makeImage();
     apply_looper(paint, [&](const SkPaint& p) {
-        mCanvas->drawImage(image, left, top, &p);
+        auto sampling = SkSamplingOptions(p.getFilterQuality());
+        mCanvas->drawImage(image, left, top, sampling, &p);
     });
 }
 
@@ -574,7 +575,8 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, const SkMatrix& matrix, const Paint*
     SkAutoCanvasRestore acr(mCanvas, true);
     mCanvas->concat(matrix);
     apply_looper(paint, [&](const SkPaint& p) {
-        mCanvas->drawImage(image, 0, 0, &p);
+        auto sampling = SkSamplingOptions(p.getFilterQuality());
+        mCanvas->drawImage(image, 0, 0, sampling, &p);
     });
 }
 
@@ -586,8 +588,15 @@ void SkiaCanvas::drawBitmap(Bitmap& bitmap, float srcLeft, float srcTop, float s
     SkRect dstRect = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
 
     apply_looper(paint, [&](const SkPaint& p) {
-        mCanvas->drawImageRect(image, srcRect, dstRect, &p, SkCanvas::kFast_SrcRectConstraint);
+        auto sampling = SkSamplingOptions(p.getFilterQuality());
+        mCanvas->drawImageRect(image, srcRect, dstRect, sampling, &p,
+                               SkCanvas::kFast_SrcRectConstraint);
     });
+}
+
+static SkFilterMode paintToFilter(const Paint* paint) {
+    return paint && paint->isFilterBitmap() ? SkFilterMode::kLinear
+                                            : SkFilterMode::kNearest;
 }
 
 void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
@@ -664,18 +673,25 @@ void SkiaCanvas::drawBitmapMesh(Bitmap& bitmap, int meshWidth, int meshHeight,
     }
 #endif
 
+    auto image = bitmap.makeImage();
+
     // cons-up a shader for the bitmap
     Paint pnt;
     if (paint) {
         pnt = *paint;
     }
-    SkSamplingOptions sampling(pnt.isFilterBitmap() ? SkFilterMode::kLinear
-                                                    : SkFilterMode::kNearest,
-                               SkMipmapMode::kNone);
-    pnt.setShader(bitmap.makeImage()->makeShader(sampling));
+    SkSamplingOptions sampling(paintToFilter(&pnt));
+    pnt.setShader(image->makeShader(sampling));
+
     auto v = builder.detach();
     apply_looper(&pnt, [&](const SkPaint& p) {
-        mCanvas->drawVertices(v, SkBlendMode::kModulate, p);
+        SkPaint copy(p);
+        auto s = SkSamplingOptions(p.getFilterQuality());
+        if (s != sampling) {
+            // apply_looper changed the quality?
+            copy.setShader(image->makeShader(s));
+        }
+        mCanvas->drawVertices(v, SkBlendMode::kModulate, copy);
     });
 }
 
@@ -700,13 +716,11 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
         NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk, colors.get());
     }
 
-    SkFilterMode filter = paint && paint->isFilterBitmap() ? SkFilterMode::kLinear
-                                                           : SkFilterMode::kNearest;
-
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     auto image = bitmap.makeImage();
     apply_looper(paint, [&](const SkPaint& p) {
+        auto filter = SkSamplingOptions(p.getFilterQuality()).filter;
         mCanvas->drawImageLattice(image.get(), lattice, dst, filter, &p);
     });
 }

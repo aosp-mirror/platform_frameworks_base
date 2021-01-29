@@ -351,21 +351,24 @@ struct CanvasOp<CanvasOpType::DrawImage> {
         const sk_sp<Bitmap>& bitmap,
         float left,
         float top,
+        SkFilterMode filter,
         SkPaint paint
     ) : left(left),
         top(top),
+        filter(filter),
         paint(std::move(paint)),
         bitmap(bitmap),
         image(bitmap->makeImage()) { }
 
     float left;
     float top;
+    SkFilterMode filter;
     SkPaint paint;
     sk_sp<Bitmap> bitmap;
     sk_sp<SkImage> image;
 
     void draw(SkCanvas* canvas) const {
-        canvas->drawImage(image, left, top, &paint);
+        canvas->drawImage(image, left, top, SkSamplingOptions(filter), &paint);
     }
     ASSERT_DRAWABLE()
 };
@@ -377,15 +380,18 @@ struct CanvasOp<CanvasOpType::DrawImageRect> {
         const sk_sp<Bitmap>& bitmap,
         SkRect src,
         SkRect dst,
+        SkFilterMode filter,
         SkPaint paint
     ) : src(src),
         dst(dst),
+        filter(filter),
         paint(std::move(paint)),
         bitmap(bitmap),
         image(bitmap->makeImage()) { }
 
     SkRect src;
     SkRect dst;
+    SkFilterMode filter;
     SkPaint paint;
     sk_sp<Bitmap> bitmap;
     sk_sp<SkImage> image;
@@ -394,6 +400,7 @@ struct CanvasOp<CanvasOpType::DrawImageRect> {
         canvas->drawImageRect(image,
                 src,
                 dst,
+                SkSamplingOptions(filter),
                 &paint,
                 SkCanvas::kFast_SrcRectConstraint
         );
