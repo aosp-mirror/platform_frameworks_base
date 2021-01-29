@@ -134,7 +134,7 @@ public class NetworkControllerWifiTest extends NetworkControllerBaseTest {
         // Still be on wifi though.
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_WIFI, true, true);
         setConnectivityViaBroadcast(NetworkCapabilities.TRANSPORT_CELLULAR, false, false);
-        verifyLastMobileDataIndicators(false, DEFAULT_LEVEL, 0, true);
+        verifyLastMobileDataIndicators(true, DEFAULT_LEVEL, 0, true);
     }
 
     @Test

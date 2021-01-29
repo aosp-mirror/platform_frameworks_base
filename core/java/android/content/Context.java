@@ -64,7 +64,6 @@ import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
-import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -3575,6 +3574,7 @@ public abstract class Context {
             LIGHTS_SERVICE,
             //@hide: PEOPLE_SERVICE,
             //@hide: DEVICE_STATE_SERVICE,
+            //@hide: SPEECH_RECOGNITION_SERVICE,
             UWB_SERVICE,
             MEDIA_METRICS_SERVICE,
     })
@@ -5410,6 +5410,14 @@ public abstract class Context {
     public static final String MEDIA_METRICS_SERVICE = "media_metrics";
 
     /**
+     * Use with {@link #getSystemService(String)} to access system speech recognition service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+    */
+    public static final String SPEECH_RECOGNITION_SERVICE = "speech_recognition";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
@@ -6469,7 +6477,7 @@ public abstract class Context {
      * {@link WindowManager}, {@link android.view.LayoutInflater LayoutInflater} or
      * {@link android.app.WallpaperManager WallpaperManager}. Accessing UI components from non-UI
      * contexts throws {@link android.os.strictmode.Violation} if
-     * {@link StrictMode.VmPolicy.Builder#detectIncorrectContextUse()} is enabled.
+     * {@link android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()} is enabled.
      * <p>
      * Examples of UI contexts are
      * an {@link android.app.Activity Activity}, a context created from
@@ -6479,7 +6487,7 @@ public abstract class Context {
      *
      * @see #getDisplay()
      * @see #getSystemService(String)
-     * @see StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
+     * @see android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
      */
     public static boolean isUiContext(@NonNull Context context) {
         return context.isUiContext();

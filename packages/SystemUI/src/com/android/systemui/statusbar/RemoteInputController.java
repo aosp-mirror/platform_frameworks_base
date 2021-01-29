@@ -131,6 +131,7 @@ public class RemoteInputController {
      */
     public void removeRemoteInput(NotificationEntry entry, Object token) {
         Objects.requireNonNull(entry);
+        if (entry.mRemoteEditImeVisible) return;
 
         pruneWeakThenRemoveAndContains(null /* contains */, entry /* remove */, token);
 

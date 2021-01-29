@@ -71,7 +71,7 @@ public class QSCarrierGroupController {
                         boolean activityIn, boolean activityOut,
                         CharSequence typeContentDescription,
                         CharSequence typeContentDescriptionHtml, CharSequence description,
-                        boolean isWide, int subId, boolean roaming) {
+                        boolean isWide, int subId, boolean roaming, boolean showTriangle) {
                     int slotIndex = getSlotIndex(subId);
                     if (slotIndex >= SIM_SLOTS) {
                         Log.w(TAG, "setMobileDataIndicators - slot: " + slotIndex);

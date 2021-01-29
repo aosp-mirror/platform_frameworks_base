@@ -33,6 +33,7 @@ static jclass class_C;
 static jmethodID method_C_init;
 static jfieldID field_C_id;
 static jfieldID field_C_name;
+static jfieldID field_C_subsystem;
 
 // EnergyMeasurement
 static jclass class_EM;
@@ -277,11 +278,14 @@ static jobjectArray nativeGetEnergyMeterInfo(JNIEnv *env, jclass clazz) {
                     channelArray = env->NewObjectArray(railInfo.size(), class_C, nullptr);
                     for (int i = 0; i < railInfo.size(); i++) {
                         jstring name = env->NewStringUTF(railInfo[i].railName.c_str());
+                        jstring subsystem = env->NewStringUTF(railInfo[i].subsysName.c_str());
                         jobject channel = env->NewObject(class_C, method_C_init);
                         env->SetIntField(channel, field_C_id, railInfo[i].index);
                         env->SetObjectField(channel, field_C_name, name);
+                        env->SetObjectField(channel, field_C_subsystem, subsystem);
                         env->SetObjectArrayElement(channelArray, i, channel);
                         env->DeleteLocalRef(name);
+                        env->DeleteLocalRef(subsystem);
                         env->DeleteLocalRef(channel);
                     }
                 }
@@ -359,6 +363,7 @@ static jboolean nativeInit(JNIEnv *env, jclass clazz) {
     method_C_init = env->GetMethodID(class_C, "<init>", "()V");
     field_C_id = env->GetFieldID(class_C, "id", "I");
     field_C_name = env->GetFieldID(class_C, "name", "Ljava/lang/String;");
+    field_C_subsystem = env->GetFieldID(class_C, "subsystem", "Ljava/lang/String;");
 
     // EnergyMeasurement
     temp = env->FindClass("android/hardware/power/stats/EnergyMeasurement");

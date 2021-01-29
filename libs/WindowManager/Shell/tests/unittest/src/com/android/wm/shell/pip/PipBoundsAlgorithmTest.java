@@ -24,12 +24,14 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
 import android.util.Size;
+import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.common.DisplayLayout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +64,8 @@ public class PipBoundsAlgorithmTest extends ShellTestCase {
         mPipBoundsState = new PipBoundsState(mContext);
         mPipBoundsAlgorithm = new PipBoundsAlgorithm(mContext, mPipBoundsState);
 
-        mPipBoundsState.setDisplayInfo(mDefaultDisplayInfo);
+        mPipBoundsState.setDisplayLayout(
+                new DisplayLayout(mDefaultDisplayInfo, mContext.getResources(), true, true));
     }
 
     private void initializeMockResources() {

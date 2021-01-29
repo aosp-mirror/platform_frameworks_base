@@ -204,6 +204,7 @@ public final class NetworkCapabilities implements Parcelable {
             NET_CAPABILITY_TEMPORARILY_NOT_METERED,
             NET_CAPABILITY_OEM_PRIVATE,
             NET_CAPABILITY_VEHICLE_INTERNAL,
+            NET_CAPABILITY_NOT_VCN_MANAGED,
     })
     public @interface NetCapability { }
 
@@ -399,8 +400,16 @@ public final class NetworkCapabilities implements Parcelable {
     @SystemApi
     public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27;
 
+    /**
+     * Indicates that this network is not managed by a Virtual Carrier Network (VCN).
+     *
+     * TODO(b/177299683): Add additional clarifying javadoc.
+     * @hide
+     */
+    public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28;
+
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
-    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_VEHICLE_INTERNAL;
+    private static final int MAX_NET_CAPABILITY = NET_CAPABILITY_NOT_VCN_MANAGED;
 
     /**
      * Network capabilities that are expected to be mutable, i.e., can change while a particular
@@ -417,7 +426,8 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_NOT_CONGESTED)
             | (1 << NET_CAPABILITY_NOT_SUSPENDED)
             | (1 << NET_CAPABILITY_PARTIAL_CONNECTIVITY)
-            | (1 << NET_CAPABILITY_TEMPORARILY_NOT_METERED);
+            | (1 << NET_CAPABILITY_TEMPORARILY_NOT_METERED)
+            | (1 << NET_CAPABILITY_NOT_VCN_MANAGED);
 
     /**
      * Network capabilities that are not allowed in NetworkRequests. This exists because the
@@ -426,16 +436,21 @@ public final class NetworkCapabilities implements Parcelable {
      * can get into a cycle where the NetworkFactory endlessly churns out NetworkAgents that then
      * get immediately torn down because they do not have the requested capability.
      */
+    // Note that as a historical exception, the TRUSTED and NOT_VCN_MANAGED capabilities
+    // are mutable but requestable. Factories are responsible for not getting
+    // in an infinite loop about these.
     private static final long NON_REQUESTABLE_CAPABILITIES =
-            MUTABLE_CAPABILITIES & ~(1 << NET_CAPABILITY_TRUSTED);
+            MUTABLE_CAPABILITIES
+            & ~(1 << NET_CAPABILITY_TRUSTED)
+            & ~(1 << NET_CAPABILITY_NOT_VCN_MANAGED);
 
     /**
      * Capabilities that are set by default when the object is constructed.
      */
     private static final long DEFAULT_CAPABILITIES =
-            (1 << NET_CAPABILITY_NOT_RESTRICTED) |
-            (1 << NET_CAPABILITY_TRUSTED) |
-            (1 << NET_CAPABILITY_NOT_VPN);
+            (1 << NET_CAPABILITY_NOT_RESTRICTED)
+            | (1 << NET_CAPABILITY_TRUSTED)
+            | (1 << NET_CAPABILITY_NOT_VPN);
 
     /**
      * Capabilities that suggest that a network is restricted.
@@ -495,7 +510,8 @@ public final class NetworkCapabilities implements Parcelable {
             | (1 << NET_CAPABILITY_NOT_VPN)
             | (1 << NET_CAPABILITY_NOT_ROAMING)
             | (1 << NET_CAPABILITY_NOT_CONGESTED)
-            | (1 << NET_CAPABILITY_NOT_SUSPENDED);
+            | (1 << NET_CAPABILITY_NOT_SUSPENDED)
+            | (1 << NET_CAPABILITY_NOT_VCN_MANAGED);
 
     /**
      * Adds the given capability to this {@code NetworkCapability} instance.
@@ -1982,6 +1998,7 @@ public final class NetworkCapabilities implements Parcelable {
             case NET_CAPABILITY_TEMPORARILY_NOT_METERED:    return "TEMPORARILY_NOT_METERED";
             case NET_CAPABILITY_OEM_PRIVATE:          return "OEM_PRIVATE";
             case NET_CAPABILITY_VEHICLE_INTERNAL:     return "NET_CAPABILITY_VEHICLE_INTERNAL";
+            case NET_CAPABILITY_NOT_VCN_MANAGED:      return "NOT_VCN_MANAGED";
             default:                                  return Integer.toString(capability);
         }
     }

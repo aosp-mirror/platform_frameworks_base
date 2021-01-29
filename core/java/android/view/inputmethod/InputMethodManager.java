@@ -2307,7 +2307,9 @@ public final class InputMethodManager {
     public void removeImeSurface(IBinder windowToken) {
         synchronized (mH) {
             try {
-                mService.removeImeSurfaceFromWindow(windowToken);
+                final Completable.Void value = Completable.createVoid();
+                mService.removeImeSurfaceFromWindow(windowToken, ResultCallbacks.of(value));
+                Completable.getResult(value);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -3239,7 +3241,9 @@ public final class InputMethodManager {
     @Deprecated
     public void setAdditionalInputMethodSubtypes(String imiId, InputMethodSubtype[] subtypes) {
         try {
-            mService.setAdditionalInputMethodSubtypes(imiId, subtypes);
+            final Completable.Void value = Completable.createVoid();
+            mService.setAdditionalInputMethodSubtypes(imiId, subtypes, ResultCallbacks.of(value));
+            Completable.getResult(value);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

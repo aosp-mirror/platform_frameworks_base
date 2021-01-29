@@ -23,7 +23,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.SensorManager;
-import android.net.ConnectivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryStats.Uid;
 import android.os.Build;
@@ -37,11 +36,11 @@ import android.os.SELinux;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;
-import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -120,12 +119,11 @@ public class BatteryStatsHelper {
     private double mMaxDrainedPower;
 
     public static boolean checkWifiOnly(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(
-                Context.CONNECTIVITY_SERVICE);
-        if (cm == null) {
+        final TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+        if (tm == null) {
             return false;
         }
-        return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
+        return !tm.isDataCapable();
     }
 
     @UnsupportedAppUsage
@@ -380,6 +378,7 @@ public class BatteryStatsHelper {
         mMaxDrainedPower = (mStats.getHighDischargeAmountSinceCharge()
                 * mPowerProfile.getBatteryCapacity()) / 100;
 
+        // Create list of (almost all) sippers, calculate their usage, and put them in mUsageList.
         processAppUsage(asUsers);
 
         Collections.sort(mUsageList);
@@ -557,8 +556,7 @@ public class BatteryStatsHelper {
     }
 
     /**
-     * Mark the {@link BatterySipper} that we should hide and smear the screen usage based on
-     * foreground activity time.
+     * Mark the {@link BatterySipper} that we should hide.
      *
      * @param sippers sipper list that need to check and remove
      * @return the total power of the hidden items of {@link BatterySipper}
@@ -566,7 +564,6 @@ public class BatteryStatsHelper {
      */
     public double removeHiddenBatterySippers(List<BatterySipper> sippers) {
         double proportionalSmearPowerMah = 0;
-        BatterySipper screenSipper = null;
         for (int i = sippers.size() - 1; i >= 0; i--) {
             final BatterySipper sipper = sippers.get(i);
             sipper.shouldHide = shouldHideSipper(sipper);
@@ -582,42 +579,8 @@ public class BatteryStatsHelper {
                     proportionalSmearPowerMah += sipper.totalPowerMah;
                 }
             }
-
-            if (sipper.drainType == BatterySipper.DrainType.SCREEN) {
-                screenSipper = sipper;
-            }
         }
-
-        smearScreenBatterySipper(sippers, screenSipper);
-
         return proportionalSmearPowerMah;
-    }
-
-    /**
-     * Smear the screen on power usage among {@code sippers}, based on ratio of foreground activity
-     * time.
-     */
-    public void smearScreenBatterySipper(List<BatterySipper> sippers, BatterySipper screenSipper) {
-        long totalActivityTimeMs = 0;
-        final SparseLongArray activityTimeArray = new SparseLongArray();
-        for (int i = 0, size = sippers.size(); i < size; i++) {
-            final BatteryStats.Uid uid = sippers.get(i).uidObj;
-            if (uid != null) {
-                final long timeMs = getProcessForegroundTimeMs(uid,
-                        BatteryStats.STATS_SINCE_CHARGED);
-                activityTimeArray.put(uid.getUid(), timeMs);
-                totalActivityTimeMs += timeMs;
-            }
-        }
-
-        if (screenSipper != null && totalActivityTimeMs >= 10 * DateUtils.MINUTE_IN_MILLIS) {
-            final double screenPowerMah = screenSipper.totalPowerMah;
-            for (int i = 0, size = sippers.size(); i < size; i++) {
-                final BatterySipper sipper = sippers.get(i);
-                sipper.screenPowerMah = screenPowerMah * activityTimeArray.get(sipper.getUid(), 0)
-                        / totalActivityTimeMs;
-            }
-        }
     }
 
     /**
@@ -680,33 +643,6 @@ public class BatteryStatsHelper {
 
     public long convertMsToUs(long timeMs) {
         return timeMs * 1000;
-    }
-
-    @VisibleForTesting
-    public long getForegroundActivityTotalTimeUs(BatteryStats.Uid uid, long rawRealtimeUs) {
-        final BatteryStats.Timer timer = uid.getForegroundActivityTimer();
-        if (timer != null) {
-            return timer.getTotalTimeLocked(rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
-        }
-
-        return 0;
-    }
-
-    @VisibleForTesting
-    public long getProcessForegroundTimeMs(BatteryStats.Uid uid, int which) {
-        final long rawRealTimeUs = convertMsToUs(SystemClock.elapsedRealtime());
-        final int foregroundTypes[] = {BatteryStats.Uid.PROCESS_STATE_TOP};
-
-        long timeUs = 0;
-        for (int type : foregroundTypes) {
-            final long localTime = uid.getProcessStateTime(type, rawRealTimeUs, which);
-            timeUs += localTime;
-        }
-
-        // Return the min value of STATE_TOP time and foreground activity time, since both of these
-        // time have some errors.
-        return convertUsToMs(
-                Math.min(timeUs, getForegroundActivityTotalTimeUs(uid, rawRealTimeUs)));
     }
 
     @VisibleForTesting

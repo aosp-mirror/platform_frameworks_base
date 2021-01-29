@@ -44,14 +44,15 @@ import static com.android.server.alarm.AlarmManagerService.ACTIVE_INDEX;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.APP_STANDBY_BUCKET_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.CHARGING_STATUS_CHANGED;
 import static com.android.server.alarm.AlarmManagerService.AlarmHandler.REMOVE_FOR_CANCELED;
-import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
-import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_SHORT_TIME;
+import static com.android.server.alarm.AlarmManagerService.Constants.ALLOW_WHILE_IDLE_WINDOW;
+import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_QUOTA;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LAZY_BATCHING;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_LISTENER_TIMEOUT;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MAX_INTERVAL;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.alarm.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
+import static com.android.server.alarm.AlarmManagerService.FREQUENT_INDEX;
 import static com.android.server.alarm.AlarmManagerService.INDEFINITE_DELAY;
 import static com.android.server.alarm.AlarmManagerService.IS_WAKEUP_MASK;
 import static com.android.server.alarm.AlarmManagerService.TIME_CHANGED_MASK;
@@ -409,6 +410,12 @@ public class AlarmManagerServiceTest {
         return mockPi;
     }
 
+    private void setDeviceConfigInt(String key, int val) {
+        mDeviceConfigKeys.add(key);
+        doReturn(val).when(mDeviceConfigProperties).getInt(eq(key), anyInt());
+        mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
+    }
+
     private void setDeviceConfigLong(String key, long val) {
         mDeviceConfigKeys.add(key);
         doReturn(val).when(mDeviceConfigProperties).getLong(eq(key), anyLong());
@@ -430,10 +437,12 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_MIN_INTERVAL, 0);
         mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]);
         mDeviceConfigKeys.add(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]);
-        doReturn(8).when(mDeviceConfigProperties)
+        doReturn(50).when(mDeviceConfigProperties)
                 .getInt(eq(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[ACTIVE_INDEX]), anyInt());
-        doReturn(5).when(mDeviceConfigProperties)
+        doReturn(35).when(mDeviceConfigProperties)
                 .getInt(eq(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[WORKING_INDEX]), anyInt());
+        doReturn(20).when(mDeviceConfigProperties)
+                .getInt(eq(mService.mConstants.KEYS_APP_STANDBY_QUOTAS[FREQUENT_INDEX]), anyInt());
 
         mService.mConstants.onPropertiesChanged(mDeviceConfigProperties);
     }
@@ -496,15 +505,13 @@ public class AlarmManagerServiceTest {
         setDeviceConfigLong(KEY_MIN_FUTURITY, 5);
         setDeviceConfigLong(KEY_MIN_INTERVAL, 10);
         setDeviceConfigLong(KEY_MAX_INTERVAL, 15);
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, 20);
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, 25);
+        setDeviceConfigInt(KEY_ALLOW_WHILE_IDLE_QUOTA, 20);
         setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_WHITELIST_DURATION, 30);
         setDeviceConfigLong(KEY_LISTENER_TIMEOUT, 35);
         assertEquals(5, mService.mConstants.MIN_FUTURITY);
         assertEquals(10, mService.mConstants.MIN_INTERVAL);
         assertEquals(15, mService.mConstants.MAX_INTERVAL);
-        assertEquals(20, mService.mConstants.ALLOW_WHILE_IDLE_SHORT_TIME);
-        assertEquals(25, mService.mConstants.ALLOW_WHILE_IDLE_LONG_TIME);
+        assertEquals(20, mService.mConstants.ALLOW_WHILE_IDLE_QUOTA);
         assertEquals(30, mService.mConstants.ALLOW_WHILE_IDLE_WHITELIST_DURATION);
         assertEquals(35, mService.mConstants.LISTENER_TIMEOUT);
     }
@@ -1301,62 +1308,54 @@ public class AlarmManagerServiceTest {
     public void allowWhileIdleAlarmsWhileDeviceIdle() throws Exception {
         doReturn(0).when(mService).fuzzForDuration(anyLong());
 
-        final long awiDelayForTest = 23;
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, awiDelayForTest);
-
-        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1000,
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + ALLOW_WHILE_IDLE_WINDOW + 1000,
                 getNewMockPendingIntent());
         assertNotNull(mService.mPendingIdleUntil);
 
-        final long seedTrigger = mNowElapsedTest + 3;
-        final int numAlarms = 10;
-        final PendingIntent[] pis = new PendingIntent[numAlarms];
-        for (int i = 0; i < numAlarms; i++) {
-            pis[i] = getNewMockPendingIntent();
-            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, seedTrigger + i * i, pis[i], false);
-        }
-
-        long lastAwiDispatch = -1;
-        int i = 0;
-        while (i < numAlarms) {
-            final long nextDispatch = (lastAwiDispatch >= 0) ? (lastAwiDispatch + awiDelayForTest)
-                    : (seedTrigger + i * i);
-            assertEquals("Wrong allow-while-idle dispatch", nextDispatch, mTestTimer.getElapsed());
-
-            mNowElapsedTest = nextDispatch;
+        final int quota = mService.mConstants.ALLOW_WHILE_IDLE_QUOTA;
+        final long firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < quota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    getNewMockPendingIntent(), false);
+            mNowElapsedTest = mTestTimer.getElapsed();
             mTestTimer.expire();
-
-            while (i < numAlarms && (seedTrigger + i * i) <= nextDispatch) {
-                verify(pis[i]).send(eq(mMockContext), eq(0), any(Intent.class), any(),
-                        any(Handler.class), isNull(), any());
-                i++;
-            }
-            Log.d(TAG, "Dispatched alarms upto " + i + " at " + nextDispatch);
-            lastAwiDispatch = nextDispatch;
         }
+        // This one should get deferred on set.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
+                getNewMockPendingIntent(), false);
+        final long expectedNextTrigger = firstTrigger + ALLOW_WHILE_IDLE_WINDOW;
+        assertEquals("Incorrect trigger when no quota left", expectedNextTrigger,
+                mTestTimer.getElapsed());
+
+        // Bring the idle until alarm back.
+        setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, expectedNextTrigger - 50,
+                getNewMockPendingIntent());
+        assertEquals(expectedNextTrigger - 50, mService.mPendingIdleUntil.getWhenElapsed());
+        assertEquals(expectedNextTrigger - 50, mTestTimer.getElapsed());
     }
 
     @Test
-    public void allowWhileIdleUnrestrictedInIdle() throws Exception {
+    public void allowWhileIdleUnrestricted() throws Exception {
         doReturn(0).when(mService).fuzzForDuration(anyLong());
 
-        final long awiDelayForTest = 127;
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, awiDelayForTest);
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, 0);
-
+        // Both battery saver and doze are on.
         setIdleUntilAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1000,
                 getNewMockPendingIntent());
         assertNotNull(mService.mPendingIdleUntil);
 
-        final long seedTrigger = mNowElapsedTest + 3;
-        for (int i = 1; i <= 5; i++) {
-            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, seedTrigger + i * i,
+        when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+
+        final int numAlarms = mService.mConstants.ALLOW_WHILE_IDLE_QUOTA + 100;
+        final long firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < numAlarms; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
                     getNewMockPendingIntent(), true);
         }
-        for (int i = 1; i <= 5; i++) {
-            final long nextTrigger = mTestTimer.getElapsed();
-            assertEquals("Wrong trigger for alarm " + i, seedTrigger + i * i, nextTrigger);
-            mNowElapsedTest = nextTrigger;
+        // All of them should fire as expected.
+        for (int i = 0; i < numAlarms; i++) {
+            mNowElapsedTest = mTestTimer.getElapsed();
+            assertEquals("Incorrect trigger at i=" + i, firstTrigger + i, mNowElapsedTest);
             mTestTimer.expire();
         }
     }
@@ -1427,9 +1426,10 @@ public class AlarmManagerServiceTest {
         verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
         final AppStateTrackerImpl.Listener listener = listenerArgumentCaptor.getValue();
 
-        final PendingIntent alarmPi = getNewMockPendingIntent();
         when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
                 TEST_CALLING_PACKAGE)).thenReturn(true);
+
+        final PendingIntent alarmPi = getNewMockPendingIntent();
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 7, alarmPi);
         assertEquals(mNowElapsedTest + INDEFINITE_DELAY, mTestTimer.getElapsed());
 
@@ -1446,61 +1446,64 @@ public class AlarmManagerServiceTest {
 
     @Test
     public void allowWhileIdleAlarmsInBatterySaver() throws Exception {
-        final ArgumentCaptor<AppStateTrackerImpl.Listener> listenerArgumentCaptor =
-                ArgumentCaptor.forClass(AppStateTrackerImpl.Listener.class);
-        verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
-        final AppStateTrackerImpl.Listener listener = listenerArgumentCaptor.getValue();
-
-        final long longDelay = 23;
-        final long shortDelay = 7;
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_LONG_TIME, longDelay);
-        setDeviceConfigLong(KEY_ALLOW_WHILE_IDLE_SHORT_TIME, shortDelay);
-
         when(mAppStateTracker.areAlarmsRestrictedByBatterySaver(TEST_CALLING_UID,
                 TEST_CALLING_PACKAGE)).thenReturn(true);
-        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1,
+        when(mAppStateTracker.isForceAllAppsStandbyEnabled()).thenReturn(true);
+
+        final int quota = mService.mConstants.ALLOW_WHILE_IDLE_QUOTA;
+        long firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < quota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    getNewMockPendingIntent(), false);
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        // This one should get deferred on set.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
                 getNewMockPendingIntent(), false);
-        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 2,
+        long expectedNextTrigger = firstTrigger + ALLOW_WHILE_IDLE_WINDOW;
+        assertEquals("Incorrect trigger when no quota available", expectedNextTrigger,
+                mTestTimer.getElapsed());
+
+        // Refresh the state
+        mService.removeLocked(TEST_CALLING_UID);
+        mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
+
+        firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < quota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    getNewMockPendingIntent(), false);
+        }
+        // This one should get deferred after the latest alarm expires.
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + quota,
                 getNewMockPendingIntent(), false);
+        for (int i = 0; i < quota; i++) {
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        expectedNextTrigger = firstTrigger + ALLOW_WHILE_IDLE_WINDOW;
+        assertEquals("Incorrect trigger when no quota available", expectedNextTrigger,
+                mTestTimer.getElapsed());
 
-        assertEquals(mNowElapsedTest + 1, mTestTimer.getElapsed());
+        // Refresh the state
+        mService.removeLocked(TEST_CALLING_UID);
+        mService.mAllowWhileIdleHistory.removeForPackage(TEST_CALLING_PACKAGE, TEST_CALLING_USER);
 
-        mNowElapsedTest += 1;
-        mTestTimer.expire();
-
-        assertEquals(mNowElapsedTest + longDelay, mTestTimer.getElapsed());
-        listener.onUidForeground(TEST_CALLING_UID, true);
-        // The next alarm should be deferred by shortDelay.
-        assertEquals(mNowElapsedTest + shortDelay, mTestTimer.getElapsed());
-
-        mNowElapsedTest = mTestTimer.getElapsed();
-        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1,
+        firstTrigger = mNowElapsedTest + 10;
+        for (int i = 0; i < quota; i++) {
+            setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, firstTrigger + i,
+                    getNewMockPendingIntent(), false);
+        }
+        // This delivery time maintains the quota invariant. Should not be deferred.
+        expectedNextTrigger = firstTrigger + ALLOW_WHILE_IDLE_WINDOW + 5;
+        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, expectedNextTrigger,
                 getNewMockPendingIntent(), false);
-
-        when(mAppStateTracker.isUidInForeground(TEST_CALLING_UID)).thenReturn(true);
-        mTestTimer.expire();
-        // The next alarm should be deferred by shortDelay again.
-        assertEquals(mNowElapsedTest + shortDelay, mTestTimer.getElapsed());
-
-        mNowElapsedTest = mTestTimer.getElapsed();
-        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 1,
-                getNewMockPendingIntent(), true);
-        when(mAppStateTracker.isUidInForeground(TEST_CALLING_UID)).thenReturn(false);
-        mTestTimer.expire();
-        final long lastAwiDispatch = mNowElapsedTest;
-        // Unrestricted, so should not be changed.
-        assertEquals(mNowElapsedTest + 1, mTestTimer.getElapsed());
-
-        mNowElapsedTest = mTestTimer.getElapsed();
-        // AWI_unrestricted should not affect normal AWI bookkeeping.
-        // The next alarm is after the short delay but before the long delay.
-        setAllowWhileIdleAlarm(ELAPSED_REALTIME_WAKEUP, lastAwiDispatch + shortDelay + 1,
-                getNewMockPendingIntent(), false);
-        mTestTimer.expire();
-        assertEquals(lastAwiDispatch + longDelay, mTestTimer.getElapsed());
-
-        listener.onUidForeground(TEST_CALLING_UID, true);
-        assertEquals(lastAwiDispatch + shortDelay + 1, mTestTimer.getElapsed());
+        for (int i = 0; i < quota; i++) {
+            mNowElapsedTest = mTestTimer.getElapsed();
+            mTestTimer.expire();
+        }
+        assertEquals("Incorrect trigger when no quota available", expectedNextTrigger,
+                mTestTimer.getElapsed());
     }
 
     @Test

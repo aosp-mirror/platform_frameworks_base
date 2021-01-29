@@ -212,7 +212,6 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -233,6 +232,7 @@ import android.view.InputWindowHandle;
 import android.view.InsetsSource;
 import android.view.InsetsState;
 import android.view.InsetsState.InternalInsetsType;
+import android.view.Surface;
 import android.view.Surface.Rotation;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
@@ -647,14 +647,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     /**
-     * The insets state of sources provided by windows above the current window.
+     * Indicates if this window is behind IME. Only windows behind IME can get insets from IME.
      */
-    InsetsState mAboveInsetsState = new InsetsState();
-
-    /**
-     * The insets sources provided by this window.
-     */
-    ArrayMap<Integer, InsetsSource> mProvidedInsetsSources = new ArrayMap<>();
+    boolean mBehindIme = false;
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -729,6 +724,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * default. The variable is cached, so we do not send too many updates to SF.
      */
     int mFrameRateSelectionPriority = RefreshRatePolicy.LAYER_PRIORITY_UNSET;
+
+    /**
+     * This is the frame rate which is passed to SurfaceFlinger if the window is part of the
+     * high refresh rate deny list. The variable is cached, so we do not send too many updates to
+     * SF.
+     */
+    float mDenyListFrameRate = 0f;
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
@@ -5233,7 +5235,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mAttrs.flags & FLAG_BLUR_BEHIND) != 0 && mOwnerCanUseBackgroundBlur;
     }
 
-
     /**
      * Notifies SF about the priority of the window, if it changed. SF then uses this information
      * to decide which window's desired rendering rate should have a priority when deciding about
@@ -5242,12 +5243,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     @VisibleForTesting
     void updateFrameRateSelectionPriorityIfNeeded() {
-        final int priority = getDisplayContent().getDisplayPolicy().getRefreshRatePolicy()
-                .calculatePriority(this);
+        RefreshRatePolicy refreshRatePolicy =
+                getDisplayContent().getDisplayPolicy().getRefreshRatePolicy();
+        final int priority = refreshRatePolicy.calculatePriority(this);
         if (mFrameRateSelectionPriority != priority) {
             mFrameRateSelectionPriority = priority;
             getPendingTransaction().setFrameRateSelectionPriority(mSurfaceControl,
                     mFrameRateSelectionPriority);
+        }
+
+        final float refreshRate = refreshRatePolicy.getPreferredRefreshRate(this);
+        if (mDenyListFrameRate != refreshRate) {
+            mDenyListFrameRate = refreshRate;
+            getPendingTransaction().setFrameRate(
+                    mSurfaceControl, mDenyListFrameRate, Surface.FRAME_RATE_COMPATIBILITY_EXACT);
         }
     }
 

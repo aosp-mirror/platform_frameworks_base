@@ -30,7 +30,7 @@ public class PowerStatsServiceProtoParser {
         for (int i = 0; i < proto.getChannelCount(); i++) {
             ChannelProto energyMeterInfo = proto.getChannel(i);
             csvHeader += "Index,Timestamp,Duration," + energyMeterInfo.getId()
-                + "/" + energyMeterInfo.getName() + ",";
+                + "/" + energyMeterInfo.getName() + "/" + energyMeterInfo.getSubsystem() + ",";
         }
         System.out.println(csvHeader);
     }

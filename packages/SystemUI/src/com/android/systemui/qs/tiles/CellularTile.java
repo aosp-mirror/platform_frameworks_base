@@ -268,7 +268,7 @@ public class CellularTile extends QSTileImpl<SignalState> {
                 int qsType, boolean activityIn, boolean activityOut,
                 CharSequence typeContentDescription,
                 CharSequence typeContentDescriptionHtml, CharSequence description,
-                boolean isWide, int subId, boolean roaming) {
+                boolean isWide, int subId, boolean roaming, boolean showTriangle) {
             if (qsIcon == null) {
                 // Not data sim, don't display.
                 return;

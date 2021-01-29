@@ -47,6 +47,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -71,7 +72,8 @@ import javax.inject.Inject;
  * {@code sensorId} parameters.
  */
 @SuppressWarnings("deprecation")
-class UdfpsController implements DozeReceiver {
+@SysUISingleton
+public class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     // Gamma approximation for the sRGB color space.
     private static final float DISPLAY_GAMMA = 2.2f;
@@ -177,7 +179,7 @@ class UdfpsController implements DozeReceiver {
     };
 
     @Inject
-    UdfpsController(@NonNull Context context,
+    public UdfpsController(@NonNull Context context,
             @Main Resources resources,
             LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
@@ -464,7 +466,7 @@ class UdfpsController implements DozeReceiver {
         onFingerUp();
     }
 
-    private void onFingerDown(int x, int y, float minor, float major) {
+    protected void onFingerDown(int x, int y, float minor, float major) {
         if (mHbmSupported) {
             try {
                 FileWriter fw = new FileWriter(mHbmPath);
@@ -482,7 +484,7 @@ class UdfpsController implements DozeReceiver {
         mView.showScrimAndDot();
     }
 
-    private void onFingerUp() {
+    protected void onFingerUp() {
         mFingerprintManager.onPointerUp(mSensorProps.sensorId);
         // Hiding the scrim before disabling HBM results in less noticeable flicker.
         mView.hideScrimAndDot();
@@ -520,5 +522,9 @@ class UdfpsController implements DozeReceiver {
             normalizedBacklight[i] = BrightnessSynchronizer.brightnessIntToFloat(backlight[i]);
         }
         return normalizedBacklight;
+    }
+
+    protected UdfpsView getView() {
+        return mView;
     }
 }

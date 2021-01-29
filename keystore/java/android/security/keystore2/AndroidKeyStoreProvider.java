@@ -94,6 +94,9 @@ public class AndroidKeyStoreProvider extends Provider {
             put("KeyGenerator.DESede", PACKAGE_NAME + ".AndroidKeyStoreKeyGeneratorSpi$DESede");
         }
 
+        // javax.crypto.KeyAgreement
+        put("KeyAgreement.ECDH", PACKAGE_NAME + ".AndroidKeyStoreKeyAgreementSpi$ECDH");
+
         // java.security.SecretKeyFactory
         putSecretKeyFactoryImpl("AES");
         if (supports3DES) {

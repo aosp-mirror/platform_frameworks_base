@@ -5658,7 +5658,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (ns == null) {
             return;
         }
-        MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(ns);
+        if (ns instanceof MatchAllNetworkSpecifier) {
+            throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
+        }
     }
 
     private void ensureValid(NetworkCapabilities nc) {
@@ -6194,7 +6196,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         nai.networkAgentPortalData = lp.getCaptivePortalData();
     }
 
-    private void updateLinkProperties(NetworkAgentInfo networkAgent, LinkProperties newLp,
+    private void updateLinkProperties(NetworkAgentInfo networkAgent, @NonNull LinkProperties newLp,
             @NonNull LinkProperties oldLp) {
         int netId = networkAgent.network.getNetId();
 
@@ -6203,8 +6205,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // the LinkProperties for the network are accurate.
         networkAgent.clatd.fixupLinkProperties(oldLp, newLp);
 
-        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities,
-                networkAgent.networkInfo.getType());
+        updateInterfaces(newLp, oldLp, netId, networkAgent.networkCapabilities);
 
         // update filtering rules, need to happen after the interface update so netd knows about the
         // new interface (the interface name -> index map becomes initialized)
@@ -6343,7 +6344,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     private void updateInterfaces(final @Nullable LinkProperties newLp,
             final @Nullable LinkProperties oldLp, final int netId,
-            final @Nullable NetworkCapabilities caps, final int legacyType) {
+            final @NonNull NetworkCapabilities caps) {
         final CompareResult<String> interfaceDiff = new CompareResult<>(
                 oldLp != null ? oldLp.getAllInterfaceNames() : null,
                 newLp != null ? newLp.getAllInterfaceNames() : null);
@@ -6354,7 +6355,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     if (DBG) log("Adding iface " + iface + " to network " + netId);
                     mNetd.networkAddInterface(netId, iface);
                     wakeupModifyInterface(iface, caps, true);
-                    bs.noteNetworkInterfaceType(iface, legacyType);
+                    bs.noteNetworkInterfaceForTransports(iface, caps.getTransportTypes());
                 } catch (Exception e) {
                     loge("Exception adding interface: " + e);
                 }
@@ -6626,6 +6627,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * maintained here that the NetworkAgent is not aware of (e.g., validated, captive portal,
      * and foreground status).
      */
+    @NonNull
     private NetworkCapabilities mixInCapabilities(NetworkAgentInfo nai, NetworkCapabilities nc) {
         // Once a NetworkAgent is connected, complain if some immutable capabilities are removed.
          // Don't complain for VPNs since they're not driven by requests and there is no risk of
@@ -6682,6 +6684,25 @@ public class ConnectivityService extends IConnectivityManager.Stub
         return newNc;
     }
 
+    private void updateNetworkInfoForRoamingAndSuspended(NetworkAgentInfo nai,
+            NetworkCapabilities prevNc, NetworkCapabilities newNc) {
+        final boolean prevSuspended = !prevNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        final boolean suspended = !newNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        final boolean prevRoaming = !prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        final boolean roaming = !newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+        if (prevSuspended != suspended) {
+            // TODO (b/73132094) : remove this call once the few users of onSuspended and
+            // onResumed have been removed.
+            notifyNetworkCallbacks(nai, suspended ? ConnectivityManager.CALLBACK_SUSPENDED
+                    : ConnectivityManager.CALLBACK_RESUMED);
+        }
+        if (prevSuspended != suspended || prevRoaming != roaming) {
+            // updateNetworkInfo will mix in the suspended info from the capabilities and
+            // take appropriate action for the network having possibly changed state.
+            updateNetworkInfo(nai, nai.networkInfo);
+        }
+    }
+
     /**
      * Update the NetworkCapabilities for {@code nai} to {@code nc}. Specifically:
      *
@@ -6713,25 +6734,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // on this network. We might have been called by rematchNetworkAndRequests when a
             // network changed foreground state.
             processListenRequests(nai);
-            final boolean prevSuspended = !prevNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
-            final boolean suspended = !newNc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED);
-            final boolean prevRoaming = !prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
-            final boolean roaming = !newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
-            if (prevSuspended != suspended || prevRoaming != roaming) {
-                // TODO (b/73132094) : remove this call once the few users of onSuspended and
-                // onResumed have been removed.
-                notifyNetworkCallbacks(nai, suspended ? ConnectivityManager.CALLBACK_SUSPENDED
-                        : ConnectivityManager.CALLBACK_RESUMED);
-                // updateNetworkInfo will mix in the suspended info from the capabilities and
-                // take appropriate action for the network having possibly changed state.
-                updateNetworkInfo(nai, nai.networkInfo);
-            }
         } else {
             // If the requestable capabilities have changed or the score changed, we can't have been
             // called by rematchNetworkAndRequests, so it's safe to start a rematch.
             rematchAllNetworksAndRequests();
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
+        updateNetworkInfoForRoamingAndSuspended(nai, prevNc, newNc);
 
         final boolean oldMetered = prevNc.isMetered();
         final boolean newMetered = newNc.isMetered();
