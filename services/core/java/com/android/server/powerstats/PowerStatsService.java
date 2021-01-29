@@ -69,6 +69,8 @@ public class PowerStatsService extends SystemService {
     private BatteryTrigger mBatteryTrigger;
     @Nullable
     private TimerTrigger mTimerTrigger;
+    @Nullable
+    private StatsPullAtomCallbackImpl mPullAtomCallback;
 
     @VisibleForTesting
     static class Injector {
@@ -119,6 +121,11 @@ public class PowerStatsService extends SystemService {
         TimerTrigger createTimerTrigger(Context context, PowerStatsLogger powerStatsLogger) {
             return new TimerTrigger(context, powerStatsLogger, true /* trigger enabled */);
         }
+
+        StatsPullAtomCallbackImpl createStatsPullerImpl(Context context,
+                IPowerStatsHALWrapper powerStatsHALWrapper) {
+            return new StatsPullAtomCallbackImpl(context, powerStatsHALWrapper);
+        }
     }
 
     private final class BinderService extends Binder {
@@ -156,8 +163,10 @@ public class PowerStatsService extends SystemService {
 
     @Override
     public void onBootPhase(int phase) {
-        if (phase == SystemService.PHASE_BOOT_COMPLETED) {
-            onSystemServiceReady();
+        if (phase == SystemService.PHASE_SYSTEM_SERVICES_READY) {
+            onSystemServicesReady();
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            onBootCompleted();
         }
     }
 
@@ -170,7 +179,18 @@ public class PowerStatsService extends SystemService {
         publishBinderService(Context.POWER_STATS_SERVICE, new BinderService());
     }
 
-    private void onSystemServiceReady() {
+    private void onSystemServicesReady() {
+        if (getPowerStatsHal().isInitialized()) {
+            if (DEBUG) Slog.d(TAG, "Starting PowerStatsService statsd pullers");
+
+            // Only start statsd pullers if initialization is successful.
+            mPullAtomCallback = mInjector.createStatsPullerImpl(mContext, getPowerStatsHal());
+        } else {
+            Slog.e(TAG, "Failed to start PowerStatsService statsd pullers");
+        }
+    }
+
+    private void onBootCompleted() {
         if (getPowerStatsHal().isInitialized()) {
             if (DEBUG) Slog.d(TAG, "Starting PowerStatsService loggers");
 
