@@ -66,6 +66,8 @@ public class ApkLiteParseUtils {
     private static final int PARSE_DEFAULT_INSTALL_LOCATION =
             PackageInfo.INSTALL_LOCATION_UNSPECIFIED;
 
+    private static final Comparator<String> sSplitNameComparator = new SplitNameComparator();
+
     public static final String APK_FILE_EXTENSION = ".apk";
 
     /**
@@ -79,7 +81,7 @@ public class ApkLiteParseUtils {
      *
      * @see PackageParser#parsePackage(File, int)
      */
-    public static ParseResult<PackageParser.PackageLite> parsePackageLite(ParseInput input,
+    public static ParseResult<PackageLite> parsePackageLite(ParseInput input,
             File packageFile, int flags) {
         if (packageFile.isDirectory()) {
             return parseClusterPackageLite(input, packageFile, flags);
@@ -88,26 +90,32 @@ public class ApkLiteParseUtils {
         }
     }
 
-    public static ParseResult<PackageParser.PackageLite> parseMonolithicPackageLite(
-            ParseInput input, File packageFile, int flags) {
+    /**
+     * Parse lightweight details about a single APK files.
+     */
+    public static ParseResult<PackageLite> parseMonolithicPackageLite(ParseInput input,
+            File packageFile, int flags) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
         try {
-            ParseResult<PackageParser.ApkLite> result = parseApkLite(input, packageFile, flags);
+            final ParseResult<ApkLite> result = parseApkLite(input, packageFile, flags);
             if (result.isError()) {
                 return input.error(result);
             }
 
-            final PackageParser.ApkLite baseApk = result.getResult();
+            final ApkLite baseApk = result.getResult();
             final String packagePath = packageFile.getAbsolutePath();
             return input.success(
-                    new PackageParser.PackageLite(packagePath, baseApk.codePath, baseApk, null,
+                    new PackageLite(packagePath, baseApk.getPath(), baseApk, null,
                             null, null, null, null, null));
         } finally {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
     }
 
-    public static ParseResult<PackageParser.PackageLite> parseClusterPackageLite(ParseInput input,
+    /**
+     * Parse lightweight details about a directory of APKs.
+     */
+    public static ParseResult<PackageLite> parseClusterPackageLite(ParseInput input,
             File packageDir, int flags) {
         final File[] files = packageDir.listFiles();
         if (ArrayUtils.isEmpty(files)) {
@@ -122,39 +130,39 @@ public class ApkLiteParseUtils {
         String packageName = null;
         int versionCode = 0;
 
-        final ArrayMap<String, PackageParser.ApkLite> apks = new ArrayMap<>();
+        final ArrayMap<String, ApkLite> apks = new ArrayMap<>();
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "parseApkLite");
         try {
             for (File file : files) {
-                if (PackageParser.isApkFile(file)) {
-                    ParseResult<PackageParser.ApkLite> result = parseApkLite(input, file, flags);
+                if (isApkFile(file)) {
+                    final ParseResult<ApkLite> result = parseApkLite(input, file, flags);
                     if (result.isError()) {
                         return input.error(result);
                     }
 
-                    final PackageParser.ApkLite lite = result.getResult();
+                    final ApkLite lite = result.getResult();
                     // Assert that all package names and version codes are
                     // consistent with the first one we encounter.
                     if (packageName == null) {
-                        packageName = lite.packageName;
-                        versionCode = lite.versionCode;
+                        packageName = lite.getPackageName();
+                        versionCode = lite.getVersionCode();
                     } else {
-                        if (!packageName.equals(lite.packageName)) {
+                        if (!packageName.equals(lite.getPackageName())) {
                             return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                    "Inconsistent package " + lite.packageName + " in " + file
+                                    "Inconsistent package " + lite.getPackageName() + " in " + file
                                             + "; expected " + packageName);
                         }
-                        if (versionCode != lite.versionCode) {
+                        if (versionCode != lite.getVersionCode()) {
                             return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                    "Inconsistent version " + lite.versionCode + " in " + file
+                                    "Inconsistent version " + lite.getVersionCode() + " in " + file
                                             + "; expected " + versionCode);
                         }
                     }
 
                     // Assert that each split is defined only oncuses-static-libe
-                    if (apks.put(lite.splitName, lite) != null) {
+                    if (apks.put(lite.getSplitName(), lite) != null) {
                         return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
-                                "Split name " + lite.splitName
+                                "Split name " + lite.getSplitName()
                                         + " defined more than once; most recent was " + file);
                     }
                 }
@@ -163,7 +171,7 @@ public class ApkLiteParseUtils {
             Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
         }
 
-        final PackageParser.ApkLite baseApk = apks.remove(null);
+        final ApkLite baseApk = apks.remove(null);
         return composePackageLiteFromApks(input, packageDir, baseApk, apks);
     }
 
@@ -176,9 +184,8 @@ public class ApkLiteParseUtils {
      * @param splitApks Parsed split APKs
      * @return PackageLite
      */
-    public static ParseResult<PackageParser.PackageLite> composePackageLiteFromApks(
-            ParseInput input, File packageDir, PackageParser.ApkLite baseApk,
-            ArrayMap<String, PackageParser.ApkLite> splitApks) {
+    public static ParseResult<PackageLite> composePackageLiteFromApks(ParseInput input,
+            File packageDir, ApkLite baseApk, ArrayMap<String, ApkLite> splitApks) {
         return composePackageLiteFromApks(input, packageDir, baseApk, splitApks, false);
     }
 
@@ -192,9 +199,9 @@ public class ApkLiteParseUtils {
      * @param apkRenamed Indicate whether the APKs are renamed after parsed.
      * @return PackageLite
      */
-    public static ParseResult<PackageParser.PackageLite> composePackageLiteFromApks(
-            ParseInput input, File packageDir, PackageParser.ApkLite baseApk,
-            ArrayMap<String, PackageParser.ApkLite> splitApks, boolean apkRenamed) {
+    public static ParseResult<PackageLite> composePackageLiteFromApks(
+            ParseInput input, File packageDir, ApkLite baseApk,
+            ArrayMap<String, ApkLite> splitApks, boolean apkRenamed) {
         if (baseApk == null) {
             return input.error(PackageManager.INSTALL_PARSE_FAILED_BAD_MANIFEST,
                     "Missing base APK in " + packageDir);
@@ -217,26 +224,25 @@ public class ApkLiteParseUtils {
             splitRevisionCodes = new int[size];
 
             splitNames = splitApks.keySet().toArray(splitNames);
-            Arrays.sort(splitNames, PackageParser.sSplitNameComparator);
+            Arrays.sort(splitNames, sSplitNameComparator);
 
             for (int i = 0; i < size; i++) {
-                final PackageParser.ApkLite apk = splitApks.get(splitNames[i]);
-                usesSplitNames[i] = apk.usesSplitName;
-                isFeatureSplits[i] = apk.isFeatureSplit;
-                configForSplits[i] = apk.configForSplit;
+                final ApkLite apk = splitApks.get(splitNames[i]);
+                usesSplitNames[i] = apk.getUsesSplitName();
+                isFeatureSplits[i] = apk.isFeatureSplit();
+                configForSplits[i] = apk.getConfigForSplit();
                 splitCodePaths[i] = apkRenamed ? new File(packageDir,
-                        splitNameToFileName(apk)).getAbsolutePath() : apk.codePath;
-                splitRevisionCodes[i] = apk.revisionCode;
+                        splitNameToFileName(apk)).getAbsolutePath() : apk.getPath();
+                splitRevisionCodes[i] = apk.getRevisionCode();
             }
         }
 
         final String codePath = packageDir.getAbsolutePath();
         final String baseCodePath = apkRenamed ? new File(packageDir,
-                splitNameToFileName(baseApk)).getAbsolutePath() : baseApk.codePath;
+                splitNameToFileName(baseApk)).getAbsolutePath() : baseApk.getPath();
         return input.success(
-                new PackageParser.PackageLite(codePath, baseCodePath, baseApk, splitNames,
-                        isFeatureSplits, usesSplitNames, configForSplits, splitCodePaths,
-                        splitRevisionCodes));
+                new PackageLite(codePath, baseCodePath, baseApk, splitNames, isFeatureSplits,
+                        usesSplitNames, configForSplits, splitCodePaths, splitRevisionCodes));
     }
 
     /**
@@ -245,9 +251,9 @@ public class ApkLiteParseUtils {
      * @param apk Parsed APK
      * @return The canonical file name
      */
-    public static String splitNameToFileName(@NonNull PackageParser.ApkLite apk) {
+    public static String splitNameToFileName(@NonNull ApkLite apk) {
         Objects.requireNonNull(apk);
-        final String fileName = apk.splitName == null ? "base" : "split_" + apk.splitName;
+        final String fileName = apk.getSplitName() == null ? "base" : "split_" + apk.getSplitName();
         return fileName + APK_FILE_EXTENSION;
     }
 
@@ -257,10 +263,9 @@ public class ApkLiteParseUtils {
      *
      * @param apkFile path to a single APK
      * @param flags optional parse flags, such as
-     *            {@link PackageParser#PARSE_COLLECT_CERTIFICATES}
+     *            {@link ParsingPackageUtils#PARSE_COLLECT_CERTIFICATES}
      */
-    public static ParseResult<PackageParser.ApkLite> parseApkLite(ParseInput input, File apkFile,
-            int flags) {
+    public static ParseResult<ApkLite> parseApkLite(ParseInput input, File apkFile, int flags) {
         return parseApkLiteInner(input, apkFile, null, null, flags);
     }
 
@@ -271,14 +276,14 @@ public class ApkLiteParseUtils {
      * @param fd already open file descriptor of an apk file
      * @param debugPathName arbitrary text name for this file, for debug output
      * @param flags optional parse flags, such as
-     *            {@link PackageParser#PARSE_COLLECT_CERTIFICATES}
+     *            {@link ParsingPackageUtils#PARSE_COLLECT_CERTIFICATES}
      */
-    public static ParseResult<PackageParser.ApkLite> parseApkLite(ParseInput input,
+    public static ParseResult<ApkLite> parseApkLite(ParseInput input,
             FileDescriptor fd, String debugPathName, int flags) {
         return parseApkLiteInner(input, null, fd, debugPathName, flags);
     }
 
-    private static ParseResult<PackageParser.ApkLite> parseApkLiteInner(ParseInput input,
+    private static ParseResult<ApkLite> parseApkLiteInner(ParseInput input,
             File apkFile, FileDescriptor fd, String debugPathName, int flags) {
         final String apkPath = fd != null ? debugPathName : apkFile.getAbsolutePath();
 
@@ -294,11 +299,11 @@ public class ApkLiteParseUtils {
                         "Failed to parse " + apkPath, e);
             }
 
-            parser = apkAssets.openXml(PackageParser.ANDROID_MANIFEST_FILENAME);
+            parser = apkAssets.openXml(ParsingPackageUtils.ANDROID_MANIFEST_FILENAME);
 
             final PackageParser.SigningDetails signingDetails;
-            if ((flags & PackageParser.PARSE_COLLECT_CERTIFICATES) != 0) {
-                final boolean skipVerify = (flags & PackageParser.PARSE_IS_SYSTEM_DIR) != 0;
+            if ((flags & ParsingPackageUtils.PARSE_COLLECT_CERTIFICATES) != 0) {
+                final boolean skipVerify = (flags & ParsingPackageUtils.PARSE_IS_SYSTEM_DIR) != 0;
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "collectCertificates");
                 try {
                     ParseResult<PackageParser.SigningDetails> result =
@@ -335,9 +340,8 @@ public class ApkLiteParseUtils {
         }
     }
 
-    private static ParseResult<PackageParser.ApkLite> parseApkLite(ParseInput input,
-            String codePath, XmlPullParser parser, AttributeSet attrs,
-            PackageParser.SigningDetails signingDetails)
+    private static ParseResult<ApkLite> parseApkLite(ParseInput input, String codePath,
+            XmlPullParser parser, AttributeSet attrs, PackageParser.SigningDetails signingDetails)
             throws IOException, XmlPullParserException {
         ParseResult<Pair<String, String>> result = parsePackageSplitNames(input, parser, attrs);
         if (result.isError()) {
@@ -421,12 +425,12 @@ public class ApkLiteParseUtils {
                 continue;
             }
 
-            if (PackageParser.TAG_PACKAGE_VERIFIER.equals(parser.getName())) {
+            if (ParsingPackageUtils.TAG_PACKAGE_VERIFIER.equals(parser.getName())) {
                 final VerifierInfo verifier = parseVerifier(attrs);
                 if (verifier != null) {
                     verifiers.add(verifier);
                 }
-            } else if (PackageParser.TAG_APPLICATION.equals(parser.getName())) {
+            } else if (ParsingPackageUtils.TAG_APPLICATION.equals(parser.getName())) {
                 for (int i = 0; i < attrs.getAttributeCount(); ++i) {
                     final String attr = attrs.getAttributeName(i);
                     switch (attr) {
@@ -464,7 +468,7 @@ public class ApkLiteParseUtils {
                         continue;
                     }
 
-                    if (PackageParser.TAG_PROFILEABLE.equals(parser.getName())) {
+                    if (ParsingPackageUtils.TAG_PROFILEABLE.equals(parser.getName())) {
                         for (int i = 0; i < attrs.getAttributeCount(); ++i) {
                             final String attr = attrs.getAttributeName(i);
                             if ("shell".equals(attr)) {
@@ -474,7 +478,7 @@ public class ApkLiteParseUtils {
                         }
                     }
                 }
-            } else if (PackageParser.TAG_OVERLAY.equals(parser.getName())) {
+            } else if (ParsingPackageUtils.TAG_OVERLAY.equals(parser.getName())) {
                 for (int i = 0; i < attrs.getAttributeCount(); ++i) {
                     final String attr = attrs.getAttributeName(i);
                     if ("requiredSystemPropertyName".equals(attr)) {
@@ -489,7 +493,7 @@ public class ApkLiteParseUtils {
                         overlayPriority = attrs.getAttributeIntValue(i, 0);
                     }
                 }
-            } else if (PackageParser.TAG_USES_SPLIT.equals(parser.getName())) {
+            } else if (ParsingPackageUtils.TAG_USES_SPLIT.equals(parser.getName())) {
                 if (usesSplitName != null) {
                     Slog.w(TAG, "Only one <uses-split> permitted. Ignoring others.");
                     continue;
@@ -500,7 +504,7 @@ public class ApkLiteParseUtils {
                     return input.error(PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                             "<uses-split> tag requires 'android:name' attribute");
                 }
-            } else if (PackageParser.TAG_USES_SDK.equals(parser.getName())) {
+            } else if (ParsingPackageUtils.TAG_USES_SDK.equals(parser.getName())) {
                 for (int i = 0; i < attrs.getAttributeCount(); ++i) {
                     final String attr = attrs.getAttributeName(i);
                     if ("targetSdkVersion".equals(attr)) {
@@ -526,8 +530,8 @@ public class ApkLiteParseUtils {
         }
 
         return input.success(
-                new PackageParser.ApkLite(codePath, packageSplit.first, packageSplit.second,
-                        isFeatureSplit, configForSplit, usesSplitName, isSplitRequired, versionCode,
+                new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
+                        configForSplit, usesSplitName, isSplitRequired, versionCode,
                         versionCodeMajor, revisionCode, installLocation, verifiers, signingDetails,
                         coreApp, debuggable, profilableByShell, multiArch, use32bitAbi,
                         useEmbeddedDex, extractNativeLibs, isolatedSplits, targetPackage,
@@ -546,7 +550,7 @@ public class ApkLiteParseUtils {
             return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "No start tag found");
         }
-        if (!parser.getName().equals(PackageParser.TAG_MANIFEST)) {
+        if (!parser.getName().equals(ParsingPackageUtils.TAG_MANIFEST)) {
             return input.error(INSTALL_PARSE_FAILED_MANIFEST_MALFORMED,
                     "No <manifest> tag");
         }
@@ -624,5 +628,25 @@ public class ApkLiteParseUtils {
                 return lhs.compareTo(rhs);
             }
         }
+    }
+
+    /**
+     * Check if the given file is an APK file.
+     *
+     * @param file the file to check.
+     * @return {@code true} if the given file is an APK file.
+     */
+    public static boolean isApkFile(File file) {
+        return isApkPath(file.getName());
+    }
+
+    /**
+     * Check if the given path ends with APK file extension.
+     *
+     * @param path the path to check.
+     * @return {@code true} if the given path ends with APK file extension.
+     */
+    public static boolean isApkPath(String path) {
+        return path.endsWith(APK_FILE_EXTENSION);
     }
 }

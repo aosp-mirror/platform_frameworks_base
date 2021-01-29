@@ -17,6 +17,7 @@
 package android.service.voice;
 
 import android.Manifest;
+import android.annotation.NonNull;
 import android.app.AppGlobals;
 import android.content.ComponentName;
 import android.content.pm.PackageManager;
@@ -28,6 +29,7 @@ import android.os.RemoteException;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Xml;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -47,24 +49,27 @@ public class VoiceInteractionServiceInfo {
     private boolean mSupportsLaunchFromKeyguard;
     private boolean mSupportsLocalInteraction;
 
-    public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp)
-            throws PackageManager.NameNotFoundException {
-        this(pm, pm.getServiceInfo(comp, PackageManager.GET_META_DATA));
-    }
-
-    public VoiceInteractionServiceInfo(PackageManager pm, ComponentName comp, int userHandle)
+    /**
+     * Loads the service metadata published by the component. Success is indicated by
+     * {@link #getParseError()}.
+     *
+     * @param pm A PackageManager from which the XML can be loaded.
+     * @param comp The {@link VoiceInteractionService} component.
+     */
+    public VoiceInteractionServiceInfo(
+            @NonNull PackageManager pm, @NonNull ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         this(pm, getServiceInfoOrThrow(comp, userHandle));
     }
 
-    static ServiceInfo getServiceInfoOrThrow(ComponentName comp, int userHandle)
+    @NonNull
+    private static ServiceInfo getServiceInfoOrThrow(@NonNull ComponentName comp, int userHandle)
             throws PackageManager.NameNotFoundException {
         try {
             ServiceInfo si = AppGlobals.getPackageManager().getServiceInfo(comp,
                     PackageManager.GET_META_DATA
                             | PackageManager.MATCH_DIRECT_BOOT_AWARE
-                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                            | PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                     userHandle);
             if (si != null) {
                 return si;
@@ -74,20 +79,23 @@ public class VoiceInteractionServiceInfo {
         throw new PackageManager.NameNotFoundException(comp.toString());
     }
 
-    public VoiceInteractionServiceInfo(PackageManager pm, ServiceInfo si) {
-        if (si == null) {
-            mParseError = "Service not available";
-            return;
-        }
+    /**
+     * Loads the service metadata published by the component. Success is indicated by
+     * {@link #getParseError()}.
+     *
+     * @param pm A PackageManager from which the XML can be loaded; usually the PackageManager
+     *           from which {@code si} was originally retrieved.
+     * @param si The {@link VoiceInteractionService} info.
+     */
+    public VoiceInteractionServiceInfo(@NonNull PackageManager pm, @NonNull ServiceInfo si) {
         if (!Manifest.permission.BIND_VOICE_INTERACTION.equals(si.permission)) {
             mParseError = "Service does not require permission "
                     + Manifest.permission.BIND_VOICE_INTERACTION;
             return;
         }
 
-        XmlResourceParser parser = null;
-        try {
-            parser = si.loadXmlMetaData(pm, VoiceInteractionService.SERVICE_META_DATA);
+        try (XmlResourceParser parser = si.loadXmlMetaData(pm,
+                VoiceInteractionService.SERVICE_META_DATA)) {
             if (parser == null) {
                 mParseError = "No " + VoiceInteractionService.SERVICE_META_DATA
                         + " meta-data for " + si.packageName;
@@ -134,20 +142,10 @@ public class VoiceInteractionServiceInfo {
                 mParseError = "No recognitionService specified";
                 return;
             }
-        } catch (XmlPullParserException e) {
+        } catch (XmlPullParserException | IOException | PackageManager.NameNotFoundException e) {
             mParseError = "Error parsing voice interation service meta-data: " + e;
             Log.w(TAG, "error parsing voice interaction service meta-data", e);
             return;
-        } catch (IOException e) {
-            mParseError = "Error parsing voice interation service meta-data: " + e;
-            Log.w(TAG, "error parsing voice interaction service meta-data", e);
-            return;
-        } catch (PackageManager.NameNotFoundException e) {
-            mParseError = "Error parsing voice interation service meta-data: " + e;
-            Log.w(TAG, "error parsing voice interaction service meta-data", e);
-            return;
-        } finally {
-            if (parser != null) parser.close();
         }
         mServiceInfo = si;
     }

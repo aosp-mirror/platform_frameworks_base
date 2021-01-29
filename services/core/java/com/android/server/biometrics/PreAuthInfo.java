@@ -90,6 +90,7 @@ class PreAuthInfo {
             int userId, PromptInfo promptInfo, String opPackageName,
             boolean checkDevicePolicyManager)
             throws RemoteException {
+
         final boolean confirmationRequested = promptInfo.isConfirmationRequested();
         final boolean biometricRequested = Utils.isBiometricRequested(promptInfo);
         final int requestedStrength = Utils.getPublicBiometricStrength(promptInfo);
@@ -111,7 +112,7 @@ class PreAuthInfo {
 
                 @AuthenticatorStatus int status = getStatusForBiometricAuthenticator(
                         devicePolicyManager, settingObserver, sensor, userId, opPackageName,
-                        checkDevicePolicyManager, requestedStrength);
+                        checkDevicePolicyManager, requestedStrength, promptInfo.getSensorId());
 
                 Slog.d(TAG, "Package: " + opPackageName
                         + " Sensor ID: " + sensor.id
@@ -141,7 +142,11 @@ class PreAuthInfo {
             DevicePolicyManager devicePolicyManager,
             BiometricService.SettingObserver settingObserver,
             BiometricSensor sensor, int userId, String opPackageName,
-            boolean checkDevicePolicyManager, int requestedStrength) {
+            boolean checkDevicePolicyManager, int requestedStrength, int requestedSensorId) {
+
+        if (requestedSensorId != BiometricManager.SENSOR_ID_ANY && sensor.id != requestedSensorId) {
+            return BIOMETRIC_NO_HARDWARE;
+        }
 
         final boolean wasStrongEnough =
                 Utils.isAtLeastStrength(sensor.oemStrength, requestedStrength);

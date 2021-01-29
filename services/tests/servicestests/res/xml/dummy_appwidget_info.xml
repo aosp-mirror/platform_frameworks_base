@@ -20,5 +20,6 @@
   android:updatePeriodMillis="86400000"
   android:previewImage="@drawable/icon1"
   android:resizeMode="horizontal|vertical"
+  android:description="@string/widget_description"
   android:widgetCategory="home_screen">
 </appwidget-provider>

@@ -66,12 +66,12 @@ class FaceAuthenticationClient extends AuthenticationClient<IBiometricsFace> {
             @NonNull LazyDaemon<IBiometricsFace> lazyDaemon, @NonNull IBinder token,
             @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
-            boolean isStrongBiometric, int statsClient,
-            @NonNull LockoutTracker lockoutTracker, @NonNull UsageStats usageStats) {
+            boolean isStrongBiometric, int statsClient, @NonNull LockoutTracker lockoutTracker,
+            @NonNull UsageStats usageStats, boolean isKeyguard) {
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, null /* taskStackListener */,
-                lockoutTracker);
+                lockoutTracker, isKeyguard);
         mNotificationManager = context.getSystemService(NotificationManager.class);
         mUsageStats = usageStats;
 

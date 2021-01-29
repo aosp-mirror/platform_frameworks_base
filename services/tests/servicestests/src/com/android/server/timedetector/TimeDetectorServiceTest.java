@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.timedetector.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -205,6 +206,36 @@ public class TimeDetectorServiceTest {
         mStubbedTimeDetectorStrategy.verifySuggestGnssTimeCalled(gnssTimeSuggestion);
     }
 
+    @Test(expected = SecurityException.class)
+    public void testSuggestExternalTime_withoutPermission() {
+        doThrow(new SecurityException("Mock"))
+                .when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+        ExternalTimeSuggestion externalTimeSuggestion = createExternalTimeSuggestion();
+
+        try {
+            mTimeDetectorService.suggestExternalTime(externalTimeSuggestion);
+            fail();
+        } finally {
+            verify(mMockContext).enforceCallingPermission(
+                    eq(android.Manifest.permission.SET_TIME), anyString());
+        }
+    }
+
+    @Test
+    public void testSuggestExternalTime() throws Exception {
+        doNothing().when(mMockContext).enforceCallingOrSelfPermission(anyString(), any());
+
+        ExternalTimeSuggestion externalTimeSuggestion = createExternalTimeSuggestion();
+        mTimeDetectorService.suggestExternalTime(externalTimeSuggestion);
+        mTestHandler.assertTotalMessagesEnqueued(1);
+
+        verify(mMockContext).enforceCallingPermission(
+                eq(android.Manifest.permission.SET_TIME), anyString());
+
+        mTestHandler.waitForMessagesToBeProcessed();
+        mStubbedTimeDetectorStrategy.verifySuggestExternalTimeCalled(externalTimeSuggestion);
+    }
+
     @Test
     public void testDump() {
         when(mMockContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP))
@@ -255,6 +286,11 @@ public class TimeDetectorServiceTest {
         return new GnssTimeSuggestion(timeValue);
     }
 
+    private static ExternalTimeSuggestion createExternalTimeSuggestion() {
+        TimestampedValue<Long> timeValue = new TimestampedValue<>(100L, 1_000_000L);
+        return new ExternalTimeSuggestion(timeValue);
+    }
+
     private static class StubbedTimeDetectorStrategy implements TimeDetectorStrategy {
 
         // Call tracking.
@@ -262,6 +298,7 @@ public class TimeDetectorServiceTest {
         private ManualTimeSuggestion mLastManualSuggestion;
         private NetworkTimeSuggestion mLastNetworkSuggestion;
         private GnssTimeSuggestion mLastGnssSuggestion;
+        private ExternalTimeSuggestion mLastExternalSuggestion;
         private boolean mHandleAutoTimeDetectionChangedCalled;
         private boolean mDumpCalled;
 
@@ -287,6 +324,11 @@ public class TimeDetectorServiceTest {
         }
 
         @Override
+        public void suggestExternalTime(ExternalTimeSuggestion timeSuggestion) {
+            mLastExternalSuggestion = timeSuggestion;
+        }
+
+        @Override
         public void handleAutoTimeConfigChanged() {
             mHandleAutoTimeDetectionChangedCalled = true;
         }
@@ -301,6 +343,7 @@ public class TimeDetectorServiceTest {
             mLastManualSuggestion = null;
             mLastNetworkSuggestion = null;
             mLastGnssSuggestion = null;
+            mLastExternalSuggestion = null;
             mHandleAutoTimeDetectionChangedCalled = false;
             mDumpCalled = false;
         }
@@ -319,6 +362,10 @@ public class TimeDetectorServiceTest {
 
         void verifySuggestGnssTimeCalled(GnssTimeSuggestion expectedSuggestion) {
             assertEquals(expectedSuggestion, mLastGnssSuggestion);
+        }
+
+        void verifySuggestExternalTimeCalled(ExternalTimeSuggestion expectedSuggestion) {
+            assertEquals(expectedSuggestion, mLastExternalSuggestion);
         }
 
         void verifyHandleAutoTimeDetectionChangedCalled() {

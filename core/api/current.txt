@@ -657,6 +657,7 @@ package android {
     field @Deprecated public static final int fontProviderCerts = 16844125; // 0x101055d
     field @Deprecated public static final int fontProviderPackage = 16844119; // 0x1010557
     field @Deprecated public static final int fontProviderQuery = 16844113; // 0x1010551
+    field public static final int fontProviderSystemFontFamily = 16844322; // 0x1010622
     field public static final int fontStyle = 16844095; // 0x101053f
     field public static final int fontVariationSettings = 16844144; // 0x1010570
     field public static final int fontWeight = 16844083; // 0x1010533
@@ -6189,7 +6190,11 @@ package android.app {
     method public android.content.IntentSender getIntentSender();
     method public static android.app.PendingIntent getService(android.content.Context, int, @NonNull android.content.Intent, int);
     method @Deprecated public String getTargetPackage();
+    method public boolean isActivity();
+    method public boolean isBroadcast();
+    method public boolean isForegroundService();
     method public boolean isImmutable();
+    method public boolean isService();
     method @Nullable public static android.app.PendingIntent readPendingIntentOrNullFromParcel(@NonNull android.os.Parcel);
     method public void send() throws android.app.PendingIntent.CanceledException;
     method public void send(int) throws android.app.PendingIntent.CanceledException;
@@ -7907,24 +7912,6 @@ package android.app.people {
 
 }
 
-package android.app.role {
-
-  public final class RoleManager {
-    method @NonNull public android.content.Intent createRequestRoleIntent(@NonNull String);
-    method public boolean isRoleAvailable(@NonNull String);
-    method public boolean isRoleHeld(@NonNull String);
-    field public static final String ROLE_ASSISTANT = "android.app.role.ASSISTANT";
-    field public static final String ROLE_BROWSER = "android.app.role.BROWSER";
-    field public static final String ROLE_CALL_REDIRECTION = "android.app.role.CALL_REDIRECTION";
-    field public static final String ROLE_CALL_SCREENING = "android.app.role.CALL_SCREENING";
-    field public static final String ROLE_DIALER = "android.app.role.DIALER";
-    field public static final String ROLE_EMERGENCY = "android.app.role.EMERGENCY";
-    field public static final String ROLE_HOME = "android.app.role.HOME";
-    field public static final String ROLE_SMS = "android.app.role.SMS";
-  }
-
-}
-
 package android.app.slice {
 
   public final class Slice implements android.os.Parcelable {
@@ -8363,6 +8350,7 @@ package android.appwidget {
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
     method public final android.os.UserHandle getProfile();
+    method @Nullable public final String loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
     method public final android.graphics.drawable.Drawable loadPreviewImage(@NonNull android.content.Context, int);
@@ -8375,10 +8363,12 @@ package android.appwidget {
     field public static final int WIDGET_CATEGORY_HOME_SCREEN = 1; // 0x1
     field public static final int WIDGET_CATEGORY_KEYGUARD = 2; // 0x2
     field public static final int WIDGET_CATEGORY_SEARCHBOX = 4; // 0x4
+    field public static final int WIDGET_FEATURE_CONFIGURATION_OPTIONAL = 3; // 0x3
     field public static final int WIDGET_FEATURE_HIDE_FROM_PICKER = 2; // 0x2
     field public static final int WIDGET_FEATURE_RECONFIGURABLE = 1; // 0x1
     field public int autoAdvanceViewId;
     field public android.content.ComponentName configure;
+    field @IdRes public int descriptionResource;
     field public int icon;
     field public int initialKeyguardLayout;
     field public int initialLayout;
@@ -10384,6 +10374,8 @@ package android.content {
     field public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final String LOCATION_SERVICE = "location";
+    field public static final String MEDIA_COMMUNICATION_SERVICE = "media_communication";
+    field public static final String MEDIA_METRICS_SERVICE = "media_metrics";
     field public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final String MEDIA_ROUTER_SERVICE = "media_router";
     field public static final String MEDIA_SESSION_SERVICE = "media_session";
@@ -12354,6 +12346,8 @@ package android.content.pm {
     field public static final String FEATURE_GAMEPAD = "android.hardware.gamepad";
     field public static final String FEATURE_HIFI_SENSORS = "android.hardware.sensor.hifi_sensors";
     field public static final String FEATURE_HOME_SCREEN = "android.software.home_screen";
+    field public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE = "android.hardware.identity_credential";
+    field public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE_DIRECT_ACCESS = "android.hardware.identity_credential_direct_access";
     field public static final String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
     field public static final String FEATURE_IRIS = "android.hardware.biometrics.iris";
@@ -15778,6 +15772,7 @@ package android.graphics {
     method @NonNull public static android.graphics.RenderEffect createColorFilterEffect(@NonNull android.graphics.ColorFilter);
     method @NonNull public static android.graphics.RenderEffect createOffsetEffect(float, float);
     method @NonNull public static android.graphics.RenderEffect createOffsetEffect(float, float, @NonNull android.graphics.RenderEffect);
+    method @NonNull public static android.graphics.RenderEffect createShaderEffect(@NonNull android.graphics.Shader);
   }
 
   public final class RenderNode {
@@ -16806,6 +16801,18 @@ package android.graphics.text {
 
 package android.hardware {
 
+  public abstract class Battery {
+    ctor public Battery();
+    method @FloatRange(from=-1.0F, to=1.0f) public abstract float getCapacity();
+    method public abstract int getStatus();
+    method public abstract boolean hasBattery();
+    field public static final int STATUS_CHARGING = 2; // 0x2
+    field public static final int STATUS_DISCHARGING = 3; // 0x3
+    field public static final int STATUS_FULL = 5; // 0x5
+    field public static final int STATUS_NOT_CHARGING = 4; // 0x4
+    field public static final int STATUS_UNKNOWN = 1; // 0x1
+  }
+
   @Deprecated public class Camera {
     method @Deprecated public final void addCallbackBuffer(byte[]);
     method @Deprecated public final void autoFocus(android.hardware.Camera.AutoFocusCallback);
@@ -17645,6 +17652,7 @@ package android.hardware.camera2 {
     method public void createCaptureSession(android.hardware.camera2.params.SessionConfiguration) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createCaptureSessionByOutputConfigurations(java.util.List<android.hardware.camera2.params.OutputConfiguration>, android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createConstrainedHighSpeedCaptureSession(@NonNull java.util.List<android.view.Surface>, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
+    method public void createExtensionSession(@NonNull android.hardware.camera2.params.ExtensionSessionConfiguration) throws android.hardware.camera2.CameraAccessException;
     method @NonNull public abstract android.hardware.camera2.CaptureRequest.Builder createReprocessCaptureRequest(@NonNull android.hardware.camera2.TotalCaptureResult) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createReprocessableCaptureSession(@NonNull android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.view.Surface>, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
     method @Deprecated public abstract void createReprocessableCaptureSessionByConfigurations(@NonNull android.hardware.camera2.params.InputConfiguration, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, @NonNull android.hardware.camera2.CameraCaptureSession.StateCallback, @Nullable android.os.Handler) throws android.hardware.camera2.CameraAccessException;
@@ -17676,8 +17684,44 @@ package android.hardware.camera2 {
     field public static final int ERROR_MAX_CAMERAS_IN_USE = 2; // 0x2
   }
 
+  public final class CameraExtensionCharacteristics {
+    method @NonNull public <T> java.util.List<android.util.Size> getExtensionSupportedSizes(int, @NonNull Class<T>);
+    method @NonNull public java.util.List<android.util.Size> getExtensionSupportedSizes(int, int);
+    method @NonNull public java.util.List<java.lang.Integer> getSupportedExtensions();
+    field public static final int EXTENSION_AUTOMATIC = 0; // 0x0
+    field public static final int EXTENSION_BEAUTY = 1; // 0x1
+    field public static final int EXTENSION_BOKEH = 2; // 0x2
+    field public static final int EXTENSION_HDR = 3; // 0x3
+    field public static final int EXTENSION_NIGHT = 4; // 0x4
+  }
+
+  public abstract class CameraExtensionSession implements java.lang.AutoCloseable {
+    method public int capture(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
+    method public void close() throws android.hardware.camera2.CameraAccessException;
+    method @NonNull public android.hardware.camera2.CameraDevice getDevice();
+    method public int setRepeatingRequest(@NonNull android.hardware.camera2.CaptureRequest, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.ExtensionCaptureCallback) throws android.hardware.camera2.CameraAccessException;
+    method public void stopRepeating() throws android.hardware.camera2.CameraAccessException;
+  }
+
+  public abstract static class CameraExtensionSession.ExtensionCaptureCallback {
+    ctor public CameraExtensionSession.ExtensionCaptureCallback();
+    method public void onCaptureFailed(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureProcessStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest);
+    method public void onCaptureSequenceAborted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
+    method public void onCaptureSequenceCompleted(@NonNull android.hardware.camera2.CameraExtensionSession, int);
+    method public void onCaptureStarted(@NonNull android.hardware.camera2.CameraExtensionSession, @NonNull android.hardware.camera2.CaptureRequest, long);
+  }
+
+  public abstract static class CameraExtensionSession.StateCallback {
+    ctor public CameraExtensionSession.StateCallback();
+    method public void onClosed(@NonNull android.hardware.camera2.CameraExtensionSession);
+    method public abstract void onConfigureFailed(@NonNull android.hardware.camera2.CameraExtensionSession);
+    method public abstract void onConfigured(@NonNull android.hardware.camera2.CameraExtensionSession);
+  }
+
   public final class CameraManager {
     method @NonNull public android.hardware.camera2.CameraCharacteristics getCameraCharacteristics(@NonNull String) throws android.hardware.camera2.CameraAccessException;
+    method @NonNull public android.hardware.camera2.CameraExtensionCharacteristics getCameraExtensionCharacteristics(@NonNull String) throws android.hardware.camera2.CameraAccessException;
     method @NonNull public String[] getCameraIdList() throws android.hardware.camera2.CameraAccessException;
     method @NonNull public java.util.Set<java.util.Set<java.lang.String>> getConcurrentCameraIds() throws android.hardware.camera2.CameraAccessException;
     method @RequiresPermission(android.Manifest.permission.CAMERA) public boolean isConcurrentSessionConfigurationSupported(@NonNull java.util.Map<java.lang.String,android.hardware.camera2.params.SessionConfiguration>) throws android.hardware.camera2.CameraAccessException;
@@ -18187,6 +18231,14 @@ package android.hardware.camera2.params {
     method public android.util.Rational getElement(int, int);
   }
 
+  public final class ExtensionSessionConfiguration {
+    ctor public ExtensionSessionConfiguration(int, @NonNull java.util.List<android.hardware.camera2.params.OutputConfiguration>, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.camera2.CameraExtensionSession.StateCallback);
+    method @NonNull public java.util.concurrent.Executor getExecutor();
+    method public int getExtension();
+    method @NonNull public java.util.List<android.hardware.camera2.params.OutputConfiguration> getOutputConfigurations();
+    method @NonNull public android.hardware.camera2.CameraExtensionSession.StateCallback getStateCallback();
+  }
+
   public final class Face {
     method public android.graphics.Rect getBounds();
     method public int getId();
@@ -18461,6 +18513,7 @@ package android.hardware.input {
   public final class InputManager {
     method public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
+    method public float getMaximumObscuringOpacityForTouch();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     method @Nullable public android.view.VerifiedInputEvent verifyInputEvent(@NonNull android.view.InputEvent);
@@ -23946,6 +23999,19 @@ package android.media.effect {
 
 }
 
+package android.media.metrics {
+
+  public class MediaMetricsManager {
+    method @NonNull public android.media.metrics.PlaybackSession createPlaybackSession();
+  }
+
+  public final class PlaybackSession implements java.lang.AutoCloseable {
+    method public void close();
+    method @NonNull public String getId();
+  }
+
+}
+
 package android.media.midi {
 
   public final class MidiDevice implements java.io.Closeable {
@@ -24175,7 +24241,8 @@ package android.media.session {
     method public void setCallback(@Nullable android.media.session.MediaSession.Callback, @Nullable android.os.Handler);
     method public void setExtras(@Nullable android.os.Bundle);
     method public void setFlags(int);
-    method public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
+    method public void setMediaButtonBroadcastReceiver(@Nullable android.content.ComponentName);
+    method @Deprecated public void setMediaButtonReceiver(@Nullable android.app.PendingIntent);
     method public void setMetadata(@Nullable android.media.MediaMetadata);
     method public void setPlaybackState(@Nullable android.media.session.PlaybackState);
     method public void setPlaybackToLocal(android.media.AudioAttributes);
@@ -25578,6 +25645,8 @@ package android.net {
     method public void applyTransportModeTransform(@NonNull java.net.Socket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
     method public void applyTransportModeTransform(@NonNull java.net.DatagramSocket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
     method public void applyTransportModeTransform(@NonNull java.io.FileDescriptor, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
+    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void applyTunnelModeTransform(@NonNull android.net.IpSecManager.IpSecTunnelInterface, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
+    method @NonNull @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket(int) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket() throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method public void removeTransportModeTransforms(@NonNull java.net.Socket) throws java.io.IOException;
@@ -25585,6 +25654,12 @@ package android.net {
     method public void removeTransportModeTransforms(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     field public static final int DIRECTION_IN = 0; // 0x0
     field public static final int DIRECTION_OUT = 1; // 0x1
+  }
+
+  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
+    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void addAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
+    method public void close();
+    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public static final class IpSecManager.ResourceUnavailableException extends android.util.AndroidException {
@@ -30133,6 +30208,8 @@ package android.os {
     field @Deprecated public static final String RADIO;
     field @Deprecated public static final String SERIAL;
     field @NonNull public static final String SKU;
+    field @NonNull public static final String SOC_MANUFACTURER;
+    field @NonNull public static final String SOC_MODEL;
     field public static final String[] SUPPORTED_32_BIT_ABIS;
     field public static final String[] SUPPORTED_64_BIT_ABIS;
     field public static final String[] SUPPORTED_ABIS;
@@ -31820,6 +31897,8 @@ package android.os.strictmode {
   }
 
   public final class UnsafeIntentLaunchViolation extends android.os.strictmode.Violation {
+    ctor public UnsafeIntentLaunchViolation(@NonNull android.content.Intent);
+    method @Nullable public android.content.Intent getIntent();
   }
 
   public final class UntaggedSocketViolation extends android.os.strictmode.Violation {
@@ -36660,15 +36739,20 @@ package android.security.identity {
   public abstract class IdentityCredential {
     method @NonNull public abstract java.security.KeyPair createEphemeralKeyPair();
     method @NonNull public abstract byte[] decryptMessageFromReader(@NonNull byte[]) throws android.security.identity.MessageDecryptionException;
+    method @NonNull public byte[] delete(@NonNull byte[]);
     method @NonNull public abstract byte[] encryptMessageToReader(@NonNull byte[]);
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getAuthKeysNeedingCertification();
     method @NonNull public abstract int[] getAuthenticationDataUsageCount();
     method @NonNull public abstract java.util.Collection<java.security.cert.X509Certificate> getCredentialKeyCertificateChain();
     method @NonNull public abstract android.security.identity.ResultData getEntries(@Nullable byte[], @NonNull java.util.Map<java.lang.String,java.util.Collection<java.lang.String>>, @Nullable byte[], @Nullable byte[]) throws android.security.identity.EphemeralPublicKeyNotFoundException, android.security.identity.InvalidReaderSignatureException, android.security.identity.InvalidRequestMessageException, android.security.identity.NoAuthenticationKeyAvailableException, android.security.identity.SessionTranscriptMismatchException;
+    method @NonNull public byte[] proveOwnership(@NonNull byte[]);
     method public abstract void setAllowUsingExhaustedKeys(boolean);
+    method public void setAllowUsingExpiredKeys(boolean);
     method public abstract void setAvailableAuthenticationKeys(int, int);
     method public abstract void setReaderEphemeralPublicKey(@NonNull java.security.PublicKey) throws java.security.InvalidKeyException;
-    method public abstract void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
+    method @Deprecated public abstract void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
+    method public void storeStaticAuthenticationData(@NonNull java.security.cert.X509Certificate, @NonNull java.time.Instant, @NonNull byte[]) throws android.security.identity.UnknownAuthenticationKeyException;
+    method @NonNull public byte[] update(@NonNull android.security.identity.PersonalizationData);
   }
 
   public class IdentityCredentialException extends java.lang.Exception {
@@ -36678,7 +36762,7 @@ package android.security.identity {
 
   public abstract class IdentityCredentialStore {
     method @NonNull public abstract android.security.identity.WritableIdentityCredential createCredential(@NonNull String, @NonNull String) throws android.security.identity.AlreadyPersonalizedException, android.security.identity.DocTypeNotSupportedException;
-    method @Nullable public abstract byte[] deleteCredentialByName(@NonNull String);
+    method @Deprecated @Nullable public abstract byte[] deleteCredentialByName(@NonNull String);
     method @Nullable public abstract android.security.identity.IdentityCredential getCredentialByName(@NonNull String, int) throws android.security.identity.CipherSuiteNotSupportedException;
     method @Nullable public static android.security.identity.IdentityCredentialStore getDirectAccessInstance(@NonNull android.content.Context);
     method @Nullable public static android.security.identity.IdentityCredentialStore getInstance(@NonNull android.content.Context);
@@ -36894,6 +36978,7 @@ package android.security.keystore {
     field public static final int ORIGIN_IMPORTED = 2; // 0x2
     field public static final int ORIGIN_SECURELY_IMPORTED = 8; // 0x8
     field public static final int ORIGIN_UNKNOWN = 4; // 0x4
+    field public static final int PURPOSE_AGREE_KEY = 64; // 0x40
     field public static final int PURPOSE_DECRYPT = 2; // 0x2
     field public static final int PURPOSE_ENCRYPT = 1; // 0x1
     field public static final int PURPOSE_SIGN = 4; // 0x4
@@ -38507,6 +38592,7 @@ package android.speech {
 
   public class SpeechRecognizer {
     method public void cancel();
+    method @NonNull public static android.speech.SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull android.content.Context);
     method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context);
     method public static android.speech.SpeechRecognizer createSpeechRecognizer(android.content.Context, android.content.ComponentName);
     method public void destroy();
@@ -39644,7 +39730,6 @@ package android.telecom {
     field public static final String EXTRA_HAS_PICTURE = "android.telecom.extra.HAS_PICTURE";
     field public static final String EXTRA_INCOMING_CALL_ADDRESS = "android.telecom.extra.INCOMING_CALL_ADDRESS";
     field public static final String EXTRA_INCOMING_CALL_EXTRAS = "android.telecom.extra.INCOMING_CALL_EXTRAS";
-    field public static final String EXTRA_INCOMING_PICTURE = "android.telecom.extra.INCOMING_PICTURE";
     field public static final String EXTRA_INCOMING_VIDEO_STATE = "android.telecom.extra.INCOMING_VIDEO_STATE";
     field public static final String EXTRA_IS_DEFAULT_CALL_SCREENING_APP = "android.telecom.extra.IS_DEFAULT_CALL_SCREENING_APP";
     field public static final String EXTRA_LOCATION = "android.telecom.extra.LOCATION";
@@ -39653,6 +39738,7 @@ package android.telecom {
     field public static final String EXTRA_OUTGOING_CALL_EXTRAS = "android.telecom.extra.OUTGOING_CALL_EXTRAS";
     field public static final String EXTRA_OUTGOING_PICTURE = "android.telecom.extra.OUTGOING_PICTURE";
     field public static final String EXTRA_PHONE_ACCOUNT_HANDLE = "android.telecom.extra.PHONE_ACCOUNT_HANDLE";
+    field public static final String EXTRA_PICTURE_URI = "android.telecom.extra.PICTURE_URI";
     field public static final String EXTRA_PRIORITY = "android.telecom.extra.PRIORITY";
     field public static final String EXTRA_START_CALL_WITH_RTT = "android.telecom.extra.START_CALL_WITH_RTT";
     field public static final String EXTRA_START_CALL_WITH_SPEAKERPHONE = "android.telecom.extra.START_CALL_WITH_SPEAKERPHONE";
@@ -40160,6 +40246,7 @@ package android.telephony {
     field public static final String KEY_RTT_DOWNGRADE_SUPPORTED_BOOL = "rtt_downgrade_supported_bool";
     field public static final String KEY_RTT_SUPPORTED_BOOL = "rtt_supported_bool";
     field public static final String KEY_RTT_SUPPORTED_FOR_VT_BOOL = "rtt_supported_for_vt_bool";
+    field public static final String KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL = "rtt_supported_while_roaming_bool";
     field public static final String KEY_RTT_UPGRADE_SUPPORTED_BOOL = "rtt_upgrade_supported_bool";
     field public static final String KEY_SHOW_4G_FOR_3G_DATA_ICON_BOOL = "show_4g_for_3g_data_icon_bool";
     field public static final String KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL = "show_4g_for_lte_data_icon_bool";
@@ -41171,12 +41258,6 @@ package android.telephony {
     field public static final int SCAN_TYPE_PERIODIC = 1; // 0x1
   }
 
-  public final class PhoneCapability implements android.os.Parcelable {
-    method public int describeContents();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.PhoneCapability> CREATOR;
-  }
-
   public class PhoneNumberFormattingTextWatcher implements android.text.TextWatcher {
     ctor public PhoneNumberFormattingTextWatcher();
     ctor public PhoneNumberFormattingTextWatcher(String);
@@ -41351,10 +41432,6 @@ package android.telephony {
 
   public static interface PhoneStateListener.MessageWaitingIndicatorChangedListener {
     method @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE) public void onMessageWaitingIndicatorChanged(boolean);
-  }
-
-  public static interface PhoneStateListener.PhoneCapabilityChangedListener {
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void onPhoneCapabilityChanged(@NonNull android.telephony.PhoneCapability);
   }
 
   public static interface PhoneStateListener.PreciseDataConnectionStateChangedListener {
@@ -46302,6 +46379,7 @@ package android.view {
 
   public final class InputDevice implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.hardware.Battery getBattery();
     method public int getControllerNumber();
     method public String getDescriptor();
     method public static android.view.InputDevice getDevice(int);
@@ -46356,6 +46434,7 @@ package android.view {
     field public static final int SOURCE_MOUSE = 8194; // 0x2002
     field public static final int SOURCE_MOUSE_RELATIVE = 131076; // 0x20004
     field public static final int SOURCE_ROTARY_ENCODER = 4194304; // 0x400000
+    field public static final int SOURCE_SENSOR = 67108864; // 0x4000000
     field public static final int SOURCE_STYLUS = 16386; // 0x4002
     field public static final int SOURCE_TOUCHPAD = 1048584; // 0x100008
     field public static final int SOURCE_TOUCHSCREEN = 4098; // 0x1002

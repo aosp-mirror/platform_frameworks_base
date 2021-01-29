@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
+import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
@@ -48,7 +49,6 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     private static final String TAG = "Biometrics/FingerprintAuthClient";
 
-    private final boolean mIsKeyguard;
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
     @Nullable private final IUdfpsOverlayController mUdfpsOverlayController;
 
@@ -63,10 +63,9 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
         super(context, lazyDaemon, token, listener, targetUserId, operationId, restricted,
                 owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutTracker);
+                lockoutTracker, isKeyguard);
         mLockoutFrameworkImpl = lockoutTracker;
         mUdfpsOverlayController = udfpsOverlayController;
-        mIsKeyguard = isKeyguard;
     }
 
     @Override
@@ -120,7 +119,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
 
     @Override
     protected void startHalOperation() {
-        UdfpsHelper.showUdfpsOverlay(getSensorId(), IUdfpsOverlayController.REASON_AUTH,
+        UdfpsHelper.showUdfpsOverlay(getSensorId(), Utils.getUdfpsAuthReason(this),
                 mUdfpsOverlayController);
         try {
             // GroupId was never used. In fact, groupId is always the same as userId.
@@ -169,9 +168,5 @@ class FingerprintAuthenticationClient extends AuthenticationClient<IBiometricsFi
                 Slog.e(TAG, "Remote exception", e);
             }
         }
-    }
-
-    public boolean isKeyguard() {
-        return mIsKeyguard;
     }
 }

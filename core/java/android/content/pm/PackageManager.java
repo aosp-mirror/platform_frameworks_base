@@ -48,12 +48,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -82,7 +76,6 @@ import com.android.internal.util.ArrayUtils;
 
 import dalvik.system.VMRuntime;
 
-import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -2443,6 +2436,35 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
+     * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
+     * at the given feature version.
+     *
+     * <p>Known feature versions include:
+     * <ul>
+     * <li><code>202009</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 11.
+     * <li><code>202101</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 12.
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE =
+            "android.hardware.identity_credential";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
+     * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
+     * with direct access at the given feature version.
+     * See {@link #FEATURE_IDENTITY_CREDENTIAL_HARDWARE} for known feature versions.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE_DIRECT_ACCESS =
+            "android.hardware.identity_credential_direct_access";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports one or more methods of
      * reporting current location.
      */
@@ -3940,6 +3962,15 @@ public abstract class PackageManager {
      */
     @SystemApi
     public static final int FLAG_PERMISSION_RESTRICTION_ROLE_EXEMPT =  1 << 18;
+
+    /**
+     * Permission flag: This location permission is selected as the level of granularity of
+     * location accuracy.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int FLAG_PERMISSION_SELECTED_LOCATION_ACCURACY =  1 << 19;
 
     /**
      * Permission flags: Reserved for use by the permission controller. The platform and any
@@ -6722,25 +6753,8 @@ public abstract class PackageManager {
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
             @PackageInfoFlags int flags) {
-        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                | PackageManager.MATCH_DIRECT_BOOT_AWARE)) == 0) {
-            // Caller expressed no opinion about what encryption
-            // aware/unaware components they want to see, so match both
-            flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-        }
-
-        boolean collectCertificates = (flags & PackageManager.GET_SIGNATURES) != 0
-                || (flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
-
-        ParseInput input = ParseTypeImpl.forParsingWithoutPlatformCompat().reset();
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefault(input,
-                new File(archiveFilePath), 0, collectCertificates);
-        if (result.isError()) {
-            return null;
-        }
-        return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flags, 0, 0, null,
-                new PackageUserState(), UserHandle.getCallingUserId());
+        throw new UnsupportedOperationException(
+                "getPackageArchiveInfo() not implemented in subclass");
     }
 
     /**
@@ -8634,6 +8648,16 @@ public abstract class PackageManager {
     public String getAttentionServicePackageName() {
         throw new UnsupportedOperationException(
                 "getAttentionServicePackageName not implemented in subclass");
+    }
+
+    /**
+     * @return rotation resolver service's package name, or null if there's none.
+     *
+     * @hide
+     */
+    public String getRotationResolverPackageName() {
+        throw new UnsupportedOperationException(
+                "getRotationResolverPackageName not implemented in subclass");
     }
 
     /**

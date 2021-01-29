@@ -18,6 +18,7 @@ package android.media;
 
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.graphics.GraphicBuffer;
 import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
 import android.graphics.PixelFormat;
@@ -360,16 +361,20 @@ public class ImageWriter implements AutoCloseable {
             throw new IllegalStateException("Image from ImageWriter is invalid");
         }
 
-        // For images from other components, need to detach first, then attach.
+        // For images from other components that have non-null owner, need to detach first,
+        // then attach. Images without owners must already be attachable.
         if (!ownedByMe) {
-            if (!(image.getOwner() instanceof ImageReader)) {
+            if (image.getOwner() == null) {
+
+            } else if ((image.getOwner() instanceof ImageReader)) {
+                ImageReader prevOwner = (ImageReader) image.getOwner();
+
+                prevOwner.detachImage(image);
+            } else {
                 throw new IllegalArgumentException("Only images from ImageReader can be queued to"
                         + " ImageWriter, other image source is not supported yet!");
             }
 
-            ImageReader prevOwner = (ImageReader) image.getOwner();
-
-            prevOwner.detachImage(image);
             attachAndQueueInputImage(image);
             // This clears the native reference held by the original owner.
             // When this Image is detached later by this ImageWriter, the
@@ -565,9 +570,18 @@ public class ImageWriter implements AutoCloseable {
         // need do some cleanup to make sure no orphaned
         // buffer caused leak.
         Rect crop = image.getCropRect();
-        nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(), image.getFormat(),
-                image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom,
-                image.getTransform(), image.getScalingMode());
+        if (image.getNativeContext() != 0) {
+            nativeAttachAndQueueImage(mNativeContext, image.getNativeContext(), image.getFormat(),
+                    image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom,
+                    image.getTransform(), image.getScalingMode());
+        } else {
+            GraphicBuffer gb = GraphicBuffer.createFromHardwareBuffer(image.getHardwareBuffer());
+            nativeAttachAndQueueGraphicBuffer(mNativeContext, gb, image.getFormat(),
+                    image.getTimestamp(), crop.left, crop.top, crop.right, crop.bottom,
+                    image.getTransform(), image.getScalingMode());
+            gb.destroy();
+            image.close();
+        }
     }
 
     /**
@@ -771,7 +785,7 @@ public class ImageWriter implements AutoCloseable {
         }
 
         @Override
-        boolean isAttachable() {
+        public boolean isAttachable() {
             throwISEIfImageIsInvalid();
             // Don't allow Image to be detached from ImageWriter for now, as no
             // detach API is exposed.
@@ -897,6 +911,9 @@ public class ImageWriter implements AutoCloseable {
 
     private synchronized native int nativeAttachAndQueueImage(long nativeCtx,
             long imageNativeBuffer, int imageFormat, long timestampNs, int left,
+            int top, int right, int bottom, int transform, int scalingMode);
+    private synchronized native int nativeAttachAndQueueGraphicBuffer(long nativeCtx,
+            GraphicBuffer graphicBuffer, int imageFormat, long timestampNs, int left,
             int top, int right, int bottom, int transform, int scalingMode);
 
     private synchronized native void cancelImage(long nativeCtx, Image image);

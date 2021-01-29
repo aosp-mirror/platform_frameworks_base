@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.pip
 
 import android.content.Intent
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.runFlicker
@@ -44,6 +45,7 @@ import org.junit.runners.Parameterized
  * Test Pip with orientation changes.
  * To run this test: `atest WMShellFlickerTests:PipOrientationTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -110,10 +112,10 @@ class PipOrientationTest(
                         showsAppWindowOnTop(pipApp.defaultWindowName)
                     }
                     start("pipApp window hides testApp") {
-                        hidesAppWindow(testApp.defaultWindowName)
+                        isInvisible(testApp.defaultWindowName)
                     }
                     end("testApp windows is shown") {
-                        showsAppWindow(testApp.defaultWindowName)
+                        isVisible(testApp.defaultWindowName)
                     }
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
@@ -123,9 +125,9 @@ class PipOrientationTest(
                     val endingBounds = WindowUtils.getDisplayBounds(Surface.ROTATION_0)
                     start("pipApp layer hides testApp") {
                         hasVisibleRegion(pipApp.defaultWindowName, startingBounds)
-                        hidesLayer(testApp.defaultWindowName)
+                        isInvisible(testApp.defaultWindowName)
                     }
-                    end("testApp layer covers fullscreen") {
+                    end("testApp layer covers fullscreen", enabled = false) {
                         hasVisibleRegion(testApp.defaultWindowName, endingBounds)
                     }
                     navBarLayerIsAlwaysVisible(bugId = 140855415)

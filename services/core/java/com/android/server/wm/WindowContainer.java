@@ -54,7 +54,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.logWithStack;
-import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
+import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 
 import android.annotation.CallSuper;
 import android.annotation.IntDef;
@@ -2543,7 +2543,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     // TODO: Remove this and use #getBounds() instead once we set an app transition animation
     // on TaskStack.
-    Rect getAnimationBounds(int appStackClipMode) {
+    Rect getAnimationBounds(int appRootTaskClipMode) {
         return getBounds();
     }
 
@@ -2611,10 +2611,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     Pair<AnimationAdapter, AnimationAdapter> getAnimationAdapter(WindowManager.LayoutParams lp,
             @TransitionOldType int transit, boolean enter, boolean isVoiceInteraction) {
         final Pair<AnimationAdapter, AnimationAdapter> resultAdapters;
-        final int appStackClipMode = getDisplayContent().mAppTransition.getAppStackClipMode();
+        final int appRootTaskClipMode = getDisplayContent().mAppTransition.getAppRootTaskClipMode();
 
         // Separate position and size for use in animators.
-        final Rect screenBounds = getAnimationBounds(appStackClipMode);
+        final Rect screenBounds = getAnimationBounds(appRootTaskClipMode);
         mTmpRect.set(screenBounds);
         getAnimationPosition(mTmpPoint);
         mTmpRect.offsetTo(0, 0);
@@ -2652,7 +2652,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             mTransit = transit;
             mTransitFlags = getDisplayContent().mAppTransition.getTransitFlags();
         } else {
-            mNeedsAnimationBoundsLayer = (appStackClipMode == STACK_CLIP_AFTER_ANIM);
+            mNeedsAnimationBoundsLayer = (appRootTaskClipMode == ROOT_TASK_CLIP_AFTER_ANIM);
             final Animation a = loadAnimation(lp, transit, enter, isVoiceInteraction);
 
             if (a != null) {
@@ -2664,7 +2664,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 AnimationAdapter adapter = new LocalAnimationAdapter(
                         new WindowAnimationSpec(a, mTmpPoint, mTmpRect,
                                 getDisplayContent().mAppTransition.canSkipFirstFrame(),
-                                appStackClipMode, true /* isAppAnimation */, windowCornerRadius),
+                                appRootTaskClipMode, true /* isAppAnimation */, windowCornerRadius),
                         getSurfaceAnimationRunner());
 
                 resultAdapters = new Pair<>(adapter, null);

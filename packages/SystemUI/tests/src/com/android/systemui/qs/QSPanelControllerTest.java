@@ -117,7 +117,8 @@ public class QSPanelControllerTest extends SysuiTestCase {
         mController = new QSPanelController(mQSPanel, mQSSecurityFooter, mTunerService,
                 mQSTileHost, mQSCustomizerController, true, mMediaHost,
                 mQSTileRevealControllerFactory, mDumpManager, mMetricsLogger, mUiEventLogger,
-                mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory);
+                mQSLogger, mBrightnessControllerFactory, mToggleSliderViewControllerFactory,
+                /* labelsFlag */ false, /* sideLabels */ false);
 
         mController.init();
     }

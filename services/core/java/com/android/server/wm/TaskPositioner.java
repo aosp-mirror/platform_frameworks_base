@@ -465,18 +465,18 @@ class TaskPositioner implements IBinder.DeathRecipient {
         }
     }
 
-    private void updateWindowDragBounds(int x, int y, Rect stackBounds) {
+    private void updateWindowDragBounds(int x, int y, Rect rootTaskBounds) {
         final int offsetX = Math.round(x - mStartDragX);
         final int offsetY = Math.round(y - mStartDragY);
         mWindowDragBounds.set(mWindowOriginalBounds);
         // Horizontally, at least mMinVisibleWidth pixels of the window should remain visible.
-        final int maxLeft = stackBounds.right - mMinVisibleWidth;
-        final int minLeft = stackBounds.left + mMinVisibleWidth - mWindowOriginalBounds.width();
+        final int maxLeft = rootTaskBounds.right - mMinVisibleWidth;
+        final int minLeft = rootTaskBounds.left + mMinVisibleWidth - mWindowOriginalBounds.width();
 
         // Vertically, the top mMinVisibleHeight of the window should remain visible.
         // (This assumes that the window caption bar is at the top of the window).
-        final int minTop = stackBounds.top;
-        final int maxTop = stackBounds.bottom - mMinVisibleHeight;
+        final int minTop = rootTaskBounds.top;
+        final int maxTop = rootTaskBounds.bottom - mMinVisibleHeight;
 
         mWindowDragBounds.offsetTo(
                 Math.min(Math.max(mWindowOriginalBounds.left + offsetX, minLeft), maxLeft),

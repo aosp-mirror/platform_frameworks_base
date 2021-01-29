@@ -18,6 +18,7 @@ package com.android.server.media;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ParceledListSlice;
@@ -851,6 +852,21 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 }
                 mMediaButtonReceiverHolder =
                         MediaButtonReceiverHolder.create(mContext, mUserId, pi);
+                mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void setMediaButtonBroadcastReceiver(ComponentName receiver) throws RemoteException {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                if ((mPolicies & SessionPolicyProvider.SESSION_POLICY_IGNORE_BUTTON_RECEIVER)
+                        != 0) {
+                    return;
+                }
+                mMediaButtonReceiverHolder = MediaButtonReceiverHolder.create(mUserId, receiver);
                 mService.onMediaButtonReceiverChanged(MediaSessionRecord.this);
             } finally {
                 Binder.restoreCallingIdentity(token);

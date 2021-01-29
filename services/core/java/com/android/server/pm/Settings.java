@@ -73,6 +73,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.service.pm.PackageServiceDumpProto;
@@ -2957,6 +2958,8 @@ public final class Settings implements Watchable, Snappable {
         if (pkg.isPackageLoading()) {
             serializer.attributeBoolean(null, "isLoading", true);
         }
+        serializer.attributeFloat(null, "loadingProgress",
+                pkg.getIncrementalStates().getProgress());
 
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
@@ -3162,6 +3165,17 @@ public final class Settings implements Watchable, Snappable {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR, "Error reading settings: " + e);
             Slog.wtf(PackageManagerService.TAG, "Error reading package manager settings", e);
+        } finally {
+            if (!mVersion.containsKey(StorageManager.UUID_PRIVATE_INTERNAL)) {
+                Slog.wtf(PackageManagerService.TAG,
+                        "No internal VersionInfo found in settings, using current.");
+                findOrCreateVersion(StorageManager.UUID_PRIVATE_INTERNAL).forceCurrent();
+            }
+            if (!mVersion.containsKey(StorageManager.UUID_PRIMARY_PHYSICAL)) {
+                Slog.wtf(PackageManagerService.TAG,
+                        "No external VersionInfo found in settings, using current.");
+                findOrCreateVersion(StorageManager.UUID_PRIMARY_PHYSICAL).forceCurrent();
+            }
         }
 
         // If the build is setup to drop runtime permissions
@@ -3699,6 +3713,7 @@ public final class Settings implements Watchable, Snappable {
         boolean installedForceQueryable = false;
         boolean isStartable = false;
         boolean isLoading = false;
+        float loadingProgress = 0;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3717,6 +3732,7 @@ public final class Settings implements Watchable, Snappable {
             installedForceQueryable = parser.getAttributeBoolean(null, "forceQueryable", false);
             isStartable = parser.getAttributeBoolean(null, "isStartable", false);
             isLoading = parser.getAttributeBoolean(null, "isLoading", false);
+            loadingProgress = parser.getAttributeFloat(null, "loadingProgress", 0);
 
             if (primaryCpuAbiString == null && legacyCpuAbiString != null) {
                 primaryCpuAbiString = legacyCpuAbiString;
@@ -3864,7 +3880,8 @@ public final class Settings implements Watchable, Snappable {
             packageSetting.secondaryCpuAbiString = secondaryCpuAbiString;
             packageSetting.updateAvailable = updateAvailable;
             packageSetting.forceQueryableOverride = installedForceQueryable;
-            packageSetting.incrementalStates = new IncrementalStates(isStartable, isLoading);
+            packageSetting.incrementalStates = new IncrementalStates(isStartable, isLoading,
+                    loadingProgress);
             // Handle legacy string here for single-user mode
             final String enabledStr = parser.getAttributeValue(null, ATTR_ENABLED);
             if (enabledStr != null) {
@@ -4814,6 +4831,10 @@ public final class Settings implements Watchable, Snappable {
             pw.print(prefix); pw.print("  installerAttributionTag=");
             pw.println(ps.installSource.installerAttributionTag);
         }
+        if (IncrementalManager.isIncrementalPath(ps.getPathString())) {
+            pw.print(prefix); pw.println("  loadingProgress="
+                    + (int) (ps.getIncrementalStates().getProgress() * 100) + "%");
+        }
         if (ps.volumeUuid != null) {
             pw.print(prefix); pw.print("  volumeUuid=");
                     pw.println(ps.volumeUuid);
@@ -5497,6 +5518,12 @@ public final class Settings implements Watchable, Snappable {
                     List<RuntimePermissionsState.PermissionState> permissions =
                             getPermissionsFromPermissionsState(
                                     packageSetting.getLegacyPermissionState(), userId);
+                    if (permissions.isEmpty() && !packageSetting.areInstallPermissionsFixed()) {
+                        // Storing an empty state means the package is known to the system and its
+                        // install permissions have been granted and fixed. If this is not the case,
+                        // we should not store anything.
+                        continue;
+                    }
                     packagePermissions.put(packageName, permissions);
                 }
             }

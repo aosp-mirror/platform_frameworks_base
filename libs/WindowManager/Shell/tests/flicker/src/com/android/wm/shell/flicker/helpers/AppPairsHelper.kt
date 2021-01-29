@@ -17,19 +17,15 @@
 package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.graphics.Region
 import com.android.server.wm.flicker.helpers.WindowUtils
-import com.android.wm.shell.flicker.testapp.Components
 
 class AppPairsHelper(
     instrumentation: Instrumentation,
     activityLabel: String,
-    componentsInfo: Components.ComponentsInfo
-) : BaseAppHelper(
-    instrumentation,
-    activityLabel,
-    componentsInfo
-) {
+    component: ComponentName
+) : BaseAppHelper(instrumentation, activityLabel, component) {
     fun getPrimaryBounds(dividerBounds: Region): android.graphics.Region {
         val primaryAppBounds = Region(0, 0, dividerBounds.bounds.right,
                 dividerBounds.bounds.bottom + WindowUtils.dockedStackDividerInset)

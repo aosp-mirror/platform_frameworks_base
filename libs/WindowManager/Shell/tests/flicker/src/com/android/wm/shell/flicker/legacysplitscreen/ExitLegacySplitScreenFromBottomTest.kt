@@ -32,11 +32,8 @@ import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-
 import com.android.server.wm.flicker.repetitions
-import com.android.wm.shell.flicker.TEST_APP_SPLITSCREEN_PRIMARY_LABEL
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper
-import com.android.wm.shell.flicker.testapp.Components
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
@@ -52,31 +49,28 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ExitLegacySplitScreenFromBottomTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
-            val splitScreenApp = SplitScreenHelper(instrumentation,
-                    TEST_APP_SPLITSCREEN_PRIMARY_LABEL,
-                    Components.SplitScreenActivity())
-
+            val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
             // TODO(b/162923992) Use of multiple segments of flicker spec for testing
             return FlickerTestRunnerFactory(instrumentation,
                     listOf(Surface.ROTATION_0, Surface.ROTATION_90))
                     .buildTest { configuration ->
                         withTestName {
-                            buildTestTag("exitSplitScreenFromBottom", splitScreenApp,
-                                    configuration)
+                            buildTestTag("exitSplitScreenFromBottom", configuration)
                         }
                         repeat { configuration.repetitions }
                         setup {
                             eachRun {
                                 device.wakeUpAndGoToHomeScreen()
                                 device.openQuickStepAndClearRecentAppsFromOverview()
-                                splitScreenApp.launchViaIntent()
+                                splitScreenApp.launchViaIntent(wmHelper)
                                 device.launchSplitScreen()
                                 device.waitForIdle()
                                 this.setRotation(configuration.endRotation)

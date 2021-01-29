@@ -18,6 +18,7 @@ package com.android.server.timedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.timedetector.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ITimeDetectorService;
 import android.app.timedetector.ManualTimeSuggestion;
@@ -138,6 +139,14 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mHandler.post(() -> mTimeDetectorStrategy.suggestGnssTime(timeSignal));
     }
 
+    @Override
+    public void suggestExternalTime(@NonNull ExternalTimeSuggestion timeSignal) {
+        enforceSuggestExternalTimePermission();
+        Objects.requireNonNull(timeSignal);
+
+        mHandler.post(() -> mTimeDetectorStrategy.suggestExternalTime(timeSignal));
+    }
+
     /** Internal method for handling the auto time setting being changed. */
     @VisibleForTesting
     public void handleAutoTimeDetectionChanged() {
@@ -176,5 +185,12 @@ public final class TimeDetectorService extends ITimeDetectorService.Stub {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.SET_TIME,
                 "suggest gnss time");
+    }
+
+    private void enforceSuggestExternalTimePermission() {
+        // We don't expect a call from system server, so simply enforce calling permission.
+        mContext.enforceCallingPermission(
+                android.Manifest.permission.SET_TIME,
+                "suggest time from external source");
     }
 }

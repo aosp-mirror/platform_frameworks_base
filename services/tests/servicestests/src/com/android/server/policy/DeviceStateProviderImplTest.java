@@ -128,6 +128,32 @@ public final class DeviceStateProviderImplTest {
     }
 
     @Test
+    public void create_multipleMatchingStatesDefaultsToLowestIdentifier() {
+        String configString = "<device-state-config>\n"
+                + "    <device-state>\n"
+                + "        <identifier>1</identifier>\n"
+                + "        <conditions/>\n"
+                + "    </device-state>\n"
+                + "    <device-state>\n"
+                + "        <identifier>2</identifier>\n"
+                + "        <conditions/>\n"
+                + "    </device-state>\n"
+                + "</device-state-config>\n";
+        DeviceStateProviderImpl.ReadableConfig config = new TestReadableConfig(configString);
+        DeviceStateProviderImpl provider = DeviceStateProviderImpl.createFromConfig(mContext,
+                config);
+
+        DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
+        provider.setListener(listener);
+
+        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        assertArrayEquals(new int[] { 1, 2 }, mIntArrayCaptor.getValue());
+
+        verify(listener).onStateChanged(mIntegerCaptor.capture());
+        assertEquals(1, mIntegerCaptor.getValue().intValue());
+    }
+
+    @Test
     public void create_lidSwitch() {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"

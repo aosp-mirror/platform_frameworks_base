@@ -289,6 +289,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native void nativeCancelVibrate(long ptr, int deviceId, int token);
     private static native boolean nativeIsVibrating(long ptr, int deviceId);
     private static native int[] nativeGetVibratorIds(long ptr, int deviceId);
+    private static native int nativeGetBatteryCapacity(long ptr, int deviceId);
+    private static native int nativeGetBatteryStatus(long ptr, int deviceId);
     private static native void nativeReloadKeyboardLayouts(long ptr);
     private static native void nativeReloadDeviceAliases(long ptr);
     private static native String nativeDump(long ptr);
@@ -1818,8 +1820,7 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     private void updateMaximumObscuringOpacityForTouchFromSettings() {
-        final float opacity = InputManager.getInstance().getMaximumObscuringOpacityForTouch(
-                mContext);
+        final float opacity = InputManager.getInstance().getMaximumObscuringOpacityForTouch();
         if (opacity < 0 || opacity > 1) {
             Log.e(TAG, "Invalid maximum obscuring opacity " + opacity
                     + ", it should be >= 0 and <= 1, rejecting update.");
@@ -2005,6 +2006,18 @@ public class InputManagerService extends IInputManager.Stub
                 v.mVibrating = false;
             }
         }
+    }
+
+    // Binder call
+    @Override
+    public int getBatteryStatus(int deviceId) {
+        return nativeGetBatteryStatus(mPtr, deviceId);
+    }
+
+    // Binder call
+    @Override
+    public int getBatteryCapacity(int deviceId) {
+        return nativeGetBatteryCapacity(mPtr, deviceId);
     }
 
     // Binder call

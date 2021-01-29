@@ -17,38 +17,68 @@
 package com.android.server.wm.flicker.helpers
 
 import android.app.Instrumentation
+import android.content.ComponentName
 import android.support.test.launcherhelper.ILauncherStrategy
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
+import com.android.server.wm.flicker.testapp.ActivityOptions
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
-import org.junit.Assert
 
-open class ImeAppHelper(
+open class ImeAppHelper @JvmOverloads constructor(
     instr: Instrumentation,
-    launcherName: String = "ImeApp",
+    launcherName: String = ActivityOptions.IME_ACTIVITY_LAUNCHER_NAME,
+    component: ComponentName = ActivityOptions.IME_ACTIVITY_COMPONENT_NAME,
     launcherStrategy: ILauncherStrategy = LauncherStrategyFactory
             .getInstance(instr)
             .launcherStrategy
-) : StandardAppHelper(instr, launcherName, launcherStrategy) {
-    open fun openIME(device: UiDevice) {
+) : StandardAppHelper(instr, launcherName, component, launcherStrategy) {
+    /**
+     * Opens the IME and wait for it to be displayed
+     *
+     * @param device UIDevice instance to interact with the device
+     * @param wmHelper Helper used to wait for WindowManager states
+     */
+    @JvmOverloads
+    open fun openIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
         val editText = device.wait(
-                Until.findObject(By.res(getPackage(), "plain_text_input")),
-                FIND_TIMEOUT)
-        Assert.assertNotNull("Text field not found, this usually happens when the device " +
-                "was left in an unknown state (e.g. in split screen)", editText)
+            Until.findObject(By.res(getPackage(), "plain_text_input")),
+            FIND_TIMEOUT)
+
+        require(editText != null) {
+            "Text field not found, this usually happens when the device " +
+                "was left in an unknown state (e.g. in split screen)"
+        }
         editText.click()
-        if (!WindowManagerStateHelper().waitImeWindowShown()) {
-            Assert.fail("IME did not appear")
+        waitAndAssertIMEShown(device, wmHelper)
+    }
+
+    protected fun waitAndAssertIMEShown(
+        device: UiDevice,
+        wmHelper: WindowManagerStateHelper? = null
+    ) {
+        if (wmHelper == null) {
+            device.waitForIdle()
+        } else {
+            require(wmHelper.waitImeWindowShown()) { "IME did not appear" }
         }
     }
 
-    open fun closeIME(device: UiDevice) {
+    /**
+     * Opens the IME and wait for it to be gone
+     *
+     * @param device UIDevice instance to interact with the device
+     * @param wmHelper Helper used to wait for WindowManager states
+     */
+    @JvmOverloads
+    open fun closeIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
         device.pressBack()
         // Using only the AccessibilityInfo it is not possible to identify if the IME is active
-        if (!WindowManagerStateHelper().waitImeWindowGone()) {
-            Assert.fail("IME did not close")
+        if (wmHelper == null) {
+            device.waitForIdle()
+        } else {
+            require(wmHelper.waitImeWindowGone()) { "IME did did not close" }
         }
     }
 }

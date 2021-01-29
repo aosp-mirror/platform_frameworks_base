@@ -103,6 +103,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.appbinding.AppBindingService;
+import com.android.server.apphibernation.AppHibernationService;
 import com.android.server.attention.AttentionManagerService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.AuthService;
@@ -169,6 +170,7 @@ import com.android.server.profcollect.ProfcollectForwardingService;
 import com.android.server.recoverysystem.RecoverySystemService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.role.RoleServicePlatformHelper;
+import com.android.server.rotationresolver.RotationResolverManagerService;
 import com.android.server.security.FileIntegrityService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -235,6 +237,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.appwidget.AppWidgetService";
     private static final String VOICE_RECOGNITION_MANAGER_SERVICE_CLASS =
             "com.android.server.voiceinteraction.VoiceInteractionManagerService";
+    private static final String APP_HIBERNATION_SERVICE_CLASS =
+            "com.android.server.apphibernation.AppHibernationService";
     private static final String PRINT_MANAGER_SERVICE_CLASS =
             "com.android.server.print.PrintManagerService";
     private static final String COMPANION_DEVICE_MANAGER_SERVICE_CLASS =
@@ -322,13 +326,15 @@ public final class SystemServer implements Dumpable {
     private static final String TIME_ZONE_DETECTOR_SERVICE_CLASS =
             "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String LOCATION_TIME_ZONE_MANAGER_SERVICE_CLASS =
-            "com.android.server.location.timezone.LocationTimeZoneManagerService$Lifecycle";
+            "com.android.server.timezonedetector.location.LocationTimeZoneManagerService$Lifecycle";
     private static final String GNSS_TIME_UPDATE_SERVICE_CLASS =
             "com.android.server.timedetector.GnssTimeUpdateService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
     private static final String ADB_SERVICE_CLASS =
             "com.android.server.adb.AdbService$Lifecycle";
+    private static final String SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS =
+            "com.android.server.speech.SpeechRecognitionManagerService";
     private static final String APP_PREDICTION_MANAGER_SERVICE_CLASS =
             "com.android.server.appprediction.AppPredictionManagerService";
     private static final String CONTENT_SUGGESTIONS_SERVICE_CLASS =
@@ -353,7 +359,10 @@ public final class SystemServer implements Dumpable {
             "com.android.server.ConnectivityServiceInitializer";
     private static final String IP_CONNECTIVITY_METRICS_CLASS =
             "com.android.server.connectivity.IpConnectivityMetrics";
-    private static final String ROLE_SERVICE_CLASS = "com.android.server.role.RoleService";
+    private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
+            "com.android.server.media.MediaCommunicationService";
+
+    private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -494,7 +503,7 @@ public final class SystemServer implements Dumpable {
                 }
 
                 try {
-                    Thread.sleep(checkInterval);
+                    Thread.sleep(checkInterval * 1000);
                 } catch (InterruptedException ex) {
                     continue;
                 }
@@ -1625,11 +1634,20 @@ public final class SystemServer implements Dumpable {
                         "MusicRecognitionManagerService not defined by OEM or disabled by flag");
             }
 
-
             startContentCaptureService(context, t);
             startAttentionService(context, t);
-
+            startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
+
+            // System Speech Recognition Service
+            if (deviceHasConfigString(context,
+                    R.string.config_defaultOnDeviceSpeechRecognitionService)) {
+                t.traceBegin("StartSpeechRecognitionManagerService");
+                mSystemServiceManager.startService(SPEECH_RECOGNITION_MANAGER_SERVICE_CLASS);
+                t.traceEnd();
+            } else {
+                Slog.d(TAG, "System speech recognition is not defined by OEM");
+            }
 
             // App prediction manager service
             if (deviceHasConfigString(context, R.string.config_defaultAppPredictionService)) {
@@ -2045,6 +2063,12 @@ public final class SystemServer implements Dumpable {
             t.traceBegin("StartVoiceRecognitionManager");
             mSystemServiceManager.startService(VOICE_RECOGNITION_MANAGER_SERVICE_CLASS);
             t.traceEnd();
+
+            if (AppHibernationService.isAppHibernationEnabled()) {
+                t.traceBegin("StartAppHibernationService");
+                mSystemServiceManager.startService(APP_HIBERNATION_SERVICE_CLASS);
+                t.traceEnd();
+            }
 
             if (GestureLauncherService.isGestureLauncherEnabled(context.getResources())) {
                 t.traceBegin("StartGestureLauncher");
@@ -2501,6 +2525,10 @@ public final class SystemServer implements Dumpable {
         mSystemServiceManager.startService(APP_SEARCH_MANAGER_SERVICE_CLASS);
         t.traceEnd();
 
+        t.traceBegin("StartMediaCommunicationService");
+        mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
+        t.traceEnd();
+
         ConcurrentUtils.waitForFutureNoInterrupt(mBlobStoreServiceStart,
                 START_BLOB_STORE_SERVICE);
 
@@ -2831,6 +2859,19 @@ public final class SystemServer implements Dumpable {
         t.traceBegin("StartAttentionManagerService");
         mSystemServiceManager.startService(AttentionManagerService.class);
         t.traceEnd();
+    }
+
+    private void startRotationResolverService(@NonNull Context context,
+            @NonNull TimingsTraceAndSlog t) {
+        if (!RotationResolverManagerService.isServiceConfigured(context)) {
+            Slog.d(TAG, "RotationResolverService is not configured on this device");
+            return;
+        }
+
+        t.traceBegin("StartRotationResolverService");
+        mSystemServiceManager.startService(RotationResolverManagerService.class);
+        t.traceEnd();
+
     }
 
     private static void startSystemUi(Context context, WindowManagerService windowManager) {

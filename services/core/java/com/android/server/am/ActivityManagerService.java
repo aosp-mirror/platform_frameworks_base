@@ -4946,6 +4946,15 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
+    public boolean isIntentSenderAService(IIntentSender pendingResult) {
+        if (pendingResult instanceof PendingIntentRecord) {
+            final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
+            return res.key.type == ActivityManager.INTENT_SENDER_SERVICE;
+        }
+        return false;
+    }
+
+    @Override
     public boolean isIntentSenderABroadcast(IIntentSender pendingResult) {
         if (pendingResult instanceof PendingIntentRecord) {
             final PendingIntentRecord res = (PendingIntentRecord) pendingResult;
@@ -4967,6 +4976,39 @@ public class ActivityManagerService extends IActivityManager.Stub
         } catch (ClassCastException e) {
         }
         return null;
+    }
+
+    @Override
+    public List<ResolveInfo> queryIntentComponentsForIntentSender(
+            IIntentSender pendingResult, int matchFlags) {
+        enforceCallingPermission(Manifest.permission.GET_INTENT_SENDER_INTENT,
+                "queryIntentComponentsForIntentSender()");
+        Preconditions.checkNotNull(pendingResult);
+        final PendingIntentRecord res;
+        try {
+            res = (PendingIntentRecord) pendingResult;
+        } catch (ClassCastException e) {
+            return null;
+        }
+        final Intent intent = res.key.requestIntent;
+        if (intent == null) {
+            return null;
+        }
+        final int userId = res.key.userId;
+        switch (res.key.type) {
+            case ActivityManager.INTENT_SENDER_ACTIVITY:
+                return mContext.getPackageManager().queryIntentActivitiesAsUser(
+                        intent, matchFlags, userId);
+            case ActivityManager.INTENT_SENDER_SERVICE:
+            case ActivityManager.INTENT_SENDER_FOREGROUND_SERVICE:
+                return mContext.getPackageManager().queryIntentServicesAsUser(
+                        intent, matchFlags, userId);
+            case ActivityManager.INTENT_SENDER_BROADCAST:
+                return mContext.getPackageManager().queryBroadcastReceiversAsUser(
+                        intent, matchFlags, userId);
+            default: // ActivityManager.INTENT_SENDER_ACTIVITY_RESULT
+                throw new IllegalStateException("Unsupported intent sender type: " + res.key.type);
+        }
     }
 
     @Override
@@ -16429,7 +16471,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         public int broadcastIntent(Intent intent,
                 IIntentReceiver resultTo,
                 String[] requiredPermissions,
-                boolean serialized, int userId, int[] appIdAllowList) {
+                boolean serialized, int userId, int[] appIdAllowList, @Nullable Bundle bOptions) {
             synchronized (ActivityManagerService.this) {
                 intent = verifyBroadcastLocked(intent);
 
@@ -16441,10 +16483,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                             null /*callerPackage*/, null /*callingFeatureId*/, intent,
                             null /*resolvedType*/, resultTo, 0 /*resultCode*/, null /*resultData*/,
                             null /*resultExtras*/, requiredPermissions, AppOpsManager.OP_NONE,
-                            null /*options*/, serialized, false /*sticky*/, callingPid, callingUid,
-                            callingUid, callingPid, userId, false /*allowBackgroundStarts*/,
-                            null /*tokenNeededForBackgroundActivityStarts*/,
-                            appIdAllowList);
+                            bOptions /*options*/, serialized, false /*sticky*/, callingPid,
+                            callingUid, callingUid, callingPid, userId,
+                            false /*allowBackgroundStarts*/,
+                            null /*tokenNeededForBackgroundActivityStarts*/, appIdAllowList);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -17523,7 +17565,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         int callerUid = Binder.getCallingUid();
 
         // Only system can toggle the freezer state
-        if (callerUid == SYSTEM_UID) {
+        if (callerUid == SYSTEM_UID || Build.IS_DEBUGGABLE) {
             return mOomAdjuster.mCachedAppOptimizer.enableFreezer(enable);
         } else {
             throw new SecurityException("Caller uid " + callerUid + " cannot set freezer state ");

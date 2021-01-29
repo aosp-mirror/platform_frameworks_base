@@ -16,6 +16,7 @@
 
 package android.app.timedetector;
 
+import android.app.timedetector.ExternalTimeSuggestion;
 import android.app.timedetector.GnssTimeSuggestion;
 import android.app.timedetector.ManualTimeSuggestion;
 import android.app.timedetector.NetworkTimeSuggestion;
@@ -35,6 +36,7 @@ import android.app.timedetector.TelephonyTimeSuggestion;
  * {@hide}
  */
 interface ITimeDetectorService {
+  void suggestExternalTime( in ExternalTimeSuggestion timeSuggestion);
   void suggestGnssTime(in GnssTimeSuggestion timeSuggestion);
   boolean suggestManualTime(in ManualTimeSuggestion timeSuggestion);
   void suggestNetworkTime(in NetworkTimeSuggestion timeSuggestion);

@@ -505,6 +505,12 @@ public final class MediaTranscodeManager {
         /** Uri of the destination media file. */
         private @NonNull Uri mDestinationUri;
 
+        /** FileDescriptor of the source media file. */
+        private @Nullable ParcelFileDescriptor mSourceFileDescriptor;
+
+        /** FileDescriptor of the destination media file. */
+        private @Nullable ParcelFileDescriptor mDestinationFileDescriptor;
+
         /**
          *  The UID of the client that the TranscodingRequest is for. Only privileged caller could
          *  set this Uid as only they could do the transcoding on behalf of the client.
@@ -554,7 +560,9 @@ public final class MediaTranscodeManager {
 
         private TranscodingRequest(Builder b) {
             mSourceUri = b.mSourceUri;
+            mSourceFileDescriptor = b.mSourceFileDescriptor;
             mDestinationUri = b.mDestinationUri;
+            mDestinationFileDescriptor = b.mDestinationFileDescriptor;
             mClientUid = b.mClientUid;
             mClientPid = b.mClientPid;
             mPriority = b.mPriority;
@@ -577,6 +585,15 @@ public final class MediaTranscodeManager {
             return mSourceUri;
         }
 
+        /**
+         * Return source file descriptor of the transcoding.
+         * This will be null if client has not provided it.
+         */
+        @Nullable
+        public ParcelFileDescriptor getSourceFileDescriptor() {
+            return mSourceFileDescriptor;
+        }
+
         /** Return the UID of the client that this request is for. -1 means not available. */
         public int getClientUid() {
             return mClientUid;
@@ -591,6 +608,15 @@ public final class MediaTranscodeManager {
         @NonNull
         public Uri getDestinationUri() {
             return mDestinationUri;
+        }
+
+        /**
+         * Return destination file descriptor of the transcoding.
+         * This will be null if client has not provided it.
+         */
+        @Nullable
+        public ParcelFileDescriptor getDestinationFileDescriptor() {
+            return mDestinationFileDescriptor;
         }
 
         /** Return priority of the transcoding. */
@@ -623,7 +649,9 @@ public final class MediaTranscodeManager {
             parcel.priority = mPriority;
             parcel.transcodingType = mType;
             parcel.sourceFilePath = mSourceUri.toString();
+            parcel.sourceFd = mSourceFileDescriptor;
             parcel.destinationFilePath = mDestinationUri.toString();
+            parcel.destinationFd = mDestinationFileDescriptor;
             parcel.clientUid = mClientUid;
             parcel.clientPid = mClientPid;
             if (mClientUid < 0) {
@@ -713,6 +741,8 @@ public final class MediaTranscodeManager {
         public static final class Builder {
             private @NonNull Uri mSourceUri;
             private @NonNull Uri mDestinationUri;
+            private @Nullable ParcelFileDescriptor mSourceFileDescriptor = null;
+            private @Nullable ParcelFileDescriptor mDestinationFileDescriptor = null;
             private int mClientUid = -1;
             private int mClientPid = -1;
             private @TranscodingType int mType = TRANSCODING_TYPE_UNKNOWN;
@@ -725,11 +755,14 @@ public final class MediaTranscodeManager {
             /**
              * Specifies the uri of source media file.
              *
+             * Client must set the source Uri. If client also provides the source fileDescriptor
+             * through is provided by {@link #setSourceFileDescriptor(ParcelFileDescriptor)},
+             * TranscodingSession will use the fd instead of calling back to the client to open the
+             * sourceUri.
              * @param sourceUri Content uri for the source media file.
              * @return The same builder instance.
              * @throws IllegalArgumentException if Uri is null or empty.
              */
-            // TODO(hkuang): Add documentation on how the app could generate the correct Uri.
             @NonNull
             public Builder setSourceUri(@NonNull Uri sourceUri) {
                 if (sourceUri == null || Uri.EMPTY.equals(sourceUri)) {
@@ -741,8 +774,33 @@ public final class MediaTranscodeManager {
             }
 
             /**
+             * Specifies the fileDescriptor opened from the source media file.
+             *
+             * This call is optional. If the source fileDescriptor is provided, TranscodingSession
+             * will use it directly instead of opening the uri from {@link #setSourceUri(Uri)}. It
+             * is client's responsibility to make sure the fileDescriptor is opened from the source
+             * uri.
+             * @param fileDescriptor a {@link ParcelFileDescriptor} opened from source media file.
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if fileDescriptor is invalid.
+             */
+            @NonNull
+            public Builder setSourceFileDescriptor(@NonNull ParcelFileDescriptor fileDescriptor) {
+                if (fileDescriptor == null || fileDescriptor.getFd() < 0) {
+                    throw new IllegalArgumentException(
+                            "Invalid source descriptor.");
+                }
+                mSourceFileDescriptor = fileDescriptor;
+                return this;
+            }
+
+            /**
              * Specifies the uri of the destination media file.
              *
+             * Client must set the destination Uri. If client also provides the destination
+             * fileDescriptor through {@link #setDestinationFileDescriptor(ParcelFileDescriptor)},
+             * TranscodingSession will use the fd instead of calling back to the client to open the
+             * destinationUri.
              * @param destinationUri Content uri for the destination media file.
              * @return The same builder instance.
              * @throws IllegalArgumentException if Uri is null or empty.
@@ -754,6 +812,29 @@ public final class MediaTranscodeManager {
                             "You must specify a non-empty destination Uri.");
                 }
                 mDestinationUri = destinationUri;
+                return this;
+            }
+
+            /**
+             * Specifies the fileDescriptor opened from the destination media file.
+             *
+             * This call is optional. If the destination fileDescriptor is provided,
+             * TranscodingSession will use it directly instead of opening the uri from
+             * {@link #setDestinationUri(Uri)} upon transcoding starts. It is client's
+             * responsibility to make sure the fileDescriptor is opened from the destination uri.
+             * @param fileDescriptor a {@link ParcelFileDescriptor} opened from destination media
+             *                       file.
+             * @return The same builder instance.
+             * @throws IllegalArgumentException if fileDescriptor is invalid.
+             */
+            @NonNull
+            public Builder setDestinationFileDescriptor(
+                    @NonNull ParcelFileDescriptor fileDescriptor) {
+                if (fileDescriptor == null || fileDescriptor.getFd() < 0) {
+                    throw new IllegalArgumentException(
+                            "Invalid destination descriptor.");
+                }
+                mDestinationFileDescriptor = fileDescriptor;
                 return this;
             }
 

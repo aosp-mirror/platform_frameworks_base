@@ -357,6 +357,18 @@ public final class ColorDisplayManager {
     }
 
     /**
+     * Returns whether the specified color mode is part of the standard set.
+     *
+     * @hide
+     */
+    public static boolean isStandardColorMode(int mode) {
+        return mode == ColorDisplayManager.COLOR_MODE_NATURAL
+                || mode == ColorDisplayManager.COLOR_MODE_BOOSTED
+                || mode == ColorDisplayManager.COLOR_MODE_SATURATED
+                || mode == ColorDisplayManager.COLOR_MODE_AUTOMATIC;
+    }
+
+    /**
      * Returns whether the device has a wide color gamut display.
      *
      * @hide

@@ -64,7 +64,6 @@ import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.StatFs;
-import android.os.StrictMode;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.storage.StorageManager;
@@ -3575,7 +3574,9 @@ public abstract class Context {
             LIGHTS_SERVICE,
             //@hide: PEOPLE_SERVICE,
             //@hide: DEVICE_STATE_SERVICE,
+            //@hide: SPEECH_RECOGNITION_SERVICE,
             UWB_SERVICE,
+            MEDIA_METRICS_SERVICE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceName {}
@@ -4370,6 +4371,16 @@ public abstract class Context {
     public static final String BIOMETRIC_SERVICE = "biometric";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.MediaCommunicationManager}
+     * for managing {@link android.media.MediaSession2}.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.MediaCommunicationManager
+     */
+    public static final String MEDIA_COMMUNICATION_SERVICE = "media_communication";
+
+    /**
      * Use with {@link #getSystemService} to retrieve a
      * {@link android.media.MediaRouter} for controlling and managing
      * routing of media.
@@ -4478,6 +4489,18 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.graphics.fonts.FontManager} for font services.
+     *
+     * @see #getSystemService(String)
+     * @see android.graphics.fonts.FontManager
+     * @hide
+     */
+    @SystemApi
+    @TestApi
+    public static final String FONT_SERVICE = "font";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link com.android.server.attention.AttentionManagerService} for attention services.
      *
      * @see #getSystemService(String)
@@ -4485,6 +4508,16 @@ public abstract class Context {
      * @hide
      */
     public static final String ATTENTION_SERVICE = "attention";
+
+    /**
+     * Official published name of the (internal) rotation resolver service.
+     *
+     * // TODO(b/178151184): change it back to rotation resolver before S release.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String ROTATION_RESOLVER_SERVICE = "resolver";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -4643,6 +4676,17 @@ public abstract class Context {
      * @hide
      */
     public static final String PERMISSION_CONTROLLER_SERVICE = "permission_controller";
+
+    /**
+     * Use with {@link #getSystemService(String) to retrieve an
+     * {@link android.apphibernation.AppHibernationManager}} for
+     * communicating with the hibernation service.
+     * @hide
+     *
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String APP_HIBERNATION_SERVICE = "app_hibernation";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve an
@@ -5364,6 +5408,24 @@ public abstract class Context {
      * @hide
      */
     public static final String DEVICE_STATE_SERVICE = "device_state";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.media.metrics.MediaMetricsManager} for interacting with media metrics
+     * on the device.
+     *
+     * @see #getSystemService(String)
+     * @see android.media.metrics.MediaMetricsManager
+     */
+    public static final String MEDIA_METRICS_SERVICE = "media_metrics";
+
+    /**
+     * Use with {@link #getSystemService(String)} to access system speech recognition service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+    */
+    public static final String SPEECH_RECOGNITION_SERVICE = "speech_recognition";
 
     /**
      * Determine whether the given permission is allowed for a particular
@@ -6425,7 +6487,7 @@ public abstract class Context {
      * {@link WindowManager}, {@link android.view.LayoutInflater LayoutInflater} or
      * {@link android.app.WallpaperManager WallpaperManager}. Accessing UI components from non-UI
      * contexts throws {@link android.os.strictmode.Violation} if
-     * {@link StrictMode.VmPolicy.Builder#detectIncorrectContextUse()} is enabled.
+     * {@link android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()} is enabled.
      * <p>
      * Examples of UI contexts are
      * an {@link android.app.Activity Activity}, a context created from
@@ -6435,7 +6497,7 @@ public abstract class Context {
      *
      * @see #getDisplay()
      * @see #getSystemService(String)
-     * @see StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
+     * @see android.os.StrictMode.VmPolicy.Builder#detectIncorrectContextUse()
      */
     public static boolean isUiContext(@NonNull Context context) {
         return context.isUiContext();

@@ -83,6 +83,7 @@ import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.util.RingerModeTracker;
@@ -159,6 +160,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     private StatusBarStateController mStatusBarStateController;
     @Mock
     private AuthController mAuthController;
+    @Mock
+    private FeatureFlags mFeatureFlags;
     @Captor
     private ArgumentCaptor<StatusBarStateController.StateListener> mStatusBarStateListenerCaptor;
     // Direct executor
@@ -215,6 +218,8 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
         mSpiedContext.addMockSystemService(TelephonyManager.class, mTelephonyManager);
 
         when(mRingerModeTracker.getRingerMode()).thenReturn(mRingerModeLiveData);
+
+        when(mFeatureFlags.isKeyguardLayoutEnabled()).thenReturn(false);
 
         mMockitoSession = ExtendedMockito.mockitoSession()
                 .spyStatic(SubscriptionManager.class).startMocking();
@@ -884,7 +889,7 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
                     mBroadcastDispatcher, mDumpManager,
                     mRingerModeTracker, mBackgroundExecutor,
                     mStatusBarStateController, mLockPatternUtils,
-                    mAuthController);
+                    mAuthController, mFeatureFlags);
             setStrongAuthTracker(KeyguardUpdateMonitorTest.this.mStrongAuthTracker);
         }
 

@@ -3058,6 +3058,7 @@
     <public name="sspSuffix" />
     <public name="pathAdvancedPattern" />
     <public name="sspAdvancedPattern" />
+    <public name="fontProviderSystemFontFamily" />
   </public-group>
 
   <public-group type="drawable" first-id="0x010800b5">

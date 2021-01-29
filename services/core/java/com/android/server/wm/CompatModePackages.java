@@ -313,8 +313,8 @@ public final class CompatModePackages {
 
             scheduleWrite();
 
-            final Task stack = mService.getTopDisplayFocusedRootTask();
-            ActivityRecord starting = stack.restartPackage(packageName);
+            final Task rootTask = mService.getTopDisplayFocusedRootTask();
+            ActivityRecord starting = rootTask.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
             SparseArray<WindowProcessController> pidMap = mService.mProcessMap.getPidMap();
@@ -338,7 +338,7 @@ public final class CompatModePackages {
                         false /* preserveWindow */);
                 // And we need to make sure at this point that all other activities
                 // are made visible with the correct configuration.
-                stack.ensureActivitiesVisible(starting, 0, !PRESERVE_WINDOWS);
+                rootTask.ensureActivitiesVisible(starting, 0, !PRESERVE_WINDOWS);
             }
         }
     }

@@ -700,11 +700,14 @@ void SkiaCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& chunk, floa
         NinePatchUtils::SetLatticeFlags(&lattice, flags.get(), numFlags, chunk, colors.get());
     }
 
+    SkFilterMode filter = paint && paint->isFilterBitmap() ? SkFilterMode::kLinear
+                                                           : SkFilterMode::kNearest;
+
     lattice.fBounds = nullptr;
     SkRect dst = SkRect::MakeLTRB(dstLeft, dstTop, dstRight, dstBottom);
     auto image = bitmap.makeImage();
     apply_looper(paint, [&](const SkPaint& p) {
-        mCanvas->drawImageLattice(image.get(), lattice, dst, &p);
+        mCanvas->drawImageLattice(image.get(), lattice, dst, filter, &p);
     });
 }
 

@@ -54,6 +54,7 @@ import android.os.PowerManager;
 import android.os.ServiceManager;
 import android.os.UserManager;
 import android.os.Vibrator;
+import android.permission.PermissionManager;
 import android.service.dreams.DreamService;
 import android.service.dreams.IDreamManager;
 import android.telecom.TelecomManager;
@@ -378,5 +379,11 @@ public class FrameworkServicesModule {
     @Singleton
     static WindowManager provideWindowManager(Context context) {
         return context.getSystemService(WindowManager.class);
+    }
+
+    @Provides
+    @Singleton
+    static PermissionManager providePermissionManager(Context context) {
+        return context.getSystemService(PermissionManager.class);
     }
 }

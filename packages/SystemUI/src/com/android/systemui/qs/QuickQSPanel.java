@@ -47,6 +47,11 @@ public class QuickQSPanel extends QSPanel {
         super(context, attrs);
         mMaxTiles = Math.min(DEFAULT_MAX_TILES,
                 getResources().getInteger(R.integer.quick_qs_panel_max_columns));
+    }
+
+    @Override
+    void initialize(boolean sideLabels) {
+        super.initialize(sideLabels);
         applyBottomMargin((View) mRegularTileLayout);
     }
 

@@ -129,7 +129,6 @@ public class TaskViewTest extends ShellTestCase {
 
         verify(mOrganizer).setPendingLaunchCookieListener(any(), eq(mTaskView));
         assertThat(options.getLaunchWindowingMode()).isEqualTo(WINDOWING_MODE_MULTI_WINDOW);
-        assertThat(options.getTaskAlwaysOnTop()).isTrue();
     }
 
     @Test

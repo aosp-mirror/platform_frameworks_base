@@ -50,6 +50,7 @@ import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.PromptInfo;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
 import android.os.RemoteException;
@@ -61,6 +62,7 @@ import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 
 import java.util.List;
@@ -397,15 +399,48 @@ public class Utils {
         }
     }
 
-    public static boolean isKeyguard(Context context, String clientPackage) {
-        final boolean hasPermission = context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
-                == PackageManager.PERMISSION_GRANTED;
-
+    /**
+     * Checks if a client package matches Keyguard and can perform internal biometric operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against Keyguard.
+     * @return Whether the given package matches Keyguard.
+     */
+    public static boolean isKeyguard(@NonNull Context context, @Nullable String clientPackage) {
+        final boolean hasPermission = hasInternalPermission(context);
         final ComponentName keyguardComponent = ComponentName.unflattenFromString(
                 context.getResources().getString(R.string.config_keyguardComponent));
         final String keyguardPackage = keyguardComponent != null
                 ? keyguardComponent.getPackageName() : null;
         return hasPermission && keyguardPackage != null && keyguardPackage.equals(clientPackage);
+    }
+
+    /**
+     * Checks if a client package matches the Android system and can perform internal biometric
+     * operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against the Android system.
+     * @return Whether the given package matches the Android system.
+     */
+    public static boolean isSystem(@NonNull Context context, @Nullable String clientPackage) {
+        return hasInternalPermission(context) && "android".equals(clientPackage);
+    }
+
+    /**
+     * Checks if a client package matches Settings and can perform internal biometric operations.
+     *
+     * @param context The system context.
+     * @param clientPackage The name of the package to be checked against Settings.
+     * @return Whether the given package matches Settings.
+     */
+    public static boolean isSettings(@NonNull Context context, @Nullable String clientPackage) {
+        return hasInternalPermission(context) && "com.android.settings".equals(clientPackage);
+    }
+
+    private static boolean hasInternalPermission(@NonNull Context context) {
+        return context.checkCallingOrSelfPermission(USE_BIOMETRIC_INTERNAL)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     public static String getClientName(@Nullable BaseClientMonitor client) {
@@ -476,6 +511,16 @@ public class Utils {
                 return Authenticators.BIOMETRIC_STRONG;
             default:
                 throw new IllegalArgumentException("Unknown strength: " + strength);
+        }
+    }
+
+    public static int getUdfpsAuthReason(@NonNull AuthenticationClient<?> client) {
+        if (client.isKeyguard()) {
+            return IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD;
+        } else if (client.isBiometricPrompt()) {
+            return IUdfpsOverlayController.REASON_AUTH_BP;
+        } else {
+            return IUdfpsOverlayController.REASON_AUTH_FPM_OTHER;
         }
     }
 }

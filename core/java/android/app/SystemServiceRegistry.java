@@ -72,6 +72,7 @@ import android.content.res.Resources;
 import android.content.rollback.RollbackManagerFrameworkInitializer;
 import android.debug.AdbManager;
 import android.debug.IAdbManager;
+import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
@@ -106,6 +107,8 @@ import android.media.AudioManager;
 import android.media.MediaFrameworkInitializer;
 import android.media.MediaFrameworkPlatformInitializer;
 import android.media.MediaRouter;
+import android.media.metrics.IMediaMetricsManager;
+import android.media.metrics.MediaMetricsManager;
 import android.media.midi.IMidiManager;
 import android.media.midi.MidiManager;
 import android.media.musicrecognition.IMusicRecognitionManager;
@@ -216,6 +219,7 @@ import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.app.ISoundTriggerService;
 import com.android.internal.appwidget.IAppWidgetService;
+import com.android.internal.graphics.fonts.IFontManager;
 import com.android.internal.net.INetworkWatchlistManager;
 import com.android.internal.os.IDropBoxManagerService;
 import com.android.internal.policy.PhoneLayoutInflater;
@@ -342,6 +346,14 @@ public final class SystemServiceRegistry {
             @Override
             public TextClassificationManager createService(ContextImpl ctx) {
                 return new TextClassificationManager(ctx);
+            }});
+
+        registerService(Context.FONT_SERVICE, FontManager.class,
+                new CachedServiceFetcher<FontManager>() {
+            @Override
+            public FontManager createService(ContextImpl ctx) throws ServiceNotFoundException {
+                IBinder b = ServiceManager.getServiceOrThrow(Context.FONT_SERVICE);
+                return FontManager.create(IFontManager.Stub.asInterface(b));
             }});
 
         registerService(Context.CLIPBOARD_SERVICE, ClipboardManager.class,
@@ -1400,6 +1412,18 @@ public final class SystemServiceRegistry {
                     @Override
                     public DeviceStateManager createService(ContextImpl ctx) {
                         return new DeviceStateManager();
+                    }});
+
+        registerService(Context.MEDIA_METRICS_SERVICE, MediaMetricsManager.class,
+                new CachedServiceFetcher<MediaMetricsManager>() {
+                    @Override
+                    public MediaMetricsManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        IBinder iBinder =
+                                ServiceManager.getServiceOrThrow(Context.MEDIA_METRICS_SERVICE);
+                        IMediaMetricsManager service =
+                                IMediaMetricsManager.Stub.asInterface(iBinder);
+                        return new MediaMetricsManager(service, ctx.getUserId());
                     }});
 
         sInitializing = true;

@@ -96,7 +96,8 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         Slog.e(getTag(), "Task stack changed for client: " + client);
                         continue;
                     }
-                    if (Utils.isKeyguard(mContext, client.getOwnerString())) {
+                    if (Utils.isKeyguard(mContext, client.getOwnerString())
+                            || Utils.isSystem(mContext, client.getOwnerString())) {
                         continue; // Keyguard is always allowed
                     }
 
@@ -466,7 +467,7 @@ public class FingerprintProvider implements IBinder.DeathRecipient, ServiceProvi
                         operationId, restricted, opPackageName, cookie,
                         false /* requireConfirmation */, sensorId, isStrongBiometric, statsClient,
                         mTaskStackListener, mSensors.get(sensorId).getLockoutCache(),
-                        mUdfpsOverlayController);
+                        mUdfpsOverlayController, isKeyguard);
                 mSensors.get(sensorId).getScheduler().scheduleClientMonitor(client);
             } catch (RemoteException e) {
                 Slog.e(getTag(), "Remote exception when scheduling authenticate", e);

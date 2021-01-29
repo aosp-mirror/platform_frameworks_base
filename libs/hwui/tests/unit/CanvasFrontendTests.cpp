@@ -124,12 +124,12 @@ TEST(CanvasFrontend, transform) {
 
 TEST(CanvasFrontend, drawOpTransform) {
     CanvasFrontend<CanvasOpBuffer> opCanvas(100, 100);
-    const auto& receiver = opCanvas.receiver();
+    const auto &receiver = opCanvas.receiver();
 
     auto makeDrawRect = [] {
         return CanvasOp<CanvasOpType::DrawRect>{
-            .rect = SkRect::MakeWH(50, 50),
-            .paint = SkPaint(SkColors::kBlack),
+                .rect = SkRect::MakeWH(50, 50),
+                .paint = SkPaint(SkColors::kBlack),
         };
     };
 
@@ -167,14 +167,14 @@ TEST(CanvasFrontend, drawOpTransform) {
 
     {
         // First result should be identity
-        const auto& result = transforms[0];
+        const auto &result = transforms[0];
         EXPECT_EQ(SkMatrix::kIdentity_Mask, result.getType());
         EXPECT_EQ(SkMatrix::I(), result);
     }
 
     {
         // Should be translate 10, 10
-        const auto& result = transforms[1];
+        const auto &result = transforms[1];
         EXPECT_EQ(SkMatrix::kTranslate_Mask, result.getType());
         SkMatrix m;
         m.setTranslate(10, 10);
@@ -183,7 +183,7 @@ TEST(CanvasFrontend, drawOpTransform) {
 
     {
         // Should be translate 10, 10 + scale 2, 4
-        const auto& result = transforms[2];
+        const auto &result = transforms[2];
         EXPECT_EQ(SkMatrix::kTranslate_Mask | SkMatrix::kScale_Mask, result.getType());
         SkMatrix m;
         m.setTranslate(10, 10);
@@ -193,7 +193,7 @@ TEST(CanvasFrontend, drawOpTransform) {
 
     {
         // Should be translate 10, 10 + translate 20, 15
-        const auto& result = transforms[3];
+        const auto &result = transforms[3];
         EXPECT_EQ(SkMatrix::kTranslate_Mask, result.getType());
         SkMatrix m;
         m.setTranslate(30, 25);
@@ -202,9 +202,9 @@ TEST(CanvasFrontend, drawOpTransform) {
 
     {
         // Should be translate 10, 10 + translate 20, 15 + rotate 90
-        const auto& result = transforms[4];
+        const auto &result = transforms[4];
         EXPECT_EQ(SkMatrix::kTranslate_Mask | SkMatrix::kAffine_Mask | SkMatrix::kScale_Mask,
-                result.getType());
+                  result.getType());
         SkMatrix m;
         m.setTranslate(30, 25);
         m.preRotate(90.f);

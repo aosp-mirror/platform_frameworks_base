@@ -105,10 +105,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
     @GuardedBy("mLock")
     final SparseBooleanArray mActiveUids = new SparseBooleanArray();
 
-    /** UIDs that are in the foreground. */
-    @GuardedBy("mLock")
-    final SparseBooleanArray mForegroundUids = new SparseBooleanArray();
-
     /**
      * System except-idle + user exemption list in the device idle controller.
      */
@@ -286,13 +282,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         /**
-         * This is called when the foreground state changed for a UID.
-         */
-        private void onUidForegroundStateChanged(AppStateTrackerImpl sender, int uid) {
-            onUidForeground(uid, sender.isUidInForeground(uid));
-        }
-
-        /**
          * This is called when the active/idle state changed for a UID.
          */
         private void onUidActiveStateChanged(AppStateTrackerImpl sender, int uid) {
@@ -416,14 +405,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         }
 
         /**
-         * Called when a UID comes into the foreground or the background.
-         *
-         * @see #isUidInForeground(int)
-         */
-        public void onUidForeground(int uid, boolean foreground) {
-        }
-
-        /**
          * Called when an ephemeral uid goes to the background, so its alarms need to be removed.
          */
         public void removeAlarmsForUid(int uid) {
@@ -460,7 +441,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         mExemptedBucketPackages.remove(userId, pkgName);
                         mRunAnyRestrictedPackages.remove(Pair.create(uid, pkgName));
                         mActiveUids.delete(uid);
-                        mForegroundUids.delete(uid);
                     }
                     break;
             }
@@ -496,8 +476,7 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 mIActivityManager.registerUidObserver(new UidObserver(),
                         ActivityManager.UID_OBSERVER_GONE
                                 | ActivityManager.UID_OBSERVER_IDLE
-                                | ActivityManager.UID_OBSERVER_ACTIVE
-                                | ActivityManager.UID_OBSERVER_PROCSTATE,
+                                | ActivityManager.UID_OBSERVER_ACTIVE,
                         ActivityManager.PROCESS_STATE_UNKNOWN, null);
                 mAppOpsService.startWatchingMode(TARGET_OP, null,
                         new AppOpsWatcher());
@@ -698,7 +677,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
     private final class UidObserver extends IUidObserver.Stub {
         @Override
         public void onUidStateChanged(int uid, int procState, long procStateSeq, int capability) {
-            mHandler.onUidStateChanged(uid, procState);
         }
 
         @Override
@@ -769,7 +747,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
     private class MyHandler extends Handler {
         private static final int MSG_UID_ACTIVE_STATE_CHANGED = 0;
-        private static final int MSG_UID_FG_STATE_CHANGED = 1;
         private static final int MSG_RUN_ANY_CHANGED = 3;
         private static final int MSG_ALL_UNEXEMPTED = 4;
         private static final int MSG_ALL_EXEMPTION_LIST_CHANGED = 5;
@@ -779,7 +756,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private static final int MSG_FORCE_APP_STANDBY_FEATURE_FLAG_CHANGED = 9;
         private static final int MSG_EXEMPTED_BUCKET_CHANGED = 10;
 
-        private static final int MSG_ON_UID_STATE_CHANGED = 11;
         private static final int MSG_ON_UID_ACTIVE = 12;
         private static final int MSG_ON_UID_GONE = 13;
         private static final int MSG_ON_UID_IDLE = 14;
@@ -790,10 +766,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
 
         public void notifyUidActiveStateChanged(int uid) {
             obtainMessage(MSG_UID_ACTIVE_STATE_CHANGED, uid, 0).sendToTarget();
-        }
-
-        public void notifyUidForegroundStateChanged(int uid) {
-            obtainMessage(MSG_UID_FG_STATE_CHANGED, uid, 0).sendToTarget();
         }
 
         public void notifyRunAnyAppOpsChanged(int uid, @NonNull String packageName) {
@@ -834,10 +806,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
             obtainMessage(MSG_USER_REMOVED, userId, 0).sendToTarget();
         }
 
-        public void onUidStateChanged(int uid, int procState) {
-            obtainMessage(MSG_ON_UID_STATE_CHANGED, uid, procState).sendToTarget();
-        }
-
         public void onUidActive(int uid) {
             obtainMessage(MSG_ON_UID_ACTIVE, uid, 0).sendToTarget();
         }
@@ -873,13 +841,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                         l.onUidActiveStateChanged(sender, msg.arg1);
                     }
                     mStatLogger.logDurationStat(Stats.UID_ACTIVE_STATE_CHANGED, start);
-                    return;
-
-                case MSG_UID_FG_STATE_CHANGED:
-                    for (Listener l : cloneListeners()) {
-                        l.onUidForegroundStateChanged(sender, msg.arg1);
-                    }
-                    mStatLogger.logDurationStat(Stats.UID_FG_STATE_CHANGED, start);
                     return;
 
                 case MSG_RUN_ANY_CHANGED:
@@ -944,9 +905,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                     handleUserRemoved(msg.arg1);
                     return;
 
-                case MSG_ON_UID_STATE_CHANGED:
-                    handleUidStateChanged(msg.arg1, msg.arg2);
-                    return;
                 case MSG_ON_UID_ACTIVE:
                     handleUidActive(msg.arg1);
                     return;
@@ -968,20 +926,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
         private void handleUidDisabled(int uid) {
             for (Listener l : cloneListeners()) {
                 l.removeAlarmsForUid(uid);
-            }
-        }
-
-        public void handleUidStateChanged(int uid, int procState) {
-            synchronized (mLock) {
-                if (procState > ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND) {
-                    if (removeUidFromArray(mForegroundUids, uid, false)) {
-                        mHandler.notifyUidForegroundStateChanged(uid);
-                    }
-                } else {
-                    if (addUidToArray(mForegroundUids, uid)) {
-                        mHandler.notifyUidForegroundStateChanged(uid);
-                    }
-                }
             }
         }
 
@@ -1007,9 +951,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 if (removeUidFromArray(mActiveUids, uid, remove)) {
                     mHandler.notifyUidActiveStateChanged(uid);
                 }
-                if (removeUidFromArray(mForegroundUids, uid, remove)) {
-                    mHandler.notifyUidForegroundStateChanged(uid);
-                }
             }
         }
     }
@@ -1026,7 +967,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
                 }
             }
             cleanUpArrayForUser(mActiveUids, removedUserId);
-            cleanUpArrayForUser(mForegroundUids, removedUserId);
             mExemptedBucketPackages.remove(removedUserId);
         }
     }
@@ -1222,22 +1162,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
     }
 
     /**
-     * @return whether a UID is in the foreground or not.
-     *
-     * Note this information is based on the UID proc state callback, meaning it's updated
-     * asynchronously and may subtly be stale. If the fresh data is needed, use
-     * {@link ActivityManagerInternal#getUidProcessState} instead.
-     */
-    public boolean isUidInForeground(int uid) {
-        if (UserHandle.isCore(uid)) {
-            return true;
-        }
-        synchronized (mLock) {
-            return mForegroundUids.get(uid);
-        }
-    }
-
-    /**
      * @return whether force all apps standby is enabled or not.
      */
     public boolean isForceAllAppsStandbyEnabled() {
@@ -1315,9 +1239,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
             pw.print("Active uids: ");
             dumpUids(pw, mActiveUids);
 
-            pw.print("Foreground uids: ");
-            dumpUids(pw, mForegroundUids);
-
             pw.print("Except-idle + user exemption list appids: ");
             pw.println(Arrays.toString(mPowerExemptAllAppIds));
 
@@ -1392,12 +1313,6 @@ public class AppStateTrackerImpl implements AppStateTracker {
             for (int i = 0; i < mActiveUids.size(); i++) {
                 if (mActiveUids.valueAt(i)) {
                     proto.write(AppStateTrackerProto.ACTIVE_UIDS, mActiveUids.keyAt(i));
-                }
-            }
-
-            for (int i = 0; i < mForegroundUids.size(); i++) {
-                if (mForegroundUids.valueAt(i)) {
-                    proto.write(AppStateTrackerProto.FOREGROUND_UIDS, mForegroundUids.keyAt(i));
                 }
             }
 

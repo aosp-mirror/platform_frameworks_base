@@ -24,13 +24,15 @@
 #include <SkImage.h>
 #include <SkPicture.h>
 #include <SkRuntimeEffect.h>
-#include <hwui/Bitmap.h>
-#include <log/log.h>
-#include "CanvasProperty.h"
-#include "Points.h"
 
+#include <log/log.h>
+
+#include "hwui/Bitmap.h"
+#include "CanvasProperty.h"
 #include "CanvasOpTypes.h"
 #include "Layer.h"
+#include "Points.h"
+#include "RenderNode.h"
 
 #include <experimental/type_traits>
 #include <utility>
@@ -408,21 +410,24 @@ struct CanvasOp<CanvasOpType::DrawImageLattice> {
         const sk_sp<Bitmap>& bitmap,
         SkRect dst,
         SkCanvas::Lattice lattice,
+        SkFilterMode filter,
         SkPaint  paint
     ):  dst(dst),
         lattice(lattice),
+        filter(filter),
         bitmap(bitmap),
         image(bitmap->makeImage()),
         paint(std::move(paint)) {}
 
     SkRect dst;
     SkCanvas::Lattice lattice;
+    SkFilterMode filter;
     const sk_sp<Bitmap> bitmap;
     const sk_sp<SkImage> image;
 
     SkPaint paint;
     void draw(SkCanvas* canvas) const {
-        canvas->drawImageLattice(image.get(), lattice, dst, &paint);
+        canvas->drawImageLattice(image.get(), lattice, dst, filter, &paint);
     }
     ASSERT_DRAWABLE()
 };
@@ -438,6 +443,11 @@ struct CanvasOp<CanvasOpType::DrawPicture> {
 template<>
 struct CanvasOp<CanvasOpType::DrawLayer> {
     sp<Layer> layer;
+};
+
+template<>
+struct CanvasOp<CanvasOpType::DrawRenderNode> {
+    sp<RenderNode> renderNode;
 };
 
 // cleanup our macros

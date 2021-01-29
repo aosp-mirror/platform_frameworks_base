@@ -18,6 +18,7 @@ package com.android.server;
 
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
+import static com.android.server.vcn.VcnTestUtils.setupSystemService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -138,11 +139,16 @@ public class VcnManagementServiceTest {
     private final IBinder mMockIBinder = mock(IBinder.class);
 
     public VcnManagementServiceTest() throws Exception {
-        setupSystemService(mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
-        setupSystemService(mTelMgr, Context.TELEPHONY_SERVICE, TelephonyManager.class);
         setupSystemService(
-                mSubMgr, Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class);
-        setupSystemService(mAppOpsMgr, Context.APP_OPS_SERVICE, AppOpsManager.class);
+                mMockContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
+        setupSystemService(
+                mMockContext, mTelMgr, Context.TELEPHONY_SERVICE, TelephonyManager.class);
+        setupSystemService(
+                mMockContext,
+                mSubMgr,
+                Context.TELEPHONY_SUBSCRIPTION_SERVICE,
+                SubscriptionManager.class);
+        setupSystemService(mMockContext, mAppOpsMgr, Context.APP_OPS_SERVICE, AppOpsManager.class);
 
         doReturn(TEST_PACKAGE_NAME).when(mMockContext).getOpPackageName();
 
@@ -184,11 +190,6 @@ public class VcnManagementServiceTest {
 
         // Make sure the profiles are loaded.
         mTestLooper.dispatchAll();
-    }
-
-    private void setupSystemService(Object service, String name, Class<?> serviceClass) {
-        doReturn(name).when(mMockContext).getSystemServiceName(serviceClass);
-        doReturn(service).when(mMockContext).getSystemService(name);
     }
 
     private void setupMockedCarrierPrivilege(boolean isPrivileged) {

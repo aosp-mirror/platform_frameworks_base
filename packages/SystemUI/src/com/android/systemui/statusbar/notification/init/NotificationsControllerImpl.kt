@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.init
 
 import android.service.notification.StatusBarNotification
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.people.widget.PeopleSpaceWidgetManager
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption
 import com.android.systemui.statusbar.FeatureFlags
 import com.android.systemui.statusbar.NotificationListener
@@ -73,7 +74,8 @@ class NotificationsControllerImpl @Inject constructor(
     private val headsUpController: HeadsUpController,
     private val headsUpViewBinder: HeadsUpViewBinder,
     private val clickerBuilder: NotificationClicker.Builder,
-    private val animatedImageNotificationManager: AnimatedImageNotificationManager
+    private val animatedImageNotificationManager: AnimatedImageNotificationManager,
+    private val peopleSpaceWidgetManager: PeopleSpaceWidgetManager
 ) : NotificationsController {
 
     override fun initialize(
@@ -125,6 +127,10 @@ class NotificationsControllerImpl @Inject constructor(
             groupAlertTransferHelper.setHeadsUpManager(headsUpManager)
 
             entryManager.attach(notificationListener)
+        }
+
+        if (featureFlags.isPeopleTileEnabled) {
+            peopleSpaceWidgetManager.attach(notificationListener)
         }
     }
 

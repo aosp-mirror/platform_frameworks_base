@@ -25,6 +25,7 @@ import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -909,18 +910,17 @@ public final class InputManager {
     }
 
     /**
-     * Returns the maximum allowed obscuring opacity by UID to propagate touches.
+     * Returns the maximum allowed obscuring opacity per UID to propagate touches.
      *
-     * For certain window types (eg. SAWs), the decision of honoring {@link LayoutParams
-     * #FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring opacity of the windows
-     * above the touch-consuming window.
+     * <p>For certain window types (eg. {@link LayoutParams#TYPE_APPLICATION_OVERLAY}), the decision
+     * of honoring {@link LayoutParams#FLAG_NOT_TOUCHABLE} or not depends on the combined obscuring
+     * opacity of the windows above the touch-consuming window, per UID. Check documentation of
+     * {@link LayoutParams#FLAG_NOT_TOUCHABLE} for more details.
      *
-     * @see #setMaximumObscuringOpacityForTouch(Context, float)
-     *
-     * @hide
+     * @see LayoutParams#FLAG_NOT_TOUCHABLE
      */
-    @TestApi
-    public float getMaximumObscuringOpacityForTouch(@NonNull Context context) {
+    public float getMaximumObscuringOpacityForTouch() {
+        Context context = ActivityThread.currentApplication();
         return Settings.Global.getFloat(context.getContentResolver(),
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH,
                 DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
@@ -946,17 +946,18 @@ public final class InputManager {
      *
      * This value should be between 0 (inclusive) and 1 (inclusive).
      *
-     * @see #getMaximumObscuringOpacityForTouch(Context)
+     * @see #getMaximumObscuringOpacityForTouch()
      *
      * @hide
      */
     @TestApi
     @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
-    public void setMaximumObscuringOpacityForTouch(@NonNull Context context, float opacity) {
+    public void setMaximumObscuringOpacityForTouch(float opacity) {
         if (opacity < 0 || opacity > 1) {
             throw new IllegalArgumentException(
                     "Maximum obscuring opacity for touch should be >= 0 and <= 1");
         }
+        Context context = ActivityThread.currentApplication();
         Settings.Global.putFloat(context.getContentResolver(),
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH, opacity);
     }
@@ -1244,6 +1245,32 @@ public final class InputManager {
     }
 
     /**
+     * Get the battery status of the input device
+     * @param deviceId The input device ID
+     * @hide
+     */
+    public int getBatteryStatus(int deviceId) {
+        try {
+            return mIm.getBatteryStatus(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the remaining battery capacity of the input device
+     * @param deviceId The input device ID
+     * @hide
+     */
+    public int getBatteryCapacity(int deviceId) {
+        try {
+            return mIm.getBatteryCapacity(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
      * @param inputPort The port of the input device.
@@ -1467,6 +1494,15 @@ public final class InputManager {
             mInputDeviceSensorManager = new InputDeviceSensorManager(this);
         }
         return mInputDeviceSensorManager.getSensorManager(deviceId);
+    }
+
+    /**
+     * Gets a battery object associated with an input device, assuming it has one.
+     * @return The battery, never null.
+     * @hide
+     */
+    public InputDeviceBattery getInputDeviceBattery(int deviceId, boolean hasBattery) {
+        return new InputDeviceBattery(this, deviceId, hasBattery);
     }
 
     /**

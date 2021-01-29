@@ -445,7 +445,6 @@ public class SettingsBackupTest {
                     Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED,
                     Settings.Global.SHOW_NOTIFICATION_CHANNEL_WARNINGS,
                     Settings.Global.SHOW_PEOPLE_SPACE,
-                    Settings.Global.SHOW_NEW_LOCKSCREEN,
                     Settings.Global.SHOW_NEW_NOTIF_DISMISS,
                     Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
                     Settings.Global.SHOW_TEMPERATURE_WARNING,
@@ -750,7 +749,8 @@ public class SettingsBackupTest {
                  Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER,
                  Settings.Secure.SUPPRESS_DOZE,
                  Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
-                 Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT);
+                 Settings.Secure.ACCESSIBILITY_SHOW_WINDOW_MAGNIFICATION_PROMPT,
+                 Settings.Secure.TRANSFORM_ENABLED);
 
     @Test
     public void systemSettingsBackedUpOrDenied() {

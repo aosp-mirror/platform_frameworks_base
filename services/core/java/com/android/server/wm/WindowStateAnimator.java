@@ -85,23 +85,23 @@ class WindowStateAnimator {
     static final int PRESERVED_SURFACE_LAYER = 1;
 
     /**
-     * Mode how the window gets clipped by the stack bounds during an animation: The clipping should
-     * be applied after applying the animation transformation, i.e. the stack bounds don't move
-     * during the animation.
+     * Mode how the window gets clipped by the root task bounds during an animation: The clipping
+     * should be applied after applying the animation transformation, i.e. the root task bounds
+     * don't move during the animation.
      */
-    static final int STACK_CLIP_AFTER_ANIM = 0;
+    static final int ROOT_TASK_CLIP_AFTER_ANIM = 0;
 
     /**
-     * Mode how the window gets clipped by the stack bounds: The clipping should be applied before
-     * applying the animation transformation, i.e. the stack bounds move with the window.
+     * Mode how the window gets clipped by the root task bounds: The clipping should be applied
+     * before applying the animation transformation, i.e. the root task bounds move with the window.
      */
-    static final int STACK_CLIP_BEFORE_ANIM = 1;
+    static final int ROOT_TASK_CLIP_BEFORE_ANIM = 1;
 
     /**
-     * Mode how window gets clipped by the stack bounds during an animation: Don't clip the window
-     * by the stack bounds.
+     * Mode how window gets clipped by the root task bounds during an animation: Don't clip the
+     * window by the root task bounds.
      */
-    static final int STACK_CLIP_NONE = 2;
+    static final int ROOT_TASK_CLIP_NONE = 2;
 
     // Unchanging local convenience fields.
     final WindowManagerService mService;
@@ -443,20 +443,9 @@ class WindowStateAnimator {
         // Set up surface control with initial size.
         try {
 
+            // This can be removed once we move all Buffer Layers to use BLAST.
             final boolean isHwAccelerated = (attrs.flags & FLAG_HARDWARE_ACCELERATED) != 0;
             final int format = isHwAccelerated ? PixelFormat.TRANSLUCENT : attrs.format;
-            if (!PixelFormat.formatHasAlpha(attrs.format)
-                    // Don't make surface with surfaceInsets opaque as they display a
-                    // translucent shadow.
-                    && attrs.surfaceInsets.left == 0
-                    && attrs.surfaceInsets.top == 0
-                    && attrs.surfaceInsets.right == 0
-                    && attrs.surfaceInsets.bottom == 0
-                    // Don't make surface opaque when resizing to reduce the amount of
-                    // artifacts shown in areas the app isn't drawing content to.
-                    && !w.isDragResizing()) {
-                flags |= SurfaceControl.OPAQUE;
-            }
 
             mSurfaceController = new WindowSurfaceController(attrs.getTitle().toString(), width,
                     height, format, flags, this, windowType);
@@ -1119,18 +1108,6 @@ class WindowStateAnimator {
             mWin.setHasSurface(false);
             mSurfaceController = null;
             mDrawState = NO_SURFACE;
-        }
-    }
-
-    void detachChildren(SurfaceControl.Transaction t) {
-
-        // Do not detach children of starting windows, as their lifecycle is well under control and
-        // it may lead to issues in case we relaunch when we just added the starting window.
-        if (mWin.mAttrs.type == TYPE_APPLICATION_STARTING) {
-            return;
-        }
-        if (mSurfaceController != null) {
-            mSurfaceController.detachChildren(t);
         }
     }
 

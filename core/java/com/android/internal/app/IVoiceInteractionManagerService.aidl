@@ -223,4 +223,16 @@ interface IVoiceInteractionManagerService {
     IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
             in Identity originatorIdentity,
             IBinder client);
+
+    /**
+     * Sets hotword detection configuration.
+     *
+     * Note: Currently it will trigger hotword detection service after calling this function when
+     * all conditions meet the requirements.
+     *
+     * @param options Config data.
+     * @return {@link VoiceInteractionService#HOTWORD_CONFIG_SUCCESS} in case of success,
+     * {@link VoiceInteractionService#HOTWORD_CONFIG_FAILURE} in case of failure.
+     */
+    int setHotwordDetectionConfig(in Bundle options);
 }

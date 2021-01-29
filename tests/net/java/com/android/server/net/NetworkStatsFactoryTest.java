@@ -36,13 +36,13 @@ import static org.junit.Assert.fail;
 import android.content.res.Resources;
 import android.net.NetworkStats;
 import android.net.TrafficStats;
+import android.net.VpnInfo;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.frameworks.tests.net.R;
-import com.android.internal.net.VpnInfo;
 
 import libcore.io.IoUtils;
 import libcore.io.Streams;

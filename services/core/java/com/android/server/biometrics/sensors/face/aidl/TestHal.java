@@ -49,8 +49,8 @@ public class TestHal extends IFace.Stub {
             }
 
             @Override
-            public ICancellationSignal enroll(int cookie, byte enrollmentType,
-                    HardwareAuthToken hat, NativeHandle previewSurface) {
+            public ICancellationSignal enroll(int cookie, HardwareAuthToken hat,
+                    byte enrollmentType, byte[] features, NativeHandle previewSurface) {
                 return null;
             }
 
@@ -71,6 +71,17 @@ public class TestHal extends IFace.Stub {
 
             @Override
             public void removeEnrollments(int cookie, int[] enrollmentIds) {
+
+            }
+
+            @Override
+            public void getFeatures(int cookie, int enrollmentId) {
+
+            }
+
+            @Override
+            public void setFeature(int cookie, HardwareAuthToken hat, int enrollmentId,
+                    byte feature, boolean enabled) {
 
             }
 

@@ -47,6 +47,7 @@ import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
@@ -122,7 +123,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     Slog.e(TAG, "Task stack changed for client: " + client);
                     return;
                 }
-                if (Utils.isKeyguard(mContext, client.getOwnerString())) {
+                if (Utils.isKeyguard(mContext, client.getOwnerString())
+                        || Utils.isSystem(mContext, client.getOwnerString())) {
                     return; // Keyguard is always allowed
                 }
 
@@ -397,7 +399,8 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         });
     }
 
-    private synchronized IBiometricsFingerprint getDaemon() {
+    @VisibleForTesting
+    synchronized IBiometricsFingerprint getDaemon() {
         if (mTestHalEnabled) {
             final TestHal testHal = new TestHal();
             testHal.setNotify(mHalResultController);

@@ -47,9 +47,11 @@ import androidx.annotation.Nullable;
 import com.android.internal.BrightnessSynchronizer;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
+import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.settings.SystemSettings;
 
@@ -70,7 +72,8 @@ import javax.inject.Inject;
  * {@code sensorId} parameters.
  */
 @SuppressWarnings("deprecation")
-class UdfpsController implements DozeReceiver {
+@SysUISingleton
+public class UdfpsController implements DozeReceiver {
     private static final String TAG = "UdfpsController";
     // Gamma approximation for the sRGB color space.
     private static final float DISPLAY_GAMMA = 2.2f;
@@ -81,6 +84,7 @@ class UdfpsController implements DozeReceiver {
     private final WindowManager mWindowManager;
     private final SystemSettings mSystemSettings;
     private final DelayableExecutor mFgExecutor;
+    private final StatusBarStateController mStatusBarStateController;
     // Currently the UdfpsController supports a single UDFPS sensor. If devices have multiple
     // sensors, this, in addition to a lot of the code here, will be updated.
     @VisibleForTesting final FingerprintSensorPropertiesInternal mSensorProps;
@@ -130,6 +134,16 @@ class UdfpsController implements DozeReceiver {
         }
 
         @Override
+        public void onEnrollmentProgress(int sensorId, int remaining) {
+            mView.onEnrollmentProgress(remaining);
+        }
+
+        @Override
+        public void onEnrollmentHelp(int sensorId) {
+            mView.onEnrollmentHelp();
+        }
+
+        @Override
         public void setDebugMessage(int sensorId, String message) {
             mView.setDebugMessage(message);
         }
@@ -165,7 +179,7 @@ class UdfpsController implements DozeReceiver {
     };
 
     @Inject
-    UdfpsController(@NonNull Context context,
+    public UdfpsController(@NonNull Context context,
             @Main Resources resources,
             LayoutInflater inflater,
             @Nullable FingerprintManager fingerprintManager,
@@ -173,7 +187,8 @@ class UdfpsController implements DozeReceiver {
             WindowManager windowManager,
             SystemSettings systemSettings,
             @NonNull StatusBarStateController statusBarStateController,
-            @Main DelayableExecutor fgExecutor) {
+            @Main DelayableExecutor fgExecutor,
+            @NonNull ScrimController scrimController) {
         mContext = context;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
@@ -181,6 +196,7 @@ class UdfpsController implements DozeReceiver {
         mWindowManager = windowManager;
         mSystemSettings = systemSettings;
         mFgExecutor = fgExecutor;
+        mStatusBarStateController = statusBarStateController;
 
         mSensorProps = findFirstUdfps();
         // At least one UDFPS sensor exists
@@ -208,6 +224,7 @@ class UdfpsController implements DozeReceiver {
 
         mHbmSupported = !TextUtils.isEmpty(mHbmPath);
         mView.setHbmSupported(mHbmSupported);
+        scrimController.addScrimChangedListener(mView);
         statusBarStateController.addCallback(mView);
 
         // This range only consists of the minimum and maximum values, which only cover
@@ -340,7 +357,7 @@ class UdfpsController implements DozeReceiver {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
-                    mView.setShowReason(reason);
+                    mView.setUdfpsAnimation(getUdfpsAnimationForReason(reason));
                     mWindowManager.addView(mView, computeLayoutParams());
                     mView.setOnTouchListener(mOnTouchListener);
                     mIsOverlayShowing = true;
@@ -353,11 +370,27 @@ class UdfpsController implements DozeReceiver {
         });
     }
 
+    @Nullable
+    private UdfpsAnimation getUdfpsAnimationForReason(int reason) {
+        Log.d(TAG, "getUdfpsAnimationForReason: " + reason);
+        switch (reason) {
+            case IUdfpsOverlayController.REASON_ENROLL:
+                return new UdfpsAnimationEnroll(mContext);
+            case IUdfpsOverlayController.REASON_AUTH_FPM_KEYGUARD:
+                return new UdfpsAnimationKeyguard(mView, mContext, mStatusBarStateController);
+            case IUdfpsOverlayController.REASON_AUTH_FPM_OTHER:
+                return new UdfpsAnimationFpmOther(mContext);
+            default:
+                Log.d(TAG, "Animation for reason " + reason + " not supported yet");
+                return null;
+        }
+    }
+
     private void hideUdfpsOverlay() {
         mFgExecutor.execute(() -> {
             if (mIsOverlayShowing) {
                 Log.v(TAG, "hideUdfpsOverlay | removing window");
-                mView.setShowReason(IUdfpsOverlayController.REASON_UNKNOWN);
+                mView.setUdfpsAnimation(null);
                 mView.setOnTouchListener(null);
                 // Reset the controller back to its starting state.
                 onFingerUp();
@@ -433,7 +466,7 @@ class UdfpsController implements DozeReceiver {
         onFingerUp();
     }
 
-    private void onFingerDown(int x, int y, float minor, float major) {
+    protected void onFingerDown(int x, int y, float minor, float major) {
         if (mHbmSupported) {
             try {
                 FileWriter fw = new FileWriter(mHbmPath);
@@ -451,7 +484,7 @@ class UdfpsController implements DozeReceiver {
         mView.showScrimAndDot();
     }
 
-    private void onFingerUp() {
+    protected void onFingerUp() {
         mFingerprintManager.onPointerUp(mSensorProps.sensorId);
         // Hiding the scrim before disabling HBM results in less noticeable flicker.
         mView.hideScrimAndDot();
@@ -489,5 +522,9 @@ class UdfpsController implements DozeReceiver {
             normalizedBacklight[i] = BrightnessSynchronizer.brightnessIntToFloat(backlight[i]);
         }
         return normalizedBacklight;
+    }
+
+    protected UdfpsView getView() {
+        return mView;
     }
 }

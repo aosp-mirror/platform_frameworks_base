@@ -48,7 +48,7 @@ class PipKeyboardTest(
     rotation: Int
 ) : PipTestBase(rotationName, rotation) {
     private val keyboardApp = ImeAppHelper(instrumentation)
-    private val keyboardComponent = Components.ImeActivity().componentName
+    private val keyboardComponent = Components.ImeActivity.COMPONENT
     private val helper = WindowManagerStateHelper()
 
     private val keyboardScenario: FlickerBuilder
@@ -61,7 +61,7 @@ class PipKeyboardTest(
                     device.wakeUpAndGoToHomeScreen()
                     device.pressHome()
                     // launch our target pip app
-                    testApp.open()
+                    testApp.launchViaIntent(wmHelper)
                     this.setRotation(rotation)
                     testApp.clickEnterPipButton()
                     // open an app with an input field and a keyboard
@@ -93,11 +93,11 @@ class PipKeyboardTest(
             withTestName { testTag }
             transitions {
                 // open the soft keyboard
-                keyboardApp.openIME()
+                keyboardApp.openIME(device, wmHelper)
                 helper.waitImeWindowShown()
 
                 // then close it again
-                keyboardApp.closeIME()
+                keyboardApp.closeIME(device, wmHelper)
                 helper.waitImeWindowGone()
             }
             assertions {
@@ -119,13 +119,13 @@ class PipKeyboardTest(
             withTestName { testTag }
             transitions {
                 // open the soft keyboard
-                keyboardApp.openIME()
+                keyboardApp.openIME(device, wmHelper)
                 helper.waitImeWindowShown()
             }
             teardown {
                 eachRun {
                     // close the keyboard
-                    keyboardApp.closeIME()
+                    keyboardApp.closeIME(device, wmHelper)
                     helper.waitImeWindowGone()
                 }
             }
@@ -140,7 +140,7 @@ class PipKeyboardTest(
     }
 
     companion object {
-        private const val TEST_REPETITIONS = 10
+        private const val TEST_REPETITIONS = 5
 
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic

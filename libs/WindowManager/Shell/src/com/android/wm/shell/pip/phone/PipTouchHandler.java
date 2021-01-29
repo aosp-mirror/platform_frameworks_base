@@ -167,18 +167,20 @@ public class PipTouchHandler {
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
                 mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(),
-                floatingContentCoordinator);
+                floatingContentCoordinator, mainExecutor);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
                         mMotionHelper, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, pipUiEventLogger, menuController);
+                        this::updateMovementBounds, pipUiEventLogger, menuController,
+                        mainExecutor);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
-                mMotionHelper, mHandler);
-        mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
+                mMotionHelper, mainExecutor);
+        mTouchState = new PipTouchState(ViewConfiguration.get(context),
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL,
                         mPipBoundsState.getBounds(), true /* allowMenuTimeout */, willResizeMenu(),
                         shouldShowResizeHandle()),
-                menuController::hideMenu);
+                menuController::hideMenu,
+                mainExecutor);
 
         Resources res = context.getResources();
         mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
@@ -196,7 +198,7 @@ public class PipTouchHandler {
                 PIP_STASHING,
                 /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                context.getMainExecutor(),
+                mainExecutor,
                 properties -> {
                     if (properties.getKeyset().contains(PIP_STASHING)) {
                         mEnableStash = properties.getBoolean(

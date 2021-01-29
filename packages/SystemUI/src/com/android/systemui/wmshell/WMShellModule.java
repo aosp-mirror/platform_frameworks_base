@@ -19,6 +19,7 @@ package com.android.systemui.wmshell;
 import android.animation.AnimationHandler;
 import android.app.ActivityTaskManager;
 import android.content.Context;
+import android.os.Handler;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
@@ -125,11 +126,15 @@ public class WMShellModule {
         return new PipBoundsAlgorithm(context, pipBoundsState);
     }
 
+    // Handler is used by Icon.loadDrawableAsync
     @WMSingleton
     @Provides
     static PhonePipMenuController providesPipPhoneMenuController(Context context,
-            PipMediaController pipMediaController, SystemWindows systemWindows) {
-        return new PhonePipMenuController(context, pipMediaController, systemWindows);
+            PipMediaController pipMediaController, SystemWindows systemWindows,
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
+        return new PhonePipMenuController(context, pipMediaController, systemWindows,
+                mainExecutor, mainHandler);
     }
 
     @WMSingleton
@@ -154,9 +159,10 @@ public class WMShellModule {
             PhonePipMenuController menuPhoneController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
-            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer) {
+            PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
+            @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
                 menuPhoneController, pipSurfaceTransactionHelper, splitScreenOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer);
+                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
     }
 }

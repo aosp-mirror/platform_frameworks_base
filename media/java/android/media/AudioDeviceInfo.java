@@ -28,7 +28,7 @@ import java.util.Objects;
 import java.util.TreeSet;
 
 /**
- * Class to provide information about the audio devices.
+ * Provides information about an audio device.
  */
 public final class AudioDeviceInfo {
 
@@ -354,7 +354,7 @@ public final class AudioDeviceInfo {
 
     /**
      * @hide
-     * @return the internal device tyoe
+     * @return the internal device type
      */
     public int getInternalType() {
         return mPort.type();

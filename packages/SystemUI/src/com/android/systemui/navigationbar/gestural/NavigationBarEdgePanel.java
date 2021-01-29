@@ -18,6 +18,9 @@ package com.android.systemui.navigationbar.gestural;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE;
+import static com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler.DEBUG_MISSING_GESTURE_TAG;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -29,6 +32,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemClock;
 import android.os.VibrationEffect;
+import android.util.Log;
 import android.util.MathUtils;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -461,6 +465,10 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 handleMoveEvent(event);
                 break;
             case MotionEvent.ACTION_UP:
+                if (DEBUG_MISSING_GESTURE) {
+                    Log.d(DEBUG_MISSING_GESTURE_TAG,
+                            "NavigationBarEdgePanel ACTION_UP, mTriggerBack=" + mTriggerBack);
+                }
                 if (mTriggerBack) {
                     triggerBack();
                 } else {
@@ -471,6 +479,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
                 mVelocityTracker = null;
                 break;
             case MotionEvent.ACTION_CANCEL:
+                if (DEBUG_MISSING_GESTURE) {
+                    Log.d(DEBUG_MISSING_GESTURE_TAG, "NavigationBarEdgePanel ACTION_CANCEL");
+                }
                 cancelBack();
                 mRegionSamplingHelper.stop();
                 mVelocityTracker.recycle();
@@ -661,6 +672,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         mAngleOffset = 0;
         mTranslationAnimation.setSpring(mRegularTranslationSpring);
         // Reset the arrow to the side
+        if (DEBUG_MISSING_GESTURE) {
+            Log.d(DEBUG_MISSING_GESTURE_TAG, "reset mTriggerBack=false");
+        }
         setTriggerBack(false /* triggerBack */, false /* animated */);
         setDesiredTranslation(0, false /* animated */);
         setCurrentTranslation(0);
@@ -696,6 +710,9 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
             mDisappearAmount = 0.0f;
             setAlpha(1f);
             // And animate it go to back by default!
+            if (DEBUG_MISSING_GESTURE) {
+                Log.d(DEBUG_MISSING_GESTURE_TAG, "set mTriggerBack=true");
+            }
             setTriggerBack(true /* triggerBack */, true /* animated */);
         }
 
@@ -735,6 +752,14 @@ public class NavigationBarEdgePanel extends View implements NavigationEdgeBackPl
         // Last if the direction in Y is bigger than X * 2 we also abort
         if (Math.abs(yOffset) > Math.abs(x - mStartX) * 2) {
             triggerBack = false;
+        }
+        if (DEBUG_MISSING_GESTURE && mTriggerBack != triggerBack) {
+            Log.d(DEBUG_MISSING_GESTURE_TAG, "set mTriggerBack=" + triggerBack
+                    + ", mTotalTouchDelta=" + mTotalTouchDelta
+                    + ", mMinDeltaForSwitch=" + mMinDeltaForSwitch
+                    + ", yOffset=" + yOffset
+                    + ", x=" + x
+                    + ", mStartX=" + mStartX);
         }
         setTriggerBack(triggerBack, true /* animated */);
 

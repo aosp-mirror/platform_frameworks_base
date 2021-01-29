@@ -16,8 +16,11 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.RemoteException;
 import android.util.Slog;
@@ -84,5 +87,34 @@ public class UdfpsHelper {
         } catch (RemoteException e) {
             Slog.e(TAG, "Remote exception when hiding the UDFPS overlay", e);
         }
+    }
+
+    public static void onEnrollmentProgress(int sensorId, int remaining,
+            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+        if (udfpsOverlayController == null) {
+            return;
+        }
+        try {
+            udfpsOverlayController.onEnrollmentProgress(sensorId, remaining);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when sending onEnrollmentProgress", e);
+        }
+    }
+
+    public static void onEnrollmentHelp(int sensorId,
+            @Nullable IUdfpsOverlayController udfpsOverlayController) {
+        if (udfpsOverlayController == null) {
+            return;
+        }
+        try {
+            udfpsOverlayController.onEnrollmentHelp(sensorId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when sending onEnrollmentHelp", e);
+        }
+    }
+
+    public static boolean isValidAcquisitionMessage(@NonNull Context context,
+            int acquireInfo, int vendorCode) {
+        return FingerprintManager.getAcquiredString(context, acquireInfo, vendorCode) != null;
     }
 }

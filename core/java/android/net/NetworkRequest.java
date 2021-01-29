@@ -353,7 +353,9 @@ public class NetworkRequest implements Parcelable {
          *                         NetworkSpecifier.
          */
         public Builder setNetworkSpecifier(NetworkSpecifier networkSpecifier) {
-            MatchAllNetworkSpecifier.checkNotMatchAllNetworkSpecifier(networkSpecifier);
+            if (networkSpecifier instanceof MatchAllNetworkSpecifier) {
+                throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
+            }
             mNetworkCapabilities.setNetworkSpecifier(networkSpecifier);
             return this;
         }

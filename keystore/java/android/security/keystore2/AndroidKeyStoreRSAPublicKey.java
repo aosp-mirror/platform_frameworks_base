@@ -36,9 +36,11 @@ public class AndroidKeyStoreRSAPublicKey extends AndroidKeyStorePublicKey implem
 
     public AndroidKeyStoreRSAPublicKey(@NonNull KeyDescriptor descriptor,
             @NonNull KeyMetadata metadata,
+            @NonNull byte[] x509EncodedForm,
             @NonNull KeyStoreSecurityLevel securityLevel, @NonNull BigInteger modulus,
             @NonNull BigInteger publicExponent) {
-        super(descriptor, metadata, KeyProperties.KEY_ALGORITHM_RSA, securityLevel);
+        super(descriptor, metadata, x509EncodedForm, KeyProperties.KEY_ALGORITHM_RSA,
+                securityLevel);
         mModulus = modulus;
         mPublicExponent = publicExponent;
     }
@@ -46,7 +48,8 @@ public class AndroidKeyStoreRSAPublicKey extends AndroidKeyStorePublicKey implem
     public AndroidKeyStoreRSAPublicKey(@NonNull KeyDescriptor descriptor,
             @NonNull KeyMetadata metadata,
             @NonNull KeyStoreSecurityLevel securityLevel, @NonNull RSAPublicKey info) {
-        this(descriptor, metadata, securityLevel, info.getModulus(), info.getPublicExponent());
+        this(descriptor, metadata, info.getEncoded(), securityLevel, info.getModulus(),
+                info.getPublicExponent());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());

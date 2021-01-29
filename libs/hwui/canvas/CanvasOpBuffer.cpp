@@ -22,4 +22,32 @@ namespace android::uirenderer {
 
 template class OpBuffer<CanvasOpType, CanvasOpContainer>;
 
+void CanvasOpBuffer::updateChildren(std::function<void(RenderNode*)> updateFn) {
+    // TODO: Do we need a fast-path for finding children?
+    if (mHas.children) {
+        for (auto& iter : filter<CanvasOpType::DrawRenderNode>()) {
+            updateFn(iter->renderNode.get());
+        }
+    }
+}
+
+void CanvasOpBuffer::output(std::ostream& output, uint32_t level) const {
+    LOG_ALWAYS_FATAL("TODO");
+}
+
+bool CanvasOpBuffer::prepareListAndChildren(
+            TreeObserver& observer, TreeInfo& info, bool functorsNeedLayer,
+            std::function<void(RenderNode*, TreeObserver&, TreeInfo&, bool)> childFn) {
+    LOG_ALWAYS_FATAL("TODO");
+    return false;
+}
+
+void CanvasOpBuffer::syncContents(const WebViewSyncData& data) {
+    LOG_ALWAYS_FATAL("TODO");
+}
+
+void CanvasOpBuffer::applyColorTransform(ColorTransform transform) {
+    LOG_ALWAYS_FATAL("TODO");
+}
+
 }  // namespace android::uirenderer

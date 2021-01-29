@@ -404,6 +404,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyRenderingContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
+    LOG_ALWAYS_FATAL_IF(pipeline->isSurfaceReady());
 }
 
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, pictureCallback) {

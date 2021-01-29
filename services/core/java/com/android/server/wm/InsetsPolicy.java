@@ -390,16 +390,16 @@ class InsetsPolicy {
     }
 
     private boolean forceShowsSystemBarsForWindowingMode() {
-        final boolean isDockedStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+        final boolean isDockedRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
                 .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        final boolean isFreeformStackVisible = mDisplayContent.getDefaultTaskDisplayArea()
+        final boolean isFreeformRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
                 .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
         final boolean isResizing = mDisplayContent.getDockedDividerController().isResizing();
 
-        // We need to force system bars when the docked stack is visible, when the freeform stack
-        // is visible but also when we are resizing for the transitions when docked stack
-        // visibility changes.
-        return isDockedStackVisible || isFreeformStackVisible || isResizing;
+        // We need to force system bars when the docked root task is visible, when the freeform
+        // root task is visible but also when we are resizing for the transitions when docked
+        // root task visibility changes.
+        return isDockedRootTaskVisible || isFreeformRootTaskVisible || isResizing;
     }
 
     @VisibleForTesting

@@ -17,10 +17,15 @@
 package com.android.wm.shell.common;
 
 import android.os.Looper;
+import android.os.SystemClock;
+import android.os.Trace;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Super basic Executor interface that adds support for delayed execution and removing callbacks.
@@ -65,17 +70,17 @@ public interface ShellExecutor extends Executor {
     /**
      * See {@link android.os.Handler#postDelayed(Runnable, long)}.
      */
-    void executeDelayed(Runnable r, long delayMillis);
+    void executeDelayed(Runnable runnable, long delayMillis);
 
     /**
      * See {@link android.os.Handler#removeCallbacks}.
      */
-    void removeCallbacks(Runnable r);
+    void removeCallbacks(Runnable runnable);
 
     /**
      * See {@link android.os.Handler#hasCallbacks(Runnable)}.
      */
-    boolean hasCallback(Runnable r);
+    boolean hasCallback(Runnable runnable);
 
     /**
      * Returns the looper that this executor is running on.

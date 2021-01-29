@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.runFlicker
@@ -38,6 +39,7 @@ import org.junit.runners.Parameterized
  * Test Pip launch and exit.
  * To run this test: `atest WMShellFlickerTests:EnterExitPipTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -79,7 +81,7 @@ class EnterExitPipTest(
                     }
                     all("Initially shows both app windows then pipApp hides testApp") {
                         showsAppWindow(testApp.defaultWindowName)
-                                .and().showsAppWindowOnTop(pipApp.defaultWindowName)
+                                .showsAppWindowOnTop(pipApp.defaultWindowName)
                                 .then()
                                 .hidesAppWindow(testApp.defaultWindowName)
                     }
@@ -89,7 +91,7 @@ class EnterExitPipTest(
                 layersTrace {
                     all("Initially shows both app layers then pipApp hides testApp") {
                         showsLayer(testApp.defaultWindowName)
-                                .and().showsLayer(pipApp.defaultWindowName)
+                                .showsLayer(pipApp.defaultWindowName)
                                 .then()
                                 .hidesLayer(testApp.defaultWindowName)
                     }

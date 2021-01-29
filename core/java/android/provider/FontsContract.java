@@ -362,7 +362,8 @@ public class FontsContract {
             // the font provider takes too much time. For now, request the font data to ensure
             // it is in the cache next time and return.
             if (sHandler == null) {
-                sThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_BACKGROUND);
+                // Use FOREGROUND priority as this thread will block UI thread.
+                sThread = new HandlerThread("fonts", Process.THREAD_PRIORITY_FOREGROUND);
                 sThread.start();
                 sHandler = new Handler(sThread.getLooper());
             }

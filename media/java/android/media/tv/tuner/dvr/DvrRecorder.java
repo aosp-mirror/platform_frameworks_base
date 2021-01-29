@@ -19,12 +19,12 @@ package android.media.tv.tuner.dvr;
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
-import android.app.ActivityManager;
 import android.media.tv.tuner.Tuner;
 import android.media.tv.tuner.Tuner.Result;
 import android.media.tv.tuner.TunerUtils;
 import android.media.tv.tuner.filter.Filter;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.util.Log;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -61,7 +61,7 @@ public class DvrRecorder implements AutoCloseable {
     private native long nativeWrite(byte[] bytes, long offset, long size);
 
     private DvrRecorder() {
-        mUserId = ActivityManager.getCurrentUser();
+        mUserId = Process.myUid();
         mSegmentId = (sInstantId & 0x0000ffff) << 16;
         sInstantId++;
     }

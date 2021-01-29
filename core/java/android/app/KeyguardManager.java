@@ -598,33 +598,29 @@ public class KeyguardManager {
     @SystemApi
     public void requestDismissKeyguard(@NonNull Activity activity, @Nullable CharSequence message,
             @Nullable KeyguardDismissCallback callback) {
-        try {
-            ActivityTaskManager.getService().dismissKeyguard(
-                    activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
-                @Override
-                public void onDismissError() throws RemoteException {
-                    if (callback != null && !activity.isDestroyed()) {
-                        activity.mHandler.post(callback::onDismissError);
-                    }
+        ActivityClient.getInstance().dismissKeyguard(
+                activity.getActivityToken(), new IKeyguardDismissCallback.Stub() {
+            @Override
+            public void onDismissError() throws RemoteException {
+                if (callback != null && !activity.isDestroyed()) {
+                    activity.mHandler.post(callback::onDismissError);
                 }
+            }
 
-                @Override
-                public void onDismissSucceeded() throws RemoteException {
-                    if (callback != null && !activity.isDestroyed()) {
-                        activity.mHandler.post(callback::onDismissSucceeded);
-                    }
+            @Override
+            public void onDismissSucceeded() throws RemoteException {
+                if (callback != null && !activity.isDestroyed()) {
+                    activity.mHandler.post(callback::onDismissSucceeded);
                 }
+            }
 
-                @Override
-                public void onDismissCancelled() throws RemoteException {
-                    if (callback != null && !activity.isDestroyed()) {
-                        activity.mHandler.post(callback::onDismissCancelled);
-                    }
+            @Override
+            public void onDismissCancelled() throws RemoteException {
+                if (callback != null && !activity.isDestroyed()) {
+                    activity.mHandler.post(callback::onDismissCancelled);
                 }
-            }, message);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+            }
+        }, message);
     }
 
     /**

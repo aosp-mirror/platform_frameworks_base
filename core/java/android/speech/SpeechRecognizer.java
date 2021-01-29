@@ -16,6 +16,7 @@
 
 package android.speech;
 
+import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +28,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
@@ -38,8 +40,9 @@ import java.util.Queue;
 /**
  * This class provides access to the speech recognition service. This service allows access to the
  * speech recognizer. Do not instantiate this class directly, instead, call
- * {@link SpeechRecognizer#createSpeechRecognizer(Context)}. This class's methods must be
- * invoked only from the main application thread. 
+ * {@link SpeechRecognizer#createSpeechRecognizer(Context)}, or
+ * {@link SpeechRecognizer#createOnDeviceSpeechRecognizer(Context)}. This class's methods must be
+ * invoked only from the main application thread.
  *
  * <p>The implementation of this API is likely to stream audio to remote servers to perform speech
  * recognition. As such this API is not intended to be used for continuous recognition, which would
@@ -122,8 +125,13 @@ public class SpeechRecognizer {
     /** Component to direct service intent to */
     private final ComponentName mServiceComponent;
 
+    /** Whether to use on-device speech recognizer. */
+    private final boolean mOnDevice;
+
+    private IRecognitionServiceManager mManagerService;
+
     /** Handler that will execute the main tasks */
-    private Handler mHandler = new Handler() {
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -159,6 +167,17 @@ public class SpeechRecognizer {
     private SpeechRecognizer(final Context context, final ComponentName serviceComponent) {
         mContext = context;
         mServiceComponent = serviceComponent;
+        mOnDevice = false;
+    }
+
+    /**
+     * The right way to create a {@code SpeechRecognizer} is by using
+     * {@link #createOnDeviceSpeechRecognizer} static factory method
+     */
+    private SpeechRecognizer(final Context context, boolean onDevice) {
+        mContext = context;
+        mServiceComponent = null;
+        mOnDevice = onDevice;
     }
 
     /**
@@ -194,6 +213,7 @@ public class SpeechRecognizer {
      * @return {@code true} if recognition is available, {@code false} otherwise
      */
     public static boolean isRecognitionAvailable(final Context context) {
+        // TODO(b/176578753): make sure this works well with system speech recognizers.
         final List<ResolveInfo> list = context.getPackageManager().queryIntentServices(
                 new Intent(RecognitionService.SERVICE_INTERFACE), 0);
         return list != null && list.size() != 0;
@@ -231,10 +251,29 @@ public class SpeechRecognizer {
     public static SpeechRecognizer createSpeechRecognizer(final Context context,
             final ComponentName serviceComponent) {
         if (context == null) {
-            throw new IllegalArgumentException("Context cannot be null)");
+            throw new IllegalArgumentException("Context cannot be null");
         }
         checkIsCalledFromMainThread();
         return new SpeechRecognizer(context, serviceComponent);
+    }
+
+    /**
+     * Factory method to create a new {@code SpeechRecognizer}.
+     *
+     * <p>Please note that {@link #setRecognitionListener(RecognitionListener)} should be called
+     * before dispatching any command to the created {@code SpeechRecognizer}, otherwise no
+     * notifications will be received.
+     *
+     * @param context in which to create {@code SpeechRecognizer}
+     * @return a new on-device {@code SpeechRecognizer}.
+     */
+    @NonNull
+    public static SpeechRecognizer createOnDeviceSpeechRecognizer(@NonNull final Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("Context cannot be null");
+        }
+        checkIsCalledFromMainThread();
+        return new SpeechRecognizer(context, /* onDevice */ true);
     }
 
     /**
@@ -265,34 +304,72 @@ public class SpeechRecognizer {
         }
         checkIsCalledFromMainThread();
         if (mConnection == null) { // first time connection
-            mConnection = new Connection();
-            
-            Intent serviceIntent = new Intent(RecognitionService.SERVICE_INTERFACE);
-            
-            if (mServiceComponent == null) {
-                String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),
-                        Settings.Secure.VOICE_RECOGNITION_SERVICE);
-                
-                if (TextUtils.isEmpty(serviceComponent)) {
-                    Log.e(TAG, "no selected voice recognition service");
-                    mListener.onError(ERROR_CLIENT);
-                    return;
-                }
-                
-                serviceIntent.setComponent(ComponentName.unflattenFromString(serviceComponent));                
+            // TODO(b/176578753): both flows should go through system service.
+            if (mOnDevice) {
+                connectToSystemService();
             } else {
-                serviceIntent.setComponent(mServiceComponent);
-            }
-            if (!mContext.bindService(serviceIntent, mConnection,
-                    Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES)) {
-                Log.e(TAG, "bind to recognition service failed");
-                mConnection = null;
-                mService = null;
-                mListener.onError(ERROR_CLIENT);
-                return;
+                connectToService();
             }
         }
         putMessage(Message.obtain(mHandler, MSG_START, recognizerIntent));
+    }
+
+    private void connectToSystemService() {
+        mManagerService = IRecognitionServiceManager.Stub.asInterface(
+                ServiceManager.getService(Context.SPEECH_RECOGNITION_SERVICE));
+
+        if (mManagerService == null) {
+            mListener.onError(ERROR_CLIENT);
+            return;
+        }
+
+        try {
+            // TODO(b/176578753): this has to supply information on whether to use on-device impl.
+            mManagerService.createSession(new IRecognitionServiceManagerCallback.Stub(){
+                @Override
+                public void onSuccess(IRecognitionService service) throws RemoteException {
+                    mService = service;
+                }
+
+                @Override
+                public void onError() throws RemoteException {
+                    Log.e(TAG, "Bind to system recognition service failed");
+                    mListener.onError(ERROR_CLIENT);
+                }
+            });
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    private void connectToService() {
+        mConnection = new Connection();
+
+        Intent serviceIntent = new Intent(RecognitionService.SERVICE_INTERFACE);
+
+        if (mServiceComponent == null) {
+            String serviceComponent = Settings.Secure.getString(mContext.getContentResolver(),
+                    Settings.Secure.VOICE_RECOGNITION_SERVICE);
+
+            if (TextUtils.isEmpty(serviceComponent)) {
+                Log.e(TAG, "no selected voice recognition service");
+                mListener.onError(ERROR_CLIENT);
+                return;
+            }
+
+            serviceIntent.setComponent(
+                    ComponentName.unflattenFromString(serviceComponent));
+        } else {
+            serviceIntent.setComponent(mServiceComponent);
+        }
+        if (!mContext.bindService(serviceIntent, mConnection,
+                Context.BIND_AUTO_CREATE | Context.BIND_INCLUDE_CAPABILITIES)) {
+            Log.e(TAG, "bind to recognition service failed");
+            mConnection = null;
+            mService = null;
+            mListener.onError(ERROR_CLIENT);
+            return;
+        }
     }
 
     /**
@@ -378,7 +455,7 @@ public class SpeechRecognizer {
             mListener.onError(ERROR_CLIENT);
         }
     }
-    
+
     private boolean checkOpenConnection() {
         if (mService != null) {
             return true;
@@ -433,7 +510,7 @@ public class SpeechRecognizer {
         private final static int MSG_RMS_CHANGED = 8;
         private final static int MSG_ON_EVENT = 9;
 
-        private final Handler mInternalHandler = new Handler() {
+        private final Handler mInternalHandler = new Handler(Looper.getMainLooper()) {
             @Override
             public void handleMessage(Message msg) {
                 if (mInternalListener == null) {

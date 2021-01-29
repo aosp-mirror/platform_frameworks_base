@@ -298,10 +298,10 @@
         <item>@string/crossSimFormat_spn_cross_sim_calling</item>
     </string-array>
 
-    <!-- Spn during Cross-SIM Calling: "<operator> " [CHAR LIMIT=NONE] -->
+    <!-- Spn during Backup Calling: "<operator> " [CHAR LIMIT=NONE] -->
     <string name="crossSimFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
-    <!-- Spn during Cross SIM Calling: "<operator> Cross-SIM Calling" [CHAR LIMIT=NONE] -->
-    <string name="crossSimFormat_spn_cross_sim_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Cross-SIM Calling</string>
+    <!-- Spn during Backup Calling: "<operator> Backup Calling" [CHAR LIMIT=NONE] -->
+    <string name="crossSimFormat_spn_cross_sim_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Backup Calling</string>
 
     <!--
         {0} is one of "bearerServiceCode*"
@@ -1585,6 +1585,8 @@
 
     <!-- Template to be used to name enrolled fingerprints by default. -->
     <string name="fingerprint_name_template">Finger <xliff:g id="fingerId" example="1">%d</xliff:g></string>
+    <!-- Subtitle shown on the system-provided biometric dialog, asking the user to authenticate with their fingerprint. [CHAR LIMIT=70] -->
+    <string name="fingerprint_dialog_default_subtitle">Use your fingerprint to continue</string>
 
     <!-- Array containing custom error messages from vendor.  Vendor is expected to add and translate these strings -->
     <string-array name="fingerprint_error_vendor">
