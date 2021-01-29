@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
@@ -210,6 +211,11 @@ public class PhonePipMenuController implements PipMenuController {
         }
     }
 
+    @Nullable
+    Size getEstimatedMenuSize() {
+        return mPipMenuView == null ? null : mPipMenuView.getEstimatedMenuSize();
+    }
+
     /**
      * When other components requests the menu controller directly to show the menu, we must
      * first fire off the request to the other listeners who will then propagate the call
@@ -224,13 +230,13 @@ public class PhonePipMenuController implements PipMenuController {
      * Similar to {@link #showMenu(int, Rect, boolean, boolean, boolean)} but only show the menu
      * upon PiP window transition is finished.
      */
-    public void showMenuWithDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
+    public void showMenuWithPossibleDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean willResizeMenu, boolean showResizeHandle) {
         // hide all visible controls including close button and etc. first, this is to ensure
         // menu is totally invisible during the transition to eliminate unpleasant artifacts
         fadeOutMenu();
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
-                true /* withDelay */, showResizeHandle);
+                willResizeMenu /* withDelay=willResizeMenu here */, showResizeHandle);
     }
 
     /**

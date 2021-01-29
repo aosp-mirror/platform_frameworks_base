@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -76,9 +77,6 @@ public class PipMenuView extends FrameLayout {
 
     private static final String TAG = "PipMenuView";
 
-    private static final int MESSAGE_INVALID_TYPE = -1;
-    public static final int MESSAGE_MENU_EXPANDED = 8;
-
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
@@ -86,8 +84,6 @@ public class PipMenuView extends FrameLayout {
     private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
-    private static final float DISMISS_BACKGROUND_ALPHA = 0.6f;
-
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private static final boolean ENABLE_RESIZE_HANDLE = false;
@@ -368,6 +364,19 @@ public class PipMenuView extends FrameLayout {
             });
             mMenuContainerAnimator.start();
         }
+    }
+
+    /**
+     * @return estimated {@link Size} for which the width is based on number of actions and
+     *         height based on the height of expand button + top and bottom action bar.
+     */
+    Size getEstimatedMenuSize() {
+        final int pipActionSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.pip_action_size);
+        final int width = mActions.size() * pipActionSize;
+        final int height = pipActionSize * 2 + mContext.getResources().getDimensionPixelSize(
+                R.dimen.pip_expand_action_size);
+        return new Size(width, height);
     }
 
     void setActions(Rect stackBounds, List<RemoteAction> actions) {
