@@ -76,7 +76,7 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
                         }
                     }
                     windowManagerTrace {
-                        end {
+                        end("bothAppWindowsVisible") {
                             isVisible(primaryApp.defaultWindowName)
                             isVisible(secondaryApp.defaultWindowName)
                         }
