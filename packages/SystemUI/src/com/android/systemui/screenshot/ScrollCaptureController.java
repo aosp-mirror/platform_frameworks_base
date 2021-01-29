@@ -23,7 +23,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
@@ -59,7 +58,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private final Executor mBgExecutor;
     private final ImageExporter mImageExporter;
     private final ImageTileSet mImageTileSet;
-    private final LayoutInflater mLayoutInflater;
 
     private ZonedDateTime mCaptureTime;
     private UUID mRequestId;
@@ -81,7 +79,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mBgExecutor = bgExecutor;
         mImageExporter = exporter;
         mImageTileSet = new ImageTileSet();
-        mLayoutInflater = mContext.getSystemService(LayoutInflater.class);
     }
 
     /**
@@ -114,7 +111,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
-        mPreview.setImageDrawable(mImageTileSet.getDrawable());
+        //mPreview.setImageDrawable(mImageTileSet.getDrawable());
         mConnection.start(this::startCapture);
     }
 
@@ -242,6 +239,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         if (mImageTileSet.isEmpty()) {
             session.end(mCallback::onFinish);
         } else {
+            mPreview.setImageDrawable(mImageTileSet.getDrawable());
             mExportFuture = mImageExporter.export(
                     mBgExecutor, mRequestId, mImageTileSet.toBitmap(), mCaptureTime);
             // The user chose an action already, link it to the result
