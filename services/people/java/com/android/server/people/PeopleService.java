@@ -45,7 +45,6 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.people.data.DataManager;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -154,6 +153,13 @@ public class PeopleService extends SystemService {
     }
 
     final IBinder mService = new IPeopleManager.Stub() {
+
+        @Override
+        public ConversationChannel getConversation(
+                String packageName, int userId, String shortcutId) {
+            enforceSystemRootOrSystemUI(getContext(), "get conversation");
+            return mDataManager.getConversation(packageName, userId, shortcutId);
+        }
 
         @Override
         public ParceledListSlice<ConversationChannel> getRecentConversations() {
