@@ -18,7 +18,6 @@ package com.android.systemui.statusbar.phone;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,12 +29,12 @@ import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardSecurityModel;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -45,6 +44,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -64,7 +64,7 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardIndicationController mKeyguardIndicationController;
     @Mock
-    private LockIcon mLockIcon; // TODO: make this not a mock once inject is removed.
+    private LockIcon mLockIcon;
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
@@ -81,34 +81,36 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
     private Resources mResources;
     @Mock
     private HeadsUpManagerPhone mHeadsUpManagerPhone;
-    @Mock
-    private KeyguardSecurityModel mKeyguardSecurityModel;
 
     private LockscreenLockIconController mLockIconController;
+
+    @Captor ArgumentCaptor<OnAttachStateChangeListener> mOnAttachStateChangeCaptor;
+    @Captor ArgumentCaptor<StatusBarStateController.StateListener> mStateListenerCaptor;
+
     private OnAttachStateChangeListener mOnAttachStateChangeListener;
+    private StatusBarStateController.StateListener mStatusBarStateListener;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
-        when(mKeyguardUpdateMonitor.shouldShowLockIcon()).thenReturn(true);
+        when(mKeyguardUpdateMonitor.canShowLockIcon()).thenReturn(true);
         when(mLockIcon.getContext()).thenReturn(mContext);
-        mLockIconController = new LockscreenLockIconController(
+        mLockIconController = new LockscreenLockIconController(mLockIcon,
                 mLockscreenGestureLogger, mKeyguardUpdateMonitor, mLockPatternUtils,
                 mShadeController, mAccessibilityController, mKeyguardIndicationController,
                 mStatusBarStateController, mConfigurationController, mNotificationWakeUpCoordinator,
                 mKeyguardBypassController, mDockManager, mKeyguardStateController, mResources,
-                mHeadsUpManagerPhone, mKeyguardSecurityModel);
+                mHeadsUpManagerPhone);
 
-        ArgumentCaptor<OnAttachStateChangeListener> onAttachStateChangeListenerArgumentCaptor =
-                ArgumentCaptor.forClass(OnAttachStateChangeListener.class);
+        when(mLockIcon.isAttachedToWindow()).thenReturn(true);
+        mLockIconController.init();
 
-        doNothing().when(mLockIcon)
-                .addOnAttachStateChangeListener(
-                        onAttachStateChangeListenerArgumentCaptor.capture());
-        mLockIconController.attach(mLockIcon);
-
-        mOnAttachStateChangeListener = onAttachStateChangeListenerArgumentCaptor.getValue();
+        verify(mLockIcon).addOnAttachStateChangeListener(
+                mOnAttachStateChangeCaptor.capture());
+        mOnAttachStateChangeListener = mOnAttachStateChangeCaptor.getValue();
+        verify(mStatusBarStateController).addCallback(mStateListenerCaptor.capture());
+        mStatusBarStateListener = mStateListenerCaptor.getValue();
     }
 
     @Test
@@ -133,23 +135,17 @@ public class LockscreenIconControllerTest extends SysuiTestCase {
 
     @Test
     public void testVisibility_Dozing() {
-        ArgumentCaptor<StatusBarStateController.StateListener> sBStateListenerCaptor =
-                ArgumentCaptor.forClass(StatusBarStateController.StateListener.class);
-
-        mOnAttachStateChangeListener.onViewAttachedToWindow(mLockIcon);
-        verify(mStatusBarStateController).addCallback(sBStateListenerCaptor.capture());
-
         when(mStatusBarStateController.isDozing()).thenReturn(true);
-        sBStateListenerCaptor.getValue().onDozingChanged(true);
+        mStatusBarStateListener.onDozingChanged(true);
 
         verify(mLockIcon).updateIconVisibility(false);
     }
 
     @Test
     public void testVisibility_doNotShowLockIcon() {
-        when(mKeyguardUpdateMonitor.shouldShowLockIcon()).thenReturn(false);
+        when(mKeyguardUpdateMonitor.canShowLockIcon()).thenReturn(false);
+        mStatusBarStateListener.onStateChanged(StatusBarState.KEYGUARD);
 
-        mOnAttachStateChangeListener.onViewAttachedToWindow(mLockIcon);
         verify(mLockIcon).setVisibility(View.GONE);
     }
 }

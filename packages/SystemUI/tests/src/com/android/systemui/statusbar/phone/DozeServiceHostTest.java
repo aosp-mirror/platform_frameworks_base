@@ -88,7 +88,6 @@ public class DozeServiceHostTest extends SysuiTestCase {
     @Mock private NotificationPanelViewController mNotificationPanel;
     @Mock private View mAmbientIndicationContainer;
     @Mock private BiometricUnlockController mBiometricUnlockController;
-    @Mock private LockscreenLockIconController mLockscreenLockIconController;
     @Mock private AuthController mAuthController;
 
     @Before
@@ -100,7 +99,7 @@ public class DozeServiceHostTest extends SysuiTestCase {
                 mKeyguardViewMediator, () -> mAssistManager, mDozeScrimController,
                 mKeyguardUpdateMonitor, mPulseExpansionHandler,
                 mNotificationShadeWindowController, mNotificationWakeUpCoordinator,
-                mLockscreenLockIconController, mAuthController, mNotificationIconAreaController);
+                mAuthController, mNotificationIconAreaController);
 
         mDozeServiceHost.initialize(
                 mStatusBar,
