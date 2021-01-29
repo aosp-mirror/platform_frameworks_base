@@ -255,7 +255,9 @@ public abstract class LocationProviderBase {
     /**
      * Implements optional custom commands.
      */
-    public abstract void onSendExtraCommand(@NonNull String command, @Nullable Bundle extras);
+    public abstract void onSendExtraCommand(@NonNull String command,
+            @SuppressLint("NullableCollection")
+            @Nullable Bundle extras);
 
     private final class Service extends ILocationProvider.Stub {
 
