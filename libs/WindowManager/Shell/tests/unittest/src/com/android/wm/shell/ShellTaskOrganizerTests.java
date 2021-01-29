@@ -16,11 +16,14 @@
 
 package com.android.wm.shell;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_FULLSCREEN;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_MULTI_WINDOW;
 import static com.android.wm.shell.ShellTaskOrganizer.TASK_LISTENER_TYPE_PIP;
 
@@ -48,6 +51,7 @@ import androidx.test.filters.SmallTest;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.TransactionPool;
+import com.android.wm.shell.sizecompatui.SizeCompatUI;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,6 +63,9 @@ import java.util.ArrayList;
 
 /**
  * Tests for the shell task organizer.
+ *
+ * Build/Install/Run:
+ *  atest WMShellUnitTests:ShellTaskOrganizerTests
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -68,6 +75,8 @@ public class ShellTaskOrganizerTests {
     private ITaskOrganizerController mTaskOrganizerController;
     @Mock
     private Context mContext;
+    @Mock
+    private SizeCompatUI mSizeCompatUI;
 
     ShellTaskOrganizer mOrganizer;
     private final SyncTransactionQueue mSyncTransactionQueue = mock(SyncTransactionQueue.class);
@@ -102,7 +111,8 @@ public class ShellTaskOrganizerTests {
             doReturn(ParceledListSlice.<TaskAppearedInfo>emptyList())
                     .when(mTaskOrganizerController).registerTaskOrganizer(any());
         } catch (RemoteException e) {}
-        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext));
+        mOrganizer = spy(new ShellTaskOrganizer(mTaskOrganizerController, mTestExecutor, mContext,
+                mSizeCompatUI));
     }
 
     @Test
@@ -255,6 +265,39 @@ public class ShellTaskOrganizerTests {
         mOrganizer.onTaskAppeared(task2, null);
 
         assertTrue(mwListener.appeared.contains(task2));
+    }
+
+    @Test
+    public void testOnSizeCompatActivityChanged() {
+        final RunningTaskInfo taskInfo1 = createTaskInfo(12, WINDOWING_MODE_FULLSCREEN);
+        taskInfo1.displayId = DEFAULT_DISPLAY;
+        taskInfo1.topActivityToken = mock(IBinder.class);
+        taskInfo1.topActivityInSizeCompat = false;
+        final TrackingTaskListener taskListener = new TrackingTaskListener();
+        mOrganizer.addListenerForType(taskListener, TASK_LISTENER_TYPE_FULLSCREEN);
+        mOrganizer.onTaskAppeared(taskInfo1, null);
+
+        // sizeCompatActivity is null if top activity is not in size compat.
+        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+                taskInfo1.configuration.windowConfiguration.getBounds(),
+                null /* sizeCompatActivity*/ , taskListener);
+
+        // sizeCompatActivity is non-null if top activity is in size compat.
+        final RunningTaskInfo taskInfo2 =
+                createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
+        taskInfo2.displayId = taskInfo1.displayId;
+        taskInfo2.topActivityToken = taskInfo1.topActivityToken;
+        taskInfo2.topActivityInSizeCompat = true;
+        mOrganizer.onTaskInfoChanged(taskInfo2);
+        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+                taskInfo1.configuration.windowConfiguration.getBounds(),
+                taskInfo1.topActivityToken,
+                taskListener);
+
+        mOrganizer.onTaskVanished(taskInfo1);
+        verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
+                null /* taskConfig */, null /* sizeCompatActivity*/,
+                null /* taskListener */);
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {

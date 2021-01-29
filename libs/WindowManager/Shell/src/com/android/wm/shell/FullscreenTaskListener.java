@@ -106,5 +106,4 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     public String toString() {
         return TAG + ":" + taskListenerTypeToString(TASK_LISTENER_TYPE_FULLSCREEN);
     }
-
 }

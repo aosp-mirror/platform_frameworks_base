@@ -18,7 +18,6 @@ package com.android.systemui.wmshell;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -41,7 +40,6 @@ import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.onehanded.OneHandedGestureHandler;
 import com.android.wm.shell.onehanded.OneHandedTransitionCallback;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.pip.phone.PipTouchHandler;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +49,12 @@ import org.mockito.MockitoAnnotations;
 
 import java.util.Optional;
 
+/**
+ * Tests for {@link WMShell}.
+ *
+ * Build/Install/Run:
+ *  atest SystemUITests:WMShellTest
+ */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class WMShellTest extends SysuiTestCase {

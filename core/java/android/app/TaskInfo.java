@@ -337,6 +337,23 @@ public class TaskInfo {
     }
 
     /**
+     * @return {@code true} if parameters that are important for size compat have changed.
+     * @hide
+     */
+    public boolean equalsForSizeCompat(@Nullable TaskInfo that) {
+        if (that == null) {
+            return false;
+        }
+        return displayId == that.displayId
+                && taskId == that.taskId
+                && topActivityInSizeCompat == that.topActivityInSizeCompat
+                // TopActivityToken and bounds are important if top activity is in size compat
+                && (!topActivityInSizeCompat || topActivityToken.equals(that.topActivityToken))
+                && (!topActivityInSizeCompat || configuration.windowConfiguration.getBounds()
+                    .equals(that.configuration.windowConfiguration.getBounds()));
+    }
+
+    /**
      * Reads the TaskInfo from a parcel.
      */
     void readFromParcel(Parcel source) {
