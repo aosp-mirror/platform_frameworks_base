@@ -710,9 +710,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
     }
 
-    private void initialize() {
+    private void initialize(int displayState) {
         mPowerState = new DisplayPowerState(mBlanker,
-                mColorFadeEnabled ? new ColorFade(mDisplayId) : null, mDisplayId);
+                mColorFadeEnabled ? new ColorFade(mDisplayId) : null, mDisplayId, displayState);
 
         if (mColorFadeEnabled) {
             mColorFadeOnAnimator = ObjectAnimator.ofFloat(
@@ -812,11 +812,6 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             mustNotify = !mDisplayReadyLocked;
         }
 
-        // Initialize things the first time the power state is changed.
-        if (mustInitialize) {
-            initialize();
-        }
-
         // Compute the basic display state using the policy.
         // We might override this below based on other factors.
         // Initialise brightness as invalid.
@@ -849,6 +844,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 break;
         }
         assert(state != Display.STATE_UNKNOWN);
+
+        // Initialize things the first time the power state is changed.
+        if (mustInitialize) {
+            initialize(state);
+        }
 
         // Apply the proximity sensor.
         if (mProximitySensor != null) {

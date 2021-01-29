@@ -1036,12 +1036,12 @@ public final class PowerManagerService extends SystemService
                 userActivityNoUpdateLocked(
                         now, PowerManager.USER_ACTIVITY_EVENT_OTHER, 0, Process.SYSTEM_UID);
 
+                updatePowerStateLocked();
                 if (sQuiescent) {
                     goToSleepNoUpdateLocked(mClock.uptimeMillis(),
                             PowerManager.GO_TO_SLEEP_REASON_QUIESCENT,
                             PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE, Process.SYSTEM_UID);
                 }
-                updatePowerStateLocked();
             }
         }
     }
@@ -1679,8 +1679,15 @@ public final class PowerManagerService extends SystemService
             Slog.d(TAG, "wakeUpNoUpdateLocked: eventTime=" + eventTime + ", uid=" + reasonUid);
         }
 
-        if (eventTime < mLastSleepTime || getWakefulnessLocked() == WAKEFULNESS_AWAKE
-                || mForceSuspendActive || !mSystemReady) {
+        if (eventTime < mLastSleepTime || mForceSuspendActive || !mSystemReady) {
+            return false;
+        }
+
+        if (getWakefulnessLocked() == WAKEFULNESS_AWAKE) {
+            if (!mBootCompleted && sQuiescent) {
+                mDirty |= DIRTY_QUIESCENT;
+                return true;
+            }
             return false;
         }
 
@@ -2821,7 +2828,7 @@ public final class PowerManagerService extends SystemService
      *
      * This function recalculates the display power state each time.
      *
-     * @return True if the display became ready.
+     * @return true if the display became ready.
      */
     private boolean updateDisplayPowerStateLocked(int dirty) {
         final boolean oldDisplayReady = mDisplayReady;
@@ -2830,7 +2837,11 @@ public final class PowerManagerService extends SystemService
                 | DIRTY_SETTINGS | DIRTY_SCREEN_BRIGHTNESS_BOOST | DIRTY_VR_MODE_CHANGED |
                 DIRTY_QUIESCENT)) != 0) {
             if ((dirty & DIRTY_QUIESCENT) != 0) {
-                sQuiescent = false;
+                if (mDisplayReady) {
+                    sQuiescent = false;
+                } else {
+                    mDirty |= DIRTY_QUIESCENT;
+                }
             }
 
             final DisplayPowerRequest displayPowerRequest = mDisplayPowerRequestMapper.get(
@@ -5605,7 +5616,7 @@ public final class PowerManagerService extends SystemService
      * ignore the proximity sensor.  We don't turn off the proximity sensor because
      * we still want it to be reenabled if it's state changes.
      *
-     * @return True if the proximity sensor was successfully ignored and we should
+     * @return true if the proximity sensor was successfully ignored and we should
      * consume the key event.
      */
     private boolean interceptPowerKeyDownInternal(KeyEvent event) {
