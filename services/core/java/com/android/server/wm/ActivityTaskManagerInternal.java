@@ -279,12 +279,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void cancelRecentsAnimation(boolean restoreHomeRootTaskPosition);
 
     /**
-     * This enforces {@code func} can only be called if either the caller is Recents activity or
-     * has {@code permission}.
-     */
-    public abstract void enforceCallerIsRecentsOrHasPermission(String permission, String func);
-
-    /**
      * Returns true if the app can close system dialogs. Otherwise it either throws a {@link
      * SecurityException} or returns false with a logcat message depending on whether the app
      * targets SDK level {@link android.os.Build.VERSION_CODES#S} or not.

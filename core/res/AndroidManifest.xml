@@ -2541,7 +2541,7 @@
     <!-- Allows an application to start a task from a ActivityManager#RecentTaskInfo.
          @hide -->
     <permission android:name="android.permission.START_TASKS_FROM_RECENTS"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|recents" />
 
     <!-- @SystemApi @hide Allows an application to call APIs that allow it to do interactions
          across the users on the device, using singleton services and
@@ -2606,7 +2606,7 @@
 
     <!-- @SystemApi @TestApi @hide Allows an application to change to remove/kill tasks -->
     <permission android:name="android.permission.REMOVE_TASKS"
-        android:protectionLevel="signature|documenter" />
+        android:protectionLevel="signature|documenter|recents" />
 
     <!-- @deprecated Use MANAGE_ACTIVITY_TASKS instead.
          @SystemApi @TestApi @hide Allows an application to create/manage/remove stacks -->
@@ -2615,7 +2615,7 @@
 
     <!-- @SystemApi @TestApi @hide Allows an application to create/manage/remove tasks -->
     <permission android:name="android.permission.MANAGE_ACTIVITY_TASKS"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- @SystemApi @TestApi @hide Allows an application to embed other activities -->
     <permission android:name="android.permission.ACTIVITY_EMBEDDING"
@@ -3284,7 +3284,7 @@
          and its icons.
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.STATUS_BAR"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|recents" />
 
     <!-- Allows an application to trigger bugreport via shell using the bugreport API.
         <p>Not for use by third-party applications.
@@ -3451,7 +3451,7 @@
          critical UI such as the home screen.
          @hide -->
     <permission android:name="android.permission.STOP_APP_SWITCHES"
-        android:protectionLevel="signature|privileged" />
+        android:protectionLevel="signature|privileged|recents" />
 
     <!-- @SystemApi Allows an application to retrieve private information about
          the current top activity, such as any assist context it can provide.
@@ -3836,7 +3836,7 @@
          @hide
     -->
     <permission android:name="android.permission.SET_ORIENTATION"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- @SystemApi Allows low-level access to setting the pointer speed.
          <p>Not for use by third-party applications.
@@ -4100,7 +4100,7 @@
           @hide
           @removed -->
     <permission android:name="android.permission.READ_FRAME_BUFFER"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|recents" />
 
     <!-- Allows an application to use InputFlinger's low level features.
          @hide -->
@@ -5277,7 +5277,7 @@
     <!-- @SystemApi Allows modifying accessibility state.
          @hide -->
     <permission android:name="android.permission.MANAGE_ACCESSIBILITY"
-        android:protectionLevel="signature|setup" />
+        android:protectionLevel="signature|setup|recents" />
 
     <!-- @SystemApi Allows an app to grant a profile owner access to device identifiers.
          <p>Not for use by third-party applications.
