@@ -36,6 +36,8 @@
     <string name="wifi_no_internet_no_reconnect" msgid="821591791066497347">"अपने आप कनेक्ट नहीं होगा"</string>
     <string name="wifi_no_internet" msgid="1774198889176926299">"इंटरनेट नहीं है"</string>
     <string name="saved_network" msgid="7143698034077223645">"<xliff:g id="NAME">%1$s</xliff:g> के द्वारा सहेजा गया"</string>
+    <!-- no translation found for connected_to_metered_access_point (9179693207918156341) -->
+    <skip />
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"%1$s के ज़रिए ऑटोमैटिक रूप से कनेक्ट है"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"नेटवर्क रेटिंग कंपनी के ज़रिए अपने आप कनेक्ट है"</string>
     <string name="connected_via_passpoint" msgid="7735442932429075684">"%1$s के द्वारा उपलब्ध"</string>
