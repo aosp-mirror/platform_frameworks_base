@@ -44,12 +44,17 @@ public class Letterbox {
 
     private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
+    private final Supplier<Boolean> mAreCornersRounded;
     private final Rect mOuter = new Rect();
     private final Rect mInner = new Rect();
     private final LetterboxSurface mTop = new LetterboxSurface("top");
     private final LetterboxSurface mLeft = new LetterboxSurface("left");
     private final LetterboxSurface mBottom = new LetterboxSurface("bottom");
     private final LetterboxSurface mRight = new LetterboxSurface("right");
+    // Prevents wallpaper from peeking through near rounded corners. It's not included in
+    // mSurfaces array since it isn't needed in methods like notIntersectsOrFullyContains
+    // or attachInput.
+    private final LetterboxSurface mBehind = new LetterboxSurface("behind");
     private final LetterboxSurface[] mSurfaces = { mLeft, mTop, mRight, mBottom };
 
     /**
@@ -58,9 +63,11 @@ public class Letterbox {
      * @param surfaceControlFactory a factory for creating the managed {@link SurfaceControl}s
      */
     public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
-            Supplier<SurfaceControl.Transaction> transactionFactory) {
+            Supplier<SurfaceControl.Transaction> transactionFactory,
+            Supplier<Boolean> areCornersRounded) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
+        mAreCornersRounded = areCornersRounded;
     }
 
     /**
@@ -82,6 +89,7 @@ public class Letterbox {
         mLeft.layout(outer.left, outer.top, inner.left, outer.bottom, surfaceOrigin);
         mBottom.layout(outer.left, inner.bottom, outer.right, outer.bottom, surfaceOrigin);
         mRight.layout(inner.right, outer.top, outer.right, outer.bottom, surfaceOrigin);
+        mBehind.layout(inner.left, inner.top, inner.right, inner.bottom, surfaceOrigin);
     }
 
 
@@ -157,6 +165,7 @@ public class Letterbox {
         for (LetterboxSurface surface : mSurfaces) {
             surface.remove();
         }
+        mBehind.remove();
     }
 
     /** Returns whether a call to {@link #applySurfaceChanges} would change the surface. */
@@ -166,12 +175,20 @@ public class Letterbox {
                 return true;
             }
         }
+        if (mBehind.needsApplySurfaceChanges()) {
+            return true;
+        }
         return false;
     }
 
     public void applySurfaceChanges(SurfaceControl.Transaction t) {
         for (LetterboxSurface surface : mSurfaces) {
             surface.applySurfaceChanges(t);
+        }
+        if (mAreCornersRounded.get()) {
+            mBehind.applySurfaceChanges(t);
+        } else {
+            mBehind.remove();
         }
     }
 
