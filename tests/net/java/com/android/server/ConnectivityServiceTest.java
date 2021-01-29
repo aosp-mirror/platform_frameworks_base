@@ -3693,10 +3693,13 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testBackgroundNetworks() throws Exception {
-        // Create a background request. We can't do this ourselves because ConnectivityService
-        // doesn't have an API for it. So just turn on mobile data always on.
-        setAlwaysOnNetworks(true);
+        // Create a cellular background request.
         grantUsingBackgroundNetworksPermissionForUid(Binder.getCallingUid());
+        final TestNetworkCallback cellBgCallback = new TestNetworkCallback();
+        mCm.requestBackgroundNetwork(new NetworkRequest.Builder()
+                .addTransportType(TRANSPORT_CELLULAR).build(), null, cellBgCallback);
+
+        // Make callbacks for monitoring.
         final NetworkRequest request = new NetworkRequest.Builder().build();
         final NetworkRequest fgRequest = new NetworkRequest.Builder()
                 .addCapability(NET_CAPABILITY_FOREGROUND).build();
@@ -3765,6 +3768,7 @@ public class ConnectivityServiceTest {
 
         mCm.unregisterNetworkCallback(callback);
         mCm.unregisterNetworkCallback(fgCallback);
+        mCm.unregisterNetworkCallback(cellBgCallback);
     }
 
     @Ignore // This test has instrinsic chances of spurious failures: ignore for continuous testing.
