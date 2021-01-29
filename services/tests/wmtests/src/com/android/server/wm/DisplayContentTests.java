@@ -558,7 +558,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // hence isLetterboxedAppWindow() returns true.
         ws.mActivityRecord.getConfiguration().windowConfiguration.setBounds(new Rect(1, 1, 1, 1));
         assertFalse("matchesRootDisplayAreaBounds() should return false",
-                ws.matchesRootDisplayAreaBounds());
+                ws.matchesDisplayAreaBounds());
         assertTrue("isLetterboxedAppWindow() should return true", ws.isLetterboxedAppWindow());
         assertTrue("IME shouldn't be attached to app",
                 dc.computeImeParent() != dc.getImeTarget(IME_TARGET_LAYERING).getWindow()
