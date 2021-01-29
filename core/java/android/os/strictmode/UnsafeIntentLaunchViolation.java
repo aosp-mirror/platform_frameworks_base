@@ -17,9 +17,12 @@
 package android.os.strictmode;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.net.Uri;
+
+import java.util.Objects;
 
 /**
  * Violation raised when your app launches an {@link Intent} which originated
@@ -46,8 +49,20 @@ import android.net.Uri;
  * not protected, your app is likely vulnerable to malicious apps.
  */
 public final class UnsafeIntentLaunchViolation extends Violation {
-    /** @hide */
+    private transient Intent mIntent;
+
     public UnsafeIntentLaunchViolation(@NonNull Intent intent) {
         super("Launch of unsafe intent: " + intent);
+        mIntent = Objects.requireNonNull(intent);
+    }
+
+    /**
+     * Return the {@link Intent} which caused this violation to be raised. Note
+     * that this value is not available if this violation has been serialized
+     * since intents cannot be serialized.
+     */
+    @SuppressWarnings("IntentBuilderName")
+    public @Nullable Intent getIntent() {
+        return mIntent;
     }
 }

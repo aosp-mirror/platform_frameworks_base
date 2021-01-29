@@ -528,6 +528,7 @@ TEST(CanvasOp, simpleDrawImageLattice) {
             bitmap,
             SkRect::MakeWH(5, 1),
             lattice,
+            SkFilterMode::kNearest,
             SkPaint{}
         }
     );

@@ -38,6 +38,7 @@ import com.android.internal.os.ProcessCpuTracker;
 
 import libcore.io.IoUtils;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -109,10 +110,23 @@ public final class PhantomProcessList {
     private final ActivityManagerService mService;
     private final Handler mKillHandler;
 
+    private static final int CGROUP_V1 = 0;
+    private static final int CGROUP_V2 = 1;
+    private static final String[] CGROUP_PATH_PREFIXES = {
+        "/acct/uid_" /* cgroup v1 */,
+        "/sys/fs/cgroup/uid_" /* cgroup v2 */
+    };
+    private static final String CGROUP_PID_PREFIX = "/pid_";
+    private static final String CGROUP_PROCS = "/cgroup.procs";
+
+    @VisibleForTesting
+    int mCgroupVersion = CGROUP_V1;
+
     PhantomProcessList(final ActivityManagerService service) {
         mService = service;
         mKillHandler = service.mProcessList.sKillHandler;
         mInjector = new Injector();
+        probeCgroupVersion();
     }
 
     @VisibleForTesting
@@ -190,9 +204,18 @@ public final class PhantomProcessList {
         }
     }
 
+    private void probeCgroupVersion() {
+        for (int i = CGROUP_PATH_PREFIXES.length - 1; i >= 0; i--) {
+            if ((new File(CGROUP_PATH_PREFIXES[i] + Process.SYSTEM_UID)).exists()) {
+                mCgroupVersion = i;
+                break;
+            }
+        }
+    }
+
     @VisibleForTesting
-    static String getCgroupFilePath(int uid, int pid) {
-        return "/acct/uid_" + uid + "/pid_" + pid + "/cgroup.procs";
+    String getCgroupFilePath(int uid, int pid) {
+        return CGROUP_PATH_PREFIXES[mCgroupVersion] + uid + CGROUP_PID_PREFIX + pid + CGROUP_PROCS;
     }
 
     static String getProcessName(int pid) {

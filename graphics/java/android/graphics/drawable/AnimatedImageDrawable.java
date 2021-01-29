@@ -570,6 +570,13 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
         }
     }
 
+    @Override
+    protected void onBoundsChange(Rect bounds) {
+        if (mState.mNativePtr != 0) {
+            nSetBounds(mState.mNativePtr, bounds);
+        }
+    }
+
 
     private static native long nCreate(long nativeImageDecoder,
             @Nullable ImageDecoder decoder, int width, int height, long colorSpaceHandle,
@@ -601,4 +608,6 @@ public class AnimatedImageDrawable extends Drawable implements Animatable2 {
     private static native long nNativeByteSize(long nativePtr);
     @FastNative
     private static native void nSetMirrored(long nativePtr, boolean mirror);
+    @FastNative
+    private static native void nSetBounds(long nativePtr, Rect rect);
 }

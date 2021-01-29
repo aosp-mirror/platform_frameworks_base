@@ -3326,8 +3326,8 @@ public interface WindowManager extends ViewManager {
         /**
          * Specifies types of insets that this window should avoid overlapping during layout.
          *
-         * @param types which types of insets that this window should avoid. The initial value of
-         *              this object includes all system bars.
+         * @param types which {@link WindowInsets.Type}s of insets that this window should avoid.
+         *              The initial value of this object includes all system bars.
          */
         public void setFitInsetsTypes(@InsetsType int types) {
             mFitInsetsTypes = types;
@@ -3401,7 +3401,7 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
-         * @return the insets types that this window is avoiding overlapping.
+         * @return the {@link WindowInsets.Type}s that this window is avoiding overlapping.
          */
         public @InsetsType int getFitInsetsTypes() {
             return mFitInsetsTypes;

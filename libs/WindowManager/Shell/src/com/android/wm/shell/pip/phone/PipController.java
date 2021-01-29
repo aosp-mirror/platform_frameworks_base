@@ -19,8 +19,6 @@ package com.android.wm.shell.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
-import static android.view.Surface.ROTATION_0;
-import static android.view.Surface.ROTATION_180;
 import static android.view.WindowManager.INPUT_CONSUMER_PIP;
 
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
@@ -86,7 +84,6 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
     private PipTouchHandler mTouchHandler;
     protected final PipImpl mImpl = new PipImpl();
 
-    private final DisplayInfo mTmpDisplayInfo = new DisplayInfo();
     private final Rect mTmpInsetBounds = new Rect();
 
     private boolean mIsInFixedRotation;
@@ -145,7 +142,7 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         }
     };
 
-    private final DisplayController.OnDisplaysChangedListener mFixedRotationListener =
+    private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
             new DisplayController.OnDisplaysChangedListener() {
                 @Override
                 public void onFixedRotationStarted(int displayId, int newRotation) {
@@ -159,8 +156,20 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
 
                 @Override
                 public void onDisplayAdded(int displayId) {
-                    mPipBoundsState.setDisplayLayout(
-                            mDisplayController.getDisplayLayout(displayId));
+                    if (displayId != mPipBoundsState.getDisplayId()) {
+                        return;
+                    }
+                    onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
+                            false /* saveRestoreSnapFraction */);
+                }
+
+                @Override
+                public void onDisplayConfigurationChanged(int displayId, Configuration newConfig) {
+                    if (displayId != mPipBoundsState.getDisplayId()) {
+                        return;
+                    }
+                    onDisplayChanged(mDisplayController.getDisplayLayout(displayId),
+                            true /* saveRestoreSnapFraction */);
                 }
             };
 
@@ -261,12 +270,9 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
                 INPUT_CONSUMER_PIP, mainExecutor);
         mPipTaskOrganizer.registerPipTransitionCallback(this);
         mPipTaskOrganizer.registerOnDisplayIdChangeCallback((int displayId) -> {
-            final DisplayInfo newDisplayInfo = new DisplayInfo();
-            displayController.getDisplay(displayId).getDisplayInfo(newDisplayInfo);
-            mPipBoundsState.setDisplayInfo(newDisplayInfo);
-            updateMovementBounds(null /* toBounds */, false /* fromRotation */,
-                    false /* fromImeAdjustment */, false /* fromShelfAdjustment */,
-                    null /* wct */);
+            mPipBoundsState.setDisplayId(displayId);
+            onDisplayChanged(displayController.getDisplayLayout(displayId),
+                    false /* saveRestoreSnapFraction */);
         });
         mPipBoundsState.setOnMinimalSizeChangeCallback(
                 () -> {
@@ -291,13 +297,12 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
             mPipInputConsumer.setRegistrationListener(mTouchHandler::onRegistrationChanged);
         }
         displayController.addDisplayChangingController(mRotationController);
-        displayController.addDisplayWindowListener(mFixedRotationListener);
+        displayController.addDisplayWindowListener(mDisplaysChangedListener);
 
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back
-        final DisplayInfo displayInfo = new DisplayInfo();
-        context.getDisplay().getDisplayInfo(displayInfo);
-        mPipBoundsState.setDisplayInfo(displayInfo);
+        mPipBoundsState.setDisplayId(context.getDisplayId());
+        mPipBoundsState.setDisplayLayout(new DisplayLayout(context, context.getDisplay()));
 
         try {
             mWindowManagerShellWrapper.addPinnedStackListener(mPinnedStackListener);
@@ -363,11 +368,42 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
     }
 
     private void onOverlayChanged() {
-        mPipBoundsState.setDisplayLayout(new DisplayLayout(mContext, mContext.getDisplay()));
-        updateMovementBounds(null /* toBounds */,
-                false /* fromRotation */, false /* fromImeAdjustment */,
-                false /* fromShelfAdjustment */,
-                null /* windowContainerTransaction */);
+        onDisplayChanged(new DisplayLayout(mContext, mContext.getDisplay()),
+                false /* saveRestoreSnapFraction */);
+    }
+
+    private void onDisplayChanged(DisplayLayout layout, boolean saveRestoreSnapFraction) {
+        Runnable updateDisplayLayout = () -> {
+            mPipBoundsState.setDisplayLayout(layout);
+            updateMovementBounds(null /* toBounds */,
+                    false /* fromRotation */, false /* fromImeAdjustment */,
+                    false /* fromShelfAdjustment */,
+                    null /* windowContainerTransaction */);
+        };
+
+        if (saveRestoreSnapFraction) {
+            // Calculate the snap fraction of the current stack along the old movement bounds
+            final PipSnapAlgorithm pipSnapAlgorithm = mPipBoundsAlgorithm.getSnapAlgorithm();
+            final Rect postChangeStackBounds = new Rect(mPipBoundsState.getBounds());
+            final float snapFraction = pipSnapAlgorithm.getSnapFraction(postChangeStackBounds,
+                    mPipBoundsAlgorithm.getMovementBounds(postChangeStackBounds),
+                    mPipBoundsState.getStashedState());
+
+            updateDisplayLayout.run();
+
+            // Calculate the stack bounds in the new orientation based on same fraction along the
+            // rotated movement bounds.
+            final Rect postChangeMovementBounds = mPipBoundsAlgorithm.getMovementBounds(
+                    postChangeStackBounds, false /* adjustForIme */);
+            pipSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
+                    snapFraction, mPipBoundsState.getStashedState(),
+                    mPipBoundsState.getStashOffset(),
+                    mPipBoundsState.getDisplayBounds());
+
+            mTouchHandler.getMotionHelper().movePip(postChangeStackBounds);
+        } else {
+            updateDisplayLayout.run();
+        }
     }
 
     private void registerSessionListenerForCurrentUser() {
@@ -500,7 +536,7 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         // Populate inset / normal bounds and DisplayInfo from mPipBoundsHandler before
         // passing to mTouchHandler/mPipTaskOrganizer
         final Rect outBounds = new Rect(toBounds);
-        mTmpDisplayInfo.copyFrom(mPipBoundsState.getDisplayInfo());
+        final int rotation = mPipBoundsState.getDisplayLayout().rotation();
 
         mPipBoundsAlgorithm.getInsetBounds(mTmpInsetBounds);
         mPipBoundsState.setNormalBounds(mPipBoundsAlgorithm.getNormalBounds());
@@ -512,8 +548,7 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         mPipTaskOrganizer.onMovementBoundsChanged(outBounds, fromRotation, fromImeAdjustment,
                 fromShelfAdjustment, wct);
         mTouchHandler.onMovementBoundsChanged(mTmpInsetBounds, mPipBoundsState.getNormalBounds(),
-                outBounds, fromImeAdjustment, fromShelfAdjustment,
-                mTmpDisplayInfo.rotation);
+                outBounds, fromImeAdjustment, fromShelfAdjustment, rotation);
     }
 
     /**
@@ -525,13 +560,6 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         // Update the display layout, note that we have to do this on every rotation even if we
         // aren't in PIP since we need to update the display layout to get the right resources
         mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
-
-        // Populate the new {@link #mDisplayInfo}.
-        // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
-        // therefore, the width/height may require a swap first.
-        // Moving forward, we should get the new dimensions after rotation from DisplayLayout.
-        mPipBoundsState.setDisplayRotation(toRotation);
-        updateDisplayInfoIfNeeded();
     }
 
     /**
@@ -543,9 +571,8 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
     private boolean onDisplayRotationChanged(Context context, Rect outBounds, Rect oldBounds,
             Rect outInsetBounds,
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) {
-        // Bail early if the event is not sent to current {@link #mDisplayInfo}
-        if ((displayId != mPipBoundsState.getDisplayInfo().displayId)
-                || (fromRotation == toRotation)) {
+        // Bail early if the event is not sent to current display
+        if ((displayId != mPipBoundsState.getDisplayId()) || (fromRotation == toRotation)) {
             return false;
         }
 
@@ -570,13 +597,6 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         // Update the display layout
         mPipBoundsState.getDisplayLayout().rotateTo(context.getResources(), toRotation);
 
-        // Populate the new {@link #mDisplayInfo}.
-        // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
-        // therefore, the width/height may require a swap first.
-        // Moving forward, we should get the new dimensions after rotation from DisplayLayout.
-        mPipBoundsState.getDisplayInfo().rotation = toRotation;
-        updateDisplayInfoIfNeeded();
-
         // Calculate the stack bounds in the new orientation based on same fraction along the
         // rotated movement bounds.
         final Rect postChangeMovementBounds = mPipBoundsAlgorithm.getMovementBounds(
@@ -589,21 +609,6 @@ public class PipController implements PipTaskOrganizer.PipTransitionCallback {
         outBounds.set(postChangeStackBounds);
         t.setBounds(pinnedTaskInfo.token, outBounds);
         return true;
-    }
-
-    private void updateDisplayInfoIfNeeded() {
-        final DisplayInfo displayInfo = mPipBoundsState.getDisplayInfo();
-        final boolean updateNeeded;
-        if ((displayInfo.rotation == ROTATION_0) || (displayInfo.rotation == ROTATION_180)) {
-            updateNeeded = (displayInfo.logicalWidth > displayInfo.logicalHeight);
-        } else {
-            updateNeeded = (displayInfo.logicalWidth < displayInfo.logicalHeight);
-        }
-        if (updateNeeded) {
-            final int newLogicalHeight = displayInfo.logicalWidth;
-            displayInfo.logicalWidth = displayInfo.logicalHeight;
-            displayInfo.logicalHeight = newLogicalHeight;
-        }
     }
 
     private void dump(PrintWriter pw) {

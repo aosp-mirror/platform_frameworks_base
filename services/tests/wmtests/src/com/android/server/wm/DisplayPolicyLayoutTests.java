@@ -123,15 +123,6 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         updateDisplayFrames();
     }
 
-    void addWindowWithRawInsetsState(WindowState win) {
-        addWindow(win);
-        // Without mPerformLayout in display content, the window cannot see any insets. Override the
-        // insets state with the global one.
-        final InsetsState insetsState =
-                win.getDisplayContent().getInsetsStateController().getRawInsetsState();
-        win.mAboveInsetsState = insetsState;
-    }
-
     public void setRotation(int rotation, boolean includingWindows) {
         mRotation = rotation;
         updateDisplayFrames();
@@ -281,7 +272,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_fitStatusBars() {
         mWindow.mAttrs.setFitInsetsTypes(Type.statusBars());
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -292,7 +283,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_fitNavigationBars() {
         mWindow.mAttrs.setFitInsetsTypes(Type.navigationBars());
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -303,7 +294,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_fitAllSides() {
         mWindow.mAttrs.setFitInsetsSides(Side.all());
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -314,7 +305,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     @Test
     public void layoutWindowLw_fitTopOnly() {
         mWindow.mAttrs.setFitInsetsSides(Side.TOP);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -324,12 +315,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitInsetsIgnoringVisibility() {
-        final InsetsState state =
-                mDisplayContent.getInsetsStateController().getRawInsetsState();
+        final InsetsState state = mWindow.getInsetsState();
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(true);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -339,12 +329,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void layoutWindowLw_fitInsetsNotIgnoringVisibility() {
-        final InsetsState state =
-                mDisplayContent.getInsetsStateController().getRawInsetsState();
+        final InsetsState state = mWindow.getInsetsState();
         state.getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         state.getSource(InsetsState.ITYPE_NAVIGATION_BAR).setVisible(false);
         mWindow.mAttrs.setFitInsetsIgnoringVisibility(false);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -360,7 +349,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         state.getSource(InsetsState.ITYPE_IME).setFrame(
                 0, DISPLAY_HEIGHT - IME_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         mWindow.mAttrs.privateFlags |= PRIVATE_FLAG_INSET_PARENT_FRAME_BY_IME;
-        addWindowWithRawInsetsState(mWindow);
+        mWindow.mBehindIme = true;
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -374,7 +364,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
         mWindow.mAttrs.setFitInsetsTypes(Type.displayCutout());
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -389,7 +379,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -405,7 +395,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -421,7 +411,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -437,7 +427,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -452,7 +442,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -467,12 +457,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
+        mWindow.getInsetsState().getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
         mWindow.updateRequestedVisibility(requestedState);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -487,13 +476,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        mDisplayContent.getInsetsStateController().getRawInsetsState()
-                .getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
+        mWindow.getInsetsState().getSource(InsetsState.ITYPE_STATUS_BAR).setVisible(false);
         final InsetsState requestedState = new InsetsState();
         requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
         mWindow.updateRequestedVisibility(requestedState);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -509,7 +497,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -525,7 +513,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -541,7 +529,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -557,7 +545,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.type = TYPE_APPLICATION_OVERLAY;
         mWindow.mAttrs.width = DISPLAY_WIDTH;
         mWindow.mAttrs.height = DISPLAY_HEIGHT;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -574,7 +562,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -588,7 +576,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         mWindow.mAttrs.flags =
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -604,7 +592,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -620,7 +608,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -636,7 +624,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         mDisplayPolicy.layoutWindowLw(mWindow, null, mFrames);
 
@@ -650,7 +638,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
                 FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mWindow.mAttrs.setFitInsetsTypes(0 /* types */);
         mWindow.mAttrs.softInputMode = SOFT_INPUT_ADJUST_NOTHING;
-        addWindowWithRawInsetsState(mWindow);
+        addWindow(mWindow);
 
         final int forwardedInsetBottom = 50;
         mDisplayPolicy.setForwardedInsets(Insets.of(0, 0, 0, forwardedInsetBottom));
@@ -788,13 +776,9 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void testFixedRotationInsetsSourceFrame() {
         doReturn((mDisplayContent.getRotation() + 1) % 4).when(mDisplayContent)
                 .rotationForActivityInDifferentOrientation(eq(mWindow.mActivityRecord));
-        mWindow.mAboveInsetsState.addSource(mDisplayContent.getInsetsStateController()
-                .getRawInsetsState().peekSource(ITYPE_STATUS_BAR));
-        final Rect frame = mDisplayPolicy.getInsetsPolicy().getInsetsForWindow(mWindow)
-                .getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect frame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
         mDisplayContent.rotateInDifferentOrientationIfNeeded(mWindow.mActivityRecord);
-        final Rect rotatedFrame = mDisplayPolicy.getInsetsPolicy().getInsetsForWindow(mWindow)
-                .getSource(ITYPE_STATUS_BAR).getFrame();
+        final Rect rotatedFrame = mWindow.getInsetsState().getSource(ITYPE_STATUS_BAR).getFrame();
 
         assertEquals(DISPLAY_WIDTH, frame.width());
         assertEquals(DISPLAY_HEIGHT, rotatedFrame.width());

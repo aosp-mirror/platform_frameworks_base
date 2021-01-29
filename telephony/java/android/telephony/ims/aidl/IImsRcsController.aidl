@@ -52,7 +52,7 @@ interface IImsRcsController {
     // ImsUceAdapter specific
     void requestCapabilities(int subId, String callingPackage, String callingFeatureId,
             in List<Uri> contactNumbers, IRcsUceControllerCallback c);
-    void requestNetworkAvailability(int subId, String callingPackage,
+    void requestAvailability(int subId, String callingPackage,
             String callingFeatureId, in Uri contactNumber,
             IRcsUceControllerCallback c);
     int getUcePublishState(int subId);

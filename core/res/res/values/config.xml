@@ -3800,6 +3800,12 @@
 -->
     <string name="config_defaultSearchUiService" translatable="false"></string>
 
+    <!-- The package name for the system's speech recognition service.
+         This service must be trusted, as it can be activated without explicit consent of the user.
+         Example: "com.android.speech/.RecognitionService"
+    -->
+    <string name="config_defaultOnDeviceSpeechRecognitionService" translatable="false"></string>
+
     <string name="config_defaultMusicRecognitionService" translatable="false"></string>
 
     <!-- The package name for the default retail demo app.
@@ -4657,4 +4663,7 @@
     <bool name="config_telephony5gStandalone">false</bool>
     <!-- Whether the device enable the non-standalone (NSA) mode of 5G NR.-->
     <bool name="config_telephony5gNonStandalone">false</bool>
+
+    <!-- Whether to select voice/data/sms preference without user confirmation -->
+    <bool name="config_voice_data_sms_auto_fallback">false</bool>
 </resources>

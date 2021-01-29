@@ -231,7 +231,6 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
-import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
@@ -1796,23 +1795,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void restartActivityProcessIfVisible(IBinder activityToken) {
-        enforceTaskPermission("restartActivityProcess()");
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInRootTaskLocked(activityToken);
-                if (r == null) {
-                    return;
-                }
-                r.restartProcessIfVisible();
-            }
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
-    @Override
     public boolean removeTask(int taskId) {
         enforceCallerIsRecentsOrHasPermission(REMOVE_TASKS, "removeTask()");
         synchronized (mGlobalLock) {
@@ -3263,7 +3245,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             // If the keyguard is showing or occluded, then try and dismiss it before
             // entering picture-in-picture (this will prompt the user to authenticate if the
             // device is currently locked).
-            dismissKeyguard(r.appToken, new KeyguardDismissCallback() {
+            mActivityClientController.dismissKeyguard(r.appToken, new KeyguardDismissCallback() {
                 @Override
                 public void onDismissSucceeded() {
                     mH.post(enterPipRunnable);
@@ -3388,23 +3370,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void dismissKeyguard(IBinder token, IKeyguardDismissCallback callback,
-            CharSequence message) {
-        if (message != null) {
-            mAmInternal.enforceCallingPermission(
-                    Manifest.permission.SHOW_KEYGUARD_MESSAGE, "dismissKeyguard()");
-        }
-        final long callingId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mKeyguardController.dismissKeyguard(token, callback, message);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(callingId);
-        }
-    }
-
-    @Override
     public void cancelTaskWindowTransition(int taskId) {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_TASKS,
                 "cancelTaskWindowTransition()");
@@ -3448,17 +3413,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         // Don't call this while holding the lock as this operation might hit the disk.
         return task.getSnapshot(isLowResolution, restoreFromDisk);
-    }
-
-    @Override
-    public void invalidateHomeTaskSnapshot(IBinder token) {
-        synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
-            if (r == null || !r.isActivityTypeHome()) {
-                return;
-            }
-            mWindowManager.mTaskSnapshotController.removeSnapshotCache(r.getTask().mTaskId);
-        }
     }
 
     /** Return the user id of the last resumed activity. */

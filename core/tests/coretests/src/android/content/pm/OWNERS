@@ -1,3 +1,5 @@
+include /core/java/android/content/pm/OWNERS
+
 per-file AppSearchPersonTest.java = file:/core/java/android/content/pm/SHORTCUT_OWNERS
-per-file SigningDetailsTest.java = mpgroover@google.com
 per-file SigningDetailsTest.java = cbrubaker@google.com
+per-file SigningDetailsTest.java = mpgroover@google.com

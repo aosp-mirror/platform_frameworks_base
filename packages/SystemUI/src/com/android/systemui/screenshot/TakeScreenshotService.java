@@ -25,6 +25,7 @@ import static com.android.systemui.screenshot.LogConfig.DEBUG_DISMISS;
 import static com.android.systemui.screenshot.LogConfig.DEBUG_SERVICE;
 import static com.android.systemui.screenshot.LogConfig.logTag;
 
+import android.annotation.MainThread;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -59,7 +60,8 @@ import javax.inject.Inject;
 public class TakeScreenshotService extends Service {
     private static final String TAG = logTag(TakeScreenshotService.class);
 
-    private final ScreenshotController mScreenshot;
+    private ScreenshotController mScreenshot;
+
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
     private final ScreenshotNotificationsController mNotificationsController;
@@ -78,6 +80,15 @@ public class TakeScreenshotService extends Service {
             }
         }
     };
+
+    /** Informs about coarse grained state of the Controller. */
+    interface RequestCallback {
+        /** Respond to the current request indicating the screenshot request failed.*/
+        void reportError();
+
+        /** The controller has completed handling this request UI has been removed */
+        void onFinish();
+    }
 
     @Inject
     public TakeScreenshotService(ScreenshotController screenshotController, UserManager userManager,
@@ -116,7 +127,8 @@ public class TakeScreenshotService extends Service {
             Log.d(TAG, "onUnbind");
         }
         if (mScreenshot != null) {
-            mScreenshot.dismissScreenshot(true);
+            mScreenshot.removeWindow();
+            mScreenshot = null;
         }
         unregisterReceiver(mCloseSystemDialogs);
         return false;
@@ -126,18 +138,39 @@ public class TakeScreenshotService extends Service {
     public void onDestroy() {
         super.onDestroy();
         if (mScreenshot != null) {
+            mScreenshot.removeWindow();
             mScreenshot.releaseContext();
+            mScreenshot = null;
         }
         if (DEBUG_SERVICE) {
             Log.d(TAG, "onDestroy");
         }
     }
 
+    static class RequestCallbackImpl implements RequestCallback {
+        private final Messenger mReplyTo;
+
+        RequestCallbackImpl(Messenger replyTo) {
+            mReplyTo = replyTo;
+        }
+
+        public void reportError() {
+            reportUri(mReplyTo, null);
+            sendComplete(mReplyTo);
+        }
+
+        @Override
+        public void onFinish() {
+            sendComplete(mReplyTo);
+        }
+    }
+
     /** Respond to incoming Message via Binder (Messenger) */
+    @MainThread
     private boolean handleMessage(Message msg) {
         final Messenger replyTo = msg.replyTo;
-        final Runnable onComplete = () -> sendComplete(replyTo);
         final Consumer<Uri> uriConsumer = (uri) -> reportUri(replyTo, uri);
+        RequestCallback requestCallback = new RequestCallbackImpl(replyTo);
 
         // If the storage for this user is locked, we have no place to store
         // the screenshot, so skip taking it instead of showing a misleading
@@ -146,14 +179,7 @@ public class TakeScreenshotService extends Service {
             Log.w(TAG, "Skipping screenshot because storage is locked!");
             mNotificationsController.notifyScreenshotError(
                     R.string.screenshot_failed_to_save_user_locked_text);
-            if (DEBUG_CALLBACK) {
-                Log.d(TAG, "handleMessage: calling uriConsumer.accept(null)");
-            }
-            uriConsumer.accept(null);
-            if (DEBUG_CALLBACK) {
-                Log.d(TAG, "handleMessage: calling onComplete.run()");
-            }
-            onComplete.run();
+            requestCallback.reportError();
             return true;
         }
 
@@ -167,13 +193,13 @@ public class TakeScreenshotService extends Service {
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_FULLSCREEN");
                 }
-                mScreenshot.takeScreenshotFullscreen(uriConsumer, onComplete);
+                mScreenshot.takeScreenshotFullscreen(uriConsumer, requestCallback);
                 break;
             case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
                 if (DEBUG_SERVICE) {
                     Log.d(TAG, "handleMessage: TAKE_SCREENSHOT_SELECTED_REGION");
                 }
-                mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
+                mScreenshot.takeScreenshotPartial(uriConsumer, requestCallback);
                 break;
             case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
                 if (DEBUG_SERVICE) {
@@ -186,8 +212,16 @@ public class TakeScreenshotService extends Service {
                 int taskId = screenshotRequest.getTaskId();
                 int userId = screenshotRequest.getUserId();
                 ComponentName topComponent = screenshotRequest.getTopComponent();
-                mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
-                        taskId, userId, topComponent, uriConsumer, onComplete);
+
+                if (screenshot == null) {
+                    Log.e(TAG, "Got null bitmap from screenshot message");
+                    mNotificationsController.notifyScreenshotError(
+                            R.string.screenshot_failed_to_capture_text);
+                    requestCallback.reportError();
+                } else {
+                    mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                            taskId, userId, topComponent, uriConsumer, requestCallback);
+                }
                 break;
             default:
                 Log.w(TAG, "Invalid screenshot option: " + msg.what);
@@ -196,7 +230,7 @@ public class TakeScreenshotService extends Service {
         return true;
     };
 
-    private void sendComplete(Messenger target) {
+    private static void sendComplete(Messenger target) {
         try {
             if (DEBUG_CALLBACK) {
                 Log.d(TAG, "sendComplete: " + target);
@@ -207,7 +241,7 @@ public class TakeScreenshotService extends Service {
         }
     }
 
-    private void reportUri(Messenger target, Uri uri) {
+    private static void reportUri(Messenger target, Uri uri) {
         try {
             if (DEBUG_CALLBACK) {
                 Log.d(TAG, "reportUri: " + target + " -> " + uri);

@@ -218,7 +218,7 @@ public class QSCarrierGroupControllerTest extends LeakCheckedTest {
         mSignalCallback.setMobileDataIndicators(
                 mock(NetworkController.IconState.class),
                 mock(NetworkController.IconState.class),
-                0, 0, true, true, "", "", "", true, 0, true);
+                0, 0, true, true, "", "", "", true, 0, true, true);
     }
 
     @Test

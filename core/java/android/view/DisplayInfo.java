@@ -66,6 +66,11 @@ public final class DisplayInfo implements Parcelable {
     public int displayId;
 
     /**
+     * Display Group identifier.
+     */
+    public int displayGroupId;
+
+    /**
      * Display address, or null if none.
      * Interpretation varies by display type.
      */
@@ -331,6 +336,7 @@ public final class DisplayInfo implements Parcelable {
                 && flags == other.flags
                 && type == other.type
                 && displayId == other.displayId
+                && displayGroupId == other.displayGroupId
                 && Objects.equals(address, other.address)
                 && Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 && Objects.equals(uniqueId, other.uniqueId)
@@ -376,6 +382,7 @@ public final class DisplayInfo implements Parcelable {
         flags = other.flags;
         type = other.type;
         displayId = other.displayId;
+        displayGroupId = other.displayGroupId;
         address = other.address;
         deviceProductInfo = other.deviceProductInfo;
         name = other.name;
@@ -418,6 +425,7 @@ public final class DisplayInfo implements Parcelable {
         flags = source.readInt();
         type = source.readInt();
         displayId = source.readInt();
+        displayGroupId = source.readInt();
         address = source.readParcelable(null);
         deviceProductInfo = source.readParcelable(null);
         name = source.readString8();
@@ -468,6 +476,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeInt(this.flags);
         dest.writeInt(type);
         dest.writeInt(displayId);
+        dest.writeInt(displayGroupId);
         dest.writeParcelable(address, flags);
         dest.writeParcelable(deviceProductInfo, flags);
         dest.writeString8(name);
@@ -547,16 +556,17 @@ public final class DisplayInfo implements Parcelable {
      * Returns the id of the "default" mode with the given refresh rate, or {@code 0} if no suitable
      * mode could be found.
      */
-    public int findDefaultModeByRefreshRate(float refreshRate) {
+    @Nullable
+    public Display.Mode findDefaultModeByRefreshRate(float refreshRate) {
         Display.Mode[] modes = supportedModes;
         Display.Mode defaultMode = getDefaultMode();
         for (int i = 0; i < modes.length; i++) {
             if (modes[i].matches(
                     defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), refreshRate)) {
-                return modes[i].getModeId();
+                return modes[i];
             }
         }
-        return 0;
+        return null;
     }
 
     /**
@@ -661,6 +671,8 @@ public final class DisplayInfo implements Parcelable {
         sb.append(name);
         sb.append("\", displayId ");
         sb.append(displayId);
+        sb.append("\", displayGroupId ");
+        sb.append(displayGroupId);
         sb.append(flagsToString(flags));
         sb.append(", real ");
         sb.append(logicalWidth);

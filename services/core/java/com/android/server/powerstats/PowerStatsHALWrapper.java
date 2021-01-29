@@ -295,14 +295,14 @@ public final class PowerStatsHALWrapper {
         @Override
         public android.hardware.power.stats.EnergyConsumer[] getEnergyConsumerInfo() {
             if (DEBUG) Slog.d(TAG, "Energy consumer info is not supported");
-            return null;
+            return new android.hardware.power.stats.EnergyConsumer[0];
         }
 
         @Override
         public android.hardware.power.stats.EnergyConsumerResult[] getEnergyConsumed(
                 int[] energyConsumerIds) {
             if (DEBUG) Slog.d(TAG, "Energy consumer results are not supported");
-            return null;
+            return new android.hardware.power.stats.EnergyConsumerResult[0];
         }
 
         @Override

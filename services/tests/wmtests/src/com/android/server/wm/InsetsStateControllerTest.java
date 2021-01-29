@@ -59,6 +59,25 @@ import org.junit.runner.RunWith;
 public class InsetsStateControllerTest extends WindowTestsBase {
 
     @Test
+    public void testStripForDispatch_notOwn() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+        statusBar.setControllableInsetProvider(getController().getSourceProvider(ITYPE_STATUS_BAR));
+        assertNotNull(getController().getInsetsForWindow(app).peekSource(ITYPE_STATUS_BAR));
+    }
+
+    @Test
+    public void testStripForDispatch_own() {
+        final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
+        mDisplayContent.getInsetsStateController().getSourceProvider(ITYPE_STATUS_BAR)
+                .setWindow(statusBar, null, null);
+        statusBar.setControllableInsetProvider(getController().getSourceProvider(ITYPE_STATUS_BAR));
+        final InsetsState state = getController().getInsetsForWindow(statusBar);
+        assertNull(state.peekSource(ITYPE_STATUS_BAR));
+    }
+
+    @Test
     public void testStripForDispatch_navBar() {
         final WindowState navBar = createWindow(null, TYPE_APPLICATION, "navBar");
         final WindowState statusBar = createWindow(null, TYPE_APPLICATION, "statusBar");
@@ -123,15 +142,14 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
 
         final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
-        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+        app1.mBehindIme = true;
 
-        app1.mAboveInsetsState.addSource(getController().getRawInsetsState().getSource(ITYPE_IME));
+        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+        app2.mBehindIme = false;
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertFalse(getController().getInsetsForWindow(app2).getSource(ITYPE_IME)
-                .isVisible());
-        assertTrue(getController().getInsetsForWindow(app1).getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(getController().getInsetsForWindow(app2).getSource(ITYPE_IME).isVisible());
+        assertTrue(getController().getInsetsForWindow(app1).getSource(ITYPE_IME).isVisible());
     }
 
     @UseTestDisplay(addWindows = W_INPUT_METHOD)
@@ -140,8 +158,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
-        app.mAboveInsetsState.getSource(ITYPE_IME).setVisible(true);
-        app.mAboveInsetsState.getSource(ITYPE_IME).setFrame(mImeWindow.getFrame());
+        app.mBehindIme = true;
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
         assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
@@ -153,10 +170,10 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         getController().getSourceProvider(ITYPE_IME).setWindow(mImeWindow, null, null);
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        app.mBehindIme = false;
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
-        assertFalse(getController().getInsetsForWindow(app).getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
     }
 
     @UseTestDisplay(addWindows = W_INPUT_METHOD)
@@ -193,8 +210,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         // app won't get visible IME insets while above IME even when IME is visible.
         assertTrue(getController().getRawInsetsState().getSourceOrDefaultVisibility(ITYPE_IME));
-        assertFalse(getController().getInsetsForWindow(app).getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
 
         // Reset invocation counter.
         clearInvocations(app);
@@ -203,8 +219,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         app.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         mDisplayContent.computeImeTarget(true);
         mDisplayContent.applySurfaceChangesTransaction();
-        app.mAboveInsetsState.getSource(ITYPE_IME).setVisible(true);
-        app.mAboveInsetsState.getSource(ITYPE_IME).setFrame(mImeWindow.getFrame());
 
         // Make sure app got notified.
         verify(app, atLeast(1)).notifyInsetsChanged();
@@ -220,8 +234,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
-        app.mAboveInsetsState.set(getController().getRawInsetsState());
-        child.mAboveInsetsState.set(getController().getRawInsetsState());
         child.mAttrs.flags |= FLAG_ALT_FOCUSABLE_IM;
 
         mDisplayContent.computeImeTarget(true);
@@ -230,8 +242,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
         assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
-        assertFalse(getController().getInsetsForWindow(child).getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(getController().getInsetsForWindow(child).getSource(ITYPE_IME).isVisible());
     }
 
     @UseTestDisplay(addWindows = W_INPUT_METHOD)
@@ -241,7 +252,6 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         final WindowState child = createWindow(app, TYPE_APPLICATION, "child");
-        app.mAboveInsetsState.addSource(getController().getRawInsetsState().peekSource(ITYPE_IME));
         child.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         child.setWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
 
@@ -251,8 +261,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         getController().getRawInsetsState().setSourceVisible(ITYPE_IME, true);
         assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
-        assertFalse(getController().getInsetsForWindow(child).getSource(ITYPE_IME)
-                .isVisible());
+        assertFalse(getController().getInsetsForWindow(child).getSource(ITYPE_IME).isVisible());
     }
 
     @Test

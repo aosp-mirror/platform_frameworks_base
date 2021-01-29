@@ -22,12 +22,15 @@ import android.content.Context;
 import android.graphics.Typeface;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontFileUtil;
+import android.graphics.fonts.FontManager;
 import android.graphics.fonts.SystemFonts;
-import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
 import android.os.SharedMemory;
+import android.os.ShellCallback;
 import android.system.ErrnoException;
 import android.text.FontConfig;
+import android.util.AndroidException;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -48,6 +51,7 @@ import java.nio.ByteBuffer;
 import java.nio.NioUtils;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Map;
 
 /** A service for managing system fonts. */
@@ -55,13 +59,29 @@ import java.util.Map;
 public final class FontManagerService extends IFontManager.Stub {
     private static final String TAG = "FontManagerService";
 
-    // TODO: make this a DeviceConfig flag.
-    private static final boolean ENABLE_FONT_UPDATES = false;
     private static final String FONT_FILES_DIR = "/data/fonts/files";
 
     @Override
     public FontConfig getFontConfig() throws RemoteException {
         return getCurrentFontSettings().getSystemFontConfig();
+    }
+
+    /* package */ static class SystemFontException extends AndroidException {
+        private final int mErrorCode;
+
+        SystemFontException(@FontManager.ErrorCode int errorCode, String msg, Throwable cause) {
+            super(msg, cause);
+            mErrorCode = errorCode;
+        }
+
+        SystemFontException(int errorCode, String msg) {
+            super(msg);
+            mErrorCode = errorCode;
+        }
+
+        @FontManager.ErrorCode int getErrorCode() {
+            return mErrorCode;
+        }
     }
 
     /** Class to manage FontManagerService's lifecycle. */
@@ -151,7 +171,6 @@ public final class FontManagerService extends IFontManager.Stub {
 
     @Nullable
     private static UpdatableFontDir createUpdatableFontDir() {
-        if (!ENABLE_FONT_UPDATES) return null;
         // If apk verity is supported, fs-verity should be available.
         if (!FileIntegrityService.isApkVeritySupported()) return null;
         return new UpdatableFontDir(new File(FONT_FILES_DIR),
@@ -178,19 +197,34 @@ public final class FontManagerService extends IFontManager.Stub {
         }
     }
 
-    // TODO(b/173619554): Expose as API.
-    private boolean installFontFile(FileDescriptor fd, byte[] pkcs7Signature) {
-        if (mUpdatableFontDir == null) return false;
+    /* package */ void installFontFile(FileDescriptor fd, byte[] pkcs7Signature)
+            throws SystemFontException {
+        if (mUpdatableFontDir == null) {
+            throw new SystemFontException(
+                    FontManager.ERROR_CODE_FONT_UPDATER_DISABLED,
+                    "The font updater is disabled.");
+        }
         synchronized (FontManagerService.this) {
-            try {
-                mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
-            } catch (IOException e) {
-                Slog.w(TAG, "Failed to install font file");
-                return false;
-            }
+            mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
             // Create updated font map in the next getSerializedSystemFontMap() call.
             mCurrentFontSettings = null;
-            return true;
+        }
+    }
+
+    /* package */ void clearUpdates() throws SystemFontException {
+        if (mUpdatableFontDir == null) {
+            throw new SystemFontException(
+                    FontManager.ERROR_CODE_FONT_UPDATER_DISABLED,
+                    "The font updater is disabled.");
+        }
+        mUpdatableFontDir.clearUpdates();
+    }
+
+    /* package */ Map<String, File> getFontFileMap() {
+        if (mUpdatableFontDir == null) {
+            return Collections.emptyMap();
+        } else {
+            return mUpdatableFontDir.getFontFileMap();
         }
     }
 
@@ -202,11 +236,13 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     @Override
-    public int handleShellCommand(@NonNull ParcelFileDescriptor in,
-            @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
-            @NonNull String[] args) {
-        return new FontManagerShellCommand(this).exec(this,
-                in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
+    public void onShellCommand(@Nullable FileDescriptor in,
+            @Nullable FileDescriptor out,
+            @Nullable FileDescriptor err,
+            @NonNull String[] args,
+            @Nullable ShellCallback callback,
+            @NonNull ResultReceiver result) throws RemoteException {
+        new FontManagerShellCommand(this).exec(this, in, out, err, args, callback, result);
     }
 
     /* package */ static class SystemFontSettings {
@@ -245,8 +281,7 @@ public final class FontManagerService extends IFontManager.Stub {
         public static @Nullable SystemFontSettings create(
                 @Nullable UpdatableFontDir updatableFontDir) {
             if (updatableFontDir != null) {
-                final FontConfig fontConfig = SystemFonts.getSystemFontConfig(
-                        updatableFontDir.getFontFileMap());
+                final FontConfig fontConfig = updatableFontDir.getSystemFontConfig();
                 final Map<String, FontFamily[]> fallback =
                         SystemFonts.buildSystemFallback(fontConfig);
                 final Map<String, Typeface> typefaceMap =
@@ -274,4 +309,5 @@ public final class FontManagerService extends IFontManager.Stub {
             return null;
         }
     }
+
 }
