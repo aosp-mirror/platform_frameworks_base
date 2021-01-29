@@ -10109,7 +10109,7 @@ public final class ViewRootImpl implements ViewParent,
      * Merges the transaction passed in with the next transaction in BLASTBufferQueue. This ensures
      * you can add transactions to the upcoming frame.
      */
-    void mergeWithNextTransaction(Transaction t, long frameNumber) {
+    public void mergeWithNextTransaction(Transaction t, long frameNumber) {
         if (mBlastBufferQueue != null) {
             mBlastBufferQueue.mergeWithNextTransaction(t, frameNumber);
         }
