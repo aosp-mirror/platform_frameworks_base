@@ -356,7 +356,9 @@ void IncrementalService::onDump(int fd) {
             dprintf(fd, "    storages (%d): {\n", int(mnt.storages.size()));
             for (auto&& [storageId, storage] : mnt.storages) {
                 dprintf(fd, "      [%d] -> [%s] (%d %% loaded) \n", storageId, storage.name.c_str(),
-                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str()).getProgress() *
+                        (int)(getLoadingProgressFromPath(mnt, storage.name.c_str(),
+                                                         /*stopOnFirstIncomplete=*/false)
+                                      .getProgress() *
                               100));
             }
             dprintf(fd, "    }\n");
@@ -427,10 +429,8 @@ auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
 }
 
 StorageId IncrementalService::createStorage(
-        std::string_view mountPoint, content::pm::DataLoaderParamsParcel&& dataLoaderParams,
-        CreateOptions options, const DataLoaderStatusListener& statusListener,
-        StorageHealthCheckParams&& healthCheckParams, const StorageHealthListener& healthListener,
-        const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
+        std::string_view mountPoint, const content::pm::DataLoaderParamsParcel& dataLoaderParams,
+        CreateOptions options) {
     LOG(INFO) << "createStorage: " << mountPoint << " | " << int(options);
     if (!path::isAbsolute(mountPoint)) {
         LOG(ERROR) << "path is not absolute: " << mountPoint;
@@ -538,13 +538,10 @@ StorageId IncrementalService::createStorage(
         metadata::Mount m;
         m.mutable_storage()->set_id(ifs->mountId);
         m.mutable_loader()->set_type((int)dataLoaderParams.type);
-        m.mutable_loader()->set_allocated_package_name(&dataLoaderParams.packageName);
-        m.mutable_loader()->set_allocated_class_name(&dataLoaderParams.className);
-        m.mutable_loader()->set_allocated_arguments(&dataLoaderParams.arguments);
+        m.mutable_loader()->set_package_name(dataLoaderParams.packageName);
+        m.mutable_loader()->set_class_name(dataLoaderParams.className);
+        m.mutable_loader()->set_arguments(dataLoaderParams.arguments);
         const auto metadata = m.SerializeAsString();
-        m.mutable_loader()->release_arguments();
-        m.mutable_loader()->release_class_name();
-        m.mutable_loader()->release_package_name();
         if (auto err =
                     mIncFs->makeFile(ifs->control,
                                      path::join(ifs->root, constants().mount,
@@ -568,25 +565,8 @@ StorageId IncrementalService::createStorage(
     // Done here as well, all data structures are in good state.
     secondCleanupOnFailure.release();
 
-    // DataLoader.
-    auto dataLoaderStub = prepareDataLoader(*ifs, std::move(dataLoaderParams), &statusListener,
-                                            std::move(healthCheckParams), &healthListener);
-    CHECK(dataLoaderStub);
-
     mountIt->second = std::move(ifs);
     l.unlock();
-
-    // Per Uid timeouts.
-    if (!perUidReadTimeouts.empty()) {
-        setUidReadTimeouts(mountId, perUidReadTimeouts);
-    }
-
-    if (mSystemReady.load(std::memory_order_relaxed) && !dataLoaderStub->requestCreate()) {
-        // failed to create data loader
-        LOG(ERROR) << "initializeDataLoader() failed";
-        deleteStorage(dataLoaderStub->id());
-        return kInvalidStorageId;
-    }
 
     LOG(INFO) << "created storage " << mountId;
     return mountId;
@@ -632,6 +612,37 @@ StorageId IncrementalService::createLinkedStorage(std::string_view mountPoint,
 
     mountIt->second = ifs;
     return storageId;
+}
+
+bool IncrementalService::startLoading(StorageId storage,
+                                      content::pm::DataLoaderParamsParcel&& dataLoaderParams,
+                                      const DataLoaderStatusListener& statusListener,
+                                      StorageHealthCheckParams&& healthCheckParams,
+                                      const StorageHealthListener& healthListener,
+                                      const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
+    // Per Uid timeouts.
+    if (!perUidReadTimeouts.empty()) {
+        setUidReadTimeouts(storage, perUidReadTimeouts);
+    }
+
+    // Re-initialize DataLoader.
+    std::unique_lock l(mLock);
+    const auto ifs = getIfsLocked(storage);
+    if (!ifs) {
+        return false;
+    }
+    if (ifs->dataLoaderStub) {
+        ifs->dataLoaderStub->cleanupResources();
+        ifs->dataLoaderStub = {};
+    }
+    l.unlock();
+
+    // DataLoader.
+    auto dataLoaderStub = prepareDataLoader(*ifs, std::move(dataLoaderParams), &statusListener,
+                                            std::move(healthCheckParams), &healthListener);
+    CHECK(dataLoaderStub);
+
+    return dataLoaderStub->requestStart();
 }
 
 IncrementalService::BindPathMap::const_iterator IncrementalService::findStorageLocked(
@@ -960,7 +971,12 @@ int IncrementalService::link(StorageId sourceStorageId, std::string_view oldPath
         LOG(ERROR) << "Invalid paths in link(): " << normOldPath << " | " << normNewPath;
         return -EINVAL;
     }
-    return mIncFs->link(ifsSrc->control, normOldPath, normNewPath);
+    if (auto err = mIncFs->link(ifsSrc->control, normOldPath, normNewPath); err < 0) {
+        PLOG(ERROR) << "Failed to link " << oldPath << "[" << normOldPath << "]"
+                    << " to " << newPath << "[" << normNewPath << "]";
+        return err;
+    }
+    return 0;
 }
 
 int IncrementalService::unlink(StorageId storage, std::string_view path) {
@@ -1065,23 +1081,6 @@ RawMetadata IncrementalService::getMetadata(StorageId storage, FileId node) cons
     return mIncFs->getMetadata(ifs->control, node);
 }
 
-bool IncrementalService::startLoading(StorageId storage) const {
-    DataLoaderStubPtr dataLoaderStub;
-    {
-        std::unique_lock l(mLock);
-        const auto& ifs = getIfsLocked(storage);
-        if (!ifs) {
-            return false;
-        }
-        dataLoaderStub = ifs->dataLoaderStub;
-        if (!dataLoaderStub) {
-            return false;
-        }
-    }
-    dataLoaderStub->requestStart();
-    return true;
-}
-
 void IncrementalService::setUidReadTimeouts(
         StorageId storage, const std::vector<PerUidReadTimeouts>& perUidReadTimeouts) {
     using microseconds = std::chrono::microseconds;
@@ -1092,11 +1091,15 @@ void IncrementalService::setUidReadTimeouts(
         maxPendingTimeUs = std::max(maxPendingTimeUs, microseconds(timeouts.maxPendingTimeUs));
     }
     if (maxPendingTimeUs < Constants::minPerUidTimeout) {
+        LOG(ERROR) << "Skip setting timeouts: maxPendingTime < Constants::minPerUidTimeout"
+                   << duration_cast<milliseconds>(maxPendingTimeUs).count() << "ms < "
+                   << Constants::minPerUidTimeout.count() << "ms";
         return;
     }
 
     const auto ifs = getIfs(storage);
     if (!ifs) {
+        LOG(ERROR) << "Setting read timeouts failed: invalid storage id: " << storage;
         return;
     }
 
@@ -1126,7 +1129,7 @@ void IncrementalService::updateUidReadTimeouts(StorageId storage, Clock::time_po
     }
 
     // Still loading?
-    const auto progress = getLoadingProgress(storage);
+    const auto progress = getLoadingProgress(storage, /*stopOnFirstIncomplete=*/true);
     if (progress.isError()) {
         // Something is wrong, abort.
         return clearUidReadTimeouts(storage);
@@ -1840,7 +1843,7 @@ int IncrementalService::isFileFullyLoadedFromPath(const IncFsMount& ifs,
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
-        StorageId storage) const {
+        StorageId storage, bool stopOnFirstIncomplete) const {
     std::unique_lock l(mLock);
     const auto ifs = getIfsLocked(storage);
     if (!ifs) {
@@ -1853,11 +1856,11 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgress(
         return {-EINVAL, -EINVAL};
     }
     l.unlock();
-    return getLoadingProgressFromPath(*ifs, storageInfo->second.name);
+    return getLoadingProgressFromPath(*ifs, storageInfo->second.name, stopOnFirstIncomplete);
 }
 
 IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPath(
-        const IncFsMount& ifs, std::string_view storagePath) const {
+        const IncFsMount& ifs, std::string_view storagePath, bool stopOnFirstIncomplete) const {
     ssize_t totalBlocks = 0, filledBlocks = 0;
     const auto filePaths = mFs->listFilesRecursive(storagePath);
     for (const auto& filePath : filePaths) {
@@ -1870,6 +1873,9 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPa
         }
         totalBlocks += totalBlocksCount;
         filledBlocks += filledBlocksCount;
+        if (stopOnFirstIncomplete && filledBlocks < totalBlocks) {
+            break;
+        }
     }
 
     return {filledBlocks, totalBlocks};
@@ -1877,7 +1883,7 @@ IncrementalService::LoadingProgress IncrementalService::getLoadingProgressFromPa
 
 bool IncrementalService::updateLoadingProgress(
         StorageId storage, const StorageLoadingProgressListener& progressListener) {
-    const auto progress = getLoadingProgress(storage);
+    const auto progress = getLoadingProgress(storage, /*stopOnFirstIncomplete=*/false);
     if (progress.isError()) {
         // Failed to get progress from incfs, abort.
         return false;
