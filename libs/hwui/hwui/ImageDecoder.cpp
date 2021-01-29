@@ -437,11 +437,11 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
             if (outputMatrix.invert(&inverse)) {
                 SkCanvas canvas(tmp, SkCanvas::ColorBehavior::kLegacy);
                 canvas.setMatrix(inverse);
-                SkPaint paint;
-                paint.setFilterQuality(kLow_SkFilterQuality); // bilinear
                 SkBitmap priorFrame;
                 priorFrame.installPixels(outputInfo, pixels, rowBytes);
-                canvas.drawBitmap(priorFrame, 0, 0, &paint);
+                priorFrame.setImmutable(); // Don't want asImage() to force a copy
+                canvas.drawImage(priorFrame.asImage(), 0, 0,
+                                 SkSamplingOptions(SkFilterMode::kLinear));
             } else {
                 ALOGE("Failed to invert matrix!");
             }
@@ -458,11 +458,11 @@ SkCodec::Result ImageDecoder::decode(void* pixels, size_t rowBytes) {
 
         SkPaint paint;
         paint.setBlendMode(SkBlendMode::kSrc);
-        paint.setFilterQuality(kLow_SkFilterQuality);  // bilinear filtering
 
         SkCanvas canvas(scaledBm, SkCanvas::ColorBehavior::kLegacy);
         canvas.setMatrix(outputMatrix);
-        canvas.drawBitmap(tmp, 0.0f, 0.0f, &paint);
+        tmp.setImmutable(); // Don't want asImage() to force copy
+        canvas.drawImage(tmp.asImage(), 0, 0, SkSamplingOptions(SkFilterMode::kLinear), &paint);
     }
 
     return result;
