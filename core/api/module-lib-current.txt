@@ -19,6 +19,14 @@ package android.net {
     method public int getResourceId();
   }
 
+  public final class NetworkAgentConfig implements android.os.Parcelable {
+    method @Nullable public String getSubscriberId();
+  }
+
+  public static final class NetworkAgentConfig.Builder {
+    method @NonNull public android.net.NetworkAgentConfig.Builder setSubscriberId(@Nullable String);
+  }
+
   public final class NetworkCapabilities implements android.os.Parcelable {
     field public static final int TRANSPORT_TEST = 7; // 0x7
   }
