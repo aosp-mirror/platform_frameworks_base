@@ -602,7 +602,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
-            @Nullable NativeHandle surfaceHandle) {
+            @Nullable NativeHandle surfaceHandle, boolean debugConsent) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
