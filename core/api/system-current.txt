@@ -4622,6 +4622,7 @@ package android.media {
   public static class AudioAttributes.Builder {
     method public android.media.AudioAttributes.Builder addBundle(@NonNull android.os.Bundle);
     method public android.media.AudioAttributes.Builder setCapturePreset(int);
+    method @NonNull @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD) public android.media.AudioAttributes.Builder setHotwordMode();
     method public android.media.AudioAttributes.Builder setInternalCapturePreset(int);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_AUDIO_ROUTING) public android.media.AudioAttributes.Builder setSystemUsage(int);
   }
