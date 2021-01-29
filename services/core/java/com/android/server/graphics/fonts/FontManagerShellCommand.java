@@ -25,6 +25,7 @@ import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.fonts.SystemFonts;
 import android.os.Binder;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -95,8 +96,8 @@ public class FontManagerShellCommand extends ShellCommand {
     }
 
     /* package */ void dumpAll(@NonNull IndentingPrintWriter w) {
-        final FontManagerService.SystemFontSettings settings = mService.getCurrentFontSettings();
-        dumpFontConfig(w, settings.getSystemFontConfig());
+        FontConfig fontConfig = mService.getSystemFontConfig();
+        dumpFontConfig(w, fontConfig);
     }
 
     private void dumpSingleFontConfig(
@@ -276,19 +277,19 @@ public class FontManagerShellCommand extends ShellCommand {
 
     private int dump(ShellCommand shell) {
         final Context ctx = mService.getContext();
-        final FontManagerService.SystemFontSettings settings =
-                mService.getCurrentFontSettings();
+
         if (!DumpUtils.checkDumpPermission(ctx, TAG, shell.getErrPrintWriter())) {
             return 1;
         }
         final IndentingPrintWriter writer =
                 new IndentingPrintWriter(shell.getOutPrintWriter(), "  ");
         String nextArg = shell.getNextArg();
+        FontConfig fontConfig = mService.getSystemFontConfig();
         if (nextArg == null) {
-            dumpFontConfig(writer, settings.getSystemFontConfig());
+            dumpFontConfig(writer, fontConfig);
         } else {
             final Map<String, FontFamily[]> fallbackMap =
-                    settings.getSystemFallbackMap();
+                    SystemFonts.buildSystemFallback(fontConfig);
             FontFamily[] families = fallbackMap.get(nextArg);
             if (families == null) {
                 writer.println("Font Family \"" + nextArg + "\" not found");
@@ -364,10 +365,9 @@ public class FontManagerShellCommand extends ShellCommand {
     }
 
     private int status(ShellCommand shell) throws SystemFontException {
-        final FontManagerService.SystemFontSettings settings = mService.getCurrentFontSettings();
         final IndentingPrintWriter writer =
                 new IndentingPrintWriter(shell.getOutPrintWriter(), "  ");
-        FontConfig config = settings.getSystemFontConfig();
+        FontConfig config = mService.getSystemFontConfig();
 
         writer.println("Current Version: " + config.getConfigVersion());
         LocalDateTime dt = LocalDateTime.ofEpochSecond(config.getLastModifiedDate(), 0,
