@@ -104,8 +104,8 @@ import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
+import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
-import android.net.VpnInfo;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
@@ -973,7 +973,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             Network[] defaultNetworks,
             NetworkState[] networkStates,
             String activeIface,
-            VpnInfo[] vpnInfos) {
+            UnderlyingNetworkInfo[] underlyingNetworkInfos) {
         checkNetworkStackPermission(mContext);
 
         final long token = Binder.clearCallingIdentity();
@@ -986,7 +986,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // Update the VPN underlying interfaces only after the poll is made and tun data has been
         // migrated. Otherwise the migration would use the new interfaces instead of the ones that
         // were current when the polled data was transferred.
-        mStatsFactory.updateVpnInfos(vpnInfos);
+        mStatsFactory.updateUnderlyingNetworkInfos(underlyingNetworkInfos);
     }
 
     @Override
