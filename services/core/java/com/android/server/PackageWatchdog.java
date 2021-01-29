@@ -260,8 +260,8 @@ public class PackageWatchdog {
             mHealthCheckController.setCallbacks(packageName -> onHealthCheckPassed(packageName),
                     packages -> onSupportedPackages(packages),
                     () -> {
-                            syncRequestsAsync();
                             mSyncRequired = true;
+                            syncRequestsAsync();
                     });
             setPropertyChangedListenerLocked();
             updateConfigs();
