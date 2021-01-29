@@ -32,17 +32,6 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class MatchAllNetworkSpecifier extends NetworkSpecifier implements Parcelable {
-    /**
-     * Utility method which verifies that the ns argument is not a MatchAllNetworkSpecifier and
-     * throws an IllegalArgumentException if it is.
-     * @hide
-     */
-    public static void checkNotMatchAllNetworkSpecifier(NetworkSpecifier ns) {
-        if (ns instanceof MatchAllNetworkSpecifier) {
-            throw new IllegalArgumentException("A MatchAllNetworkSpecifier is not permitted");
-        }
-    }
-
     /** @hide */
     @Override
     public boolean canBeSatisfiedBy(NetworkSpecifier other) {
