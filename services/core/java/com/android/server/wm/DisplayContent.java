@@ -5471,14 +5471,19 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Checks whether the given activity is in size compatibility mode and notifies the change. */
     void handleActivitySizeCompatModeIfNeeded(ActivityRecord r) {
-        if (!r.isState(RESUMED) || r.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
+        final Task organizedTask = r.getOrganizedTask();
+        if (!r.isState(RESUMED) || r.getWindowingMode() != WINDOWING_MODE_FULLSCREEN
+                || organizedTask == null) {
             // The callback is only interested in the foreground changes of fullscreen activity.
             return;
         }
         if (!r.inSizeCompatMode()) {
             if (mLastCompatModeActivity != null) {
+                // TODO(b/178327644) Remove notifySizeCompatModeActivityChanged
                 mAtmService.getTaskChangeNotificationController()
                         .notifySizeCompatModeActivityChanged(mDisplayId, null /* activityToken */);
+                // This will do nothing until SizeCompatModeActivityController is moved to shell
+                organizedTask.onSizeCompatActivityChanged();
             }
             mLastCompatModeActivity = null;
             return;
@@ -5487,8 +5492,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
         mLastCompatModeActivity = r;
+        // TODO(b/178327644) Remove notifySizeCompatModeActivityChanged
         mAtmService.getTaskChangeNotificationController()
                 .notifySizeCompatModeActivityChanged(mDisplayId, r.appToken);
+        // This will do nothing until SizeCompatModeActivityController is moved to shell
+        organizedTask.onSizeCompatActivityChanged();
     }
 
     boolean isUidPresent(int uid) {
