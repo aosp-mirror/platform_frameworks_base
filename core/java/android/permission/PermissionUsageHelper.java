@@ -95,7 +95,7 @@ public class PermissionUsageHelper {
     private static final String SYSTEM_PKG = "android";
 
     private static final long DEFAULT_RUNNING_TIME_MS = 5000L;
-    private static final long DEFAULT_RECENT_TIME_MS = 30000L;
+    private static final long DEFAULT_RECENT_TIME_MS = 15000L;
 
     private static boolean shouldShowPermissionsHub() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
