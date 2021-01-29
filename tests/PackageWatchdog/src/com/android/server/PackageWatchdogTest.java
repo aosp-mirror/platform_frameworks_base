@@ -112,7 +112,8 @@ public class PackageWatchdogTest {
         MockitoAnnotations.initMocks(this);
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
-        adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG);
+        adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG,
+                Manifest.permission.WRITE_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
@@ -157,6 +158,14 @@ public class PackageWatchdogTest {
                     return storedValue == null ? defaultValue : Long.parseLong(storedValue);
                 }
         ).when(() -> SystemProperties.getLong(anyString(), anyLong()));
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
+                Boolean.toString(true), false);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT), false);
     }
 
     @After
@@ -611,10 +620,6 @@ public class PackageWatchdogTest {
      */
     @Test
     public void testExplicitHealthCheckStateChanges() throws Exception {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
-
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
@@ -807,9 +812,6 @@ public class PackageWatchdogTest {
     /** Test default values are used when device property is invalid. */
     @Test
     public void testInvalidConfig_watchdogTriggerFailureCount() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(-1), /*makeDefault*/false);
@@ -835,9 +837,6 @@ public class PackageWatchdogTest {
     /** Test default values are used when device property is invalid. */
     @Test
     public void testInvalidConfig_watchdogTriggerDurationMillis() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(2), /*makeDefault*/false);
@@ -915,9 +914,6 @@ public class PackageWatchdogTest {
     /** Test we are notified when enough failures are triggered within any window. */
     @Test
     public void testFailureTriggerWindow() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(3), /*makeDefault*/false);
