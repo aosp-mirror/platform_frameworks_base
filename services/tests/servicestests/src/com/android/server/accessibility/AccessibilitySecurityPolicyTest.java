@@ -51,9 +51,6 @@ import android.util.ArraySet;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityWindowInfo;
 
-import com.android.server.LocalServices;
-import com.android.server.wm.ActivityTaskManagerInternal;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -123,7 +120,6 @@ public class AccessibilitySecurityPolicyTest {
     @Mock private AccessibilityWindowManager mMockA11yWindowManager;
     @Mock private AppWidgetManagerInternal mMockAppWidgetManager;
     @Mock private AccessibilitySecurityPolicy.AccessibilityUserManager mMockA11yUserManager;
-    @Mock private ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
 
     @Before
     public void setUp() {
@@ -131,10 +127,6 @@ public class AccessibilitySecurityPolicyTest {
         when(mMockContext.getPackageManager()).thenReturn(mMockPackageManager);
         when(mMockContext.getSystemService(Context.USER_SERVICE)).thenReturn(mMockUserManager);
         when(mMockContext.getSystemService(Context.APP_OPS_SERVICE)).thenReturn(mMockAppOpsManager);
-
-        LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
-        LocalServices.addService(
-                ActivityTaskManagerInternal.class, mMockActivityTaskManagerInternal);
 
         mA11ySecurityPolicy = new AccessibilitySecurityPolicy(mMockContext, mMockA11yUserManager);
         mA11ySecurityPolicy.setAccessibilityWindowManager(mMockA11yWindowManager);
@@ -570,10 +562,4 @@ public class AccessibilitySecurityPolicyTest {
                 APP_UID, PACKAGE_NAME);
     }
 
-    @Test
-    public void testEnforceCallerIsRecentsOrHasPermission() {
-        mA11ySecurityPolicy.enforceCallerIsRecentsOrHasPermission(PERMISSION, FUNCTION);
-        verify(mMockActivityTaskManagerInternal).enforceCallerIsRecentsOrHasPermission(
-                PERMISSION, FUNCTION);
-    }
 }

@@ -45,7 +45,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -58,7 +57,6 @@ import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
 import android.content.ComponentName;
-import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
@@ -1109,28 +1107,6 @@ public class RecentTasksTest extends WindowTestsBase {
         assertEquals(originalStackCount, mTaskContainer.getRootTaskCount());
     }
 
-    @Test
-    public void testNotRecentsComponent_denyApiAccess() throws Exception {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mAtm)
-                .checkGetTasksPermission(anyString(), anyInt(), anyInt());
-        // Expect the following methods to fail due to recents component not being set
-        mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.DENY_THROW_SECURITY_EXCEPTION);
-        doTestRecentTasksApis(false /* expectNoSecurityException */);
-        // Don't throw for the following tests
-        mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.DENY);
-        testGetTasksApis(false /* expectNoSecurityException */);
-    }
-
-    @Test
-    public void testRecentsComponent_allowApiAccessWithoutPermissions() {
-        doReturn(PackageManager.PERMISSION_DENIED).when(mAtm)
-                .checkGetTasksPermission(anyString(), anyInt(), anyInt());
-        // Set the recents component and ensure that the following calls do not fail
-        mRecentTasks.setIsCallerRecentsOverride(TestRecentTasks.GRANT);
-        doTestRecentTasksApis(true /* expectNoSecurityException */);
-        testGetTasksApis(true /* expectNoSecurityException */);
-    }
-
     private void doTestRecentTasksApis(boolean expectCallable) {
         assertSecurityException(expectCallable, () -> mAtm.removeTask(INVALID_STACK_ID));
         assertSecurityException(expectCallable,
@@ -1295,13 +1271,7 @@ public class RecentTasksTest extends WindowTestsBase {
     }
 
     private static class TestRecentTasks extends RecentTasks {
-        static final int GRANT = 0;
-        static final int DENY = 1;
-        static final int DENY_THROW_SECURITY_EXCEPTION = 2;
-
-        private boolean mOverrideIsCallerRecents;
         private boolean mIsTrimmableOverride;
-        private int mIsCallerRecentsPolicy;
 
         public boolean mLastAllowed;
 
@@ -1332,26 +1302,6 @@ public class RecentTasksTest extends WindowTestsBase {
         @Override
         int[] getCurrentProfileIds() {
             return new int[] { TEST_USER_0_ID, TEST_QUIET_USER_ID };
-        }
-
-        @Override
-        boolean isCallerRecents(int callingUid) {
-            if (mOverrideIsCallerRecents) {
-                switch (mIsCallerRecentsPolicy) {
-                    case GRANT:
-                        return true;
-                    case DENY:
-                        return false;
-                    case DENY_THROW_SECURITY_EXCEPTION:
-                        throw new SecurityException();
-                }
-            }
-            return super.isCallerRecents(callingUid);
-        }
-
-        void setIsCallerRecentsOverride(int policy) {
-            mOverrideIsCallerRecents = true;
-            mIsCallerRecentsPolicy = policy;
         }
 
         /**
