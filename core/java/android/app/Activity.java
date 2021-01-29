@@ -2669,6 +2669,10 @@ public class Activity extends ContextThemeWrapper
         dispatchActivityDestroyed();
 
         notifyContentCaptureManagerIfNeeded(CONTENT_CAPTURE_STOP);
+
+        if (mUiTranslationController != null) {
+            mUiTranslationController.onActivityDestroyed();
+        }
     }
 
     /**
@@ -7877,6 +7881,10 @@ public class Activity extends ContextThemeWrapper
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     final void performCreate(Bundle icicle, PersistableBundle persistentState) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performCreate:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPreCreated(icicle);
         mCanEnterPictureInPicture = true;
         // initialize mIsInMultiWindowMode and mIsInPictureInPictureMode before onCreate
@@ -7899,6 +7907,7 @@ public class Activity extends ContextThemeWrapper
         mFragments.dispatchActivityCreated();
         mActivityTransitionState.setEnterActivityOptions(this, getActivityOptions());
         dispatchActivityPostCreated(icicle);
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performNewIntent(@NonNull Intent intent) {
@@ -8004,6 +8013,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performResume(boolean followedByPause, String reason) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performResume:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPreResumed();
         performRestart(true /* start */, reason);
 
@@ -8055,9 +8068,14 @@ public class Activity extends ContextThemeWrapper
                 " did not call through to super.onPostResume()");
         }
         dispatchActivityPostResumed();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performPause() {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performPause:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPrePaused();
         mDoReportFullyDrawn = false;
         mFragments.dispatchPause();
@@ -8073,6 +8091,7 @@ public class Activity extends ContextThemeWrapper
                     " did not call through to super.onPause()");
         }
         dispatchActivityPostPaused();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performUserLeaving() {
@@ -8081,6 +8100,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     final void performStop(boolean preserveWindow, String reason) {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performStop:"
+                    + mComponent.getClassName());
+        }
         mDoReportFullyDrawn = false;
         mFragments.doLoaderStop(mChangingConfigurations /*retain*/);
 
@@ -8126,9 +8149,14 @@ public class Activity extends ContextThemeWrapper
             dispatchActivityPostStopped();
         }
         mResumed = false;
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void performDestroy() {
+        if (Trace.isTagEnabled(Trace.TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "performDestroy:"
+                    + mComponent.getClassName());
+        }
         dispatchActivityPreDestroyed();
         mDestroyed = true;
         mWindow.destroy();
@@ -8141,6 +8169,7 @@ public class Activity extends ContextThemeWrapper
             mVoiceInteractor.detachActivity();
         }
         dispatchActivityPostDestroyed();
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     final void dispatchMultiWindowModeChanged(boolean isInMultiWindowMode,
@@ -8450,9 +8479,8 @@ public class Activity extends ContextThemeWrapper
     }
 
     /** @hide */
-    @Override
     @Nullable
-    public final View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
+    public View findViewByAutofillIdTraversal(@NonNull AutofillId autofillId) {
         final ArrayList<ViewRootImpl> roots =
                 WindowManagerGlobal.getInstance().getRootViews(getActivityToken());
         for (int rootNum = 0; rootNum < roots.size(); rootNum++) {
@@ -8465,8 +8493,14 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
-
         return null;
+    }
+
+    /** @hide */
+    @Override
+    @Nullable
+    public final View autofillClientFindViewByAutofillIdTraversal(AutofillId autofillId) {
+        return findViewByAutofillIdTraversal(autofillId);
     }
 
     /** @hide */

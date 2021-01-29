@@ -5912,7 +5912,7 @@
 
         <!-- AOSP configures a default secondary LocationTimeZoneProvider that uses an on-device
              data set from the com.android.geotz APEX. -->
-        <service android:name="com.android.timezone.geotz.provider.OfflineLocationTimeZoneProviderService"
+        <service android:name="com.android.timezone.location.provider.OfflineLocationTimeZoneProviderService"
                  android:enabled="@bool/config_enableSecondaryLocationTimeZoneProvider"
                  android:permission="android.permission.BIND_TIME_ZONE_PROVIDER_SERVICE"
                  android:exported="false">

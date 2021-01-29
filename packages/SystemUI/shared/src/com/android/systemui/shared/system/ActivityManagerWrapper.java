@@ -24,6 +24,7 @@ import static android.app.ActivityTaskManager.getService;
 
 import android.annotation.NonNull;
 import android.app.Activity;
+import android.app.ActivityClient;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RecentTaskInfo;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -140,8 +141,9 @@ public class ActivityManagerWrapper {
      */
     public void invalidateHomeTaskSnapshot(final Activity homeActivity) {
         try {
-            getService().invalidateHomeTaskSnapshot(homeActivity.getActivityToken());
-        } catch (RemoteException e) {
+            ActivityClient.getInstance().invalidateHomeTaskSnapshot(
+                    homeActivity.getActivityToken());
+        } catch (Throwable e) {
             Log.w(TAG, "Failed to invalidate home snapshot", e);
         }
     }

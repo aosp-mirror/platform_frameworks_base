@@ -25,6 +25,8 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.RemoteAnimationDefinition;
 
+import com.android.internal.policy.IKeyguardDismissCallback;
+
 /**
  * Interface for the callback and request from an activity to system.
  *
@@ -34,7 +36,13 @@ interface IActivityClientController {
     oneway void activityIdle(in IBinder token, in Configuration config, in boolean stopProfiling);
     oneway void activityResumed(in IBinder token);
     oneway void activityTopResumedStateLost();
-    oneway void activityPaused(in IBinder token);
+    /**
+     * Notifies that the activity has completed paused. This call is not one-way because it can make
+     * consecutive launch in the same process more coherent. About the order of binder call, it
+     * should be fine with other one-way calls because if pause hasn't completed on the server side,
+     * there won't be other lifecycle changes.
+     */
+    void activityPaused(in IBinder token);
     oneway void activityStopped(in IBinder token, in Bundle state,
             in PersistableBundle persistentState, in CharSequence description);
     oneway void activityDestroyed(in IBinder token);
@@ -94,6 +102,27 @@ interface IActivityClientController {
 
     /** See {@link android.app.Activity#setDisablePreviewScreenshots}. */
     oneway void setDisablePreviewScreenshots(in IBinder token, boolean disable);
+
+    /**
+     * Restarts the activity by killing its process if it is visible. If the activity is not
+     * visible, the activity will not be restarted immediately and just keep the activity record in
+     * the stack. It also resets the current override configuration so the activity will use the
+     * configuration according to the latest state.
+     *
+     * @param activityToken The token of the target activity to restart.
+     */
+    void restartActivityProcessIfVisible(in IBinder activityToken);
+
+    /**
+     * It should only be called from home activity to remove its outdated snapshot. The home
+     * snapshot is used to speed up entering home from screen off. If the content of home activity
+     * is significantly different from before taking the snapshot, then the home activity can use
+     * this method to avoid inconsistent transition.
+     */
+    void invalidateHomeTaskSnapshot(IBinder homeToken);
+
+    void dismissKeyguard(in IBinder token, in IKeyguardDismissCallback callback,
+            in CharSequence message);
 
     /** Registers remote animations for a specific activity. */
     void registerRemoteAnimations(in IBinder token, in RemoteAnimationDefinition definition);

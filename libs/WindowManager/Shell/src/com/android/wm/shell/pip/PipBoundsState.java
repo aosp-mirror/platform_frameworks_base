@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Size;
+import android.view.Display;
 import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -68,7 +69,7 @@ public final class PipBoundsState {
     private int mStashOffset;
     private @Nullable PipReentryState mPipReentryState;
     private @Nullable ComponentName mLastPipComponentName;
-    private final @NonNull DisplayInfo mDisplayInfo = new DisplayInfo();
+    private int mDisplayId = Display.DEFAULT_DISPLAY;
     private final @NonNull DisplayLayout mDisplayLayout = new DisplayLayout();
     /** The current minimum edge size of PIP. */
     private int mMinEdgeSize;
@@ -238,26 +239,20 @@ public final class PipBoundsState {
         return mLastPipComponentName;
     }
 
-    /** Get the current display info. */
-    @NonNull
-    public DisplayInfo getDisplayInfo() {
-        return mDisplayInfo;
+    /** Get the current display id. */
+    public int getDisplayId() {
+        return mDisplayId;
     }
 
-    /** Update the display info. */
-    public void setDisplayInfo(@NonNull DisplayInfo displayInfo) {
-        mDisplayInfo.copyFrom(displayInfo);
-    }
-
-    /** Set the rotation of the display. */
-    public void setDisplayRotation(int rotation) {
-        mDisplayInfo.rotation = rotation;
+    /** Set the current display id for the associated display layout. */
+    public void setDisplayId(int displayId) {
+        mDisplayId = displayId;
     }
 
     /** Returns the display's bounds. */
     @NonNull
     public Rect getDisplayBounds() {
-        return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
+        return new Rect(0, 0, mDisplayLayout.width(), mDisplayLayout.height());
     }
 
     /** Update the display layout. */
@@ -474,7 +469,7 @@ public final class PipBoundsState {
         pw.println(innerPrefix + "mExpandedMovementBounds=" + mExpandedMovementBounds);
         pw.println(innerPrefix + "mLastPipComponentName=" + mLastPipComponentName);
         pw.println(innerPrefix + "mAspectRatio=" + mAspectRatio);
-        pw.println(innerPrefix + "mDisplayInfo=" + mDisplayInfo);
+        pw.println(innerPrefix + "mDisplayId=" + mDisplayId);
         pw.println(innerPrefix + "mDisplayLayout=" + mDisplayLayout);
         pw.println(innerPrefix + "mStashedState=" + mStashedState);
         pw.println(innerPrefix + "mStashOffset=" + mStashOffset);

@@ -220,6 +220,9 @@ message ChannelProto {
 
     /** Name of the energy meter channel */
     optional string name = 2;
+
+    /** Name of the subsystem associated with this Channel. Opaque to framework */
+    optional string subsystem = 3;
 }
 
 /**

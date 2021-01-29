@@ -150,7 +150,7 @@ public class WifiSignalController extends
         callback.setMobileDataIndicators(statusIcon, qsIcon, typeIcon, qsTypeIcon,
                 mCurrentState.activityIn, mCurrentState.activityOut, dataContentDescription,
                 dataContentDescriptionHtml, description, icons.isWide,
-                mCurrentState.subId, /* roaming= */ false);
+                mCurrentState.subId, /* roaming= */ false, /* showTriangle= */ true);
     }
 
     private int getCurrentIconIdForCarrierWifi() {

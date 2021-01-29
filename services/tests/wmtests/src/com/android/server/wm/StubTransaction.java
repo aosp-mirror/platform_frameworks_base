@@ -245,6 +245,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
+    public SurfaceControl.Transaction setFrameRate(SurfaceControl sc, float frameRate,
+            int compatibility) {
+        return this;
+    }
+
+    @Override
     public SurfaceControl.Transaction unsetColor(SurfaceControl sc) {
         return this;
     }

@@ -179,6 +179,8 @@ public final class NotificationEntry extends ListEntry {
     private boolean mShelfIconVisible;
     private boolean mIsAlerting;
 
+    public boolean mRemoteEditImeVisible;
+
     /**
      * @param sbn the StatusBarNotification from system server
      * @param ranking also from system server

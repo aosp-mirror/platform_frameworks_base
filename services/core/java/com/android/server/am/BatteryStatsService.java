@@ -254,6 +254,8 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         mStats.setRadioScanningTimeoutLocked(mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_radioScanningTimeout) * 1000L);
         mStats.setPowerProfileLocked(new PowerProfile(context));
+        mStats.startTrackingSystemServerCpuTime();
+
         mBatteryUsageStatsProvider = new BatteryUsageStatsProvider(context, mStats);
     }
 
@@ -1674,11 +1676,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public void noteNetworkInterfaceType(final String iface, final int networkType) {
+    public void noteNetworkInterfaceForTransports(final String iface, int[] transportTypes) {
         enforceCallingPermission();
         synchronized (mLock) {
             mHandler.post(() -> {
-                mStats.noteNetworkInterfaceType(iface, networkType);
+                mStats.noteNetworkInterfaceForTransports(iface, transportTypes);
             });
         }
     }
