@@ -25,13 +25,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         androidprv:layout_maxWidth="@dimen/keyguard_security_width"
+        androidprv:layout_maxHeight="@dimen/keyguard_security_max_height"
         android:gravity="center_horizontal">
-
-  <Space
-      android:layout_width="match_parent"
-      android:layout_height="0dp"
-      android:layout_weight="1"
-      />
 
     <ImageView
             android:id="@+id/keyguard_sim"
@@ -42,9 +37,10 @@
 
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:orientation="vertical"
             android:gravity="center"
+            android:layout_weight="1"
             android:layoutDirection="ltr"
             >
         <include layout="@layout/keyguard_esim_area"
@@ -56,23 +52,32 @@
         <RelativeLayout
                 android:id="@+id/row0"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:paddingBottom="16dp"
                 >
             <com.android.keyguard.PasswordTextView
                     android:id="@+id/simPinEntry"
                     android:layout_width="@dimen/keyguard_security_width"
-                    android:layout_height="@dimen/keyguard_password_height"
+                    android:layout_height="match_parent"
                     android:gravity="center"
                     android:layout_centerHorizontal="true"
                     android:layout_marginRight="72dp"
                     androidprv:scaledTextSize="@integer/scaled_password_text_size"
                     android:contentDescription="@string/keyguard_accessibility_sim_pin_area"
                     />
+            <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_alignParentBottom="true"
+                    android:background="@drawable/pin_divider"
+                    />
         </RelativeLayout>
         <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:orientation="horizontal"
                 >
             <com.android.keyguard.NumPadKey
@@ -102,7 +107,8 @@
         </LinearLayout>
         <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:orientation="horizontal"
                 >
             <com.android.keyguard.NumPadKey
@@ -132,8 +138,9 @@
         </LinearLayout>
         <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
                 android:orientation="horizontal"
+                android:layout_weight="1"
                 >
             <com.android.keyguard.NumPadKey
                     android:id="@+id/key7"
@@ -162,16 +169,18 @@
         </LinearLayout>
         <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:orientation="horizontal"
                 >
-            <com.android.keyguard.NumPadButton
+            <com.android.keyguard.AlphaOptimizedImageButton
                     android:id="@+id/delete_button"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="@drawable/ripple_drawable_pin"
                     android:contentDescription="@string/keyboardview_keycode_delete"
-                    style="@style/NumPadKey.Delete"
+                    style="@style/Keyguard.ImageButton.NumPadDelete"
                     />
             <com.android.keyguard.NumPadKey
                     android:id="@+id/key0"
@@ -181,12 +190,13 @@
                     androidprv:textView="@+id/simPinEntry"
                     androidprv:digit="0"
                     />
-            <com.android.keyguard.NumPadButton
+            <com.android.keyguard.AlphaOptimizedImageButton
                     android:id="@+id/key_enter"
                     android:layout_width="0px"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    style="@style/NumPadKey.Enter"
+                    style="@style/Keyguard.ImageButton.NumPadEnter"
+                    android:background="@drawable/ripple_drawable_pin"
                     android:contentDescription="@string/keyboardview_keycode_enter"
                     />
         </LinearLayout>
