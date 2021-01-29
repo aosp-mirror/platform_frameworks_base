@@ -356,11 +356,11 @@ public class DisplayLayout {
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return null;
         }
-        final Insets waterfallInsets =
-                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         if (rotation == ROTATION_0) {
             return computeSafeInsets(cutout, displayWidth, displayHeight);
         }
+        final Insets waterfallInsets =
+                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         Rect[] cutoutRects = cutout.getBoundingRectsAll();
         final Rect[] newBounds = new Rect[cutoutRects.length];
@@ -372,8 +372,12 @@ public class DisplayLayout {
             }
             newBounds[getBoundIndexFromRotation(i, rotation)] = rect;
         }
+        final DisplayCutout.CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
+        final DisplayCutout.CutoutPathParserInfo newInfo = new DisplayCutout.CutoutPathParserInfo(
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
+                info.getCutoutSpec(), rotation, info.getScale());
         return computeSafeInsets(
-                DisplayCutout.fromBoundsAndWaterfall(newBounds, waterfallInsets),
+                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
                 rotated ? displayHeight : displayWidth,
                 rotated ? displayWidth : displayHeight);
     }
