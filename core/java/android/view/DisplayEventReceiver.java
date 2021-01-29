@@ -58,11 +58,11 @@ public abstract class DisplayEventReceiver {
     public static final int VSYNC_SOURCE_SURFACE_FLINGER = 1;
 
     /**
-     * Specifies to generate config changed events from Surface Flinger.
+     * Specifies to generate mode changed events from Surface Flinger.
      * <p>
      * Needs to be kept in sync with frameworks/native/include/gui/ISurfaceComposer.h
      */
-    public static final int EVENT_REGISTRATION_CONFIG_CHANGED_FLAG = 0x1;
+    public static final int EVENT_REGISTRATION_MODE_CHANGED_FLAG = 0x1;
 
     /**
      * Specifies to generate frame rate override events from Surface Flinger.
@@ -197,14 +197,14 @@ public abstract class DisplayEventReceiver {
     }
 
     /**
-     * Called when a display config changed event is received.
+     * Called when a display mode changed event is received.
      *
      * @param timestampNanos The timestamp of the event, in the {@link System#nanoTime()}
      * timebase.
      * @param physicalDisplayId Stable display ID that uniquely describes a (display, port) pair.
-     * @param configId The new config Id
+     * @param modeId The new mode Id
      */
-    public void onConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
+    public void onModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
     }
 
     /**
@@ -273,8 +273,8 @@ public abstract class DisplayEventReceiver {
 
     // Called from native code.
     @SuppressWarnings("unused")
-    private void dispatchConfigChanged(long timestampNanos, long physicalDisplayId, int configId) {
-        onConfigChanged(timestampNanos, physicalDisplayId, configId);
+    private void dispatchModeChanged(long timestampNanos, long physicalDisplayId, int modeId) {
+        onModeChanged(timestampNanos, physicalDisplayId, modeId);
     }
 
     // Called from native code.

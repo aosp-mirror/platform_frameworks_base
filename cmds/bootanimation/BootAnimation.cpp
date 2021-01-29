@@ -43,7 +43,7 @@
 
 #include <android-base/properties.h>
 
-#include <ui/DisplayConfig.h>
+#include <ui/DisplayMode.h>
 #include <ui/PixelFormat.h>
 #include <ui/Rect.h>
 #include <ui/Region.h>
@@ -64,6 +64,8 @@
 #define STRTO(x) STR(x)
 
 namespace android {
+
+using ui::DisplayMode;
 
 static const char OEM_BOOTANIMATION_FILE[] = "/oem/media/bootanimation.zip";
 static const char PRODUCT_BOOTANIMATION_DARK_FILE[] = "/product/media/bootanimation-dark.zip";
@@ -345,14 +347,14 @@ public:
                         continue;
                     }
 
-                    DisplayConfig displayConfig;
-                    const status_t error = SurfaceComposerClient::getActiveDisplayConfig(
-                        mBootAnimation->mDisplayToken, &displayConfig);
+                    DisplayMode displayMode;
+                    const status_t error = SurfaceComposerClient::getActiveDisplayMode(
+                        mBootAnimation->mDisplayToken, &displayMode);
                     if (error != NO_ERROR) {
-                        SLOGE("Can't get active display configuration.");
+                        SLOGE("Can't get active display mode.");
                     }
-                    mBootAnimation->resizeSurface(displayConfig.resolution.getWidth(),
-                        displayConfig.resolution.getHeight());
+                    mBootAnimation->resizeSurface(displayMode.resolution.getWidth(),
+                        displayMode.resolution.getHeight());
                 }
             }
         } while (numEvents > 0);
@@ -401,15 +403,15 @@ status_t BootAnimation::readyToRun() {
     if (mDisplayToken == nullptr)
         return NAME_NOT_FOUND;
 
-    DisplayConfig displayConfig;
+    DisplayMode displayMode;
     const status_t error =
-            SurfaceComposerClient::getActiveDisplayConfig(mDisplayToken, &displayConfig);
+            SurfaceComposerClient::getActiveDisplayMode(mDisplayToken, &displayMode);
     if (error != NO_ERROR)
         return error;
 
     mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
     mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
-    ui::Size resolution = displayConfig.resolution;
+    ui::Size resolution = displayMode.resolution;
     resolution = limitSurfaceSize(resolution.width, resolution.height);
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
