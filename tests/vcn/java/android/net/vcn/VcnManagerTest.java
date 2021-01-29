@@ -18,14 +18,19 @@ package android.net.vcn;
 
 import static androidx.test.InstrumentationRegistry.getContext;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.vcn.VcnManager.VcnUnderlyingNetworkPolicyListener;
 
 import org.junit.Before;
@@ -102,5 +107,29 @@ public class VcnManagerTest {
     @Test(expected = NullPointerException.class)
     public void testRemoveVcnUnderlyingNetworkPolicyListenerNullListener() {
         mVcnManager.removeVcnUnderlyingNetworkPolicyListener(null);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy() throws Exception {
+        NetworkCapabilities nc = new NetworkCapabilities();
+        LinkProperties lp = new LinkProperties();
+        when(mMockVcnManagementService.getUnderlyingNetworkPolicy(eq(nc), eq(lp)))
+                .thenReturn(new VcnUnderlyingNetworkPolicy(false /* isTearDownRequested */, nc));
+
+        VcnUnderlyingNetworkPolicy policy = mVcnManager.getUnderlyingNetworkPolicy(nc, lp);
+
+        assertFalse(policy.isTeardownRequested());
+        assertEquals(nc, policy.getMergedNetworkCapabilities());
+        verify(mMockVcnManagementService).getUnderlyingNetworkPolicy(eq(nc), eq(lp));
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetUnderlyingNetworkPolicyNullNetworkCapabilities() throws Exception {
+        mVcnManager.getUnderlyingNetworkPolicy(null, new LinkProperties());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void testGetUnderlyingNetworkPolicyNullLinkProperties() throws Exception {
+        mVcnManager.getUnderlyingNetworkPolicy(new NetworkCapabilities(), null);
     }
 }
