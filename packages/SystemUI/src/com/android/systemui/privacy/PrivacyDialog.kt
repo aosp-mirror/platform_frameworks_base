@@ -123,7 +123,7 @@ class PrivacyDialog(
         val finalText = element.attribution?.let {
             TextUtils.concat(
                     firstLine,
-                    "\n",
+                    " ",
                     context.getString(R.string.ongoing_privacy_dialog_attribution_text, it)
             )
         } ?: firstLine
