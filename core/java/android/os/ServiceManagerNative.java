@@ -103,6 +103,10 @@ class ServiceManagerProxy implements IServiceManager {
         throw new RemoteException();
     }
 
+    public ServiceDebugInfo[] getServiceDebugInfo() throws RemoteException {
+        return mServiceManager.getServiceDebugInfo();
+    }
+
     /**
      * Same as mServiceManager but used by apps.
      *
