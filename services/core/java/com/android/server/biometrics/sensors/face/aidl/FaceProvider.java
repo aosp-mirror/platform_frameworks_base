@@ -382,7 +382,7 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
-            @Nullable NativeHandle previewSurface) {
+            @Nullable NativeHandle previewSurface, boolean debugConsent) {
         mHandler.post(() -> {
             final IFace daemon = getHalInstance();
             if (daemon == null) {
@@ -404,7 +404,8 @@ public class FaceProvider implements IBinder.DeathRecipient, ServiceProvider {
                         mSensors.get(sensorId).getLazySession(), token,
                         new ClientMonitorCallbackConverter(receiver), userId, hardwareAuthToken,
                         opPackageName, FaceUtils.getInstance(sensorId), disabledFeatures,
-                        ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser);
+                        ENROLL_TIMEOUT_SEC, previewSurface, sensorId, maxTemplatesPerUser,
+                        debugConsent);
                 scheduleForSensor(sensorId, client, new BaseClientMonitor.Callback() {
                     @Override
                     public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,

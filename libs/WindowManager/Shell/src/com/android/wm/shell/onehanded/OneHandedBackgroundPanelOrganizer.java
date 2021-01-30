@@ -56,7 +56,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
     private final float[] mColor;
     private final float mAlpha;
     private final Rect mRect;
-    private final Handler mHandler;
+    private final Executor mMainExecutor;
     private final Point mDisplaySize = new Point();
     private final OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
@@ -76,13 +76,13 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
                 @Override
                 public void onOneHandedAnimationStart(
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                    mHandler.post(() -> showBackgroundPanelLayer());
+                    mMainExecutor.execute(() -> showBackgroundPanelLayer());
                 }
             };
 
     @Override
     public void onStopFinished(Rect bounds) {
-        mHandler.post(() -> removeBackgroundPanelLayer());
+        mMainExecutor.execute(() -> removeBackgroundPanelLayer());
     }
 
     public OneHandedBackgroundPanelOrganizer(Context context, DisplayController displayController,
@@ -94,7 +94,7 @@ public class OneHandedBackgroundPanelOrganizer extends DisplayAreaOrganizer
         mColor = new float[]{defaultRGB, defaultRGB, defaultRGB};
         mAlpha = res.getFloat(R.dimen.config_one_handed_background_alpha);
         mRect = new Rect(0, 0, mDisplaySize.x, mDisplaySize.y);
-        mHandler = new Handler();
+        mMainExecutor = executor;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
     }
 

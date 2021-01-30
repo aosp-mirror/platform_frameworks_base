@@ -713,6 +713,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private @Nullable InsetsSourceProvider mControllableInsetProvider;
     private final InsetsState mRequestedInsetsState = new InsetsState();
 
+    /**
+     * Freeze the insets state in some cases that not necessarily keeps up-to-date to the client.
+     * (e.g app exiting transition)
+     */
+    private InsetsState mFrozenInsetsState;
+
     @Nullable InsetsSourceProvider mPendingPositionChanged;
 
     private static final float DEFAULT_DIM_AMOUNT_DEAD_WINDOW = 0.5f;
@@ -756,6 +762,33 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (source == null) continue;
             mRequestedInsetsState.addSource(source);
         }
+    }
+
+    /**
+     * Set a freeze state for the window to ignore dispatching its insets state to the client.
+     *
+     * Used to keep the insets state for some use cases. (e.g. app exiting transition)
+     */
+    void freezeInsetsState() {
+        if (mFrozenInsetsState == null) {
+            mFrozenInsetsState = new InsetsState(getInsetsState(), true /* copySources */);
+        }
+    }
+
+    void clearFrozenInsetsState() {
+        mFrozenInsetsState = null;
+    }
+
+    InsetsState getFrozenInsetsState() {
+        return mFrozenInsetsState;
+    }
+
+    /**
+     * Check if the insets state of the window is ready to dispatch to the client when invoking
+     * {@link InsetsStateController#notifyInsetsChanged}.
+     */
+    boolean isReadyToDispatchInsetsState() {
+        return isVisible() && mFrozenInsetsState == null;
     }
 
     void seamlesslyRotateIfAllowed(Transaction transaction, @Rotation int oldRotation,
@@ -2110,12 +2143,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().getBounds().equals(getBounds());
     }
 
-    boolean matchesRootDisplayAreaBounds() {
-        RootDisplayArea root = getRootDisplayArea();
-        if (root == null || root == getDisplayContent()) {
+    boolean matchesDisplayAreaBounds() {
+        final DisplayArea displayArea = getDisplayArea();
+        if (displayArea == null) {
             return matchesDisplayBounds();
         }
-        return root.getBounds().equals(getBounds());
+        return displayArea.getBounds().equals(getBounds());
     }
 
     /**
@@ -3762,16 +3795,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return getDisplayContent().mCurrentFocus == this;
     }
 
-
     /** Is this window in a container that takes up the entire screen space? */
     private boolean inAppWindowThatMatchesParentBounds() {
         return mActivityRecord == null || (mActivityRecord.matchParentBounds() && !inMultiWindowMode());
     }
 
-    /** @return true when the window is in fullscreen mode, but has non-fullscreen bounds set, or
-     *          is transitioning into/out-of fullscreen. */
+    /** @return true when the window should be letterboxed. */
     boolean isLetterboxedAppWindow() {
-        return !inMultiWindowMode() && !matchesRootDisplayAreaBounds()
+        // Fullscreen mode but doesn't fill display area.
+        return (!inMultiWindowMode() && !matchesDisplayAreaBounds())
+                // Activity in size compat.
+                || (mActivityRecord != null && mActivityRecord.inSizeCompatMode())
+                // Task letterboxed.
+                || (getTask() != null && getTask().isTaskLetterboxed())
+                // Letterboxed for display cutout.
                 || isLetterboxedForDisplayCutout();
     }
 
@@ -3809,11 +3846,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @see Letterbox#notIntersectsOrFullyContains(Rect)
+     * @return {@code true} if bar shown within a given frame is allowed to be transparent
+     *     when the current window is displayed.
      */
-    boolean letterboxNotIntersectsOrFullyContains(Rect rect) {
-        return mActivityRecord == null
-                || mActivityRecord.letterboxNotIntersectsOrFullyContains(rect);
+    boolean isTransparentBarAllowed(Rect frame) {
+        return mActivityRecord == null || mActivityRecord.isTransparentBarAllowed(frame);
     }
 
     public boolean isLetterboxedOverlappingWith(Rect rect) {

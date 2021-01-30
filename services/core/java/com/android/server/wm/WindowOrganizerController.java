@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.READ_FRAME_BUFFER;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REORDER;
 import static android.window.WindowContainerTransaction.HierarchyOp.HIERARCHY_OP_TYPE_REPARENT;
@@ -264,57 +265,63 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
             }
             // Hierarchy changes
             final List<WindowContainerTransaction.HierarchyOp> hops = t.getHierarchyOps();
-            for (int i = 0, n = hops.size(); i < n; ++i) {
-                final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
-                switch (hop.getType()) {
-                    case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
-                        final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                        final Task task = wc != null ? wc.asTask() : null;
-                        if (task != null) {
-                            task.getDisplayArea().setLaunchRootTask(task,
-                                    hop.getWindowingModes(), hop.getActivityTypes());
-                        } else {
-                            throw new IllegalArgumentException(
-                                    "Cannot set non-task as launch root: " + wc);
+            if (!hops.isEmpty() && mService.isInLockTaskMode()) {
+                Slog.w(TAG, "Attempt to perform hierarchy operations while in lock task mode...");
+            } else {
+                for (int i = 0, n = hops.size(); i < n; ++i) {
+                    final WindowContainerTransaction.HierarchyOp hop = hops.get(i);
+                    switch (hop.getType()) {
+                        case HIERARCHY_OP_TYPE_SET_LAUNCH_ROOT: {
+                            final WindowContainer wc = WindowContainer.fromBinder(
+                                    hop.getContainer());
+                            final Task task = wc != null ? wc.asTask() : null;
+                            if (task != null) {
+                                task.getDisplayArea().setLaunchRootTask(task,
+                                        hop.getWindowingModes(), hop.getActivityTypes());
+                            } else {
+                                throw new IllegalArgumentException(
+                                        "Cannot set non-task as launch root: " + wc);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
-                        effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId);
-                        break;
-                    case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
-                        effects |= setAdjacentRootsHierarchyOp(hop);
-                        break;
-                    case HIERARCHY_OP_TYPE_REORDER:
-                    case HIERARCHY_OP_TYPE_REPARENT:
-                        final WindowContainer wc = WindowContainer.fromBinder(hop.getContainer());
-                        if (wc == null || !wc.isAttached()) {
-                            Slog.e(TAG, "Attempt to operate on detached container: " + wc);
-                            continue;
-                        }
-                        if (syncId >= 0) {
-                            addToSyncSet(syncId, wc);
-                        }
-                        if (transition != null) {
-                            transition.collect(wc);
-                            if (hop.isReparent()) {
-                                if (wc.getParent() != null) {
-                                    // Collect the current parent. It's visibility may change as
-                                    // a result of this reparenting.
-                                    transition.collect(wc.getParent());
-                                }
-                                if (hop.getNewParent() != null) {
-                                    final WindowContainer parentWc =
-                                            WindowContainer.fromBinder(hop.getNewParent());
-                                    if (parentWc == null) {
-                                        Slog.e(TAG, "Can't resolve parent window from token");
-                                        continue;
+                        case HIERARCHY_OP_TYPE_CHILDREN_TASKS_REPARENT:
+                            effects |= reparentChildrenTasksHierarchyOp(hop, transition, syncId);
+                            break;
+                        case HIERARCHY_OP_TYPE_SET_ADJACENT_ROOTS:
+                            effects |= setAdjacentRootsHierarchyOp(hop);
+                            break;
+                        case HIERARCHY_OP_TYPE_REORDER:
+                        case HIERARCHY_OP_TYPE_REPARENT:
+                            final WindowContainer wc = WindowContainer.fromBinder(
+                                    hop.getContainer());
+                            if (wc == null || !wc.isAttached()) {
+                                Slog.e(TAG, "Attempt to operate on detached container: " + wc);
+                                continue;
+                            }
+                            if (syncId >= 0) {
+                                addToSyncSet(syncId, wc);
+                            }
+                            if (transition != null) {
+                                transition.collect(wc);
+                                if (hop.isReparent()) {
+                                    if (wc.getParent() != null) {
+                                        // Collect the current parent. It's visibility may change as
+                                        // a result of this reparenting.
+                                        transition.collect(wc.getParent());
                                     }
-                                    transition.collect(parentWc);
+                                    if (hop.getNewParent() != null) {
+                                        final WindowContainer parentWc =
+                                                WindowContainer.fromBinder(hop.getNewParent());
+                                        if (parentWc == null) {
+                                            Slog.e(TAG, "Can't resolve parent window from token");
+                                            continue;
+                                        }
+                                        transition.collect(parentWc);
+                                    }
                                 }
                             }
-                        }
-                        effects |= sanitizeAndApplyHierarchyOp(wc, hop);
+                            effects |= sanitizeAndApplyHierarchyOp(wc, hop);
+                    }
                 }
             }
             // Queue-up bounds-change transactions for tasks which are now organized. Do
@@ -412,6 +419,10 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         if (windowingMode > -1) {
+            if (mService.isInLockTaskMode() && windowingMode != WINDOWING_MODE_FULLSCREEN) {
+                throw new UnsupportedOperationException("Not supported to set non-fullscreen"
+                        + " windowing mode during locked task mode.");
+            }
             container.setWindowingMode(windowingMode);
         }
         return effects;

@@ -218,7 +218,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
         @Override // Binder call
         public void enroll(int userId, final IBinder token, final byte[] hardwareAuthToken,
                 final IFaceServiceReceiver receiver, final String opPackageName,
-                final int[] disabledFeatures, Surface surface) {
+                final int[] disabledFeatures, Surface surface, boolean debugConsent) {
             Utils.checkPermission(getContext(), MANAGE_BIOMETRIC);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -229,7 +229,7 @@ public class FaceService extends SystemService implements BiometricServiceCallba
 
             provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
                     receiver, opPackageName, disabledFeatures,
-                    convertSurfaceToNativeHandle(surface));
+                    convertSurfaceToNativeHandle(surface), debugConsent);
         }
 
         @Override // Binder call

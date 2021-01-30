@@ -24,13 +24,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
-import android.os.Handler;
+import android.os.Binder;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.Display;
@@ -89,12 +90,14 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
+        Binder binder = new Binder();
+        doReturn(binder).when(mMockRealToken).asBinder();
         mToken = new WindowContainerToken(mMockRealToken);
         mLeash = new SurfaceControl();
         mDisplay = mContext.getDisplay();
         mDisplayAreaInfo = new DisplayAreaInfo(mToken, DEFAULT_DISPLAY, FEATURE_ONE_HANDED);
         mDisplayAreaInfo.configuration.orientation = Configuration.ORIENTATION_PORTRAIT;
-        when(mMockAnimationController.getAnimator(any(), any(), any())).thenReturn(null);
+        when(mMockAnimationController.getAnimator(any(), any(), any(), any())).thenReturn(null);
         when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockSurfaceTransactionHelper.translate(any(), any(), anyFloat())).thenReturn(
                 mMockSurfaceTransactionHelper);
@@ -121,7 +124,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
     public void testOnDisplayAreaAppeared() {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
 
-        verify(mMockAnimationController, never()).getAnimator(any(), any(), any());
+        verify(mMockAnimationController, never()).getAnimator(any(), any(), any(), any());
     }
 
     @Test
@@ -129,7 +132,7 @@ public class OneHandedDisplayAreaOrganizerTest extends OneHandedTestCase {
         mDisplayAreaOrganizer.onDisplayAreaAppeared(mDisplayAreaInfo, mLeash);
         mDisplayAreaOrganizer.onDisplayAreaVanished(mDisplayAreaInfo);
 
-        assertThat(mDisplayAreaOrganizer.mDisplayAreaMap).isEmpty();
+        assertThat(mDisplayAreaOrganizer.mDisplayAreaTokenMap).isEmpty();
     }
 
     @Test

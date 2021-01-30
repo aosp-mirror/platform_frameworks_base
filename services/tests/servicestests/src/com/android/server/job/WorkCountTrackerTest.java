@@ -16,36 +16,42 @@
 
 package com.android.server.job;
 
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
+import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import android.util.Log;
+import android.util.Pair;
 
-import com.android.server.job.JobConcurrencyManager.JobCountTracker;
+import androidx.test.filters.MediumTest;
+import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.job.JobConcurrencyManager.WorkCountTracker;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.List;
 import java.util.Random;
 
-import androidx.test.filters.MediumTest;
-import androidx.test.runner.AndroidJUnit4;
-
 /**
- * Test for {@link com.android.server.job.JobConcurrencyManager.JobCountTracker}.
+ * Test for {@link WorkCountTracker}.
  */
 @RunWith(AndroidJUnit4.class)
 @MediumTest
-public class JobCountTrackerTest {
-    private static final String TAG = "JobCountTrackerTest";
+public class WorkCountTrackerTest {
+    private static final String TAG = "WorkerCountTrackerTest";
 
     private Random mRandom;
-    private JobCountTracker mJobCountTracker;
+    private WorkCountTracker mWorkCountTracker;
 
     @Before
     public void setUp() {
         mRandom = new Random(1); // Always use the same series of pseudo random values.
-        mJobCountTracker = new JobCountTracker();
+        mWorkCountTracker = new WorkCountTracker();
     }
 
     /**
@@ -83,44 +89,57 @@ public class JobCountTrackerTest {
 
 
     private void startPendingJobs(Jobs jobs, int totalMax, int maxBg, int minBg) {
-        mJobCountTracker.reset(totalMax, maxBg, minBg);
+        mWorkCountTracker.setConfig(new JobConcurrencyManager.WorkTypeConfig("critical",
+                totalMax,
+                // defaultMin
+                List.of(Pair.create(WORK_TYPE_TOP, totalMax - maxBg),
+                        Pair.create(WORK_TYPE_BG, minBg)),
+                // defaultMax
+                List.of(Pair.create(WORK_TYPE_BG, maxBg))));
+        mWorkCountTracker.resetCounts();
 
         for (int i = 0; i < jobs.runningFg; i++) {
-            mJobCountTracker.incrementRunningJobCount(true);
+            mWorkCountTracker.incrementRunningJobCount(WORK_TYPE_TOP);
         }
         for (int i = 0; i < jobs.runningBg; i++) {
-            mJobCountTracker.incrementRunningJobCount(false);
+            mWorkCountTracker.incrementRunningJobCount(WORK_TYPE_BG);
         }
 
         for (int i = 0; i < jobs.pendingFg; i++) {
-            mJobCountTracker.incrementPendingJobCount(true);
+            mWorkCountTracker.incrementPendingJobCount(WORK_TYPE_TOP);
         }
         for (int i = 0; i < jobs.pendingBg; i++) {
-            mJobCountTracker.incrementPendingJobCount(false);
+            mWorkCountTracker.incrementPendingJobCount(WORK_TYPE_BG);
         }
 
-        mJobCountTracker.onCountDone();
+        mWorkCountTracker.onCountDone();
 
-        while ((jobs.pendingFg > 0 && mJobCountTracker.canJobStart(true))
-                || (jobs.pendingBg > 0 && mJobCountTracker.canJobStart(false))) {
+        while ((jobs.pendingFg > 0
+                && mWorkCountTracker.canJobStart(WORK_TYPE_TOP) != WORK_TYPE_NONE)
+                || (jobs.pendingBg > 0
+                && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE)) {
             final boolean isStartingFg = mRandom.nextBoolean();
 
             if (isStartingFg) {
-                if (jobs.pendingFg > 0 && mJobCountTracker.canJobStart(true)) {
+                if (jobs.pendingFg > 0
+                        && mWorkCountTracker.canJobStart(WORK_TYPE_TOP) != WORK_TYPE_NONE) {
                     jobs.pendingFg--;
                     jobs.runningFg++;
-                    mJobCountTracker.onStartingNewJob(true);
+                    mWorkCountTracker.stageJob(WORK_TYPE_TOP);
+                    mWorkCountTracker.onJobStarted(WORK_TYPE_TOP);
                 }
             } else {
-                if (jobs.pendingBg > 0 && mJobCountTracker.canJobStart(false)) {
+                if (jobs.pendingBg > 0
+                        && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE) {
                     jobs.pendingBg--;
                     jobs.runningBg++;
-                    mJobCountTracker.onStartingNewJob(false);
+                    mWorkCountTracker.stageJob(WORK_TYPE_BG);
+                    mWorkCountTracker.onJobStarted(WORK_TYPE_BG);
                 }
             }
         }
 
-        Log.i(TAG, "" + mJobCountTracker);
+        Log.i(TAG, "" + mWorkCountTracker);
     }
 
     /**
@@ -277,6 +296,7 @@ public class JobCountTrackerTest {
 
         startPendingJobs(jobs, totalMax, maxBg, minBg);
 
+//        fail(mWorkerCountTracker.toString());
         assertThat(jobs.runningFg).isEqualTo(resultRunningFg);
         assertThat(jobs.runningBg).isEqualTo(resultRunningBg);
 
@@ -299,6 +319,8 @@ public class JobCountTrackerTest {
         // When there are BG jobs pending, 2 (min-BG) jobs should run.
         checkSimple(6, 4, 2, /*run=*/ 0, 0, /*pen=*/ 10, 1, /*res run/pen=*/ 5, 1, 5, 0);
         checkSimple(6, 4, 2, /*run=*/ 0, 0, /*pen=*/ 10, 3, /*res run/pen=*/ 4, 2, 6, 1);
+
+        checkSimple(8, 6, 2, /*run=*/ 0, 0, /*pen=*/ 0, 49, /*res run/pen=*/ 0, 6, 0, 43);
 
         checkSimple(6, 4, 2, /*run=*/ 6, 0, /*pen=*/ 10, 3, /*res run/pen=*/ 6, 0, 10, 3);
     }

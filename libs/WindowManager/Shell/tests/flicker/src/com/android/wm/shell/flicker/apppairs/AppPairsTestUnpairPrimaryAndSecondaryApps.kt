@@ -85,7 +85,7 @@ class AppPairsTestUnpairPrimaryAndSecondaryApps(
                         }
                     }
                     windowManagerTrace {
-                        end {
+                        end("bothAppWindowsInvisible") {
                             isInvisible(primaryApp.defaultWindowName)
                             isInvisible(secondaryApp.defaultWindowName)
                         }
