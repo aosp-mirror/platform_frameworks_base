@@ -128,7 +128,7 @@ final class ConnectionRecord {
                 && association == null && binding.service.app != null
                 && (binding.service.appInfo.uid != clientUid
                         || !binding.service.processName.equals(clientProcessName))) {
-            ProcessStats.ProcessStateHolder holder = binding.service.app.pkgList.get(
+            ProcessStats.ProcessStateHolder holder = binding.service.app.getPkgList().get(
                     binding.service.instanceName.getPackageName());
             if (holder == null) {
                 Slog.wtf(TAG_AM, "No package in referenced service "
