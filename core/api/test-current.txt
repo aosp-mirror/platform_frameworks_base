@@ -826,6 +826,17 @@ package android.graphics.fonts {
 
   public class FontManager {
     method @Nullable public android.text.FontConfig getFontConfig();
+    method @RequiresPermission(android.Manifest.permission.UPDATE_FONTS) public int updateFontFile(@NonNull android.os.ParcelFileDescriptor, @NonNull byte[], @IntRange(from=0) int);
+    field public static final int RESULT_ERROR_DOWNGRADING = -5; // 0xfffffffb
+    field public static final int RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE = -1; // 0xffffffff
+    field public static final int RESULT_ERROR_FAILED_UPDATE_CONFIG = -6; // 0xfffffffa
+    field public static final int RESULT_ERROR_FONT_UPDATER_DISABLED = -7; // 0xfffffff9
+    field public static final int RESULT_ERROR_INVALID_FONT_FILE = -3; // 0xfffffffd
+    field public static final int RESULT_ERROR_INVALID_FONT_NAME = -4; // 0xfffffffc
+    field public static final int RESULT_ERROR_REMOTE_EXCEPTION = -9; // 0xfffffff7
+    field public static final int RESULT_ERROR_VERIFICATION_FAILURE = -2; // 0xfffffffe
+    field public static final int RESULT_ERROR_VERSION_MISMATCH = -8; // 0xfffffff8
+    field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
 }
@@ -2033,7 +2044,9 @@ package android.text {
   public final class FontConfig implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public java.util.List<android.text.FontConfig.Alias> getAliases();
+    method @IntRange(from=0) public int getConfigVersion();
     method @NonNull public java.util.List<android.text.FontConfig.FontFamily> getFontFamilies();
+    method public long getLastModifiedTimeMillis();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.text.FontConfig> CREATOR;
   }

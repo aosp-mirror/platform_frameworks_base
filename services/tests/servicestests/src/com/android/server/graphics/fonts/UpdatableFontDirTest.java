@@ -147,7 +147,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
-        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedDate())
+        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
                 .isEqualTo(expectedModifiedDate);
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
@@ -156,7 +156,7 @@ public final class UpdatableFontDirTest {
         // Four font dirs are created.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(4);
         //
-        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedDate())
+        assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
                 .isNotEqualTo(expectedModifiedDate);
 
         UpdatableFontDir dir = new UpdatableFontDir(
@@ -319,7 +319,7 @@ public final class UpdatableFontDirTest {
             installFontFile(dir, "test,1", GOOD_SIGNATURE);
             fail("Expect IllegalArgumentException");
         } catch (FontManagerService.SystemFontException e) {
-            assertThat(e.getErrorCode()).isEqualTo(FontManager.ERROR_CODE_DOWNGRADING);
+            assertThat(e.getErrorCode()).isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
         }
         assertThat(dir.getFontFileMap()).containsKey("test.ttf");
         assertWithMessage("Font should not be downgraded to an older revision")
@@ -355,7 +355,7 @@ public final class UpdatableFontDirTest {
             fail("Expect SystemFontException");
         } catch (FontManagerService.SystemFontException e) {
             assertThat(e.getErrorCode())
-                    .isEqualTo(FontManager.ERROR_CODE_VERIFICATION_FAILURE);
+                    .isEqualTo(FontManager.RESULT_ERROR_VERIFICATION_FAILURE);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }
@@ -373,7 +373,7 @@ public final class UpdatableFontDirTest {
             installFontFile(dir, "test,1", GOOD_SIGNATURE);
             fail("Expect IllegalArgumentException");
         } catch (FontManagerService.SystemFontException e) {
-            assertThat(e.getErrorCode()).isEqualTo(FontManager.ERROR_CODE_DOWNGRADING);
+            assertThat(e.getErrorCode()).isEqualTo(FontManager.RESULT_ERROR_DOWNGRADING);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }
@@ -403,9 +403,9 @@ public final class UpdatableFontDirTest {
                 installFontFile(dir, "test,2", GOOD_SIGNATURE);
             } catch (FontManagerService.SystemFontException e) {
                 assertThat(e.getErrorCode())
-                        .isEqualTo(FontManager.ERROR_CODE_FAILED_TO_CREATE_CONFIG_FILE);
+                        .isEqualTo(FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG);
             }
-            assertThat(dir.getSystemFontConfig().getLastModifiedDate())
+            assertThat(dir.getSystemFontConfig().getLastModifiedTimeMillis())
                     .isEqualTo(expectedModifiedDate);
             assertThat(dir.getFontFileMap()).isEmpty();
         } finally {
@@ -435,7 +435,7 @@ public final class UpdatableFontDirTest {
             fail("Expect SystemFontException");
         } catch (FontManagerService.SystemFontException e) {
             assertThat(e.getErrorCode())
-                    .isEqualTo(FontManager.ERROR_CODE_MISSING_POST_SCRIPT_NAME);
+                    .isEqualTo(FontManager.RESULT_ERROR_INVALID_FONT_NAME);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }
@@ -462,7 +462,7 @@ public final class UpdatableFontDirTest {
             fail("Expect SystemFontException");
         } catch (FontManagerService.SystemFontException e) {
             assertThat(e.getErrorCode())
-                    .isEqualTo(FontManager.ERROR_CODE_INVALID_FONT_FILE);
+                    .isEqualTo(FontManager.RESULT_ERROR_INVALID_FONT_FILE);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }
@@ -497,7 +497,7 @@ public final class UpdatableFontDirTest {
             fail("Expect SystemFontException");
         } catch (FontManagerService.SystemFontException e) {
             assertThat(e.getErrorCode())
-                    .isEqualTo(FontManager.ERROR_CODE_FAILED_TO_WRITE_FONT_FILE);
+                    .isEqualTo(FontManager.RESULT_ERROR_FAILED_TO_WRITE_FONT_FILE);
         }
         assertThat(dir.getFontFileMap()).isEmpty();
     }

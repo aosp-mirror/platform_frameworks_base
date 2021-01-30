@@ -304,27 +304,27 @@ public class FontManagerShellCommand extends ShellCommand {
         String fontPath = shell.getNextArg();
         if (fontPath == null) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_INVALID_SHELL_ARGUMENT,
+                    FontManager.RESULT_ERROR_INVALID_SHELL_ARGUMENT,
                     "Font file path argument is required.");
         }
         String signaturePath = shell.getNextArg();
         if (signaturePath == null) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_INVALID_SHELL_ARGUMENT,
+                    FontManager.RESULT_ERROR_INVALID_SHELL_ARGUMENT,
                     "Signature file argument is required.");
         }
 
         ParcelFileDescriptor fontFd = shell.openFileForSystem(fontPath, "r");
         if (fontFd == null) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_FAILED_TO_OPEN_FONT_FILE,
+                    FontManager.RESULT_ERROR_FAILED_TO_OPEN_FONT_FILE,
                     "Failed to open font file");
         }
 
         ParcelFileDescriptor sigFd = shell.openFileForSystem(signaturePath, "r");
         if (sigFd == null) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_FAILED_TO_OPEN_SIGNATURE_FILE,
+                    FontManager.RESULT_ERROR_FAILED_TO_OPEN_SIGNATURE_FILE,
                     "Failed to open signature file");
         }
 
@@ -333,24 +333,24 @@ public class FontManagerShellCommand extends ShellCommand {
                 int len = sigFis.available();
                 if (len > MAX_SIGNATURE_FILE_SIZE_BYTES) {
                     throw new SystemFontException(
-                            FontManager.ERROR_CODE_SIGNATURE_TOO_LARGE,
+                            FontManager.RESULT_ERROR_SIGNATURE_TOO_LARGE,
                             "Signature file is too large");
                 }
                 byte[] signature = new byte[len];
                 if (sigFis.read(signature, 0, len) != len) {
                     throw new SystemFontException(
-                            FontManager.ERROR_CODE_INVALID_SIGNATURE_FILE,
+                            FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
                             "Invalid read length");
                 }
-                mService.installFontFile(fontFis.getFD(), signature);
+                mService.installFontFile(fontFis.getFD(), signature, -1);
             } catch (IOException e) {
                 throw new SystemFontException(
-                        FontManager.ERROR_CODE_INVALID_SIGNATURE_FILE,
+                        FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
                         "Failed to read signature file.", e);
             }
         } catch (IOException e) {
             throw new SystemFontException(
-                    FontManager.ERROR_CODE_INVALID_FONT_FILE,
+                    FontManager.RESULT_ERROR_INVALID_FONT_FILE,
                     "Failed to read font files.", e);
         }
 
@@ -370,7 +370,7 @@ public class FontManagerShellCommand extends ShellCommand {
         FontConfig config = mService.getSystemFontConfig();
 
         writer.println("Current Version: " + config.getConfigVersion());
-        LocalDateTime dt = LocalDateTime.ofEpochSecond(config.getLastModifiedDate(), 0,
+        LocalDateTime dt = LocalDateTime.ofEpochSecond(config.getLastModifiedTimeMillis(), 0,
                 ZoneOffset.UTC);
         writer.println("Last Modified Date: " + dt.format(DateTimeFormatter.ISO_DATE_TIME));
 
