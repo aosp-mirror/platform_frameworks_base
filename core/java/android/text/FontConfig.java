@@ -53,7 +53,7 @@ import java.util.List;
 public final class FontConfig implements Parcelable {
     private final @NonNull List<FontFamily> mFamilies;
     private final @NonNull List<Alias> mAliases;
-    private final long mLastModifiedDate;
+    private final long mLastModifiedTimeMillis;
     private final int mConfigVersion;
 
     /**
@@ -65,10 +65,10 @@ public final class FontConfig implements Parcelable {
      * @hide Only system server can create this instance and passed via IPC.
      */
     public FontConfig(@NonNull List<FontFamily> families, @NonNull List<Alias> aliases,
-            long lastModifiedDate, @IntRange(from = 0) int configVersion) {
+            long lastModifiedTimeMillis, @IntRange(from = 0) int configVersion) {
         mFamilies = families;
         mAliases = aliases;
-        mLastModifiedDate = lastModifiedDate;
+        mLastModifiedTimeMillis = lastModifiedTimeMillis;
         mConfigVersion = configVersion;
     }
 
@@ -93,20 +93,21 @@ public final class FontConfig implements Parcelable {
     }
 
     /**
-     * Returns the last modified date as Java epoch seconds.
+     * Returns the last modified time in milliseconds.
+     *
+     * This is a value of {@link System#currentTimeMillis()} when the system font configuration was
+     * modified last time.
      *
      * If there is no update, this return 0.
-     * @hide
      */
-    public long getLastModifiedDate() {
-        return mLastModifiedDate;
+    public long getLastModifiedTimeMillis() {
+        return mLastModifiedTimeMillis;
     }
 
     /**
      * Returns the monotonically increasing config version value.
      *
      * The config version is reset to 0 when the system is restarted.
-     * @hide
      */
     public @IntRange(from = 0) int getConfigVersion() {
         return mConfigVersion;
@@ -132,7 +133,7 @@ public final class FontConfig implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelableList(mFamilies, flags);
         dest.writeParcelableList(mAliases, flags);
-        dest.writeLong(mLastModifiedDate);
+        dest.writeLong(mLastModifiedTimeMillis);
         dest.writeInt(mConfigVersion);
     }
 
