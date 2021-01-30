@@ -32,6 +32,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_BLUETOOTH;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_ETHERNET;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+import static android.net.NetworkRequest.Type.BACKGROUND_REQUEST;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
 
@@ -366,6 +367,12 @@ public class ConnectivityManagerTest {
         manager.registerDefaultNetworkCallback(callback);
         verify(mService).requestNetwork(eq(null),
                 eq(TRACK_DEFAULT.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
+                eq(testPkgName), eq(null));
+        reset(mService);
+
+        manager.requestBackgroundNetwork(request, null, callback);
+        verify(mService).requestNetwork(eq(request.networkCapabilities),
+                eq(BACKGROUND_REQUEST.ordinal()), any(), anyInt(), any(), eq(TYPE_NONE),
                 eq(testPkgName), eq(null));
         reset(mService);
     }
