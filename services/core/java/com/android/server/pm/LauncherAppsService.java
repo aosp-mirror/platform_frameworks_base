@@ -21,6 +21,7 @@ import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.pm.LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
 import static android.content.pm.LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
+import static android.content.pm.LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1158,6 +1159,8 @@ public class LauncherAppsService extends SystemService {
                 ret = ShortcutInfo.FLAG_CACHED_NOTIFICATIONS;
             } else if (cacheFlags == FLAG_CACHE_BUBBLE_SHORTCUTS) {
                 ret = ShortcutInfo.FLAG_CACHED_BUBBLES;
+            } else if (cacheFlags == FLAG_CACHE_PEOPLE_TILE_SHORTCUTS) {
+                ret = ShortcutInfo.FLAG_CACHED_PEOPLE_TILE;
             }
             Preconditions.checkArgumentPositive(ret, "Invalid cache owner");
 

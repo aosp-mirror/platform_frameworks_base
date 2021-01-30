@@ -103,7 +103,6 @@ import android.util.TypedXmlSerializer;
 import android.util.Xml;
 
 import com.android.frameworks.servicestests.R;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.server.pm.ShortcutService.ConfigConstants;
 import com.android.server.pm.ShortcutService.FileOutputStreamWithPath;
 import com.android.server.pm.ShortcutUser.PackageWithUser;
@@ -111,7 +110,6 @@ import com.android.server.pm.ShortcutUser.PackageWithUser;
 import org.mockito.ArgumentCaptor;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -141,6 +139,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     private static final int CACHE_OWNER_0 = LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
     private static final int CACHE_OWNER_1 = LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS;
+    private static final int CACHE_OWNER_2 = LauncherApps.FLAG_CACHE_PEOPLE_TILE_SHORTCUTS;
 
     @Override
     protected void tearDown() throws Exception {
@@ -1531,7 +1530,8 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(makeShortcut("s1"),
                     makeLongLivedShortcut("s2"), makeLongLivedShortcut("s3"),
-                    makeLongLivedShortcut("s4"))));
+                    makeLongLivedShortcut("s4"), makeLongLivedShortcut("s5"),
+                    makeLongLivedShortcut("s6"))));
         });
 
         // Pin s2
@@ -1545,28 +1545,30 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
             mInjectCheckAccessShortcutsPermission = true;
             mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1", "s2"),
                     HANDLE_USER_0, CACHE_OWNER_0);
-            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s2", "s4"),
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s2", "s4", "s5"),
                     HANDLE_USER_0, CACHE_OWNER_1);
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s5", "s6"),
+                    HANDLE_USER_0, CACHE_OWNER_2);
         });
 
         setCaller(CALLING_PACKAGE_1);
 
         // Get dynamic shortcuts
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_DYNAMIC),
-                "s1", "s2", "s3", "s4");
+                "s1", "s2", "s3", "s4", "s5", "s6");
         // Get pinned shortcuts
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_PINNED),
                 "s2");
         // Get cached shortcuts
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s2", "s4");
+                "s2", "s4", "s5", "s6");
 
         // Remove a dynamic cached shortcut
-        mManager.removeDynamicShortcuts(list("s4"));
+        mManager.removeDynamicShortcuts(list("s4", "s5"));
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_DYNAMIC),
-                "s1", "s2", "s3");
+                "s1", "s2", "s3", "s6");
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s2", "s4");
+                "s2", "s4", "s5", "s6");
 
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             mLauncherApps.uncacheShortcuts(CALLING_PACKAGE_1, list("s2", "s4"),
@@ -1574,15 +1576,21 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
         // s2 still cached by owner1. s4 wasn't cached by owner0 so didn't get removed.
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s2", "s4");
+                "s2", "s4", "s5", "s6");
 
         // uncache a non-dynamic shortcut. Should be removed.
         runWithCaller(LAUNCHER_1, USER_0, () -> {
             mLauncherApps.uncacheShortcuts(CALLING_PACKAGE_1, list("s4"),
                     HANDLE_USER_0, CACHE_OWNER_1);
         });
+
+        // uncache s6 by its only owner. s5 still cached by owner1
+        runWithCaller(LAUNCHER_1, USER_0, () -> {
+            mLauncherApps.uncacheShortcuts(CALLING_PACKAGE_1, list("s5", "s6"),
+                    HANDLE_USER_0, CACHE_OWNER_2);
+        });
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s2");
+                "s2", "s5");
 
         // Cache another shortcut
         runWithCaller(LAUNCHER_1, USER_0, () -> {
@@ -1590,14 +1598,14 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                     HANDLE_USER_0, CACHE_OWNER_0);
         });
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s2", "s3");
+                "s2", "s3", "s5");
 
         // Remove a dynamic cached pinned long lived shortcut
         mManager.removeLongLivedShortcuts(list("s2"));
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_DYNAMIC),
-                "s1", "s3");
+                "s1", "s3", "s6");
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_CACHED),
-                "s3");
+                "s3", "s5");
         assertShortcutIds(mManager.getShortcuts(ShortcutManager.FLAG_MATCH_PINNED),
                 "s2");
     }

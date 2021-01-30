@@ -129,6 +129,12 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public static final int FLAG_HAS_ICON_URI = 1 << 15;
 
+    /**
+     * TODO(b/155135057): This is a quick and temporary fix for b/155135890. ShortcutService doesn't
+     *  need to be aware of the outside world. Replace this with a more extensible solution.
+     * @hide
+     */
+    public static final int FLAG_CACHED_PEOPLE_TILE = 1 << 29;
 
     /**
      * TODO(b/155135057): This is a quick and temporary fix for b/155135890. ShortcutService doesn't
@@ -138,7 +144,8 @@ public final class ShortcutInfo implements Parcelable {
     public static final int FLAG_CACHED_BUBBLES = 1 << 30;
 
     /** @hide */
-    public static final int FLAG_CACHED_ALL = FLAG_CACHED_NOTIFICATIONS | FLAG_CACHED_BUBBLES;
+    public static final int FLAG_CACHED_ALL =
+            FLAG_CACHED_NOTIFICATIONS | FLAG_CACHED_BUBBLES | FLAG_CACHED_PEOPLE_TILE;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
@@ -159,6 +166,7 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_HAS_ICON_URI,
             FLAG_CACHED_NOTIFICATIONS,
             FLAG_CACHED_BUBBLES,
+            FLAG_CACHED_PEOPLE_TILE
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
