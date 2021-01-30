@@ -445,6 +445,9 @@ applications that come with the platform
         <!-- Permission needed for CTS test - WifiManagerTest -->
         <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
+        <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
+        <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
+        <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
