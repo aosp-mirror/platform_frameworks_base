@@ -1277,6 +1277,7 @@ public final class PendingIntent implements Parcelable {
      */
     @RequiresPermission(permission.GET_INTENT_SENDER_INTENT)
     @SystemApi(client = Client.MODULE_LIBRARIES)
+    @TestApi
     public @Nullable List<ResolveInfo> queryIntentComponents(@ResolveInfoFlags int flags) {
         try {
             return ActivityManager.getService()
