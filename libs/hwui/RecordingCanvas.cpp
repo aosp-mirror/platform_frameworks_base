@@ -487,7 +487,9 @@ struct DrawVectorDrawable final : Op {
         tree->getPaintFor(&paint, tree->stagingProperties());
     }
 
-    void draw(SkCanvas* canvas, const SkMatrix&) const { mRoot->draw(canvas, mBounds, paint); }
+    void draw(SkCanvas* canvas, const SkMatrix&) const {
+        mRoot->draw(canvas, mBounds, paint);
+    }
 
     sp<VectorDrawableRoot> mRoot;
     SkRect mBounds;

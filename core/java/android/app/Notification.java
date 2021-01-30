@@ -5255,6 +5255,7 @@ public class Notification implements Parcelable
                 // We still want a time to be set but gone, such that we can show and hide it
                 // on demand in case it's a child notification without anything in the header
                 contentView.setLong(R.id.time, "setTime", mN.when != 0 ? mN.when : mN.creationTime);
+                setTextViewColorSecondary(contentView, R.id.time, p);
             }
         }
 

@@ -88,7 +88,7 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
                     windowManagerTrace {
                         navBarWindowIsAlwaysVisible()
                         statusBarWindowIsAlwaysVisible()
-                        end {
+                        end("bothAppWindowsVisible") {
                             isVisible(primaryApp.defaultWindowName)
                             isVisible(secondaryApp.defaultWindowName)
                         }

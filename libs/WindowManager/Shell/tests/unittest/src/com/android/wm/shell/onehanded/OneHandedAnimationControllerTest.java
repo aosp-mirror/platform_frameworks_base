@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
+import android.window.WindowContainerToken;
 
 import androidx.test.filters.SmallTest;
 
@@ -50,6 +51,8 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
 
     @Mock
     private SurfaceControl mMockLeash;
+    @Mock
+    private WindowContainerToken mMockToken;
 
     @Mock
     private ShellExecutor mMainExecutor;
@@ -69,7 +72,7 @@ public class OneHandedAnimationControllerTest extends OneHandedTestCase {
         destinationBounds.offset(0, 300);
         final OneHandedAnimationController.OneHandedTransitionAnimator animator =
                 mOneHandedAnimationController
-                        .getAnimator(mMockLeash, originalBounds, destinationBounds);
+                        .getAnimator(mMockToken, mMockLeash, originalBounds, destinationBounds);
 
         assertNotNull(animator);
     }

@@ -18,7 +18,9 @@ package com.android.server.rotationresolver;
 
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_CANCELLED;
 
+import static com.android.server.rotationresolver.RotationResolverManagerService.RESOLUTION_UNAVAILABLE;
 import static com.android.server.rotationresolver.RotationResolverManagerService.getServiceConfigPackage;
+import static com.android.server.rotationresolver.RotationResolverManagerService.logRotationStats;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -98,6 +100,7 @@ final class RotationResolverManagerPerUserService extends
         if (!isServiceAvailableLocked()) {
             Slog.w(TAG, "Service is not available at this moment.");
             callbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);
+            logRotationStats(proposedRotation, currentRotation, RESOLUTION_UNAVAILABLE);
             return;
         }
 

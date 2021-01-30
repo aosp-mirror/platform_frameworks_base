@@ -221,8 +221,14 @@ public class OneHandedGestureHandler implements OneHandedTransitionCallback,
                     displaySize.y);
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-gesture-offset", DEFAULT_DISPLAY);
-            mInputEventReceiver = new EventReceiver(
-                    mInputMonitor.getInputChannel(), mMainExecutor.getLooper());
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    mInputEventReceiver = new EventReceiver(
+                            mInputMonitor.getInputChannel(), Looper.myLooper());
+                });
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to create input event receiver", e);
+            }
         }
     }
 

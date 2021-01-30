@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,24 +14,6 @@
  * limitations under the License.
  */
 
-#pragma once
+package android.net;
 
-#include <stats_event.h>
-#include <stats_pull_atom_callback.h>
-
-namespace android {
-namespace server {
-namespace stats {
-
-/**
- * Reads hal for sleep states
- */
-class SubsystemSleepStatePuller {
-public:
-    SubsystemSleepStatePuller();
-    AStatsManager_PullAtomCallbackReturn Pull(int32_t atomTag, AStatsEventList* data);
-};
-
-} // namespace stats
-} // namespace server
-} // namespace android
+parcelable UnderlyingNetworkInfo;

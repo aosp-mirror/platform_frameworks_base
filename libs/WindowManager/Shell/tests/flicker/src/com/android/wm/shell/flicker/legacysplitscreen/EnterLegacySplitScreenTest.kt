@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
@@ -115,7 +116,7 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
@@ -150,7 +151,7 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                             .isVisible(secondaryApp.defaultWindowName)
                     }
@@ -162,6 +163,7 @@ class EnterLegacySplitScreenTest(
         }
     }
 
+    @FlakyTest(bugId = 173875043)
     @Test
     fun testNonResizeableNotDocked() {
         val testTag = "testNonResizeableNotDocked"
@@ -185,7 +187,7 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
+                    end("appWindowIsVisible") {
                         isInvisible(nonResizeableApp.defaultWindowName)
                     }
                     visibleWindowsShownMoreThanOneConsecutiveEntry(

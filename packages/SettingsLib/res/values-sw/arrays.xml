@@ -161,7 +161,7 @@
     <item msgid="2715700596495505626">"K256"</item>
     <item msgid="7099386891713159947">"M1"</item>
     <item msgid="6069075827077845520">"M4"</item>
-    <item msgid="6078203297886482480">"M8"</item>
+    <item msgid="6078203297886482480">"MB 8"</item>
   </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Imezimwa"</item>
@@ -175,7 +175,7 @@
     <item msgid="7464037639415220106">"K256 kwa kila akiba ya kumbukumbu"</item>
     <item msgid="8539423820514360724">"M1 kwa kila akiba ya kumbukumbu"</item>
     <item msgid="1984761927103140651">"M4 kwa kila akiba ya kumbukumbu"</item>
-    <item msgid="2983219471251787208">"M8 kwa kila akiba ya kumbukumbu"</item>
+    <item msgid="2983219471251787208">"MB 8 kwa kila akiba ya kumbukumbu"</item>
   </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Yamezimwa"</item>

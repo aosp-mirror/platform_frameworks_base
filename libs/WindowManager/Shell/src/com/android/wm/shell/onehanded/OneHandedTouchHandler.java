@@ -132,8 +132,14 @@ public class OneHandedTouchHandler implements OneHandedTransitionCallback {
         if (mIsEnabled) {
             mInputMonitor = InputManager.getInstance().monitorGestureInput(
                     "onehanded-touch", DEFAULT_DISPLAY);
-            mInputEventReceiver = new EventReceiver(
-                    mInputMonitor.getInputChannel(), mMainExecutor.getLooper());
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    mInputEventReceiver = new EventReceiver(
+                            mInputMonitor.getInputChannel(), Looper.myLooper());
+                });
+            } catch (InterruptedException e) {
+                throw new RuntimeException("Failed to create input event receiver", e);
+            }
         }
     }
 

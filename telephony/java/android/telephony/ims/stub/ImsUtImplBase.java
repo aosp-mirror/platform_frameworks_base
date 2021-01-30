@@ -29,6 +29,7 @@ import com.android.ims.internal.IImsUtListener;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Objects;
 
 /**
  * Base implementation of IMS UT interface, which implements stubs. Override these methods to
@@ -116,7 +117,10 @@ public class ImsUtImplBase {
      */
     public static final int INVALID_RESULT = -1;
 
-    private IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
+    private final IImsUt.Stub mServiceImpl = new IImsUt.Stub() {
+        private final Object mLock = new Object();
+        private ImsUtListener mUtListener;
+
         @Override
         public void close() throws RemoteException {
             ImsUtImplBase.this.close();
@@ -202,7 +206,26 @@ public class ImsUtImplBase {
 
         @Override
         public void setListener(IImsUtListener listener) throws RemoteException {
-            ImsUtImplBase.this.setListener(new ImsUtListener(listener));
+            synchronized (mLock) {
+                if (mUtListener != null && listener != null && Objects.equals(
+                        mUtListener.getListenerInterface().asBinder(), listener.asBinder())) {
+                    return;
+                }
+
+                if (listener == null) {
+                    mUtListener = null;
+                } else if (listener != null && mUtListener == null) {
+                    mUtListener = new ImsUtListener(listener);
+                } else {
+                    // This is a limitation of the current API surface, there can only be one
+                    // listener connected. Fail fast instead of silently overwriting the other
+                    // listener.
+                    throw new IllegalStateException("ImsUtImplBase#setListener: listener already "
+                            + "set by another connected interface!");
+                }
+            }
+
+            ImsUtImplBase.this.setListener(mUtListener);
         }
 
         @Override

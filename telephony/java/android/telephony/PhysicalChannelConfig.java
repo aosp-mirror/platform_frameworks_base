@@ -554,7 +554,8 @@ public final class PhysicalChannelConfig implements Parcelable {
         }
 
         public @NonNull Builder setFrequencyRange(int frequencyRange) {
-            if (!ServiceState.isFrequencyRangeValid(frequencyRange)) {
+            if (!ServiceState.isFrequencyRangeValid(frequencyRange)
+                    && frequencyRange != ServiceState.FREQUENCY_RANGE_UNKNOWN) {
                 throw new IllegalArgumentException("Frequency range: " + frequencyRange +
                         " is invalid.");
             }

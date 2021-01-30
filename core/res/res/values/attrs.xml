@@ -9276,6 +9276,12 @@
              {@deprecated Use app:fontProviderCerts with Jetpack Core library instead.}
          -->
         <attr name="fontProviderCerts" format="reference" />
+        <!-- Provides the system font family name to check before downloading the font. For example
+        if the fontProviderQuery asked for "Sans Serif", it is possible to define
+        fontProviderSystemFontFamily as "sans-serif" to tell the system to use "sans-serif" font
+        family if it exists on the system.
+         -->
+        <attr name="fontProviderSystemFontFamily" format="string" />
     </declare-styleable>
 
     <!-- Attributes that are read when parsing a  tag. -->

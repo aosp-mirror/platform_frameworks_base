@@ -262,7 +262,7 @@ public:
         }
     }
 
-    binder::Status onScreenCaptureComplete(
+    binder::Status onScreenCaptureCompleted(
             const gui::ScreenCaptureResults& captureResults) override {
         JNIEnv* env = getenv();
         if (captureResults.result != NO_ERROR || captureResults.buffer == nullptr) {
@@ -270,6 +270,7 @@ public:
                                 gScreenCaptureListenerClassInfo.onScreenCaptureComplete, nullptr);
             return binder::Status::ok();
         }
+        captureResults.fence->waitForever("");
         jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
                 env, captureResults.buffer->toAHardwareBuffer());
         const jint namedColorSpace =

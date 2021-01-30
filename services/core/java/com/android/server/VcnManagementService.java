@@ -25,9 +25,12 @@ import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
+import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -527,7 +530,7 @@ public class VcnManagementService extends IVcnManagementService.Stub {
             @NonNull IVcnUnderlyingNetworkPolicyListener listener) {
         requireNonNull(listener, "listener was null");
 
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.NETWORK_FACTORY,
                 "Must have permission NETWORK_FACTORY to register a policy listener");
 
@@ -560,5 +563,28 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 listener.asBinder().unlinkToDeath(listenerBinderDeath, 0 /* flags */);
             }
         }
+    }
+
+    /**
+     * Gets the UnderlyingNetworkPolicy as determined by the provided NetworkCapabilities and
+     * LinkProperties.
+     */
+    @NonNull
+    @Override
+    public VcnUnderlyingNetworkPolicy getUnderlyingNetworkPolicy(
+            @NonNull NetworkCapabilities networkCapabilities,
+            @NonNull LinkProperties linkProperties) {
+        requireNonNull(networkCapabilities, "networkCapabilities was null");
+        requireNonNull(linkProperties, "linkProperties was null");
+
+        mContext.enforceCallingOrSelfPermission(
+                android.Manifest.permission.NETWORK_FACTORY,
+                "Must have permission NETWORK_FACTORY or be the SystemServer to get underlying"
+                        + " Network policies");
+
+        // TODO(b/175914059): implement policy generation once VcnManagementService is able to
+        // determine policies
+
+        return new VcnUnderlyingNetworkPolicy(false /* isTearDownRequested */, networkCapabilities);
     }
 }

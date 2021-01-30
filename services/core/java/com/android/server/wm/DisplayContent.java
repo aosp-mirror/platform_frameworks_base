@@ -190,6 +190,7 @@ import android.util.SparseBooleanArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.DisplayCutout.CutoutPathParserInfo;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.IDisplayWindowInsetsController;
@@ -1934,18 +1935,22 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (cutout == null || cutout == DisplayCutout.NO_CUTOUT) {
             return WmDisplayCutout.NO_CUTOUT;
         }
-        final Insets waterfallInsets =
-                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         if (rotation == ROTATION_0) {
             return WmDisplayCutout.computeSafeInsets(
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
+        final Insets waterfallInsets =
+                RotationUtils.rotateInsets(cutout.getWaterfallInsets(), rotation);
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final Rect[] newBounds = mRotationUtil.getRotatedBounds(
                 cutout.getBoundingRectsAll(),
                 rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+        final CutoutPathParserInfo info = cutout.getCutoutPathParserInfo();
+        final CutoutPathParserInfo newInfo = new CutoutPathParserInfo(
+                info.getDisplayWidth(), info.getDisplayHeight(), info.getDensity(),
+                info.getCutoutSpec(), rotation, info.getScale());
         return WmDisplayCutout.computeSafeInsets(
-                DisplayCutout.fromBoundsAndWaterfall(newBounds, waterfallInsets),
+                DisplayCutout.constructDisplayCutout(newBounds, waterfallInsets, newInfo),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
@@ -3604,7 +3609,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 && mImeLayeringTarget.mActivityRecord.matchParentBounds()
                 // IME is attached to non-Letterboxed app windows, other than windows with
                 // LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER flag. (Refer to WS.isLetterboxedAppWindow())
-                && mImeLayeringTarget.matchesRootDisplayAreaBounds();
+                && mImeLayeringTarget.matchesDisplayAreaBounds();
     }
 
     /**
@@ -4102,8 +4107,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      * Callbacks when the given type of {@link WindowContainer} animation finished running in the
      * hierarchy.
      */
-    void onWindowAnimationFinished(int type) {
+    void onWindowAnimationFinished(@NonNull WindowContainer wc, int type) {
         if (type == ANIMATION_TYPE_APP_TRANSITION || type == ANIMATION_TYPE_RECENTS) {
+            // Unfreeze the insets state of the frozen target when the animation finished if exists.
+            final Task task = wc.asTask();
+            if (task != null) {
+                task.forAllWindows(w -> {
+                    w.clearFrozenInsetsState();
+                }, true /* traverseTopToBottom */);
+            }
             removeImeSurfaceImmediately();
         }
     }
@@ -4180,12 +4192,14 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mInsetsStateController.getImeSourceProvider().checkShowImePostLayout();
 
         mLastHasContent = mTmpApplySurfaceChangesTransactionState.displayHasContent;
-        mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
-                mLastHasContent,
-                mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
-                mTmpApplySurfaceChangesTransactionState.preferredModeId,
-                mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
-                true /* inTraversal, must call performTraversalInTrans... below */);
+        if (!mWmService.mDisplayFrozen) {
+            mWmService.mDisplayManagerInternal.setDisplayProperties(mDisplayId,
+                    mLastHasContent,
+                    mTmpApplySurfaceChangesTransactionState.preferredRefreshRate,
+                    mTmpApplySurfaceChangesTransactionState.preferredModeId,
+                    mTmpApplySurfaceChangesTransactionState.preferMinimalPostProcessing,
+                    true /* inTraversal, must call performTraversalInTrans... below */);
+        }
 
         final boolean wallpaperVisible = mWallpaperController.isWallpaperVisible();
         if (wallpaperVisible != mLastWallpaperVisible) {
