@@ -16,14 +16,21 @@
 
 #define LOG_TAG "FilterClient"
 
+#include <aidlcommonsupport/NativeHandle.h>
 #include <android-base/logging.h>
 #include <utils/Log.h>
 
 #include "FilterClient.h"
 
+using ::aidl::android::media::tv::tuner::TunerFilterAvSettings;
+using ::aidl::android::media::tv::tuner::TunerFilterSharedHandleInfo;
+using ::aidl::android::media::tv::tuner::TunerFilterTsConfiguration;
+
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxStreamId;
+using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
 
 namespace android {
@@ -48,7 +55,6 @@ FilterClient::~FilterClient() {
 void FilterClient::setHidlFilter(sp<IFilter> filter) {
     mFilter = filter;
     mFilter_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(mFilter);
-    handleAvShareMemory();
 }
 
 int FilterClient::read(uint8_t* buffer, int size) {
@@ -66,23 +72,20 @@ int FilterClient::read(uint8_t* buffer, int size) {
 }
 
 SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
+    handleAvShareMemory();
     SharedHandleInfo info{
-        .sharedHandle = NULL,
-        .size = 0,
+        .sharedHandle = mAvSharedHandle,
+        .size = mAvSharedMemSize,
     };
-
-    // TODO: pending aidl interface
-
-    if (mFilter_1_1 != NULL) {
-        info.sharedHandle = mAvSharedHandle;
-        info.size = mAvSharedMemSize;
-    }
 
     return info;
 }
 
 Result FilterClient::configure(DemuxFilterSettings configure) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->configure(getAidlFilterSettings(configure));
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         return mFilter->configure(configure);
@@ -122,7 +125,10 @@ Result FilterClient::configureAvStreamType(AvStreamType avStreamType) {
 }
 
 Result FilterClient::start() {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->start();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         return mFilter->start();
@@ -132,7 +138,10 @@ Result FilterClient::start() {
 }
 
 Result FilterClient::stop() {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->stop();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         return mFilter->stop();
@@ -142,7 +151,10 @@ Result FilterClient::stop() {
 }
 
 Result FilterClient::flush() {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->flush();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         return mFilter->flush();
@@ -192,7 +204,10 @@ Result FilterClient::getId64Bit(uint64_t& id) {
 }
 
 Result FilterClient::releaseAvHandle(native_handle_t* handle, uint64_t avDataId) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->releaseAvHandle(makeToAidl(handle), avDataId);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         return mFilter->releaseAvHandle(hidl_handle(handle), avDataId);
@@ -216,13 +231,18 @@ Result FilterClient::setDataSource(sp<FilterClient> filterClient){
 }
 
 Result FilterClient::close() {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->close();
+        closeAvSharedMemory();
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         Result res = mFilter->close();
         if (res == Result::SUCCESS) {
             mFilter = NULL;
         }
+        closeAvSharedMemory();
         return res;
     }
 
@@ -269,12 +289,102 @@ Status TunerFilterCallback::onFilterStatus(int status) {
     return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
 }
 
-Status TunerFilterCallback::onFilterEvent(vector<TunerFilterEvent>* /*filterEvent*/) {
-    // TODO: complete onFilterEvent
+Status TunerFilterCallback::onFilterEvent(const vector<TunerFilterEvent>& filterEvents) {
+    if (mFilterClientCallback == NULL) {
+        return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
+    }
+
+    DemuxFilterEvent event;
+    DemuxFilterEventExt eventExt;
+    getHidlFilterEvent(filterEvents, event, eventExt);
+    if (eventExt.events.size() > 0) {
+        mFilterClientCallback->onFilterEvent_1_1(event, eventExt);
+    } else {
+        mFilterClientCallback->onFilterEvent(event);
+    }
+
     return Status::ok();
 }
 
 /////////////// FilterClient Helper Methods ///////////////////////
+
+TunerFilterConfiguration FilterClient::getAidlFilterSettings(DemuxFilterSettings configure) {
+    TunerFilterConfiguration config;
+    // TODO: complete filter setting conversion
+    switch (configure.getDiscriminator()) {
+        case DemuxFilterSettings::hidl_discriminator::ts: {
+            TunerFilterSettings filterSettings;
+            switch (configure.ts().filterSettings.getDiscriminator()) {
+                case DemuxTsFilterSettings::FilterSettings::hidl_discriminator::av: {
+                    TunerFilterAvSettings av{
+                        .isPassthrough = configure.ts().filterSettings.av().isPassthrough,
+                    };
+                    filterSettings.set<TunerFilterSettings::av>(av);
+                    break;
+                }
+                default:
+                    break;
+            }
+
+            TunerFilterTsConfiguration ts{
+                .tpid = configure.ts().tpid,
+                .filterSettings = filterSettings,
+            };
+            config.set<TunerFilterConfiguration::ts>(ts);
+
+            return config;
+        }
+        case DemuxFilterSettings::hidl_discriminator::mmtp:
+            break;
+        case DemuxFilterSettings::hidl_discriminator::ip:
+            break;
+        case DemuxFilterSettings::hidl_discriminator::tlv:
+            break;
+        default:
+            break;
+    }
+    return config;
+}
+
+
+void TunerFilterCallback::getHidlFilterEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEvent& event, DemuxFilterEventExt& /*eventExt*/) {
+    // TODO: finish handling extended evets and other filter event types
+    switch (filterEvents[0].getTag()) {
+        case  TunerFilterEvent::media: {
+            for (int i = 0; i < filterEvents.size(); i++) {
+                hidl_handle handle = hidl_handle(
+                        makeFromAidl(filterEvents[i].get<TunerFilterEvent::media>().avMemory));
+                int size = event.events.size();
+                event.events.resize(size + 1);
+                event.events[size].media({
+                    .avMemory = handle,
+                    .streamId = static_cast<DemuxStreamId>(
+                            filterEvents[i].get<TunerFilterEvent::media>().streamId),
+                    .isPtsPresent =
+                            filterEvents[i].get<TunerFilterEvent::media>().isPtsPresent,
+                    .pts = static_cast<uint64_t>(
+                            filterEvents[i].get<TunerFilterEvent::media>().pts),
+                    .dataLength = static_cast<uint32_t>(
+                            filterEvents[i].get<TunerFilterEvent::media>().dataLength),
+                    .offset = static_cast<uint32_t>(
+                            filterEvents[i].get<TunerFilterEvent::media>().offset),
+                    .isSecureMemory =
+                            filterEvents[i].get<TunerFilterEvent::media>().isSecureMemory,
+                    .avDataId = static_cast<uint64_t>(
+                            filterEvents[i].get<TunerFilterEvent::media>().avDataId),
+                    .mpuSequenceNumber = static_cast<uint32_t>(
+                            filterEvents[i].get<TunerFilterEvent::media>().offset),
+                    .isPesPrivateData =
+                            filterEvents[i].get<TunerFilterEvent::media>().isPesPrivateData,
+                });
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
 
 Result FilterClient::getFilterMq() {
     if (mFilter == NULL) {
@@ -333,6 +443,20 @@ void FilterClient::checkIsMediaFilter(DemuxFilterType type) {
 }
 
 void FilterClient::handleAvShareMemory() {
+    if (mAvSharedHandle != NULL) {
+        return;
+    }
+
+    if (mTunerFilter != NULL && mIsMediaFilter) {
+        TunerFilterSharedHandleInfo aidlHandleInfo;
+        Status s = mTunerFilter->getAvSharedHandleInfo(&aidlHandleInfo);
+        if (ClientHelper::getServiceSpecificErrorCode(s) == Result::SUCCESS) {
+            mAvSharedHandle = native_handle_clone(makeFromAidl(aidlHandleInfo.handle));
+            mAvSharedMemSize = aidlHandleInfo.size;
+        }
+        return;
+    }
+
     if (mFilter_1_1 != NULL && mIsMediaFilter) {
         mFilter_1_1->getAvSharedHandle([&](Result r, hidl_handle avMemory, uint64_t avMemSize) {
             if (r == Result::SUCCESS) {
@@ -341,5 +465,11 @@ void FilterClient::handleAvShareMemory() {
             }
         });
     }
+}
+
+void FilterClient::closeAvSharedMemory() {
+    native_handle_close(mAvSharedHandle);
+    native_handle_delete(mAvSharedHandle);
+    mAvSharedMemSize = 0;
 }
 }  // namespace android
