@@ -70,4 +70,8 @@ final class FgsStartTempAllowList {
             return true;
         }
     }
+
+    void remove(int uid) {
+        mTempAllowListFgs.delete(uid);
+    }
 }
