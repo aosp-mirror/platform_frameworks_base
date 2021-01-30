@@ -635,10 +635,15 @@ public class BiometricScheduler {
         proto.write(BiometricSchedulerProto.CURRENT_OPERATION, mCurrentOperation != null
                 ? mCurrentOperation.mClientMonitor.getProtoEnum() : BiometricsProto.CM_NONE);
         proto.write(BiometricSchedulerProto.TOTAL_OPERATIONS, mTotalOperationsHandled);
-        Slog.d(getTag(), "Total operations: " + mTotalOperationsHandled);
-        for (int i = 0; i < mRecentOperations.size(); i++) {
-            Slog.d(getTag(), "Operation: " + mRecentOperations.get(i));
-            proto.write(BiometricSchedulerProto.RECENT_OPERATIONS, mRecentOperations.get(i));
+
+        if (!mRecentOperations.isEmpty()) {
+            for (int i = 0; i < mRecentOperations.size(); i++) {
+                proto.write(BiometricSchedulerProto.RECENT_OPERATIONS, mRecentOperations.get(i));
+            }
+        } else {
+            // TODO:(b/178828362) Unsure why protobuf has a problem decoding when an empty list
+            //  is returned. So, let's just add a no-op for this case.
+            proto.write(BiometricSchedulerProto.RECENT_OPERATIONS, BiometricsProto.CM_NONE);
         }
         proto.flush();
 
