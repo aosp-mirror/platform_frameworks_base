@@ -64,6 +64,8 @@ public final class AppHibernationServiceTest {
     private static final int USER_ID_1 = 1;
     private static final int USER_ID_2 = 2;
 
+    private final List<UserInfo> mUserInfos = new ArrayList<>();
+
     private AppHibernationService mAppHibernationService;
     private BroadcastReceiver mBroadcastReceiver;
     @Mock
@@ -88,47 +90,42 @@ public final class AppHibernationServiceTest {
         verify(mContext, times(2)).registerReceiver(mReceiverCaptor.capture(), any());
         mBroadcastReceiver = mReceiverCaptor.getValue();
 
-        List<UserInfo> userList = new ArrayList<>();
-        userList.add(new UserInfo(USER_ID_1, "user 1", 0 /* flags */));
-        doReturn(userList).when(mUserManager).getUsers();
-
-        List<PackageInfo> userPackages = new ArrayList<>();
-        userPackages.add(makePackageInfo(PACKAGE_NAME_1));
-
-        doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
-                .getInstalledPackages(anyInt(), eq(USER_ID_1));
+        doReturn(mUserInfos).when(mUserManager).getUsers();
 
         doAnswer(returnsArgAt(2)).when(mIActivityManager).handleIncomingUser(anyInt(), anyInt(),
                 anyInt(), anyBoolean(), anyBoolean(), any(), any());
 
+        addUser(USER_ID_1);
         mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
     }
 
     @Test
-    public void testSetHibernating_packageIsHibernating() {
+    public void testSetHibernatingForUser_packageIsHibernating() throws RemoteException {
         // WHEN we hibernate a package for a user
-        mAppHibernationService.setHibernating(PACKAGE_NAME_1, USER_ID_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
 
         // THEN the package is marked hibernating for the user
-        assertTrue(mAppHibernationService.isHibernating(PACKAGE_NAME_1, USER_ID_1));
+        assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_1));
     }
 
     @Test
-    public void testSetHibernating_newPackageAdded_packageIsHibernating() {
+    public void testSetHibernatingForUser_newPackageAdded_packageIsHibernating()
+            throws RemoteException {
         // WHEN a new package is added and it is hibernated
         Intent intent = new Intent(Intent.ACTION_PACKAGE_ADDED,
                 Uri.fromParts(PACKAGE_SCHEME, PACKAGE_NAME_2, null /* fragment */));
         intent.putExtra(Intent.EXTRA_USER_HANDLE, USER_ID_1);
         mBroadcastReceiver.onReceive(mContext, intent);
 
-        mAppHibernationService.setHibernating(PACKAGE_NAME_2, USER_ID_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_2, USER_ID_1, true);
 
         // THEN the new package is hibernated
-        assertTrue(mAppHibernationService.isHibernating(PACKAGE_NAME_2, USER_ID_1));
+        assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_2, USER_ID_1));
     }
 
     @Test
-    public void testSetHibernating_newUserAdded_packageIsHibernating() throws RemoteException {
+    public void testSetHibernatingForUser_newUserAdded_packageIsHibernating()
+            throws RemoteException {
         // WHEN a new user is added and a package from the user is hibernated
         List<PackageInfo> userPackages = new ArrayList<>();
         userPackages.add(makePackageInfo(PACKAGE_NAME_1));
@@ -138,16 +135,17 @@ public final class AppHibernationServiceTest {
         intent.putExtra(Intent.EXTRA_USER_HANDLE, USER_ID_2);
         mBroadcastReceiver.onReceive(mContext, intent);
 
-        mAppHibernationService.setHibernating(PACKAGE_NAME_1, USER_ID_2, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
 
         // THEN the new user's package is hibernated
-        assertTrue(mAppHibernationService.isHibernating(PACKAGE_NAME_1, USER_ID_2));
+        assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_2));
     }
 
     @Test
-    public void testIsHibernating_packageReplaced_stillReturnsHibernating() {
+    public void testIsHibernatingForUser_packageReplaced_stillReturnsHibernating()
+            throws RemoteException {
         // GIVEN a package is currently hibernated
-        mAppHibernationService.setHibernating(PACKAGE_NAME_1, USER_ID_1, true);
+        mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
 
         // WHEN the package is removed but marked as replacing
         Intent intent = new Intent(Intent.ACTION_PACKAGE_REMOVED,
@@ -157,7 +155,38 @@ public final class AppHibernationServiceTest {
         mBroadcastReceiver.onReceive(mContext, intent);
 
         // THEN the package is still hibernating
-        assertTrue(mAppHibernationService.isHibernating(PACKAGE_NAME_1, USER_ID_1));
+        assertTrue(mAppHibernationService.isHibernatingForUser(PACKAGE_NAME_1, USER_ID_1));
+    }
+
+    @Test
+    public void testSetHibernatingGlobally_packageIsHibernatingGlobally() throws RemoteException {
+        // WHEN we hibernate a package
+        mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
+
+        // THEN the package is marked hibernating for the user
+        assertTrue(mAppHibernationService.isHibernatingGlobally(PACKAGE_NAME_1));
+    }
+
+    /**
+     * Add a mock user with one package. Must be called before
+     * {@link AppHibernationService#onBootPhase(int)} to work properly.
+     */
+    private void addUser(int userId) throws RemoteException {
+        addUser(userId, new String[]{PACKAGE_NAME_1});
+    }
+
+    /**
+     * Add a mock user with the packages specified. Must be called before
+     * {@link AppHibernationService#onBootPhase(int)} to work properly
+     */
+    private void addUser(int userId, String[] packageNames) throws RemoteException {
+        mUserInfos.add(new UserInfo(userId, "user_" + userId, 0 /* flags */));
+        List<PackageInfo> userPackages = new ArrayList<>();
+        for (String pkgName : packageNames) {
+            userPackages.add(makePackageInfo(pkgName));
+        }
+        doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
+                .getInstalledPackages(anyInt(), eq(userId));
     }
 
     private static PackageInfo makePackageInfo(String packageName) {
