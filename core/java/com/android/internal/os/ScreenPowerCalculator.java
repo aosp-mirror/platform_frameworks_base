@@ -24,7 +24,7 @@ import android.os.SystemBatteryConsumer;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.DateUtils;
-import android.util.Log;
+import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
 
@@ -62,7 +62,8 @@ public class ScreenPowerCalculator extends PowerCalculator {
                     .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah);
         }
-        // TODO(b/178140704): Attribute screen usage similar to smearScreenBatterySipper.
+        // TODO(b/178140704): Attribute *measured* total usage for BatteryUsageStats.
+        // TODO(b/178140704): Attribute (measured/smeared) usage *per app* for BatteryUsageStats.
     }
 
     /**
@@ -71,17 +72,43 @@ public class ScreenPowerCalculator extends PowerCalculator {
     @Override
     public void calculate(List<BatterySipper> sippers, BatteryStats batteryStats,
             long rawRealtimeUs, long rawUptimeUs, int statsType, SparseArray<UserHandle> asUsers) {
-        final long durationMs = computeDuration(batteryStats, rawRealtimeUs, statsType);
-        final double powerMah = computePower(batteryStats, rawRealtimeUs, statsType, durationMs);
-        if (powerMah != 0) {
-            final BatterySipper bs = new BatterySipper(BatterySipper.DrainType.SCREEN, null, 0);
-            bs.usagePowerMah = powerMah;
-            bs.usageTimeMs = durationMs;
-            bs.sumPower();
-            sippers.add(bs);
 
+        final long energyUJ = batteryStats.getScreenOnEnergy();
+        final boolean isMeasuredDataAvailable = energyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE;
+
+        final long durationMs = computeDuration(batteryStats, rawRealtimeUs, statsType);
+        final double powerMah = getMeasuredOrComputedPower(
+                energyUJ, batteryStats, rawRealtimeUs, statsType, durationMs);
+        if (powerMah == 0) {
+            return;
+        }
+
+        // First deal with the SCREEN BatterySipper (since we need this for smearing over apps).
+        final BatterySipper bs = new BatterySipper(BatterySipper.DrainType.SCREEN, null, 0);
+        bs.usagePowerMah = powerMah;
+        bs.usageTimeMs = durationMs;
+        bs.sumPower();
+        sippers.add(bs);
+
+        // Now deal with each app's BatterySipper. The results are stored in the screenPowerMah
+        // field, which is considered smeared, but the method depends on the data source.
+        if (isMeasuredDataAvailable) {
+            super.calculate(sippers, batteryStats, rawRealtimeUs, rawUptimeUs, statsType, asUsers);
+        } else {
             smearScreenBatterySipper(sippers, bs);
         }
+    }
+
+    @Override
+    protected void calculateApp(BatterySipper app, BatteryStats.Uid u, long rawRealtimeUs,
+            long rawUptimeUs, int statsType) {
+        final long energyUJ = u.getScreenOnEnergy();
+        if (energyUJ < 0) {
+            Slog.wtf(TAG, "Screen energy not supported, so calculateApp shouldn't de called");
+            return;
+        }
+        if (energyUJ == 0) return;
+        app.screenPowerMah = mAhToUJ(u.getScreenOnEnergy());
     }
 
     private long computeDuration(BatteryStats batteryStats, long rawRealtimeUs, int statsType) {
@@ -97,12 +124,22 @@ public class ScreenPowerCalculator extends PowerCalculator {
             final double binPowerMah = mScreenFullPowerEstimator.calculatePower(brightnessTime)
                     * (i + 0.5f) / BatteryStats.NUM_SCREEN_BRIGHTNESS_BINS;
             if (DEBUG && binPowerMah != 0) {
-                Log.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
+                Slog.d(TAG, "Screen bin #" + i + ": time=" + brightnessTime
                         + " power=" + formatCharge(binPowerMah));
             }
             power += binPowerMah;
         }
         return power;
+    }
+
+    private double getMeasuredOrComputedPower(long measuredEnergyUJ,
+            BatteryStats batteryStats, long rawRealtimeUs, int statsType, long durationMs) {
+
+        if (measuredEnergyUJ != BatteryStats.ENERGY_DATA_UNAVAILABLE) {
+            return mAhToUJ(measuredEnergyUJ);
+        } else {
+            return computePower(batteryStats, rawRealtimeUs, statsType, durationMs);
+        }
     }
 
     /**
@@ -124,10 +161,11 @@ public class ScreenPowerCalculator extends PowerCalculator {
         }
 
         if (screenSipper != null && totalActivityTimeMs >= 10 * DateUtils.MINUTE_IN_MILLIS) {
-            final double screenPowerMah = screenSipper.totalPowerMah;
+            final double totalScreenPowerMah = screenSipper.totalPowerMah;
             for (int i = sippers.size() - 1; i >= 0; i--) {
                 final BatterySipper sipper = sippers.get(i);
-                sipper.screenPowerMah = screenPowerMah * activityTimeArray.get(sipper.getUid(), 0)
+                sipper.screenPowerMah = totalScreenPowerMah
+                        * activityTimeArray.get(sipper.getUid(), 0)
                         / totalActivityTimeMs;
             }
         }
