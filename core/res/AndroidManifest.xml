@@ -3858,6 +3858,12 @@
     <permission android:name="android.permission.SET_KEYBOARD_LAYOUT"
         android:protectionLevel="signature" />
 
+    <!-- Allows an app to use exact alarm scheduling APIs to perform timing
+         sensitive background work.
+     -->
+    <permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:protectionLevel="normal|appop"/>
+
     <!-- Allows an application to query tablet mode state and monitor changes
          in it.
          <p>Not for use by third-party applications.

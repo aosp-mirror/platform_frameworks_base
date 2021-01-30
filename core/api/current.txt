@@ -144,6 +144,7 @@ package android {
     field public static final String REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE = "android.permission.REQUEST_OBSERVE_COMPANION_DEVICE_PRESENCE";
     field public static final String REQUEST_PASSWORD_COMPLEXITY = "android.permission.REQUEST_PASSWORD_COMPLEXITY";
     field @Deprecated public static final String RESTART_PACKAGES = "android.permission.RESTART_PACKAGES";
+    field public static final String SCHEDULE_EXACT_ALARM = "android.permission.SCHEDULE_EXACT_ALARM";
     field public static final String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final String SEND_SMS = "android.permission.SEND_SMS";
     field public static final String SET_ALARM = "com.android.alarm.permission.SET_ALARM";
@@ -4299,16 +4300,17 @@ package android.app {
   }
 
   public class AlarmManager {
+    method public boolean canScheduleExactAlarms();
     method public void cancel(android.app.PendingIntent);
     method public void cancel(android.app.AlarmManager.OnAlarmListener);
     method public android.app.AlarmManager.AlarmClockInfo getNextAlarmClock();
     method public void set(int, long, android.app.PendingIntent);
     method public void set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
+    method @RequiresPermission(android.Manifest.permission.SCHEDULE_EXACT_ALARM) public void setAlarmClock(android.app.AlarmManager.AlarmClockInfo, android.app.PendingIntent);
     method public void setAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setExact(int, long, android.app.PendingIntent);
     method public void setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler);
-    method public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
+    method @RequiresPermission(value=android.Manifest.permission.SCHEDULE_EXACT_ALARM, conditional=true) public void setExactAndAllowWhileIdle(int, long, android.app.PendingIntent);
     method public void setInexactRepeating(int, long, long, android.app.PendingIntent);
     method public void setRepeating(int, long, long, android.app.PendingIntent);
     method @RequiresPermission(android.Manifest.permission.SET_TIME) public void setTime(long);
