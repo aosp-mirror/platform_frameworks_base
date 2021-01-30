@@ -16,6 +16,9 @@
 
 package com.android.systemui.appops;
 
+import static android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_CAMERA;
+import static android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE;
+
 import static junit.framework.TestCase.assertFalse;
 
 import static org.junit.Assert.assertEquals;
@@ -49,6 +52,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.statusbar.policy.IndividualSensorPrivacyController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -81,6 +85,8 @@ public class AppOpsControllerTest extends SysuiTestCase {
     private PermissionFlagsCache mFlagsCache;
     @Mock
     private PackageManager mPackageManager;
+    @Mock
+    private IndividualSensorPrivacyController mSensorPrivacyController;
     @Mock(stubOnly = true)
     private AudioManager mAudioManager;
     @Mock()
@@ -118,12 +124,18 @@ public class AppOpsControllerTest extends SysuiTestCase {
         when(mAudioManager.getActiveRecordingConfigurations())
                 .thenReturn(List.of(mPausedMockRecording));
 
+        when(mSensorPrivacyController.isSensorBlocked(INDIVIDUAL_SENSOR_CAMERA))
+                .thenReturn(false);
+        when(mSensorPrivacyController.isSensorBlocked(INDIVIDUAL_SENSOR_CAMERA))
+                .thenReturn(false);
+
         mController = new AppOpsControllerImpl(
                 mContext,
                 mTestableLooper.getLooper(),
                 mDumpManager,
                 mFlagsCache,
                 mAudioManager,
+                mSensorPrivacyController,
                 mDispatcher
         );
     }
@@ -133,6 +145,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.setListening(true);
         verify(mAppOpsManager, times(1)).startWatchingActive(AppOpsControllerImpl.OPS, mController);
         verify(mDispatcher, times(1)).registerReceiverWithHandler(eq(mController), any(), any());
+        verify(mSensorPrivacyController, times(1)).addCallback(mController);
     }
 
     @Test
@@ -140,6 +153,7 @@ public class AppOpsControllerTest extends SysuiTestCase {
         mController.setListening(false);
         verify(mAppOpsManager, times(1)).stopWatchingActive(mController);
         verify(mDispatcher, times(1)).unregisterReceiver(mController);
+        verify(mSensorPrivacyController, times(1)).removeCallback(mController);
     }
 
     @Test
@@ -474,6 +488,71 @@ public class AppOpsControllerTest extends SysuiTestCase {
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
         inOrder.verify(mCallback).onActiveStateChanged(
                 AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, false);
+    }
+
+    @Test
+    public void testAudioFilteredWhenMicDisabled() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO, AppOpsManager.OP_CAMERA},
+                mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(0).getCode());
+        assertFalse(list.get(0).isDisabled());
+
+        // Add a camera op, and disable the microphone. The camera op should be the only op returned
+        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_MICROPHONE, true);
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_CAMERA, list.get(0).getCode());
+
+
+        // Re enable the microphone, and verify the op returns
+        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_MICROPHONE, false);
+        mTestableLooper.processAllMessages();
+
+        list = mController.getActiveAppOps();
+        assertEquals(2, list.size());
+        int micIdx = list.get(0).getCode() == AppOpsManager.OP_CAMERA ? 1 : 0;
+        assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(micIdx).getCode());
+    }
+
+    @Test
+    public void testCameraFilteredWhenCameraDisabled() {
+        mController.addCallback(new int[]{AppOpsManager.OP_RECORD_AUDIO, AppOpsManager.OP_CAMERA},
+                mCallback);
+        mTestableLooper.processAllMessages();
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_CAMERA, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        List<AppOpItem> list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_CAMERA, list.get(0).getCode());
+        assertFalse(list.get(0).isDisabled());
+
+        // Add an audio op, and disable the camera. The audio op should be the only op returned
+        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_CAMERA, true);
+        mController.onOpActiveChanged(
+                AppOpsManager.OP_RECORD_AUDIO, TEST_UID_OTHER, TEST_PACKAGE_NAME, true);
+        mTestableLooper.processAllMessages();
+        list = mController.getActiveAppOps();
+        assertEquals(1, list.size());
+        assertEquals(AppOpsManager.OP_RECORD_AUDIO, list.get(0).getCode());
+
+        // Re enable the camera, and verify the op returns
+        mController.onSensorBlockedChanged(INDIVIDUAL_SENSOR_CAMERA, false);
+        mTestableLooper.processAllMessages();
+
+        list = mController.getActiveAppOps();
+        assertEquals(2, list.size());
+        int cameraIdx = list.get(0).getCode() == AppOpsManager.OP_CAMERA ? 0 : 1;
+        assertEquals(AppOpsManager.OP_CAMERA, list.get(cameraIdx).getCode());
     }
 
     private class TestHandler extends AppOpsControllerImpl.H {

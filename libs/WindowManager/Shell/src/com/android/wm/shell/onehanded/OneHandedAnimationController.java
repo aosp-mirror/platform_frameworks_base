@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.view.SurfaceControl;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
+import android.window.WindowContainerToken;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -55,7 +56,7 @@ public class OneHandedAnimationController {
 
     private final Interpolator mOvershootInterpolator;
     private final OneHandedSurfaceTransactionHelper mSurfaceTransactionHelper;
-    private final HashMap<SurfaceControl, OneHandedTransitionAnimator> mAnimatorMap =
+    private final HashMap<WindowContainerToken, OneHandedTransitionAnimator> mAnimatorMap =
             new HashMap<>();
 
     /**
@@ -67,23 +68,23 @@ public class OneHandedAnimationController {
     }
 
     @SuppressWarnings("unchecked")
-    OneHandedTransitionAnimator getAnimator(SurfaceControl leash, Rect startBounds,
-            Rect endBounds) {
-        final OneHandedTransitionAnimator animator = mAnimatorMap.get(leash);
+    OneHandedTransitionAnimator getAnimator(WindowContainerToken token, SurfaceControl leash,
+            Rect startBounds, Rect endBounds) {
+        final OneHandedTransitionAnimator animator = mAnimatorMap.get(token);
         if (animator == null) {
-            mAnimatorMap.put(leash, setupOneHandedTransitionAnimator(
-                    OneHandedTransitionAnimator.ofBounds(leash, startBounds, endBounds)));
+            mAnimatorMap.put(token, setupOneHandedTransitionAnimator(
+                    OneHandedTransitionAnimator.ofBounds(token, leash, startBounds, endBounds)));
         } else if (animator.isRunning()) {
             animator.updateEndValue(endBounds);
         } else {
             animator.cancel();
-            mAnimatorMap.put(leash, setupOneHandedTransitionAnimator(
-                    OneHandedTransitionAnimator.ofBounds(leash, startBounds, endBounds)));
+            mAnimatorMap.put(token, setupOneHandedTransitionAnimator(
+                    OneHandedTransitionAnimator.ofBounds(token, leash, startBounds, endBounds)));
         }
-        return mAnimatorMap.get(leash);
+        return mAnimatorMap.get(token);
     }
 
-    HashMap<SurfaceControl, OneHandedTransitionAnimator> getAnimatorMap() {
+    HashMap<WindowContainerToken, OneHandedTransitionAnimator> getAnimatorMap() {
         return mAnimatorMap;
     }
 
@@ -91,8 +92,8 @@ public class OneHandedAnimationController {
         return mAnimatorMap.isEmpty();
     }
 
-    void removeAnimator(SurfaceControl key) {
-        final OneHandedTransitionAnimator animator = mAnimatorMap.remove(key);
+    void removeAnimator(WindowContainerToken token) {
+        final OneHandedTransitionAnimator animator = mAnimatorMap.remove(token);
         if (animator != null && animator.isRunning()) {
             animator.cancel();
         }
@@ -116,6 +117,7 @@ public class OneHandedAnimationController {
             ValueAnimator.AnimatorListener {
 
         private final SurfaceControl mLeash;
+        private final WindowContainerToken mToken;
         private T mStartValue;
         private T mEndValue;
         private T mCurrentValue;
@@ -128,8 +130,10 @@ public class OneHandedAnimationController {
 
         private @TransitionDirection int mTransitionDirection;
 
-        private OneHandedTransitionAnimator(SurfaceControl leash, T startValue, T endValue) {
+        private OneHandedTransitionAnimator(WindowContainerToken token, SurfaceControl leash,
+                T startValue, T endValue) {
             mLeash = leash;
+            mToken = token;
             mStartValue = startValue;
             mEndValue = endValue;
             addListener(this);
@@ -208,8 +212,8 @@ public class OneHandedAnimationController {
             return this;
         }
 
-        SurfaceControl getLeash() {
-            return mLeash;
+        WindowContainerToken getToken() {
+            return mToken;
         }
 
         Rect getDestinationBounds() {
@@ -254,10 +258,10 @@ public class OneHandedAnimationController {
         }
 
         @VisibleForTesting
-        static OneHandedTransitionAnimator<Rect> ofBounds(SurfaceControl leash,
-                Rect startValue, Rect endValue) {
+        static OneHandedTransitionAnimator<Rect> ofBounds(WindowContainerToken token,
+                SurfaceControl leash, Rect startValue, Rect endValue) {
 
-            return new OneHandedTransitionAnimator<Rect>(leash, new Rect(startValue),
+            return new OneHandedTransitionAnimator<Rect>(token, leash, new Rect(startValue),
                     new Rect(endValue)) {
 
                 private final Rect mTmpRect = new Rect();

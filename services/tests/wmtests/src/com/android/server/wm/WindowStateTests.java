@@ -810,4 +810,27 @@ public class WindowStateTests extends WindowTestsBase {
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
+
+    @Test
+    public void testSetFreezeInsetsState() {
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        spyOn(app);
+        doReturn(true).when(app).isVisible();
+
+        // Set freezing the insets state to make the window ignore to dispatch insets changed.
+        final InsetsState expectedState = new InsetsState(app.getInsetsState(),
+                true /* copySources */);
+        app.freezeInsetsState();
+        assertEquals(expectedState, app.getFrozenInsetsState());
+        assertFalse(app.isReadyToDispatchInsetsState());
+        assertEquals(expectedState, app.getInsetsState());
+        mDisplayContent.getInsetsStateController().notifyInsetsChanged();
+        verify(app, never()).notifyInsetsChanged();
+
+        // Unfreeze the insets state to make the window can dispatch insets changed.
+        app.clearFrozenInsetsState();
+        assertTrue(app.isReadyToDispatchInsetsState());
+        mDisplayContent.getInsetsStateController().notifyInsetsChanged();
+        verify(app).notifyInsetsChanged();
+    }
 }

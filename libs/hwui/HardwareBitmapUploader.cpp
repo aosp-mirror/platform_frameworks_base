@@ -362,13 +362,8 @@ static SkBitmap makeHwCompatible(const FormatInfo& format, const SkBitmap& sourc
         return source;
     } else {
         SkBitmap bitmap;
-        const SkImageInfo& info = source.info();
-        bitmap.allocPixels(info.makeColorType(kN32_SkColorType));
-
-        SkCanvas canvas(bitmap);
-        canvas.drawColor(0);
-        canvas.drawBitmap(source, 0.0f, 0.0f, nullptr);
-
+        bitmap.allocPixels(source.info().makeColorType(kN32_SkColorType));
+        bitmap.writePixels(source.pixmap());
         return bitmap;
     }
 }

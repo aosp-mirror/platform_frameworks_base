@@ -407,8 +407,6 @@ public class StatsPullAtomService extends SystemService {
         mContext = context;
     }
 
-    private native void nativeInit();
-
     /**
      * Use of this StatsPullAtomCallbackImpl means we avoid one class per tagId, which we would
      * get if we used lambdas.
@@ -681,7 +679,6 @@ public class StatsPullAtomService extends SystemService {
         super.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             BackgroundThread.getHandler().post(() -> {
-                nativeInit();
                 initializePullersState();
                 registerPullers();
                 registerEventListeners();

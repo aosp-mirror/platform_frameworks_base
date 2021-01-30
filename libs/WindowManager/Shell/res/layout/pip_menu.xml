@@ -36,8 +36,8 @@
             android:layout_height="match_parent">
             <ImageButton
                 android:id="@+id/expand_button"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="@dimen/pip_expand_action_size"
+                android:layout_height="@dimen/pip_expand_action_size"
                 android:layout_gravity="center"
                 android:contentDescription="@string/pip_phone_expand"
                 android:padding="10dp"

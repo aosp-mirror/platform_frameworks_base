@@ -507,10 +507,12 @@ void Tree::draw(SkCanvas* canvas, const SkRect& bounds, const SkPaint& inPaint) 
 
     sk_sp<SkImage> cachedBitmap = getBitmapUpdateIfDirty().makeImage();
 
+    // HWUI always draws VD with bilinear filtering.
+    auto sampling = SkSamplingOptions(SkFilterMode::kLinear);
     int scaledWidth = SkScalarCeilToInt(mProperties.getScaledWidth());
     int scaledHeight = SkScalarCeilToInt(mProperties.getScaledHeight());
     canvas->drawImageRect(cachedBitmap, SkRect::MakeWH(scaledWidth, scaledHeight), bounds,
-                           &paint, SkCanvas::kFast_SrcRectConstraint);
+                          sampling, &paint, SkCanvas::kFast_SrcRectConstraint);
 }
 
 void Tree::updateBitmapCache(Bitmap& bitmap, bool useStagingData) {

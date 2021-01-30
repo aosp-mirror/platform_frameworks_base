@@ -166,8 +166,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     //       their capabilities are ready.
     private static final int WAIT_MOTION_INJECTOR_TIMEOUT_MILLIS = 1000;
 
-    static final String FUNCTION_REGISTER_SYSTEM_ACTION = "registerSystemAction";
-    static final String FUNCTION_UNREGISTER_SYSTEM_ACTION = "unregisterSystemAction";
     private static final String FUNCTION_REGISTER_UI_TEST_AUTOMATION_SERVICE =
         "registerUiTestAutomationService";
 
@@ -748,9 +746,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void registerSystemAction(RemoteAction action, int actionId) {
-        mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY,
-                FUNCTION_REGISTER_SYSTEM_ACTION);
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         getSystemActionPerformer().registerSystemAction(actionId, action);
     }
 
@@ -761,9 +757,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
      */
     @Override
     public void unregisterSystemAction(int actionId) {
-        mSecurityPolicy.enforceCallerIsRecentsOrHasPermission(
-                Manifest.permission.MANAGE_ACCESSIBILITY,
-                FUNCTION_UNREGISTER_SYSTEM_ACTION);
+        mSecurityPolicy.enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ACCESSIBILITY);
         getSystemActionPerformer().unregisterSystemAction(actionId);
     }
 

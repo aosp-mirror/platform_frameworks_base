@@ -21,6 +21,9 @@ import static android.content.Context.BIND_INCLUDE_CAPABILITIES;
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_CANCELLED;
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_TIMED_OUT;
 
+import static com.android.server.rotationresolver.RotationResolverManagerService.RESOLUTION_FAILURE;
+import static com.android.server.rotationresolver.RotationResolverManagerService.logRotationStats;
+
 import android.annotation.NonNull;
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +32,7 @@ import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.ICancellationSignal;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.rotationresolver.RotationResolverInternal;
 import android.service.rotationresolver.IRotationResolverCallback;
 import android.service.rotationresolver.IRotationResolverService;
@@ -112,6 +116,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
 
         boolean mIsDispatched;
         private final Object mLock = new Object();
+        private final long mRequestStartTimeMillis;
 
         RotationRequest(
                 @NonNull RotationResolverInternal.RotationResolverCallbackInternal
@@ -125,6 +130,7 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
             mPackageName = packageName;
             mIRotationResolverCallback = new RotationResolverCallback();
             mCancellationSignalInternal = cancellationSignal;
+            mRequestStartTimeMillis = SystemClock.elapsedRealtime();
         }
 
 
@@ -164,7 +170,10 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     }
                     mIsFulfilled = true;
                     mCallbackInternal.onSuccess(rotation);
-                    logStats(rotation);
+                    final long timeToCalculate =
+                            SystemClock.elapsedRealtime() - mRequestStartTimeMillis;
+                    logRotationStats(mProposedRotation, mCurrentRotation, rotation,
+                            timeToCalculate);
                 }
             }
 
@@ -177,7 +186,10 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     }
                     mIsFulfilled = true;
                     mCallbackInternal.onFailure(error);
-                    logStats(error);
+                    final long timeToCalculate =
+                            SystemClock.elapsedRealtime() - mRequestStartTimeMillis;
+                    logRotationStats(mProposedRotation, mCurrentRotation, RESOLUTION_FAILURE,
+                            timeToCalculate);
                 }
             }
 
@@ -195,10 +207,6 @@ class RemoteRotationResolverService extends ServiceConnector.Impl<IRotationResol
                     }
                 }
 
-            }
-
-            private void logStats(int result) {
-                // TODO FrameworkStatsLog
             }
         }
     }

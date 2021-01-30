@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
-import static android.service.SensorPrivacyIndividualEnabledSensorProto.CAMERA;
-import static android.service.SensorPrivacyIndividualEnabledSensorProto.MICROPHONE;
+import static android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_CAMERA;
+import static android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE;
 
 import android.hardware.SensorPrivacyManager;
 import android.hardware.SensorPrivacyManager.IndividualSensor;
@@ -30,7 +30,8 @@ import java.util.Set;
 
 public class IndividualSensorPrivacyControllerImpl implements IndividualSensorPrivacyController {
 
-    private static final int[] SENSORS = new int[] {CAMERA, MICROPHONE};
+    private static final int[] SENSORS = new int[] {INDIVIDUAL_SENSOR_CAMERA,
+            INDIVIDUAL_SENSOR_MICROPHONE};
 
     private final @NonNull SensorPrivacyManager mSensorPrivacyManager;
     private final SparseBooleanArray mState = new SparseBooleanArray();

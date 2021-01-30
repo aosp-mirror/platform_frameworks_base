@@ -335,7 +335,8 @@ static jobjectArray nativeReadEnergyMeters(JNIEnv *env, jclass clazz, jintArray 
                                                                   field_EM_timestampMs,
                                                                   energyData[i].timestamp);
                                                 env->SetLongField(energyMeasurement,
-                                                                  field_EM_durationMs, -1);
+                                                                  field_EM_durationMs,
+                                                                  energyData[i].timestamp);
                                                 env->SetLongField(energyMeasurement,
                                                                   field_EM_energyUWs,
                                                                   energyData[i].energy);
