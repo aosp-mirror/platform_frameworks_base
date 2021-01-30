@@ -151,7 +151,8 @@ public class AlarmManagerService extends SystemService {
     static final boolean DEBUG_BG_LIMIT = localLOGV || false;
     static final boolean DEBUG_STANDBY = localLOGV || false;
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
-    static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
+    // TODO(b/178484639) : Turn off once alarms and reminders work is complete.
+    static final boolean RECORD_DEVICE_IDLE_ALARMS = true;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
     static final int TICK_HISTORY_DEPTH = 10;
@@ -1731,8 +1732,8 @@ public class AlarmManagerService extends SystemService {
             if (RECORD_DEVICE_IDLE_ALARMS) {
                 IdleDispatchEntry ent = new IdleDispatchEntry();
                 ent.uid = a.uid;
-                ent.pkg = a.operation.getCreatorPackage();
-                ent.tag = a.operation.getTag("");
+                ent.pkg = a.sourcePackage;
+                ent.tag = a.statsTag;
                 ent.op = "START IDLE";
                 ent.elapsedRealtime = mInjector.getElapsedRealtime();
                 ent.argRealtime = a.getWhenElapsed();
@@ -3151,8 +3152,8 @@ public class AlarmManagerService extends SystemService {
                 if (RECORD_DEVICE_IDLE_ALARMS) {
                     IdleDispatchEntry ent = new IdleDispatchEntry();
                     ent.uid = alarm.uid;
-                    ent.pkg = alarm.operation.getCreatorPackage();
-                    ent.tag = alarm.operation.getTag("");
+                    ent.pkg = alarm.sourcePackage;
+                    ent.tag = alarm.statsTag;
                     ent.op = "END IDLE";
                     ent.elapsedRealtime = mInjector.getElapsedRealtime();
                     ent.argRealtime = alarm.getWhenElapsed();
