@@ -104,6 +104,26 @@ public final class LegacyPermissionState {
     }
 
     /**
+     * Get the permission state for a permission and a user.
+     *
+     * @param permissionName the permission name
+     * @param userId the user ID
+     * @return the permission state
+     *
+     * @hide
+     */
+    @Nullable
+    public PermissionState getPermissionState(@NonNull String permissionName,
+            @UserIdInt int userId) {
+        checkUserId(userId);
+        UserState userState = mUserStates.get(userId);
+        if (userState == null) {
+            return null;
+        }
+        return userState.getPermissionState(permissionName);
+    }
+
+    /**
      * Put a permission state for a user.
      *
      * @param permissionState the permission state
@@ -142,10 +162,10 @@ public final class LegacyPermissionState {
     }
 
     /**
-     * Get all the runtime permission states for a user.
+     * Get all the permission states for a user.
      *
      * @param userId the user ID
-     * @return the runtime permission states
+     * @return the permission states
      */
     @NonNull
     public Collection<PermissionState> getPermissionStates(@UserIdInt int userId) {
@@ -300,6 +320,26 @@ public final class LegacyPermissionState {
         @NonNull
         public int getFlags() {
             return mFlags;
+        }
+
+        @Override
+        public boolean equals(@Nullable Object object) {
+            if (this == object) {
+                return true;
+            }
+            if (object == null || getClass() != object.getClass()) {
+                return false;
+            }
+            PermissionState that = (PermissionState) object;
+            return mRuntime == that.mRuntime
+                    && mGranted == that.mGranted
+                    && mFlags == that.mFlags
+                    && Objects.equals(mName, that.mName);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mName, mRuntime, mGranted, mFlags);
         }
     }
 }
