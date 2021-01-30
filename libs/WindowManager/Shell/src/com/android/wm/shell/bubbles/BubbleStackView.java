@@ -1659,6 +1659,7 @@ public class BubbleStackView extends FrameLayout
         }
         beforeExpandedViewAnimation();
 
+        updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
         mBubbleContainer.setActiveController(mExpandedAnimationController);
         updateOverflowVisibility();
         updatePointerPosition();
@@ -1870,7 +1871,7 @@ public class BubbleStackView extends FrameLayout
                                 mExpandedBubble));
                     }
                     updateOverflowVisibility();
-
+                    updateBadgesAndZOrder(true /* setBadgeForCollapsedStack */);
                     afterExpandedViewAnimation();
                     if (previouslySelected != null) {
                         previouslySelected.setContentVisibility(false);
@@ -2618,7 +2619,6 @@ public class BubbleStackView extends FrameLayout
         }
 
         mStackOnLeftOrWillBe = mStackAnimationController.isStackOnLeftSide();
-        updateBadgesAndZOrder(false /* setBadgeForCollapsedStack */);
     }
 
     /**
