@@ -235,7 +235,8 @@ sp<DescramblerClient> TunerClient::openDescrambler(int /*descramblerHandle*/) {
         }
     }
 
-    return NULL;}
+    return NULL;
+}
 
 sp<LnbClient> TunerClient::openLnb(int lnbHandle) {
     if (mTunerService != NULL) {

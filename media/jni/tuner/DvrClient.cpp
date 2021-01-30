@@ -210,14 +210,13 @@ Result DvrClient::configure(DvrSettings settings) {
             return res;
         }
 
-        AidlMQDesc* aidlMqDesc = NULL;
-        s = mTunerDvr->getQueueDesc(aidlMqDesc);
+        AidlMQDesc aidlMqDesc;
+        s = mTunerDvr->getQueueDesc(&aidlMqDesc);
         res = ClientHelper::getServiceSpecificErrorCode(s);
         if (res != Result::SUCCESS) {
             return res;
         }
-
-        mDvrMQ = new (nothrow) AidlMQ(*aidlMqDesc);
+        mDvrMQ = new (nothrow) AidlMQ(aidlMqDesc);
         EventFlag::createEventFlag(mDvrMQ->getEventFlagWord(), &mDvrMQEventFlag);
         return res;
     }
