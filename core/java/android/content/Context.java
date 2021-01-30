@@ -37,6 +37,7 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.GameManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
@@ -5419,7 +5420,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.graphics.GameManager}.
+     * {@link GameManager}.
      *
      * @see #getSystemService(String)
      *

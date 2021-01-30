@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.server.graphics;
+package com.android.server.app;
 
 import static org.junit.Assert.assertEquals;
 
-import android.graphics.GameManager;
+import android.app.GameManager;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;

@@ -361,7 +361,7 @@ public final class SystemServer implements Dumpable {
             "com.android.server.connectivity.IpConnectivityMetrics";
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
-            "com.android.server.graphics.GameManagerService$Lifecycle";
+            "com.android.server.app.GameManagerService$Lifecycle";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 

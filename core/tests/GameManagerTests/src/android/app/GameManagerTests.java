@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package android.graphics;
+package android.app;
 
 import static junit.framework.Assert.assertEquals;
 
-import android.graphics.GameManager.GameMode;
+import android.app.GameManager.GameMode;
 import android.util.ArrayMap;
 import android.util.Pair;
 
@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**
- * Unit tests for {@link GameManager}.
+ * Unit tests for {@link android.app.GameManager}.
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
