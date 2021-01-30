@@ -900,7 +900,7 @@ public final class ActiveServices {
             String callingPackage, @Nullable String callingFeatureId, int callingUid,
             Intent service, boolean callerFg, final int userId,
             final boolean isBinding, final IServiceConnection connection) {
-        if (mAm.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+        if (mAm.getPackageManagerInternal().isPermissionsReviewRequired(
                 r.packageName, r.userId)) {
 
             // Show a permission review UI only for starting/binding from a foreground app
@@ -932,7 +932,7 @@ public final class ActiveServices {
                                         // binding request is still valid, so hook them up. We
                                         // proceed only if the caller cleared the review requirement
                                         // otherwise we unbind because the user didn't approve.
-                                        if (!mAm.getPackageManagerInternalLocked()
+                                        if (!mAm.getPackageManagerInternal()
                                                 .isPermissionsReviewRequired(r.packageName,
                                                     r.userId)) {
                                             try {
@@ -941,9 +941,14 @@ public final class ActiveServices {
                                                         callerFg,
                                                         false /* whileRestarting */,
                                                         false /* permissionsReviewRequired */,
-                                                        false /* packageFrozen */);
+                                                        false /* packageFrozen */,
+                                                        true /* enqueueOomAdj */);
                                             } catch (RemoteException e) {
                                                 /* ignore - local call */
+                                            } finally {
+                                                /* Will be a no-op if nothing pending */
+                                                mAm.updateOomAdjPendingTargetsLocked(
+                                                        OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
                                             }
                                         } else {
                                             unbindServiceLocked(connection);
@@ -994,7 +999,7 @@ public final class ActiveServices {
             int callingUid, int callingPid, boolean fgRequired, boolean callerFg, int userId,
             boolean allowBackgroundActivityStarts, @Nullable IBinder backgroundActivityStartsToken,
             boolean isBinding, IServiceConnection connection) {
-        final PackageManagerInternal pm = mAm.getPackageManagerInternalLocked();
+        final PackageManagerInternal pm = mAm.getPackageManagerInternal();
         final boolean frozen = pm.isPackageFrozen(s.packageName, callingUid, s.userId);
         if (!frozen) {
             // Not frozen, it's okay to go
@@ -1025,9 +1030,14 @@ public final class ActiveServices {
                             bringUpServiceLocked(s, serviceIntent.getFlags(), callerFg,
                                     false /* whileRestarting */,
                                     false /* permissionsReviewRequired */,
-                                    false /* packageFrozen */);
+                                    false /* packageFrozen */,
+                                    true /* enqueueOomAdj */);
                         } catch (TransactionTooLargeException e) {
                             /* ignore - local call */
+                        } finally {
+                            /* Will be a no-op if nothing pending */
+                            mAm.updateOomAdjPendingTargetsLocked(
+                                    OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
                         }
                     } else { // Starting a service
                         try {
@@ -1091,7 +1101,13 @@ public final class ActiveServices {
         FrameworkStatsLog.write(FrameworkStatsLog.SERVICE_STATE_CHANGED, uid, packageName,
                 serviceName, FrameworkStatsLog.SERVICE_STATE_CHANGED__STATE__START);
         mAm.mBatteryStatsService.noteServiceStartRunning(uid, packageName, serviceName);
-        String error = bringUpServiceLocked(r, service.getFlags(), callerFg, false, false, false);
+        String error = bringUpServiceLocked(r, service.getFlags(), callerFg,
+                false /* whileRestarting */,
+                false /* permissionsReviewRequired */,
+                false /* packageFrozen */,
+                true /* enqueueOomAdj */);
+        /* Will be a no-op if nothing pending */
+        mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
         if (error != null) {
             return new ComponentName("!!", error);
         }
@@ -1117,7 +1133,7 @@ public final class ActiveServices {
         return r.name;
     }
 
-    private void stopServiceLocked(ServiceRecord service) {
+    private void stopServiceLocked(ServiceRecord service, boolean enqueueOomAdj) {
         if (service.delayed) {
             // If service isn't actually running, but is being held in the
             // delayed list, then we need to keep it started but note that it
@@ -1140,7 +1156,7 @@ public final class ActiveServices {
         }
         service.callStart = false;
 
-        bringDownServiceIfNeededLocked(service, false, false);
+        bringDownServiceIfNeededLocked(service, false, false, enqueueOomAdj);
     }
 
     int stopServiceLocked(IApplicationThread caller, Intent service,
@@ -1163,7 +1179,7 @@ public final class ActiveServices {
             if (r.record != null) {
                 final long origId = Binder.clearCallingIdentity();
                 try {
-                    stopServiceLocked(r.record);
+                    stopServiceLocked(r.record, false);
                 } finally {
                     Binder.restoreCallingIdentity(origId);
                 }
@@ -1213,11 +1229,15 @@ public final class ActiveServices {
                 }
             }
             if (stopping != null) {
-                for (int i=stopping.size()-1; i>=0; i--) {
+                final int size = stopping.size();
+                for (int i = size - 1; i >= 0; i--) {
                     ServiceRecord service = stopping.get(i);
                     service.delayed = false;
                     services.ensureNotStartingBackgroundLocked(service);
-                    stopServiceLocked(service);
+                    stopServiceLocked(service, true);
+                }
+                if (size > 0) {
+                    mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
                 }
             }
         }
@@ -1226,7 +1246,7 @@ public final class ActiveServices {
     void killMisbehavingService(ServiceRecord r,
             int appUid, int appPid, String localPackageName) {
         synchronized (mAm) {
-            stopServiceLocked(r);
+            stopServiceLocked(r, false);
             mAm.crashApplication(appUid, appPid, localPackageName, -1,
                     "Bad notification for startForeground", true /*force*/);
         }
@@ -1301,7 +1321,7 @@ public final class ActiveServices {
             }
             r.callStart = false;
             final long origId = Binder.clearCallingIdentity();
-            bringDownServiceIfNeededLocked(r, false, false);
+            bringDownServiceIfNeededLocked(r, false, false, false);
             Binder.restoreCallingIdentity(origId);
             return true;
         }
@@ -2229,12 +2249,12 @@ public final class ActiveServices {
         mAm.updateProcessForegroundLocked(proc, anyForeground, fgServiceTypes, oomAdj);
     }
 
-    private void updateWhitelistManagerLocked(ProcessRecord proc) {
-        proc.whitelistManager = false;
+    private void updateAllowlistManagerLocked(ProcessRecord proc) {
+        proc.mAllowlistManager = false;
         for (int i = proc.numberOfRunningServices() - 1; i >= 0; i--) {
             ServiceRecord sr = proc.getRunningServiceAt(i);
             if (sr.whitelistManager) {
-                proc.whitelistManager = true;
+                proc.mAllowlistManager = true;
                 break;
             }
         }
@@ -2475,10 +2495,13 @@ public final class ActiveServices {
             }
             clist.add(c);
 
+            boolean needOomAdj = false;
             if ((flags&Context.BIND_AUTO_CREATE) != 0) {
                 s.lastActivity = SystemClock.uptimeMillis();
+                needOomAdj = true;
                 if (bringUpServiceLocked(s, service.getFlags(), callerFg, false,
-                        permissionsReviewRequired, packageFrozen) != null) {
+                        permissionsReviewRequired, packageFrozen, true) != null) {
+                    mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
                     return 0;
                 }
             }
@@ -2489,7 +2512,7 @@ public final class ActiveServices {
                     s.app.treatLikeActivity = true;
                 }
                 if (s.whitelistManager) {
-                    s.app.whitelistManager = true;
+                    s.app.mAllowlistManager = true;
                 }
                 // This could have made the service more important.
                 mAm.updateLruProcessLocked(s.app,
@@ -2497,7 +2520,11 @@ public final class ActiveServices {
                                 || (callerApp.getCurProcState() <= ActivityManager.PROCESS_STATE_TOP
                                         && (flags & Context.BIND_TREAT_LIKE_ACTIVITY) != 0),
                         b.client);
-                mAm.updateOomAdjLocked(s.app, OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
+                needOomAdj = true;
+                mAm.enqueueOomAdjTargetLocked(s.app);
+            }
+            if (needOomAdj) {
+                mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_BIND_SERVICE);
             }
 
             if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bind " + s + " with " + b
@@ -2591,7 +2618,7 @@ public final class ActiveServices {
                     }
                 }
 
-                serviceDoneExecutingLocked(r, mDestroyingServices.contains(r), false);
+                serviceDoneExecutingLocked(r, mDestroyingServices.contains(r), false, false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2647,7 +2674,7 @@ public final class ActiveServices {
         try {
             while (clist.size() > 0) {
                 ConnectionRecord r = clist.get(0);
-                removeConnectionLocked(r, null, null);
+                removeConnectionLocked(r, null, null, true);
                 if (clist.size() > 0 && clist.get(0) == r) {
                     // In case it didn't get removed above, do it now.
                     Slog.wtf(TAG, "Connection " + r + " not removed for binder " + binder);
@@ -2656,8 +2683,8 @@ public final class ActiveServices {
 
                 final ProcessRecord app = r.binding.service.app;
                 if (app != null) {
-                    if (app.whitelistManager) {
-                        updateWhitelistManagerLocked(app);
+                    if (app.mAllowlistManager) {
+                        updateAllowlistManagerLocked(app);
                     }
                     // This could have made the service less important.
                     if ((r.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
@@ -2716,7 +2743,7 @@ public final class ActiveServices {
                     }
                 }
 
-                serviceDoneExecutingLocked(r, inDestroying, false);
+                serviceDoneExecutingLocked(r, inDestroying, false, false);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
@@ -2803,7 +2830,7 @@ public final class ActiveServices {
                     flags |= PackageManager.MATCH_INSTANT;
                 }
                 // TODO: come back and remove this assumption to triage all services
-                ResolveInfo rInfo = mAm.getPackageManagerInternalLocked().resolveService(service,
+                ResolveInfo rInfo = mAm.getPackageManagerInternal().resolveService(service,
                         resolvedType, flags, userId, callingUid);
                 ServiceInfo sInfo = rInfo != null ? rInfo.serviceInfo : null;
                 if (sInfo == null) {
@@ -2876,7 +2903,7 @@ public final class ActiveServices {
                         final long token = Binder.clearCallingIdentity();
                         try {
                             ResolveInfo rInfoForUserId0 =
-                                    mAm.getPackageManagerInternalLocked().resolveService(service,
+                                    mAm.getPackageManagerInternal().resolveService(service,
                                             resolvedType, flags, userId, callingUid);
                             if (rInfoForUserId0 == null) {
                                 Slog.w(TAG_SERVICE,
@@ -3055,13 +3082,13 @@ public final class ActiveServices {
                 // Keep the executeNesting count accurate.
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while binding " + r, e);
                 final boolean inDestroying = mDestroyingServices.contains(r);
-                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying, false);
                 throw e;
             } catch (RemoteException e) {
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Crashed while binding " + r);
                 // Keep the executeNesting count accurate.
                 final boolean inDestroying = mDestroyingServices.contains(r);
-                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying, false);
                 return false;
             }
         }
@@ -3217,9 +3244,12 @@ public final class ActiveServices {
         }
         try {
             bringUpServiceLocked(r, r.intent.getIntent().getFlags(), r.createdFromFg, true, false,
-                    false);
+                    false, true);
         } catch (TransactionTooLargeException e) {
             // Ignore, it's been logged and nothing upstack cares.
+        } finally {
+            /* Will be a no-op if nothing pending */
+            mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
         }
     }
 
@@ -3262,7 +3292,8 @@ public final class ActiveServices {
     }
 
     private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
-            boolean whileRestarting, boolean permissionsReviewRequired, boolean packageFrozen)
+            boolean whileRestarting, boolean permissionsReviewRequired, boolean packageFrozen,
+            boolean enqueueOomAdj)
             throws TransactionTooLargeException {
         if (r.app != null && r.app.thread != null) {
             sendServiceArgsLocked(r, execInFg, false);
@@ -3299,7 +3330,7 @@ public final class ActiveServices {
                     + r.appInfo.uid + " for service "
                     + r.intent.getIntent() + ": user " + r.userId + " is stopped";
             Slog.w(TAG, msg);
-            bringDownServiceLocked(r);
+            bringDownServiceLocked(r, enqueueOomAdj);
             return msg;
         }
 
@@ -3325,7 +3356,7 @@ public final class ActiveServices {
             if (app != null && app.thread != null) {
                 try {
                     app.addPackage(r.appInfo.packageName, r.appInfo.longVersionCode, mAm.mProcessStats);
-                    realStartServiceLocked(r, app, execInFg);
+                    realStartServiceLocked(r, app, execInFg, enqueueOomAdj);
                     return null;
                 } catch (TransactionTooLargeException e) {
                     throw e;
@@ -3366,7 +3397,7 @@ public final class ActiveServices {
                         + r.appInfo.uid + " for service "
                         + r.intent.getIntent() + ": process is bad";
                 Slog.w(TAG, msg);
-                bringDownServiceLocked(r);
+                bringDownServiceLocked(r, enqueueOomAdj);
                 return msg;
             }
             if (isolated) {
@@ -3379,7 +3410,7 @@ public final class ActiveServices {
                 Slog.v(TAG, "Whitelisting " + UserHandle.formatUid(r.appInfo.uid)
                         + " for fg-service launch");
             }
-            mAm.tempWhitelistUidLocked(r.appInfo.uid,
+            mAm.tempAllowlistUidLocked(r.appInfo.uid,
                     SERVICE_START_FOREGROUND_TIMEOUT, "fg-service-launch",
                     BroadcastOptions.TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED);
         }
@@ -3394,7 +3425,7 @@ public final class ActiveServices {
             if (r.startRequested) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "Applying delayed stop (in bring up): " + r);
-                stopServiceLocked(r);
+                stopServiceLocked(r, enqueueOomAdj);
             }
         }
 
@@ -3417,7 +3448,7 @@ public final class ActiveServices {
      * from bindService() as well.
      */
     private final void realStartServiceLocked(ServiceRecord r,
-            ProcessRecord app, boolean execInFg) throws RemoteException {
+            ProcessRecord app, boolean execInFg, boolean enqueueOomAdj) throws RemoteException {
         if (app.thread == null) {
             throw new RemoteException();
         }
@@ -3431,7 +3462,11 @@ public final class ActiveServices {
         bumpServiceExecutingLocked(r, execInFg, "create");
         mAm.updateLruProcessLocked(app, false, null);
         updateServiceForegroundLocked(r.app, /* oomAdj= */ false);
-        mAm.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
+        if (enqueueOomAdj) {
+            mAm.enqueueOomAdjTargetLocked(app);
+        } else {
+            mAm.updateOomAdjLocked(app, OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
+        }
 
         boolean created = false;
         try {
@@ -3466,7 +3501,7 @@ public final class ActiveServices {
             if (!created) {
                 // Keep the executeNesting count accurate.
                 final boolean inDestroying = mDestroyingServices.contains(r);
-                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying, false);
 
                 // Cleanup.
                 if (newService) {
@@ -3482,7 +3517,7 @@ public final class ActiveServices {
         }
 
         if (r.whitelistManager) {
-            app.whitelistManager = true;
+            app.mAllowlistManager = true;
         }
 
         requestServiceBindingsLocked(r, execInFg);
@@ -3515,7 +3550,7 @@ public final class ActiveServices {
             if (r.startRequested) {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "Applying delayed stop (from start): " + r);
-                stopServiceLocked(r);
+                stopServiceLocked(r, enqueueOomAdj);
             }
         }
     }
@@ -3603,9 +3638,11 @@ public final class ActiveServices {
         if (caughtException != null) {
             // Keep nesting count correct
             final boolean inDestroying = mDestroyingServices.contains(r);
-            for (int i = 0; i < args.size(); i++) {
-                serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+            for (int i = 0, size = args.size(); i < size; i++) {
+                serviceDoneExecutingLocked(r, inDestroying, inDestroying, true);
             }
+            /* Will be a no-op if nothing pending */
+            mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             if (caughtException instanceof TransactionTooLargeException) {
                 throw (TransactionTooLargeException)caughtException;
             }
@@ -3631,7 +3668,7 @@ public final class ActiveServices {
     }
 
     private final void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
-            boolean hasConn) {
+            boolean hasConn, boolean enqueueOomAdj) {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
 
@@ -3644,10 +3681,10 @@ public final class ActiveServices {
             return;
         }
 
-        bringDownServiceLocked(r);
+        bringDownServiceLocked(r, enqueueOomAdj);
     }
 
-    private final void bringDownServiceLocked(ServiceRecord r) {
+    private void bringDownServiceLocked(ServiceRecord r, boolean enqueueOomAdj) {
         //Slog.i(TAG, "Bring down service:");
         //r.dump("  ");
 
@@ -3672,9 +3709,9 @@ public final class ActiveServices {
             }
         }
 
+        boolean needOomAdj = false;
         // Tell the service that it has been unbound.
         if (r.app != null && r.app.thread != null) {
-            boolean needOomAdj = false;
             for (int i = r.bindings.size() - 1; i >= 0; i--) {
                 IntentBindRecord ibr = r.bindings.valueAt(i);
                 if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "Bringing down binding " + ibr
@@ -3691,14 +3728,10 @@ public final class ActiveServices {
                         Slog.w(TAG, "Exception when unbinding service "
                                 + r.shortInstanceName, e);
                         needOomAdj = false;
-                        serviceProcessGoneLocked(r);
+                        serviceProcessGoneLocked(r, enqueueOomAdj);
                         break;
                     }
                 }
-            }
-            if (needOomAdj) {
-                mAm.updateOomAdjLocked(r.app, true,
-                        OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             }
         }
 
@@ -3801,7 +3834,7 @@ public final class ActiveServices {
             r.app.stopService(r);
             r.app.updateBoundClientUids();
             if (r.whitelistManager) {
-                updateWhitelistManagerLocked(r.app);
+                updateAllowlistManagerLocked(r.app);
             }
             if (r.app.thread != null) {
                 updateServiceForegroundLocked(r.app, false);
@@ -3815,7 +3848,7 @@ public final class ActiveServices {
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when destroying service "
                             + r.shortInstanceName, e);
-                    serviceProcessGoneLocked(r);
+                    serviceProcessGoneLocked(r, enqueueOomAdj);
                 }
             } else {
                 if (DEBUG_SERVICE) Slog.v(
@@ -3826,6 +3859,13 @@ public final class ActiveServices {
                 TAG_SERVICE, "Removed service that is not running: " + r);
         }
 
+        if (needOomAdj) {
+            if (enqueueOomAdj) {
+                mAm.enqueueOomAdjTargetLocked(r.app);
+            } else {
+                mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+            }
+        }
         if (r.bindings.size() > 0) {
             r.bindings.clear();
         }
@@ -3849,7 +3889,7 @@ public final class ActiveServices {
     }
 
     void removeConnectionLocked(ConnectionRecord c, ProcessRecord skipApp,
-            ActivityServiceConnectionsHolder skipAct) {
+            ActivityServiceConnectionsHolder skipAct, boolean enqueueOomAdj) {
         IBinder binder = c.conn.asBinder();
         AppBindRecord b = c.binding;
         ServiceRecord s = b.service;
@@ -3875,7 +3915,7 @@ public final class ActiveServices {
             if ((c.flags&Context.BIND_ALLOW_WHITELIST_MANAGEMENT) != 0) {
                 s.updateWhitelistManager();
                 if (!s.whitelistManager && s.app != null) {
-                    updateWhitelistManagerLocked(s.app);
+                    updateAllowlistManagerLocked(s.app);
                 }
             }
             // And do the same for bg activity starts ability.
@@ -3918,8 +3958,12 @@ public final class ActiveServices {
                         // it to go down there and we want it to start out near the top.
                         mAm.updateLruProcessLocked(s.app, false, null);
                     }
-                    mAm.updateOomAdjLocked(s.app, true,
-                            OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                    if (enqueueOomAdj) {
+                        mAm.enqueueOomAdjTargetLocked(s.app);
+                    } else {
+                        mAm.updateOomAdjLocked(s.app, true,
+                                OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                    }
                     b.intent.hasBound = false;
                     // Assume the client doesn't want to know about a rebind;
                     // we will deal with that later if it asks for one.
@@ -3927,7 +3971,7 @@ public final class ActiveServices {
                     s.app.thread.scheduleUnbindService(s, b.intent.intent.getIntent());
                 } catch (Exception e) {
                     Slog.w(TAG, "Exception when unbinding service " + s.shortInstanceName, e);
-                    serviceProcessGoneLocked(s);
+                    serviceProcessGoneLocked(s, enqueueOomAdj);
                 }
             }
 
@@ -3946,12 +3990,13 @@ public final class ActiveServices {
                                 SystemClock.uptimeMillis());
                     }
                 }
-                bringDownServiceIfNeededLocked(s, true, hasAutoCreate);
+                bringDownServiceIfNeededLocked(s, true, hasAutoCreate, enqueueOomAdj);
             }
         }
     }
 
-    void serviceDoneExecutingLocked(ServiceRecord r, int type, int startId, int res) {
+    void serviceDoneExecutingLocked(ServiceRecord r, int type, int startId, int res,
+            boolean enqueueOomAdj) {
         boolean inDestroying = mDestroyingServices.contains(r);
         if (r != null) {
             if (type == ActivityThread.SERVICE_DONE_EXECUTING_START) {
@@ -4024,7 +4069,7 @@ public final class ActiveServices {
                 }
             }
             final long origId = Binder.clearCallingIdentity();
-            serviceDoneExecutingLocked(r, inDestroying, inDestroying);
+            serviceDoneExecutingLocked(r, inDestroying, inDestroying, enqueueOomAdj);
             Binder.restoreCallingIdentity(origId);
         } else {
             Slog.w(TAG, "Done executing unknown service from pid "
@@ -4032,7 +4077,7 @@ public final class ActiveServices {
         }
     }
 
-    private void serviceProcessGoneLocked(ServiceRecord r) {
+    private void serviceProcessGoneLocked(ServiceRecord r, boolean enqueueOomAdj) {
         if (r.tracker != null) {
             int memFactor = mAm.mProcessStats.getMemFactorLocked();
             long now = SystemClock.uptimeMillis();
@@ -4041,11 +4086,11 @@ public final class ActiveServices {
             r.tracker.setBound(false, memFactor, now);
             r.tracker.setStarted(false, memFactor, now);
         }
-        serviceDoneExecutingLocked(r, true, true);
+        serviceDoneExecutingLocked(r, true, true, enqueueOomAdj);
     }
 
     private void serviceDoneExecutingLocked(ServiceRecord r, boolean inDestroying,
-            boolean finishing) {
+            boolean finishing, boolean enqueueOomAdj) {
         if (DEBUG_SERVICE) Slog.v(TAG_SERVICE, "<<< DONE EXECUTING " + r
                 + ": nesting=" + r.executeNesting
                 + ", inDestroying=" + inDestroying + ", app=" + r.app);
@@ -4077,7 +4122,11 @@ public final class ActiveServices {
                     mDestroyingServices.remove(r);
                     r.bindings.clear();
                 }
-                mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                if (enqueueOomAdj) {
+                    mAm.enqueueOomAdjTargetLocked(r.app);
+                } else {
+                    mAm.updateOomAdjLocked(r.app, true, OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
+                }
             }
             r.executeFg = false;
             if (r.tracker != null) {
@@ -4095,7 +4144,7 @@ public final class ActiveServices {
                     r.app.stopService(r);
                     r.app.updateBoundClientUids();
                     if (r.whitelistManager) {
-                        updateWhitelistManagerLocked(r.app);
+                        updateAllowlistManagerLocked(r.app);
                     }
                 }
                 r.setProcess(null);
@@ -4121,15 +4170,17 @@ public final class ActiveServices {
                     i--;
                     proc.addPackage(sr.appInfo.packageName, sr.appInfo.longVersionCode,
                             mAm.mProcessStats);
-                    realStartServiceLocked(sr, proc, sr.createdFromFg);
+                    realStartServiceLocked(sr, proc, sr.createdFromFg, true);
                     didSomething = true;
                     if (!isServiceNeededLocked(sr, false, false)) {
                         // We were waiting for this service to start, but it is actually no
                         // longer needed.  This could happen because bringDownServiceIfNeeded
                         // won't bring down a service that is pending...  so now the pending
                         // is done, so let's drop it.
-                        bringDownServiceLocked(sr);
+                        bringDownServiceLocked(sr, true);
                     }
+                    /* Will be a no-op if nothing pending */
+                    mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_START_SERVICE);
                 }
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception in new application when starting service "
@@ -4157,7 +4208,8 @@ public final class ActiveServices {
     }
 
     void processStartTimedOutLocked(ProcessRecord proc) {
-        for (int i=0; i<mPendingServices.size(); i++) {
+        boolean needOomAdj = false;
+        for (int i = 0, size = mPendingServices.size(); i < size; i++) {
             ServiceRecord sr = mPendingServices.get(i);
             if ((proc.uid == sr.appInfo.uid
                     && proc.processName.equals(sr.processName))
@@ -4166,8 +4218,12 @@ public final class ActiveServices {
                 sr.isolatedProc = null;
                 mPendingServices.remove(i);
                 i--;
-                bringDownServiceLocked(sr);
+                needOomAdj = true;
+                bringDownServiceLocked(sr, true);
             }
+        }
+        if (needOomAdj) {
+            mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
         }
     }
 
@@ -4191,7 +4247,7 @@ public final class ActiveServices {
                     service.app.stopService(service);
                     service.app.updateBoundClientUids();
                     if (service.whitelistManager) {
-                        updateWhitelistManagerLocked(service.app);
+                        updateAllowlistManagerLocked(service.app);
                     }
                 }
                 service.setProcess(null);
@@ -4237,8 +4293,12 @@ public final class ActiveServices {
         }
 
         if (mTmpCollectionResults != null) {
-            for (int i = mTmpCollectionResults.size() - 1; i >= 0; i--) {
-                bringDownServiceLocked(mTmpCollectionResults.get(i));
+            final int size = mTmpCollectionResults.size();
+            for (int i = size - 1; i >= 0; i--) {
+                bringDownServiceLocked(mTmpCollectionResults.get(i), true);
+            }
+            if (size > 0) {
+                mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
             }
             mTmpCollectionResults.clear();
         }
@@ -4279,12 +4339,14 @@ public final class ActiveServices {
         }
 
         // Take care of any running services associated with the app.
+        boolean needOomAdj = false;
         for (int i = services.size() - 1; i >= 0; i--) {
             ServiceRecord sr = services.get(i);
             if (sr.startRequested) {
                 if ((sr.serviceInfo.flags&ServiceInfo.FLAG_STOP_WITH_TASK) != 0) {
                     Slog.i(TAG, "Stopping service " + sr.shortInstanceName + ": remove task");
-                    stopServiceLocked(sr);
+                    needOomAdj = true;
+                    stopServiceLocked(sr, true);
                 } else {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,
                             sr.getLastStartId(), baseIntent, null, 0));
@@ -4299,6 +4361,9 @@ public final class ActiveServices {
                     }
                 }
             }
+        }
+        if (needOomAdj) {
+            mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
         }
     }
 
@@ -4333,12 +4398,12 @@ public final class ActiveServices {
         // Clean up any connections this application has to other services.
         for (int i = app.connections.size() - 1; i >= 0; i--) {
             ConnectionRecord r = app.connections.valueAt(i);
-            removeConnectionLocked(r, app, null);
+            removeConnectionLocked(r, app, null, true);
         }
         updateServiceConnectionActivitiesLocked(app);
         app.connections.clear();
 
-        app.whitelistManager = false;
+        app.mAllowlistManager = false;
 
         // Clear app state from services.
         for (int i = app.numberOfRunningServices() - 1; i >= 0; i--) {
@@ -4435,10 +4500,10 @@ public final class ActiveServices {
                         + " times, stopping: " + sr);
                 EventLog.writeEvent(EventLogTags.AM_SERVICE_CRASHED_TOO_MUCH,
                         sr.userId, sr.crashCount, sr.shortInstanceName, app.pid);
-                bringDownServiceLocked(sr);
+                bringDownServiceLocked(sr, true);
             } else if (!allowRestart
                     || !mAm.mUserController.isUserRunning(sr.userId, 0)) {
-                bringDownServiceLocked(sr);
+                bringDownServiceLocked(sr, true);
             } else {
                 final boolean scheduled = scheduleServiceRestartLocked(sr, true /* allowCancel */);
 
@@ -4446,7 +4511,7 @@ public final class ActiveServices {
                 // extreme case of so many attempts to deliver a command
                 // that it failed we also will stop it here.
                 if (!scheduled) {
-                    bringDownServiceLocked(sr);
+                    bringDownServiceLocked(sr, true);
                 } else if (sr.canStopIfKilled(false /* isStartCanceled */)) {
                     // Update to stopped state because the explicit start is gone. The service is
                     // scheduled to restart for other reason (e.g. connections) so we don't bring
@@ -4459,6 +4524,8 @@ public final class ActiveServices {
                 }
             }
         }
+
+        mAm.updateOomAdjPendingTargetsLocked(OomAdjuster.OOM_ADJ_REASON_UNBIND_SERVICE);
 
         if (!allowRestart) {
             app.stopAllServices();
@@ -4684,7 +4751,7 @@ public final class ActiveServices {
                 Slog.i(TAG, "Service foreground-required timeout for " + r);
             }
             r.fgWaiting = false;
-            stopServiceLocked(r);
+            stopServiceLocked(r, false);
         }
 
         if (app != null) {
@@ -5490,7 +5557,7 @@ public final class ActiveServices {
         }
 
         if (ret == FGS_FEATURE_DENIED) {
-            if (mAm.isWhitelistedForFgsStartLocked(callingUid)) {
+            if (mAm.isAllowlistedForFgsStartLocked(callingUid)) {
                 // uid is on DeviceIdleController's user/system allowlist
                 // or AMS's FgsStartTempAllowList.
                 ret = FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;
@@ -5593,7 +5660,7 @@ public final class ActiveServices {
             case FGS_FEATURE_ALLOWED_BY_BACKGROUND_FGS_PERMISSION:
                 return "ALLOWED_BY_BACKGROUND_FGS_PERMISSION";
             case FGS_FEATURE_ALLOWED_BY_ALLOWLIST:
-                return "ALLOWED_BY_WHITELIST";
+                return "ALLOWED_BY_ALLOWLIST";
             case FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER:
                 return "ALLOWED_BY_DEVICE_OWNER";
             case FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST:

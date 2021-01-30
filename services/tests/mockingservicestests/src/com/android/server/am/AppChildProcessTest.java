@@ -118,8 +118,12 @@ public class AppChildProcessTest {
     @After
     public void tearDown() {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
-        mMockitoSession.finishMocking();
-        mHandlerThread.quit();
+        if (mMockitoSession != null) {
+            mMockitoSession.finishMocking();
+        }
+        if (mHandlerThread != null) {
+            mHandlerThread.quit();
+        }
     }
 
     @Test
