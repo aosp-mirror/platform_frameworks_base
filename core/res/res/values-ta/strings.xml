@@ -148,7 +148,8 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"வைஃபை மட்டும்"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> கிராஸ்-சிம் அழைப்பு"</string>
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: பகிரப்படவில்லை"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> வினாடிகளுக்குப் பிறகு <xliff:g id="DIALING_NUMBER">{1}</xliff:g> ஐப் பகிர்"</string>
@@ -203,8 +204,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"சென்சார் அறிவிப்புச் சேவை"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Twilight சேவை"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"நேர மண்டல டிடெக்டர் (இணைப்பு இல்லை)"</string>
-    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
-    <skip />
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS நேரப் புதுப்பிப்புச் சேவை"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"சாதனத் தரவு அழிக்கப்படும்"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"நிர்வாகி ஆப்ஸை உபயோகிக்க முடியாது. இப்போது, உங்கள் சாதனம் ஆரம்ப நிலைக்கு மீட்டமைக்கப்படும்.\n\nஏதேனும் கேள்விகள் இருப்பின், உங்கள் நிறுவனத்தின் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"பிரிண்ட் செய்வதை <xliff:g id="OWNER_APP">%s</xliff:g> தடுத்துள்ளது."</string>
@@ -2205,12 +2205,8 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"திரை முழுவதையுமோ ஒரு பகுதியையோ பெரிதாக்கலாம்"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"அமைப்புகளில் ஆன் செய்க"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"மூடுக"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"தொடர, உங்கள் சாதனத்தின் மைக்ரோஃபோனை அணுகுவதற்கு &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ஆப்ஸுக்கு அனுமதி வேண்டும்."</string>
+    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"தொடர, உங்கள் சாதனத்தின் கேமராவை அணுகுவதற்கு &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; ஆப்ஸுக்கு அனுமதி வேண்டும்."</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"ஆன் செய்"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"சென்சார் தனியுரிமை"</string>
 </resources>
