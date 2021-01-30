@@ -37,7 +37,6 @@ import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
-import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseArray;

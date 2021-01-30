@@ -1656,6 +1656,7 @@ public abstract class BatteryStats implements Parcelable {
         public byte batteryPlugType;
 
         public short batteryTemperature;
+        // Battery voltage in millivolts (mV).
         @UnsupportedAppUsage
         public char batteryVoltage;
 
