@@ -84,7 +84,7 @@ public class CacheOomRankerTest {
     private int mNextPackageName = 1;
 
     private TestExecutor mExecutor = new TestExecutor();
-    private CacheOomRanker mCacheOomRanker = new CacheOomRanker();
+    private CacheOomRanker mCacheOomRanker;
 
     @Before
     public void setUp() {
@@ -107,6 +107,7 @@ public class CacheOomRankerTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInt);
 
+        mCacheOomRanker = new CacheOomRanker(mAms);
         mCacheOomRanker.init(mExecutor);
     }
 
@@ -383,7 +384,7 @@ public class CacheOomRankerTest {
         app.setProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
         app.setAdj = setAdj;
         app.lastActivityTime = lastActivityTime;
-        app.mLastRss = lastRss;
+        app.mProfile.setLastRss(lastRss);
         app.setCached(false);
         for (int i = 0; i < returnedToCacheCount; ++i) {
             app.setCached(false);

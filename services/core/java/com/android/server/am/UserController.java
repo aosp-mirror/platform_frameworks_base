@@ -118,6 +118,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 /**
  * Helper class for {@link ActivityManagerService} responsible for multi-user functionality.
@@ -1458,7 +1459,7 @@ class UserController implements Handler.Callback {
             t.traceBegin("updateConfigurationAndProfileIds");
             if (foreground) {
                 // Make sure the old user is no longer considering the display to be on.
-                mInjector.reportGlobalUsageEventLocked(UsageEvents.Event.SCREEN_NON_INTERACTIVE);
+                mInjector.reportGlobalUsageEvent(UsageEvents.Event.SCREEN_NON_INTERACTIVE);
                 boolean userSwitchUiEnabled;
                 synchronized (mLock) {
                     mCurrentUserId = userId;
@@ -3045,7 +3046,7 @@ class UserController implements Handler.Callback {
             d.show();
         }
 
-        void reportGlobalUsageEventLocked(int event) {
+        void reportGlobalUsageEvent(int event) {
             mService.reportGlobalUsageEvent(event);
         }
 

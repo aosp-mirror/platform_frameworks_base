@@ -849,7 +849,7 @@ public final class BroadcastQueue {
     private boolean requestStartTargetPermissionsReviewIfNeededLocked(
             BroadcastRecord receiverRecord, String receivingPackageName,
             final int receivingUserId) {
-        if (!mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+        if (!mService.getPackageManagerInternal().isPermissionsReviewRequired(
                 receivingPackageName, receivingUserId)) {
             return true;
         }
@@ -922,7 +922,7 @@ public final class BroadcastQueue {
             Slog.v(TAG, "Broadcast temp whitelist uid=" + uid + " duration=" + duration
                     + " type=" + type + " : " + b.toString());
         }
-        mService.tempWhitelistUidLocked(uid, duration, b.toString(), type);
+        mService.tempAllowlistUidLocked(uid, duration, b.toString(), type);
     }
 
     /**
@@ -969,7 +969,7 @@ public final class BroadcastQueue {
                 + mParallelBroadcasts.size() + " parallel broadcasts; "
                 + mDispatcher.describeStateLocked());
 
-        mService.updateCpuStatsLocked();
+        mService.updateCpuStats();
 
         if (fromMsg) {
             mBroadcastsScheduled = false;
@@ -1050,7 +1050,9 @@ public final class BroadcastQueue {
             if (r == null) {
                 // No more broadcasts are deliverable right now, so all done!
                 mDispatcher.scheduleDeferralCheckLocked(false);
-                mService.scheduleAppGcsLocked();
+                synchronized (mService.mAppProfiler.mProfilerLock) {
+                    mService.mAppProfiler.scheduleAppGcsLPf();
+                }
                 if (looped && !skipOomAdj) {
                     // If we had finished the last ordered broadcast, then
                     // make sure all processes have correct oom and sched

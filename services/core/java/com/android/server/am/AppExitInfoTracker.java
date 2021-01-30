@@ -79,6 +79,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -159,8 +160,7 @@ public final class AppExitInfoTracker {
      * persistent storage.
      */
     @VisibleForTesting
-    @GuardedBy("mLock")
-    boolean mAppExitInfoLoaded = false;
+    AtomicBoolean mAppExitInfoLoaded = new AtomicBoolean();
 
     /**
      * Temporary list being used to filter/sort intermediate results in {@link #getExitInfo}.
@@ -273,51 +273,45 @@ public final class AppExitInfoTracker {
             return;
         }
 
-        synchronized (mLock) {
-            if (!mAppExitInfoLoaded) {
-                return;
-            }
-            mKillHandler.obtainMessage(KillHandler.MSG_PROC_DIED, obtainRawRecordLocked(app))
-                    .sendToTarget();
+        if (!mAppExitInfoLoaded.get()) {
+            return;
         }
+        mKillHandler.obtainMessage(KillHandler.MSG_PROC_DIED, obtainRawRecord(app))
+                .sendToTarget();
     }
 
     void scheduleNoteAppKill(final ProcessRecord app, final @Reason int reason,
             final @SubReason int subReason, final String msg) {
-        synchronized (mLock) {
-            if (!mAppExitInfoLoaded) {
-                return;
-            }
-            if (app == null || app.info == null) {
-                return;
-            }
-
-            ApplicationExitInfo raw = obtainRawRecordLocked(app);
-            raw.setReason(reason);
-            raw.setSubReason(subReason);
-            raw.setDescription(msg);
-            mKillHandler.obtainMessage(KillHandler.MSG_APP_KILL, raw).sendToTarget();
+        if (!mAppExitInfoLoaded.get()) {
+            return;
         }
+        if (app == null || app.info == null) {
+            return;
+        }
+
+        ApplicationExitInfo raw = obtainRawRecord(app);
+        raw.setReason(reason);
+        raw.setSubReason(subReason);
+        raw.setDescription(msg);
+        mKillHandler.obtainMessage(KillHandler.MSG_APP_KILL, raw).sendToTarget();
     }
 
     void scheduleNoteAppKill(final int pid, final int uid, final @Reason int reason,
             final @SubReason int subReason, final String msg) {
-        synchronized (mLock) {
-            if (!mAppExitInfoLoaded) {
-                return;
+        if (!mAppExitInfoLoaded.get()) {
+            return;
+        }
+        ProcessRecord app;
+        synchronized (mService.mPidsSelfLocked) {
+            app = mService.mPidsSelfLocked.get(pid);
+        }
+        if (app == null) {
+            if (DEBUG_PROCESSES) {
+                Slog.w(TAG, "Skipping saving the kill reason for pid " + pid
+                        + "(uid=" + uid + ") since its process record is not found");
             }
-            ProcessRecord app;
-            synchronized (mService.mPidsSelfLocked) {
-                app = mService.mPidsSelfLocked.get(pid);
-            }
-            if (app == null) {
-                if (DEBUG_PROCESSES) {
-                    Slog.w(TAG, "Skipping saving the kill reason for pid " + pid
-                            + "(uid=" + uid + ") since its process record is not found");
-                }
-            } else {
-                scheduleNoteAppKill(app, reason, subReason, msg);
-            }
+        } else {
+            scheduleNoteAppKill(app, reason, subReason, msg);
         }
     }
 
@@ -414,7 +408,7 @@ public final class AppExitInfoTracker {
 
     @GuardedBy("mLock")
     private ApplicationExitInfo addExitInfoLocked(ApplicationExitInfo raw) {
-        if (!mAppExitInfoLoaded) {
+        if (!mAppExitInfoLoaded.get()) {
             Slog.w(TAG, "Skipping saving the exit info due to ongoing loading from storage");
             return null;
         }
@@ -627,9 +621,7 @@ public final class AppExitInfoTracker {
     @VisibleForTesting
     void loadExistingProcessExitInfo() {
         if (!mProcExitInfoFile.canRead()) {
-            synchronized (mLock) {
-                mAppExitInfoLoaded = true;
-            }
+            mAppExitInfoLoaded.set(true);
             return;
         }
 
@@ -665,7 +657,7 @@ public final class AppExitInfoTracker {
         }
         synchronized (mLock) {
             pruneAnrTracesIfNecessaryLocked();
-            mAppExitInfoLoaded = true;
+            mAppExitInfoLoaded.set(true);
         }
     }
 
@@ -834,7 +826,7 @@ public final class AppExitInfoTracker {
         container.addExitInfoLocked(info);
     }
 
-    @GuardedBy("mLocked")
+    @GuardedBy("mLock")
     private void forEachPackageLocked(
             BiFunction<String, SparseArray<AppExitInfoContainer>, Integer> callback) {
         if (callback != null) {
@@ -859,7 +851,7 @@ public final class AppExitInfoTracker {
         }
     }
 
-    @GuardedBy("mLocked")
+    @GuardedBy("mLock")
     private void removePackageLocked(String packageName, int uid, boolean removeUid, int userId) {
         if (removeUid) {
             mActiveAppStateSummary.remove(uid);
@@ -896,7 +888,7 @@ public final class AppExitInfoTracker {
         }
     }
 
-    @GuardedBy("mLocked")
+    @GuardedBy("mLock")
     private void removeByUserIdLocked(final int userId) {
         if (userId == UserHandle.USER_ALL) {
             mData.getMap().clear();
@@ -922,35 +914,36 @@ public final class AppExitInfoTracker {
     }
 
     @VisibleForTesting
-    @GuardedBy("mLock")
-    ApplicationExitInfo obtainRawRecordLocked(ProcessRecord app) {
+    ApplicationExitInfo obtainRawRecord(ProcessRecord app) {
         ApplicationExitInfo info = mRawRecordsPool.acquire();
         if (info == null) {
             info = new ApplicationExitInfo();
         }
 
-        final int definingUid = app.hostingRecord != null ? app.hostingRecord.getDefiningUid() : 0;
-        info.setPid(app.pid);
-        info.setRealUid(app.uid);
-        info.setPackageUid(app.info.uid);
-        info.setDefiningUid(definingUid > 0 ? definingUid : app.info.uid);
-        info.setProcessName(app.processName);
-        info.setConnectionGroup(app.connectionGroup);
-        info.setPackageName(app.info.packageName);
-        info.setPackageList(app.getPackageList());
-        info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
-        info.setStatus(0);
-        info.setImportance(procStateToImportance(app.setProcState));
-        info.setPss(app.lastPss);
-        info.setRss(app.mLastRss);
-        info.setTimestamp(System.currentTimeMillis());
+        synchronized (mService) {
+            final int definingUid = app.hostingRecord != null
+                    ? app.hostingRecord.getDefiningUid() : 0;
+            info.setPid(app.pid);
+            info.setRealUid(app.uid);
+            info.setPackageUid(app.info.uid);
+            info.setDefiningUid(definingUid > 0 ? definingUid : app.info.uid);
+            info.setProcessName(app.processName);
+            info.setConnectionGroup(app.connectionGroup);
+            info.setPackageName(app.info.packageName);
+            info.setPackageList(app.getPackageList());
+            info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
+            info.setStatus(0);
+            info.setImportance(procStateToImportance(app.setProcState));
+            info.setPss(app.mProfile.getLastPss());
+            info.setRss(app.mProfile.getLastRss());
+            info.setTimestamp(System.currentTimeMillis());
+        }
 
         return info;
     }
 
     @VisibleForTesting
-    @GuardedBy("mLock")
-    void recycleRawRecordLocked(ApplicationExitInfo info) {
+    void recycleRawRecord(ApplicationExitInfo info) {
         info.setProcessName(null);
         info.setDescription(null);
         info.setPackageList(null);
@@ -1549,16 +1542,16 @@ public final class AppExitInfoTracker {
                     ApplicationExitInfo raw = (ApplicationExitInfo) msg.obj;
                     synchronized (mLock) {
                         handleNoteProcessDiedLocked(raw);
-                        recycleRawRecordLocked(raw);
                     }
+                    recycleRawRecord(raw);
                 }
                 break;
                 case MSG_APP_KILL: {
                     ApplicationExitInfo raw = (ApplicationExitInfo) msg.obj;
                     synchronized (mLock) {
                         handleNoteAppKillLocked(raw);
-                        recycleRawRecordLocked(raw);
                     }
+                    recycleRawRecord(raw);
                 }
                 break;
                 default:

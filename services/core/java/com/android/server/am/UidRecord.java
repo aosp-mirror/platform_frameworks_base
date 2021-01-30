@@ -41,8 +41,8 @@ public final class UidRecord {
     long lastBackgroundTime;
     boolean ephemeral;
     boolean foregroundServices;
-    boolean curWhitelist;
-    boolean setWhitelist;
+    boolean mCurAllowlist;
+    boolean mSetAllowlist;
     boolean idle;
     boolean setIdle;
     int numProcs;
@@ -157,7 +157,7 @@ public final class UidRecord {
         proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(mCurProcState));
         proto.write(UidRecordProto.EPHEMERAL, ephemeral);
         proto.write(UidRecordProto.FG_SERVICES, foregroundServices);
-        proto.write(UidRecordProto.WHILELIST, curWhitelist);
+        proto.write(UidRecordProto.WHILELIST, mCurAllowlist);
         ProtoUtils.toDuration(proto, UidRecordProto.LAST_BACKGROUND_TIME,
                 lastBackgroundTime, SystemClock.elapsedRealtime());
         proto.write(UidRecordProto.IDLE, idle);
@@ -191,8 +191,8 @@ public final class UidRecord {
         if (foregroundServices) {
             sb.append(" fgServices");
         }
-        if (curWhitelist) {
-            sb.append(" whitelist");
+        if (mCurAllowlist) {
+            sb.append(" allowlist");
         }
         if (lastBackgroundTime > 0) {
             sb.append(" bg:");
