@@ -70,7 +70,7 @@ import android.net.NetworkRequest;
 import android.net.RouteInfo;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
-import android.net.VpnInfo;
+import android.net.UnderlyingNetworkInfo;
 import android.net.VpnManager;
 import android.net.VpnService;
 import android.net.ipsec.ike.ChildSessionCallback;
@@ -1819,12 +1819,12 @@ public class Vpn {
      * This method should not be called if underlying interfaces field is needed, because it doesn't
      * have enough data to fill VpnInfo.underlyingIfaces field.
      */
-    public synchronized VpnInfo getVpnInfo() {
+    public synchronized UnderlyingNetworkInfo getUnderlyingNetworkInfo() {
         if (!isRunningLocked()) {
             return null;
         }
 
-        return new VpnInfo(mOwnerUID, mInterface, null);
+        return new UnderlyingNetworkInfo(mOwnerUID, mInterface, new ArrayList<>());
     }
 
     public synchronized boolean appliesToUid(int uid) {
