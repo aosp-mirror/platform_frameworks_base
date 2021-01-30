@@ -26,11 +26,11 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaAppearedInfo;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.NonNull;
@@ -44,8 +44,6 @@ import com.android.wm.shell.common.ShellExecutor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.Executor;
 
 /**
  * Manages OneHanded display areas such as offset.
@@ -69,7 +67,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private int mEnterExitAnimationDurationMs;
 
     @VisibleForTesting
-    ArrayMap<DisplayAreaInfo, SurfaceControl> mDisplayAreaMap = new ArrayMap();
+    ArrayMap<WindowContainerToken, SurfaceControl> mDisplayAreaTokenMap = new ArrayMap();
     private DisplayController mDisplayController;
     private OneHandedAnimationController mAnimationController;
     private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
@@ -89,7 +87,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 @Override
                 public void onOneHandedAnimationEnd(SurfaceControl.Transaction tx,
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                    mAnimationController.removeAnimator(animator.getLeash());
+                    mAnimationController.removeAnimator(animator.getToken());
                     if (mAnimationController.isAnimatorsConsumed()) {
                         finishOffset(animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
@@ -99,7 +97,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 @Override
                 public void onOneHandedAnimationCancel(
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                    mAnimationController.removeAnimator(animator.getLeash());
+                    mAnimationController.removeAnimator(animator.getToken());
                     if (mAnimationController.isAnimatorsConsumed()) {
                         finishOffset(animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
@@ -119,7 +117,6 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         super(mainExecutor);
         mAnimationController = animationController;
         mDisplayController = displayController;
-        mDefaultDisplayBounds.set(getDisplayBounds());
         mLastVisualDisplayBounds.set(getDisplayBounds());
         final int animationDurationConfig = context.getResources().getInteger(
                 R.integer.config_one_handed_translate_animation_duration);
@@ -134,24 +131,12 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     @Override
     public void onDisplayAreaAppeared(@NonNull DisplayAreaInfo displayAreaInfo,
             @NonNull SurfaceControl leash) {
-        Objects.requireNonNull(displayAreaInfo, "displayAreaInfo must not be null");
-        Objects.requireNonNull(leash, "leash must not be null");
-        if (mDisplayAreaMap.get(displayAreaInfo) == null) {
-            // mDefaultDisplayBounds may out of date after removeDisplayChangingController()
-            mDefaultDisplayBounds.set(getDisplayBounds());
-            mDisplayAreaMap.put(displayAreaInfo, leash);
-        }
+        mDisplayAreaTokenMap.put(displayAreaInfo.token, leash);
     }
 
     @Override
     public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
-        Objects.requireNonNull(displayAreaInfo,
-                "Requires valid displayArea, and displayArea must not be null");
-        if (!mDisplayAreaMap.containsKey(displayAreaInfo)) {
-            Log.w(TAG, "Unrecognized token: " + displayAreaInfo.token);
-            return;
-        }
-        mDisplayAreaMap.remove(displayAreaInfo);
+        mDisplayAreaTokenMap.remove(displayAreaInfo.token);
     }
 
     @Override
@@ -162,6 +147,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
             final DisplayAreaAppearedInfo info = displayAreaInfos.get(i);
             onDisplayAreaAppeared(info.getDisplayAreaInfo(), info.getLeash());
         }
+        mDefaultDisplayBounds.set(getDisplayBounds());
         return displayAreaInfos;
     }
 
@@ -176,9 +162,9 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
      * handles 90 degree display rotation changes {@link Surface.Rotation}.
      *
      * @param fromRotation starting rotation of the display.
-     * @param toRotation target rotation of the display (after rotating).
-     * @param wct A task transaction {@link WindowContainerTransaction} from
-     *        {@link DisplayChangeController} to populate.
+     * @param toRotation   target rotation of the display (after rotating).
+     * @param wct          A task transaction {@link WindowContainerTransaction} from
+     *                     {@link DisplayChangeController} to populate.
      */
     public void onRotateDisplay(int fromRotation, int toRotation, WindowContainerTransaction wct) {
         // Stop one handed without animation and reset cropped size immediately
@@ -210,11 +196,11 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                 : TRANSITION_DIRECTION_EXIT;
 
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mDisplayAreaMap.forEach(
-                (key, leash) -> {
-                    animateWindows(leash, fromBounds, toBounds, direction,
+        mDisplayAreaTokenMap.forEach(
+                (token, leash) -> {
+                    animateWindows(token, leash, fromBounds, toBounds, direction,
                             mEnterExitAnimationDurationMs);
-                    wct.setBounds(key.token, toBounds);
+                    wct.setBounds(token, toBounds);
                 });
         applyTransaction(wct);
     }
@@ -222,10 +208,10 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
     private void resetWindowsOffset(WindowContainerTransaction wct) {
         final SurfaceControl.Transaction tx =
                 mSurfaceControlTransactionFactory.getTransaction();
-        mDisplayAreaMap.forEach(
-                (key, leash) -> {
+        mDisplayAreaTokenMap.forEach(
+                (token, leash) -> {
                     final OneHandedAnimationController.OneHandedTransitionAnimator animator =
-                            mAnimationController.getAnimatorMap().remove(leash);
+                            mAnimationController.getAnimatorMap().remove(token);
                     if (animator != null && animator.isRunning()) {
                         animator.cancel();
                     }
@@ -233,16 +219,17 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                             .setWindowCrop(leash, -1/* reset */, -1/* reset */);
                     // DisplayRotationController will applyTransaction() after finish rotating
                     if (wct != null) {
-                        wct.setBounds(key.token, null/* reset */);
+                        wct.setBounds(token, null/* reset */);
                     }
                 });
         tx.apply();
     }
 
-    private void animateWindows(SurfaceControl leash, Rect fromBounds, Rect toBounds,
-            @OneHandedAnimationController.TransitionDirection int direction, int durationMs) {
+    private void animateWindows(WindowContainerToken token, SurfaceControl leash, Rect fromBounds,
+            Rect toBounds, @OneHandedAnimationController.TransitionDirection int direction,
+            int durationMs) {
         final OneHandedAnimationController.OneHandedTransitionAnimator animator =
-                mAnimationController.getAnimator(leash, fromBounds, toBounds);
+                mAnimationController.getAnimator(token, leash, fromBounds, toBounds);
         if (animator != null) {
             animator.setTransitionDirection(direction)
                     .addOneHandedAnimationCallback(mOneHandedAnimationCallback)
@@ -311,8 +298,8 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mIsInOneHanded=");
         pw.println(mIsInOneHanded);
-        pw.print(innerPrefix + "mDisplayAreaMap=");
-        pw.println(mDisplayAreaMap);
+        pw.print(innerPrefix + "mDisplayAreaTokenMap=");
+        pw.println(mDisplayAreaTokenMap);
         pw.print(innerPrefix + "mDefaultDisplayBounds=");
         pw.println(mDefaultDisplayBounds);
         pw.print(innerPrefix + "mLastVisualDisplayBounds=");

@@ -656,7 +656,7 @@ void SkiaPipeline::renderOverdraw(const SkRect& clip,
     SkPaint paint;
     const SkColor* colors = kOverdrawColors[static_cast<int>(Properties::overdrawColorSet)];
     paint.setColorFilter(SkOverdrawColorFilter::MakeWithSkColors(colors));
-    surface->getCanvas()->drawImage(counts.get(), 0.0f, 0.0f, &paint);
+    surface->getCanvas()->drawImage(counts.get(), 0.0f, 0.0f, SkSamplingOptions(), &paint);
 }
 
 } /* namespace skiapipeline */

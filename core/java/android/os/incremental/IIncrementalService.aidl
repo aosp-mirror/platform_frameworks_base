@@ -38,12 +38,18 @@ interface IIncrementalService {
      * Opens or creates a storage given a target path and data loader params. Returns the storage ID.
      */
     int openStorage(in @utf8InCpp String path);
-    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode,
-                      in IDataLoaderStatusListener statusListener,
-                      in StorageHealthCheckParams healthCheckParams,
-                      in IStorageHealthListener healthListener,
-                      in PerUidReadTimeouts[] perUidReadTimeouts);
+    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode);
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
+
+    /**
+     * Loops DataLoader through bind/create/start with params.
+     */
+    boolean startLoading(int storageId,
+                         in DataLoaderParamsParcel params,
+                         in IDataLoaderStatusListener statusListener,
+                         in StorageHealthCheckParams healthCheckParams,
+                         in IStorageHealthListener healthListener,
+                         in PerUidReadTimeouts[] perUidReadTimeouts);
 
     /**
      * Bind-mounts a path under a storage to a full path. Can be permanent or temporary.
@@ -101,6 +107,14 @@ interface IIncrementalService {
     int isFileFullyLoaded(int storageId, in @utf8InCpp String path);
 
     /**
+     * Checks if all files in the storage are fully loaded.
+     * 0 - fully loaded
+     * >0 - certain pages missing
+     * <0 - -errcode
+     */
+    int isFullyLoaded(int storageId);
+
+    /**
      * Returns overall loading progress of all the files on a storage, progress value between [0,1].
      * Returns a negative value on error.
      */
@@ -111,11 +125,6 @@ interface IIncrementalService {
      */
     byte[] getMetadataByPath(int storageId, in @utf8InCpp String path);
     byte[] getMetadataById(int storageId, in byte[] fileId);
-
-    /**
-     * Starts loading data for a storage.
-     */
-    boolean startLoading(int storageId);
 
     /**
      * Deletes a storage given its ID. Deletes its bind mounts and unmount it. Stop its data loader.

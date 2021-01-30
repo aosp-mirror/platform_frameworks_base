@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
@@ -125,6 +127,7 @@ public final class NetworkAgentConfig implements Parcelable {
      * @return the subscriber ID, or null if none.
      * @hide
      */
+    @SystemApi(client = MODULE_LIBRARIES)
     @Nullable
     public String getSubscriberId() {
         return subscriberId;
@@ -275,6 +278,7 @@ public final class NetworkAgentConfig implements Parcelable {
          * @hide
          */
         @NonNull
+        @SystemApi(client = MODULE_LIBRARIES)
         public Builder setSubscriberId(@Nullable String subscriberId) {
             mConfig.subscriberId = subscriberId;
             return this;

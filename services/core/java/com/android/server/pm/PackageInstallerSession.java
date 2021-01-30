@@ -3299,17 +3299,28 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void linkFile(String relativePath, String fromBase, String toBase) throws IOException {
+        try {
+            // Try
+            if (mIncrementalFileStorages != null && mIncrementalFileStorages.makeLink(relativePath,
+                    fromBase, toBase)) {
+                return;
+            }
+            mPm.mInstaller.linkFile(relativePath, fromBase, toBase);
+        } catch (InstallerException | IOException e) {
+            throw new IOException("failed linkOrCreateDir(" + relativePath + ", "
+                    + fromBase + ", " + toBase + ")", e);
+        }
+    }
+
     private void linkFiles(List<File> fromFiles, File toDir, File fromDir)
             throws IOException {
         for (File fromFile : fromFiles) {
             final String relativePath = getRelativePath(fromFile, fromDir);
-            try {
-                mPm.mInstaller.linkFile(relativePath, fromDir.getAbsolutePath(),
-                        toDir.getAbsolutePath());
-            } catch (InstallerException e) {
-                throw new IOException("failed linkOrCreateDir(" + relativePath + ", "
-                        + fromDir + ", " + toDir + ")", e);
-            }
+            final String fromBase = fromDir.getAbsolutePath();
+            final String toBase = toDir.getAbsolutePath();
+
+            linkFile(relativePath, fromBase, toBase);
         }
 
         Slog.d(TAG, "Linked " + fromFiles.size() + " files into " + toDir);
@@ -3577,12 +3588,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         // Retrying commit.
         if (mIncrementalFileStorages != null) {
-            try {
-                mIncrementalFileStorages.startLoading();
-            } catch (IOException e) {
-                throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
-                        e.getCause());
-            }
             return false;
         }
 
@@ -3757,9 +3762,15 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             };
 
             try {
+                final PackageInfo pkgInfo = mPm.getPackageInfo(this.params.appPackageName, 0,
+                        userId);
+                final File inheritedDir =
+                        (pkgInfo != null && pkgInfo.applicationInfo != null) ? new File(
+                                pkgInfo.applicationInfo.getCodePath()).getParentFile() : null;
+
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
-                        params, statusListener, healthCheckParams, healthListener, addedFiles,
-                        perUidReadTimeouts);
+                        inheritedDir, params, statusListener, healthCheckParams, healthListener,
+                        addedFiles, perUidReadTimeouts);
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),

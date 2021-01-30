@@ -56,6 +56,6 @@ public class BarController {
         if (win == null) {
             return true;
         }
-        return win.letterboxNotIntersectsOrFullyContains(getContentFrame(win));
+        return win.isTransparentBarAllowed(getContentFrame(win));
     }
 }

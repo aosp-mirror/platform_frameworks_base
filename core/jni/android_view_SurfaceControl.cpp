@@ -27,6 +27,7 @@
 #include <android-base/chrono_utils.h>
 #include <android/graphics/region.h>
 #include <android/gui/BnScreenCaptureListener.h>
+#include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/android_hardware_HardwareBuffer.h>
 #include <android_runtime/android_view_Surface.h>
@@ -262,7 +263,7 @@ public:
         }
     }
 
-    binder::Status onScreenCaptureComplete(
+    binder::Status onScreenCaptureCompleted(
             const gui::ScreenCaptureResults& captureResults) override {
         JNIEnv* env = getenv();
         if (captureResults.result != NO_ERROR || captureResults.buffer == nullptr) {
@@ -270,6 +271,7 @@ public:
                                 gScreenCaptureListenerClassInfo.onScreenCaptureComplete, nullptr);
             return binder::Status::ok();
         }
+        captureResults.fence->waitForever("");
         jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
                 env, captureResults.buffer->toAHardwareBuffer());
         const jint namedColorSpace =
@@ -1618,7 +1620,8 @@ static void nativeSetFrameTimelineVsync(JNIEnv* env, jclass clazz, jlong transac
                                         jlong frameTimelineVsyncId) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    transaction->setFrameTimelineVsync(frameTimelineVsyncId);
+    transaction->setFrameTimelineInfo(
+            {frameTimelineVsyncId, android::os::IInputConstants::INVALID_INPUT_EVENT_ID});
 }
 
 class JankDataListenerWrapper : public JankDataListener {

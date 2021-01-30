@@ -16,11 +16,13 @@
 
 package com.android.server.wm;
 
+import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_TASK;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.DragEvent.ACTION_DRAG_STARTED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_INTERCEPT_GLOBAL_DRAG_AND_DROP;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -34,6 +36,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
 import android.app.PendingIntent;
@@ -278,6 +281,8 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testValidateAppShortcutArguments() {
+        doReturn(PERMISSION_GRANTED).when(mWm.mContext)
+                .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
         final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
             @Override
             public void onAnimatorScaleChanged(float scale) {}
@@ -329,6 +334,8 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @Test
     public void testValidateAppTaskArguments() {
+        doReturn(PERMISSION_GRANTED).when(mWm.mContext)
+                .checkCallingOrSelfPermission(eq(START_TASKS_FROM_RECENTS));
         final Session session = new Session(mWm, new IWindowSessionCallback.Stub() {
             @Override
             public void onAnimatorScaleChanged(float scale) {}

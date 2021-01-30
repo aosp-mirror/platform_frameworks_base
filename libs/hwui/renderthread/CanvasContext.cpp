@@ -490,9 +490,11 @@ void CanvasContext::draw() {
 
     if (mNativeSurface) {
         // TODO(b/165985262): measure performance impact
-        if (const auto vsyncId = mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
-                vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
-            native_window_set_frame_timeline_vsync(mNativeSurface->getNativeWindow(), vsyncId);
+        const auto vsyncId = mCurrentFrameInfo->get(FrameInfoIndex::FrameTimelineVsyncId);
+        if (vsyncId != UiFrameInfoBuilder::INVALID_VSYNC_ID) {
+            const auto inputEventId = mCurrentFrameInfo->get(FrameInfoIndex::NewestInputEvent);
+            native_window_set_frame_timeline_info(mNativeSurface->getNativeWindow(), vsyncId,
+                                                  inputEventId);
         }
     }
 

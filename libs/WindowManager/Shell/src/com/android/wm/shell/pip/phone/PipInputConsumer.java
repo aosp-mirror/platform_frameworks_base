@@ -147,7 +147,7 @@ public class PipInputConsumer {
             // Choreographer.getSfInstance() must be called on the thread that the input event
             // receiver should be receiving events
             mInputEventReceiver = new InputEventReceiver(inputChannel,
-                mMainExecutor.getLooper(), Choreographer.getSfInstance());
+                Looper.myLooper(), Choreographer.getSfInstance());
             if (mRegistrationListener != null) {
                 mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
             }

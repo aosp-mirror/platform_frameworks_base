@@ -19,6 +19,11 @@ package com.android.server.rotationresolver;
 import static android.provider.DeviceConfig.NAMESPACE_ROTATION_RESOLVER;
 import static android.service.rotationresolver.RotationResolverService.ROTATION_RESULT_FAILURE_CANCELLED;
 
+import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_0;
+import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_180;
+import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_270;
+import static com.android.internal.util.FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_90;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -33,9 +38,11 @@ import android.rotationresolver.RotationResolverInternal;
 import android.text.TextUtils;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
+import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
 import com.android.server.infra.AbstractMasterSystemService;
 import com.android.server.infra.FrameworkResourcesServiceNameResolver;
@@ -60,6 +67,15 @@ public class RotationResolverManagerService extends
 
     /** Default value in absence of {@link DeviceConfig} override. */
     private static final boolean DEFAULT_SERVICE_ENABLED = false;
+
+    static final int ORIENTATION_UNKNOWN =
+            FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__UNKNOWN;
+    static final int RESOLUTION_DISABLED =
+            FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__DISABLED;
+    static final int RESOLUTION_UNAVAILABLE =
+            FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__UNAVAILABLE;
+    static final int RESOLUTION_FAILURE =
+            FrameworkStatsLog.AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__FAILURE;
 
     private final Context mContext;
     boolean mIsServiceEnabled;
@@ -147,6 +163,7 @@ public class RotationResolverManagerService extends
                 } else {
                     Slog.w(TAG, "Rotation Resolver service is disabled.");
                     callbackInternal.onFailure(ROTATION_RESULT_FAILURE_CANCELLED);
+                    logRotationStats(proposedRotation, currentRotation, RESOLUTION_DISABLED);
                 }
             }
         }
@@ -176,6 +193,38 @@ public class RotationResolverManagerService extends
                     UserHandle.getCallingUserId());
             new RotationResolverShellCommend(service).exec(this, in, out, err, args, callback,
                     resultReceiver);
+        }
+    }
+
+    static void logRotationStats(int proposedRotation, int currentRotation,
+            int resolvedRotation, long timeToCalculate) {
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTO_ROTATE_REPORTED,
+                /* previous_orientation= */ surfaceRotationToProto(currentRotation),
+                /* proposed_orientation= */ surfaceRotationToProto(proposedRotation),
+                /* resolved_orientation= */ surfaceRotationToProto(resolvedRotation),
+                /* process_duration_millis= */ timeToCalculate);
+    }
+
+    static void logRotationStats(int proposedRotation, int currentRotation,
+            int resolvedRotation) {
+        FrameworkStatsLog.write(FrameworkStatsLog.AUTO_ROTATE_REPORTED,
+                /* previous_orientation= */ surfaceRotationToProto(currentRotation),
+                /* proposed_orientation= */ surfaceRotationToProto(proposedRotation),
+                /* resolved_orientation= */ surfaceRotationToProto(resolvedRotation));
+    }
+
+    private static int surfaceRotationToProto(@Surface.Rotation int rotationPoseResult) {
+        switch (rotationPoseResult) {
+            case Surface.ROTATION_0:
+                return AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_0;
+            case Surface.ROTATION_90:
+                return AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_90;
+            case Surface.ROTATION_180:
+                return AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_180;
+            case Surface.ROTATION_270:
+                return AUTO_ROTATE_REPORTED__PROPOSED_ORIENTATION__ROTATION_270;
+            default:
+                return ORIENTATION_UNKNOWN;
         }
     }
 }

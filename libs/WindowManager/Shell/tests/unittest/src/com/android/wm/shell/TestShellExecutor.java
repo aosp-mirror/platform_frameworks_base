@@ -40,6 +40,11 @@ public class TestShellExecutor implements ShellExecutor {
     }
 
     @Override
+    public void removeAllCallbacks() {
+        mRunnables.clear();
+    }
+
+    @Override
     public void removeCallbacks(Runnable r) {
         mRunnables.remove(r);
     }
@@ -47,11 +52,6 @@ public class TestShellExecutor implements ShellExecutor {
     @Override
     public boolean hasCallback(Runnable r) {
         return mRunnables.contains(r);
-    }
-
-    @Override
-    public Looper getLooper() {
-        return null;
     }
 
     public void flushAll() {

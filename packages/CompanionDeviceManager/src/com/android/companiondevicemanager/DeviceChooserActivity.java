@@ -18,6 +18,7 @@ package com.android.companiondevicemanager;
 
 import static android.companion.BluetoothDeviceFilterUtils.getDeviceMacAddress;
 import static android.text.TextUtils.emptyIfNull;
+import static android.text.TextUtils.isEmpty;
 import static android.text.TextUtils.withoutPrefix;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
@@ -67,7 +68,13 @@ public class DeviceChooserActivity extends Activity {
         getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         String deviceProfile = getRequest().getDeviceProfile();
-        String profileName = getDeviceProfileName(deviceProfile);
+        String profilePrivacyDisclaimer = emptyIfNull(getRequest()
+                .getDeviceProfilePrivilegesDescription())
+                .replace("APP_NAME", getCallingAppName());
+        boolean useDeviceProfile = deviceProfile != null && !isEmpty(profilePrivacyDisclaimer);
+        String profileName = useDeviceProfile
+                ? getDeviceProfileName(deviceProfile)
+                : getString(R.string.profile_name_generic);
 
         if (getRequest().isSingleDevice()) {
             setContentView(R.layout.device_confirmation);
@@ -110,15 +117,12 @@ public class DeviceChooserActivity extends Activity {
 
         TextView profileSummary = findViewById(R.id.profile_summary);
 
-        if (deviceProfile != null) {
-            String privacyDisclaimer = emptyIfNull(getRequest()
-                    .getDeviceProfilePrivilegesDescription())
-                    .replace("APP_NAME", getCallingAppName());
+        if (useDeviceProfile) {
             profileSummary.setVisibility(View.VISIBLE);
             profileSummary.setText(getString(R.string.profile_summary,
                     getCallingAppName(),
                     profileName,
-                    privacyDisclaimer));
+                    profilePrivacyDisclaimer));
         } else {
             profileSummary.setVisibility(View.GONE);
         }
@@ -142,7 +146,7 @@ public class DeviceChooserActivity extends Activity {
                 return getString(R.string.profile_name_watch);
             }
             default: {
-                Log.wtf(LOG_TAG,
+                Log.w(LOG_TAG,
                         "No localized profile name found for device profile: " + deviceProfile);
                 return withoutPrefix("android.app.role.COMPANION_DEVICE_", deviceProfile)
                         .toLowerCase()

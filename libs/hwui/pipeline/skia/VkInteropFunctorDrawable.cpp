@@ -182,7 +182,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     auto functorImage = SkImage::MakeFromAHardwareBuffer(mFrameBuffer.get(), kPremul_SkAlphaType,
                                                          canvas->imageInfo().refColorSpace(),
                                                          kBottomLeft_GrSurfaceOrigin);
-    canvas->drawImage(functorImage, 0, 0, &paint);
+    canvas->drawImage(functorImage, 0, 0, SkSamplingOptions(), &paint);
     canvas->restore();
 }
 

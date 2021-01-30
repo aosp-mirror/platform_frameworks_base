@@ -26,6 +26,9 @@
     <!-- The height of the PiP actions container in which the actions are vertically centered. -->
     <dimen name="pip_action_size">48dp</dimen>
 
+    <!-- The width and height of the PiP expand action. -->
+    <dimen name="pip_expand_action_size">60dp</dimen>
+
     <!-- The padding between actions in the PiP in landscape  Note that the PiP does not reflect
          the configuration of the device, so we can't use -land resources. -->
     <dimen name="pip_between_action_padding_land">8dp</dimen>

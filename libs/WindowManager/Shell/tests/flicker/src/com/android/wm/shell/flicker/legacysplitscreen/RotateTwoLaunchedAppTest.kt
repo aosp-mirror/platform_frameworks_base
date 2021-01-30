@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
@@ -104,7 +105,7 @@ class RotateTwoLaunchedAppTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                             .isVisible(secondaryApp.defaultWindowName)
                     }
@@ -113,6 +114,7 @@ class RotateTwoLaunchedAppTest(
         }
     }
 
+    @FlakyTest(bugId = 173875043)
     @Test
     fun testRotateAndEnterSplitScreenMode() {
         val testTag = "testRotateAndEnterSplitScreenMode"
@@ -141,7 +143,7 @@ class RotateTwoLaunchedAppTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                                 .isVisible(secondaryApp.defaultWindowName)
                     }

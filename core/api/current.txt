@@ -36838,9 +36838,10 @@ package android.security.identity {
 package android.security.keystore {
 
   public class BackendBusyException extends java.security.ProviderException {
-    ctor public BackendBusyException();
-    ctor public BackendBusyException(@NonNull String);
-    ctor public BackendBusyException(@NonNull String, @NonNull Throwable);
+    ctor public BackendBusyException(long);
+    ctor public BackendBusyException(long, @NonNull String);
+    ctor public BackendBusyException(long, @NonNull String, @NonNull Throwable);
+    method public long getBackOffHintMillis();
   }
 
   public class KeyExpiredException extends java.security.InvalidKeyException {
@@ -46197,6 +46198,7 @@ package android.view {
     method @NonNull public android.graphics.Rect getBoundingRectRight();
     method @NonNull public android.graphics.Rect getBoundingRectTop();
     method @NonNull public java.util.List<android.graphics.Rect> getBoundingRects();
+    method @Nullable public android.graphics.Path getCutoutPath();
     method public int getSafeInsetBottom();
     method public int getSafeInsetLeft();
     method public int getSafeInsetRight();

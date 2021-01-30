@@ -104,7 +104,7 @@ class ExitLegacySplitScreenTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
+                    end("appWindowIsInvisible") {
                         isInvisible(splitScreenApp.defaultWindowName)
                     }
                 }
@@ -132,7 +132,7 @@ class ExitLegacySplitScreenTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
+                    end("appWindowIsVisible") {
                         isVisible(splitScreenApp.defaultWindowName)
                     }
                 }

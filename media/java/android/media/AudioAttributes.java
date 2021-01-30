@@ -739,6 +739,13 @@ public final class AudioAttributes implements Parcelable {
             if (mBundle != null) {
                 aa.mBundle = new Bundle(mBundle);
             }
+
+            // Allow the FLAG_HW_HOTWORD only for AudioSource.VOICE_RECOGNITION
+            if (mSource != MediaRecorder.AudioSource.VOICE_RECOGNITION
+                    && (mFlags & FLAG_HW_HOTWORD) == FLAG_HW_HOTWORD) {
+                aa.mFlags &= ~FLAG_HW_HOTWORD;
+            }
+
             return aa;
         }
 
@@ -848,6 +855,23 @@ public final class AudioAttributes implements Parcelable {
         public Builder setFlags(int flags) {
             flags &= AudioAttributes.FLAG_ALL_API_SET;
             mFlags |= flags;
+            return this;
+        }
+
+        /**
+         * @hide
+         * Request for capture in hotword mode.
+         *
+         * Requests an audio path optimized for Hotword detection use cases from
+         * the low power audio DSP. This is valid only for capture with
+         * audio source {@link MediaRecorder.AudioSource#VOICE_RECOGNITION}.
+         * There is no guarantee that this mode is available on the device.
+         * @return the same Builder instance.
+         */
+        @SystemApi
+        @RequiresPermission(android.Manifest.permission.CAPTURE_AUDIO_HOTWORD)
+        public @NonNull Builder setHotwordMode() {
+            mFlags |= FLAG_HW_HOTWORD;
             return this;
         }
 

@@ -74,7 +74,7 @@ class InsetsStateController {
     private final ArraySet<InsetsControlTarget> mPendingControlChanged = new ArraySet<>();
 
     private final Consumer<WindowState> mDispatchInsetsChanged = w -> {
-        if (w.isVisible()) {
+        if (w.isReadyToDispatchInsetsState()) {
             w.notifyInsetsChanged();
         }
     };
@@ -117,7 +117,8 @@ class InsetsStateController {
         final @InternalInsetsType int type = provider != null
                 ? provider.getSource().getType() : ITYPE_INVALID;
         return getInsetsForTarget(type, target.getWindowingMode(), target.isAlwaysOnTop(),
-                isAboveIme(target));
+                isAboveIme(target),
+                target.getFrozenInsetsState() != null ? target.getFrozenInsetsState() : mState);
     }
 
     InsetsState getInsetsForWindowMetrics(@NonNull WindowManager.LayoutParams attrs) {
@@ -132,7 +133,7 @@ class InsetsStateController {
         final @WindowingMode int windowingMode = token != null
                 ? token.getWindowingMode() : WINDOWING_MODE_UNDEFINED;
         final boolean alwaysOnTop = token != null && token.isAlwaysOnTop();
-        return getInsetsForTarget(type, windowingMode, alwaysOnTop, isAboveIme(token));
+        return getInsetsForTarget(type, windowingMode, alwaysOnTop, isAboveIme(token), mState);
     }
 
     private boolean isAboveIme(WindowContainer target) {
@@ -180,9 +181,8 @@ class InsetsStateController {
      * @see #getInsetsForWindowMetrics
      */
     private InsetsState getInsetsForTarget(@InternalInsetsType int type,
-            @WindowingMode int windowingMode, boolean isAlwaysOnTop, boolean aboveIme) {
-        InsetsState state = mState;
-
+            @WindowingMode int windowingMode, boolean isAlwaysOnTop, boolean aboveIme,
+            @NonNull InsetsState state) {
         if (type != ITYPE_INVALID) {
             state = new InsetsState(state);
             state.removeSource(type);
