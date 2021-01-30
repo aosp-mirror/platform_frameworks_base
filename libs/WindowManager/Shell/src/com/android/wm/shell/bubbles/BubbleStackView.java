@@ -1475,6 +1475,9 @@ public class BubbleStackView extends FrameLayout
      * Update bubble order and pointer position.
      */
     public void updateBubbleOrder(List<Bubble> bubbles) {
+        if (isExpansionAnimating()) {
+            return;
+        }
         final Runnable reorder = () -> {
             for (int i = 0; i < bubbles.size(); i++) {
                 Bubble bubble = bubbles.get(i);
