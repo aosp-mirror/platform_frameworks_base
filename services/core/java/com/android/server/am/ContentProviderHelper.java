@@ -1214,9 +1214,8 @@ public class ContentProviderHelper {
                     final ProcessRecord app = apps.valueAt(iApp);
                     if (app.userId != userId || app.thread == null || app.unlocked) continue;
 
-                    for (int iPkg = 0, numPkgs = app.pkgList.size(); iPkg < numPkgs; iPkg++) {
+                    app.getPkgList().forEachPackage(pkgName -> {
                         try {
-                            final String pkgName = app.pkgList.keyAt(iPkg);
                             final PackageInfo pkgInfo = AppGlobals.getPackageManager()
                                     .getPackageInfo(pkgName, matchFlags, userId);
                             if (pkgInfo != null && !ArrayUtils.isEmpty(pkgInfo.providers)) {
@@ -1243,7 +1242,7 @@ public class ContentProviderHelper {
                             }
                         } catch (RemoteException ignored) {
                         }
-                    }
+                    });
                 }
             }
         }
@@ -1430,13 +1429,14 @@ public class ContentProviderHelper {
             return mService.validateAssociationAllowedLocked(cpi.packageName,
                     cpi.applicationInfo.uid, null, callingUid) ? null : "<null>";
         }
-        for (int i = callingApp.pkgList.size() - 1; i >= 0; i--) {
-            if (!mService.validateAssociationAllowedLocked(callingApp.pkgList.keyAt(i),
+        final String r = callingApp.getPkgList().forEachPackage(pkgName -> {
+            if (!mService.validateAssociationAllowedLocked(pkgName,
                     callingApp.uid, cpi.packageName, cpi.applicationInfo.uid)) {
                 return cpi.packageName;
             }
-        }
-        return null;
+            return null;
+        });
+        return r;
     }
 
     ProviderInfo getProviderInfoLocked(String authority, @UserIdInt int userId, int pmFlags) {
@@ -1531,7 +1531,7 @@ public class ContentProviderHelper {
 
     private boolean requestTargetProviderPermissionsReviewIfNeededLocked(ProviderInfo cpi,
             ProcessRecord r, final int userId, Context context) {
-        if (!mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
+        if (!mService.getPackageManagerInternal().isPermissionsReviewRequired(
                 cpi.packageName, userId)) {
             return true;
         }

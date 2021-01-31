@@ -1026,6 +1026,8 @@ public class UsageStatsDatabase {
             writeLocked(fos, stats, version, packagesTokenData);
             file.finishWrite(fos);
             fos = null;
+        } catch (Exception e) {
+            // Do nothing. Exception has already been handled.
         } finally {
             // When fos is null (successful write), this will no-op
             file.failWrite(fos);
@@ -1033,7 +1035,7 @@ public class UsageStatsDatabase {
     }
 
     private static void writeLocked(OutputStream out, IntervalStats stats, int version,
-            PackagesTokenData packagesTokenData) throws RuntimeException {
+            PackagesTokenData packagesTokenData) throws Exception {
         switch (version) {
             case 1:
             case 2:
@@ -1045,6 +1047,7 @@ public class UsageStatsDatabase {
                     UsageStatsProto.write(out, stats);
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to write interval stats to proto.", e);
+                    throw e;
                 }
                 break;
             case 5:
@@ -1053,6 +1056,7 @@ public class UsageStatsDatabase {
                     UsageStatsProtoV2.write(out, stats);
                 } catch (Exception e) {
                     Slog.e(TAG, "Unable to write interval stats to proto.", e);
+                    throw e;
                 }
                 break;
             default:

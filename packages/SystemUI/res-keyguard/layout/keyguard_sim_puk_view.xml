@@ -46,7 +46,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_weight="1"
             android:layoutDirection="ltr"
             >
         <include layout="@layout/keyguard_esim_area"

@@ -37,6 +37,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.LocalServices;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,6 +81,13 @@ public class UsageStatsServiceTest {
         spyOn(mService);
         doNothing().when(mService).publishBinderServices();
         mService.onStart();
+    }
+
+    @After
+    public void tearDown() {
+        if (mMockingSession != null) {
+            mMockingSession.finishMocking();
+        }
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.internal.graphics.fonts;
 
+import android.os.ParcelFileDescriptor;
 import android.text.FontConfig;
 import android.graphics.fonts.SystemFontState;
 
@@ -26,4 +27,6 @@ import android.graphics.fonts.SystemFontState;
  */
 interface IFontManager {
     FontConfig getFontConfig();
+
+    int updateFont(in ParcelFileDescriptor fd, in byte[] signature, int baseVersion);
 }

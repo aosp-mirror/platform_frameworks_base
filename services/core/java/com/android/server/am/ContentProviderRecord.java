@@ -343,7 +343,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                     && mAssociation == null && provider.proc != null
                     && (provider.appInfo.uid != mOwningUid
                             || !provider.info.processName.equals(mOwningProcessName))) {
-                ProcessStats.ProcessStateHolder holder = provider.proc.pkgList.get(
+                ProcessStats.ProcessStateHolder holder = provider.proc.getPkgList().get(
                         provider.name.getPackageName());
                 if (holder == null) {
                     Slog.wtf(TAG_AM, "No package in referenced provider "
