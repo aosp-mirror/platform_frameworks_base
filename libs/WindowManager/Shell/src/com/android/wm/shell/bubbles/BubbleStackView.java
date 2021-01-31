@@ -2733,9 +2733,13 @@ public class BubbleStackView extends FrameLayout
      * @param action the user interaction enum.
      */
     private void logBubbleEvent(@Nullable BubbleViewProvider provider, int action) {
+        final String packageName =
+                (provider != null && provider instanceof Bubble)
+                    ? ((Bubble) provider).getPackageName()
+                    : "null";
         mBubbleData.logBubbleEvent(provider,
                 action,
-                mContext.getApplicationInfo().packageName,
+                packageName,
                 getBubbleCount(),
                 getBubbleIndex(provider),
                 getNormalizedXPosition(),
