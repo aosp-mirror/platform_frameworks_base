@@ -28,6 +28,16 @@ import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_BOT
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_LEFT;
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_NONE;
 import static com.android.wm.shell.bubbles.BubblePositioner.TASKBAR_POSITION_RIGHT;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_AGED;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_BLOCKED;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_GROUP_CANCELLED;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_INVALID_INTENT;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NOTIF_CANCEL;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NO_BUBBLE_UP;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_NO_LONGER_BUBBLE;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_PACKAGE_REMOVED;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_SHORTCUT_REMOVED;
+import static com.android.wm.shell.bubbles.Bubbles.DISMISS_USER_CHANGED;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
@@ -45,6 +55,8 @@ import android.graphics.PixelFormat;
 import android.graphics.PointF;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -53,6 +65,7 @@ import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Slog;
 import android.util.SparseSetArray;
 import android.view.View;
 import android.view.ViewGroup;
@@ -75,6 +88,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -83,7 +99,7 @@ import java.util.function.IntConsumer;
  *
  * The controller manages addition, removal, and visible state of bubbles on screen.
  */
-public class BubbleController implements Bubbles {
+public class BubbleController {
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleController" : TAG_BUBBLES;
 
@@ -101,7 +117,8 @@ public class BubbleController implements Bubbles {
     public static final String BOTTOM_POSITION = "Bottom";
 
     private final Context mContext;
-    private BubbleExpandListener mExpandListener;
+    private final BubblesImpl mImpl = new BubblesImpl();
+    private Bubbles.BubbleExpandListener mExpandListener;
     @Nullable private BubbleStackView.SurfaceSynchronizer mSurfaceSynchronizer;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
@@ -111,7 +128,7 @@ public class BubbleController implements Bubbles {
     @Nullable private BubbleStackView mStackView;
     private BubbleIconFactory mBubbleIconFactory;
     private BubblePositioner mBubblePositioner;
-    private SysuiProxy mSysuiProxy;
+    private Bubbles.SysuiProxy mSysuiProxy;
 
     // Tracks the id of the current (foreground) user.
     private int mCurrentUserId;
@@ -177,7 +194,7 @@ public class BubbleController implements Bubbles {
     /**
      * Injected constructor.
      */
-    public static BubbleController create(Context context,
+    public static Bubbles create(Context context,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
             @Nullable IStatusBarService statusBarService,
@@ -186,14 +203,15 @@ public class BubbleController implements Bubbles {
             LauncherApps launcherApps,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
         BubbleLogger logger = new BubbleLogger(uiEventLogger);
         BubblePositioner positioner = new BubblePositioner(context, windowManager);
-        BubbleData data = new BubbleData(context, logger, positioner);
+        BubbleData data = new BubbleData(context, logger, positioner, mainExecutor);
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
-                new BubbleDataRepository(context, launcherApps),
+                new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, organizer, positioner, mainExecutor);
+                logger, organizer, positioner, mainExecutor, mainHandler).mImpl;
     }
 
     /**
@@ -212,7 +230,8 @@ public class BubbleController implements Bubbles {
             BubbleLogger bubbleLogger,
             ShellTaskOrganizer organizer,
             BubblePositioner positioner,
-            ShellExecutor mainExecutor) {
+            ShellExecutor mainExecutor,
+            Handler mainHandler) {
         mContext = context;
         mFloatingContentCoordinator = floatingContentCoordinator;
         mDataRepository = dataRepository;
@@ -299,7 +318,12 @@ public class BubbleController implements Bubbles {
                 mBubbleData.removeBubblesWithInvalidShortcuts(
                         packageName, validShortcuts, DISMISS_SHORTCUT_REMOVED);
             }
-        });
+        }, mainHandler);
+    }
+
+    @VisibleForTesting
+    public Bubbles getImpl() {
+        return mImpl;
     }
 
     /**
@@ -313,8 +337,7 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void openBubbleOverflow() {
+    private void openBubbleOverflow() {
         ensureStackViewCreated();
         mBubbleData.setShowingOverflow(true);
         mBubbleData.setSelectedBubble(mBubbleData.getOverflow());
@@ -322,8 +345,7 @@ public class BubbleController implements Bubbles {
     }
 
     /** Called when any taskbar state changes (e.g. visibility, position, sizes). */
-    @Override
-    public void onTaskbarChanged(Bundle b) {
+    private void onTaskbarChanged(Bundle b) {
         if (b == null) {
             return;
         }
@@ -371,8 +393,7 @@ public class BubbleController implements Bubbles {
      * Called when the status bar has become visible or invisible (either permanently or
      * temporarily).
      */
-    @Override
-    public void onStatusBarVisibilityChanged(boolean visible) {
+    private void onStatusBarVisibilityChanged(boolean visible) {
         if (mStackView != null) {
             // Hide the stack temporarily if the status bar has been made invisible, and the stack
             // is collapsed. An expanded stack should remain visible until collapsed.
@@ -380,15 +401,13 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void onZenStateChanged() {
+    private void onZenStateChanged() {
         for (Bubble b : mBubbleData.getBubbles()) {
             b.setShowDot(b.showInShade());
         }
     }
 
-    @Override
-    public void onStatusBarStateChanged(boolean isShade) {
+    private void onStatusBarStateChanged(boolean isShade) {
         mIsStatusBarShade = isShade;
         if (!mIsStatusBarShade) {
             collapseStack();
@@ -402,8 +421,7 @@ public class BubbleController implements Bubbles {
         updateStack();
     }
 
-    @Override
-    public void onUserChanged(int newUserId) {
+    private void onUserChanged(int newUserId) {
         saveBubbles(mCurrentUserId);
         mBubbleData.dismissAll(DISMISS_USER_CHANGED);
         restoreBubbles(newUserId);
@@ -442,7 +460,7 @@ public class BubbleController implements Bubbles {
         return mBubblePositioner;
     }
 
-    SysuiProxy getSysuiProxy() {
+    Bubbles.SysuiProxy getSysuiProxy() {
         return mSysuiProxy;
     }
 
@@ -453,7 +471,8 @@ public class BubbleController implements Bubbles {
     private void ensureStackViewCreated() {
         if (mStackView == null) {
             mStackView = new BubbleStackView(
-                    mContext, this, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator);
+                    mContext, this, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
+                    mMainExecutor);
             mStackView.onOrientationChanged();
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -576,8 +595,7 @@ public class BubbleController implements Bubbles {
         mSavedBubbleKeysPerUser.remove(mCurrentUserId);
     }
 
-    @Override
-    public void updateForThemeChanges() {
+    private void updateForThemeChanges() {
         if (mStackView != null) {
             mStackView.onThemeChanged();
         }
@@ -593,8 +611,7 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void onConfigChanged(Configuration newConfig) {
+    private void onConfigChanged(Configuration newConfig) {
         if (mBubblePositioner != null) {
             // This doesn't trigger any changes, always update it
             mBubblePositioner.update(newConfig.orientation);
@@ -620,18 +637,19 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void setBubbleScrim(View view) {
+    private void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback) {
         mBubbleScrim = view;
+        callback.accept(mMainExecutor, mMainExecutor.executeBlockingForResult(() -> {
+            return Looper.myLooper();
+        }, Looper.class));
     }
 
-    @Override
-    public void setSysuiProxy(SysuiProxy proxy) {
+    private void setSysuiProxy(Bubbles.SysuiProxy proxy) {
         mSysuiProxy = proxy;
     }
 
-    @Override
-    public void setExpandListener(BubbleExpandListener listener) {
+    @VisibleForTesting
+    public void setExpandListener(Bubbles.BubbleExpandListener listener) {
         mExpandListener = ((isExpanding, key) -> {
             if (listener != null) {
                 listener.onBubbleExpandChanged(isExpanding, key);
@@ -654,17 +672,17 @@ public class BubbleController implements Bubbles {
         return mBubbleData.hasBubbles() || mBubbleData.isShowingOverflow();
     }
 
-    @Override
+    @VisibleForTesting
     public boolean isStackExpanded() {
         return mBubbleData.isExpanded();
     }
 
-    @Override
+    @VisibleForTesting
     public void collapseStack() {
         mBubbleData.setExpanded(false /* expanded */);
     }
 
-    @Override
+    @VisibleForTesting
     public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
         boolean isSuppressedBubble = (mBubbleData.hasAnyBubbleWithKey(key)
                 && !mBubbleData.getAnyBubbleWithkey(key).showInShade());
@@ -674,23 +692,19 @@ public class BubbleController implements Bubbles {
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
     }
 
-    @Override
-    public boolean isSummarySuppressed(String groupKey) {
-        return mBubbleData.isSummarySuppressed(groupKey);
+    private void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
+            Executor callbackExecutor) {
+        if (mBubbleData.isSummarySuppressed(groupKey)) {
+            mBubbleData.removeSuppressedSummary(groupKey);
+            if (callback != null) {
+                callbackExecutor.execute(() -> {
+                    callback.accept(mBubbleData.getSummaryKey(groupKey));
+                });
+            }
+        }
     }
 
-    @Override
-    public void removeSuppressedSummary(String groupKey) {
-        mBubbleData.removeSuppressedSummary(groupKey);
-    }
-
-    @Override
-    public String getSummaryKey(String groupKey) {
-        return mBubbleData.getSummaryKey(groupKey);
-    }
-
-    @Override
-    public boolean isBubbleExpanded(String key) {
+    private boolean isBubbleExpanded(String key) {
         return isStackExpanded() && mBubbleData != null && mBubbleData.getSelectedBubble() != null
                 && mBubbleData.getSelectedBubble().getKey().equals(key);
     }
@@ -704,7 +718,7 @@ public class BubbleController implements Bubbles {
         setIsBubble(bubble, true /* isBubble */);
     }
 
-    @Override
+    @VisibleForTesting
     public void expandStackAndSelectBubble(BubbleEntry entry) {
         if (mIsStatusBarShade) {
             mNotifEntryToExpandOnShadeUnlock = null;
@@ -809,15 +823,13 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void onEntryAdded(BubbleEntry entry) {
+    private void onEntryAdded(BubbleEntry entry) {
         if (canLaunchInActivityView(mContext, entry)) {
             updateBubble(entry);
         }
     }
 
-    @Override
-    public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+    private void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
         // shouldBubbleUp checks canBubble & for bubble metadata
         boolean shouldBubble = shouldBubbleUp && canLaunchInActivityView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
@@ -828,8 +840,7 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void onEntryRemoved(BubbleEntry entry) {
+    private void onEntryRemoved(BubbleEntry entry) {
         if (isSummaryOfBubbles(entry)) {
             final String groupKey = entry.getStatusBarNotification().getGroupKey();
             mBubbleData.removeSuppressedSummary(groupKey);
@@ -844,8 +855,7 @@ public class BubbleController implements Bubbles {
         }
     }
 
-    @Override
-    public void onRankingUpdated(RankingMap rankingMap) {
+    private void onRankingUpdated(RankingMap rankingMap) {
         if (mTmpRanking == null) {
             mTmpRanking = new NotificationListenerService.Ranking();
         }
@@ -882,6 +892,8 @@ public class BubbleController implements Bubbles {
             return bubbleChildren;
         }
         for (Bubble bubble : mBubbleData.getActiveBubbles()) {
+            // TODO(178620678): Prevent calling into SysUI since this can be a part of a blocking
+            //                  call from SysUI to Shell
             final BubbleEntry entry = mSysuiProxy.getPendingOrActiveEntry(bubble.getKey());
             if (entry != null && groupKey.equals(entry.getStatusBarNotification().getGroupKey())) {
                 bubbleChildren.add(bubble);
@@ -951,7 +963,7 @@ public class BubbleController implements Bubbles {
             ArrayList<Bubble> bubblesToBeRemovedFromRepository = new ArrayList<>();
             for (Pair<Bubble, Integer> removed : removedBubbles) {
                 final Bubble bubble = removed.first;
-                @DismissReason final int reason = removed.second;
+                @Bubbles.DismissReason final int reason = removed.second;
 
                 if (mStackView != null) {
                     mStackView.removeBubble(bubble);
@@ -1029,8 +1041,7 @@ public class BubbleController implements Bubbles {
         }
     };
 
-    @Override
-    public boolean handleDismissalInterception(BubbleEntry entry,
+    private boolean handleDismissalInterception(BubbleEntry entry,
             @Nullable List<BubbleEntry> children, IntConsumer removeCallback) {
         if (isSummaryOfBubbles(entry)) {
             handleSummaryDismissalInterception(entry, children, removeCallback);
@@ -1137,8 +1148,7 @@ public class BubbleController implements Bubbles {
     /**
      * Description of current bubble state.
      */
-    @Override
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+    private void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("BubbleController state:");
         mBubbleData.dump(fd, pw, args);
         pw.println();
@@ -1213,6 +1223,177 @@ public class BubbleController implements Bubbles {
         public void onImeVisibilityChanged(boolean imeVisible, int imeHeight) {
             if (mStackView != null) {
                 mStackView.onImeVisibilityChanged(imeVisible, imeHeight);
+            }
+        }
+    }
+
+    private class BubblesImpl implements Bubbles {
+        @Override
+        public boolean isBubbleNotificationSuppressedFromShade(String key, String groupKey) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return BubbleController.this.isBubbleNotificationSuppressedFromShade(key, groupKey);
+            }, Boolean.class);
+        }
+
+        @Override
+        public boolean isBubbleExpanded(String key) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return BubbleController.this.isBubbleExpanded(key);
+            }, Boolean.class);
+        }
+
+        @Override
+        public boolean isStackExpanded() {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return BubbleController.this.isStackExpanded();
+            }, Boolean.class);
+        }
+
+        @Override
+        public void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
+                Executor callbackExecutor) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.removeSuppressedSummaryIfNecessary(groupKey, callback,
+                        callbackExecutor);
+            });
+        }
+
+        @Override
+        public void collapseStack() {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.collapseStack();
+            });
+        }
+
+        @Override
+        public void updateForThemeChanges() {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.updateForThemeChanges();
+            });
+        }
+
+        @Override
+        public void expandStackAndSelectBubble(BubbleEntry entry) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.expandStackAndSelectBubble(entry);
+            });
+        }
+
+        @Override
+        public void onTaskbarChanged(Bundle b) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onTaskbarChanged(b);
+            });
+        }
+
+        @Override
+        public void openBubbleOverflow() {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.openBubbleOverflow();
+            });
+        }
+
+        @Override
+        public boolean handleDismissalInterception(BubbleEntry entry,
+                @Nullable List<BubbleEntry> children, IntConsumer removeCallback) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return BubbleController.this.handleDismissalInterception(entry, children,
+                        removeCallback);
+            }, Boolean.class);
+        }
+
+        @Override
+        public void setSysuiProxy(SysuiProxy proxy) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.setSysuiProxy(proxy);
+            });
+        }
+
+        @Override
+        public void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.setBubbleScrim(view, callback);
+            });
+        }
+
+        @Override
+        public void setExpandListener(BubbleExpandListener listener) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.setExpandListener(listener);
+            });
+        }
+
+        @Override
+        public void onEntryAdded(BubbleEntry entry) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onEntryAdded(entry);
+            });
+        }
+
+        @Override
+        public void onEntryUpdated(BubbleEntry entry, boolean shouldBubbleUp) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onEntryUpdated(entry, shouldBubbleUp);
+            });
+        }
+
+        @Override
+        public void onEntryRemoved(BubbleEntry entry) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onEntryRemoved(entry);
+            });
+        }
+
+        @Override
+        public void onRankingUpdated(RankingMap rankingMap) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onRankingUpdated(rankingMap);
+            });
+        }
+
+        @Override
+        public void onStatusBarVisibilityChanged(boolean visible) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onStatusBarVisibilityChanged(visible);
+            });
+        }
+
+        @Override
+        public void onZenStateChanged() {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onZenStateChanged();
+            });
+        }
+
+        @Override
+        public void onStatusBarStateChanged(boolean isShade) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onStatusBarStateChanged(isShade);
+            });
+        }
+
+        @Override
+        public void onUserChanged(int newUserId) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onUserChanged(newUserId);
+            });
+        }
+
+        @Override
+        public void onConfigChanged(Configuration newConfig) {
+            mMainExecutor.execute(() -> {
+                BubbleController.this.onConfigChanged(newConfig);
+            });
+        }
+
+        @Override
+        public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    BubbleController.this.dump(fd, pw, args);
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to dump BubbleController in 2s");
             }
         }
     }

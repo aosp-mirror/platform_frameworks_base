@@ -49,6 +49,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Encapsulates the data and UI elements of a bubble.
@@ -58,6 +59,7 @@ public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
     private final String mKey;
+    private final Executor mMainExecutor;
 
     private long mLastUpdated;
     private long mLastAccessed;
@@ -156,7 +158,8 @@ public class Bubble implements BubbleViewProvider {
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
     Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
-            final int desiredHeight, final int desiredHeightResId, @Nullable final String title) {
+            final int desiredHeight, final int desiredHeightResId, @Nullable final String title,
+            Executor mainExecutor) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mMetadataShortcutId = shortcutInfo.getId();
@@ -170,20 +173,25 @@ public class Bubble implements BubbleViewProvider {
         mDesiredHeightResId = desiredHeightResId;
         mTitle = title;
         mShowBubbleUpdateDot = false;
+        mMainExecutor = mainExecutor;
     }
 
     @VisibleForTesting(visibility = PRIVATE)
     Bubble(@NonNull final BubbleEntry entry,
             @Nullable final Bubbles.NotificationSuppressionChangedListener listener,
-            final Bubbles.PendingIntentCanceledListener intentCancelListener) {
+            final Bubbles.PendingIntentCanceledListener intentCancelListener,
+            Executor mainExecutor) {
         mKey = entry.getKey();
         mSuppressionListener = listener;
         mIntentCancelListener = intent -> {
             if (mIntent != null) {
                 mIntent.unregisterCancelListener(mIntentCancelListener);
             }
-            intentCancelListener.onPendingIntentCanceled(this);
+            mainExecutor.execute(() -> {
+                intentCancelListener.onPendingIntentCanceled(this);
+            });
         };
+        mMainExecutor = mainExecutor;
         setEntry(entry);
     }
 
@@ -329,7 +337,8 @@ public class Bubble implements BubbleViewProvider {
                 stackView,
                 iconFactory,
                 skipInflation,
-                callback);
+                callback,
+                mMainExecutor);
         if (mInflateSynchronously) {
             mInflationTask.onPostExecute(mInflationTask.doInBackground());
         } else {
