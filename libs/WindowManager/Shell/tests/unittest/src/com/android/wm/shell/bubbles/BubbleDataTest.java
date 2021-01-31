@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.bubbles.BubbleData.TimeSource;
+import com.android.wm.shell.common.ShellExecutor;
 
 import com.google.common.collect.ImmutableList;
 
@@ -98,6 +99,8 @@ public class BubbleDataTest extends ShellTestCase {
     private PendingIntent mDeleteIntent;
     @Mock
     private BubbleLogger mBubbleLogger;
+    @Mock
+    private ShellExecutor mMainExecutor;
 
     @Captor
     private ArgumentCaptor<BubbleData.Update> mUpdateCaptor;
@@ -124,21 +127,31 @@ public class BubbleDataTest extends ShellTestCase {
                 mock(NotificationListenerService.Ranking.class);
         when(ranking.visuallyInterruptive()).thenReturn(true);
         mEntryInterruptive = createBubbleEntry(1, "interruptive", "package.d", ranking);
-        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null);
+        mBubbleInterruptive = new Bubble(mEntryInterruptive, mSuppressionListener, null,
+                mMainExecutor);
 
         mEntryDismissed = createBubbleEntry(1, "dismissed", "package.d", null);
-        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener, null);
+        mBubbleDismissed = new Bubble(mEntryDismissed, mSuppressionListener, null,
+                mMainExecutor);
 
-        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener, mPendingIntentCanceledListener);
-        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener, mPendingIntentCanceledListener);
-        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener, mPendingIntentCanceledListener);
-        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener, mPendingIntentCanceledListener);
-        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener);
-        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener);
-        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener);
+        mBubbleA1 = new Bubble(mEntryA1, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleA2 = new Bubble(mEntryA2, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleA3 = new Bubble(mEntryA3, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleB1 = new Bubble(mEntryB1, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleB2 = new Bubble(mEntryB2, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleB3 = new Bubble(mEntryB3, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
+        mBubbleC1 = new Bubble(mEntryC1, mSuppressionListener, mPendingIntentCanceledListener,
+                mMainExecutor);
         TestableBubblePositioner positioner = new TestableBubblePositioner(mContext,
                 mock(WindowManager.class));
-        mBubbleData = new BubbleData(getContext(), mBubbleLogger, positioner);
+        mBubbleData = new BubbleData(getContext(), mBubbleLogger, positioner,
+                mMainExecutor);
 
         // Used by BubbleData to set lastAccessedTime
         when(mTimeSource.currentTimeMillis()).thenReturn(1000L);
@@ -796,7 +809,7 @@ public class BubbleDataTest extends ShellTestCase {
         assertWithMessage("addedBubble").that(update.addedBubble).isEqualTo(expected);
     }
 
-    private void assertBubbleRemoved(Bubble expected, @BubbleController.DismissReason int reason) {
+    private void assertBubbleRemoved(Bubble expected, @Bubbles.DismissReason int reason) {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertWithMessage("removedBubbles").that(update.removedBubbles)
                 .isEqualTo(ImmutableList.of(Pair.create(expected, reason)));
