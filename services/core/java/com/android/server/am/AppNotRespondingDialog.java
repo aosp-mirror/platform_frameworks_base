@@ -63,8 +63,8 @@ final class AppNotRespondingDialog extends BaseErrorDialog implements View.OnCli
                 ? data.aInfo.loadLabel(context.getPackageManager())
                 : null;
         CharSequence name2 = null;
-        if ((mProc.pkgList.size() == 1) &&
-                (name2=context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
+        if ((mProc.getPkgList().size() == 1)
+                && (name2 = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
             if (name1 != null) {
                 resid = com.android.internal.R.string.anr_activity_application;
             } else {

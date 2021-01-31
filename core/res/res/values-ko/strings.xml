@@ -148,7 +148,8 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Wi-Fi에서만"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> Cross SIM 통화"</string>
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: 착신전환 안됨"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g><xliff:g id="TIME_DELAY">{2}</xliff:g>초 후"</string>
@@ -203,8 +204,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"센서 알림 서비스"</string>
     <string name="twilight_service" msgid="8964898045693187224">"새벽 서비스"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"시간대 감지(연결되지 않음)"</string>
-    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
-    <skip />
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"GNSS 시간 업데이트 서비스"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"기기가 삭제됩니다."</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"관리자 앱을 사용할 수 없습니다. 곧 기기가 삭제됩니다.\n\n궁금한 점이 있으면 조직의 관리자에게 문의하세요."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g>에 의해 사용 중지되었습니다."</string>
@@ -2205,12 +2205,8 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"이제 화면 일부 또는 전체를 확대할 수 있습니다."</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"설정에서 사용 설정"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"닫기"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"계속하려면 &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 마이크에 액세스해야 합니다."</string>
+    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"계속하려면 &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;에서 기기 카메라에 액세스해야 합니다."</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"사용"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"센서 개인정보 보호"</string>
 </resources>

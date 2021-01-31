@@ -40,6 +40,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 /**
  * Test class for {@link OomAdjuster}.
  *
@@ -76,11 +79,26 @@ public class OomAdjusterTests {
 
             sService.mConstants = new ActivityManagerConstants(sContext, sService,
                     sContext.getMainThreadHandler());
+            final AppProfiler profiler = mock(AppProfiler.class);
+            setFieldValue(AppProfiler.class, profiler, "mProfilerLock", new Object());
+            setFieldValue(ActivityManagerService.class, sService, "mAppProfiler", profiler);
             sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList, null);
             LocalServices.addService(UsageStatsManagerInternal.class,
                     mock(UsageStatsManagerInternal.class));
             sService.mUsageStatsService = LocalServices.getService(UsageStatsManagerInternal.class);
         });
+    }
+
+    private static <T> void setFieldValue(Class clazz, Object obj, String fieldName, T val) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            Field mfield = Field.class.getDeclaredField("accessFlags");
+            mfield.setAccessible(true);
+            mfield.setInt(field, mfield.getInt(field) & ~(Modifier.FINAL | Modifier.PRIVATE));
+            field.set(obj, val);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+        }
     }
 
     @AfterClass

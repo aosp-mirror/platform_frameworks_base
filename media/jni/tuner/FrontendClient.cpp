@@ -21,8 +21,8 @@
 
 #include "FrontendClient.h"
 
+using ::aidl::android::media::tv::tuner::TunerFrontendDvbtSettings;
 using ::aidl::android::media::tv::tuner::TunerFrontendScanAtsc3PlpInfo;
-using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
 
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSifStandard;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogType;
@@ -86,10 +86,9 @@ void FrontendClient::setHidlFrontend(sp<IFrontend> frontend) {
 Result FrontendClient::tune(const FrontendSettings& settings,
         const FrontendSettingsExt1_1& settingsExt1_1) {
     if (mTunerFrontend != NULL) {
-        // TODO: parse hidl settings to aidl settings
         // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
-        TunerFrontendSettings settings;
-        Status s = mTunerFrontend->tune(settings);
+        TunerFrontendSettings tunerFeSettings = getAidlFrontendSettings(settings, settingsExt1_1);
+        Status s = mTunerFrontend->tune(tunerFeSettings);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
@@ -124,10 +123,9 @@ Result FrontendClient::stopTune() {
 Result FrontendClient::scan(const FrontendSettings& settings, FrontendScanType type,
         const FrontendSettingsExt1_1& settingsExt1_1) {
     if (mTunerFrontend != NULL) {
-        // TODO: parse hidl settings to aidl settings
         // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
-        TunerFrontendSettings settings;
-        Status s = mTunerFrontend->scan(settings, (int)type);
+        TunerFrontendSettings tunerFeSettings = getAidlFrontendSettings(settings, settingsExt1_1);
+        Status s = mTunerFrontend->scan(tunerFeSettings, (int)type);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
@@ -279,7 +277,6 @@ Result FrontendClient::unlinkCiCamToFrontend(int ciCamId) {
 
 Result FrontendClient::close() {
     if (mTunerFrontend != NULL) {
-        // TODO: handle error message.
         Status s = mTunerFrontend->close();
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
@@ -302,6 +299,61 @@ shared_ptr<ITunerFrontend> FrontendClient::getAidlFrontend() {
 
 int FrontendClient::getId() {
     return mId;
+}
+
+TunerFrontendSettings FrontendClient::getAidlFrontendSettings(const FrontendSettings& settings,
+        const FrontendSettingsExt1_1& /*settingsExt1_1*/) {
+    // TODO: complete hidl to aidl frontend settings conversion
+    TunerFrontendSettings s;
+    switch (settings.getDiscriminator()) {
+        case FrontendSettings::hidl_discriminator::analog: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::atsc: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::atsc3: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::dvbs: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::dvbc: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::dvbt: {
+            TunerFrontendDvbtSettings dvbtSettings{
+                .frequency = (int)settings.dvbt().frequency,
+                .transmissionMode = (int)settings.dvbt().transmissionMode,
+                .bandwidth = (int)settings.dvbt().bandwidth,
+                .constellation = (int)settings.dvbt().constellation,
+                .hierarchy = (int)settings.dvbt().hierarchy,
+                .hpCodeRate = (int)settings.dvbt().hpCoderate,
+                .lpCodeRate = (int)settings.dvbt().lpCoderate,
+                .guardInterval = (int)settings.dvbt().guardInterval,
+                .isHighPriority = settings.dvbt().isHighPriority,
+                .standard = (int)settings.dvbt().standard,
+                .isMiso = settings.dvbt().isMiso,
+                .plpMode = (int)settings.dvbt().plpMode,
+                .plpId = (int)settings.dvbt().plpId,
+                .plpGroupId = (int)settings.dvbt().plpGroupId,
+            };
+            s.set<TunerFrontendSettings::dvbt>(dvbtSettings);
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::isdbs: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::isdbs3: {
+            break;
+        }
+        case FrontendSettings::hidl_discriminator::isdbt: {
+            break;
+        }
+        default:
+            break;
+    }
+    return s;
 }
 
 /////////////// TunerFrontendCallback ///////////////////////

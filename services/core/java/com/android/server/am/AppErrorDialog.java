@@ -71,8 +71,8 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         BidiFormatter bidi = BidiFormatter.getInstance();
 
         CharSequence name;
-        if ((mProc.pkgList.size() == 1) &&
-                (name = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
+        if ((mProc.getPkgList().size() == 1)
+                && (name = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
             setTitle(res.getString(
                     data.repeating ? com.android.internal.R.string.aerr_application_repeated
                             : com.android.internal.R.string.aerr_application,

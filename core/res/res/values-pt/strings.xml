@@ -148,7 +148,8 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Somente Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"Chamadas entre chips da <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não encaminhado"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> após <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -203,7 +204,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Serviço de notificações do sensor"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Serviço de crepúsculo"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Detector de fuso horário (sem conectividade)"</string>
-    <string name="gnss_time_update_service" msgid="9039489496037616095">"Serviço de atualização de horário do GNSS"</string>
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"Serviço de atualização de horário do Sistema Global de Navegação por Satélites (GNSS, na sigla em inglês)"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Seu dispositivo será limpo"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Não é possível usar o aplicativo para administrador. Seu dispositivo passará por uma limpeza agora.\n\nEm caso de dúvidas, entre em contato com o administrador da sua organização."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impressão desativada por <xliff:g id="OWNER_APP">%s</xliff:g>."</string>

@@ -57,7 +57,7 @@
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
     <string name="ClipMmi" msgid="4110549342447630629">"ID chiamante in entrata"</string>
-    <string name="ClirMmi" msgid="6752346475055446417">"Nascondi ID chiamante in uscita"</string>
+    <string name="ClirMmi" msgid="6752346475055446417">"Nascondi ID chiamante per le chiamate in uscita"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID linea connessa"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Limitazione ID linea connessa"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Deviazione chiamate"</string>
@@ -148,7 +148,8 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Solo Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"Chiamate tramite più SIM <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: inoltro non effettuato"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g><xliff:g id="DIALING_NUMBER">{1}</xliff:g> dopo <xliff:g id="TIME_DELAY">{2}</xliff:g> secondi"</string>
@@ -203,8 +204,7 @@
     <string name="sensor_notification_service" msgid="7474531979178682676">"Servizio di notifica dei sensori"</string>
     <string name="twilight_service" msgid="8964898045693187224">"Servizio Twilight"</string>
     <string name="offline_location_time_zone_detection_service_attribution" msgid="303754195048744816">"Rilevatore di fuso orario (connessione a Internet non necessaria)"</string>
-    <!-- no translation found for gnss_time_update_service (9039489496037616095) -->
-    <skip />
+    <string name="gnss_time_update_service" msgid="9039489496037616095">"Servizio di aggiornamento dell\'orario GNSS"</string>
     <string name="factory_reset_warning" msgid="6858705527798047809">"Il dispositivo verrà resettato"</string>
     <string name="factory_reset_message" msgid="2657049595153992213">"Impossibile usare l\'app di amministrazione. Il dispositivo verrà resettato.\n\nPer eventuali domande, contatta l\'amministratore della tua organizzazione."</string>
     <string name="printing_disabled_by" msgid="3517499806528864633">"Stampa disattivata da <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
@@ -2205,12 +2205,8 @@
     <string name="window_magnification_prompt_content" msgid="4166711383253283838">"Puoi ingrandire lo schermo in parte o per intero"</string>
     <string name="turn_on_magnification_settings_action" msgid="8521433346684847700">"Attiva nelle Impostazioni"</string>
     <string name="dismiss_action" msgid="1728820550388704784">"Ignora"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_notification_content (8063355861118105607) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_notification_content (4738005643315863736) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_dialog_turn_on_button (7921147002346108119) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_notification_channel_label (936036783155261349) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_notification_content" msgid="8063355861118105607">"Per continuare, l\'app &lt;b&gt;‎‏‎‎‏‏‎<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; deve accedere al microfono del dispositivo."</string>
+    <string name="sensor_privacy_start_use_camera_notification_content" msgid="4738005643315863736">"Per continuare, l\'app &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; deve accedere alla videocamera del dispositivo."</string>
+    <string name="sensor_privacy_start_use_dialog_turn_on_button" msgid="7921147002346108119">"Attiva"</string>
+    <string name="sensor_privacy_notification_channel_label" msgid="936036783155261349">"Privacy relativa ai sensori"</string>
 </resources>

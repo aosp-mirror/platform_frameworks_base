@@ -148,7 +148,8 @@
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"Apenas Wi-Fi"</string>
     <!-- no translation found for crossSimFormat_spn (9125246077491634262) -->
     <skip />
-    <string name="crossSimFormat_spn_cross_sim_calling" msgid="779976494687695991">"<xliff:g id="SPN">%s</xliff:g> Chamadas com vários cartões SIM"</string>
+    <!-- no translation found for crossSimFormat_spn_cross_sim_calling (5620807020002879057) -->
+    <skip />
     <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Não reencaminhado"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g> após <xliff:g id="TIME_DELAY">{2}</xliff:g> segundos"</string>
@@ -2068,7 +2069,7 @@
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>:"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"enviou uma imagem"</string>
     <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Conversa"</string>
-    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversa de grupo"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Conversa em grupo"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"&gt; <xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Pessoal"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabalho"</string>
