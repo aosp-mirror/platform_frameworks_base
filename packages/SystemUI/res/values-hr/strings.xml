@@ -418,10 +418,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Snimač zaslona"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Početak"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Zaustavi"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Da bi nastavila s radom, aplikacija &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; treba pristupiti mikrofonu vašeg uređaja."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Da bi nastavila s radom, aplikacija &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; treba pristupiti fotoaparatu vašeg uređaja."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Uređaj"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Prijeđite prstom prema gore da biste promijenili aplikaciju"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Povucite udesno da biste brzo promijenili aplikaciju"</string>
@@ -444,8 +442,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Dodirnite opet za otvaranje"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Prijeđite prstom prema gore da biste otvorili"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Prijeđite prstom prema gore za ponovni pokušaj"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Otključajte da biste upotrijebili NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ovaj uređaj pripada vašoj organizaciji"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Prijeđite prstom od ikone za telefon"</string>
@@ -975,6 +972,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Aplikacije upotrebljavaju <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" i "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"Aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> koristi sljedeće: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Aplikacija <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> nedavno je koristila sljedeće: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(za poslovne korisnike)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Telefonski poziv"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(putem aplikacije <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"fotoaparat"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"lokaciju"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>
