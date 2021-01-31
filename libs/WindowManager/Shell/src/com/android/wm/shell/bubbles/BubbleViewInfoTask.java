@@ -46,6 +46,7 @@ import com.android.wm.shell.R;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.concurrent.Executor;
 
 /**
  * Simple task to inflate views & load necessary info to display a bubble.
@@ -71,6 +72,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     private BubbleIconFactory mIconFactory;
     private boolean mSkipInflation;
     private Callback mCallback;
+    private Executor mMainExecutor;
 
     /**
      * Creates a task to load information for the provided {@link Bubble}. Once all info
@@ -82,7 +84,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             BubbleStackView stackView,
             BubbleIconFactory factory,
             boolean skipInflation,
-            Callback c) {
+            Callback c,
+            Executor mainExecutor) {
         mBubble = b;
         mContext = new WeakReference<>(context);
         mController = new WeakReference<>(controller);
@@ -90,6 +93,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         mIconFactory = factory;
         mSkipInflation = skipInflation;
         mCallback = c;
+        mMainExecutor = mainExecutor;
     }
 
     @Override
@@ -103,10 +107,12 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
         if (isCancelled() || viewInfo == null) {
             return;
         }
-        mBubble.setViewInfo(viewInfo);
-        if (mCallback != null) {
-            mCallback.onBubbleViewsReady(mBubble);
-        }
+        mMainExecutor.execute(() -> {
+            mBubble.setViewInfo(viewInfo);
+            if (mCallback != null) {
+                mCallback.onBubbleViewsReady(mBubble);
+            }
+        });
     }
 
     /**
