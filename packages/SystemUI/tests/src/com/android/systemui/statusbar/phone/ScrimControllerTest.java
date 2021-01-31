@@ -54,6 +54,8 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.ScrimView;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.DelayedWakeLock;
 import com.android.systemui.utils.os.FakeHandler;
 
@@ -220,7 +222,8 @@ public class ScrimControllerTest extends SysuiTestCase {
         mScrimController = new ScrimController(mLightBarController,
                 mDozeParamenters, mAlarmManager, mKeyguardStateController, mDelayedWakeLockBuilder,
                 new FakeHandler(mLooper.getLooper()), mKeyguardUpdateMonitor,
-                mDockManager, mBlurUtils, mConfigurationController, mFeatureFlags);
+                mDockManager, mBlurUtils, mConfigurationController, mFeatureFlags,
+                new FakeExecutor(new FakeSystemClock()));
         mScrimController.setScrimVisibleListener(visible -> mScrimVisibility = visible);
         mScrimController.attachViews(mScrimBehind, mScrimInFront, mScrimForBubble);
         mScrimController.setAnimatorListener(mAnimatorListener);

@@ -29,6 +29,7 @@ import com.android.systemui.appops.dagger.AppOpsModule;
 import com.android.systemui.assist.AssistModule;
 import com.android.systemui.classifier.FalsingModule;
 import com.android.systemui.controls.dagger.ControlsModule;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.dagger.DemoModeModule;
 import com.android.systemui.doze.dagger.DozeComponent;
 import com.android.systemui.dump.DumpManager;
@@ -75,6 +76,7 @@ import com.android.systemui.wmshell.BubblesManager;
 import com.android.wm.shell.bubbles.Bubbles;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 import dagger.Binds;
 import dagger.BindsOptionalOf;
@@ -153,6 +155,7 @@ public abstract class SystemUIModule {
     @Binds
     abstract SystemClock bindSystemClock(SystemClockImpl systemClock);
 
+    // TODO: This should provided by the WM component
     /** Provides Optional of BubbleManager */
     @SysUISingleton
     @Provides
@@ -166,11 +169,12 @@ public abstract class SystemUIModule {
             ZenModeController zenModeController, NotificationLockscreenUserManager notifUserManager,
             NotificationGroupManagerLegacy groupManager, NotificationEntryManager entryManager,
             NotifPipeline notifPipeline, SysUiState sysUiState, FeatureFlags featureFlags,
-            DumpManager dumpManager) {
+            DumpManager dumpManager, @Main Executor sysuiMainExecutor) {
         return Optional.ofNullable(BubblesManager.create(context, bubblesOptional,
                 notificationShadeWindowController, statusBarStateController, shadeController,
                 configurationController, statusBarService, notificationManager,
                 interruptionStateProvider, zenModeController, notifUserManager,
-                groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager));
+                groupManager, entryManager, notifPipeline, sysUiState, featureFlags, dumpManager,
+                sysuiMainExecutor));
     }
 }
