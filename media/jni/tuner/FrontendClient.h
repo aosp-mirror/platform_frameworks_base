@@ -32,6 +32,7 @@ using Status = ::ndk::ScopedAStatus;
 using ::aidl::android::media::tv::tuner::BnTunerFrontendCallback;
 using ::aidl::android::media::tv::tuner::ITunerFrontend;
 using ::aidl::android::media::tv::tuner::TunerFrontendScanMessage;
+using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
 
 using ::android::hardware::Return;
 using ::android::hardware::Void;
@@ -171,6 +172,9 @@ public:
     int getId();
 
 private:
+    TunerFrontendSettings getAidlFrontendSettings(const FrontendSettings& settings,
+            const FrontendSettingsExt1_1& settingsExt1_1);
+
     /**
      * An AIDL Tuner Frontend Singleton assigned at the first time when the Tuner Client
      * opens a frontend cient. Default null when the service does not exist.

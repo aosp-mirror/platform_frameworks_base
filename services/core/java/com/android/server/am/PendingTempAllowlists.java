@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,49 +11,49 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.am;
 
 import android.util.SparseArray;
 
-/** Whitelists of uids to temporarily bypass Power Save mode. */
-final class PendingTempWhitelists {
+/** Allowlists of uids to temporarily bypass Power Save mode. */
+final class PendingTempAllowlists {
 
     private ActivityManagerService mService;
 
-    private final SparseArray<ActivityManagerService.PendingTempWhitelist> mPendingTempWhitelist =
+    private final SparseArray<ActivityManagerService.PendingTempAllowlist> mPendingTempAllowlist =
             new SparseArray<>();
 
-    PendingTempWhitelists(ActivityManagerService service) {
+    PendingTempAllowlists(ActivityManagerService service) {
         mService = service;
     }
 
-    void put(int uid, ActivityManagerService.PendingTempWhitelist value) {
-        mPendingTempWhitelist.put(uid, value);
+    void put(int uid, ActivityManagerService.PendingTempAllowlist value) {
+        mPendingTempAllowlist.put(uid, value);
         mService.mAtmInternal.onUidAddedToPendingTempAllowlist(uid, value.tag);
     }
 
     void removeAt(int index) {
-        final int uid = mPendingTempWhitelist.keyAt(index);
-        mPendingTempWhitelist.removeAt(index);
+        final int uid = mPendingTempAllowlist.keyAt(index);
+        mPendingTempAllowlist.removeAt(index);
         mService.mAtmInternal.onUidRemovedFromPendingTempAllowlist(uid);
     }
 
-    ActivityManagerService.PendingTempWhitelist get(int uid) {
-        return mPendingTempWhitelist.get(uid);
+    ActivityManagerService.PendingTempAllowlist get(int uid) {
+        return mPendingTempAllowlist.get(uid);
     }
 
     int size() {
-        return mPendingTempWhitelist.size();
+        return mPendingTempAllowlist.size();
     }
 
-    ActivityManagerService.PendingTempWhitelist valueAt(int index) {
-        return mPendingTempWhitelist.valueAt(index);
+    ActivityManagerService.PendingTempAllowlist valueAt(int index) {
+        return mPendingTempAllowlist.valueAt(index);
     }
 
     int indexOfKey(int key) {
-        return mPendingTempWhitelist.indexOfKey(key);
+        return mPendingTempAllowlist.indexOfKey(key);
     }
 }

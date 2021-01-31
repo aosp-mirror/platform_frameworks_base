@@ -20,6 +20,7 @@ import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
 import static android.content.Intent.ACTION_USER_ADDED;
 import static android.content.Intent.ACTION_USER_REMOVED;
+import static android.content.Intent.EXTRA_REMOVED_FOR_ALL_USERS;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PackageManager.MATCH_ALL;
 import static android.provider.DeviceConfig.NAMESPACE_APP_HIBERNATION;
@@ -46,6 +47,7 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -55,6 +57,7 @@ import com.android.server.SystemService;
 import java.io.FileDescriptor;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * System service that manages app hibernation state, a state apps can enter that means they are
@@ -74,6 +77,8 @@ public final class AppHibernationService extends SystemService {
     private final UserManager mUserManager;
     @GuardedBy("mLock")
     private final SparseArray<Map<String, UserPackageState>> mUserStates = new SparseArray<>();
+    @GuardedBy("mLock")
+    private final Set<String> mGloballyHibernatedPackages = new ArraySet<>();
 
     /**
      * Initializes the system service.
@@ -138,7 +143,7 @@ public final class AppHibernationService extends SystemService {
      * @param userId the user to check
      * @return true if package is hibernating for the user
      */
-    public boolean isHibernating(String packageName, int userId) {
+    boolean isHibernatingForUser(String packageName, int userId) {
         userId = handleIncomingUser(userId, "isHibernating");
         synchronized (mLock) {
             final Map<String, UserPackageState> packageStates = mUserStates.get(userId);
@@ -151,7 +156,19 @@ public final class AppHibernationService extends SystemService {
                         String.format("Package %s is not installed for user %s",
                                 packageName, userId));
             }
-            return pkgState != null ? pkgState.hibernated : null;
+            return pkgState.hibernated;
+        }
+    }
+
+    /**
+     * Whether a package is hibernated globally. This only occurs when a package is hibernating for
+     * all users and allows us to make optimizations at the package or APK level.
+     *
+     * @param packageName package to check
+     */
+    boolean isHibernatingGlobally(String packageName) {
+        synchronized (mLock) {
+            return mGloballyHibernatedPackages.contains(packageName);
         }
     }
 
@@ -162,7 +179,7 @@ public final class AppHibernationService extends SystemService {
      * @param userId user
      * @param isHibernating new hibernation state
      */
-    public void setHibernating(String packageName, int userId, boolean isHibernating) {
+    void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
         userId = handleIncomingUser(userId, "setHibernating");
         synchronized (mLock) {
             if (!mUserStates.contains(userId)) {
@@ -180,29 +197,96 @@ public final class AppHibernationService extends SystemService {
                 return;
             }
 
-
-            final long caller = Binder.clearCallingIdentity();
-            try {
-                if (isHibernating) {
-                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackage");
-                    mIActivityManager.forceStopPackage(packageName, userId);
-                    mIPackageManager.deleteApplicationCacheFilesAsUser(packageName, userId,
-                            null /* observer */);
-                } else {
-                    Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
-                    mIPackageManager.setPackageStoppedState(packageName, false, userId);
-                }
-                pkgState.hibernated = isHibernating;
-            } catch (RemoteException e) {
-                throw new IllegalStateException(
-                        "Failed to hibernate due to manager not being available", e);
-            } finally {
-                Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
-                Binder.restoreCallingIdentity(caller);
+            if (isHibernating) {
+                hibernatePackageForUserL(packageName, userId, pkgState);
+            } else {
+                unhibernatePackageForUserL(packageName, userId, pkgState);
             }
-
-            // TODO: Support package level hibernation when package is hibernating for all users
         }
+    }
+
+    /**
+     * Set whether the package should be hibernated globally at a package level, allowing the
+     * the system to make optimizations at the package or APK level.
+     *
+     * @param packageName package to hibernate globally
+     * @param isHibernating new hibernation state
+     */
+    void setHibernatingGlobally(String packageName, boolean isHibernating) {
+        if (isHibernating != mGloballyHibernatedPackages.contains(packageName)) {
+            synchronized (mLock) {
+                if (isHibernating) {
+                    hibernatePackageGloballyL(packageName);
+                } else {
+                    unhibernatePackageGloballyL(packageName);
+                }
+            }
+        }
+    }
+
+    /**
+     * Put an app into hibernation for a given user, allowing user-level optimizations to occur.
+     * The caller should hold {@link #mLock}
+     *
+     * @param pkgState package hibernation state
+     */
+    private void hibernatePackageForUserL(@NonNull String packageName, int userId,
+            @NonNull UserPackageState pkgState) {
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackage");
+        final long caller = Binder.clearCallingIdentity();
+        try {
+            mIActivityManager.forceStopPackage(packageName, userId);
+            mIPackageManager.deleteApplicationCacheFilesAsUser(packageName, userId,
+                    null /* observer */);
+            pkgState.hibernated = true;
+        } catch (RemoteException e) {
+            throw new IllegalStateException(
+                    "Failed to hibernate due to manager not being available", e);
+        } finally {
+            Binder.restoreCallingIdentity(caller);
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+        }
+    }
+
+    /**
+     * Remove a package from hibernation for a given user. The caller should hold {@link #mLock}.
+     *
+     * @param pkgState package hibernation state
+     */
+    private void unhibernatePackageForUserL(@NonNull String packageName, int userId,
+            UserPackageState pkgState) {
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
+        final long caller = Binder.clearCallingIdentity();
+        try {
+            mIPackageManager.setPackageStoppedState(packageName, false, userId);
+            pkgState.hibernated = false;
+        } catch (RemoteException e) {
+            throw new IllegalStateException(
+                    "Failed to unhibernate due to manager not being available", e);
+        } finally {
+            Binder.restoreCallingIdentity(caller);
+            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+        }
+    }
+
+    /**
+     * Put a package into global hibernation, optimizing its storage at a package / APK level.
+     * The caller should hold {@link #mLock}.
+     */
+    private void hibernatePackageGloballyL(@NonNull String packageName) {
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
+        // TODO(175830194): Delete vdex/odex when DexManager API is built out
+        mGloballyHibernatedPackages.add(packageName);
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
+    }
+
+    /**
+     * Unhibernate a package from global hibernation. The caller should hold {@link #mLock}.
+     */
+    private void unhibernatePackageGloballyL(@NonNull String packageName) {
+        Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
+        mGloballyHibernatedPackages.remove(packageName);
+        Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**
@@ -220,8 +304,8 @@ public final class AppHibernationService extends SystemService {
             throw new IllegalStateException("Package manager not available.", e);
         }
 
-        for (PackageInfo pkg : packageList) {
-            packages.put(pkg.packageName, new UserPackageState());
+        for (int i = 0, size = packageList.size(); i < size; i++) {
+            packages.put(packageList.get(i).packageName, new UserPackageState());
         }
         mUserStates.put(userId, packages);
     }
@@ -247,6 +331,12 @@ public final class AppHibernationService extends SystemService {
     private void onPackageRemoved(@NonNull String packageName, int userId) {
         synchronized (mLock) {
             mUserStates.get(userId).remove(packageName);
+        }
+    }
+
+    private void onPackageRemovedForAllUsers(@NonNull String packageName) {
+        synchronized (mLock) {
+            mGloballyHibernatedPackages.remove(packageName);
         }
     }
 
@@ -277,13 +367,23 @@ public final class AppHibernationService extends SystemService {
         }
 
         @Override
-        public boolean isHibernating(String packageName, int userId) {
-            return mService.isHibernating(packageName, userId);
+        public boolean isHibernatingForUser(String packageName, int userId) {
+            return mService.isHibernatingForUser(packageName, userId);
         }
 
         @Override
-        public void setHibernating(String packageName, int userId, boolean isHibernating) {
-            mService.setHibernating(packageName, userId, isHibernating);
+        public void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
+            mService.setHibernatingForUser(packageName, userId, isHibernating);
+        }
+
+        @Override
+        public void setHibernatingGlobally(String packageName, boolean isHibernating) {
+            mService.setHibernatingGlobally(packageName, isHibernating);
+        }
+
+        @Override
+        public boolean isHibernatingGlobally(String packageName) {
+            return mService.isHibernatingGlobally(packageName);
         }
 
         @Override
@@ -322,6 +422,9 @@ public final class AppHibernationService extends SystemService {
                     onPackageAdded(packageName, userId);
                 } else if (ACTION_PACKAGE_REMOVED.equals(action)) {
                     onPackageRemoved(packageName, userId);
+                    if (intent.getBooleanExtra(EXTRA_REMOVED_FOR_ALL_USERS, false)) {
+                        onPackageRemovedForAllUsers(packageName);
+                    }
                 }
             }
         }
