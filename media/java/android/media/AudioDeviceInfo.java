@@ -16,8 +16,10 @@
 
 package android.media;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.util.SparseIntArray;
 
 import java.lang.annotation.Retention;
@@ -161,6 +163,14 @@ public final class AudioDeviceInfo {
      */
     public static final int TYPE_BLE_SPEAKER   = 27;
 
+    /**
+     * A device type describing an Echo Canceller loopback Reference.
+     * This device is only used when capturing with MediaRecorder.AudioSource.ECHO_REFERENCE,
+     * which requires privileged permission
+     * {@link android.Manifest.permission#CAPTURE_AUDIO_OUTPUT}.
+     * @hide */
+    @RequiresPermission(Manifest.permission.CAPTURE_AUDIO_OUTPUT)
+    public static final int TYPE_ECHO_REFERENCE   = 28;
 
     /** @hide */
     @IntDef(flag = false, prefix = "TYPE", value = {
@@ -188,7 +198,8 @@ public final class AudioDeviceInfo {
             TYPE_FM_TUNER,
             TYPE_TV_TUNER,
             TYPE_BLE_HEADSET,
-            TYPE_BLE_SPEAKER}
+            TYPE_BLE_SPEAKER,
+            TYPE_ECHO_REFERENCE}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceType {}
@@ -211,7 +222,8 @@ public final class AudioDeviceInfo {
             TYPE_LINE_DIGITAL,
             TYPE_IP,
             TYPE_BUS,
-            TYPE_BLE_HEADSET}
+            TYPE_BLE_HEADSET,
+            TYPE_ECHO_REFERENCE}
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface AudioDeviceTypeIn {}
@@ -297,6 +309,7 @@ public final class AudioDeviceInfo {
             case TYPE_BUS:
             case TYPE_REMOTE_SUBMIX:
             case TYPE_BLE_HEADSET:
+            case TYPE_ECHO_REFERENCE:
                 return true;
             default:
                 return false;
@@ -621,6 +634,8 @@ public final class AudioDeviceInfo {
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BUS, TYPE_BUS);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_REMOTE_SUBMIX, TYPE_REMOTE_SUBMIX);
         INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_BLE_HEADSET, TYPE_BLE_HEADSET);
+        INT_TO_EXT_DEVICE_MAPPING.put(AudioSystem.DEVICE_IN_ECHO_REFERENCE, TYPE_ECHO_REFERENCE);
+
 
         // privileges mapping to output device
         EXT_TO_INT_DEVICE_MAPPING = new SparseIntArray();
@@ -678,6 +693,9 @@ public final class AudioDeviceInfo {
         EXT_TO_INT_INPUT_DEVICE_MAPPING.put(
                 TYPE_REMOTE_SUBMIX, AudioSystem.DEVICE_IN_REMOTE_SUBMIX);
         EXT_TO_INT_INPUT_DEVICE_MAPPING.put(TYPE_BLE_HEADSET, AudioSystem.DEVICE_IN_BLE_HEADSET);
+        EXT_TO_INT_INPUT_DEVICE_MAPPING.put(
+                TYPE_ECHO_REFERENCE, AudioSystem.DEVICE_IN_ECHO_REFERENCE);
+
     }
 }
 
