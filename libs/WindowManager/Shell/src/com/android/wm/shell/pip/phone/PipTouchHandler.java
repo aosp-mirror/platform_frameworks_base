@@ -30,7 +30,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Size;
@@ -932,14 +931,14 @@ public class PipTouchHandler {
         if (!mEnableResize) {
             return false;
         }
-        final Size estimatedMenuSize = mMenuController.getEstimatedMenuSize();
-        if (estimatedMenuSize == null) {
+        final Size estimatedMinMenuSize = mMenuController.getEstimatedMinMenuSize();
+        if (estimatedMinMenuSize == null) {
             Log.wtf(TAG, "Failed to get estimated menu size");
             return false;
         }
         final Rect currentBounds = mPipBoundsState.getBounds();
-        return currentBounds.width() < estimatedMenuSize.getWidth()
-                || currentBounds.height() < estimatedMenuSize.getHeight();
+        return currentBounds.width() < estimatedMinMenuSize.getWidth()
+                || currentBounds.height() < estimatedMinMenuSize.getHeight();
     }
 
     /**
