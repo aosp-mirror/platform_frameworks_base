@@ -13,4 +13,12 @@ java_library {
         "framework",
         "services.core",
     ],
+    visibility: [
+        "//frameworks/base/apex/jobscheduler:__subpackages__",
+        // These are required until jobscheduler is properly unbundled.
+        "//frameworks/base/services",
+        "//frameworks/base/services/tests/mockingservicestests",
+        "//frameworks/base/services/tests/servicestests",
+        "//frameworks/base/tests/JobSchedulerPerfTests",
+    ],
 }
