@@ -22,7 +22,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -54,16 +53,13 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object : RotateTwoLaunchedAppsTransition(
         InstrumentationRegistry.getInstrumentation()) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
-            val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
                     buildTestTag("testRotateAndEnterAppPairsMode", configuration)
@@ -96,10 +92,11 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
                 }
             }
 
-            return FlickerTestRunnerFactory(instrumentation,
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                transition, testSpec,
                 repetitions = SplitScreenHelper.TEST_REPETITIONS,
                 supportedRotations = listOf(Surface.ROTATION_90, Surface.ROTATION_270)
-            ).buildTest(transition, testSpec)
+            )
         }
     }
 }
