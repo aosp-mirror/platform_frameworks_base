@@ -30,7 +30,6 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.os.Handler;
 import android.provider.DeviceConfig;
 import android.util.Log;
 import android.util.Size;
@@ -847,11 +846,11 @@ public class PipTouchHandler {
                             && mPipBoundsState.getBounds().height()
                             < mPipBoundsState.getMaxSize().y;
                     if (toExpand) {
+                        mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                         animateToMaximizedState(null);
                     } else {
-                        animateToMinimizedState();
+                        animateToUnexpandedState(getUserResizeBounds());
                     }
-                    mPipResizeGestureHandler.setUserResizeBounds(mPipBoundsState.getBounds());
                 } else {
                     // Expand to fullscreen if this is a double tap
                     // the PiP should be frozen until the transition ends
