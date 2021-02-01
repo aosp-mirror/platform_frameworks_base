@@ -8896,6 +8896,7 @@ package android.provider {
     field @Deprecated public static final String NAMESPACE_STORAGE = "storage";
     field public static final String NAMESPACE_STORAGE_NATIVE_BOOT = "storage_native_boot";
     field public static final String NAMESPACE_SYSTEMUI = "systemui";
+    field public static final String NAMESPACE_SYSTEM_TIME = "system_time";
     field public static final String NAMESPACE_TELEPHONY = "telephony";
     field public static final String NAMESPACE_TEXTCLASSIFIER = "textclassifier";
     field public static final String NAMESPACE_WINDOW_MANAGER_NATIVE_BOOT = "window_manager_native_boot";

@@ -368,6 +368,14 @@ public final class DeviceConfig {
     public static final String NAMESPACE_SYSTEMUI = "systemui";
 
     /**
+     * Namespace for system time and time zone detection related features / behavior.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_SYSTEM_TIME = "system_time";
+
+    /**
      * Telephony related properties.
      *
      * @hide
