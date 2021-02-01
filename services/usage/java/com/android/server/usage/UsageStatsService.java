@@ -79,7 +79,6 @@ import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -111,6 +110,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * A service that collects, aggregates, and persists application usage data.
@@ -162,7 +162,7 @@ public class UsageStatsService extends SystemService implements
     ShortcutServiceInternal mShortcutServiceInternal;
 
     private final SparseArray<UserUsageStatsService> mUserState = new SparseArray<>();
-    private final SparseBooleanArray mUserUnlockedStates = new SparseBooleanArray();
+    private final CopyOnWriteArraySet<Integer> mUserUnlockedStates = new CopyOnWriteArraySet<>();
     private final SparseIntArray mUidToKernelCounter = new SparseIntArray();
     int mUsageSource;
 
@@ -333,7 +333,7 @@ public class UsageStatsService extends SystemService implements
 
         synchronized (mLock) {
             // User was started but never unlocked so no need to report a user stopped event
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 persistPendingEventsLocked(userId);
                 return;
             }
@@ -346,7 +346,7 @@ public class UsageStatsService extends SystemService implements
             if (userService != null) {
                 userService.userStopped();
             }
-            mUserUnlockedStates.put(userId, false);
+            mUserUnlockedStates.remove(userId);
             mUserState.put(userId, null); // release the service (mainly for GC)
         }
     }
@@ -360,6 +360,11 @@ public class UsageStatsService extends SystemService implements
             UsageStatsIdleService.scheduleUpdateMappingsJob(getContext());
         }
         synchronized (mLock) {
+            // This should be safe to add this early. Other than reportEventOrAddToQueue, every
+            // other user grabs the lock before accessing
+            // mUserUnlockedStates. reportEventOrAddToQueue does not depend on anything other than
+            // mUserUnlockedStates, and the lock will protect the handler.
+            mUserUnlockedStates.add(userId);
             // Create a user unlocked event to report
             final Event unlockEvent = new Event(USER_UNLOCKED, SystemClock.elapsedRealtime());
             unlockEvent.mPackage = Event.DEVICE_EVENT_PACKAGE_NAME;
@@ -377,7 +382,6 @@ public class UsageStatsService extends SystemService implements
 
             initializeUserUsageStatsServiceLocked(userId, System.currentTimeMillis(),
                     installedPackages);
-            mUserUnlockedStates.put(userId, true);
             final UserUsageStatsService userService = getUserUsageStatsServiceLocked(userId);
             if (userService == null) {
                 Slog.i(TAG, "Attempted to unlock stopped or removed user " + userId);
@@ -780,12 +784,11 @@ public class UsageStatsService extends SystemService implements
     }
 
     private void reportEventOrAddToQueue(int userId, Event event) {
+        if (mUserUnlockedStates.contains(userId)) {
+            mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
+            return;
+        }
         synchronized (mLock) {
-            if (mUserUnlockedStates.get(userId)) {
-                mHandler.obtainMessage(MSG_REPORT_EVENT, userId, 0, event).sendToTarget();
-                return;
-            }
-
             LinkedList<Event> events = mReportedEvents.get(userId);
             if (events == null) {
                 events = new LinkedList<>();
@@ -823,7 +826,7 @@ public class UsageStatsService extends SystemService implements
 
         synchronized (mLock) {
             // This should never be called directly when the user is locked
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.wtf(TAG, "Failed to report event for locked user " + userId
                         + " (" + event.mPackage + "/" + event.mClass
                         + " eventType:" + event.mEventType
@@ -1006,7 +1009,7 @@ public class UsageStatsService extends SystemService implements
         final int tokenRemoved;
         synchronized (mLock) {
             final long timeRemoved = System.currentTimeMillis();
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 // If user is not unlocked and a package is removed for them, we will handle it
                 // when the user service is initialized and package manager is queried.
                 return;
@@ -1030,7 +1033,7 @@ public class UsageStatsService extends SystemService implements
      */
     private boolean pruneUninstalledPackagesData(int userId) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 return false; // user is no longer unlocked
             }
 
@@ -1050,7 +1053,7 @@ public class UsageStatsService extends SystemService implements
         // fetch the installed packages outside the lock so it doesn't block package manager.
         final HashMap<String, Long> installedPkgs = getInstalledPackages(UserHandle.USER_SYSTEM);
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(UserHandle.USER_SYSTEM)) {
+            if (!mUserUnlockedStates.contains(UserHandle.USER_SYSTEM)) {
                 return false; // user is no longer unlocked
             }
 
@@ -1069,7 +1072,7 @@ public class UsageStatsService extends SystemService implements
     List<UsageStats> queryUsageStats(int userId, int bucketType, long beginTime, long endTime,
             boolean obfuscateInstantApps) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query usage stats for locked user " + userId);
                 return null;
             }
@@ -1103,7 +1106,7 @@ public class UsageStatsService extends SystemService implements
     List<ConfigurationStats> queryConfigurationStats(int userId, int bucketType, long beginTime,
             long endTime) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query configuration stats for locked user " + userId);
                 return null;
             }
@@ -1122,7 +1125,7 @@ public class UsageStatsService extends SystemService implements
     List<EventStats> queryEventStats(int userId, int bucketType, long beginTime,
             long endTime) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query event stats for locked user " + userId);
                 return null;
             }
@@ -1140,7 +1143,7 @@ public class UsageStatsService extends SystemService implements
      */
     UsageEvents queryEvents(int userId, long beginTime, long endTime, int flags) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query events for locked user " + userId);
                 return null;
             }
@@ -1159,7 +1162,7 @@ public class UsageStatsService extends SystemService implements
     UsageEvents queryEventsForPackage(int userId, long beginTime, long endTime,
             String packageName, boolean includeTaskRoot) {
         synchronized (mLock) {
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 Slog.w(TAG, "Failed to query package events for locked user " + userId);
                 return null;
             }
@@ -1203,7 +1206,7 @@ public class UsageStatsService extends SystemService implements
         final int userCount = mUserState.size();
         for (int i = 0; i < userCount; i++) {
             final int userId = mUserState.keyAt(i);
-            if (!mUserUnlockedStates.get(userId)) {
+            if (!mUserUnlockedStates.contains(userId)) {
                 persistPendingEventsLocked(userId);
                 continue;
             }
@@ -1261,7 +1264,7 @@ public class UsageStatsService extends SystemService implements
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
                                 final int userId = mUserState.keyAt(user);
-                                if (!mUserUnlockedStates.get(userId)) {
+                                if (!mUserUnlockedStates.contains(userId)) {
                                     continue;
                                 }
                                 ipw.println("user=" + userId);
@@ -1288,7 +1291,7 @@ public class UsageStatsService extends SystemService implements
                             final int numUsers = mUserState.size();
                             for (int user = 0; user < numUsers; user++) {
                                 final int userId = mUserState.keyAt(user);
-                                if (!mUserUnlockedStates.get(userId)) {
+                                if (!mUserUnlockedStates.contains(userId)) {
                                     continue;
                                 }
                                 ipw.println("user=" + userId);
@@ -1344,7 +1347,7 @@ public class UsageStatsService extends SystemService implements
                 idpw.printPair("user", userId);
                 idpw.println();
                 idpw.increaseIndent();
-                if (mUserUnlockedStates.get(userId)) {
+                if (mUserUnlockedStates.contains(userId)) {
                     if (checkin) {
                         mUserState.valueAt(i).checkin(idpw);
                     } else {
@@ -1382,7 +1385,7 @@ public class UsageStatsService extends SystemService implements
             ipw.println("the specified user does not exist.");
             return UserHandle.USER_NULL;
         }
-        if (!mUserUnlockedStates.get(userId)) {
+        if (!mUserUnlockedStates.contains(userId)) {
             ipw.println("the specified user is currently in a locked state.");
             return UserHandle.USER_NULL;
         }
@@ -2250,12 +2253,11 @@ public class UsageStatsService extends SystemService implements
 
         @Override
         public byte[] getBackupPayload(int user, String key) {
+            if (!mUserUnlockedStates.contains(user)) {
+                Slog.w(TAG, "Failed to get backup payload for locked user " + user);
+                return null;
+            }
             synchronized (mLock) {
-                if (!mUserUnlockedStates.get(user)) {
-                    Slog.w(TAG, "Failed to get backup payload for locked user " + user);
-                    return null;
-                }
-
                 // Check to ensure that only user 0's data is b/r for now
                 // Note: if backup and restore is enabled for users other than the system user, the
                 // #onUserUnlocked logic, specifically when the update mappings job is scheduled via
@@ -2275,7 +2277,7 @@ public class UsageStatsService extends SystemService implements
         @Override
         public void applyRestoredPayload(int user, String key, byte[] payload) {
             synchronized (mLock) {
-                if (!mUserUnlockedStates.get(user)) {
+                if (!mUserUnlockedStates.contains(user)) {
                     Slog.w(TAG, "Failed to apply restored payload for locked user " + user);
                     return;
                 }
