@@ -416,9 +416,21 @@ public final class PowerManager {
     public static final int GO_TO_SLEEP_REASON_QUIESCENT = 10;
 
     /**
+     * Go to sleep reason code: The last powered on display group has been removed.
      * @hide
      */
-    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_QUIESCENT;
+    public static final int GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED = 11;
+
+    /**
+     * Go to sleep reason code: Every display group has been turned off.
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF = 12;
+
+    /**
+     * @hide
+     */
+    public static final int GO_TO_SLEEP_REASON_MAX = GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF;
 
     /**
      * @hide
@@ -435,6 +447,8 @@ public final class PowerManager {
             case GO_TO_SLEEP_REASON_ACCESSIBILITY: return "accessibility";
             case GO_TO_SLEEP_REASON_FORCE_SUSPEND: return "force_suspend";
             case GO_TO_SLEEP_REASON_INATTENTIVE: return "inattentive";
+            case GO_TO_SLEEP_REASON_DISPLAY_GROUP_REMOVED: return "display_group_removed";
+            case GO_TO_SLEEP_REASON_DISPLAY_GROUPS_TURNED_OFF: return "display_groups_turned_off";
             default: return Integer.toString(sleepReason);
         }
     }
@@ -521,6 +535,8 @@ public final class PowerManager {
             WAKE_REASON_WAKE_KEY,
             WAKE_REASON_WAKE_MOTION,
             WAKE_REASON_HDMI,
+            WAKE_REASON_DISPLAY_GROUP_ADDED,
+            WAKE_REASON_DISPLAY_GROUP_TURNED_ON,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface WakeReason{}
@@ -608,6 +624,18 @@ public final class PowerManager {
     public static final int WAKE_REASON_LID = 9;
 
     /**
+     * Wake up reason code: Waking due to display group being added.
+     * @hide
+     */
+    public static final int WAKE_REASON_DISPLAY_GROUP_ADDED = 10;
+
+    /**
+     * Wake up reason code: Waking due to display group being powered on.
+     * @hide
+     */
+    public static final int WAKE_REASON_DISPLAY_GROUP_TURNED_ON = 11;
+
+    /**
      * Convert the wake reason to a string for debugging purposes.
      * @hide
      */
@@ -623,6 +651,8 @@ public final class PowerManager {
             case WAKE_REASON_WAKE_MOTION: return "WAKE_REASON_WAKE_MOTION";
             case WAKE_REASON_HDMI: return "WAKE_REASON_HDMI";
             case WAKE_REASON_LID: return "WAKE_REASON_LID";
+            case WAKE_REASON_DISPLAY_GROUP_ADDED: return "WAKE_REASON_DISPLAY_GROUP_ADDED";
+            case WAKE_REASON_DISPLAY_GROUP_TURNED_ON: return "WAKE_REASON_DISPLAY_GROUP_TURNED_ON";
             default: return Integer.toString(wakeReason);
         }
     }
@@ -1253,8 +1283,15 @@ public final class PowerManager {
         }
     }
 
-   /**
-     * Forces the device to go to sleep.
+    /**
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn off.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned on it will be turned off. If all displays are off as a result of this action the
+     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
+     * default display group} is already off then nothing will happen.
+     *
      * <p>
      * Overrides all the wake locks that are held.
      * This is what happens when the power key is pressed to turn off the screen.
@@ -1277,7 +1314,14 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to go to sleep.
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn off.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned on it will be turned off. If all displays are off as a result of this action the
+     * device will be put to sleep. If the {@link com.android.server.display.DisplayGroup#DEFAULT
+     * default display group} is already off then nothing will happen.
+     *
      * <p>
      * Overrides all the wake locks that are held.
      * This is what happens when the power key is pressed to turn off the screen.
@@ -1307,9 +1351,15 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to wake up from sleep.
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn on.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
+     * the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is already
+     * on then nothing will happen.
+     *
      * <p>
-     * If the device is currently asleep, wakes it up, otherwise does nothing.
      * This is what happens when the power key is pressed to turn on the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
@@ -1332,9 +1382,15 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to wake up from sleep.
+     * Forces the {@link com.android.server.display.DisplayGroup#DEFAULT default display group}
+     * to turn on.
+     *
+     * <p>If the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is
+     * turned off it will be turned on. Additionally, if the device is asleep it will be awoken. If
+     * the {@link com.android.server.display.DisplayGroup#DEFAULT default display group} is already
+     * on then nothing will happen.
+     *
      * <p>
-     * If the device is currently asleep, wakes it up, otherwise does nothing.
      * This is what happens when the power key is pressed to turn on the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
@@ -1361,9 +1417,13 @@ public final class PowerManager {
     }
 
     /**
-     * Forces the device to wake up from sleep.
+     * Forces the {@link android.view.Display#DEFAULT_DISPLAY default display} to turn on.
+     *
+     * <p>If the {@link android.view.Display#DEFAULT_DISPLAY default display} is turned off it will
+     * be turned on. Additionally, if the device is asleep it will be awoken. If the {@link
+     * android.view.Display#DEFAULT_DISPLAY default display} is already on then nothing will happen.
+     *
      * <p>
-     * If the device is currently asleep, wakes it up, otherwise does nothing.
      * This is what happens when the power key is pressed to turn on the screen.
      * </p><p>
      * Requires the {@link android.Manifest.permission#DEVICE_POWER} permission.
