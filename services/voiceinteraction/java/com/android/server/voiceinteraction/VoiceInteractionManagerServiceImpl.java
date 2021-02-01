@@ -163,8 +163,13 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         mValid = true;
         mSessionComponentName = new ComponentName(service.getPackageName(),
                 mInfo.getSessionService());
-        // TODO : Need to get the hotword detection service from the xml metadata
-        mHotwordDetectionComponentName = null;
+        final String hotwordDetectionServiceName = mInfo.getHotwordDetectionService();
+        if (hotwordDetectionServiceName != null) {
+            mHotwordDetectionComponentName = new ComponentName(service.getPackageName(),
+                    hotwordDetectionServiceName);
+        } else {
+            mHotwordDetectionComponentName = null;
+        }
         mIWindowManager = IWindowManager.Stub.asInterface(
                 ServiceManager.getService(Context.WINDOW_SERVICE));
         IntentFilter filter = new IntentFilter();
@@ -388,7 +393,11 @@ class VoiceInteractionManagerServiceImpl implements VoiceInteractionSessionConne
         if (DEBUG) {
             Slog.d(TAG, "setHotwordDetectionConfigLocked");
         }
-
+        if (mHotwordDetectionComponentName == null) {
+            Slog.e(TAG, "Calling setHotwordDetectionConfigLocked, but hotword detection service"
+                    + " name not found");
+            return VoiceInteractionService.HOTWORD_CONFIG_FAILURE;
+        }
         if (!isIsolatedProcessLocked(mHotwordDetectionComponentName)) {
             return VoiceInteractionService.HOTWORD_CONFIG_FAILURE;
         }
