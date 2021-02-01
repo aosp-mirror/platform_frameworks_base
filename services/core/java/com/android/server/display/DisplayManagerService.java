@@ -181,8 +181,8 @@ public final class DisplayManagerService extends SystemService {
     private static final String FORCE_WIFI_DISPLAY_ENABLE = "persist.debug.wfd.enable";
 
     private static final String PROP_DEFAULT_DISPLAY_TOP_INSET = "persist.sys.displayinset.top";
-
     private static final long WAIT_FOR_DEFAULT_DISPLAY_TIMEOUT = 10000;
+    private static final float THRESHOLD_FOR_REFRESH_RATES_DIVIDERS = 0.1f;
 
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
     private static final int MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS = 2;
@@ -371,7 +371,7 @@ public final class DisplayManagerService extends SystemService {
 
     private final boolean mAllowNonNativeRefreshRateOverride;
 
-    private static final float THRESHOLD_FOR_REFRESH_RATES_DIVIDERS = 0.1f;
+    private final BrightnessSynchronizer mBrightnessSynchronizer;
 
     /**
      * Applications use {@link android.view.Display#getRefreshRate} and
@@ -408,6 +408,7 @@ public final class DisplayManagerService extends SystemService {
         mLogicalDisplayMapper = new LogicalDisplayMapper(context, mDisplayDeviceRepo,
                 new LogicalDisplayListener());
         mDisplayModeDirector = new DisplayModeDirector(context, mHandler);
+        mBrightnessSynchronizer = new BrightnessSynchronizer(mContext);
         Resources resources = mContext.getResources();
         mDefaultDisplayDefaultColorMode = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_defaultDisplayDefaultColorMode);
@@ -542,6 +543,7 @@ public final class DisplayManagerService extends SystemService {
         mHandler.sendEmptyMessage(MSG_REGISTER_ADDITIONAL_DISPLAY_ADAPTERS);
 
         mSettingsObserver = new SettingsObserver();
+        mBrightnessSynchronizer.startSynchronizing();
     }
 
     @VisibleForTesting
