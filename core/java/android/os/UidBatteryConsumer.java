@@ -98,8 +98,8 @@ public final class UidBatteryConsumer extends BatteryConsumer implements Parcela
         private boolean mSystemComponent;
 
         public Builder(int customPowerComponentCount, int customTimeComponentCount,
-                boolean includeModeledComponents, BatteryStats.Uid batteryStatsUid) {
-            super(customPowerComponentCount, customTimeComponentCount, includeModeledComponents);
+                BatteryStats.Uid batteryStatsUid) {
+            super(customPowerComponentCount, customTimeComponentCount);
             mBatteryStatsUid = batteryStatsUid;
             mUid = batteryStatsUid.getUid();
         }

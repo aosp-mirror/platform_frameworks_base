@@ -66,7 +66,7 @@ public class BatteryUsageStatsTest {
         final MockBatteryStatsImpl batteryStats = new MockBatteryStatsImpl(clocks);
         final BatteryStatsImpl.Uid batteryStatsUid = batteryStats.getUidStatsLocked(2000);
 
-        final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(1, 1, true);
+        final BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(1, 1);
         builder.setConsumedPower(100);
         builder.setDischargePercentage(20);
 
@@ -77,9 +77,6 @@ public class BatteryUsageStatsTest {
         uidBatteryConsumerBuilder.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 400);
         uidBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 500);
-        uidBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
-                BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                        + BatteryConsumer.POWER_COMPONENT_CPU, 510);
         uidBatteryConsumerBuilder.setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU, 600);
         uidBatteryConsumerBuilder.setUsageDurationMillis(
                 BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND, 700);
@@ -92,9 +89,6 @@ public class BatteryUsageStatsTest {
         systemBatteryConsumerBuilder.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 10100);
         systemBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200);
-        systemBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
-                BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                        + BatteryConsumer.POWER_COMPONENT_CPU, 10210);
         systemBatteryConsumerBuilder.setUsageDurationMillis(
                 BatteryConsumer.TIME_COMPONENT_CPU, 10300);
         systemBatteryConsumerBuilder.setUsageDurationForCustomComponentMillis(
@@ -118,9 +112,6 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(400);
                 assertThat(uidBatteryConsumer.getConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(500);
-                assertThat(uidBatteryConsumer.getConsumedPowerForCustomComponent(
-                        BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                                + BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(510);
                 assertThat(uidBatteryConsumer.getUsageDurationMillis(
                         BatteryConsumer.TIME_COMPONENT_CPU)).isEqualTo(600);
                 assertThat(uidBatteryConsumer.getUsageDurationMillis(
@@ -141,9 +132,6 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10100);
                 assertThat(systemBatteryConsumer.getConsumedPowerForCustomComponent(
                         BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID)).isEqualTo(10200);
-                assertThat(systemBatteryConsumer.getConsumedPowerForCustomComponent(
-                        BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                                + BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10210);
                 assertThat(systemBatteryConsumer.getUsageDurationMillis(
                         BatteryConsumer.TIME_COMPONENT_CPU)).isEqualTo(10300);
                 assertThat(systemBatteryConsumer.getUsageDurationForCustomComponentMillis(

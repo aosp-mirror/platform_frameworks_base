@@ -561,10 +561,10 @@ public final class BatteryStatsService extends IBatteryStats.Stub
      * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
      * and per-UID basis.
      */
-    public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
+    public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
         mContext.enforceCallingPermission(
                 android.Manifest.permission.BATTERY_STATS, null);
-        return mBatteryUsageStatsProvider.getBatteryUsageStats(query);
+        return mBatteryUsageStatsProvider.getBatteryUsageStats(queries);
     }
 
     public byte[] getStatistics() {

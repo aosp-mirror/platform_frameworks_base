@@ -114,7 +114,6 @@ public final class BatteryUsageStats implements Parcelable {
     public static final class Builder {
         private final int mCustomPowerComponentCount;
         private final int mCustomTimeComponentCount;
-        private final boolean mIncludeModeledComponents;
         private double mConsumedPower;
         private int mDischargePercentage;
         private final SparseArray<UidBatteryConsumer.Builder> mUidBatteryConsumerBuilders =
@@ -122,11 +121,9 @@ public final class BatteryUsageStats implements Parcelable {
         private final SparseArray<SystemBatteryConsumer.Builder> mSystemBatteryConsumerBuilders =
                 new SparseArray<>();
 
-        public Builder(int customPowerComponentCount, int customTimeComponentCount,
-                boolean includeModeledComponents) {
+        public Builder(int customPowerComponentCount, int customTimeComponentCount) {
             mCustomPowerComponentCount = customPowerComponentCount;
             mCustomTimeComponentCount = customTimeComponentCount;
-            mIncludeModeledComponents = includeModeledComponents;
         }
 
         /**
@@ -169,7 +166,7 @@ public final class BatteryUsageStats implements Parcelable {
             UidBatteryConsumer.Builder builder = mUidBatteryConsumerBuilders.get(uid);
             if (builder == null) {
                 builder = new UidBatteryConsumer.Builder(mCustomPowerComponentCount,
-                        mCustomTimeComponentCount, mIncludeModeledComponents, batteryStatsUid);
+                        mCustomTimeComponentCount, batteryStatsUid);
                 mUidBatteryConsumerBuilders.put(uid, builder);
             }
             return builder;
@@ -185,7 +182,7 @@ public final class BatteryUsageStats implements Parcelable {
             SystemBatteryConsumer.Builder builder = mSystemBatteryConsumerBuilders.get(drainType);
             if (builder == null) {
                 builder = new SystemBatteryConsumer.Builder(mCustomPowerComponentCount,
-                        mCustomTimeComponentCount, mIncludeModeledComponents, drainType);
+                        mCustomTimeComponentCount, drainType);
                 mSystemBatteryConsumerBuilders.put(drainType, builder);
             }
             return builder;
