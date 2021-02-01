@@ -12,9 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+package {
+    default_visibility: [":__subpackages__"],
+}
+
 mainline_stubs_args =
     "--error UnhiddenSystemApi " +
     "--hide BroadcastBehavior " +
+    "--hide CallbackInterface " +
     "--hide DeprecationMismatch " +
     "--hide HiddenSuperclass " +
     "--hide HiddenTypedefConstant " +
@@ -79,6 +84,10 @@ java_defaults {
     // entry.
     shared_library: false,
 
+    // Prevent dependencies that do not specify an sdk_version from accessing the
+    // implementation library by default and force them to use stubs instead.
+    default_to_stubs: true,
+
     // Enable api lint. This will eventually become the default for java_sdk_library
     // but it cannot yet be turned on because some usages have not been cleaned up.
     // TODO(b/156126315) - Remove when no longer needed.
@@ -92,6 +101,10 @@ java_defaults {
         sdk_version: "module_current",
     },
 
+    // installable implies we'll create a non-apex (platform) variant, which
+    // we shouldn't ordinarily need (and it can create issues), so disable that.
+    installable: false,
+
     // Configure framework module specific metalava options.
     droiddoc_options: [mainline_stubs_args],
 
@@ -102,7 +115,10 @@ java_defaults {
     stubs_library_visibility: ["//visibility:public"],
 
     // Hide impl library and stub sources
-    impl_library_visibility: [":__package__"],
+    impl_library_visibility: [
+        ":__pkg__",
+        "//frameworks/base", // For framework-all
+    ],
     stubs_source_visibility: ["//visibility:private"],
 
     defaults_visibility: ["//visibility:private"],
@@ -128,6 +144,13 @@ java_defaults {
         enabled: true,
         sdk_version: "module_current",
     },
+    defaults_visibility: [
+        ":__subpackages__",
+        "//frameworks/base/libs/hwui",
+        "//frameworks/base/wifi",
+        "//packages/modules:__subpackages__",
+        "//packages/providers/MediaProvider:__subpackages__",
+    ],
 }
 
 // Defaults for mainline module system server provided java_sdk_library instances.
@@ -139,6 +162,10 @@ java_defaults {
         enabled: true,
         sdk_version: "module_current",
     },
+    defaults_visibility: [
+        ":__subpackages__",
+        "//packages/modules:__subpackages__",
+    ],
 }
 
 stubs_defaults {
