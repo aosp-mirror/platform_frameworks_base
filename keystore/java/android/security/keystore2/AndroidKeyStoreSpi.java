@@ -490,7 +490,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             int[] keymasterEncryptionPaddings =
                     KeyProperties.EncryptionPadding.allToKeymaster(
                             spec.getEncryptionPaddings());
-            if (((spec.getPurposes() & KeyProperties.PURPOSE_DECRYPT) != 0)
+            if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
                     && (spec.isRandomizedEncryptionRequired())) {
                 for (int keymasterPadding : keymasterEncryptionPaddings) {
                     if (!KeymasterUtils
