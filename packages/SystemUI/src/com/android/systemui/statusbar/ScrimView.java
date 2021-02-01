@@ -26,25 +26,41 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.core.graphics.ColorUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.colorextraction.drawable.ScrimDrawable;
 
+import java.util.concurrent.Executor;
+
+
 /**
- * A view which can draw a scrim
+ * A view which can draw a scrim.  This view maybe be used in multiple windows running on different
+ * threads, but is controlled by {@link com.android.systemui.statusbar.phone.ScrimController} so we
+ * need to be careful to synchronize when necessary.
  */
 public class ScrimView extends View {
+    private final Object mColorLock = new Object();
+
+    @GuardedBy("mColorLock")
     private final ColorExtractor.GradientColors mColors;
+    // Used only for returning the colors
+    private final ColorExtractor.GradientColors mTmpColors = new ColorExtractor.GradientColors();
     private float mViewAlpha = 1.0f;
     private Drawable mDrawable;
     private PorterDuffColorFilter mColorFilter;
     private int mTintColor;
     private Runnable mChangeRunnable;
+    private Executor mChangeRunnableExecutor;
+    private Executor mExecutor;
+    private Looper mExecutorLooper;
 
     public ScrimView(Context context) {
         this(context, null);
@@ -64,7 +80,16 @@ public class ScrimView extends View {
         mDrawable = new ScrimDrawable();
         mDrawable.setCallback(this);
         mColors = new ColorExtractor.GradientColors();
-        updateColorWithTint(false);
+        mExecutorLooper = Looper.myLooper();
+        mExecutor = Runnable::run;
+        executeOnExecutor(() -> {
+            updateColorWithTint(false);
+        });
+    }
+
+    public void setExecutor(Executor executor, Looper looper) {
+        mExecutor = executor;
+        mExecutorLooper = looper;
     }
 
     @Override
@@ -75,11 +100,13 @@ public class ScrimView extends View {
     }
 
     public void setDrawable(Drawable drawable) {
-        mDrawable = drawable;
-        mDrawable.setCallback(this);
-        mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
-        mDrawable.setAlpha((int) (255 * mViewAlpha));
-        invalidate();
+        executeOnExecutor(() -> {
+            mDrawable = drawable;
+            mDrawable.setCallback(this);
+            mDrawable.setBounds(getLeft(), getTop(), getRight(), getBottom());
+            mDrawable.setAlpha((int) (255 * mViewAlpha));
+            invalidate();
+        });
     }
 
     @Override
@@ -99,6 +126,13 @@ public class ScrimView extends View {
         }
     }
 
+    @Override
+    public void setClickable(boolean clickable) {
+        executeOnExecutor(() -> {
+            super.setClickable(clickable);
+        });
+    }
+
     public void setColors(@NonNull ColorExtractor.GradientColors colors) {
         setColors(colors, false);
     }
@@ -107,11 +141,15 @@ public class ScrimView extends View {
         if (colors == null) {
             throw new IllegalArgumentException("Colors cannot be null");
         }
-        if (mColors.equals(colors)) {
-            return;
-        }
-        mColors.set(colors);
-        updateColorWithTint(animated);
+        executeOnExecutor(() -> {
+            synchronized(mColorLock) {
+                if (mColors.equals(colors)) {
+                    return;
+                }
+                mColors.set(colors);
+            }
+            updateColorWithTint(animated);
+        });
     }
 
     @VisibleForTesting
@@ -120,7 +158,10 @@ public class ScrimView extends View {
     }
 
     public ColorExtractor.GradientColors getColors() {
-        return mColors;
+        synchronized(mColorLock) {
+            mTmpColors.set(mColors);
+        }
+        return mTmpColors;
     }
 
     public void setTint(int color) {
@@ -128,11 +169,13 @@ public class ScrimView extends View {
     }
 
     public void setTint(int color, boolean animated) {
-        if (mTintColor == color) {
-            return;
-        }
-        mTintColor = color;
-        updateColorWithTint(animated);
+        executeOnExecutor(() -> {
+            if (mTintColor == color) {
+                return;
+            }
+            mTintColor = color;
+            updateColorWithTint(animated);
+        });
     }
 
     private void updateColorWithTint(boolean animated) {
@@ -160,7 +203,7 @@ public class ScrimView extends View {
         }
 
         if (mChangeRunnable != null) {
-            mChangeRunnable.run();
+            mChangeRunnableExecutor.execute(mChangeRunnable);
         }
     }
 
@@ -184,26 +227,37 @@ public class ScrimView extends View {
         if (isNaN(alpha)) {
             throw new IllegalArgumentException("alpha cannot be NaN: " + alpha);
         }
-        if (alpha != mViewAlpha) {
-            mViewAlpha = alpha;
+        executeOnExecutor(() -> {
+            if (alpha != mViewAlpha) {
+                mViewAlpha = alpha;
 
-            mDrawable.setAlpha((int) (255 * alpha));
-            if (mChangeRunnable != null) {
-                mChangeRunnable.run();
+                mDrawable.setAlpha((int) (255 * alpha));
+                if (mChangeRunnable != null) {
+                    mChangeRunnableExecutor.execute(mChangeRunnable);
+                }
             }
-        }
+        });
     }
 
     public float getViewAlpha() {
         return mViewAlpha;
     }
 
-    public void setChangeRunnable(Runnable changeRunnable) {
+    public void setChangeRunnable(Runnable changeRunnable, Executor changeRunnableExecutor) {
         mChangeRunnable = changeRunnable;
+        mChangeRunnableExecutor = changeRunnableExecutor;
     }
 
     @Override
     protected boolean canReceivePointerEvents() {
         return false;
+    }
+
+    private void executeOnExecutor(Runnable r) {
+        if (mExecutor == null || Looper.myLooper() == mExecutorLooper) {
+            r.run();
+        } else {
+            mExecutor.execute(r);
+        }
     }
 }

@@ -38,6 +38,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.service.notification.NotificationListenerService.RankingMap;
@@ -83,10 +84,14 @@ import com.android.wm.shell.bubbles.Bubbles;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
 import java.util.function.IntConsumer;
+import java.util.function.Supplier;
 
 /**
  * The SysUi side bubbles manager which communicate with other SysUi components.
@@ -106,8 +111,9 @@ public class BubblesManager implements Dumpable {
     private final NotificationGroupManagerLegacy mNotificationGroupManager;
     private final NotificationEntryManager mNotificationEntryManager;
     private final NotifPipeline mNotifPipeline;
+    private final Executor mSysuiMainExecutor;
 
-    private final ScrimView mBubbleScrim;
+    private ScrimView mBubbleScrim;
     private final Bubbles.SysuiProxy mSysuiProxy;
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
@@ -133,14 +139,15 @@ public class BubblesManager implements Dumpable {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            Executor sysuiMainExecutor) {
         if (bubblesOptional.isPresent()) {
             return new BubblesManager(context, bubblesOptional.get(),
                     notificationShadeWindowController, statusBarStateController, shadeController,
                     configurationController, statusBarService, notificationManager,
                     interruptionStateProvider, zenModeController, notifUserManager,
                     groupManager, entryManager, notifPipeline, sysUiState, featureFlags,
-                    dumpManager);
+                    dumpManager, sysuiMainExecutor);
         } else {
             return null;
         }
@@ -163,7 +170,8 @@ public class BubblesManager implements Dumpable {
             NotifPipeline notifPipeline,
             SysUiState sysUiState,
             FeatureFlags featureFlags,
-            DumpManager dumpManager) {
+            DumpManager dumpManager,
+            Executor sysuiMainExecutor) {
         mContext = context;
         mBubbles = bubbles;
         mNotificationShadeWindowController = notificationShadeWindowController;
@@ -173,6 +181,7 @@ public class BubblesManager implements Dumpable {
         mNotificationGroupManager = groupManager;
         mNotificationEntryManager = entryManager;
         mNotifPipeline = notifPipeline;
+        mSysuiMainExecutor = sysuiMainExecutor;
 
         mBarService = statusBarService == null
                 ? IStatusBarService.Stub.asInterface(
@@ -181,7 +190,9 @@ public class BubblesManager implements Dumpable {
 
         mBubbleScrim = new ScrimView(mContext);
         mBubbleScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        mBubbles.setBubbleScrim(mBubbleScrim);
+        mBubbles.setBubbleScrim(mBubbleScrim, (executor, looper) -> {
+            mBubbleScrim.setExecutor(executor, looper);
+        });
 
         if (featureFlags.isNewNotifPipelineRenderingEnabled()) {
             setupNotifPipeline();
@@ -237,128 +248,177 @@ public class BubblesManager implements Dumpable {
                 });
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
+            private <T> T executeBlockingForResult(Supplier<T> runnable, Executor executor,
+                    Class clazz) {
+                if (Looper.myLooper() == Looper.getMainLooper()) {
+                    return runnable.get();
+                }
+                final T[] result = (T[]) Array.newInstance(clazz, 1);
+                final CountDownLatch latch = new CountDownLatch(1);
+                executor.execute(() -> {
+                    result[0] = runnable.get();
+                    latch.countDown();
+                });
+                try {
+                    latch.await();
+                    return result[0];
+                } catch (InterruptedException e) {
+                    return null;
+                }
+            }
+
             @Override
             @Nullable
             public BubbleEntry getPendingOrActiveEntry(String key) {
-                NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(key);
-                return entry == null ? null : notifToBubbleEntry(entry);
+                return executeBlockingForResult(() -> {
+                    NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    return entry == null ? null : notifToBubbleEntry(entry);
+                }, sysuiMainExecutor, BubbleEntry.class);
             }
 
             @Override
             public List<BubbleEntry> getShouldRestoredEntries(ArraySet<String> savedBubbleKeys) {
-                List<BubbleEntry> result = new ArrayList<>();
-                List<NotificationEntry> activeEntries =
-                        mNotificationEntryManager.getActiveNotificationsForCurrentUser();
-                for (int i = 0; i < activeEntries.size(); i++) {
-                    NotificationEntry entry = activeEntries.get(i);
-                    if (savedBubbleKeys.contains(entry.getKey())
-                            && mNotificationInterruptStateProvider.shouldBubbleUp(entry)
-                            && entry.isBubble()) {
-                        result.add(notifToBubbleEntry(entry));
+                return executeBlockingForResult(() -> {
+                    List<BubbleEntry> result = new ArrayList<>();
+                    List<NotificationEntry> activeEntries =
+                            mNotificationEntryManager.getActiveNotificationsForCurrentUser();
+                    for (int i = 0; i < activeEntries.size(); i++) {
+                        NotificationEntry entry = activeEntries.get(i);
+                        if (savedBubbleKeys.contains(entry.getKey())
+                                && mNotificationInterruptStateProvider.shouldBubbleUp(entry)
+                                && entry.isBubble()) {
+                            result.add(notifToBubbleEntry(entry));
+                        }
                     }
-                }
-                return result;
+                    return result;
+                }, sysuiMainExecutor, List.class);
             }
 
             @Override
             public boolean isNotificationShadeExpand() {
-                return mNotificationShadeWindowController.getPanelExpanded();
+                return executeBlockingForResult(() -> {
+                    return mNotificationShadeWindowController.getPanelExpanded();
+                }, sysuiMainExecutor, Boolean.class);
             }
 
             @Override
             public boolean shouldBubbleUp(String key) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null) {
-                    return mNotificationInterruptStateProvider.shouldBubbleUp(entry);
-                }
-                return false;
+                return executeBlockingForResult(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null) {
+                        return mNotificationInterruptStateProvider.shouldBubbleUp(entry);
+                    }
+                    return false;
+                }, sysuiMainExecutor, Boolean.class);
             }
 
             @Override
             public void setNotificationInterruption(String key) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null && entry.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
-                    entry.setInterruption();
-                }
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null
+                            && entry.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
+                        entry.setInterruption();
+                    }
+                });
             }
 
             @Override
             public void requestNotificationShadeTopUi(boolean requestTopUi, String componentTag) {
-                mNotificationShadeWindowController.setRequestTopUi(requestTopUi, componentTag);
+                sysuiMainExecutor.execute(() -> {
+                    mNotificationShadeWindowController.setRequestTopUi(requestTopUi, componentTag);
+                });
             }
 
             @Override
             public void notifyRemoveNotification(String key, int reason) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null) {
-                    for (NotifCallback cb : mCallbacks) {
-                        cb.removeNotification(entry, getDismissedByUserStats(entry, true), reason);
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null) {
+                        for (NotifCallback cb : mCallbacks) {
+                            cb.removeNotification(entry, getDismissedByUserStats(entry, true),
+                                    reason);
+                        }
                     }
-                }
+                });
             }
 
             @Override
             public void notifyInvalidateNotifications(String reason) {
-                for (NotifCallback cb : mCallbacks) {
-                    cb.invalidateNotifications(reason);
-                }
+                sysuiMainExecutor.execute(() -> {
+                    for (NotifCallback cb : mCallbacks) {
+                        cb.invalidateNotifications(reason);
+                    }
+                });
             }
 
             @Override
             public void notifyMaybeCancelSummary(String key) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null) {
-                    for (NotifCallback cb : mCallbacks) {
-                        cb.maybeCancelSummary(entry);
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null) {
+                        for (NotifCallback cb : mCallbacks) {
+                            cb.maybeCancelSummary(entry);
+                        }
                     }
-                }
+                });
             }
 
             @Override
             public void removeNotificationEntry(String key) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null) {
-                    mNotificationGroupManager.onEntryRemoved(entry);
-                }
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null) {
+                        mNotificationGroupManager.onEntryRemoved(entry);
+                    }
+                });
             }
 
             @Override
             public void updateNotificationBubbleButton(String key) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null && entry.getRow() != null) {
-                    entry.getRow().updateBubbleButton();
-                }
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null && entry.getRow() != null) {
+                        entry.getRow().updateBubbleButton();
+                    }
+                });
             }
 
             @Override
             public void updateNotificationSuppression(String key) {
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        key);
-                if (entry != null) {
-                    mNotificationGroupManager.updateSuppression(entry);
-                }
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null) {
+                        mNotificationGroupManager.updateSuppression(entry);
+                    }
+                });
             }
 
             @Override
             public void onStackExpandChanged(boolean shouldExpand) {
-                sysUiState
-                        .setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
-                        .commitUpdate(mContext.getDisplayId());
+                sysuiMainExecutor.execute(() -> {
+                    sysUiState.setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
+                            .commitUpdate(mContext.getDisplayId());
+                });
             }
 
             @Override
             public void onUnbubbleConversation(String key) {
-                final NotificationEntry entry =
-                        mNotificationEntryManager.getPendingOrActiveNotif(key);
-                if (entry != null) {
-                    onUserChangedBubble(entry, false /* shouldBubble */);
-                }
+                sysuiMainExecutor.execute(() -> {
+                    final NotificationEntry entry =
+                            mNotificationEntryManager.getPendingOrActiveNotif(key);
+                    if (entry != null) {
+                        onUserChangedBubble(entry, false /* shouldBubble */);
+                    }
+                });
             }
         };
         mBubbles.setSysuiProxy(mSysuiProxy);
@@ -424,9 +484,8 @@ public class BubblesManager implements Dumpable {
                         final String groupKey = group.summary != null
                                 ? group.summary.getSbn().getGroupKey()
                                 : null;
-                        if (!suppressed && groupKey != null
-                                && mBubbles.isSummarySuppressed(groupKey)) {
-                            mBubbles.removeSuppressedSummary(groupKey);
+                        if (!suppressed && groupKey != null) {
+                            mBubbles.removeSuppressedSummaryIfNecessary(groupKey, null, null);
                         }
                     }
                 });
@@ -449,19 +508,16 @@ public class BubblesManager implements Dumpable {
                 // Check if removed bubble has an associated suppressed group summary that needs
                 // to be removed now.
                 final String groupKey = entry.getSbn().getGroupKey();
-                if (mBubbles.isSummarySuppressed(groupKey)) {
-                    mBubbles.removeSuppressedSummary(groupKey);
-
+                mBubbles.removeSuppressedSummaryIfNecessary(groupKey, (summaryKey) -> {
                     final NotificationEntry summary =
-                            mNotificationEntryManager.getActiveNotificationUnfiltered(
-                                    mBubbles.getSummaryKey(groupKey));
+                            mNotificationEntryManager.getActiveNotificationUnfiltered(summaryKey);
                     if (summary != null) {
                         mNotificationEntryManager.performRemoveNotification(
                                 summary.getSbn(),
                                 getDismissedByUserStats(summary, false),
                                 UNDEFINED_DISMISS_REASON);
                     }
-                }
+                }, mSysuiMainExecutor);
 
                 // Check if we still need to remove the summary from NoManGroup because the summary
                 // may not be in the mBubbleData.mSuppressedGroupKeys list and removed above.

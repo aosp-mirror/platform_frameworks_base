@@ -49,10 +49,11 @@ public class TestableBubbleController extends BubbleController {
             BubbleLogger bubbleLogger,
             ShellTaskOrganizer shellTaskOrganizer,
             BubblePositioner positioner,
-            ShellExecutor shellMainExecutor) {
+            ShellExecutor shellMainExecutor,
+            Handler shellMainHandler) {
         super(context, data, Runnable::run, floatingContentCoordinator, dataRepository,
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                bubbleLogger, shellTaskOrganizer, positioner, shellMainExecutor);
+                bubbleLogger, shellTaskOrganizer, positioner, shellMainExecutor, shellMainHandler);
         setInflateSynchronously(true);
     }
 }

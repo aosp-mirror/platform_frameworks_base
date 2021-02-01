@@ -331,6 +331,7 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract AppPairs optionalAppPairs();
 
+    // Note: Handler needed for LauncherApps.register
     @WMSingleton
     @Provides
     static Optional<Bubbles> provideBubbles(Context context,
@@ -341,11 +342,12 @@ public abstract class WMShellBaseModule {
             LauncherApps launcherApps,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, uiEventLogger, organizer,
-                mainExecutor));
+                mainExecutor, mainHandler));
     }
 
     // Needs the shell main handler for ContentObserver callbacks
