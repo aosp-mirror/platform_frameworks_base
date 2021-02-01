@@ -47,17 +47,17 @@ public class PipTouchStateTest extends ShellTestCase {
     private PipTouchState mTouchState;
     private CountDownLatch mDoubleTapCallbackTriggeredLatch;
     private CountDownLatch mHoverExitCallbackTriggeredLatch;
-    private TestShellExecutor mShellMainExecutor;
+    private TestShellExecutor mMainExecutor;
 
     @Before
     public void setUp() throws Exception {
-        mShellMainExecutor = new TestShellExecutor();
+        mMainExecutor = new TestShellExecutor();
         mDoubleTapCallbackTriggeredLatch = new CountDownLatch(1);
         mHoverExitCallbackTriggeredLatch = new CountDownLatch(1);
         mTouchState = new PipTouchState(ViewConfiguration.get(getContext()),
                 mDoubleTapCallbackTriggeredLatch::countDown,
                 mHoverExitCallbackTriggeredLatch::countDown,
-                mShellMainExecutor);
+                mMainExecutor);
         assertFalse(mTouchState.isDoubleTap());
         assertFalse(mTouchState.isWaitingForDoubleTap());
     }
@@ -87,7 +87,7 @@ public class PipTouchStateTest extends ShellTestCase {
         assertTrue(mTouchState.getDoubleTapTimeoutCallbackDelay() == 10);
         mTouchState.scheduleDoubleTapTimeoutCallback();
 
-        mShellMainExecutor.flushAll();
+        mMainExecutor.flushAll();
         assertTrue(mDoubleTapCallbackTriggeredLatch.getCount() == 0);
     }
 
@@ -122,7 +122,7 @@ public class PipTouchStateTest extends ShellTestCase {
     @Test
     public void testHoverExitTimeout_timeoutCallbackCalled() throws Exception {
         mTouchState.scheduleHoverExitTimeoutCallback();
-        mShellMainExecutor.flushAll();
+        mMainExecutor.flushAll();
         assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 0);
     }
 
@@ -137,7 +137,7 @@ public class PipTouchStateTest extends ShellTestCase {
         mTouchState.scheduleHoverExitTimeoutCallback();
         mTouchState.onTouchEvent(createMotionEvent(ACTION_BUTTON_PRESS, SystemClock.uptimeMillis(),
                 0, 0));
-        mShellMainExecutor.flushAll();
+        mMainExecutor.flushAll();
         assertTrue(mHoverExitCallbackTriggeredLatch.getCount() == 1);
     }
 
