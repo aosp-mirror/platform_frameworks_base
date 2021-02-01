@@ -380,6 +380,10 @@ public class ConnectivityServiceTest {
     private QosCallbackMockHelper mQosCallbackMockHelper;
     private QosCallbackTracker mQosCallbackTracker;
 
+    // State variables required to emulate NetworkPolicyManagerService behaviour.
+    private int mUidRules = RULE_NONE;
+    private boolean mRestrictBackground = false;
+
     @Mock DeviceIdleInternal mDeviceIdleInternal;
     @Mock INetworkManagementService mNetworkManagementService;
     @Mock INetworkStatsService mStatsService;
@@ -1277,12 +1281,45 @@ public class ConnectivityServiceTest {
         }
     }
 
+    private void updateUidNetworkingBlocked() {
+        // Changes the return value of the mock NetworkPolicyManager's isUidNetworkingBlocked method
+        // based on the current UID rules and restrict background setting. Note that the test never
+        // pretends to be a foreground app, so always declare no connectivity if background
+        // networking is not allowed.
+        switch (mUidRules) {
+            case RULE_REJECT_ALL:
+                when(mNetworkPolicyManager.isUidNetworkingBlocked(anyInt(), anyBoolean()))
+                        .thenReturn(true);
+                break;
+
+            case RULE_REJECT_METERED:
+                when(mNetworkPolicyManager.isUidNetworkingBlocked(anyInt(), eq(true)))
+                        .thenReturn(true);
+                when(mNetworkPolicyManager.isUidNetworkingBlocked(anyInt(), eq(false)))
+                        .thenReturn(mRestrictBackground);
+                break;
+
+            case RULE_ALLOW_METERED:
+            case RULE_NONE:
+                when(mNetworkPolicyManager.isUidNetworkingBlocked(anyInt(), anyBoolean()))
+                        .thenReturn(mRestrictBackground);
+                break;
+
+            default:
+                fail("Unknown policy rule " + mUidRules);
+        }
+    }
+
     private void setUidRulesChanged(int uidRules) throws RemoteException {
-        mPolicyListener.onUidRulesChanged(Process.myUid(), uidRules);
+        mUidRules = uidRules;
+        updateUidNetworkingBlocked();
+        mPolicyListener.onUidRulesChanged(Process.myUid(), mUidRules);
     }
 
     private void setRestrictBackgroundChanged(boolean restrictBackground) throws RemoteException {
-        mPolicyListener.onRestrictBackgroundChanged(restrictBackground);
+        mRestrictBackground = restrictBackground;
+        updateUidNetworkingBlocked();
+        mPolicyListener.onRestrictBackgroundChanged(mRestrictBackground);
     }
 
     private Nat464Xlat getNat464Xlat(NetworkAgentWrapper mna) {
@@ -6839,9 +6876,15 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
         mCellNetworkAgent.connect(true);
         cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
 
         setUidRulesChanged(RULE_REJECT_ALL);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        assertNull(mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
 
         // ConnectivityService should cache it not to invoke the callback again.
         setUidRulesChanged(RULE_REJECT_METERED);
@@ -6849,20 +6892,37 @@ public class ConnectivityServiceTest {
 
         setUidRulesChanged(RULE_NONE);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
 
         setUidRulesChanged(RULE_REJECT_METERED);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        assertNull(mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
 
         // Restrict the network based on UID rule and NOT_METERED capability change.
         mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
         cellNetworkCallback.expectCapabilitiesWith(NET_CAPABILITY_NOT_METERED, mCellNetworkAgent);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+
         mCellNetworkAgent.removeCapability(NET_CAPABILITY_NOT_METERED);
         cellNetworkCallback.expectCapabilitiesWithout(NET_CAPABILITY_NOT_METERED,
                 mCellNetworkAgent);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        assertEquals(null, mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+
         setUidRulesChanged(RULE_ALLOW_METERED);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
 
         setUidRulesChanged(RULE_NONE);
         cellNetworkCallback.assertNoCallback();
@@ -6870,11 +6930,18 @@ public class ConnectivityServiceTest {
         // Restrict the network based on BackgroundRestricted.
         setRestrictBackgroundChanged(true);
         cellNetworkCallback.expectBlockedStatusCallback(true, mCellNetworkAgent);
+        assertEquals(null, mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.BLOCKED);
+
         setRestrictBackgroundChanged(true);
         cellNetworkCallback.assertNoCallback();
         setRestrictBackgroundChanged(false);
         cellNetworkCallback.expectBlockedStatusCallback(false, mCellNetworkAgent);
         cellNetworkCallback.assertNoCallback();
+        assertEquals(mCellNetworkAgent.getNetwork(), mCm.getActiveNetwork());
+        assertActiveNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
+        assertNetworkInfo(TYPE_MOBILE, DetailedState.CONNECTED);
 
         mCm.unregisterNetworkCallback(cellNetworkCallback);
     }
