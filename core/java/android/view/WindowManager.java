@@ -93,6 +93,7 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -2844,6 +2845,16 @@ public interface WindowManager extends ViewManager {
         public IBinder token = null;
 
         /**
+         * The token of {@link android.app.WindowContext}. It is usually a
+         * {@link android.app.WindowTokenClient} and is used for updating
+         * {@link android.content.res.Resources} from {@link Configuration} propagated from the
+         * server side.
+         *
+         * @hide
+         */
+        public IBinder mWindowContextToken = null;
+
+        /**
          * Name of the package owning this window.
          */
         public String packageName = null;
@@ -3315,8 +3326,8 @@ public interface WindowManager extends ViewManager {
         /**
          * Specifies types of insets that this window should avoid overlapping during layout.
          *
-         * @param types which types of insets that this window should avoid. The initial value of
-         *              this object includes all system bars.
+         * @param types which {@link WindowInsets.Type}s of insets that this window should avoid.
+         *              The initial value of this object includes all system bars.
          */
         public void setFitInsetsTypes(@InsetsType int types) {
             mFitInsetsTypes = types;
@@ -3390,7 +3401,7 @@ public interface WindowManager extends ViewManager {
         }
 
         /**
-         * @return the insets types that this window is avoiding overlapping.
+         * @return the {@link WindowInsets.Type}s that this window is avoiding overlapping.
          */
         public @InsetsType int getFitInsetsTypes() {
             return mFitInsetsTypes;
@@ -3552,6 +3563,7 @@ public interface WindowManager extends ViewManager {
             out.writeFloat(buttonBrightness);
             out.writeInt(rotationAnimation);
             out.writeStrongBinder(token);
+            out.writeStrongBinder(mWindowContextToken);
             out.writeString(packageName);
             TextUtils.writeToParcel(mTitle, out, parcelableFlags);
             out.writeInt(screenOrientation);
@@ -3620,6 +3632,7 @@ public interface WindowManager extends ViewManager {
             buttonBrightness = in.readFloat();
             rotationAnimation = in.readInt();
             token = in.readStrongBinder();
+            mWindowContextToken = in.readStrongBinder();
             packageName = in.readString();
             mTitle = TextUtils.CHAR_SEQUENCE_CREATOR.createFromParcel(in);
             screenOrientation = in.readInt();
@@ -3780,6 +3793,11 @@ public interface WindowManager extends ViewManager {
                 // NOTE: token only copied if the recipient doesn't
                 // already have one.
                 token = o.token;
+            }
+            if (mWindowContextToken == null) {
+                // NOTE: token only copied if the recipient doesn't
+                // already have one.
+                mWindowContextToken = o.mWindowContextToken;
             }
             if (packageName == null) {
                 // NOTE: packageName only copied if the recipient doesn't

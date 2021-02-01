@@ -23,6 +23,7 @@ import android.annotation.SystemApi;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioAttributes;
@@ -131,6 +132,7 @@ public final class MediaSession {
     public @interface SessionFlags { }
 
     private final Object mLock = new Object();
+    private Context mContext;
     private final int mMaxBitmapSize;
 
     private final Token mSessionToken;
@@ -194,6 +196,7 @@ public final class MediaSession {
                     + "parcelables");
         }
 
+        mContext = context;
         mMaxBitmapSize = context.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.config_mediaMetadataBitmapMaxSize);
         mCbStub = new CallbackStub(this);
@@ -277,12 +280,41 @@ public final class MediaSession {
      *
      * @param mbr The {@link PendingIntent} to send the media button event to.
      * @see PendingIntent#getActivity
+     *
+     * @deprecated Use {@link #setMediaButtonBroadcastReceiver(ComponentName)} instead.
      */
+    @Deprecated
     public void setMediaButtonReceiver(@Nullable PendingIntent mbr) {
         try {
             mBinder.setMediaButtonReceiver(mbr);
         } catch (RemoteException e) {
             Log.wtf(TAG, "Failure in setMediaButtonReceiver.", e);
+        }
+    }
+
+    /**
+     * Set the component name of the manifest-declared {@link android.content.BroadcastReceiver}
+     * class that should receive media buttons. This allows restarting playback after the session
+     * has been stopped. If your app is started in this way an {@link Intent#ACTION_MEDIA_BUTTON}
+     * intent will be sent to the broadcast receiver.
+     * <p>
+     * Note: The given {@link android.content.BroadcastReceiver} should belong to the same package
+     * as the context that was given when creating {@link MediaSession}.
+     *
+     * @param broadcastReceiver the component name of the BroadcastReceiver class
+     */
+    public void setMediaButtonBroadcastReceiver(@Nullable ComponentName broadcastReceiver) {
+        try {
+            if (broadcastReceiver != null) {
+                if (!TextUtils.equals(broadcastReceiver.getPackageName(),
+                        mContext.getPackageName())) {
+                    throw new IllegalArgumentException("broadcastReceiver should belong to the same"
+                            + " package as the context given when creating MediaSession.");
+                }
+            }
+            mBinder.setMediaButtonBroadcastReceiver(broadcastReceiver);
+        } catch (RemoteException e) {
+            Log.wtf(TAG, "Failure in setMediaButtonBroadcastReceiver.", e);
         }
     }
 

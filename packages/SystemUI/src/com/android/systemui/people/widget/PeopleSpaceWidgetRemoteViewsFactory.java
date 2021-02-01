@@ -18,7 +18,7 @@ package com.android.systemui.people.widget;
 
 import android.app.INotificationManager;
 import android.app.people.IPeopleManager;
-import com.android.systemui.people.PeopleSpaceTile;
+import android.app.people.PeopleSpaceTile;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;

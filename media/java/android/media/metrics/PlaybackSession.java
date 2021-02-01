@@ -24,11 +24,11 @@ import com.android.internal.util.AnnotationValidations;
 import java.util.Objects;
 
 /**
- * @hide
+ * An instances of this class represents a session of media playback.
  */
 public final class PlaybackSession implements AutoCloseable {
     private final @NonNull String mId;
-    private final @NonNull PlaybackMetricsManager mManager;
+    private final @NonNull MediaMetricsManager mManager;
     private boolean mClosed = false;
 
     /**
@@ -36,7 +36,7 @@ public final class PlaybackSession implements AutoCloseable {
      *
      * @hide
      */
-    public PlaybackSession(@NonNull String id, @NonNull PlaybackMetricsManager manager) {
+    public PlaybackSession(@NonNull String id, @NonNull MediaMetricsManager manager) {
         mId = id;
         mManager = manager;
         AnnotationValidations.validate(NonNull.class, null, mId);
@@ -45,6 +45,7 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports playback metrics.
+     * @hide
      */
     public void reportPlaybackMetrics(@NonNull PlaybackMetrics metrics) {
         mManager.reportPlaybackMetrics(mId, metrics);
@@ -52,6 +53,7 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports error event.
+     * @hide
      */
     public void reportPlaybackErrorEvent(PlaybackErrorEvent event) {
         mManager.reportPlaybackErrorEvent(mId, event);
@@ -59,6 +61,7 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports network event.
+     * @hide
      */
     public void reportNetworkEvent(NetworkEvent event) {
         mManager.reportNetworkEvent(mId, event);
@@ -66,6 +69,7 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports playback state event.
+     * @hide
      */
     public void reportPlaybackStateEvent(PlaybackStateEvent event) {
         mManager.reportPlaybackStateEvent(mId, event);
@@ -73,6 +77,7 @@ public final class PlaybackSession implements AutoCloseable {
 
     /**
      * Reports track change event.
+     * @hide
      */
     public void reportTrackChangeEvent(TrackChangeEvent event) {
         mManager.reportTrackChangeEvent(mId, event);
@@ -96,7 +101,7 @@ public final class PlaybackSession implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         mClosed = true;
     }
 }

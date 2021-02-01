@@ -33,7 +33,10 @@ import android.view.translation.UiTranslationManager.UiTranslationState;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.SyncResultReceiver;
+import com.android.server.LocalServices;
 import com.android.server.infra.AbstractPerUserSystemService;
+import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal.ActivityTokens;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,11 +54,14 @@ final class TranslationManagerServiceImpl extends
     @Nullable
     private ServiceInfo mRemoteTranslationServiceInfo;
 
+    private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+
     protected TranslationManagerServiceImpl(
             @NonNull TranslationManagerService master,
             @NonNull Object lock, int userId, boolean disabled) {
         super(master, lock, userId);
         updateRemoteServiceLocked();
+        mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
     }
 
     @GuardedBy("mLock")
@@ -130,6 +136,20 @@ final class TranslationManagerServiceImpl extends
     public void updateUiTranslationState(@UiTranslationState int state,
             TranslationSpec sourceSpec, TranslationSpec destSpec, List<AutofillId> viewIds,
             int taskId) {
-        // TODO: implement this in next change
+        // TODO(b/177394471): use taskId as a temporary solution. The solution may use a token to
+        //  content capture manager service find the activitytoken. Then we can use this
+        //  activitytoken to find the activity to callback. But we need to change cc API so use
+        //  temporary solution.
+        final ActivityTokens tokens = mActivityTaskManagerInternal.getTopActivityForTask(taskId);
+        if (tokens == null) {
+            Slog.w(TAG, "Unknown activity to query for update translation state.");
+            return;
+        }
+        try {
+            tokens.getApplicationThread().updateUiTranslationState(tokens.getActivityToken(), state,
+                    sourceSpec, destSpec, viewIds);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Update UiTranslationState fail: " + e);
+        }
     }
 }

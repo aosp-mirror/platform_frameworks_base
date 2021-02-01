@@ -79,7 +79,7 @@ public class FontFallbackSetup implements AutoCloseable {
 
         FontConfig fontConfig;
         try {
-            fontConfig = FontListParser.parse(testFontsXml, mTestFontsDir, null, null, null);
+            fontConfig = FontListParser.parse(testFontsXml, mTestFontsDir, null, null, null, 0, 0);
         } catch (IOException | XmlPullParserException e) {
             throw new RuntimeException(e);
         }

@@ -17,7 +17,9 @@
 package android.service.voice;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SuppressLint;
@@ -45,6 +47,8 @@ import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -67,6 +71,32 @@ import java.util.Set;
  */
 public class VoiceInteractionService extends Service {
     static final String TAG = VoiceInteractionService.class.getSimpleName();
+
+    /**
+     * Indicates that the given configs have been set successfully after calling
+     * {@link VoiceInteractionService#setHotwordDetectionConfig}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HOTWORD_CONFIG_SUCCESS = 0;
+
+    /**
+     * Indicates that the given configs have been set unsuccessfully after calling
+     * {@link VoiceInteractionService#setHotwordDetectionConfig}.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final int HOTWORD_CONFIG_FAILURE = 1;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "HOTWORD_CONFIG_" }, value = {
+            HOTWORD_CONFIG_SUCCESS,
+            HOTWORD_CONFIG_FAILURE,
+    })
+    public @interface HotwordConfigResult {}
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -300,6 +330,34 @@ public class VoiceInteractionService extends Service {
     }
 
     /**
+     * Set hotword detection configuration.
+     *
+     * Note: Currently it will trigger hotword detection service after calling this function when
+     * all conditions meet the requirements.
+     *
+     * @param options Config data.
+     * @return {@link VoiceInteractionService#HOTWORD_CONFIG_SUCCESS} in case of success,
+     * {@link VoiceInteractionService#HOTWORD_CONFIG_FAILURE} in case of failure.
+     *
+     * @throws IllegalStateException if the function is called before onReady() is called.
+     *
+     * @hide
+     */
+    @SystemApi
+    @HotwordConfigResult
+    public final int setHotwordDetectionConfig(@Nullable Bundle options) {
+        if (mSystemService == null) {
+            throw new IllegalStateException("Not available until onReady() is called");
+        }
+
+        try {
+            return mSystemService.setHotwordDetectionConfig(options);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Creates an {@link AlwaysOnHotwordDetector} for the given keyphrase and locale.
      * This instance must be retained and used by the client.
      * Calling this a second time invalidates the previously created hotword detector
@@ -373,6 +431,7 @@ public class VoiceInteractionService extends Service {
     }
 
     private void safelyShutdownHotwordDetector() {
+        // TODO (b/178171906): Need to check if the HotwordDetectionService should be unbound.
         synchronized (mLock) {
             if (mHotwordDetector == null) {
                 return;

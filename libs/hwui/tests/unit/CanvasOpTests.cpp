@@ -474,6 +474,7 @@ TEST(CanvasOp, simpleDrawImage) {
             bitmap,
             7,
             19,
+            SkFilterMode::kNearest,
             SkPaint{}
         }
     );
@@ -496,7 +497,7 @@ TEST(CanvasOp, simpleDrawImageRect) {
     buffer.push<Op::DrawImageRect> ({
           bitmap, SkRect::MakeWH(100, 100),
           SkRect::MakeLTRB(120, 110, 220, 210),
-          SkPaint{}
+          SkFilterMode::kNearest, SkPaint{}
         }
     );
 
@@ -528,6 +529,7 @@ TEST(CanvasOp, simpleDrawImageLattice) {
             bitmap,
             SkRect::MakeWH(5, 1),
             lattice,
+            SkFilterMode::kNearest,
             SkPaint{}
         }
     );

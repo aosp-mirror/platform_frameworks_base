@@ -144,8 +144,9 @@ public:
         }
     }
     Control openMount(std::string_view path) const final { return incfs::open(path); }
-    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs) const final {
-        return incfs::createControl(cmd, pendingReads, logs);
+    Control createControl(IncFsFd cmd, IncFsFd pendingReads, IncFsFd logs,
+                          IncFsFd blocksWritten) const final {
+        return incfs::createControl(cmd, pendingReads, logs, blocksWritten);
     }
     ErrorCode makeFile(const Control& control, std::string_view path, int mode, FileId id,
                        incfs::NewFileParams params) const final {
@@ -209,7 +210,22 @@ public:
     ErrorCode setUidReadTimeouts(const Control& control,
                                  const std::vector<android::os::incremental::PerUidReadTimeouts>&
                                          perUidReadTimeouts) const final {
-        return -ENOTSUP;
+        std::vector<incfs::UidReadTimeouts> timeouts;
+        timeouts.resize(perUidReadTimeouts.size());
+        for (int i = 0, size = perUidReadTimeouts.size(); i < size; ++i) {
+            auto&& timeout = timeouts[i];
+            const auto& perUidTimeout = perUidReadTimeouts[i];
+            timeout.uid = perUidTimeout.uid;
+            timeout.minTimeUs = perUidTimeout.minTimeUs;
+            timeout.minPendingTimeUs = perUidTimeout.minPendingTimeUs;
+            timeout.maxPendingTimeUs = perUidTimeout.maxPendingTimeUs;
+        }
+
+        LOG(ERROR) << "Set read timeouts: " << timeouts.size() << " ["
+                   << (timeouts.empty() ? -1 : timeouts.front().uid) << "@"
+                   << (timeouts.empty() ? -1 : timeouts.front().minTimeUs / 1000) << "ms]";
+
+        return incfs::setUidReadTimeouts(control, timeouts);
     }
 };
 

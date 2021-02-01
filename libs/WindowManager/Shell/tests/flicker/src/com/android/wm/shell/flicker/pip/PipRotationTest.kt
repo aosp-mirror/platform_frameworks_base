@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -48,13 +49,15 @@ import org.junit.runners.Parameterized
  * Test Pip Stack in bounds after rotations.
  * To run this test: `atest WMShellFlickerTests:PipRotationTest`
  */
+@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class PipRotationTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -72,7 +75,7 @@ class PipRotationTest(
                                 AppTestBase.removeAllTasksButHome()
                                 device.wakeUpAndGoToHomeScreen()
                                 pipApp.launchViaIntent(stringExtras = mapOf(
-                                        EXTRA_ENTER_PIP to "true"))
+                                    EXTRA_ENTER_PIP to "true"))
                                 testApp.launchViaIntent()
                                 AppTestBase.waitForAnimationComplete()
                             }
@@ -100,22 +103,22 @@ class PipRotationTest(
                                 navBarLayerIsAlwaysVisible(bugId = 140855415)
                                 statusBarLayerIsAlwaysVisible(bugId = 140855415)
                                 noUncoveredRegions(configuration.startRotation,
-                                        configuration.endRotation, allStates = false)
+                                    configuration.endRotation, allStates = false)
                                 navBarLayerRotatesAndScales(configuration.startRotation,
-                                        configuration.endRotation)
+                                    configuration.endRotation, bugId = 140855415)
                                 statusBarLayerRotatesScales(configuration.startRotation,
-                                        configuration.endRotation)
+                                    configuration.endRotation, bugId = 140855415)
                             }
                             layersTrace {
                                 val startingBounds = WindowUtils.getDisplayBounds(
-                                        configuration.startRotation)
+                                    configuration.startRotation)
                                 val endingBounds = WindowUtils.getDisplayBounds(
-                                        configuration.endRotation)
-                                start("appLayerRotates_StartingBounds") {
+                                    configuration.endRotation)
+                                start("appLayerRotates_StartingBounds", bugId = 140855415) {
                                     hasVisibleRegion(testApp.defaultWindowName, startingBounds)
                                     coversAtMostRegion(startingBounds, pipApp.defaultWindowName)
                                 }
-                                end("appLayerRotates_EndingBounds") {
+                                end("appLayerRotates_EndingBounds", bugId = 140855415) {
                                     hasVisibleRegion(testApp.defaultWindowName, endingBounds)
                                     coversAtMostRegion(endingBounds, pipApp.defaultWindowName)
                                 }

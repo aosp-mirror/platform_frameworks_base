@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.EventLogAssertion
-import com.android.server.wm.flicker.dsl.LayersAssertion
-import com.android.server.wm.flicker.dsl.WmAssertion
+import com.android.server.wm.flicker.dsl.EventLogAssertionBuilder
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
+import com.android.server.wm.flicker.dsl.WmAssertionBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 
 const val NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar"
@@ -28,7 +28,7 @@ const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
 const val WALLPAPER_TITLE = "Wallpaper"
 
 @JvmOverloads
-fun WmAssertion.statusBarWindowIsAlwaysVisible(
+fun WmAssertionBuilder.statusBarWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -38,7 +38,7 @@ fun WmAssertion.statusBarWindowIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun WmAssertion.navBarWindowIsAlwaysVisible(
+fun WmAssertionBuilder.navBarWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -47,7 +47,7 @@ fun WmAssertion.navBarWindowIsAlwaysVisible(
     }
 }
 
-fun WmAssertion.visibleWindowsShownMoreThanOneConsecutiveEntry(
+fun WmAssertionBuilder.visibleWindowsShownMoreThanOneConsecutiveEntry(
     ignoreWindows: List<String> = emptyList(),
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -57,7 +57,7 @@ fun WmAssertion.visibleWindowsShownMoreThanOneConsecutiveEntry(
     }
 }
 
-fun WmAssertion.launcherReplacesAppWindowAsTopWindow(
+fun WmAssertionBuilder.launcherReplacesAppWindowAsTopWindow(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -69,7 +69,7 @@ fun WmAssertion.launcherReplacesAppWindowAsTopWindow(
     }
 }
 
-fun WmAssertion.wallpaperWindowBecomesVisible(
+fun WmAssertionBuilder.wallpaperWindowBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -80,7 +80,7 @@ fun WmAssertion.wallpaperWindowBecomesVisible(
     }
 }
 
-fun WmAssertion.wallpaperWindowBecomesInvisible(
+fun WmAssertionBuilder.wallpaperWindowBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -91,7 +91,7 @@ fun WmAssertion.wallpaperWindowBecomesInvisible(
     }
 }
 
-fun WmAssertion.appWindowAlwaysVisibleOnTop(
+fun WmAssertionBuilder.appWindowAlwaysVisibleOnTop(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -101,7 +101,7 @@ fun WmAssertion.appWindowAlwaysVisibleOnTop(
     }
 }
 
-fun WmAssertion.appWindowBecomesVisible(
+fun WmAssertionBuilder.appWindowBecomesVisible(
     appName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -114,7 +114,7 @@ fun WmAssertion.appWindowBecomesVisible(
 }
 
 @JvmOverloads
-fun LayersAssertion.noUncoveredRegions(
+fun LayersAssertionBuilder.noUncoveredRegions(
     beginRotation: Int,
     endRotation: Int = beginRotation,
     allStates: Boolean = true,
@@ -144,7 +144,7 @@ fun LayersAssertion.noUncoveredRegions(
 }
 
 @JvmOverloads
-fun LayersAssertion.navBarLayerIsAlwaysVisible(
+fun LayersAssertionBuilder.navBarLayerIsAlwaysVisible(
     rotatesScreen: Boolean = false,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -165,7 +165,7 @@ fun LayersAssertion.navBarLayerIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun LayersAssertion.statusBarLayerIsAlwaysVisible(
+fun LayersAssertionBuilder.statusBarLayerIsAlwaysVisible(
     rotatesScreen: Boolean = false,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -186,7 +186,7 @@ fun LayersAssertion.statusBarLayerIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun LayersAssertion.navBarLayerRotatesAndScales(
+fun LayersAssertionBuilder.navBarLayerRotatesAndScales(
     beginRotation: Int,
     endRotation: Int = beginRotation,
     bugId: Int = 0,
@@ -210,7 +210,7 @@ fun LayersAssertion.navBarLayerRotatesAndScales(
 }
 
 @JvmOverloads
-fun LayersAssertion.statusBarLayerRotatesScales(
+fun LayersAssertionBuilder.statusBarLayerRotatesScales(
     beginRotation: Int,
     endRotation: Int = beginRotation,
     bugId: Int = 0,
@@ -227,7 +227,7 @@ fun LayersAssertion.statusBarLayerRotatesScales(
     }
 }
 
-fun LayersAssertion.visibleLayersShownMoreThanOneConsecutiveEntry(
+fun LayersAssertionBuilder.visibleLayersShownMoreThanOneConsecutiveEntry(
     ignoreLayers: List<String> = emptyList(),
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -237,7 +237,7 @@ fun LayersAssertion.visibleLayersShownMoreThanOneConsecutiveEntry(
     }
 }
 
-fun LayersAssertion.appLayerReplacesWallpaperLayer(
+fun LayersAssertionBuilder.appLayerReplacesWallpaperLayer(
     appName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -249,7 +249,7 @@ fun LayersAssertion.appLayerReplacesWallpaperLayer(
     }
 }
 
-fun LayersAssertion.wallpaperLayerReplacesAppLayer(
+fun LayersAssertionBuilder.wallpaperLayerReplacesAppLayer(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -261,7 +261,7 @@ fun LayersAssertion.wallpaperLayerReplacesAppLayer(
     }
 }
 
-fun LayersAssertion.layerAlwaysVisible(
+fun LayersAssertionBuilder.layerAlwaysVisible(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -271,7 +271,7 @@ fun LayersAssertion.layerAlwaysVisible(
     }
 }
 
-fun LayersAssertion.layerBecomesVisible(
+fun LayersAssertionBuilder.layerBecomesVisible(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -283,7 +283,7 @@ fun LayersAssertion.layerBecomesVisible(
     }
 }
 
-fun LayersAssertion.layerBecomesInvisible(
+fun LayersAssertionBuilder.layerBecomesInvisible(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -295,7 +295,7 @@ fun LayersAssertion.layerBecomesInvisible(
     }
 }
 
-fun EventLogAssertion.focusChanges(
+fun EventLogAssertionBuilder.focusChanges(
     vararg windows: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -305,7 +305,7 @@ fun EventLogAssertion.focusChanges(
     }
 }
 
-fun EventLogAssertion.focusDoesNotChange(
+fun EventLogAssertionBuilder.focusDoesNotChange(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {

@@ -21,9 +21,14 @@ import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
 import android.os.SystemBatteryConsumer;
+import android.os.SystemClock;
 import android.os.UserHandle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseLongArray;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.util.List;
 
@@ -57,6 +62,7 @@ public class ScreenPowerCalculator extends PowerCalculator {
                     .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_USAGE, durationMs)
                     .setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, powerMah);
         }
+        // TODO(b/178140704): Attribute screen usage similar to smearScreenBatterySipper.
     }
 
     /**
@@ -73,6 +79,8 @@ public class ScreenPowerCalculator extends PowerCalculator {
             bs.usageTimeMs = durationMs;
             bs.sumPower();
             sippers.add(bs);
+
+            smearScreenBatterySipper(sippers, bs);
         }
     }
 
@@ -95,5 +103,61 @@ public class ScreenPowerCalculator extends PowerCalculator {
             power += binPowerMah;
         }
         return power;
+    }
+
+    /**
+     * Smear the screen on power usage among {@code sippers}, based on ratio of foreground activity
+     * time, and store this in the {@link BatterySipper#screenPowerMah} field.
+     */
+    @VisibleForTesting
+    public void smearScreenBatterySipper(List<BatterySipper> sippers, BatterySipper screenSipper) {
+
+        long totalActivityTimeMs = 0;
+        final SparseLongArray activityTimeArray = new SparseLongArray();
+        for (int i = sippers.size() - 1; i >= 0; i--) {
+            final BatteryStats.Uid uid = sippers.get(i).uidObj;
+            if (uid != null) {
+                final long timeMs = getProcessForegroundTimeMs(uid);
+                activityTimeArray.put(uid.getUid(), timeMs);
+                totalActivityTimeMs += timeMs;
+            }
+        }
+
+        if (screenSipper != null && totalActivityTimeMs >= 10 * DateUtils.MINUTE_IN_MILLIS) {
+            final double screenPowerMah = screenSipper.totalPowerMah;
+            for (int i = sippers.size() - 1; i >= 0; i--) {
+                final BatterySipper sipper = sippers.get(i);
+                sipper.screenPowerMah = screenPowerMah * activityTimeArray.get(sipper.getUid(), 0)
+                        / totalActivityTimeMs;
+            }
+        }
+    }
+
+    /** Get the minimum of the uid's ForegroundActivity time and its TOP time. */
+    @VisibleForTesting
+    public long getProcessForegroundTimeMs(BatteryStats.Uid uid) {
+        final long rawRealTimeUs = SystemClock.elapsedRealtime() * 1000;
+        final int[] foregroundTypes = {BatteryStats.Uid.PROCESS_STATE_TOP};
+
+        long timeUs = 0;
+        for (int type : foregroundTypes) {
+            final long localTime = uid.getProcessStateTime(type, rawRealTimeUs,
+                    BatteryStats.STATS_SINCE_CHARGED);
+            timeUs += localTime;
+        }
+
+        // Return the min value of STATE_TOP time and foreground activity time, since both of these
+        // time have some errors.
+        return Math.min(timeUs, getForegroundActivityTotalTimeUs(uid, rawRealTimeUs)) / 1000;
+    }
+
+    /** Get the ForegroundActivity time of the given uid. */
+    @VisibleForTesting
+    public long getForegroundActivityTotalTimeUs(BatteryStats.Uid uid, long rawRealtimeUs) {
+        final BatteryStats.Timer timer = uid.getForegroundActivityTimer();
+        if (timer == null) {
+            return 0;
+        }
+        return timer.getTotalTimeLocked(rawRealtimeUs, BatteryStats.STATS_SINCE_CHARGED);
     }
 }

@@ -36,7 +36,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     private int mCellMarginTop;
     protected boolean mListening;
     protected int mMaxAllowedRows = 3;
-    private boolean mShowLabels;
+    private boolean mShowLabels = true;
 
     // Prototyping with less rows
     private final boolean mLessRows;
@@ -51,8 +51,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     public TileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         setFocusableInTouchMode(true);
-        mShowLabels = Settings.Secure.getInt(context.getContentResolver(),
-                QSPanelController.QS_REMOVE_LABELS, 0) == 0;
         mLessRows = ((Settings.System.getInt(context.getContentResolver(), "qs_less_rows", 0) != 0)
                 || useQsMediaPlayer(context));
         updateResources();

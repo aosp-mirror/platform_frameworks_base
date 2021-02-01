@@ -18,8 +18,11 @@ package com.android.server;
 
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import static com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionTrackerCallback;
+import static com.android.server.vcn.VcnTestUtils.setupSystemService;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -40,9 +43,12 @@ import static org.mockito.Mockito.verify;
 import android.app.AppOpsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.LinkProperties;
+import android.net.NetworkCapabilities;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnConfigTest;
+import android.net.vcn.VcnUnderlyingNetworkPolicy;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.PersistableBundle;
@@ -62,6 +68,7 @@ import com.android.server.vcn.VcnContext;
 import com.android.server.vcn.VcnNetworkProvider;
 import com.android.server.vcn.util.PersistableBundleUtils;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -138,11 +145,16 @@ public class VcnManagementServiceTest {
     private final IBinder mMockIBinder = mock(IBinder.class);
 
     public VcnManagementServiceTest() throws Exception {
-        setupSystemService(mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
-        setupSystemService(mTelMgr, Context.TELEPHONY_SERVICE, TelephonyManager.class);
         setupSystemService(
-                mSubMgr, Context.TELEPHONY_SUBSCRIPTION_SERVICE, SubscriptionManager.class);
-        setupSystemService(mAppOpsMgr, Context.APP_OPS_SERVICE, AppOpsManager.class);
+                mMockContext, mConnMgr, Context.CONNECTIVITY_SERVICE, ConnectivityManager.class);
+        setupSystemService(
+                mMockContext, mTelMgr, Context.TELEPHONY_SERVICE, TelephonyManager.class);
+        setupSystemService(
+                mMockContext,
+                mSubMgr,
+                Context.TELEPHONY_SUBSCRIPTION_SERVICE,
+                SubscriptionManager.class);
+        setupSystemService(mMockContext, mAppOpsMgr, Context.APP_OPS_SERVICE, AppOpsManager.class);
 
         doReturn(TEST_PACKAGE_NAME).when(mMockContext).getOpPackageName();
 
@@ -186,9 +198,12 @@ public class VcnManagementServiceTest {
         mTestLooper.dispatchAll();
     }
 
-    private void setupSystemService(Object service, String name, Class<?> serviceClass) {
-        doReturn(name).when(mMockContext).getSystemServiceName(serviceClass);
-        doReturn(service).when(mMockContext).getSystemService(name);
+    @Before
+    public void setUp() {
+        doNothing()
+                .when(mMockContext)
+                .enforceCallingOrSelfPermission(
+                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
     }
 
     private void setupMockedCarrierPrivilege(boolean isPrivileged) {
@@ -454,10 +469,6 @@ public class VcnManagementServiceTest {
 
     @Test
     public void testAddVcnUnderlyingNetworkPolicyListener() throws Exception {
-        doNothing()
-                .when(mMockContext)
-                .enforceCallingPermission(eq(android.Manifest.permission.NETWORK_FACTORY), any());
-
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
         verify(mMockIBinder).linkToDeath(any(), anyInt());
@@ -467,17 +478,14 @@ public class VcnManagementServiceTest {
     public void testAddVcnUnderlyingNetworkPolicyListenerInvalidPermission() {
         doThrow(new SecurityException())
                 .when(mMockContext)
-                .enforceCallingPermission(eq(android.Manifest.permission.NETWORK_FACTORY), any());
+                .enforceCallingOrSelfPermission(
+                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
 
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
     }
 
     @Test
     public void testRemoveVcnUnderlyingNetworkPolicyListener() {
-        // verify listener added
-        doNothing()
-                .when(mMockContext)
-                .enforceCallingPermission(eq(android.Manifest.permission.NETWORK_FACTORY), any());
         mVcnMgmtSvc.addVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
 
         mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
@@ -486,5 +494,25 @@ public class VcnManagementServiceTest {
     @Test
     public void testRemoveVcnUnderlyingNetworkPolicyListenerNeverRegistered() {
         mVcnMgmtSvc.removeVcnUnderlyingNetworkPolicyListener(mMockPolicyListener);
+    }
+
+    @Test
+    public void testGetUnderlyingNetworkPolicy() throws Exception {
+        VcnUnderlyingNetworkPolicy policy =
+                mVcnMgmtSvc.getUnderlyingNetworkPolicy(
+                        new NetworkCapabilities(), new LinkProperties());
+
+        assertFalse(policy.isTeardownRequested());
+        assertNotNull(policy.getMergedNetworkCapabilities());
+    }
+
+    @Test(expected = SecurityException.class)
+    public void testGetUnderlyingNetworkPolicyInvalidPermission() {
+        doThrow(new SecurityException())
+                .when(mMockContext)
+                .enforceCallingOrSelfPermission(
+                        eq(android.Manifest.permission.NETWORK_FACTORY), any());
+
+        mVcnMgmtSvc.getUnderlyingNetworkPolicy(new NetworkCapabilities(), new LinkProperties());
     }
 }

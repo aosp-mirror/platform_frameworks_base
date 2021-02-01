@@ -356,4 +356,10 @@ interface IAudioService {
     boolean isHomeSoundEffectEnabled();
 
     oneway void setHomeSoundEffectEnabled(boolean enabled);
+
+    boolean setAdditionalOutputDeviceDelay(in AudioDeviceAttributes device, long delayMillis);
+
+    long getAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
+
+    long getMaxAdditionalOutputDeviceDelay(in AudioDeviceAttributes device);
 }

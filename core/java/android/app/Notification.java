@@ -3589,11 +3589,6 @@ public class Notification implements Parcelable
         private int mSecondaryTextColor = COLOR_INVALID;
         private int mBackgroundColor = COLOR_INVALID;
         private int mForegroundColor = COLOR_INVALID;
-        /**
-         * A temporary location where actions are stored. If != null the view originally has action
-         * but doesn't have any for this inflation.
-         */
-        private ArrayList<Action> mOriginalActions;
         private boolean mRebuildStyledRemoteViews;
 
         private boolean mTintActionButtons;
@@ -5260,6 +5255,7 @@ public class Notification implements Parcelable
                 // We still want a time to be set but gone, such that we can show and hide it
                 // on demand in case it's a child notification without anything in the header
                 contentView.setLong(R.id.time, "setTime", mN.when != 0 ? mN.when : mN.creationTime);
+                setTextViewColorSecondary(contentView, R.id.time, p);
             }
         }
 
@@ -7407,11 +7403,10 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
             if (increasedHeight) {
-                mBuilder.mOriginalActions = mBuilder.mActions;
+                ArrayList<Action> originalActions = mBuilder.mActions;
                 mBuilder.mActions = new ArrayList<>();
                 RemoteViews remoteViews = makeBigContentView();
-                mBuilder.mActions = mBuilder.mOriginalActions;
-                mBuilder.mOriginalActions = null;
+                mBuilder.mActions = originalActions;
                 return remoteViews;
             }
             return super.makeContentView(increasedHeight);
@@ -7906,12 +7901,11 @@ public class Notification implements Parcelable
          */
         @Override
         public RemoteViews makeContentView(boolean increasedHeight) {
-            mBuilder.mOriginalActions = mBuilder.mActions;
+            ArrayList<Action> originalActions = mBuilder.mActions;
             mBuilder.mActions = new ArrayList<>();
             RemoteViews remoteViews = makeMessagingView(true /* isCollapsed */,
                     false /* hideLargeIcon */);
-            mBuilder.mActions = mBuilder.mOriginalActions;
-            mBuilder.mOriginalActions = null;
+            mBuilder.mActions = originalActions;
             return remoteViews;
         }
 

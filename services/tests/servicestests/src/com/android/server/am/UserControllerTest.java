@@ -770,7 +770,7 @@ public class UserControllerTest {
         }
 
         @Override
-        void reportGlobalUsageEventLocked(int event) {
+        void reportGlobalUsageEvent(int event) {
         }
 
         @Override

@@ -1357,7 +1357,7 @@ public final class DisplayManagerService extends SystemService {
                 // Scan supported modes returned by display.getInfo() to find a mode with the same
                 // size as the default display mode but with the specified refresh rate instead.
                 requestedModeId = display.getDisplayInfoLocked().findDefaultModeByRefreshRate(
-                        requestedRefreshRate);
+                        requestedRefreshRate).getModeId();
             }
             mDisplayModeDirector.getAppRequestObserver().setAppRequestedMode(
                     displayId, requestedModeId);
@@ -1534,6 +1534,14 @@ public final class DisplayManagerService extends SystemService {
                     Display.DEFAULT_DISPLAY);
             if (displayPowerController != null) {
                 displayPowerController.setDisplayWhiteBalanceLoggingEnabled(enabled);
+            }
+        }
+    }
+
+    void setDisplayModeDirectorLoggingEnabled(boolean enabled) {
+        synchronized (mSyncRoot) {
+            if (mDisplayModeDirector != null) {
+                mDisplayModeDirector.setLoggingEnabled(enabled);
             }
         }
     }

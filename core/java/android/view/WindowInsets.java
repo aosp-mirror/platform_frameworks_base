@@ -240,7 +240,7 @@ public final class WindowInsets {
 
     /**
      * Creates a indexOf(type) -> inset map for which the {@code insets} is just mapped to
-     * {@link InsetsType#statusBars()} and {@link InsetsType#navigationBars()}, depending on the
+     * {@link Type#statusBars()} and {@link Type#navigationBars()}, depending on the
      * location of the inset.
      */
     private static Insets[] createCompatTypeMap(@Nullable Rect insets) {
@@ -321,9 +321,9 @@ public final class WindowInsets {
 
     /**
      * Returns the insets of a specific set of windows causing insets, denoted by the
-     * {@code typeMask} bit mask of {@link InsetsType}s.
+     * {@code typeMask} bit mask of {@link Type}s.
      *
-     * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
+     * @param typeMask Bit mask of {@link Type}s to query the insets for.
      * @return The insets.
      */
     @NonNull
@@ -333,7 +333,7 @@ public final class WindowInsets {
 
     /**
      * Returns the insets a specific set of windows can cause, denoted by the
-     * {@code typeMask} bit mask of {@link InsetsType}s, regardless of whether that type is
+     * {@code typeMask} bit mask of {@link Type}s, regardless of whether that type is
      * currently visible or not.
      *
      * <p>The insets represents the area of a a window that that <b>may</b> be partially
@@ -342,7 +342,7 @@ public final class WindowInsets {
      * normally shown, but temporarily hidden, the inset returned here will still provide the inset
      * associated with the status bar being shown.</p>
      *
-     * @param typeMask Bit mask of {@link InsetsType}s to query the insets for.
+     * @param typeMask Bit mask of {@link Type}s to query the insets for.
      * @return The insets.
      *
      * @throws IllegalArgumentException If the caller tries to query {@link Type#ime()}. Insets are
@@ -362,7 +362,7 @@ public final class WindowInsets {
      * Returns whether a set of windows that may cause insets is currently visible on screen,
      * regardless of whether it actually overlaps with this window.
      *
-     * @param typeMask Bit mask of {@link Type.InsetsType}s to query visibility status.
+     * @param typeMask Bit mask of {@link Type}s to query visibility status.
      * @return {@code true} if and only if all windows included in {@code typeMask} are currently
      *         visible on screen.
      */
@@ -1148,7 +1148,7 @@ public final class WindowInsets {
          *
          * @see #getInsets(int)
          *
-         * @param typeMask The bitmask of {@link InsetsType} to set the insets for.
+         * @param typeMask The bitmask of {@link Type} to set the insets for.
          * @param insets The insets to set.
          *
          * @return itself
@@ -1172,7 +1172,7 @@ public final class WindowInsets {
          *
          * @see #getInsetsIgnoringVisibility(int)
          *
-         * @param typeMask The bitmask of {@link InsetsType} to set the insets for.
+         * @param typeMask The bitmask of {@link Type} to set the insets for.
          * @param insets The insets to set.
          *
          * @return itself
@@ -1201,7 +1201,7 @@ public final class WindowInsets {
          *
          * @see #isVisible(int)
          *
-         * @param typeMask The bitmask of {@link InsetsType} to set the visibility for.
+         * @param typeMask The bitmask of {@link Type} to set the visibility for.
          * @param visible Whether to mark the windows as visible or not.
          *
          * @return itself

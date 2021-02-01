@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", actif (média)"</item>
     <item msgid="5001852592115448348">", actif (téléphone)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"Désactivé"</item>
+    <item msgid="7839165897132179888">"64 ko"</item>
+    <item msgid="2715700596495505626">"256 ko"</item>
+    <item msgid="7099386891713159947">"1 Mo"</item>
+    <item msgid="6069075827077845520">"4 Mo"</item>
+    <item msgid="6078203297886482480">"8 Mo"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Désactivé"</item>
     <item msgid="4064786181089783077">"64 ko"</item>
     <item msgid="3052710745383602630">"256 ko"</item>
     <item msgid="3691785423374588514">"1 Mo"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"Désactivé"</item>
+    <item msgid="4195153527464162486">"64 ko/tampon journal"</item>
+    <item msgid="7464037639415220106">"256 Ko/tampon journal"</item>
+    <item msgid="8539423820514360724">"1 Mo/tampon journal"</item>
+    <item msgid="1984761927103140651">"4 Mo/tampon journal"</item>
+    <item msgid="2983219471251787208">"8 Mo par tampon journal"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Désactivé"</item>
     <item msgid="6014837961827347618">"Tous"</item>

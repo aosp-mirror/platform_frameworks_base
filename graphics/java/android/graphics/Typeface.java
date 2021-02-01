@@ -70,6 +70,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The Typeface class specifies the typeface and intrinsic style of a font.
@@ -249,6 +250,21 @@ public class Typeface {
     }
 
     /**
+     * Returns true if the system has the font family with the name [familyName]. For example
+     * querying with "sans-serif" would check if the "sans-serif" family is defined in the system
+     * and return true if does.
+     *
+     * @param familyName The name of the font family, cannot be null. If null, exception will be
+     *                   thrown.
+     */
+    private static boolean hasFontFamily(@NonNull String familyName) {
+        Objects.requireNonNull(familyName, "familyName cannot be null");
+        synchronized (SYSTEM_FONT_MAP_LOCK) {
+            return sSystemFontMap.containsKey(familyName);
+        }
+    }
+
+    /**
      * @hide
      * Used by Resources to load a font resource of type xml.
      */
@@ -257,6 +273,11 @@ public class Typeface {
             FamilyResourceEntry entry, AssetManager mgr, String path) {
         if (entry instanceof ProviderResourceEntry) {
             final ProviderResourceEntry providerEntry = (ProviderResourceEntry) entry;
+
+            String systemFontFamilyName = providerEntry.getSystemFontFamilyName();
+            if (systemFontFamilyName != null && hasFontFamily(systemFontFamilyName)) {
+                return Typeface.create(systemFontFamilyName, NORMAL);
+            }
             // Downloadable font
             List<List<String>> givenCerts = providerEntry.getCerts();
             List<List<byte[]>> certs = new ArrayList<>();
@@ -1151,10 +1172,10 @@ public class Typeface {
 
         for (int i = 0; i < aliases.size(); ++i) {
             final FontConfig.Alias alias = aliases.get(i);
-            if (outSystemFontMap.containsKey(alias.getAliasName())) {
+            if (outSystemFontMap.containsKey(alias.getName())) {
                 continue; // If alias and named family are conflict, use named family.
             }
-            final Typeface base = outSystemFontMap.get(alias.getReferName());
+            final Typeface base = outSystemFontMap.get(alias.getOriginal());
             if (base == null) {
                 // The missing target is a valid thing, some configuration don't have font files,
                 // e.g. wear devices. Just skip this alias.
@@ -1163,7 +1184,7 @@ public class Typeface {
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :
                     new Typeface(nativeCreateWeightAlias(base.native_instance, weight));
-            outSystemFontMap.put(alias.getAliasName(), newFace);
+            outSystemFontMap.put(alias.getName(), newFace);
         }
     }
 

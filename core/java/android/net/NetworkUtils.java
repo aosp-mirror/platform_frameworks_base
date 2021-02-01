@@ -81,11 +81,11 @@ public class NetworkUtils {
     public native static boolean bindProcessToNetworkForHostResolution(int netId);
 
     /**
-     * Explicitly binds {@code socketfd} to the network designated by {@code netId}.  This
+     * Explicitly binds {@code fd} to the network designated by {@code netId}.  This
      * overrides any binding via {@link #bindProcessToNetwork}.
      * @return 0 on success or negative errno on failure.
      */
-    public native static int bindSocketToNetwork(int socketfd, int netId);
+    public static native int bindSocketToNetwork(FileDescriptor fd, int netId);
 
     /**
      * Protect {@code fd} from VPN connections.  After protecting, data sent through
@@ -93,9 +93,7 @@ public class NetworkUtils {
      * forwarded through the VPN.
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static boolean protectFromVpn(FileDescriptor fd) {
-        return protectFromVpn(fd.getInt$());
-    }
+    public static native boolean protectFromVpn(FileDescriptor fd);
 
     /**
      * Protect {@code socketfd} from VPN connections.  After protecting, data sent through

@@ -300,7 +300,6 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
-        mImeWindow.mAboveInsetsState = state;
         mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
                 state, displayInfo, null /* displayCutout */);
 

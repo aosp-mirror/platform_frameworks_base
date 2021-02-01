@@ -155,14 +155,28 @@
     <item msgid="253388653486517049">", активний (лише для медіа)"</item>
     <item msgid="5001852592115448348">", активний (лише для телефона)"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_titles:5 (6078203297886482480) -->
+  <string-array name="select_logd_size_titles">
+    <item msgid="1191094707770726722">"Вимкнено"</item>
+    <item msgid="7839165897132179888">"64 КБ"</item>
+    <item msgid="2715700596495505626">"256 КБ"</item>
+    <item msgid="7099386891713159947">"1 МБ"</item>
+    <item msgid="6069075827077845520">"4 МБ"</item>
+    <item msgid="6078203297886482480">"8 MБ"</item>
+  </string-array>
   <string-array name="select_logd_size_lowram_titles">
     <item msgid="1145807928339101085">"Вимкнено"</item>
     <item msgid="4064786181089783077">"64 КБ"</item>
     <item msgid="3052710745383602630">"256 КБ"</item>
     <item msgid="3691785423374588514">"1 МБ"</item>
   </string-array>
-    <!-- no translation found for select_logd_size_summaries:5 (2983219471251787208) -->
+  <string-array name="select_logd_size_summaries">
+    <item msgid="409235464399258501">"Вимкнено"</item>
+    <item msgid="4195153527464162486">"Буфер журналу: 64 КБ"</item>
+    <item msgid="7464037639415220106">"Буфер журналу: 256 КБ"</item>
+    <item msgid="8539423820514360724">"Буфер журналу: 1 МБ"</item>
+    <item msgid="1984761927103140651">"Буфер журналу: 4 МБ"</item>
+    <item msgid="2983219471251787208">"Буфер: 8 МБ на журнал"</item>
+  </string-array>
   <string-array name="select_logpersist_titles">
     <item msgid="704720725704372366">"Вимкнено"</item>
     <item msgid="6014837961827347618">"Усі"</item>

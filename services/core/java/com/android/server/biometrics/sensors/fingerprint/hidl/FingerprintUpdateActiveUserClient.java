@@ -62,13 +62,7 @@ public class FingerprintUpdateActiveUserClient extends HalClientMonitor<IBiometr
         super.start(callback);
 
         if (mCurrentUserId == getTargetUserId()) {
-            Slog.d(TAG, "Already user: " + mCurrentUserId + ", refreshing authenticatorId");
-            try {
-                mAuthenticatorIds.put(getTargetUserId(), mHasEnrolledBiometrics
-                        ? getFreshDaemon().getAuthenticatorId() : 0L);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to refresh authenticatorId", e);
-            }
+            Slog.d(TAG, "Already user: " + mCurrentUserId + ", returning");
             callback.onClientFinished(this, true /* success */);
             return;
         }

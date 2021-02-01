@@ -30,8 +30,7 @@ import java.util.UUID;
  * device supporting audio-coupled-haptic playback. Call {@link HapticGenerator#isAvailable()} to
  * check if the device supports this effect.
  * <p>An application can create a HapticGenerator object to initiate and control this audio effect
- * in the audio framework. An application can set which audio channel to be used to generate
- * haptic data.
+ * in the audio framework.
  * <p>To attach the HapticGenerator to a particular AudioTrack or MediaPlayer, specify the audio
  * session ID of this AudioTrack or MediaPlayer when constructing the HapticGenerator.
  * <p>See {@link android.media.MediaPlayer#getAudioSessionId()} for details on audio sessions.
@@ -47,6 +46,9 @@ public class HapticGenerator extends AudioEffect implements AutoCloseable {
     // haptic data based on the raw audio data.
     private AudioEffect mVolumeControlEffect;
 
+    /**
+     * @return true if the HapticGenerator is available on the device.
+     */
     public static boolean isAvailable() {
         return AudioManager.isHapticPlaybackSupported()
                 && AudioEffect.isEffectTypeAvailable(AudioEffect.EFFECT_TYPE_HAPTIC_GENERATOR);

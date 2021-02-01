@@ -298,10 +298,10 @@
         <item>@string/crossSimFormat_spn_cross_sim_calling</item>
     </string-array>
 
-    <!-- Spn during Cross-SIM Calling: "<operator> " [CHAR LIMIT=NONE] -->
+    <!-- Spn during Backup Calling: "<operator> " [CHAR LIMIT=NONE] -->
     <string name="crossSimFormat_spn"><xliff:g id="spn" example="Operator">%s</xliff:g></string>
-    <!-- Spn during Cross SIM Calling: "<operator> Cross-SIM Calling" [CHAR LIMIT=NONE] -->
-    <string name="crossSimFormat_spn_cross_sim_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Cross-SIM Calling</string>
+    <!-- Spn during Backup Calling: "<operator> Backup Calling" [CHAR LIMIT=NONE] -->
+    <string name="crossSimFormat_spn_cross_sim_calling"><xliff:g id="spn" example="Operator">%s</xliff:g> Backup Calling</string>
 
     <!--
         {0} is one of "bearerServiceCode*"

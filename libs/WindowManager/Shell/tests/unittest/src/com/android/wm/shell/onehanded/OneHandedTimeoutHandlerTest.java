@@ -33,6 +33,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 
 import org.junit.Before;
@@ -48,7 +49,7 @@ import java.util.ArrayList;
 @RunWith(AndroidTestingRunner.class)
 public class OneHandedTimeoutHandlerTest extends OneHandedTestCase {
     private OneHandedTimeoutHandler mTimeoutHandler;
-    private ShellExecutor mMainExecutor;
+    private TestShellExecutor mMainExecutor;
 
     @Before
     public void setUp() throws Exception {
@@ -103,35 +104,5 @@ public class OneHandedTimeoutHandlerTest extends OneHandedTestCase {
         mTimeoutHandler.setTimeout(ONE_HANDED_TIMEOUT_LONG_IN_SECONDS);
         mTimeoutHandler.resetTimer();
         assertTrue(mTimeoutHandler.hasScheduledTimeout());
-    }
-
-    private class TestShellExecutor implements ShellExecutor {
-        private ArrayList<Runnable> mExecuted = new ArrayList<>();
-        private ArrayList<Runnable> mDelayed = new ArrayList<>();
-
-        @Override
-        public void execute(Runnable runnable) {
-            mExecuted.add(runnable);
-        }
-
-        @Override
-        public void executeDelayed(Runnable r, long delayMillis) {
-            mDelayed.add(r);
-        }
-
-        @Override
-        public void removeCallbacks(Runnable r) {
-            mDelayed.remove(r);
-        }
-
-        @Override
-        public boolean hasCallback(Runnable r) {
-            return mDelayed.contains(r);
-        }
-
-        @Override
-        public Looper getLooper() {
-            return Looper.myLooper();
-        }
     }
 }

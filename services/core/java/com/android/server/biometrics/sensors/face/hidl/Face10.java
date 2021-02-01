@@ -602,7 +602,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId, @NonNull IFaceServiceReceiver receiver,
             @NonNull String opPackageName, @NonNull int[] disabledFeatures,
-            @Nullable NativeHandle surfaceHandle) {
+            @Nullable NativeHandle surfaceHandle, boolean debugConsent) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -646,7 +646,7 @@ public class Face10 implements IHwBinder.DeathRecipient, ServiceProvider {
             final FaceAuthenticationClient client = new FaceAuthenticationClient(mContext,
                     mLazyDaemon, token, receiver, userId, operationId, restricted, opPackageName,
                     cookie, false /* requireConfirmation */, mSensorId, isStrongBiometric,
-                    statsClient, mLockoutTracker, mUsageStats);
+                    statsClient, mLockoutTracker, mUsageStats, isKeyguard);
             mScheduler.scheduleClientMonitor(client);
         });
     }

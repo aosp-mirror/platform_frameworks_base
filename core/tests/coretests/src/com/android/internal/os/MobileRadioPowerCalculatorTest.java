@@ -21,7 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkStats;
 import android.os.BatteryConsumer;
 import android.os.Process;
@@ -78,7 +78,8 @@ public class MobileRadioPowerCalculatorTest {
                 8_000_000_000L, APP_UID, 8000, 8000);
 
         // Note established network
-        stats.noteNetworkInterfaceType("cellular", ConnectivityManager.TYPE_MOBILE);
+        stats.noteNetworkInterfaceForTransports("cellular",
+                new int[] { NetworkCapabilities.TRANSPORT_CELLULAR });
 
         // Note application network activity
         NetworkStats networkStats = new NetworkStats(10000, 1)

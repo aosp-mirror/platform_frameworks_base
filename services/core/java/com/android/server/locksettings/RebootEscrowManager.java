@@ -124,26 +124,28 @@ class RebootEscrowManager {
     static class Injector {
         protected Context mContext;
         private final RebootEscrowKeyStoreManager mKeyStoreManager;
-        private final RebootEscrowProviderInterface mRebootEscrowProvider;
+        private final LockSettingsStorage mStorage;
+        private RebootEscrowProviderInterface mRebootEscrowProvider;
 
-        Injector(Context context) {
+        Injector(Context context, LockSettingsStorage storage) {
             mContext = context;
+            mStorage = storage;
             mKeyStoreManager = new RebootEscrowKeyStoreManager();
+        }
 
-            RebootEscrowProviderInterface rebootEscrowProvider = null;
-            // TODO(xunchang) add implementation for server based ror.
+        private RebootEscrowProviderInterface createRebootEscrowProvider() {
+            RebootEscrowProviderInterface rebootEscrowProvider;
             if (DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_OTA,
                     "server_based_ror_enabled", false)) {
-                Slog.e(TAG, "Server based ror isn't implemented yet.");
+                rebootEscrowProvider = new RebootEscrowProviderServerBasedImpl(mContext, mStorage);
             } else {
                 rebootEscrowProvider = new RebootEscrowProviderHalImpl();
             }
 
-            if (rebootEscrowProvider != null && rebootEscrowProvider.hasRebootEscrowSupport()) {
-                mRebootEscrowProvider = rebootEscrowProvider;
-            } else {
-                mRebootEscrowProvider = null;
+            if (rebootEscrowProvider.hasRebootEscrowSupport()) {
+                return rebootEscrowProvider;
             }
+            return null;
         }
 
         public Context getContext() {
@@ -159,6 +161,12 @@ class RebootEscrowManager {
         }
 
         public RebootEscrowProviderInterface getRebootEscrowProvider() {
+            // Initialize for the provider lazily. Because the device_config and service
+            // implementation apps may change when system server is running.
+            if (mRebootEscrowProvider == null) {
+                mRebootEscrowProvider = createRebootEscrowProvider();
+            }
+
             return mRebootEscrowProvider;
         }
 
@@ -177,7 +185,7 @@ class RebootEscrowManager {
     }
 
     RebootEscrowManager(Context context, Callbacks callbacks, LockSettingsStorage storage) {
-        this(new Injector(context), callbacks, storage);
+        this(new Injector(context, storage), callbacks, storage);
     }
 
     @VisibleForTesting

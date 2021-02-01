@@ -79,6 +79,7 @@ import com.android.wm.shell.bubbles.animation.ExpandedAnimationController;
 import com.android.wm.shell.bubbles.animation.PhysicsAnimationLayout;
 import com.android.wm.shell.bubbles.animation.StackAnimationController;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 
 import java.io.FileDescriptor;
@@ -147,7 +148,7 @@ public class BubbleStackView extends FrameLayout
      * Handler to use for all delayed animations - this way, we can easily cancel them before
      * starting a new animation.
      */
-    private final Handler mDelayedAnimationHandler = new Handler();
+    private final ShellExecutor mDelayedAnimationExecutor;
 
     /**
      * Interface to synchronize {@link View} state and the screen.
@@ -311,7 +312,7 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    private BubbleController.BubbleExpandListener mExpandListener;
+    private Bubbles.BubbleExpandListener mExpandListener;
 
     /** Callback to run when we want to unbubble the given notification's conversation. */
     private Consumer<String> mUnbubbleConversationCallback;
@@ -734,9 +735,11 @@ public class BubbleStackView extends FrameLayout
     @SuppressLint("ClickableViewAccessibility")
     public BubbleStackView(Context context, BubbleController bubbleController,
             BubbleData data, @Nullable SurfaceSynchronizer synchronizer,
-            FloatingContentCoordinator floatingContentCoordinator) {
+            FloatingContentCoordinator floatingContentCoordinator,
+            ShellExecutor mainExecutor) {
         super(context);
 
+        mDelayedAnimationExecutor = mainExecutor;
         mBubbleController = bubbleController;
         mBubbleData = data;
 
@@ -1366,7 +1369,7 @@ public class BubbleStackView extends FrameLayout
     /**
      * Sets the listener to notify when the bubble stack is expanded.
      */
-    public void setExpandListener(BubbleController.BubbleExpandListener listener) {
+    public void setExpandListener(Bubbles.BubbleExpandListener listener) {
         mExpandListener = listener;
     }
 
@@ -1734,7 +1737,7 @@ public class BubbleStackView extends FrameLayout
             mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(false);
         }
 
-        mDelayedAnimationHandler.postDelayed(() -> {
+        mDelayedAnimationExecutor.executeDelayed(() -> {
             PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
             PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
                     .spring(AnimatableScaleMatrix.SCALE_X,
@@ -1791,10 +1794,12 @@ public class BubbleStackView extends FrameLayout
 
         final long startDelay =
                 (long) (ExpandedAnimationController.EXPAND_COLLAPSE_TARGET_ANIM_DURATION * 0.6f);
-        mDelayedAnimationHandler.postDelayed(() -> mExpandedAnimationController.collapseBackToStack(
-                mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
-                /* collapseTo */,
-                () -> mBubbleContainer.setActiveController(mStackAnimationController)), startDelay);
+        mDelayedAnimationExecutor.executeDelayed(() -> {
+            mExpandedAnimationController.collapseBackToStack(
+                    mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
+                    /* collapseTo */,
+                    () -> mBubbleContainer.setActiveController(mStackAnimationController));
+        }, startDelay);
 
         if (mTaskbarScrim.getVisibility() == VISIBLE) {
             mTaskbarScrim.animate().alpha(0f).start();
@@ -1945,7 +1950,7 @@ public class BubbleStackView extends FrameLayout
 
         mExpandedViewContainer.setAnimationMatrix(mExpandedViewContainerMatrix);
 
-        mDelayedAnimationHandler.postDelayed(() -> {
+        mDelayedAnimationExecutor.executeDelayed(() -> {
             if (!mIsExpanded) {
                 mIsBubbleSwitchAnimating = false;
                 return;
@@ -1978,7 +1983,7 @@ public class BubbleStackView extends FrameLayout
      * animating flags for those animations.
      */
     private void cancelDelayedExpandCollapseSwitchAnimations() {
-        mDelayedAnimationHandler.removeCallbacksAndMessages(null);
+        mDelayedAnimationExecutor.removeAllCallbacks();
 
         mIsExpansionAnimating = false;
         mIsBubbleSwitchAnimating = false;

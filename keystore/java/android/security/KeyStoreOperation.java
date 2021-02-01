@@ -73,8 +73,7 @@ public class KeyStoreOperation {
                     );
                 }
                 default:
-                    // TODO Human readable string. Use something like KeyStore.getKeyStoreException
-                    throw new KeyStoreException(e.errorCode, "");
+                    throw KeyStore2.getKeyStoreException(e.errorCode);
             }
         } catch (RemoteException e) {
             // Log exception and report invalid operation handle.

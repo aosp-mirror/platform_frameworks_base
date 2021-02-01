@@ -17,10 +17,16 @@
 package com.android.wm.shell.common;
 
 import android.os.Looper;
+import android.os.SystemClock;
+import android.os.Trace;
 
+import java.lang.reflect.Array;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 /**
  * Super basic Executor interface that adds support for delayed execution and removing callbacks.
@@ -63,22 +69,42 @@ public interface ShellExecutor extends Executor {
     }
 
     /**
+     * Convenience method to execute the blocking call with a default timeout and returns a value.
+     * Waits indefinitely for a typed result from a call.
+     */
+    default <T> T executeBlockingForResult(Supplier<T> runnable, Class clazz) {
+        final T[] result = (T[]) Array.newInstance(clazz, 1);
+        final CountDownLatch latch = new CountDownLatch(1);
+        execute(() -> {
+            result[0] = runnable.get();
+            latch.countDown();
+        });
+        try {
+            latch.await();
+            return result[0];
+        } catch (InterruptedException e) {
+            return null;
+        }
+    }
+
+
+    /**
      * See {@link android.os.Handler#postDelayed(Runnable, long)}.
      */
-    void executeDelayed(Runnable r, long delayMillis);
+    void executeDelayed(Runnable runnable, long delayMillis);
+
+    /**
+     * Removes all pending callbacks.
+     */
+    void removeAllCallbacks();
 
     /**
      * See {@link android.os.Handler#removeCallbacks}.
      */
-    void removeCallbacks(Runnable r);
+    void removeCallbacks(Runnable runnable);
 
     /**
      * See {@link android.os.Handler#hasCallbacks(Runnable)}.
      */
-    boolean hasCallback(Runnable r);
-
-    /**
-     * Returns the looper that this executor is running on.
-     */
-    Looper getLooper();
+    boolean hasCallback(Runnable runnable);
 }

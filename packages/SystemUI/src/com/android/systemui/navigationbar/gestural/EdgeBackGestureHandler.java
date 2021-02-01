@@ -92,6 +92,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
 
+    // Temporary log until b/176302696 is resolved
+    static final boolean DEBUG_MISSING_GESTURE = true;
+    static final String DEBUG_MISSING_GESTURE_TAG = "NoBackGesture";
+
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
                 @Override
@@ -223,8 +227,12 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             new NavigationEdgeBackPlugin.BackCallback() {
                 @Override
                 public void triggerBack() {
-                    sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
-                    sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+                    boolean sendDown = sendEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_BACK);
+                    boolean sendUp = sendEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_BACK);
+                    if (DEBUG_MISSING_GESTURE) {
+                        Log.d(DEBUG_MISSING_GESTURE_TAG, "Triggered back: down=" + sendDown
+                                + ", up=" + sendUp);
+                    }
 
                     mOverviewProxyService.notifyBackAction(true, (int) mDownPoint.x,
                             (int) mDownPoint.y, false /* isButton */, !mIsOnLeftEdge);
@@ -694,6 +702,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 if (action == MotionEvent.ACTION_POINTER_DOWN) {
                     if (mAllowGesture) {
                         logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_MULTI_TOUCH);
+                        if (DEBUG_MISSING_GESTURE) {
+                            Log.d(DEBUG_MISSING_GESTURE_TAG, "Cancel back: multitouch");
+                        }
                         // We do not support multi touch for back gesture
                         cancelGesture(ev);
                     }
@@ -704,6 +715,12 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                         if (mAllowGesture) {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_LONG_PRESS);
                             cancelGesture(ev);
+                            if (DEBUG_MISSING_GESTURE) {
+                                Log.d(DEBUG_MISSING_GESTURE_TAG, "Cancel back [longpress]: "
+                                        + ev.getEventTime()
+                                        + "  " + ev.getDownTime()
+                                        + "  " + mLongPressTimeout);
+                            }
                         }
                         mLogGesture = false;
                         return;
@@ -714,6 +731,10 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                         if (mAllowGesture) {
                             logGesture(SysUiStatsLog.BACK_GESTURE__TYPE__INCOMPLETE_VERTICAL_MOVE);
                             cancelGesture(ev);
+                            if (DEBUG_MISSING_GESTURE) {
+                                Log.d(DEBUG_MISSING_GESTURE_TAG, "Cancel back [vertical move]: "
+                                        + dy + "  " + dx + "  " + mTouchSlop);
+                            }
                         }
                         mLogGesture = false;
                         return;
@@ -769,7 +790,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         }
     }
 
-    private void sendEvent(int action, int code) {
+    private boolean sendEvent(int action, int code) {
         long when = SystemClock.uptimeMillis();
         final KeyEvent ev = new KeyEvent(when, when, action, code, 0 /* repeat */,
                 0 /* metaState */, KeyCharacterMap.VIRTUAL_KEYBOARD, 0 /* scancode */,
@@ -777,7 +798,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 InputDevice.SOURCE_KEYBOARD);
 
         ev.setDisplayId(mContext.getDisplay().getDisplayId());
-        InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+        return InputManager.getInstance()
+                .injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
 
     public void setInsets(int leftInset, int rightInset) {
@@ -803,6 +825,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
         pw.println("  mIsNavBarShownTransiently=" + mIsNavBarShownTransiently);
         pw.println("  mPredictionLog=" + String.join(";", mPredictionLog));
+        pw.println("  mEdgeBackPlugin=" + mEdgeBackPlugin);
     }
 
     private boolean isGestureBlockingActivityRunning() {

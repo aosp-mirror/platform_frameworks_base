@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
+import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
+
 import android.os.Binder;
 import android.os.SystemClock;
 import android.util.Slog;
@@ -24,9 +27,6 @@ import android.util.TimeUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.AssociationState;
 import com.android.internal.app.procstats.ProcessStats;
-
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 /**
  * Represents a link between a content provider and client.
@@ -71,7 +71,7 @@ public final class ContentProviderConnection extends Binder {
                 && association == null && provider.proc != null
                 && (provider.appInfo.uid != client.uid
                         || !provider.info.processName.equals(client.processName))) {
-            ProcessStats.ProcessStateHolder holder = provider.proc.pkgList.get(
+            ProcessStats.ProcessStateHolder holder = provider.proc.getPkgList().get(
                     provider.name.getPackageName());
             if (holder == null) {
                 Slog.wtf(TAG_AM, "No package in referenced provider "

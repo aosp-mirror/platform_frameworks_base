@@ -33,8 +33,6 @@ import com.android.server.wm.flicker.helpers.launchSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
 import com.android.server.wm.flicker.helpers.resizeSplitScreen
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
-import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.dockedStackDividerIsInvisible
 import com.android.wm.shell.flicker.helpers.SplitScreenHelper.Companion.TEST_REPETITIONS
 import org.junit.FixMethodOrder
@@ -106,8 +104,8 @@ class ExitLegacySplitScreenTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
-                        hidesAppWindow(splitScreenApp.defaultWindowName)
+                    end("appWindowIsInvisible") {
+                        isInvisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }
@@ -134,8 +132,8 @@ class ExitLegacySplitScreenTest(
                 windowManagerTrace {
                     navBarWindowIsAlwaysVisible()
                     statusBarWindowIsAlwaysVisible()
-                    end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
+                    end("appWindowIsVisible") {
+                        isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }

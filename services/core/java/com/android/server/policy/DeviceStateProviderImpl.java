@@ -63,8 +63,17 @@ import javax.xml.datatype.DatatypeConfigurationException;
 /**
  * Implementation of {@link DeviceStateProvider} that reads the set of supported device states
  * from a configuration file provided at either /vendor/etc/devicestate or
- * /data/system/devicestate/. By default, the provider supports {@link #DEFAULT_DEVICE_STATE} when
- * no configuration is provided.
+ * /data/system/devicestate/.
+ * <p>
+ * When a device state configuration file is present this provider will consider the provided
+ * {@link Conditions} block for each declared state, halting and returning when the first set of
+ * conditions for a device state match the current system state. If there are multiple states whose
+ * conditions match the current system state the matching state with the smallest integer identifier
+ * will be returned. When no declared state matches the current system state, the device state with
+ * the smallest integer identifier will be returned.
+ * <p>
+ * By default, the provider reports {@link #DEFAULT_DEVICE_STATE} when no configuration file is
+ * provided.
  */
 public final class DeviceStateProviderImpl implements DeviceStateProvider,
         InputManagerInternal.LidSwitchCallback, SensorEventListener {
@@ -273,7 +282,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
             }
 
             int newState = mOrderedStates[0];
-            for (int i = 1; i < mOrderedStates.length; i++) {
+            for (int i = 0; i < mOrderedStates.length; i++) {
                 int state = mOrderedStates[i];
                 if (mStateConditions.get(state).getAsBoolean()) {
                     newState = state;

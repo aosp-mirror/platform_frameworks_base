@@ -61,7 +61,6 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private static final long DRAG_LENGTH = 100;
     private static final float DRAG_SCALE = 1.2f;
     public static final long MOVE_DURATION = 150;
-    public static final int NUM_COLUMNS = 4;
 
     private static final int TYPE_TILE = 0;
     private static final int TYPE_EDIT = 1;
@@ -99,6 +98,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final UiEventLogger mUiEventLogger;
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
     private RecyclerView mRecyclerView;
+    private final int mNumColumns;
 
     @Inject
     public TileAdapter(Context context, QSTileHost qsHost, UiEventLogger uiEventLogger) {
@@ -109,6 +109,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         mDecoration = new TileItemDecoration(context);
         mMarginDecoration = new MarginTileDecoration();
         mMinNumTiles = context.getResources().getInteger(R.integer.quick_settings_min_num_tiles);
+        mNumColumns = context.getResources().getInteger(R.integer.quick_settings_num_columns);
         mAccessibilityDelegate = new TileAdapterDelegate();
     }
 
@@ -120,6 +121,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         mRecyclerView = null;
+    }
+
+    public int getNumColumns() {
+        return mNumColumns;
     }
 
     public ItemTouchHelper getItemTouchHelper() {
@@ -602,7 +607,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         public int getSpanSize(int position) {
             final int type = getItemViewType(position);
             if (type == TYPE_EDIT || type == TYPE_DIVIDER || type == TYPE_HEADER) {
-                return NUM_COLUMNS;
+                return mNumColumns;
             } else {
                 return 1;
             }

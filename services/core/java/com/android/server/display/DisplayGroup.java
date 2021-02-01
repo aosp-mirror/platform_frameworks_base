@@ -26,8 +26,6 @@ import java.util.List;
  */
 public class DisplayGroup {
 
-    public static final int DEFAULT = 0;
-
     private final List<LogicalDisplay> mDisplays = new ArrayList<>();
     private final int mGroupId;
 

@@ -56,6 +56,8 @@ public class PipAnimationController {
     public static final int TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN = 4;
     public static final int TRANSITION_DIRECTION_REMOVE_STACK = 5;
     public static final int TRANSITION_DIRECTION_SNAP_AFTER_RESIZE = 6;
+    public static final int TRANSITION_DIRECTION_USER_RESIZE = 7;
+    public static final int TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND = 8;
 
     @IntDef(prefix = { "TRANSITION_DIRECTION_" }, value = {
             TRANSITION_DIRECTION_NONE,
@@ -64,7 +66,9 @@ public class PipAnimationController {
             TRANSITION_DIRECTION_LEAVE_PIP,
             TRANSITION_DIRECTION_LEAVE_PIP_TO_SPLIT_SCREEN,
             TRANSITION_DIRECTION_REMOVE_STACK,
-            TRANSITION_DIRECTION_SNAP_AFTER_RESIZE
+            TRANSITION_DIRECTION_SNAP_AFTER_RESIZE,
+            TRANSITION_DIRECTION_USER_RESIZE,
+            TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TransitionDirection {}
@@ -465,6 +469,11 @@ public class PipAnimationController {
                     getSurfaceTransactionHelper()
                             .alpha(tx, leash, 1f)
                             .round(tx, leash, shouldApplyCornerRadius());
+                    // TODO(b/178632364): this is a work around for the black background when
+                    // entering PiP in buttion navigation mode.
+                    if (isInPipDirection(direction)) {
+                        tx.setWindowCrop(leash, getStartValue());
+                    }
                     tx.show(leash);
                     tx.apply();
                 }

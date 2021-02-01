@@ -17,10 +17,11 @@
 package com.android.server.powerstats;
 
 import android.content.Context;
-import android.hardware.power.stats.ChannelInfo;
+import android.hardware.power.stats.Channel;
+import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
-import android.hardware.power.stats.PowerEntityInfo;
+import android.hardware.power.stats.PowerEntity;
 import android.hardware.power.stats.StateResidencyResult;
 import android.os.Handler;
 import android.os.Looper;
@@ -30,11 +31,11 @@ import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.server.powerstats.PowerStatsHALWrapper.IPowerStatsHALWrapper;
-import com.android.server.powerstats.ProtoStreamUtils.ChannelInfoUtils;
-import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerIdUtils;
+import com.android.server.powerstats.ProtoStreamUtils.ChannelUtils;
 import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerResultUtils;
+import com.android.server.powerstats.ProtoStreamUtils.EnergyConsumerUtils;
 import com.android.server.powerstats.ProtoStreamUtils.EnergyMeasurementUtils;
-import com.android.server.powerstats.ProtoStreamUtils.PowerEntityInfoUtils;
+import com.android.server.powerstats.ProtoStreamUtils.PowerEntityUtils;
 import com.android.server.powerstats.ProtoStreamUtils.StateResidencyResultUtils;
 
 import java.io.ByteArrayInputStream;
@@ -106,9 +107,9 @@ public final class PowerStatsLogger extends Handler {
         final ProtoOutputStream pos = new ProtoOutputStream(fd);
 
         try {
-            ChannelInfo[] channelInfo = mPowerStatsHALWrapper.getEnergyMeterInfo();
-            ChannelInfoUtils.packProtoMessage(channelInfo, pos);
-            if (DEBUG) ChannelInfoUtils.print(channelInfo);
+            Channel[] channel = mPowerStatsHALWrapper.getEnergyMeterInfo();
+            ChannelUtils.packProtoMessage(channel, pos);
+            if (DEBUG) ChannelUtils.print(channel);
 
             mPowerStatsMeterStorage.read(new PowerStatsDataStorage.DataElementReadCallback() {
                 @Override
@@ -147,9 +148,9 @@ public final class PowerStatsLogger extends Handler {
         final ProtoOutputStream pos = new ProtoOutputStream(fd);
 
         try {
-            int[] energyConsumerId = mPowerStatsHALWrapper.getEnergyConsumerInfo();
-            EnergyConsumerIdUtils.packProtoMessage(energyConsumerId, pos);
-            if (DEBUG) EnergyConsumerIdUtils.print(energyConsumerId);
+            EnergyConsumer[] energyConsumer = mPowerStatsHALWrapper.getEnergyConsumerInfo();
+            EnergyConsumerUtils.packProtoMessage(energyConsumer, pos);
+            if (DEBUG) EnergyConsumerUtils.print(energyConsumer);
 
             mPowerStatsModelStorage.read(new PowerStatsDataStorage.DataElementReadCallback() {
                 @Override
@@ -188,9 +189,9 @@ public final class PowerStatsLogger extends Handler {
         final ProtoOutputStream pos = new ProtoOutputStream(fd);
 
         try {
-            PowerEntityInfo[] powerEntityInfo = mPowerStatsHALWrapper.getPowerEntityInfo();
-            PowerEntityInfoUtils.packProtoMessage(powerEntityInfo, pos);
-            if (DEBUG) PowerEntityInfoUtils.print(powerEntityInfo);
+            PowerEntity[] powerEntity = mPowerStatsHALWrapper.getPowerEntityInfo();
+            PowerEntityUtils.packProtoMessage(powerEntity, pos);
+            if (DEBUG) PowerEntityUtils.print(powerEntity);
 
             mPowerStatsResidencyStorage.read(new PowerStatsDataStorage.DataElementReadCallback() {
                 @Override

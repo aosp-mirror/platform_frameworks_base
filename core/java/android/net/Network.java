@@ -22,6 +22,7 @@ import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -381,7 +382,13 @@ public class Network implements Parcelable {
         // Query a property of the underlying socket to ensure that the socket's file descriptor
         // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        bindSocket(socket.getFileDescriptor$());
+        final ParcelFileDescriptor pfd = ParcelFileDescriptor.fromDatagramSocket(socket);
+        bindSocket(pfd.getFileDescriptor());
+        // ParcelFileDescriptor.fromSocket() creates a dup of the original fd. The original and the
+        // dup share the underlying socket in the kernel. The socket is never truly closed until the
+        // last fd pointing to the socket being closed. So close the dup one after binding the
+        // socket to control the lifetime of the dup fd.
+        pfd.close();
     }
 
     /**
@@ -393,7 +400,13 @@ public class Network implements Parcelable {
         // Query a property of the underlying socket to ensure that the socket's file descriptor
         // exists, is available to bind to a network and is not closed.
         socket.getReuseAddress();
-        bindSocket(socket.getFileDescriptor$());
+        final ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(socket);
+        bindSocket(pfd.getFileDescriptor());
+        // ParcelFileDescriptor.fromSocket() creates a dup of the original fd. The original and the
+        // dup share the underlying socket in the kernel. The socket is never truly closed until the
+        // last fd pointing to the socket being closed. So close the dup one after binding the
+        // socket to control the lifetime of the dup fd.
+        pfd.close();
     }
 
     /**
@@ -421,7 +434,7 @@ public class Network implements Parcelable {
             throw new SocketException("Only AF_INET/AF_INET6 sockets supported");
         }
 
-        final int err = NetworkUtils.bindSocketToNetwork(fd.getInt$(), netId);
+        final int err = NetworkUtils.bindSocketToNetwork(fd, netId);
         if (err != 0) {
             // bindSocketToNetwork returns negative errno.
             throw new ErrnoException("Binding socket to network " + netId, -err)

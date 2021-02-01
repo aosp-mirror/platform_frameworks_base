@@ -54,15 +54,17 @@ import org.junit.runners.Parameterized
 @FlakyTest(bugId = 152738416)
 class EnterPipTest(
     testName: String,
-    flickerSpec: Flicker
-) : FlickerTestRunner(testName, flickerSpec) {
+    flickerProvider: () -> Flicker,
+    cleanUp: Boolean
+) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = PipAppHelper(instrumentation)
-            return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
+            return FlickerTestRunnerFactory(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0))
                 .buildTest { configuration ->
                     withTestName { buildTestTag("enterPip", testApp, configuration) }
                     repeat { configuration.repetitions }
@@ -72,7 +74,7 @@ class EnterPipTest(
                         }
                         eachRun {
                             device.pressHome()
-                            testApp.open()
+                            testApp.launchViaIntent(wmHelper)
                             this.setRotation(configuration.startRotation)
                         }
                     }

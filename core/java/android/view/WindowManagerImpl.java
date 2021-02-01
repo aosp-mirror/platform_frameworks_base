@@ -24,6 +24,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.app.ResourcesManager;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -74,23 +75,42 @@ public final class WindowManagerImpl implements WindowManager {
     public final Context mContext;
     private final Window mParentWindow;
 
+    /**
+     * If {@link LayoutParams#token} is {@code null} and no parent window is specified, the value
+     * of {@link LayoutParams#token} will be overridden to {@code mDefaultToken}.
+     */
     private IBinder mDefaultToken;
 
+    /**
+     * This token will be set to {@link LayoutParams#mWindowContextToken} and used to receive
+     * configuration changes from the server side.
+     */
+    @Nullable
+    private final IBinder mWindowContextToken;
+
     public WindowManagerImpl(Context context) {
-        this(context, null);
+        this(context, null /* parentWindow */, null /* clientToken */);
     }
 
-    private WindowManagerImpl(Context context, Window parentWindow) {
+    private WindowManagerImpl(Context context, Window parentWindow,
+            @Nullable IBinder windowContextToken) {
         mContext = context;
         mParentWindow = parentWindow;
+        mWindowContextToken = windowContextToken;
     }
 
     public WindowManagerImpl createLocalWindowManager(Window parentWindow) {
-        return new WindowManagerImpl(mContext, parentWindow);
+        return new WindowManagerImpl(mContext, parentWindow, mWindowContextToken);
     }
 
     public WindowManagerImpl createPresentationWindowManager(Context displayContext) {
-        return new WindowManagerImpl(displayContext, mParentWindow);
+        return new WindowManagerImpl(displayContext, mParentWindow, mWindowContextToken);
+    }
+
+    /** Creates a {@link WindowManager} for a {@link android.app.WindowContext}. */
+    public static WindowManager createWindowContextWindowManager(Context context) {
+        final IBinder clientToken = context.getWindowContextToken();
+        return new WindowManagerImpl(context, null /* parentWindow */, clientToken);
     }
 
     /**
@@ -105,30 +125,27 @@ public final class WindowManagerImpl implements WindowManager {
 
     @Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
-        applyDefaultToken(params);
+        applyTokens(params);
         mGlobal.addView(view, params, mContext.getDisplayNoVerify(), mParentWindow,
                 mContext.getUserId());
     }
 
     @Override
     public void updateViewLayout(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
-        applyDefaultToken(params);
+        applyTokens(params);
         mGlobal.updateViewLayout(view, params);
     }
 
-    private void applyDefaultToken(@NonNull ViewGroup.LayoutParams params) {
-        // Only use the default token if we don't have a parent window.
-        if (mDefaultToken != null && mParentWindow == null) {
-            if (!(params instanceof WindowManager.LayoutParams)) {
-                throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
-            }
-
-            // Only use the default token if we don't already have a token.
-            final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
-            if (wparams.token == null) {
-                wparams.token = mDefaultToken;
-            }
+    private void applyTokens(@NonNull ViewGroup.LayoutParams params) {
+        if (!(params instanceof WindowManager.LayoutParams)) {
+            throw new IllegalArgumentException("Params must be WindowManager.LayoutParams");
         }
+        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+        // Only use the default token if we don't have a parent window and a token.
+        if (mDefaultToken != null && mParentWindow == null && wparams.token == null) {
+            wparams.token = mDefaultToken;
+        }
+        wparams.mWindowContextToken = mWindowContextToken;
     }
 
     @Override

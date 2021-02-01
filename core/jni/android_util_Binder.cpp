@@ -30,7 +30,6 @@
 #include <unistd.h>
 
 #include <android-base/stringprintf.h>
-#include <android-base/threads.h>
 #include <binder/BpBinder.h>
 #include <binder/IInterface.h>
 #include <binder/IPCThreadState.h>
@@ -1043,10 +1042,6 @@ static void android_os_Binder_setExtension(JNIEnv* env, jobject obj, jobject ext
     jbh->setExtension(extension);
 }
 
-static jint android_os_Binder_getNativeTid() {
-    return (jint)android::base::GetThreadId();
-}
-
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gBinderMethods[] = {
@@ -1079,8 +1074,6 @@ static const JNINativeMethod gBinderMethods[] = {
     { "blockUntilThreadAvailable", "()V", (void*)android_os_Binder_blockUntilThreadAvailable },
     { "getExtension", "()Landroid/os/IBinder;", (void*)android_os_Binder_getExtension },
     { "setExtension", "(Landroid/os/IBinder;)V", (void*)android_os_Binder_setExtension },
-    // @CriticalNative
-    { "getNativeTid", "()I", (void*)android_os_Binder_getNativeTid },
 };
 
 const char* const kBinderPathName = "android/os/Binder";

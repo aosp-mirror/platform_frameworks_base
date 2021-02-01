@@ -154,6 +154,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.role.RoleManagerLocal;
 import com.android.server.BatteryService;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalManagerRegistry;
@@ -162,7 +163,6 @@ import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.notification.NotificationManagerService;
-import com.android.server.role.RoleManagerLocal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
 import com.android.server.stats.pull.netstats.NetworkStatsExt;
@@ -406,8 +406,6 @@ public class StatsPullAtomService extends SystemService {
         super(context);
         mContext = context;
     }
-
-    private native void nativeInit();
 
     /**
      * Use of this StatsPullAtomCallbackImpl means we avoid one class per tagId, which we would
@@ -681,7 +679,6 @@ public class StatsPullAtomService extends SystemService {
         super.onBootPhase(phase);
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             BackgroundThread.getHandler().post(() -> {
-                nativeInit();
                 initializePullersState();
                 registerPullers();
                 registerEventListeners();

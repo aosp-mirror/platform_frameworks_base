@@ -421,7 +421,7 @@ public class MockSystemServices {
     }
 
     public static class UserManagerForMock {
-        public boolean isSplitSystemUser() {
+        public boolean isHeadlessSystemUserMode() {
             return false;
         }
     }

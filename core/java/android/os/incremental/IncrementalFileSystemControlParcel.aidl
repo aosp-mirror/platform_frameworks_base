@@ -25,4 +25,5 @@ parcelable IncrementalFileSystemControlParcel {
     ParcelFileDescriptor cmd;
     ParcelFileDescriptor pendingReads;
     ParcelFileDescriptor log;
+    @nullable ParcelFileDescriptor blocksWritten;
 }

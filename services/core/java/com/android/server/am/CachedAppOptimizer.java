@@ -80,20 +80,22 @@ public final class CachedAppOptimizer {
 
     // Phenotype sends int configurations and we map them to the strings we'll use on device,
     // preventing a weird string value entering the kernel.
+    private static final int COMPACT_ACTION_NONE = 0;
+    private static final int COMPACT_ACTION_FILE = 1;
+    private static final int COMPACT_ACTION_ANON = 2;
+    private static final int COMPACT_ACTION_FULL = 3;
+
+    private static final String COMPACT_ACTION_STRING[] = {"", "file", "anon", "all"};
+
+    // Keeps these flags in sync with services/core/jni/com_android_server_am_CachedAppOptimizer.cpp
     private static final int COMPACT_ACTION_FILE_FLAG = 1;
     private static final int COMPACT_ACTION_ANON_FLAG = 2;
-    private static final int COMPACT_ACTION_FULL_FLAG = 3;
-    private static final int COMPACT_ACTION_NONE_FLAG = 4;
-    private static final String COMPACT_ACTION_NONE = "";
-    private static final String COMPACT_ACTION_FILE = "file";
-    private static final String COMPACT_ACTION_ANON = "anon";
-    private static final String COMPACT_ACTION_FULL = "all";
 
     // Defaults for phenotype flags.
     @VisibleForTesting static final Boolean DEFAULT_USE_COMPACTION = false;
     @VisibleForTesting static final Boolean DEFAULT_USE_FREEZER = false;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE_FLAG;
-    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL_FLAG;
+    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_1 = COMPACT_ACTION_FILE;
+    @VisibleForTesting static final int DEFAULT_COMPACT_ACTION_2 = COMPACT_ACTION_FULL;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_1 = 5_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_2 = 10_000;
     @VisibleForTesting static final long DEFAULT_COMPACT_THROTTLE_3 = 500;
@@ -232,6 +234,8 @@ public final class CachedAppOptimizer {
     @VisibleForTesting
     Handler mCompactionHandler;
     private Handler mFreezeHandler;
+    @GuardedBy("mAm")
+    private boolean mFreezerOverride = false;
 
     // Maps process ID to last compaction statistics for processes that we've fully compacted. Used
     // when evaluating throttles that we only consider for "full" compaction, so we don't store
@@ -406,6 +410,14 @@ public final class CachedAppOptimizer {
     private native void compactSystem();
 
     /**
+     * Compacts a process or app
+     * @param pid pid of process to compact
+     * @param compactionFlags selects the compaction type as defined by COMPACT_ACTION_{TYPE}_FLAG
+     *         constants
+     */
+    static private native void compactProcess(int pid, int compactionFlags);
+
+    /**
      * Reads the flag value from DeviceConfig to determine whether app compaction
      * should be enabled, and starts the freeze/compaction thread if needed.
      */
@@ -454,21 +466,35 @@ public final class CachedAppOptimizer {
             }
         }
 
-        try {
-            enableFreezerInternal(enable);
-            return true;
-        } catch (java.lang.RuntimeException e) {
-            if (enable) {
-                mFreezerDisableCount = 0;
-            } else {
-                mFreezerDisableCount = 1;
-            }
+        // Override is applied immediately, restore is delayed
+        synchronized (mAm) {
+            int processCount = mAm.mProcessList.mLruProcesses.size();
 
-            Slog.e(TAG_AM, "Exception handling freezer state (enable: " + enable + "): "
-                    + e.toString());
+            mFreezerOverride = !enable;
+            Slog.d(TAG_AM, "freezer override set to " + mFreezerOverride);
+
+            for (int i = 0; i < processCount; i++) {
+                ProcessRecord process = mAm.mProcessList.mLruProcesses.get(i);
+
+                if (process == null) {
+                    continue;
+                }
+
+                if (enable && process.freezerOverride) {
+                    freezeAppAsync(process);
+                    process.freezerOverride = false;
+                }
+
+                if (!enable && process.frozen) {
+                    unfreezeAppLocked(process);
+
+                    // Set freezerOverride *after* calling unfreezeAppLocked (it resets the flag)
+                    process.freezerOverride = true;
+                }
+            }
         }
 
-        return false;
+        return true;
     }
 
     /**
@@ -515,7 +541,7 @@ public final class CachedAppOptimizer {
         FileReader fr = null;
 
         try {
-            fr = new FileReader("/sys/fs/cgroup/freezer/cgroup.freeze");
+            fr = new FileReader("/sys/fs/cgroup/uid_0/cgroup.freeze");
             char state = (char) fr.read();
 
             if (state == '1' || state == '0') {
@@ -706,18 +732,11 @@ public final class CachedAppOptimizer {
 
     @VisibleForTesting
     static String compactActionIntToString(int action) {
-        switch(action) {
-            case COMPACT_ACTION_NONE_FLAG:
-                return COMPACT_ACTION_NONE;
-            case COMPACT_ACTION_FILE_FLAG:
-                return COMPACT_ACTION_FILE;
-            case COMPACT_ACTION_ANON_FLAG:
-                return COMPACT_ACTION_ANON;
-            case COMPACT_ACTION_FULL_FLAG:
-                return COMPACT_ACTION_FULL;
-            default:
-                return COMPACT_ACTION_NONE;
+        if (action < 0 || action >= COMPACT_ACTION_STRING.length) {
+            return "";
         }
+
+        return COMPACT_ACTION_STRING[action];
     }
 
     // This will ensure app will be out of the freezer for at least FREEZE_TIMEOUT_MS
@@ -744,6 +763,8 @@ public final class CachedAppOptimizer {
     void unfreezeAppLocked(ProcessRecord app) {
         mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
 
+        app.freezerOverride = false;
+
         if (!app.frozen) {
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM,
@@ -753,6 +774,8 @@ public final class CachedAppOptimizer {
             return;
         }
 
+        // Unfreeze the binder interface first, to avoid transactions triggered by timers fired
+        // right after unfreezing the process to fail
         boolean processKilled = false;
 
         try {
@@ -950,11 +973,11 @@ public final class CachedAppOptimizer {
                             action = mCompactActionFull;
                             break;
                         default:
-                            action = COMPACT_ACTION_NONE;
+                            action = COMPACT_ACTION_STRING[COMPACT_ACTION_NONE];
                             break;
                     }
 
-                    if (COMPACT_ACTION_NONE.equals(action)) {
+                    if (COMPACT_ACTION_STRING[COMPACT_ACTION_NONE].equals(action)) {
                         return;
                     }
 
@@ -978,7 +1001,8 @@ public final class CachedAppOptimizer {
                         return;
                     }
 
-                    if (action.equals(COMPACT_ACTION_FULL) || action.equals(COMPACT_ACTION_ANON)) {
+                    if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])
+                            || action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
                         if (mFullAnonRssThrottleKb > 0L
                                 && anonRssBefore < mFullAnonRssThrottleKb) {
                             if (DEBUG_COMPACTION) {
@@ -1054,8 +1078,8 @@ public final class CachedAppOptimizer {
                             proc.lastCompactTime = end;
                             proc.lastCompactAction = pendingAction;
                         }
-                        if (action.equals(COMPACT_ACTION_FULL)
-                                || action.equals(COMPACT_ACTION_ANON)) {
+                        if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])
+                                || action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
                             // Remove entry and insert again to update insertion order.
                             mLastCompactionStats.remove(pid);
                             mLastCompactionStats.put(pid, new LastCompactionStats(rssAfter));
@@ -1131,10 +1155,29 @@ public final class CachedAppOptimizer {
                     return;
                 }
 
+                if (mFreezerOverride) {
+                    proc.freezerOverride = true;
+                    Slog.d(TAG_AM, "Skipping freeze for process " + pid
+                            + " " + name + " curAdj = " + proc.curAdj
+                            + "(override)");
+                    return;
+                }
+
                 if (pid == 0 || proc.frozen) {
                     // Already frozen or not a real process, either one being
                     // launched or one being killed
                     return;
+                }
+
+                // Freeze binder interface before the process, to flush any
+                // transactions that might be pending.
+                try {
+                    freezeBinder(pid, true);
+                } catch (RuntimeException e) {
+                    Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
+                    proc.kill("Unable to freeze binder interface",
+                            ApplicationExitInfo.REASON_OTHER,
+                            ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
                 }
 
                 long unfreezeTime = proc.freezeUnfreezeTime;
@@ -1162,15 +1205,6 @@ public final class CachedAppOptimizer {
             }
 
             EventLog.writeEvent(EventLogTags.AM_FREEZE, pid, name);
-
-            try {
-                freezeBinder(pid, true);
-            } catch (RuntimeException e) {
-                Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
-                proc.kill("Unable to freeze binder interface",
-                        ApplicationExitInfo.REASON_OTHER,
-                        ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
-            }
 
             // See above for why we're not taking mPhenotypeFlagLock here
             if (mRandom.nextFloat() < mFreezerStatsdSampleRate) {
@@ -1229,8 +1263,12 @@ public final class CachedAppOptimizer {
         // Compact process.
         @Override
         public void performCompaction(String action, int pid) throws IOException {
-            try (FileOutputStream fos = new FileOutputStream("/proc/" + pid + "/reclaim")) {
-                fos.write(action.getBytes());
+            if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG | COMPACT_ACTION_ANON_FLAG);
+            } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FILE])) {
+                compactProcess(pid, COMPACT_ACTION_FILE_FLAG);
+            } else if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
+                compactProcess(pid, COMPACT_ACTION_ANON_FLAG);
             }
         }
     }

@@ -20,12 +20,12 @@ import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toolbar;
@@ -79,15 +79,19 @@ public class QSCustomizer extends LinearLayout {
                 mContext.getString(com.android.internal.R.string.reset));
         // Prototype menu item
         toolbar.getMenu()
-                .add(Menu.NONE, MENU_REMOVE_LABELS, Menu.NONE, "Remove labels")
-                .setCheckable(true)
-                .setVisible(Build.IS_ENG || Build.IS_USERDEBUG);
+                .add(Menu.NONE, MENU_REMOVE_LABELS, Menu.NONE, R.string.qs_remove_labels)
+                .setCheckable(true);
         toolbar.setTitle(R.string.qs_edit);
         mRecyclerView = findViewById(android.R.id.list);
         mTransparentView = findViewById(R.id.customizer_transparent_view);
         DefaultItemAnimator animator = new DefaultItemAnimator();
         animator.setMoveDuration(TileAdapter.MOVE_DURATION);
         mRecyclerView.setItemAnimator(animator);
+    }
+
+    MenuItem getRemoveItem() {
+        return ((Toolbar) findViewById(com.android.internal.R.id.action_bar))
+                .getMenu().findItem(MENU_REMOVE_LABELS);
     }
 
     void updateResources() {

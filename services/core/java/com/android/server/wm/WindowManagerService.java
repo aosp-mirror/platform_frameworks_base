@@ -48,7 +48,6 @@ import static android.provider.Settings.Global.DEVELOPMENT_RENDER_SHADOWS_IN_COM
 import static android.provider.Settings.Global.DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.SurfaceControl.getGlobalTransaction;
 import static android.view.WindowManager.DISPLAY_IME_POLICY_FALLBACK_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
@@ -1013,6 +1012,9 @@ public class WindowManagerService extends IWindowManager.Stub
     // ignored.
     private float mTaskLetterboxAspectRatio;
 
+    // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
+    private int mLetterboxActivityCornersRadius;
+
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
@@ -1240,6 +1242,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
         mTaskLetterboxAspectRatio = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
+        mLetterboxActivityCornersRadius = context.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
@@ -1466,7 +1470,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0;
         int res = mPolicy.checkAddPermission(attrs.type, isRoundedCornerOverlay, attrs.packageName,
                 appOp);
-        if (res != WindowManagerGlobal.ADD_OKAY) {
+        if (res != ADD_OKAY) {
             return res;
         }
 
@@ -1556,6 +1560,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
             boolean addToastWindowRequiresToken = false;
 
+            final IBinder windowContextToken = attrs.mWindowContextToken;
+
             if (token == null) {
                 if (!unprivilegedAppCanCreateTokenWith(parentWindow, callingUid, type,
                         rootType, attrs.token, attrs.packageName)) {
@@ -1564,6 +1570,14 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (hasParent) {
                     // Use existing parent window token for child windows.
                     token = parentWindow.mToken;
+                } else if (mWindowContextListenerController.hasListener(windowContextToken)) {
+                    // Respect the window context token if the user provided it.
+                    final IBinder binder = attrs.token != null ? attrs.token : windowContextToken;
+                    final Bundle options = mWindowContextListenerController
+                            .getOptions(windowContextToken);
+                    token = new WindowToken(this, binder, type, false /* persistOnEmpty */,
+                            displayContent, session.mCanAddInternalSystemWindow, callingUid,
+                            isRoundedCornerOverlay, true /* fromClientToken */, options);
                 } else {
                     final IBinder binder = attrs.token != null ? attrs.token : client.asBinder();
                     token = new WindowToken(this, binder, type, false, displayContent,
@@ -1632,8 +1646,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // It is not valid to use an app token with other system types; we will
                 // instead make a new token for it (as if null had been passed in for the token).
                 attrs.token = null;
-                token = new WindowToken(this, client.asBinder(), type, false, displayContent,
-                        session.mCanAddInternalSystemWindow);
+                token = new WindowToken(this, client.asBinder(), type, false /* persistOnEmpty */,
+                        displayContent, session.mCanAddInternalSystemWindow);
             }
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
@@ -1657,7 +1671,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.updateRequestedVisibility(requestedVisibility);
 
             res = displayPolicy.validateAddingWindowLw(attrs, callingPid, callingUid);
-            if (res != WindowManagerGlobal.ADD_OKAY) {
+            if (res != ADD_OKAY) {
                 return res;
             }
 
@@ -1688,7 +1702,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 // show a focusable toasts while it has focus which will be kept on
                 // the screen after the activity goes away.
                 if (addToastWindowRequiresToken
-                        || (attrs.flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0
+                        || (attrs.flags & FLAG_NOT_FOCUSABLE) == 0
                         || displayContent.mCurrentFocus == null
                         || displayContent.mCurrentFocus.mOwnerUid != callingUid) {
                     mH.sendMessageDelayed(
@@ -1697,9 +1711,26 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
 
+            // Switch to listen to the {@link WindowToken token}'s configuration changes when
+            // adding a window to the window context.
+            if (mWindowContextListenerController.hasListener(windowContextToken)) {
+                final int windowContextType = mWindowContextListenerController
+                        .getWindowType(windowContextToken);
+                if (type != windowContextType) {
+                    ProtoLog.w(WM_ERROR, "Window types in WindowContext and"
+                            + " LayoutParams.type should match! Type from LayoutParams is %d,"
+                            + " but type from WindowContext is %d", type, windowContextType);
+                    return WindowManagerGlobal.ADD_INVALID_TYPE;
+                }
+                final Bundle options = mWindowContextListenerController
+                        .getOptions(windowContextToken);
+                mWindowContextListenerController.registerWindowContainerListener(
+                        windowContextToken, token, callingUid, type, options);
+            }
+
             // From now on, no exceptions or errors allowed!
 
-            res = WindowManagerGlobal.ADD_OKAY;
+            res = ADD_OKAY;
 
             if (mUseBLAST) {
                 res |= WindowManagerGlobal.ADD_FLAG_USE_BLAST;
@@ -2558,14 +2589,6 @@ public class WindowManagerService extends IWindowManager.Stub
             mAccessibilityController.onWindowTransitionLocked(win, transit);
         }
 
-        // When we start the exit animation we take the Surface from the client
-        // so it will stop perturbing it. We need to likewise takeaway the SurfaceFlinger
-        // side child surfaces, so they will remain preserved in their current state
-        // (rather than be cleaned up immediately by the app code).
-        SurfaceControl.openTransaction();
-        winAnimator.detachChildren(getGlobalTransaction());
-        SurfaceControl.closeTransaction();
-
         return focusMayChange;
     }
 
@@ -2763,7 +2786,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final DisplayArea da = dc.getAreaForWindowToken(type, options,
                         callerCanManageAppTokens, false /* roundedCornerOverlay */);
                 mWindowContextListenerController.registerWindowContainerListener(clientToken, da,
-                        callingUid);
+                        callingUid, type, options);
                 return true;
             }
         } finally {
@@ -2779,9 +2802,18 @@ public class WindowManagerService extends IWindowManager.Stub
         final long origId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                if (mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
+                if (!mWindowContextListenerController.assertCallerCanRemoveListener(clientToken,
                         callerCanManageAppTokens, callingUid)) {
-                    mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+                    return;
+                }
+                final WindowContainer wc = mWindowContextListenerController
+                        .getContainer(clientToken);
+
+                mWindowContextListenerController.unregisterWindowContainerListener(clientToken);
+
+                final WindowToken token = wc.asWindowToken();
+                if (token != null && token.isFromClient()) {
+                    removeWindowToken(token.token, token.getDisplayContent().getDisplayId());
                 }
             }
         } finally {
@@ -2792,13 +2824,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isWindowToken(IBinder binder) {
         synchronized (mGlobalLock) {
-            final WindowToken windowToken = mRoot.getWindowToken(binder);
-            if (windowToken == null) {
-                return false;
-            }
-            // We don't allow activity tokens in WindowContext. TODO(window-context): rename method
-            return windowToken.asActivityRecord() == null;
+            return mRoot.getWindowToken(binder) != null;
         }
+
     }
 
     @Override
@@ -2990,10 +3018,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
-    void getStackBounds(int windowingMode, int activityType, Rect bounds) {
-        final Task stack = mRoot.getRootTask(windowingMode, activityType);
-        if (stack != null) {
-            stack.getBounds(bounds);
+    void getRootTaskBounds(int windowingMode, int activityType, Rect bounds) {
+        final Task rootTask = mRoot.getRootTask(windowingMode, activityType);
+        if (rootTask != null) {
+            rootTask.getBounds(bounds);
             return;
         }
         bounds.setEmpty();
@@ -3452,7 +3480,7 @@ public class WindowManagerService extends IWindowManager.Stub
             mRoot.switchUser(newUserId);
             mWindowPlacerLocked.performSurfacePlacement();
 
-            // Notify whether the docked stack exists for the current user
+            // Notify whether the root docked task exists for the current user
             final DisplayContent displayContent = getDefaultDisplayContentLocked();
 
             mRoot.forAllDisplays(dc -> dc.mAppTransition.setCurrentUser(newUserId));
@@ -3913,10 +3941,66 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /**
+     * Overrides corners raidus for activities presented in the letterbox mode. If given value < 0,
+     * both it and a value of {@link
+     * com.android.internal.R.integer.config_letterboxActivityCornersRadius} will be ignored and
+     * and corners of the activity won't be rounded.
+     */
+    void setLetterboxActivityCornersRadius(int cornersRadius) {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mLetterboxActivityCornersRadius = cornersRadius;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Resets corners raidus for activities presented in the letterbox mode to {@link
+     * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
+     */
+    void resetLetterboxActivityCornersRadius() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
+                            com.android.internal.R.integer.config_letterboxActivityCornersRadius);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
+    /**
+     * Whether corners of letterboxed activities are rounded.
+     */
+    boolean isLetterboxActivityCornersRounded() {
+        return getLetterboxActivityCornersRadius() > 0;
+    }
+
+    /**
+     * Gets corners raidus for activities presented in the letterbox mode.
+     */
+    int getLetterboxActivityCornersRadius() {
+        final long origId = Binder.clearCallingIdentity();
+        try {
+            synchronized (mGlobalLock) {
+                return mLetterboxActivityCornersRadius;
+            }
+        } finally {
+            Binder.restoreCallingIdentity(origId);
+        }
+    }
+
     @Override
     public void setIgnoreOrientationRequest(int displayId, boolean ignoreOrientationRequest) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(
-                android.Manifest.permission.SET_ORIENTATION, "setIgnoreOrientationRequest()");
+        if (!checkCallingPermission(
+                android.Manifest.permission.SET_ORIENTATION, "setIgnoreOrientationRequest()")) {
+            throw new SecurityException("Requires SET_ORIENTATION permission");
+        }
 
         final long origId = Binder.clearCallingIdentity();
         try {
@@ -4816,7 +4900,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return mRoot.getTopFocusedDisplayContent().mCurrentFocus;
     }
 
-    Task getImeFocusStackLocked() {
+    Task getImeFocusRootTaskLocked() {
         // Don't use mCurrentFocus.getStack() because it returns home stack for system windows.
         // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
         // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
@@ -5979,8 +6063,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void setRecentsVisibility(boolean visible) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
-                "setRecentsVisibility()");
+        if (!checkCallingPermission(
+                android.Manifest.permission.STATUS_BAR, "setRecentsVisibility()")) {
+            throw new SecurityException("Requires STATUS_BAR permission");
+        }
         synchronized (mGlobalLock) {
             mPolicy.setRecentsVisibilityLw(visible);
         }
@@ -5988,8 +6074,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void hideTransientBars(int displayId) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.STATUS_BAR,
-                "hideTransientBars()");
+        if (!checkCallingPermission(
+                android.Manifest.permission.STATUS_BAR, "hideTransientBars()")) {
+            throw new SecurityException("Requires STATUS_BAR permission");
+        }
+
         synchronized (mGlobalLock) {
             final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
             if (displayContent != null) {
@@ -6804,7 +6893,7 @@ public class WindowManagerService extends IWindowManager.Stub
         return 0;
     }
 
-    void setDockedStackResizing(boolean resizing) {
+    void setDockedRootTaskResizing(boolean resizing) {
         getDefaultDisplayContentLocked().getDockedDividerController().setResizing(resizing);
         requestTraversal();
     }
@@ -8178,11 +8267,11 @@ public class WindowManagerService extends IWindowManager.Stub
             return;
         }
 
-        // We ignore home stack since we don't want home stack to move to front when touched.
-        // Specifically, in freeform we don't want tapping on home to cause the freeform apps to go
-        // behind home. See b/117376413
+        // We ignore root home task since we don't want root home task to move to front when
+        // touched. Specifically, in freeform we don't want tapping on home to cause the freeform
+        // apps to go behind home. See b/117376413
         if (task.isActivityTypeHome()) {
-            // Only ignore home stack if the requested focus home Task is in the same
+            // Only ignore root home task if the requested focus home Task is in the same
             // TaskDisplayArea as the current focus Task.
             TaskDisplayArea homeTda = task.getDisplayArea();
             WindowState curFocusedWindow = getFocusedWindow();
@@ -8291,8 +8380,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Return whether layer tracing is enabled */
     public boolean isLayerTracing() {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
-                "isLayerTracing");
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "isLayerTracing()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
@@ -8324,8 +8416,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Enable or disable layer tracing */
     public void setLayerTracing(boolean enabled) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
-                "setLayerTracing");
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "setLayerTracing()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;
@@ -8351,8 +8446,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** Set layer tracing flags. */
     public void setLayerTracingFlags(int flags) {
-        mAtmInternal.enforceCallerIsRecentsOrHasPermission(android.Manifest.permission.DUMP,
-                "setLayerTracingFlags");
+        if (!checkCallingPermission(
+                android.Manifest.permission.DUMP, "setLayerTracingFlags")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         final long token = Binder.clearCallingIdentity();
         try {
             Parcel data = null;

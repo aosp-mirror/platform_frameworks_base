@@ -894,7 +894,8 @@ public class AppTransitionController {
 
     /**
      * Identifies whether the current transition occurs within a single task or not. This is used
-     * to determine whether animations should be clipped to the task bounds instead of stack bounds.
+     * to determine whether animations should be clipped to the task bounds instead of root task
+     * bounds.
      */
     @VisibleForTesting
     boolean isTransitWithinTask(@TransitionOldType int transit, Task task) {

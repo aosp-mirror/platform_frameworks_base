@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.platform.test.annotations.Presubmit
 import android.view.Surface
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.dsl.runWithFlicker
@@ -34,7 +35,6 @@ import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
-
 import com.android.wm.shell.flicker.dockedStackPrimaryBoundsIsVisible
 import com.android.wm.shell.flicker.dockedStackSecondaryBoundsIsVisible
 import org.junit.Assert
@@ -116,8 +116,8 @@ class EnterLegacySplitScreenTest(
                     )
                 }
                 windowManagerTrace {
-                    end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
+                    end("appWindowIsVisible") {
+                        isVisible(splitScreenApp.defaultWindowName)
                     }
                 }
             }
@@ -141,28 +141,29 @@ class EnterLegacySplitScreenTest(
             assertions {
                 layersTrace {
                     dockedStackPrimaryBoundsIsVisible(
-                            rotation, splitScreenApp.defaultWindowName, 169271943)
+                        rotation, splitScreenApp.defaultWindowName, 169271943)
                     dockedStackSecondaryBoundsIsVisible(
-                            rotation, secondaryApp.defaultWindowName, 169271943)
+                        rotation, secondaryApp.defaultWindowName, 169271943)
                     dockedStackDividerBecomesVisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                    secondaryApp.defaultWindowName)
+                        listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                            secondaryApp.defaultWindowName)
                     )
                 }
                 windowManagerTrace {
-                    end {
-                        showsAppWindow(splitScreenApp.defaultWindowName)
-                                .and().showsAppWindow(secondaryApp.defaultWindowName)
+                    end("appWindowIsVisible") {
+                        isVisible(splitScreenApp.defaultWindowName)
+                            .isVisible(secondaryApp.defaultWindowName)
                     }
                     visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                    secondaryApp.defaultWindowName))
+                        listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
+                            secondaryApp.defaultWindowName))
                 }
             }
         }
     }
 
+    @FlakyTest(bugId = 173875043)
     @Test
     fun testNonResizeableNotDocked() {
         val testTag = "testNonResizeableNotDocked"
@@ -182,15 +183,15 @@ class EnterLegacySplitScreenTest(
                 layersTrace {
                     dockedStackDividerIsInvisible()
                     visibleLayersShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName)
+                        listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName)
                     )
                 }
                 windowManagerTrace {
-                    end {
-                        hidesAppWindow(nonResizeableApp.defaultWindowName)
+                    end("appWindowIsVisible") {
+                        isInvisible(nonResizeableApp.defaultWindowName)
                     }
                     visibleWindowsShownMoreThanOneConsecutiveEntry(
-                            listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName))
+                        listOf(LAUNCHER_PACKAGE_NAME, nonResizeableApp.defaultWindowName))
                 }
             }
         }

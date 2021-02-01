@@ -146,10 +146,16 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     void exitSplitScreen() {
+        exitSplitScreen(null /* childrenToTop */);
+    }
+
+    private void exitSplitScreen(StageTaskListener childrenToTop) {
         final WindowContainerTransaction wct = new WindowContainerTransaction();
-        mSideStage.removeAllTasks(wct);
-        mMainStage.deactivate(wct);
+        mSideStage.removeAllTasks(wct, childrenToTop == mSideStage);
+        mMainStage.deactivate(wct, childrenToTop == mMainStage);
         mTaskOrganizer.applyTransaction(wct);
+        // Reset divider position.
+        mSplitLayout.resetDividerPosition();
     }
 
     void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
@@ -272,41 +278,29 @@ class StageCoordinator implements SplitLayout.LayoutChangeListener,
     }
 
     private void onStageHasChildrenChanged(StageListenerImpl stageListener) {
-        if (stageListener == mSideStageListener) {
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            if (mSideStageListener.mHasChildren) {
-                // Make sure the main stage is active.
-                mMainStage.activate(getMainStageBounds(), wct);
-            } else {
-                // The side stage no long has children so we can deactivate the main stage.
-                mMainStage.deactivate(wct);
+        final boolean hasChildren = stageListener.mHasChildren;
+        final boolean isSideStage = stageListener == mSideStageListener;
+        if (!hasChildren) {
+            if (isSideStage && mMainStageListener.mVisible) {
+                // Exit to main stage if side stage no longer has children.
+                exitSplitScreen(mMainStage);
+            } else if (!isSideStage && mSideStageListener.mVisible) {
+                // Exit to side stage if main stage no longer has children.
+                exitSplitScreen(mSideStage);
             }
+        } else if (isSideStage) {
+            final WindowContainerTransaction wct = new WindowContainerTransaction();
+            // Make sure the main stage is active.
+            mMainStage.activate(getMainStageBounds(), wct);
             mTaskOrganizer.applyTransaction(wct);
         }
     }
 
     @Override
     public void onSnappedToDismiss(boolean bottomOrRight) {
-        if (mSideStagePosition == SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT && bottomOrRight) {
-            // Main stage was fully expanded...Just side side-stage.
-            setSideStageVisibility(false);
-        } else {
-            // Side stage was fully expanded...Move its top task to the main stage
-            // and hide side-stage.
-            // TODO: Would UX prefer the side-stage go into fullscreen mode here?
-            final int taskId = mSideStage.getTopVisibleTaskId();
-            if (taskId == INVALID_TASK_ID) {
-                throw new IllegalStateException("Side stage doesn't have visible task? "
-                        + mSideStage);
-            }
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            mSideStage.removeTask(taskId, mMainStage.mRootTaskInfo.getToken(), wct);
-            mSideStage.setVisibility(false, wct);
-            mTaskOrganizer.applyTransaction(wct);
-        }
-
-        // Reset divider position.
-        mSplitLayout.resetDividerPosition();
+        final boolean mainStageToTop = bottomOrRight
+                && mSideStagePosition == SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+        exitSplitScreen(mainStageToTop ? mMainStage : mSideStage);
     }
 
     @Override

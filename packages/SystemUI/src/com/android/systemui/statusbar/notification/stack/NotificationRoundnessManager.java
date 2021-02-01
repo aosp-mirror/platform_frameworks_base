@@ -16,8 +16,10 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
+import android.content.res.Resources;
 import android.util.MathUtils;
 
+import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -44,11 +46,6 @@ public class NotificationRoundnessManager {
     private Runnable mRoundingChangedCallback;
     private ExpandableNotificationRow mTrackedHeadsUp;
     private float mAppearFraction;
-
-    // Radius for notification corners WITH adjacent notifications
-    // as percent of radius WITHOUT adjacent notifications.
-    // TODO(b/175710408) pull from dimens and hide from beta builds.
-    static final float SMALL_CORNER_RADIUS = 4f/28;
 
     @Inject
     NotificationRoundnessManager(
@@ -128,7 +125,9 @@ public class NotificationRoundnessManager {
         if (view.showingPulsing() && !mBypassController.getBypassEnabled()) {
             return 1.0f;
         }
-        return SMALL_CORNER_RADIUS;
+        final Resources resources = view.getResources();
+        return resources.getDimension(R.dimen.notification_corner_radius_small)
+                / resources.getDimension(R.dimen.notification_corner_radius);
     }
 
     public void setExpanded(float expandedHeight, float appearFraction) {

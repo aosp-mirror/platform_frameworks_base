@@ -43,7 +43,6 @@ import android.os.ResultReceiver;
 import com.android.connectivity.aidl.INetworkAgent;
 import com.android.internal.net.LegacyVpnInfo;
 import com.android.internal.net.VpnConfig;
-import com.android.internal.net.VpnInfo;
 import com.android.internal.net.VpnProfile;
 
 /**

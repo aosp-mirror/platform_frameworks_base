@@ -34,10 +34,14 @@ import static android.os.Process.startWebView;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESS_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.DISPATCH_PROCESSES_CHANGED_UI_MSG;
+import static com.android.server.am.ActivityManagerService.DISPATCH_PROCESS_DIED_UI_MSG;
 import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_DELAY_MS;
 import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_MSG;
 import static com.android.server.am.ActivityManagerService.PERSISTENT_MASK;
@@ -59,6 +63,7 @@ import android.app.ApplicationExitInfo;
 import android.app.ApplicationExitInfo.Reason;
 import android.app.ApplicationExitInfo.SubReason;
 import android.app.IApplicationThread;
+import android.app.IProcessObserver;
 import android.app.IUidObserver;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.Disabled;
@@ -86,6 +91,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
+import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemClock;
@@ -97,18 +103,20 @@ import android.system.Os;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DebugUtils;
 import android.util.EventLog;
 import android.util.LongSparseArray;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
+import android.util.TimeUtils;
+import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ProcessMap;
-import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FrameworkStatsLog;
@@ -117,6 +125,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemConfig;
 import com.android.server.Watchdog;
+import com.android.server.am.ActivityManagerService.ProcessChangeItem;
 import com.android.server.compat.PlatformCompat;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
@@ -134,6 +143,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -144,6 +155,8 @@ import java.util.Set;
  */
 public final class ProcessList {
     static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
+
+    static final String TAG_PROCESS_OBSERVERS = TAG + POSTFIX_PROCESS_OBSERVERS;
 
     // A system property to control if app data isolation is enabled.
     static final String ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY =
@@ -416,7 +429,7 @@ public final class ProcessList {
 
     private boolean mVoldAppDataIsolationEnabled = false;
 
-    private ArrayList<String> mAppDataIsolationWhitelistedApps;
+    private ArrayList<String> mAppDataIsolationAllowlistedApps;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -643,6 +656,25 @@ public final class ProcessList {
      */
     final ArrayList<ProcessRecord> mRemovedProcesses = new ArrayList<ProcessRecord>();
 
+    // Self locked with the inner lock within the RemoteCallbackList
+    private final RemoteCallbackList<IProcessObserver> mProcessObservers =
+            new RemoteCallbackList<>();
+
+    // No lock is needed as it's accessed from single thread only
+    private ProcessChangeItem[] mActiveProcessChanges = new ProcessChangeItem[5];
+
+    @GuardedBy("mProcessChangeLock")
+    private final ArrayList<ProcessChangeItem> mPendingProcessChanges = new ArrayList<>();
+
+    @GuardedBy("mProcessChangeLock")
+    final ArrayList<ProcessChangeItem> mAvailProcessChanges = new ArrayList<>();
+
+    /**
+     * A dedicated lock for dispatching the process changes as it occurs frequently
+     */
+    private final Object mProcessChangeLock = new Object();
+
+
     /**
      * All of the applications we currently have running organized by name.
      * The keys are strings of the application package name (as
@@ -723,7 +755,7 @@ public final class ProcessList {
                 SystemProperties.getBoolean(ANDROID_APP_DATA_ISOLATION_ENABLED_PROPERTY, true);
         mVoldAppDataIsolationEnabled = SystemProperties.getBoolean(
                 ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY, false);
-        mAppDataIsolationWhitelistedApps = new ArrayList<>(
+        mAppDataIsolationAllowlistedApps = new ArrayList<>(
                 SystemConfig.getInstance().getAppDataIsolationWhitelistedApps());
 
         if (sKillHandler == null) {
@@ -1523,47 +1555,34 @@ public final class ProcessList {
         ProcessRecord proc = mProcessNames.get(processName, uid);
         if (false && proc != null && !keepIfLarge
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY
-                && proc.lastCachedPss >= 4000) {
+                && proc.mProfile.getLastCachedPss() >= 4000) {
             // Turn this condition on to cause killing to happen regularly, for testing.
-            synchronized (mService.mProcessStats.mLock) {
-                if (proc.baseProcessTracker != null) {
-                    proc.baseProcessTracker.reportCachedKill(
-                            proc.pkgList.mPkgList, proc.lastCachedPss);
-                    for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                        ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                        FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                                proc.info.uid,
-                                holder.state.getName(),
-                                holder.state.getPackage(),
-                                proc.lastCachedPss, holder.appVersion);
-                    }
-                }
+            final long lastCachedPss;
+            synchronized (mService.mAppProfiler.mProfilerLock) {
+                proc.mProfile.reportCachedKill();
+                lastCachedPss = proc.mProfile.getLastCachedPss();
             }
-            proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
+            proc.kill(Long.toString(lastCachedPss) + "k from cached",
                     ApplicationExitInfo.REASON_OTHER,
                     ApplicationExitInfo.SUBREASON_LARGE_CACHED,
                     true);
         } else if (proc != null && !keepIfLarge
                 && !mService.mAppProfiler.isLastMemoryLevelNormal()
                 && proc.setProcState >= ActivityManager.PROCESS_STATE_CACHED_EMPTY) {
-            if (DEBUG_PSS) Slog.d(TAG_PSS, "May not keep " + proc + ": pss=" + proc
-                    .lastCachedPss);
-            if (proc.lastCachedPss >= getCachedRestoreThresholdKb()) {
-                synchronized (mService.mProcessStats.mLock) {
-                    if (proc.baseProcessTracker != null) {
-                        proc.baseProcessTracker.reportCachedKill(proc.pkgList.mPkgList,
-                                proc.lastCachedPss);
-                        for (int ipkg = proc.pkgList.size() - 1; ipkg >= 0; ipkg--) {
-                            ProcessStats.ProcessStateHolder holder = proc.pkgList.valueAt(ipkg);
-                            FrameworkStatsLog.write(FrameworkStatsLog.CACHED_KILL_REPORTED,
-                                    proc.info.uid,
-                                    holder.state.getName(),
-                                    holder.state.getPackage(),
-                                    proc.lastCachedPss, holder.appVersion);
-                        }
-                    }
+            final long lastCachedPss;
+            boolean doKilling = false;
+            synchronized (mService.mAppProfiler.mProfilerLock) {
+                lastCachedPss = proc.mProfile.getLastCachedPss();
+                if (lastCachedPss >= getCachedRestoreThresholdKb()) {
+                    proc.mProfile.reportCachedKill();
+                    doKilling = true;
                 }
-                proc.kill(Long.toString(proc.lastCachedPss) + "k from cached",
+            }
+            if (DEBUG_PSS) {
+                Slog.d(TAG_PSS, "May not keep " + proc + ": pss=" + lastCachedPss);
+            }
+            if (doKilling) {
+                proc.kill(Long.toString(lastCachedPss) + "k from cached",
                         ApplicationExitInfo.REASON_OTHER,
                         ApplicationExitInfo.SUBREASON_LARGE_CACHED,
                         true);
@@ -1770,7 +1789,7 @@ public final class ProcessList {
         mService.mProcessesOnHold.remove(app);
 
         checkSlow(startTime, "startProcess: starting to update cpu stats");
-        mService.updateCpuStatsLocked();
+        mService.updateCpuStats();
         checkSlow(startTime, "startProcess: done updating cpu stats");
 
         try {
@@ -1873,10 +1892,16 @@ public final class ProcessList {
                 mService.mNativeDebuggingApp = null;
             }
 
-            if (app.info.isEmbeddedDexUsed()
-                    || (app.info.isPrivilegedApp()
-                        && DexManager.isPackageSelectedToRunOob(app.pkgList.mPkgList.keySet()))) {
+            if (app.info.isEmbeddedDexUsed()) {
                 runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
+            } else if (app.info.isPrivilegedApp()) {
+                final PackageList pkgList = app.getPkgList();
+                synchronized (pkgList) {
+                    if (DexManager.isPackageSelectedToRunOob(
+                            pkgList.getPackageListLocked().keySet())) {
+                        runtimeFlags |= Zygote.ONLY_USE_SYSTEM_OAT_FILES;
+                    }
+                }
             }
 
             if (!disableHiddenApiChecks && !mService.mHiddenApiBlacklist.isDisabled()) {
@@ -2240,7 +2265,7 @@ public final class ProcessList {
             }
 
             Map<String, Pair<String, Long>> pkgDataInfoMap;
-            Map<String, Pair<String, Long>> whitelistedAppDataInfoMap;
+            Map<String, Pair<String, Long>> allowlistedAppDataInfoMap;
             boolean bindMountAppStorageDirs = false;
             boolean bindMountAppsData = mAppDataIsolationEnabled
                     && (UserHandle.isApp(app.uid) || UserHandle.isIsolated(app.uid))
@@ -2248,7 +2273,7 @@ public final class ProcessList {
 
             // Get all packages belongs to the same shared uid. sharedPackages is empty array
             // if it doesn't have shared uid.
-            final PackageManagerInternal pmInt = mService.getPackageManagerInternalLocked();
+            final PackageManagerInternal pmInt = mService.getPackageManagerInternal();
             final String[] sharedPackages = pmInt.getSharedUserPackagesForPackage(
                     app.info.packageName, app.userId);
             final String[] targetPackagesList = sharedPackages.length == 0
@@ -2261,16 +2286,16 @@ public final class ProcessList {
                 bindMountAppsData = false;
             }
 
-            // Remove all packages in pkgDataInfoMap from mAppDataIsolationWhitelistedApps, so
+            // Remove all packages in pkgDataInfoMap from mAppDataIsolationAllowlistedApps, so
             // it won't be mounted twice.
-            final Set<String> whitelistedApps = new ArraySet<>(mAppDataIsolationWhitelistedApps);
+            final Set<String> allowlistedApps = new ArraySet<>(mAppDataIsolationAllowlistedApps);
             for (String pkg : targetPackagesList) {
-                whitelistedApps.remove(pkg);
+                allowlistedApps.remove(pkg);
             }
 
-            whitelistedAppDataInfoMap = getPackageAppDataInfoMap(pmInt,
-                    whitelistedApps.toArray(new String[0]), uid);
-            if (whitelistedAppDataInfoMap == null) {
+            allowlistedAppDataInfoMap = getPackageAppDataInfoMap(pmInt,
+                    allowlistedApps.toArray(new String[0]), uid);
+            if (allowlistedAppDataInfoMap == null) {
                 // TODO(b/152760674): Handle inode == 0 case properly, now we just give it a
                 // tmp free pass.
                 bindMountAppsData = false;
@@ -2295,7 +2320,7 @@ public final class ProcessList {
             // since it has no access to them anyway.
             if (app.isolated) {
                 pkgDataInfoMap = null;
-                whitelistedAppDataInfoMap = null;
+                allowlistedAppDataInfoMap = null;
             }
 
             final Process.ProcessStartResult startResult;
@@ -2314,7 +2339,7 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
                         /*zygotePolicyFlags=*/ ZYGOTE_POLICY_FLAG_EMPTY, isTopApp,
-                        app.mDisabledCompatChanges, pkgDataInfoMap, whitelistedAppDataInfoMap,
+                        app.mDisabledCompatChanges, pkgDataInfoMap, allowlistedAppDataInfoMap,
                         false, false,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             } else {
@@ -2323,7 +2348,7 @@ public final class ProcessList {
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName, zygotePolicyFlags,
                         isTopApp, app.mDisabledCompatChanges, pkgDataInfoMap,
-                        whitelistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
+                        allowlistedAppDataInfoMap, bindMountAppsData, bindMountAppStorageDirs,
                         new String[]{PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkSlow(startTime, "startProcess: returned from zygote!");
@@ -2373,7 +2398,7 @@ public final class ProcessList {
                 // if it had been bad.
                 if (DEBUG_PROCESSES) Slog.v(TAG, "Clearing bad process: " + info.uid
                         + "/" + processName);
-                mService.mAppErrors.resetProcessCrashTimeLocked(processName, info.uid);
+                mService.mAppErrors.resetProcessCrashTime(processName, info.uid);
                 if (mService.mAppErrors.isBadProcess(processName, info.uid)) {
                     EventLog.writeEvent(EventLogTags.AM_PROC_GOOD,
                             UserHandle.getUserId(info.uid), info.uid,
@@ -2421,7 +2446,7 @@ public final class ProcessList {
             if (!app.killed
                     || mService.mAppProfiler.isLastMemoryLevelNormal()
                     || app.setProcState < ActivityManager.PROCESS_STATE_CACHED_EMPTY
-                    || app.lastCachedPss < getCachedRestoreThresholdKb()) {
+                    || app.mProfile.getLastCachedPss() < getCachedRestoreThresholdKb()) {
                 // Throw a wtf if it's not killed, or killed but not because the system was in
                 // memory pressure + the app was in "cch-empty" and used large amount of memory
                 Slog.wtf(TAG_PROCESSES, app.toString() + " is attached to a previous process");
@@ -2736,7 +2761,7 @@ public final class ProcessList {
                     if (userId != UserHandle.USER_ALL && app.userId != userId) {
                         continue;
                     }
-                    if (!app.pkgList.containsKey(packageName) && !isDep) {
+                    if (!app.getPkgList().containsKey(packageName) && !isDep) {
                         continue;
                     }
                 }
@@ -2797,7 +2822,7 @@ public final class ProcessList {
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
                 if (app.isolated) {
                     mService.mBatteryStatsService.removeIsolatedUid(app.uid, app.info.uid);
-                    mService.getPackageManagerInternalLocked().removeIsolatedUid(app.uid);
+                    mService.getPackageManagerInternal().removeIsolatedUid(app.uid);
                 }
             }
             boolean willRestart = false;
@@ -2847,10 +2872,10 @@ public final class ProcessList {
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
-            if (Arrays.binarySearch(mService.mDeviceIdleTempWhitelist,
+            if (Arrays.binarySearch(mService.mDeviceIdleTempAllowlist,
                     UserHandle.getAppId(proc.uid)) >= 0
-                    || mService.mPendingTempWhitelist.indexOfKey(proc.uid) >= 0) {
-                uidRec.setWhitelist = uidRec.curWhitelist = true;
+                    || mService.mPendingTempAllowlist.indexOfKey(proc.uid) >= 0) {
+                uidRec.mSetAllowlist = uidRec.mCurAllowlist = true;
             }
             uidRec.updateHasInternetPermission();
             mActiveUids.put(proc.uid, uidRec);
@@ -2904,7 +2929,7 @@ public final class ProcessList {
                 uid = isolatedUid;
             }
             mAppExitInfoTracker.mIsolatedUidRecords.addIsolatedUid(uid, info.uid);
-            mService.getPackageManagerInternalLocked().addIsolatedUid(uid, info.uid);
+            mService.getPackageManagerInternal().addIsolatedUid(uid, info.uid);
 
             // Register the isolated UID with this application so BatteryStats knows to
             // attribute resource usage to the application.
@@ -2964,6 +2989,7 @@ public final class ProcessList {
                         UidRecord.CHANGE_GONE);
                 EventLogTags.writeAmUidStopped(uid);
                 mActiveUids.remove(uid);
+                mService.mFgsStartTempAllowList.remove(record.info.uid);
                 mService.noteUidProcessState(uid, ActivityManager.PROCESS_STATE_NONEXISTENT,
                         ActivityManager.PROCESS_CAPABILITY_NONE);
             }
@@ -3582,14 +3608,14 @@ public final class ProcessList {
         if (app.hasActivities()) {
             outInfo.flags |= ActivityManager.RunningAppProcessInfo.FLAG_HAS_ACTIVITIES;
         }
-        outInfo.lastTrimLevel = app.trimMemoryLevel;
+        outInfo.lastTrimLevel = app.mProfile.getTrimMemoryLevel();
         int adj = app.curAdj;
         int procState = app.getCurProcState();
         outInfo.importance = procStateToImportance(procState, adj, outInfo,
                 clientTargetSdk);
         outInfo.importanceReasonCode = app.adjTypeCode;
         outInfo.processState = app.getCurProcState();
-        outInfo.isFocused = (app == mService.getTopAppLocked());
+        outInfo.isFocused = (app == mService.getTopApp());
         outInfo.lastActivityTime = app.lastActivityTime;
     }
 
@@ -3653,6 +3679,729 @@ public final class ProcessList {
         pw.println("):");
     }
 
+    void dumpLruEntryLocked(PrintWriter pw, int index, ProcessRecord proc, String prefix) {
+        pw.print(prefix);
+        pw.print('#');
+        if (index < 10) {
+            pw.print(' ');
+        }
+        pw.print(index);
+        pw.print(": ");
+        pw.print(makeOomAdjString(proc.setAdj, false));
+        pw.print(' ');
+        pw.print(makeProcStateString(proc.getCurProcState()));
+        pw.print(' ');
+        ActivityManager.printCapabilitiesSummary(pw, proc.curCapability);
+        pw.print(' ');
+        pw.print(proc.toShortString());
+        if (proc.hasActivitiesOrRecentTasks() || proc.hasClientActivities()
+                || proc.treatLikeActivity) {
+            pw.print(" act:");
+            boolean printed = false;
+            if (proc.hasActivities()) {
+                pw.print("activities");
+                printed = true;
+            }
+            if (proc.hasRecentTasks()) {
+                if (printed) {
+                    pw.print("|");
+                }
+                pw.print("recents");
+                printed = true;
+            }
+            if (proc.hasClientActivities()) {
+                if (printed) {
+                    pw.print("|");
+                }
+                pw.print("client");
+                printed = true;
+            }
+            if (proc.treatLikeActivity) {
+                if (printed) {
+                    pw.print("|");
+                }
+                pw.print("treated");
+            }
+        }
+        pw.println();
+    }
+
+    boolean dumpLruLocked(PrintWriter pw, String dumpPackage, String prefix) {
+        final int lruSize = mLruProcesses.size();
+        final String innerPrefix;
+        if (prefix == null) {
+            pw.println("ACTIVITY MANAGER LRU PROCESSES (dumpsys activity lru)");
+            innerPrefix = "  ";
+        } else {
+            boolean haveAny = false;
+            for (int i = lruSize - 1; i >= 0; i--) {
+                final ProcessRecord r = mLruProcesses.get(i);
+                if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                    continue;
+                }
+                haveAny = true;
+                break;
+            }
+            if (!haveAny) {
+                return false;
+            }
+            pw.print(prefix);
+            pw.println("Raw LRU list (dumpsys activity lru):");
+            innerPrefix = prefix + "  ";
+        }
+        int i;
+        boolean first = true;
+        for (i = lruSize - 1; i >= mLruProcessActivityStart; i--) {
+            final ProcessRecord r = mLruProcesses.get(i);
+            if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                continue;
+            }
+            if (first) {
+                pw.print(innerPrefix);
+                pw.println("Activities:");
+                first = false;
+            }
+            dumpLruEntryLocked(pw, i, r, innerPrefix);
+        }
+        first = true;
+        for (; i >= mLruProcessServiceStart; i--) {
+            final ProcessRecord r = mLruProcesses.get(i);
+            if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                continue;
+            }
+            if (first) {
+                pw.print(innerPrefix);
+                pw.println("Services:");
+                first = false;
+            }
+            dumpLruEntryLocked(pw, i, r, innerPrefix);
+        }
+        first = true;
+        for (; i >= 0; i--) {
+            final ProcessRecord r = mLruProcesses.get(i);
+            if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                continue;
+            }
+            if (first) {
+                pw.print(innerPrefix);
+                pw.println("Other:");
+                first = false;
+            }
+            dumpLruEntryLocked(pw, i, r, innerPrefix);
+        }
+        return true;
+    }
+
+    @GuardedBy("mService")
+    void dumpProcessesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, String dumpPackage, int dumpAppId) {
+        boolean needSep = false;
+        int numPers = 0;
+
+        pw.println("ACTIVITY MANAGER RUNNING PROCESSES (dumpsys activity processes)");
+
+        if (dumpAll || dumpPackage != null) {
+            final int numOfNames = mProcessNames.getMap().size();
+            for (int ip = 0; ip < numOfNames; ip++) {
+                SparseArray<ProcessRecord> procs = mProcessNames.getMap().valueAt(ip);
+                for (int ia = 0, size = procs.size(); ia < size; ia++) {
+                    ProcessRecord r = procs.valueAt(ia);
+                    if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                        continue;
+                    }
+                    if (!needSep) {
+                        pw.println("  All known processes:");
+                        needSep = true;
+                    }
+                    pw.print(r.isPersistent() ? "  *PERS*" : "  *APP*");
+                    pw.print(" UID "); pw.print(procs.keyAt(ia));
+                    pw.print(" "); pw.println(r);
+                    r.dump(pw, "    ");
+                    if (r.isPersistent()) {
+                        numPers++;
+                    }
+                }
+            }
+        }
+
+        if (mIsolatedProcesses.size() > 0) {
+            boolean printed = false;
+            for (int i = 0, size = mIsolatedProcesses.size(); i < size; i++) {
+                ProcessRecord r = mIsolatedProcesses.valueAt(i);
+                if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                    continue;
+                }
+                if (!printed) {
+                    if (needSep) {
+                        pw.println();
+                    }
+                    pw.println("  Isolated process list (sorted by uid):");
+                    printed = true;
+                    needSep = true;
+                }
+                pw.print("    Isolated #"); pw.print(i); pw.print(": ");
+                pw.println(r);
+            }
+        }
+
+        needSep = mService.dumpActiveInstruments(pw, dumpPackage, needSep);
+
+        if (dumpOomLocked(fd, pw, needSep, args, opti, dumpAll, dumpPackage, false)) {
+            needSep = true;
+        }
+
+        if (mActiveUids.size() > 0) {
+            needSep |= mActiveUids.dump(pw, dumpPackage, dumpAppId,
+                    "UID states:", needSep);
+        }
+
+        if (dumpAll) {
+            needSep |= mService.mUidObserverController.dumpValidateUids(pw,
+                    dumpPackage, dumpAppId, "UID validation:", needSep);
+        }
+
+        if (needSep) {
+            pw.println();
+        }
+        if (dumpLruLocked(pw, dumpPackage, "  ")) {
+            needSep = true;
+        }
+
+        if (getLruSizeLocked() > 0) {
+            if (needSep) {
+                pw.println();
+            }
+            dumpLruListHeaderLocked(pw);
+            dumpProcessOomList(pw, mService, mLruProcesses, "    ", "Proc", "PERS", false,
+                    dumpPackage);
+            needSep = true;
+        }
+
+        mService.dumpOtherProcessesInfoLocked(fd, pw, dumpAll, dumpPackage, dumpAppId, numPers,
+                needSep);
+    }
+
+    @GuardedBy("this")
+    void writeProcessesToProtoLocked(ProtoOutputStream proto, String dumpPackage) {
+        int numPers = 0;
+
+        final int numOfNames = mProcessNames.getMap().size();
+        for (int ip = 0; ip < numOfNames; ip++) {
+            SparseArray<ProcessRecord> procs = mProcessNames.getMap().valueAt(ip);
+            for (int ia = 0, size = procs.size(); ia < size; ia++) {
+                ProcessRecord r = procs.valueAt(ia);
+                if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                    continue;
+                }
+                r.dumpDebug(proto, ActivityManagerServiceDumpProcessesProto.PROCS,
+                        mLruProcesses.indexOf(r)
+                );
+                if (r.isPersistent()) {
+                    numPers++;
+                }
+            }
+        }
+
+        for (int i = 0, size = mIsolatedProcesses.size(); i < size; i++) {
+            ProcessRecord r = mIsolatedProcesses.valueAt(i);
+            if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                continue;
+            }
+            r.dumpDebug(proto, ActivityManagerServiceDumpProcessesProto.ISOLATED_PROCS,
+                    mLruProcesses.indexOf(r)
+            );
+        }
+
+        final int dumpAppId = mService.getAppId(dumpPackage);
+        mActiveUids.dumpProto(proto, dumpPackage, dumpAppId,
+                ActivityManagerServiceDumpProcessesProto.ACTIVE_UIDS);
+
+        if (getLruSizeLocked() > 0) {
+            long lruToken = proto.start(ActivityManagerServiceDumpProcessesProto.LRU_PROCS);
+            int total = getLruSizeLocked();
+            proto.write(ActivityManagerServiceDumpProcessesProto.LruProcesses.SIZE, total);
+            proto.write(ActivityManagerServiceDumpProcessesProto.LruProcesses.NON_ACT_AT,
+                    total - mLruProcessActivityStart);
+            proto.write(ActivityManagerServiceDumpProcessesProto.LruProcesses.NON_SVC_AT,
+                    total - mLruProcessServiceStart);
+            writeProcessOomListToProto(proto,
+                    ActivityManagerServiceDumpProcessesProto.LruProcesses.LIST, mService,
+                    mLruProcesses, false, dumpPackage);
+            proto.end(lruToken);
+        }
+
+        mService.writeOtherProcessesInfoToProtoLocked(proto, dumpPackage, dumpAppId, numPers);
+    }
+
+    private static ArrayList<Pair<ProcessRecord, Integer>> sortProcessOomList(
+            List<ProcessRecord> origList, String dumpPackage) {
+        ArrayList<Pair<ProcessRecord, Integer>> list =
+                new ArrayList<Pair<ProcessRecord, Integer>>(origList.size());
+        for (int i = 0, size = origList.size(); i < size; i++) {
+            ProcessRecord r = origList.get(i);
+            if (dumpPackage != null && !r.getPkgList().containsKey(dumpPackage)) {
+                continue;
+            }
+            list.add(new Pair<ProcessRecord, Integer>(origList.get(i), i));
+        }
+
+        Comparator<Pair<ProcessRecord, Integer>> comparator =
+                new Comparator<Pair<ProcessRecord, Integer>>() {
+            @Override
+            public int compare(Pair<ProcessRecord, Integer> object1,
+                    Pair<ProcessRecord, Integer> object2) {
+                if (object1.first.setAdj != object2.first.setAdj) {
+                    return object1.first.setAdj > object2.first.setAdj ? -1 : 1;
+                }
+                if (object1.first.setProcState != object2.first.setProcState) {
+                    return object1.first.setProcState > object2.first.setProcState ? -1 : 1;
+                }
+                if (object1.second.intValue() != object2.second.intValue()) {
+                    return object1.second.intValue() > object2.second.intValue() ? -1 : 1;
+                }
+                return 0;
+            }
+        };
+
+        Collections.sort(list, comparator);
+        return list;
+    }
+
+    private static boolean writeProcessOomListToProto(ProtoOutputStream proto, long fieldId,
+            ActivityManagerService service, List<ProcessRecord> origList,
+            boolean inclDetails, String dumpPackage) {
+        ArrayList<Pair<ProcessRecord, Integer>> list = sortProcessOomList(origList, dumpPackage);
+        if (list.isEmpty()) return false;
+
+        final long curUptime = SystemClock.uptimeMillis();
+
+        for (int i = list.size() - 1; i >= 0; i--) {
+            ProcessRecord r = list.get(i).first;
+            long token = proto.start(fieldId);
+            String oomAdj = makeOomAdjString(r.setAdj, true);
+            proto.write(ProcessOomProto.PERSISTENT, r.isPersistent());
+            proto.write(ProcessOomProto.NUM, (origList.size() - 1) - list.get(i).second);
+            proto.write(ProcessOomProto.OOM_ADJ, oomAdj);
+            int schedGroup = ProcessOomProto.SCHED_GROUP_UNKNOWN;
+            switch (r.setSchedGroup) {
+                case SCHED_GROUP_BACKGROUND:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_BACKGROUND;
+                    break;
+                case SCHED_GROUP_DEFAULT:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_DEFAULT;
+                    break;
+                case SCHED_GROUP_TOP_APP:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_TOP_APP;
+                    break;
+                case SCHED_GROUP_TOP_APP_BOUND:
+                    schedGroup = ProcessOomProto.SCHED_GROUP_TOP_APP_BOUND;
+                    break;
+            }
+            if (schedGroup != ProcessOomProto.SCHED_GROUP_UNKNOWN) {
+                proto.write(ProcessOomProto.SCHED_GROUP, schedGroup);
+            }
+            if (r.hasForegroundActivities()) {
+                proto.write(ProcessOomProto.ACTIVITIES, true);
+            } else if (r.hasForegroundServices()) {
+                proto.write(ProcessOomProto.SERVICES, true);
+            }
+            proto.write(ProcessOomProto.STATE,
+                    makeProcStateProtoEnum(r.getCurProcState()));
+            proto.write(ProcessOomProto.TRIM_MEMORY_LEVEL, r.mProfile.getTrimMemoryLevel());
+            r.dumpDebug(proto, ProcessOomProto.PROC);
+            proto.write(ProcessOomProto.ADJ_TYPE, r.adjType);
+            if (r.adjSource != null || r.adjTarget != null) {
+                if (r.adjTarget instanceof  ComponentName) {
+                    ComponentName cn = (ComponentName) r.adjTarget;
+                    cn.dumpDebug(proto, ProcessOomProto.ADJ_TARGET_COMPONENT_NAME);
+                } else if (r.adjTarget != null) {
+                    proto.write(ProcessOomProto.ADJ_TARGET_OBJECT, r.adjTarget.toString());
+                }
+                if (r.adjSource instanceof ProcessRecord) {
+                    ProcessRecord p = (ProcessRecord) r.adjSource;
+                    p.dumpDebug(proto, ProcessOomProto.ADJ_SOURCE_PROC);
+                } else if (r.adjSource != null) {
+                    proto.write(ProcessOomProto.ADJ_SOURCE_OBJECT, r.adjSource.toString());
+                }
+            }
+            if (inclDetails) {
+                long detailToken = proto.start(ProcessOomProto.DETAIL);
+                proto.write(ProcessOomProto.Detail.MAX_ADJ, r.maxAdj);
+                proto.write(ProcessOomProto.Detail.CUR_RAW_ADJ, r.getCurRawAdj());
+                proto.write(ProcessOomProto.Detail.SET_RAW_ADJ, r.setRawAdj);
+                proto.write(ProcessOomProto.Detail.CUR_ADJ, r.curAdj);
+                proto.write(ProcessOomProto.Detail.SET_ADJ, r.setAdj);
+                proto.write(ProcessOomProto.Detail.CURRENT_STATE,
+                        makeProcStateProtoEnum(r.getCurProcState()));
+                proto.write(ProcessOomProto.Detail.SET_STATE,
+                        makeProcStateProtoEnum(r.setProcState));
+                proto.write(ProcessOomProto.Detail.LAST_PSS, DebugUtils.sizeValueToString(
+                        r.mProfile.getLastPss() * 1024, new StringBuilder()));
+                proto.write(ProcessOomProto.Detail.LAST_SWAP_PSS, DebugUtils.sizeValueToString(
+                        r.mProfile.getLastSwapPss() * 1024, new StringBuilder()));
+                proto.write(ProcessOomProto.Detail.LAST_CACHED_PSS, DebugUtils.sizeValueToString(
+                        r.mProfile.getLastCachedPss() * 1024, new StringBuilder()));
+                proto.write(ProcessOomProto.Detail.CACHED, r.isCached());
+                proto.write(ProcessOomProto.Detail.EMPTY, r.empty);
+                proto.write(ProcessOomProto.Detail.HAS_ABOVE_CLIENT, r.hasAboveClient);
+
+                if (r.setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
+                    long lastCpuTime = r.mProfile.mLastCpuTime.get();
+                    if (lastCpuTime != 0) {
+                        long uptimeSince = curUptime - service.mLastPowerCheckUptime;
+                        long timeUsed = r.mProfile.mCurCpuTime.get() - lastCpuTime;
+                        long cpuTimeToken = proto.start(ProcessOomProto.Detail.SERVICE_RUN_TIME);
+                        proto.write(ProcessOomProto.Detail.CpuRunTime.OVER_MS, uptimeSince);
+                        proto.write(ProcessOomProto.Detail.CpuRunTime.USED_MS, timeUsed);
+                        proto.write(ProcessOomProto.Detail.CpuRunTime.ULTILIZATION,
+                                (100.0 * timeUsed) / uptimeSince);
+                        proto.end(cpuTimeToken);
+                    }
+                }
+                proto.end(detailToken);
+            }
+            proto.end(token);
+        }
+
+        return true;
+    }
+
+    private static boolean dumpProcessOomList(PrintWriter pw,
+            ActivityManagerService service, List<ProcessRecord> origList,
+            String prefix, String normalLabel, String persistentLabel,
+            boolean inclDetails, String dumpPackage) {
+
+        ArrayList<Pair<ProcessRecord, Integer>> list = sortProcessOomList(origList, dumpPackage);
+        if (list.isEmpty()) return false;
+
+        final long curUptime = SystemClock.uptimeMillis();
+        final long uptimeSince = curUptime - service.mLastPowerCheckUptime;
+
+        for (int i = list.size() - 1; i >= 0; i--) {
+            ProcessRecord r = list.get(i).first;
+            String oomAdj = makeOomAdjString(r.setAdj, false);
+            char schedGroup;
+            switch (r.setSchedGroup) {
+                case SCHED_GROUP_BACKGROUND:
+                    schedGroup = 'b';
+                    break;
+                case SCHED_GROUP_DEFAULT:
+                    schedGroup = 'F';
+                    break;
+                case SCHED_GROUP_TOP_APP:
+                    schedGroup = 'T';
+                    break;
+                case SCHED_GROUP_RESTRICTED:
+                    schedGroup = 'R';
+                    break;
+                case SCHED_GROUP_TOP_APP_BOUND:
+                    schedGroup = 'B';
+                    break;
+                default:
+                    schedGroup = '?';
+                    break;
+            }
+            char foreground;
+            if (r.hasForegroundActivities()) {
+                foreground = 'A';
+            } else if (r.hasForegroundServices()) {
+                foreground = 'S';
+            } else {
+                foreground = ' ';
+            }
+            String procState = makeProcStateString(r.getCurProcState());
+            pw.print(prefix);
+            pw.print(r.isPersistent() ? persistentLabel : normalLabel);
+            pw.print(" #");
+            int num = (origList.size() - 1) - list.get(i).second;
+            if (num < 10) pw.print(' ');
+            pw.print(num);
+            pw.print(": ");
+            pw.print(oomAdj);
+            pw.print(' ');
+            pw.print(schedGroup);
+            pw.print('/');
+            pw.print(foreground);
+            pw.print('/');
+            pw.print(procState);
+            pw.print(' ');
+            ActivityManager.printCapabilitiesSummary(pw, r.curCapability);
+            pw.print(' ');
+            pw.print(" t:");
+            if (r.mProfile.getTrimMemoryLevel() < 10) pw.print(' ');
+            pw.print(r.mProfile.getTrimMemoryLevel());
+            pw.print(' ');
+            pw.print(r.toShortString());
+            pw.print(" (");
+            pw.print(r.adjType);
+            pw.println(')');
+            if (r.adjSource != null || r.adjTarget != null) {
+                pw.print(prefix);
+                pw.print("    ");
+                if (r.adjTarget instanceof ComponentName) {
+                    pw.print(((ComponentName) r.adjTarget).flattenToShortString());
+                } else if (r.adjTarget != null) {
+                    pw.print(r.adjTarget.toString());
+                } else {
+                    pw.print("{null}");
+                }
+                pw.print("<=");
+                if (r.adjSource instanceof ProcessRecord) {
+                    pw.print("Proc{");
+                    pw.print(((ProcessRecord) r.adjSource).toShortString());
+                    pw.println("}");
+                } else if (r.adjSource != null) {
+                    pw.println(r.adjSource.toString());
+                } else {
+                    pw.println("{null}");
+                }
+            }
+            if (inclDetails) {
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print("oom: max="); pw.print(r.maxAdj);
+                pw.print(" curRaw="); pw.print(r.getCurRawAdj());
+                pw.print(" setRaw="); pw.print(r.setRawAdj);
+                pw.print(" cur="); pw.print(r.curAdj);
+                pw.print(" set="); pw.println(r.setAdj);
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print("state: cur="); pw.print(
+                        makeProcStateString(r.getCurProcState()));
+                pw.print(" set="); pw.print(makeProcStateString(r.setProcState));
+                pw.print(" lastPss=");
+                DebugUtils.printSizeValue(pw, r.mProfile.getLastPss() * 1024);
+                pw.print(" lastSwapPss=");
+                DebugUtils.printSizeValue(pw, r.mProfile.getLastSwapPss() * 1024);
+                pw.print(" lastCachedPss=");
+                DebugUtils.printSizeValue(pw, r.mProfile.getLastCachedPss() * 1024);
+                pw.println();
+                pw.print(prefix);
+                pw.print("    ");
+                pw.print("cached="); pw.print(r.isCached());
+                pw.print(" empty="); pw.print(r.empty);
+                pw.print(" hasAboveClient="); pw.println(r.hasAboveClient);
+
+                if (r.setProcState >= ActivityManager.PROCESS_STATE_SERVICE) {
+                    long lastCpuTime = r.mProfile.mLastCpuTime.get();
+                    if (lastCpuTime != 0) {
+                        long timeUsed = r.mProfile.mCurCpuTime.get() - lastCpuTime;
+                        pw.print(prefix);
+                        pw.print("    ");
+                        pw.print("run cpu over ");
+                        TimeUtils.formatDuration(uptimeSince, pw);
+                        pw.print(" used ");
+                        TimeUtils.formatDuration(timeUsed, pw);
+                        pw.print(" (");
+                        pw.print((timeUsed * 100) / uptimeSince);
+                        pw.println("%)");
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private void printOomLevel(PrintWriter pw, String name, int adj) {
+        pw.print("    ");
+        if (adj >= 0) {
+            pw.print(' ');
+            if (adj < 10) pw.print(' ');
+        } else {
+            if (adj > -10) pw.print(' ');
+        }
+        pw.print(adj);
+        pw.print(": ");
+        pw.print(name);
+        pw.print(" (");
+        pw.print(ActivityManagerService.stringifySize(getMemLevel(adj), 1024));
+        pw.println(")");
+    }
+
+    boolean dumpOomLocked(FileDescriptor fd, PrintWriter pw, boolean needSep, String[] args,
+            int opti, boolean dumpAll, String dumpPackage, boolean inclGc) {
+        if (getLruSizeLocked() > 0) {
+            if (needSep) pw.println();
+            needSep = true;
+            pw.println("  OOM levels:");
+            printOomLevel(pw, "SYSTEM_ADJ", SYSTEM_ADJ);
+            printOomLevel(pw, "PERSISTENT_PROC_ADJ", PERSISTENT_PROC_ADJ);
+            printOomLevel(pw, "PERSISTENT_SERVICE_ADJ", PERSISTENT_SERVICE_ADJ);
+            printOomLevel(pw, "FOREGROUND_APP_ADJ", FOREGROUND_APP_ADJ);
+            printOomLevel(pw, "VISIBLE_APP_ADJ", VISIBLE_APP_ADJ);
+            printOomLevel(pw, "PERCEPTIBLE_APP_ADJ", PERCEPTIBLE_APP_ADJ);
+            printOomLevel(pw, "PERCEPTIBLE_LOW_APP_ADJ", PERCEPTIBLE_LOW_APP_ADJ);
+            printOomLevel(pw, "BACKUP_APP_ADJ", BACKUP_APP_ADJ);
+            printOomLevel(pw, "HEAVY_WEIGHT_APP_ADJ", HEAVY_WEIGHT_APP_ADJ);
+            printOomLevel(pw, "SERVICE_ADJ", SERVICE_ADJ);
+            printOomLevel(pw, "HOME_APP_ADJ", HOME_APP_ADJ);
+            printOomLevel(pw, "PREVIOUS_APP_ADJ", PREVIOUS_APP_ADJ);
+            printOomLevel(pw, "SERVICE_B_ADJ", SERVICE_B_ADJ);
+            printOomLevel(pw, "CACHED_APP_MIN_ADJ", CACHED_APP_MIN_ADJ);
+            printOomLevel(pw, "CACHED_APP_MAX_ADJ", CACHED_APP_MAX_ADJ);
+
+            if (needSep) pw.println();
+            pw.print("  Process OOM control ("); pw.print(getLruSizeLocked());
+            pw.print(" total, non-act at ");
+            pw.print(getLruSizeLocked() - mLruProcessActivityStart);
+            pw.print(", non-svc at ");
+            pw.print(getLruSizeLocked() - mLruProcessServiceStart);
+            pw.println("):");
+            dumpProcessOomList(pw, mService, mLruProcesses, "    ", "Proc", "PERS", true,
+                    dumpPackage);
+            needSep = true;
+        }
+
+        synchronized (mService.mAppProfiler.mProfilerLock) {
+            mService.mAppProfiler.dumpProcessesToGc(pw, needSep, dumpPackage);
+        }
+
+        pw.println();
+        mService.mAtmInternal.dumpForOom(pw);
+
+        return true;
+    }
+
+    void registerProcessObserver(IProcessObserver observer) {
+        mProcessObservers.register(observer);
+    }
+
+    void unregisterProcessObserver(IProcessObserver observer) {
+        mProcessObservers.unregister(observer);
+    }
+
+    void dispatchProcessesChanged() {
+        int numOfChanges;
+        synchronized (mProcessChangeLock) {
+            numOfChanges = mPendingProcessChanges.size();
+            if (mActiveProcessChanges.length < numOfChanges) {
+                mActiveProcessChanges = new ProcessChangeItem[numOfChanges];
+            }
+            mPendingProcessChanges.toArray(mActiveProcessChanges);
+            mPendingProcessChanges.clear();
+            if (DEBUG_PROCESS_OBSERVERS) {
+                Slog.i(TAG_PROCESS_OBSERVERS,
+                        "*** Delivering " + numOfChanges + " process changes");
+            }
+        }
+
+        int i = mProcessObservers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
+            if (observer != null) {
+                try {
+                    for (int j = 0; j < numOfChanges; j++) {
+                        ProcessChangeItem item = mActiveProcessChanges[j];
+                        if ((item.changes & ProcessChangeItem.CHANGE_ACTIVITIES) != 0) {
+                            if (DEBUG_PROCESS_OBSERVERS) {
+                                Slog.i(TAG_PROCESS_OBSERVERS,
+                                        "ACTIVITIES CHANGED pid=" + item.pid + " uid="
+                                        + item.uid + ": " + item.foregroundActivities);
+                            }
+                            observer.onForegroundActivitiesChanged(item.pid, item.uid,
+                                    item.foregroundActivities);
+                        }
+                        if ((item.changes & ProcessChangeItem.CHANGE_FOREGROUND_SERVICES) != 0) {
+                            if (DEBUG_PROCESS_OBSERVERS) {
+                                Slog.i(TAG_PROCESS_OBSERVERS,
+                                        "FOREGROUND SERVICES CHANGED pid=" + item.pid + " uid="
+                                        + item.uid + ": " + item.foregroundServiceTypes);
+                            }
+                            observer.onForegroundServicesChanged(item.pid, item.uid,
+                                    item.foregroundServiceTypes);
+                        }
+                    }
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mProcessObservers.finishBroadcast();
+
+        synchronized (mProcessChangeLock) {
+            for (int j = 0; j < numOfChanges; j++) {
+                mAvailProcessChanges.add(mActiveProcessChanges[j]);
+            }
+        }
+    }
+
+    @GuardedBy("mService")
+    ProcessChangeItem enqueueProcessChangeItemLocked(int pid, int uid) {
+        synchronized (mProcessChangeLock) {
+            int i = mPendingProcessChanges.size() - 1;
+            ActivityManagerService.ProcessChangeItem item = null;
+            while (i >= 0) {
+                item = mPendingProcessChanges.get(i);
+                if (item.pid == pid) {
+                    if (DEBUG_PROCESS_OBSERVERS) {
+                        Slog.i(TAG_PROCESS_OBSERVERS, "Re-using existing item: " + item);
+                    }
+                    break;
+                }
+                i--;
+            }
+
+            if (i < 0) {
+                // No existing item in pending changes; need a new one.
+                final int num = mAvailProcessChanges.size();
+                if (num > 0) {
+                    item = mAvailProcessChanges.remove(num - 1);
+                    if (DEBUG_PROCESS_OBSERVERS) {
+                        Slog.i(TAG_PROCESS_OBSERVERS, "Retrieving available item: " + item);
+                    }
+                } else {
+                    item = new ActivityManagerService.ProcessChangeItem();
+                    if (DEBUG_PROCESS_OBSERVERS) {
+                        Slog.i(TAG_PROCESS_OBSERVERS, "Allocating new item: " + item);
+                    }
+                }
+                item.changes = 0;
+                item.pid = pid;
+                item.uid = uid;
+                if (mPendingProcessChanges.size() == 0) {
+                    if (DEBUG_PROCESS_OBSERVERS) {
+                        Slog.i(TAG_PROCESS_OBSERVERS, "*** Enqueueing dispatch processes changed!");
+                    }
+                    mService.mUiHandler.obtainMessage(DISPATCH_PROCESSES_CHANGED_UI_MSG)
+                            .sendToTarget();
+                }
+                mPendingProcessChanges.add(item);
+            }
+
+            return item;
+        }
+    }
+
+    @GuardedBy("mService")
+    void scheduleDispatchProcessDiedLocked(int pid, int uid) {
+        synchronized (mProcessChangeLock) {
+            for (int i = mPendingProcessChanges.size() - 1; i >= 0; i--) {
+                ProcessChangeItem item = mPendingProcessChanges.get(i);
+                if (pid > 0 && item.pid == pid) {
+                    mPendingProcessChanges.remove(i);
+                    mAvailProcessChanges.add(item);
+                }
+            }
+            mService.mUiHandler.obtainMessage(DISPATCH_PROCESS_DIED_UI_MSG, pid, uid,
+                    null).sendToTarget();
+        }
+    }
+
+    void dispatchProcessDied(int pid, int uid) {
+        int i = mProcessObservers.beginBroadcast();
+        while (i > 0) {
+            i--;
+            final IProcessObserver observer = mProcessObservers.getBroadcastItem(i);
+            if (observer != null) {
+                try {
+                    observer.onProcessDied(pid, uid);
+                } catch (RemoteException e) {
+                }
+            }
+        }
+        mProcessObservers.finishBroadcast();
+    }
+
     @GuardedBy("mService")
     ArrayList<ProcessRecord> collectProcessesLocked(int start, boolean allPkgs, String[] args) {
         ArrayList<ProcessRecord> procs;
@@ -3668,8 +4417,8 @@ public final class ProcessList {
                 ProcessRecord proc = mLruProcesses.get(i);
                 if (proc.pid > 0 && proc.pid == pid) {
                     procs.add(proc);
-                } else if (allPkgs && proc.pkgList != null
-                        && proc.pkgList.containsKey(args[start])) {
+                } else if (allPkgs && proc.getPkgList() != null
+                        && proc.getPkgList().containsKey(args[start])) {
                     procs.add(proc);
                 } else if (proc.processName.equals(args[start])) {
                     procs.add(proc);
@@ -3697,27 +4446,23 @@ public final class ProcessList {
                 continue;
             }
 
-            final int packageCount = app.pkgList.size();
-            for (int j = 0; j < packageCount; j++) {
-                final String packageName = app.pkgList.keyAt(j);
-                if (!updateFrameworkRes && !packagesToUpdate.contains(packageName)) {
-                    continue;
-                }
-                try {
-                    final ApplicationInfo ai = AppGlobals.getPackageManager()
-                            .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
-                    if (ai == null) {
-                        continue;
+            app.getPkgList().forEachPackage(packageName -> {
+                if (updateFrameworkRes && packagesToUpdate.contains(packageName)) {
+                    try {
+                        final ApplicationInfo ai = AppGlobals.getPackageManager()
+                                .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);
+                        if (ai != null) {
+                            app.thread.scheduleApplicationInfoChanged(ai);
+                            if (ai.packageName.equals(app.info.packageName)) {
+                                app.info = ai;
+                            }
+                        }
+                    } catch (RemoteException e) {
+                        Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
+                                packageName, app));
                     }
-                    app.thread.scheduleApplicationInfoChanged(ai);
-                    if (ai.packageName.equals(app.info.packageName)) {
-                        app.info = ai;
-                    }
-                } catch (RemoteException e) {
-                    Slog.w(TAG, String.format("Failed to update %s ApplicationInfo for %s",
-                            packageName, app));
                 }
-            }
+            });
         }
     }
 
@@ -4103,7 +4848,7 @@ public final class ProcessList {
             boolean diff = mIdle != idle;
             mIdle = idle;
             if (diff && idle) {
-                synchronized (this) {
+                synchronized (mService) {
                     if (mWorkItems.size() > 0) {
                         mHandler.sendEmptyMessage(H.MSG_DEVICE_IDLE);
                     }
@@ -4176,13 +4921,14 @@ public final class ProcessList {
                 return true;
             }
 
-            final int pkgSize = app.pkgList.size();
-            for (int ip = 0; ip < pkgSize; ip++) {
-                if (mService.mConstants.IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.contains(
-                        app.pkgList.keyAt(ip))) {
+            if (app.getPkgList().forEachPackage(pkgName -> {
+                if (mService.mConstants.IMPERCEPTIBLE_KILL_EXEMPT_PACKAGES.contains(pkgName)) {
                     // One of the packages in this process is exempted
-                    return true;
+                    return Boolean.TRUE;
                 }
+                return null;
+            }) != null) {
+                return true;
             }
 
             if (mService.mConstants.IMPERCEPTIBLE_KILL_EXEMPT_PROC_STATES.contains(

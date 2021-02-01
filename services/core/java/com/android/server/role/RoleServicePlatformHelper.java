@@ -17,6 +17,7 @@
 package com.android.server.role;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.UserIdInt;
 
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.Set;
  *
  * @hide
  */
-//@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
+@SystemApi(client = SystemApi.Client.SYSTEM_SERVER)
 public interface RoleServicePlatformHelper {
     /**
      * Get the legacy role state stored in the platform.

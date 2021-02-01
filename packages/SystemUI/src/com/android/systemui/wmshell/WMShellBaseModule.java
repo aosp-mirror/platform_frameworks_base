@@ -250,14 +250,17 @@ public abstract class WMShellBaseModule {
     @Provides
     static PipAppOpsListener providePipAppOpsListener(Context context,
             IActivityManager activityManager,
-            PipTouchHandler pipTouchHandler) {
-        return new PipAppOpsListener(context, activityManager, pipTouchHandler.getMotionHelper());
+            PipTouchHandler pipTouchHandler,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return new PipAppOpsListener(context, pipTouchHandler.getMotionHelper(), mainExecutor);
     }
 
+    // Needs handler for registering broadcast receivers
     @WMSingleton
     @Provides
-    static PipMediaController providePipMediaController(Context context) {
-        return new PipMediaController(context);
+    static PipMediaController providePipMediaController(Context context,
+            @ShellMainThread Handler mainHandler) {
+        return new PipMediaController(context, mainHandler);
     }
 
     @WMSingleton
@@ -328,6 +331,7 @@ public abstract class WMShellBaseModule {
     @BindsOptionalOf
     abstract AppPairs optionalAppPairs();
 
+    // Note: Handler needed for LauncherApps.register
     @WMSingleton
     @Provides
     static Optional<Bubbles> provideBubbles(Context context,
@@ -338,11 +342,12 @@ public abstract class WMShellBaseModule {
             LauncherApps launcherApps,
             UiEventLogger uiEventLogger,
             ShellTaskOrganizer organizer,
-            @ShellMainThread ShellExecutor mainExecutor) {
+            @ShellMainThread ShellExecutor mainExecutor,
+            @ShellMainThread Handler mainHandler) {
         return Optional.of(BubbleController.create(context, null /* synchronizer */,
                 floatingContentCoordinator, statusBarService, windowManager,
                 windowManagerShellWrapper, launcherApps, uiEventLogger, organizer,
-                mainExecutor));
+                mainExecutor, mainHandler));
     }
 
     // Needs the shell main handler for ContentObserver callbacks

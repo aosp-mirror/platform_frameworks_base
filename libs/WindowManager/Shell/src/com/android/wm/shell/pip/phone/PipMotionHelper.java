@@ -16,6 +16,7 @@
 
 package com.android.wm.shell.pip.phone;
 
+import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_LEFT;
 import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 
@@ -39,6 +40,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.animation.PhysicsAnimator;
 import com.android.wm.shell.common.FloatingContentCoordinator;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
@@ -72,8 +74,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private PhonePipMenuController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
-
-    private final Handler mMainHandler = new Handler(Looper.getMainLooper());
 
     /** The region that all of PIP must stay within. */
     private final Rect mFloatingAllowedArea = new Rect();
@@ -129,10 +129,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                         SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     private final Consumer<Rect> mUpdateBoundsCallback = (Rect newBounds) -> {
-        mMainHandler.post(() -> {
-            mMenuController.updateMenuLayout(newBounds);
-            mPipBoundsState.setBounds(newBounds);
-        });
+        mMenuController.updateMenuLayout(newBounds);
+        mPipBoundsState.setBounds(newBounds);
     };
 
     /**
@@ -173,7 +171,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer, PhonePipMenuController menuController,
-            PipSnapAlgorithm snapAlgorithm, FloatingContentCoordinator floatingContentCoordinator) {
+            PipSnapAlgorithm snapAlgorithm, FloatingContentCoordinator floatingContentCoordinator,
+            ShellExecutor mainExecutor) {
         mContext = context;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipBoundsState = pipBoundsState;
@@ -183,8 +182,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mPipTaskOrganizer.registerPipTransitionCallback(mPipTransitionCallback);
         mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
                 mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
-        mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
-                mSfAnimationHandlerThreadLocal.get());
+
+        // Need to get the shell main thread sf vsync animation handler
+        mainExecutor.execute(() -> {
+            mTemporaryBoundsPhysicsAnimator.setCustomAnimationHandler(
+                    mSfAnimationHandlerThreadLocal.get());
+        });
 
         mResizePipUpdateListener = (target, values) -> {
             if (mPipBoundsState.getMotionBoundsState().isInMotion()) {
@@ -255,10 +258,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 mPipBoundsState.getMotionBoundsState().setBoundsInMotion(toBounds);
                 mPipTaskOrganizer.scheduleUserResizePip(getBounds(), toBounds,
                         (Rect newBounds) -> {
-                            mMainHandler.post(() -> {
                                 mMenuController.updateMenuLayout(newBounds);
-                            });
-                    });
+                        });
             }
         } else {
             // If PIP is 'catching up' after being stuck in the dismiss target, update the animation
@@ -325,11 +326,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenuWithoutResize();
-        mPipTaskOrganizer.getUpdateHandler().post(() -> {
-            mPipTaskOrganizer.exitPip(skipAnimation
-                    ? 0
-                    : LEAVE_PIP_DURATION);
-        });
+        mPipTaskOrganizer.exitPip(skipAnimation ? 0 : LEAVE_PIP_DURATION);
     }
 
     /**
@@ -392,7 +389,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 .spring(FloatProperties.RECT_WIDTH, getBounds().width(), mSpringConfig)
                 .spring(FloatProperties.RECT_HEIGHT, getBounds().height(), mSpringConfig)
                 .flingThenSpring(
-                        FloatProperties.RECT_X, velocityX, isStash ? mStashConfigX : mFlingConfigX,
+                        FloatProperties.RECT_X, velocityX,
+                        isStash ? mStashConfigX : mFlingConfigX,
                         mSpringConfig, true /* flingMustReachMinOrMax */)
                 .flingThenSpring(
                         FloatProperties.RECT_Y, velocityY, mFlingConfigY, mSpringConfig);
@@ -624,7 +622,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         // Intentionally resize here even if the current bounds match the destination bounds.
         // This is so all the proper callbacks are performed.
-        mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration, mUpdateBoundsCallback);
+        mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration,
+                TRANSITION_DIRECTION_EXPAND_OR_UNEXPAND, mUpdateBoundsCallback);
         setAnimatingToBounds(toBounds);
     }
 

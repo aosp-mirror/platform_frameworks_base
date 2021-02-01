@@ -28,7 +28,10 @@ import static android.app.AppOpsManager.OPSTR_RECORD_AUDIO;
 import static android.app.AppOpsManager.OP_FLAGS_ALL_TRUSTED;
 import static android.app.AppOpsManager.opToPermission;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED;
+import static android.media.AudioSystem.MODE_IN_COMMUNICATION;
+import static android.telephony.TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.app.AppOpsManager;
 import android.content.ComponentName;
@@ -41,12 +44,14 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.icu.text.ListFormatter;
 import android.location.LocationManager;
+import android.media.AudioManager;
 import android.os.Process;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.speech.RecognitionService;
 import android.speech.RecognizerIntent;
+import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.inputmethod.InputMethodInfo;
@@ -75,6 +80,9 @@ public class PermissionUsageHelper {
     private static final String PROPERTY_LOCATION_INDICATORS_ENABLED =
             "location_indicators_enabled";
 
+    /** Whether to show the Permissions Hub.  */
+    private static final String PROPERTY_PERMISSIONS_HUB_2_ENABLED = "permissions_hub_2_enabled";
+
     /** How long after an access to show it as "recent" */
     private static final String RECENT_ACCESS_TIME_MS = "recent_acccess_time_ms";
 
@@ -84,19 +92,25 @@ public class PermissionUsageHelper {
     /** The name of the expected voice IME subtype */
     private static final String VOICE_IME_SUBTYPE = "voice";
 
+    private static final String SYSTEM_PKG = "android";
+
     private static final long DEFAULT_RUNNING_TIME_MS = 5000L;
-    private static final long DEFAULT_RECENT_TIME_MS = 30000L;
+    private static final long DEFAULT_RECENT_TIME_MS = 15000L;
+
+    private static boolean shouldShowPermissionsHub() {
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_PERMISSIONS_HUB_2_ENABLED, false);
+    }
 
     private static boolean shouldShowIndicators() {
-        return true;
-        // TODO ntmyren: remove true set when device config is configured correctly
-        //DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-        //PROPERTY_CAMERA_MIC_ICONS_ENABLED, true);
+        return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
+                PROPERTY_CAMERA_MIC_ICONS_ENABLED, true) || shouldShowPermissionsHub();
     }
 
     private static boolean shouldShowLocationIndicator() {
         return DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_PRIVACY,
-                PROPERTY_LOCATION_INDICATORS_ENABLED, false);
+                PROPERTY_LOCATION_INDICATORS_ENABLED, false)
+                || shouldShowPermissionsHub();
     }
 
     private static long getRecentThreshold(Long now) {
@@ -115,7 +129,7 @@ public class PermissionUsageHelper {
     );
 
     private static final List<String> MIC_OPS = List.of(
-            OPSTR_PHONE_CALL_CAMERA,
+            OPSTR_PHONE_CALL_MICROPHONE,
             OPSTR_RECORD_AUDIO
     );
 
@@ -142,7 +156,7 @@ public class PermissionUsageHelper {
     }
 
     private Context mContext;
-    private Map<UserHandle, Context> mUserContexts;
+    private ArrayMap<UserHandle, Context> mUserContexts;
     private PackageManager mPkgManager;
     private AppOpsManager mAppOpsManager;
 
@@ -154,7 +168,8 @@ public class PermissionUsageHelper {
         mContext = context;
         mPkgManager = context.getPackageManager();
         mAppOpsManager = context.getSystemService(AppOpsManager.class);
-        mUserContexts = Map.of(Process.myUserHandle(), mContext);
+        mUserContexts = new ArrayMap<>();
+        mUserContexts.put(Process.myUserHandle(), mContext);
     }
 
     private Context getUserContext(UserHandle user) {
@@ -162,6 +177,13 @@ public class PermissionUsageHelper {
             mUserContexts.put(user, mContext.createContextAsUser(user, 0));
         }
         return mUserContexts.get(user);
+    }
+
+    // TODO ntmyren: Replace this with better check if this moves beyond teamfood
+    private boolean isAppPredictor(String packageName, UserHandle user) {
+        return shouldShowPermissionsHub() && getUserContext(user).getPackageManager()
+                .checkPermission(Manifest.permission.MANAGE_APP_PREDICTIONS, packageName)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
@@ -187,7 +209,28 @@ public class PermissionUsageHelper {
         Map<PackageAttribution, CharSequence> packagesWithAttributionLabels =
                 getTrustedAttributions(rawUsages.get(MICROPHONE), proxyChains);
 
-        List<String> usedPermGroups = new ArrayList<>(rawUsages.keySet());
+        ArrayList<String> usedPermGroups = new ArrayList<>(rawUsages.keySet());
+
+        // If we have a phone call, and a carrier privileged app using microphone, hide the
+        // phone call.
+        AudioManager audioManager = mContext.getSystemService(AudioManager.class);
+        boolean hasPhoneCall = usedPermGroups.contains(OPSTR_PHONE_CALL_CAMERA)
+                || usedPermGroups.contains(OPSTR_PHONE_CALL_MICROPHONE);
+        if (hasPhoneCall && usedPermGroups.contains(MICROPHONE) && audioManager.getMode()
+                == MODE_IN_COMMUNICATION) {
+            TelephonyManager telephonyManager =
+                    mContext.getSystemService(TelephonyManager.class);
+            List<OpUsage> permUsages = rawUsages.get(MICROPHONE);
+            for (int usageNum = 0; usageNum < permUsages.size(); usageNum++) {
+                if (telephonyManager.checkCarrierPrivilegesForPackage(
+                        permUsages.get(usageNum).packageName)
+                        == CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                    usedPermGroups.remove(OPSTR_PHONE_CALL_CAMERA);
+                    usedPermGroups.remove(OPSTR_PHONE_CALL_MICROPHONE);
+                }
+            }
+        }
+
         for (int permGroupNum = 0; permGroupNum < usedPermGroups.size(); permGroupNum++) {
             boolean isPhone = false;
             String permGroup = usedPermGroups.get(permGroupNum);
@@ -270,8 +313,11 @@ public class PermissionUsageHelper {
                     if (lastAccessTime < recentThreshold && !attrOpEntry.isRunning()) {
                         continue;
                     }
-                    if (!isUserSensitive(packageName, user, op)
-                            && !isLocationProvider(packageName, user)) {
+
+                    if (packageName.equals(SYSTEM_PKG)
+                            || (!isUserSensitive(packageName, user, op)
+                            && !isLocationProvider(packageName, user)
+                            && !isAppPredictor(packageName, user))) {
                         continue;
                     }
 

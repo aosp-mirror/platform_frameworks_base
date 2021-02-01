@@ -32,6 +32,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.provider.DeviceConfig;
+import android.util.Log;
 import android.util.Size;
 import android.view.InputEvent;
 import android.view.MotionEvent;
@@ -95,7 +96,6 @@ public class PipTouchHandler {
     private int mDeferResizeToNormalBoundsUntilRotation = -1;
     private int mDisplayRotation;
 
-    private final Handler mHandler = new Handler();
     private final PipAccessibilityInteractionConnection mConnection;
 
     // Behaviour states
@@ -167,18 +167,20 @@ public class PipTouchHandler {
         mGesture = new DefaultPipTouchGesture();
         mMotionHelper = new PipMotionHelper(mContext, pipBoundsState, pipTaskOrganizer,
                 mMenuController, mPipBoundsAlgorithm.getSnapAlgorithm(),
-                floatingContentCoordinator);
+                floatingContentCoordinator, mainExecutor);
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsAlgorithm, pipBoundsState,
                         mMotionHelper, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds, pipUiEventLogger, menuController);
+                        this::updateMovementBounds, pipUiEventLogger, menuController,
+                        mainExecutor);
         mPipDismissTargetHandler = new PipDismissTargetHandler(context, pipUiEventLogger,
-                mMotionHelper, mHandler);
-        mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
-                () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL,
+                mMotionHelper, mainExecutor);
+        mTouchState = new PipTouchState(ViewConfiguration.get(context),
+                () -> mMenuController.showMenuWithPossibleDelay(MENU_STATE_FULL,
                         mPipBoundsState.getBounds(), true /* allowMenuTimeout */, willResizeMenu(),
                         shouldShowResizeHandle()),
-                menuController::hideMenu);
+                menuController::hideMenu,
+                mainExecutor);
 
         Resources res = context.getResources();
         mEnableResize = res.getBoolean(R.bool.config_pipEnableResizeForMenu);
@@ -196,7 +198,7 @@ public class PipTouchHandler {
                 PIP_STASHING,
                 /* defaultValue = */ true);
         DeviceConfig.addOnPropertiesChangedListener(DeviceConfig.NAMESPACE_SYSTEMUI,
-                context.getMainExecutor(),
+                mainExecutor,
                 properties -> {
                     if (properties.getKeyset().contains(PIP_STASHING)) {
                         mEnableStash = properties.getBoolean(
@@ -923,16 +925,21 @@ public class PipTouchHandler {
     }
 
     /**
-     * @return whether the menu will resize as a part of showing the full menu.
+     * @return {@code true} if the menu should be resized on tap because app explicitly specifies
+     * PiP window size that is too small to hold all the actions.
      */
     private boolean willResizeMenu() {
         if (!mEnableResize) {
             return false;
         }
-        return mPipBoundsState.getExpandedBounds().width()
-                != mPipBoundsState.getNormalBounds().width()
-                || mPipBoundsState.getExpandedBounds().height()
-                != mPipBoundsState.getNormalBounds().height();
+        final Size estimatedMenuSize = mMenuController.getEstimatedMenuSize();
+        if (estimatedMenuSize == null) {
+            Log.wtf(TAG, "Failed to get estimated menu size");
+            return false;
+        }
+        final Rect currentBounds = mPipBoundsState.getBounds();
+        return currentBounds.width() < estimatedMenuSize.getWidth()
+                || currentBounds.height() < estimatedMenuSize.getHeight();
     }
 
     /**

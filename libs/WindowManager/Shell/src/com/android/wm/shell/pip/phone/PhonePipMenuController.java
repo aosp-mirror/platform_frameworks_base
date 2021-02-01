@@ -30,15 +30,18 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.util.Size;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.WindowManagerGlobal;
 
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipMediaController.ActionListener;
@@ -97,6 +100,8 @@ public class PhonePipMenuController implements PipMenuController {
     private final RectF mTmpDestinationRectF = new RectF();
     private final Context mContext;
     private final PipMediaController mMediaController;
+    private final ShellExecutor mMainExecutor;
+    private final Handler mMainHandler;
 
     private final ArrayList<Listener> mListeners = new ArrayList<>();
     private final SystemWindows mSystemWindows;
@@ -116,11 +121,14 @@ public class PhonePipMenuController implements PipMenuController {
         }
     };
 
-    public PhonePipMenuController(Context context,
-            PipMediaController mediaController, SystemWindows systemWindows) {
+    public PhonePipMenuController(Context context, PipMediaController mediaController,
+            SystemWindows systemWindows, ShellExecutor mainExecutor,
+            Handler mainHandler) {
         mContext = context;
         mMediaController = mediaController;
         mSystemWindows = systemWindows;
+        mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
     }
 
     public boolean isMenuVisible() {
@@ -156,7 +164,7 @@ public class PhonePipMenuController implements PipMenuController {
         if (mPipMenuView != null) {
             detachPipMenuView();
         }
-        mPipMenuView = new PipMenuView(mContext, this);
+        mPipMenuView = new PipMenuView(mContext, this, mMainExecutor, mMainHandler);
         mSystemWindows.addView(mPipMenuView,
                 getPipMenuLayoutParams(MENU_WINDOW_TITLE, 0 /* width */, 0 /* height */),
                 0, SHELL_ROOT_LAYER_PIP);
@@ -203,6 +211,11 @@ public class PhonePipMenuController implements PipMenuController {
         }
     }
 
+    @Nullable
+    Size getEstimatedMenuSize() {
+        return mPipMenuView == null ? null : mPipMenuView.getEstimatedMenuSize();
+    }
+
     /**
      * When other components requests the menu controller directly to show the menu, we must
      * first fire off the request to the other listeners who will then propagate the call
@@ -217,13 +230,13 @@ public class PhonePipMenuController implements PipMenuController {
      * Similar to {@link #showMenu(int, Rect, boolean, boolean, boolean)} but only show the menu
      * upon PiP window transition is finished.
      */
-    public void showMenuWithDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
+    public void showMenuWithPossibleDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean willResizeMenu, boolean showResizeHandle) {
         // hide all visible controls including close button and etc. first, this is to ensure
         // menu is totally invisible during the transition to eliminate unpleasant artifacts
         fadeOutMenu();
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
-                true /* withDelay */, showResizeHandle);
+                willResizeMenu /* withDelay=willResizeMenu here */, showResizeHandle);
     }
 
     /**

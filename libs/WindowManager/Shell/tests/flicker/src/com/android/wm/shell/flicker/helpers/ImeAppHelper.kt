@@ -18,43 +18,74 @@ package com.android.wm.shell.flicker.helpers
 
 import android.app.Instrumentation
 import androidx.test.uiautomator.By
+import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.Until
 import com.android.server.wm.flicker.helpers.FIND_TIMEOUT
-import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_ACTION_CLOSE_IME
-import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_ACTION_OPEN_IME
-import com.android.wm.shell.flicker.TEST_APP_IME_ACTIVITY_LABEL
+import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper
 import com.android.wm.shell.flicker.testapp.Components
-import org.junit.Assert
 
-open class ImeAppHelper(
-    instrumentation: Instrumentation
-) : BaseAppHelper(
-        instrumentation,
-        TEST_APP_IME_ACTIVITY_LABEL,
-        Components.ImeActivity()
+open class ImeAppHelper(instrumentation: Instrumentation) : BaseAppHelper(
+    instrumentation,
+    Components.ImeActivity.LABEL,
+    Components.ImeActivity.COMPONENT
 ) {
-    fun openIME() {
+    /**
+     * Opens the IME and wait for it to be displayed
+     *
+     * @param device UIDevice instance to interact with the device
+     * @param wmHelper Helper used to wait for WindowManager states
+     */
+    @JvmOverloads
+    open fun openIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
         if (!isTelevision) {
-            val editText = uiDevice.wait(
-                    Until.findObject(By.res(getPackage(), "plain_text_input")),
-                    FIND_TIMEOUT)
-            Assert.assertNotNull("Text field not found, this usually happens when the device " +
-                    "was left in an unknown state (e.g. in split screen)", editText)
+            val editText = device.wait(
+                Until.findObject(By.res(getPackage(), "plain_text_input")),
+                FIND_TIMEOUT)
+
+            require(editText != null) {
+                "Text field not found, this usually happens when the device " +
+                    "was left in an unknown state (e.g. in split screen)"
+            }
             editText.click()
+            waitAndAssertIMEShown(device, wmHelper)
         } else {
             // If we do the same thing as above - editText.click() - on TV, that's going to force TV
             // into the touch mode. We really don't want that.
-            launchViaIntent(action = TEST_APP_IME_ACTIVITY_ACTION_OPEN_IME)
+            launchViaIntent(action = Components.ImeActivity.ACTION_OPEN_IME)
         }
     }
 
-    fun closeIME() {
+    protected fun waitAndAssertIMEShown(
+        device: UiDevice,
+        wmHelper: WindowManagerStateHelper? = null
+    ) {
+        if (wmHelper == null) {
+            device.waitForIdle()
+        } else {
+            require(wmHelper.waitImeWindowShown()) { "IME did not appear" }
+        }
+    }
+
+    /**
+     * Opens the IME and wait for it to be gone
+     *
+     * @param device UIDevice instance to interact with the device
+     * @param wmHelper Helper used to wait for WindowManager states
+     */
+    @JvmOverloads
+    open fun closeIME(device: UiDevice, wmHelper: WindowManagerStateHelper? = null) {
         if (!isTelevision) {
-            uiDevice.pressBack()
+            device.pressBack()
+            // Using only the AccessibilityInfo it is not possible to identify if the IME is active
+            if (wmHelper == null) {
+                device.waitForIdle()
+            } else {
+                require(wmHelper.waitImeWindowGone()) { "IME did did not close" }
+            }
         } else {
             // While pressing the back button should close the IME on TV as well, it may also lead
             // to the app closing. So let's instead just ask the app to close the IME.
-            launchViaIntent(action = TEST_APP_IME_ACTIVITY_ACTION_CLOSE_IME)
+            launchViaIntent(action = Components.ImeActivity.ACTION_CLOSE_IME)
         }
     }
 }

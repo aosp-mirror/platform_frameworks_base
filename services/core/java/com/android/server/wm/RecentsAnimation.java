@@ -48,7 +48,7 @@ import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallback
 import com.android.server.wm.TaskDisplayArea.OnRootTaskOrderChangedListener;
 
 /**
- * Manages the recents animation, including the reordering of the stacks for the transition and
+ * Manages the recents animation, including the reordering of the root tasks for the transition and
  * cleanup. See {@link com.android.server.wm.RecentsAnimationController}.
  */
 class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChangedListener {
@@ -69,13 +69,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
 
     /**
      * The activity which has been launched behind. We need to remember the activity because the
-     * target stack may have other activities, then we are able to restore the launch-behind state
-     * for the exact activity.
+     * target root task may have other activities, then we are able to restore the launch-behind
+     * state for the exact activity.
      */
     private ActivityRecord mLaunchedTargetActivity;
 
-    // The stack to restore the target stack behind when the animation is finished
-    private Task mRestoreTargetBehindStack;
+    // The root task to restore the target root task behind when the animation is finished
+    private Task mRestoreTargetBehindRootTask;
 
     RecentsAnimation(ActivityTaskManagerService atm, ActivityTaskSupervisor taskSupervisor,
             ActivityStartController activityStartController, WindowManagerService wm,
@@ -106,9 +106,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
     void preloadRecentsActivity() {
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Preload recents with %s",
                 mTargetIntent);
-        Task targetStack = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
+        Task targetRootTask = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
-        ActivityRecord targetActivity = getTargetActivity(targetStack);
+        ActivityRecord targetActivity = getTargetActivity(targetRootTask);
         if (targetActivity != null) {
             if (targetActivity.mVisibleRequested || targetActivity.isTopRunningActivity()) {
                 // The activity is ready.
@@ -127,9 +127,9 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
             // Create the activity record. Because the activity is invisible, this doesn't really
             // start the client.
             startRecentsActivityInBackground("preloadRecents");
-            targetStack = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
+            targetRootTask = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
                     mTargetActivityType);
-            targetActivity = getTargetActivity(targetStack);
+            targetActivity = getTargetActivity(targetRootTask);
             if (targetActivity == null) {
                 Slog.w(TAG, "Cannot start " + mTargetIntent);
                 return;
@@ -164,17 +164,17 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
         ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "startRecentsActivity(): intent=%s", mTargetIntent);
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "RecentsAnimation#startRecentsActivity");
 
-        // If the activity is associated with the recents stack, then try and get that first
-        Task targetStack = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
+        // If the activity is associated with the root recents task, then try and get that first
+        Task targetRootTask = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
                 mTargetActivityType);
-        ActivityRecord targetActivity = getTargetActivity(targetStack);
+        ActivityRecord targetActivity = getTargetActivity(targetRootTask);
         final boolean hasExistingActivity = targetActivity != null;
         if (hasExistingActivity) {
-            mRestoreTargetBehindStack = getRootTaskAbove(targetStack);
-            if (mRestoreTargetBehindStack == null) {
+            mRestoreTargetBehindRootTask = getRootTaskAbove(targetRootTask);
+            if (mRestoreTargetBehindRootTask == null) {
                 notifyAnimationCancelBeforeStart(recentsAnimationRunner);
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                        "No stack above target stack=%s", targetStack);
+                        "No root task above target root task=%s", targetRootTask);
                 return;
             }
         }
@@ -197,28 +197,28 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
         try {
             if (hasExistingActivity) {
                 // Move the recents activity into place for the animation if it is not top most
-                mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(targetStack);
-                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
-                        targetStack, getRootTaskAbove(targetStack));
+                mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(targetRootTask);
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved rootTask=%s behind rootTask=%s",
+                        targetRootTask, getRootTaskAbove(targetRootTask));
 
-                // If there are multiple tasks in the target stack (ie. the home stack, with 3p
-                // and default launchers coexisting), then move the task to the top as a part of
-                // moving the stack to the front
+                // If there are multiple tasks in the target root task (ie. the root home task,
+                // with 3p and default launchers coexisting), then move the task to the top as a
+                // part of moving the root task to the front
                 final Task task = targetActivity.getTask();
-                if (targetStack.getTopMostTask() != task) {
-                    targetStack.positionChildAtTop(task);
+                if (targetRootTask.getTopMostTask() != task) {
+                    targetRootTask.positionChildAtTop(task);
                 }
             } else {
                 // No recents activity, create the new recents activity bottom most
                 startRecentsActivityInBackground("startRecentsActivity_noTargetActivity");
 
                 // Move the recents activity into place for the animation
-                targetStack = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
+                targetRootTask = mDefaultTaskDisplayArea.getRootTask(WINDOWING_MODE_UNDEFINED,
                         mTargetActivityType);
-                targetActivity = getTargetActivity(targetStack);
-                mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(targetStack);
-                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved stack=%s behind stack=%s",
-                        targetStack, getRootTaskAbove(targetStack));
+                targetActivity = getTargetActivity(targetRootTask);
+                mDefaultTaskDisplayArea.moveRootTaskBehindBottomMostVisibleRootTask(targetRootTask);
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS, "Moved rootTask=%s behind rootTask=%s",
+                        targetRootTask, getRootTaskAbove(targetRootTask));
 
                 mWindowManager.prepareAppTransitionNone();
                 mWindowManager.executeAppTransition();
@@ -256,7 +256,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
             mTaskSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
                     START_TASK_TO_FRONT, targetActivity, options);
 
-            // Register for stack order changes
+            // Register for root task order changes
             mDefaultTaskDisplayArea.registerRootTaskOrderChangedListener(this);
         } catch (Exception e) {
             Slog.e(TAG, "Failed to start recents activity", e);
@@ -274,7 +274,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     "onAnimationFinished(): controller=%s reorderMode=%d",
                             mWindowManager.getRecentsAnimationController(), reorderMode);
 
-            // Unregister for stack order changes
+            // Unregister for root task order changes
             mDefaultTaskDisplayArea.unregisterRootTaskOrderChangedListener(this);
 
             final RecentsAnimationController controller =
@@ -303,17 +303,17 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                 try {
                     mWindowManager.cleanupRecentsAnimation(reorderMode);
 
-                    final Task targetStack = mDefaultTaskDisplayArea.getRootTask(
+                    final Task targetRootTask = mDefaultTaskDisplayArea.getRootTask(
                             WINDOWING_MODE_UNDEFINED, mTargetActivityType);
                     // Prefer to use the original target activity instead of top activity because
                     // we may have moved another task to top (starting 3p launcher).
-                    final ActivityRecord targetActivity = targetStack != null
-                            ? targetStack.isInTask(mLaunchedTargetActivity)
+                    final ActivityRecord targetActivity = targetRootTask != null
+                            ? targetRootTask.isInTask(mLaunchedTargetActivity)
                             : null;
                     ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                            "onAnimationFinished(): targetStack=%s targetActivity=%s "
-                                    + "mRestoreTargetBehindStack=%s",
-                            targetStack, targetActivity, mRestoreTargetBehindStack);
+                            "onAnimationFinished(): targetRootTask=%s targetActivity=%s "
+                                    + "mRestoreTargetBehindRootTask=%s",
+                            targetRootTask, targetActivity, mRestoreTargetBehindRootTask);
                     if (targetActivity == null) {
                         return;
                     }
@@ -322,56 +322,57 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     targetActivity.mLaunchTaskBehind = false;
 
                     if (reorderMode == REORDER_MOVE_TO_TOP) {
-                        // Bring the target stack to the front
+                        // Bring the target root task to the front
                         mTaskSupervisor.mNoAnimActivities.add(targetActivity);
 
                         if (sendUserLeaveHint) {
                             // Setting this allows the previous app to PiP.
                             mTaskSupervisor.mUserLeaving = true;
-                            targetStack.moveTaskToFront(targetActivity.getTask(),
+                            targetRootTask.moveTaskToFront(targetActivity.getTask(),
                                     true /* noAnimation */, null /* activityOptions */,
                                     targetActivity.appTimeTracker,
                                     "RecentsAnimation.onAnimationFinished()");
                         } else {
-                            targetStack.moveToFront("RecentsAnimation.onAnimationFinished()");
+                            targetRootTask.moveToFront("RecentsAnimation.onAnimationFinished()");
                         }
 
                         if (WM_DEBUG_RECENTS_ANIMATIONS.isLogToAny()) {
-                            final Task topStack = getTopNonAlwaysOnTopStack();
-                            if (topStack != targetStack) {
+                            final Task topRootTask = getTopNonAlwaysOnTopRootTask();
+                            if (topRootTask != targetRootTask) {
                                 ProtoLog.w(WM_DEBUG_RECENTS_ANIMATIONS,
-                                        "Expected target stack=%s"
-                                        + " to be top most but found stack=%s",
-                                        targetStack, topStack);
+                                        "Expected target rootTask=%s"
+                                        + " to be top most but found rootTask=%s",
+                                        targetRootTask, topRootTask);
                             }
                         }
                     } else if (reorderMode == REORDER_MOVE_TO_ORIGINAL_POSITION){
-                        // Restore the target stack to its previous position
+                        // Restore the target root task to its previous position
                         final TaskDisplayArea taskDisplayArea = targetActivity.getDisplayArea();
-                        taskDisplayArea.moveRootTaskBehindRootTask(targetStack,
-                                mRestoreTargetBehindStack);
+                        taskDisplayArea.moveRootTaskBehindRootTask(targetRootTask,
+                                mRestoreTargetBehindRootTask);
                         if (WM_DEBUG_RECENTS_ANIMATIONS.isLogToAny()) {
-                            final Task aboveTargetStack = getRootTaskAbove(targetStack);
-                            if (mRestoreTargetBehindStack != null
-                                    && aboveTargetStack != mRestoreTargetBehindStack) {
+                            final Task aboveTargetRootTask = getRootTaskAbove(targetRootTask);
+                            if (mRestoreTargetBehindRootTask != null
+                                    && aboveTargetRootTask != mRestoreTargetBehindRootTask) {
                                 ProtoLog.w(WM_DEBUG_RECENTS_ANIMATIONS,
-                                        "Expected target stack=%s to restored behind stack=%s but"
-                                                + " it is behind stack=%s",
-                                        targetStack, mRestoreTargetBehindStack, aboveTargetStack);
+                                        "Expected target rootTask=%s to restored behind "
+                                                + "rootTask=%s but it is behind rootTask=%s",
+                                        targetRootTask, mRestoreTargetBehindRootTask,
+                                        aboveTargetRootTask);
                             }
                         }
                     } else {
                         // If there is no recents screenshot animation, we can update the visibility
-                        // of target stack immediately because it is visually invisible and the
+                        // of target root task immediately because it is visually invisible and the
                         // launch-behind state is restored. That also prevents the next transition
                         // type being disturbed if the visibility is updated after setting the next
                         // transition (the target activity will be one of closing apps).
                         if (!controller.shouldDeferCancelWithScreenshot()
-                                && !targetStack.isFocusedRootTaskOnDisplay()) {
-                            targetStack.ensureActivitiesVisible(null /* starting */,
+                                && !targetRootTask.isFocusedRootTaskOnDisplay()) {
+                            targetRootTask.ensureActivitiesVisible(null /* starting */,
                                     0 /* starting */, false /* preserveWindows */);
                         }
-                        // Keep target stack in place, nothing changes, so ignore the transition
+                        // Keep target root task in place, nothing changes, so ignore the transition
                         // logic below
                         return;
                     }
@@ -384,7 +385,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
                     // surfaces needs to be done immediately.
                     mWindowManager.executeAppTransition();
 
-                    final Task rootTask = targetStack.getRootTask();
+                    final Task rootTask = targetRootTask.getRootTask();
                     // Client state may have changed during the recents animation, so force
                     // send task info so the client can synchronize its state.
                     rootTask.dispatchTaskInfoChangedIfNeeded(true /* force */);
@@ -467,25 +468,25 @@ class RecentsAnimation implements RecentsAnimationCallbacks, OnRootTaskOrderChan
     }
 
     /**
-     * @return The top stack that is not always-on-top.
+     * @return The top root task that is not always-on-top.
      */
-    private Task getTopNonAlwaysOnTopStack() {
+    private Task getTopNonAlwaysOnTopRootTask() {
         return mDefaultTaskDisplayArea.getRootTask(task ->
                 !task.getWindowConfiguration().isAlwaysOnTop());
     }
 
     /**
-     * @return the top activity in the {@param targetStack} matching the {@param component}, or just
-     * the top activity of the top task if no task matches the component.
+     * @return the top activity in the {@param targetRootTask} matching the {@param component},
+     * or just the top activity of the top task if no task matches the component.
      */
-    private ActivityRecord getTargetActivity(Task targetStack) {
-        if (targetStack == null) {
+    private ActivityRecord getTargetActivity(Task targetRootTask) {
+        if (targetRootTask == null) {
             return null;
         }
 
         final PooledPredicate p = PooledLambda.obtainPredicate(RecentsAnimation::matchesTarget,
                 this, PooledLambda.__(Task.class));
-        final Task task = targetStack.getTask(p);
+        final Task task = targetRootTask.getTask(p);
         p.recycle();
         return task != null ? task.getTopNonFinishingActivity() : null;
     }

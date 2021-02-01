@@ -49,8 +49,8 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
         mProc = app;
         mResult = result;
         CharSequence name;
-        if ((app.pkgList.size() == 1) &&
-                (name=context.getPackageManager().getApplicationLabel(app.info)) != null) {
+        if ((app.getPkgList().size() == 1)
+                && (name = context.getPackageManager().getApplicationLabel(app.info)) != null) {
             setMessage(res.getString(
                     com.android.internal.R.string.smv_application,
                     name.toString(), app.info.processName));

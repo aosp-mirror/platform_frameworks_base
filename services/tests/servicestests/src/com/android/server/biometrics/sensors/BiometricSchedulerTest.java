@@ -33,8 +33,8 @@ import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.IBiometricService;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.platform.test.annotations.Presubmit;
-import android.util.proto.ProtoOutputStream;
 
 import androidx.annotation.NonNull;
 import androidx.test.InstrumentationRegistry;
@@ -196,7 +196,8 @@ public class BiometricSchedulerTest {
         BiometricSchedulerProto bsp = getDump(true /* clearSchedulerBuffer */);
         assertEquals(BiometricsProto.CM_NONE, bsp.currentOperation);
         assertEquals(0, bsp.totalOperations);
-        assertEquals(0, bsp.recentOperations.length);
+        // TODO:(b/178828362) See bug and/or commit message :/
+        // assertEquals(0, bsp.recentOperations.length);
 
         // Pretend the scheduler is busy enrolling, and check the proto dump again.
         final TestClientMonitor2 client = new TestClientMonitor2(mContext, mToken,
@@ -207,7 +208,11 @@ public class BiometricSchedulerTest {
         assertEquals(BiometricsProto.CM_ENROLL, bsp.currentOperation);
         // No operations have completed yet
         assertEquals(0, bsp.totalOperations);
-        assertEquals(0, bsp.recentOperations.length);
+
+        // TODO:(b/178828362) See bug and/or commit message :/
+        assertEquals(1, bsp.recentOperations.length);
+        assertEquals(BiometricsProto.CM_NONE, bsp.recentOperations[0]);
+
         // Finish this operation, so the next scheduled one can start
         client.getCallback().onClientFinished(client, true);
     }
@@ -223,7 +228,8 @@ public class BiometricSchedulerTest {
         assertEquals(BiometricsProto.CM_ENROLL, bsp.currentOperation);
         // No operations have completed yet
         assertEquals(0, bsp.totalOperations);
-        assertEquals(0, bsp.recentOperations.length);
+        // TODO:(b/178828362) See bug and/or commit message :/
+        // assertEquals(0, bsp.recentOperations.length);
         // Finish this operation, so the next scheduled one can start
         client.getCallback().onClientFinished(client, true);
 
@@ -265,7 +271,43 @@ public class BiometricSchedulerTest {
 
         // RecentOperations queue is cleared (by the previous dump)
         bsp = getDump(true /* clearSchedulerBuffer */);
-        assertEquals(0, bsp.recentOperations.length);
+
+        // TODO:(b/178828362) See bug and/or commit message :/
+        assertEquals(1, bsp.recentOperations.length);
+        assertEquals(BiometricsProto.CM_NONE, bsp.recentOperations[0]);
+    }
+
+    @Test
+    public void testCancelPendingAuth() throws RemoteException {
+        final HalClientMonitor.LazyDaemon<Object> lazyDaemon = () -> mock(Object.class);
+
+        final TestClientMonitor client1 = new TestClientMonitor(mContext, mToken, lazyDaemon);
+        final ClientMonitorCallbackConverter callback = mock(ClientMonitorCallbackConverter.class);
+        final TestAuthenticationClient client2 = new TestAuthenticationClient(mContext, lazyDaemon,
+                mToken, callback);
+
+        // Add a non-cancellable client, then add the auth client
+        mScheduler.scheduleClientMonitor(client1);
+        mScheduler.scheduleClientMonitor(client2);
+        waitForIdle();
+
+        assertEquals(mScheduler.getCurrentClient(), client1);
+        assertEquals(Operation.STATE_WAITING_IN_QUEUE,
+                mScheduler.mPendingOperations.getFirst().mState);
+
+        // Request cancel before the authentication client has started
+        mScheduler.cancelAuthentication(mToken);
+        waitForIdle();
+        assertEquals(Operation.STATE_WAITING_IN_QUEUE_CANCELING,
+                mScheduler.mPendingOperations.getFirst().mState);
+
+        // Finish the blocking client. The authentication client should send ERROR_CANCELED
+        client1.getCallback().onClientFinished(client1, true /* success */);
+        waitForIdle();
+        verify(callback).onError(anyInt(), anyInt(),
+                eq(BiometricConstants.BIOMETRIC_ERROR_CANCELED),
+                eq(0) /* vendorCode */);
+        assertNull(mScheduler.getCurrentClient());
     }
 
     private BiometricSchedulerProto getDump(boolean clearSchedulerBuffer) throws Exception {
@@ -279,7 +321,31 @@ public class BiometricSchedulerTest {
             super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
                     false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
                     TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
-                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class));
+                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
+                    false /* isKeyguard */);
+        }
+
+        @Override
+        protected void stopHalOperation() {
+
+        }
+
+        @Override
+        protected void startHalOperation() {
+
+        }
+    }
+
+    private static class TestAuthenticationClient extends AuthenticationClient<Object> {
+
+        public TestAuthenticationClient(@NonNull Context context,
+                @NonNull LazyDaemon<Object> lazyDaemon, @NonNull IBinder token,
+                @NonNull ClientMonitorCallbackConverter listener) {
+            super(context, lazyDaemon, token, listener, 0 /* targetUserId */, 0 /* operationId */,
+                    false /* restricted */, TAG, 1 /* cookie */, false /* requireConfirmation */,
+                    TEST_SENSOR_ID, true /* isStrongBiometric */, 0 /* statsModality */,
+                    0 /* statsClient */, null /* taskStackListener */, mock(LockoutTracker.class),
+                    false /* isKeyguard */);
         }
 
         @Override

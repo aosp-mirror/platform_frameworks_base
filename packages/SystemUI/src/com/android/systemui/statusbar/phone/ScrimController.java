@@ -34,6 +34,7 @@ import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -47,6 +48,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.BlurUtils;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -62,6 +64,9 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -116,11 +121,6 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     public static final float WAKE_SENSOR_SCRIM_ALPHA = 0.6f;
 
     /**
-     * Scrim opacity when bubbles are expanded.
-     */
-    public static final float BUBBLE_SCRIM_ALPHA = 0.6f;
-
-    /**
      * The default scrim under the shade and dialogs.
      * This should not be lower than 0.54, otherwise we won't pass GAR.
      */
@@ -152,6 +152,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private final AlarmTimeout mTimeTicker;
     private final KeyguardVisibilityCallback mKeyguardVisibilityCallback;
     private final Handler mHandler;
+    private final Executor mMainExecutor;
     private final BlurUtils mBlurUtils;
 
     private GradientColors mColors;
@@ -200,23 +201,36 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
     private boolean mWakeLockHeld;
     private boolean mKeyguardOccluded;
 
+    /**
+     * Notifies listeners of animation-related changes (currently just opacity changes).
+     */
+    public interface ScrimChangedListener {
+        void onAlphaChanged(float alpha);
+    }
+
+    @NonNull
+    private final List<ScrimChangedListener> mScrimChangedListeners;
+
     @Inject
     public ScrimController(LightBarController lightBarController, DozeParameters dozeParameters,
             AlarmManager alarmManager, KeyguardStateController keyguardStateController,
             DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
             KeyguardUpdateMonitor keyguardUpdateMonitor, DockManager dockManager,
             BlurUtils blurUtils, ConfigurationController configurationController,
-            FeatureFlags featureFlags) {
-
+            FeatureFlags featureFlags, @Main Executor mainExecutor) {
         mScrimStateListener = lightBarController::setScrimState;
         mDefaultScrimAlpha = featureFlags.isShadeOpaque() ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA;
+        ScrimState.BUBBLE_EXPANDED.setBubbleAlpha(featureFlags.isShadeOpaque()
+                ? BUSY_SCRIM_ALPHA : GAR_SCRIM_ALPHA);
         mBlurUtils = blurUtils;
+        mScrimChangedListeners = new ArrayList<>();
 
         mKeyguardStateController = keyguardStateController;
         mDarkenWhileDragging = !mKeyguardStateController.canDismissLockScreen();
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mKeyguardVisibilityCallback = new KeyguardVisibilityCallback();
         mHandler = handler;
+        mMainExecutor = mainExecutor;
         mTimeTicker = new AlarmTimeout(alarmManager, this::onHideWallpaperTimeout,
                 "hide_aod_wallpaper", mHandler);
         mWakeLock = delayedWakeLockBuilder.setHandler(mHandler).setTag("Scrims").build();
@@ -262,7 +276,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         updateThemeColors();
 
         if (mScrimBehindChangeRunnable != null) {
-            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable);
+            mScrimBehind.setChangeRunnable(mScrimBehindChangeRunnable, mMainExecutor);
             mScrimBehindChangeRunnable = null;
         }
 
@@ -285,6 +299,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
 
     void setScrimVisibleListener(Consumer<Integer> listener) {
         mScrimVisibleListener = listener;
+    }
+
+    public void addScrimChangedListener(@NonNull ScrimChangedListener listener) {
+        mScrimChangedListeners.add(listener);
     }
 
     public void transitionTo(ScrimState state) {
@@ -561,6 +579,10 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (isNaN(mBehindAlpha) || isNaN(mInFrontAlpha)) {
             throw new IllegalStateException("Scrim opacity is NaN for state: " + mState
                     + ", front: " + mInFrontAlpha + ", back: " + mBehindAlpha);
+        }
+
+        for (ScrimChangedListener listener : mScrimChangedListeners) {
+            listener.onAlphaChanged(mBehindAlpha);
         }
     }
 
@@ -1003,7 +1025,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         if (mScrimBehind == null) {
             mScrimBehindChangeRunnable = changeRunnable;
         } else {
-            mScrimBehind.setChangeRunnable(changeRunnable);
+            mScrimBehind.setChangeRunnable(changeRunnable, mMainExecutor);
         }
     }
 

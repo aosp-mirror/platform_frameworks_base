@@ -34,7 +34,10 @@ import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.internal.compat.IOverrideValidator;
 import com.android.internal.compat.OverrideAllowedState;
 import com.android.server.compat.config.Change;
-import com.android.server.compat.config.XmlParser;
+import com.android.server.compat.config.Config;
+import com.android.server.compat.overrides.ChangeOverrides;
+import com.android.server.compat.overrides.Overrides;
+import com.android.server.compat.overrides.XmlWriter;
 import com.android.server.pm.ApexManager;
 
 import org.xmlpull.v1.XmlPullParserException;
@@ -60,11 +63,14 @@ import javax.xml.datatype.DatatypeConfigurationException;
 final class CompatConfig {
 
     private static final String TAG = "CompatConfig";
+    private static final String APP_COMPAT_DATA_DIR = "/data/misc/appcompat";
+    private static final String OVERRIDES_FILE = "compat_framework_overrides.xml";
 
     @GuardedBy("mChanges")
     private final LongSparseArray<CompatChange> mChanges = new LongSparseArray<>();
 
     private final OverrideValidatorImpl mOverrideValidator;
+    private File mOverridesFile;
 
     @VisibleForTesting
     CompatConfig(AndroidBuildClassifier androidBuildClassifier, Context context) {
@@ -83,6 +89,8 @@ final class CompatConfig {
             config.initConfigFromLib(Environment.buildPath(
                     apex.apexDirectory, "etc", "compatconfig"));
         }
+        File overridesFile = new File(APP_COMPAT_DATA_DIR, OVERRIDES_FILE);
+        config.initOverrides(overridesFile);
         config.invalidateCache();
         return config;
     }
@@ -202,6 +210,17 @@ final class CompatConfig {
      * @throws IllegalStateException if overriding is not allowed
      */
     boolean addOverride(long changeId, String packageName, boolean enabled) {
+        boolean alreadyKnown = addOverrideUnsafe(changeId, packageName, enabled);
+        saveOverrides();
+        invalidateCache();
+        return alreadyKnown;
+    }
+
+    /**
+     * Unsafe version of {@link #addOverride(long, String, boolean)}.
+     * It does not invalidate the cache nor save the overrides.
+     */
+    private boolean addOverrideUnsafe(long changeId, String packageName, boolean enabled) {
         boolean alreadyKnown = true;
         OverrideAllowedState allowedState =
                 mOverrideValidator.getOverrideAllowedState(changeId, packageName);
@@ -224,7 +243,6 @@ final class CompatConfig {
                     throw new IllegalStateException("Should only be able to override changes that "
                             + "are allowed or can be deferred.");
             }
-            invalidateCache();
         }
         return alreadyKnown;
     }
@@ -282,6 +300,17 @@ final class CompatConfig {
      * @return {@code true} if an override existed;
      */
     boolean removeOverride(long changeId, String packageName) {
+        boolean overrideExists = removeOverrideUnsafe(changeId, packageName);
+        saveOverrides();
+        invalidateCache();
+        return overrideExists;
+    }
+
+    /**
+     * Unsafe version of {@link #removeOverride(long, String)}.
+     * It does not invalidate the cache nor save the overrides.
+     */
+    private boolean removeOverrideUnsafe(long changeId, String packageName) {
         boolean overrideExists = false;
         synchronized (mChanges) {
             CompatChange c = mChanges.get(changeId);
@@ -300,7 +329,6 @@ final class CompatConfig {
                 }
             }
         }
-        invalidateCache();
         return overrideExists;
     }
 
@@ -315,12 +343,13 @@ final class CompatConfig {
     void addOverrides(CompatibilityChangeConfig overrides, String packageName) {
         synchronized (mChanges) {
             for (Long changeId : overrides.enabledChanges()) {
-                addOverride(changeId, packageName, true);
+                addOverrideUnsafe(changeId, packageName, true);
             }
             for (Long changeId : overrides.disabledChanges()) {
-                addOverride(changeId, packageName, false);
+                addOverrideUnsafe(changeId, packageName, false);
 
             }
+            saveOverrides();
             invalidateCache();
         }
     }
@@ -337,8 +366,9 @@ final class CompatConfig {
         synchronized (mChanges) {
             for (int i = 0; i < mChanges.size(); ++i) {
                 CompatChange change = mChanges.valueAt(i);
-                removeOverride(change.getId(), packageName);
+                removeOverrideUnsafe(change.getId(), packageName);
             }
+            saveOverrides();
             invalidateCache();
         }
     }
@@ -372,8 +402,10 @@ final class CompatConfig {
     int enableTargetSdkChangesForPackage(String packageName, int targetSdkVersion) {
         long[] changes = getAllowedChangesSinceTargetSdkForPackage(packageName, targetSdkVersion);
         for (long changeId : changes) {
-            addOverride(changeId, packageName, true);
+            addOverrideUnsafe(changeId, packageName, true);
         }
+        saveOverrides();
+        invalidateCache();
         return changes.length;
     }
 
@@ -386,8 +418,10 @@ final class CompatConfig {
     int disableTargetSdkChangesForPackage(String packageName, int targetSdkVersion) {
         long[] changes = getAllowedChangesSinceTargetSdkForPackage(packageName, targetSdkVersion);
         for (long changeId : changes) {
-            addOverride(changeId, packageName, false);
+            addOverrideUnsafe(changeId, packageName, false);
         }
+        saveOverrides();
+        invalidateCache();
         return changes.length;
     }
 
@@ -494,12 +528,72 @@ final class CompatConfig {
 
     private void readConfig(File configFile) {
         try (InputStream in = new BufferedInputStream(new FileInputStream(configFile))) {
-            for (Change change : XmlParser.read(in).getCompatChange()) {
+            Config config = com.android.server.compat.config.XmlParser.read(in);
+            for (Change change : config.getCompatChange()) {
                 Slog.d(TAG, "Adding: " + change.toString());
                 addChange(new CompatChange(change));
             }
         } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
             Slog.e(TAG, "Encountered an error while reading/parsing compat config file", e);
+        }
+    }
+
+    void initOverrides(File overridesFile) {
+        if (!overridesFile.exists()) {
+            mOverridesFile = overridesFile;
+            // There have not been any overrides added yet.
+            return;
+        }
+
+        try (InputStream in = new BufferedInputStream(new FileInputStream(overridesFile))) {
+            Overrides overrides = com.android.server.compat.overrides.XmlParser.read(in);
+            for (ChangeOverrides changeOverrides : overrides.getChangeOverrides()) {
+                long changeId = changeOverrides.getChangeId();
+                CompatChange compatChange = mChanges.get(changeId);
+                if (compatChange == null) {
+                    Slog.w(TAG, "Change ID " + changeId + " not found. "
+                            + "Skipping overrides for it.");
+                    continue;
+                }
+                compatChange.loadOverrides(changeOverrides);
+            }
+        } catch (IOException | DatatypeConfigurationException | XmlPullParserException e) {
+            Slog.w(TAG, "Error processing " + overridesFile + " " + e.toString());
+            return;
+        }
+        mOverridesFile = overridesFile;
+    }
+
+    /**
+     * Persist compat framework overrides to /data/misc/appcompat/compat_framework_overrides.xml
+     */
+    void saveOverrides() {
+        if (mOverridesFile == null) {
+            return;
+        }
+        synchronized (mChanges) {
+            // Create the file if it doesn't already exist
+            try {
+                mOverridesFile.createNewFile();
+            } catch (IOException e) {
+                Slog.e(TAG, "Could not create override config file: " + e.toString());
+                return;
+            }
+            try (PrintWriter out = new PrintWriter(mOverridesFile)) {
+                XmlWriter writer = new XmlWriter(out);
+                Overrides overrides = new Overrides();
+                List<ChangeOverrides> changeOverridesList = overrides.getChangeOverrides();
+                for (int idx = 0; idx < mChanges.size(); ++idx) {
+                    CompatChange c = mChanges.valueAt(idx);
+                    ChangeOverrides changeOverrides = c.saveOverrides();
+                    if (changeOverrides != null) {
+                        changeOverridesList.add(changeOverrides);
+                    }
+                }
+                XmlWriter.write(writer, overrides);
+            } catch (IOException e) {
+                Slog.e(TAG, e.toString());
+            }
         }
     }
 

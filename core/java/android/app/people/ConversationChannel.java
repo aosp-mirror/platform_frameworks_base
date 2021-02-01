@@ -16,11 +16,15 @@
 
 package android.app.people;
 
+import android.annotation.Nullable;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.content.pm.ShortcutInfo;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The non-customized notification channel of a conversation. It contains the information to render
@@ -36,6 +40,8 @@ public final class ConversationChannel implements Parcelable {
     private NotificationChannelGroup mParentNotificationChannelGroup;
     private long mLastEventTimestamp;
     private boolean mHasActiveNotifications;
+    private boolean mHasBirthdayToday;
+    private List<ConversationStatus> mStatuses;
 
     public static final Creator<ConversationChannel> CREATOR = new Creator<ConversationChannel>() {
         @Override
@@ -61,6 +67,21 @@ public final class ConversationChannel implements Parcelable {
         mHasActiveNotifications = hasActiveNotifications;
     }
 
+    public ConversationChannel(ShortcutInfo shortcutInfo, int uid,
+            NotificationChannel parentNotificationChannel,
+            NotificationChannelGroup parentNotificationChannelGroup, long lastEventTimestamp,
+            boolean hasActiveNotifications, boolean hasBirthdayToday,
+            List<ConversationStatus> statuses) {
+        mShortcutInfo = shortcutInfo;
+        mUid = uid;
+        mParentNotificationChannel = parentNotificationChannel;
+        mParentNotificationChannelGroup = parentNotificationChannelGroup;
+        mLastEventTimestamp = lastEventTimestamp;
+        mHasActiveNotifications = hasActiveNotifications;
+        mHasBirthdayToday = hasBirthdayToday;
+        mStatuses = statuses;
+    }
+
     public ConversationChannel(Parcel in) {
         mShortcutInfo = in.readParcelable(ShortcutInfo.class.getClassLoader());
         mUid = in.readInt();
@@ -69,6 +90,9 @@ public final class ConversationChannel implements Parcelable {
                 in.readParcelable(NotificationChannelGroup.class.getClassLoader());
         mLastEventTimestamp = in.readLong();
         mHasActiveNotifications = in.readBoolean();
+        mHasBirthdayToday = in.readBoolean();
+        mStatuses = new ArrayList<>();
+        in.readParcelableList(mStatuses, ConversationStatus.class.getClassLoader());
     }
 
     @Override
@@ -84,6 +108,8 @@ public final class ConversationChannel implements Parcelable {
         dest.writeParcelable(mParentNotificationChannelGroup, flags);
         dest.writeLong(mLastEventTimestamp);
         dest.writeBoolean(mHasActiveNotifications);
+        dest.writeBoolean(mHasBirthdayToday);
+        dest.writeParcelableList(mStatuses, flags);
     }
 
     public ShortcutInfo getShortcutInfo() {
@@ -112,5 +138,15 @@ public final class ConversationChannel implements Parcelable {
      */
     public boolean hasActiveNotifications() {
         return mHasActiveNotifications;
+    }
+
+    /** Whether this conversation has a birthday today, as associated in the Contacts Database. */
+    public boolean hasBirthdayToday() {
+        return mHasBirthdayToday;
+    }
+
+    /** Returns statuses associated with the conversation. */
+    public @Nullable List<ConversationStatus> getStatuses() {
+        return mStatuses;
     }
 }

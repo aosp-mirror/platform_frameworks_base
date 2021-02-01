@@ -151,6 +151,18 @@ public class PipSurfaceTransactionHelper {
         return this;
     }
 
+    /**
+     * Re-parents the snapshot to the parent's surface control and shows it.
+     */
+    public PipSurfaceTransactionHelper reparentAndShowSurfaceSnapshot(
+            SurfaceControl.Transaction t, SurfaceControl parent, SurfaceControl snapshot) {
+        t.reparent(snapshot, parent);
+        t.setLayer(snapshot, Integer.MAX_VALUE);
+        t.show(snapshot);
+        t.apply();
+        return this;
+    }
+
     public interface SurfaceControlTransactionFactory {
         SurfaceControl.Transaction getTransaction();
     }

@@ -472,11 +472,6 @@ class PhysicsAnimator<T> private constructor (target: T) {
      * animator is under test.
      */
     internal fun startInternal() {
-        if (!Looper.getMainLooper().isCurrentThread) {
-            Log.e(TAG, "Animations can only be started on the main thread. If you are seeing " +
-                    "this message in a test, call PhysicsAnimatorTestUtils#prepareForTest in " +
-                    "your test setup.")
-        }
         val target = weakTarget.get()
         if (target == null) {
             Log.w(TAG, "Trying to animate a GC-ed object.")

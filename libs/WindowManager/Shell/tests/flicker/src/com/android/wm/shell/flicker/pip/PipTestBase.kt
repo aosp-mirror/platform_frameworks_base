@@ -17,10 +17,20 @@
 package com.android.wm.shell.flicker.pip
 
 import com.android.wm.shell.flicker.helpers.PipAppHelper
+import org.junit.Before
 
 abstract class PipTestBase(
     rotationName: String,
     rotation: Int
 ) : AppTestBase(rotationName, rotation) {
     protected val testApp = PipAppHelper(instrumentation)
+
+    @Before
+    override fun televisionSetUp() {
+        /**
+         * The super implementation assumes ([org.junit.Assume]) that not running on TV, thus
+         * disabling the test on TV. This test, however, *should run on TV*, so we overriding this
+         * method and simply leaving it blank.
+         */
+    }
 }

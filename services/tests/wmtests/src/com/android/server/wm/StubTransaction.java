@@ -163,11 +163,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction detachChildren(SurfaceControl sc) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction setColor(SurfaceControl sc, float[] color) {
         return this;
     }
@@ -246,6 +241,12 @@ public class StubTransaction extends SurfaceControl.Transaction {
     @Override
     public SurfaceControl.Transaction setFrameRateSelectionPriority(SurfaceControl sc,
             int priority) {
+        return this;
+    }
+
+    @Override
+    public SurfaceControl.Transaction setFrameRate(SurfaceControl sc, float frameRate,
+            int compatibility) {
         return this;
     }
 

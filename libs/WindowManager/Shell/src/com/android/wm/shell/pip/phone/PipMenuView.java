@@ -48,6 +48,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Size;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -63,6 +64,7 @@ import android.widget.LinearLayout;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.animation.Interpolators;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.pip.PipUtils;
 
 import java.util.ArrayList;
@@ -75,9 +77,6 @@ public class PipMenuView extends FrameLayout {
 
     private static final String TAG = "PipMenuView";
 
-    private static final int MESSAGE_INVALID_TYPE = -1;
-    public static final int MESSAGE_MENU_EXPANDED = 8;
-
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
     private static final long MENU_FADE_DURATION = 125;
@@ -85,8 +84,6 @@ public class PipMenuView extends FrameLayout {
     private static final long MENU_SHOW_ON_EXPAND_START_DELAY = 30;
 
     private static final float MENU_BACKGROUND_ALPHA = 0.3f;
-    private static final float DISMISS_BACKGROUND_ALPHA = 0.6f;
-
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
     private static final boolean ENABLE_RESIZE_HANDLE = false;
@@ -116,7 +113,8 @@ public class PipMenuView extends FrameLayout {
                 }
             };
 
-    private Handler mHandler = new Handler();
+    private ShellExecutor mMainExecutor;
+    private Handler mMainHandler;
 
     private final Runnable mHideMenuRunnable = this::hideMenu;
 
@@ -127,10 +125,13 @@ public class PipMenuView extends FrameLayout {
     protected View mTopEndContainer;
     protected PipMenuIconsAlgorithm mPipMenuIconsAlgorithm;
 
-    public PipMenuView(Context context, PhonePipMenuController controller) {
+    public PipMenuView(Context context, PhonePipMenuController controller,
+            ShellExecutor mainExecutor, Handler mainHandler) {
         super(context, null, 0);
         mContext = context;
         mController = controller;
+        mMainExecutor = mainExecutor;
+        mMainHandler = mainHandler;
 
         mAccessibilityManager = context.getSystemService(AccessibilityManager.class);
         inflate(context, R.layout.pip_menu, this);
@@ -365,6 +366,19 @@ public class PipMenuView extends FrameLayout {
         }
     }
 
+    /**
+     * @return estimated {@link Size} for which the width is based on number of actions and
+     *         height based on the height of expand button + top and bottom action bar.
+     */
+    Size getEstimatedMenuSize() {
+        final int pipActionSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.pip_action_size);
+        final int width = mActions.size() * pipActionSize;
+        final int height = pipActionSize * 2 + mContext.getResources().getDimensionPixelSize(
+                R.dimen.pip_expand_action_size);
+        return new Size(width, height);
+    }
+
     void setActions(Rect stackBounds, List<RemoteAction> actions) {
         mActions.clear();
         mActions.addAll(actions);
@@ -412,17 +426,15 @@ public class PipMenuView extends FrameLayout {
                             d.setTint(Color.WHITE);
                             actionView.setImageDrawable(d);
                         }
-                    }, mHandler);
+                    }, mMainHandler);
                     actionView.setContentDescription(action.getContentDescription());
                     if (action.isEnabled()) {
                         actionView.setOnClickListener(v -> {
-                            mHandler.post(() -> {
-                                try {
-                                    action.getActionIntent().send();
-                                } catch (CanceledException e) {
-                                    Log.w(TAG, "Failed to send action", e);
-                                }
-                            });
+                            try {
+                                action.getActionIntent().send();
+                            } catch (CanceledException e) {
+                                Log.w(TAG, "Failed to send action", e);
+                            }
                         });
                     }
                     actionView.setEnabled(action.isEnabled());
@@ -480,13 +492,13 @@ public class PipMenuView extends FrameLayout {
     }
 
     private void cancelDelayedHide() {
-        mHandler.removeCallbacks(mHideMenuRunnable);
+        mMainExecutor.removeCallbacks(mHideMenuRunnable);
     }
 
     private void repostDelayedHide(int delay) {
         int recommendedTimeout = mAccessibilityManager.getRecommendedTimeoutMillis(delay,
                 FLAG_CONTENT_ICONS | FLAG_CONTENT_CONTROLS);
-        mHandler.removeCallbacks(mHideMenuRunnable);
-        mHandler.postDelayed(mHideMenuRunnable, recommendedTimeout);
+        mMainExecutor.removeCallbacks(mHideMenuRunnable);
+        mMainExecutor.executeDelayed(mHideMenuRunnable, recommendedTimeout);
     }
 }

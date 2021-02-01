@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.FeatureFlagUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -65,10 +66,13 @@ public class QSCarrier extends LinearLayout {
         super.onFinishInflate();
         mDualToneHandler = new DualToneHandler(getContext());
         mMobileGroup = findViewById(R.id.mobile_combo);
+        if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SETTINGS_PROVIDER_MODEL)) {
+            mMobileRoaming = findViewById(R.id.mobile_roaming_large);
+        } else {
+            mMobileRoaming = findViewById(R.id.mobile_roaming);
+        }
         mMobileSignal = findViewById(R.id.mobile_signal);
-        mMobileRoaming = findViewById(R.id.mobile_roaming);
         mCarrierText = findViewById(R.id.qs_carrier_text);
-
         mMobileSignal.setImageDrawable(new SignalDrawable(mContext));
 
         int colorForeground = Utils.getColorAttrDefaultColor(mContext,

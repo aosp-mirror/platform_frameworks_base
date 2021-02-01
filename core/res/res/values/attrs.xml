@@ -7993,7 +7993,12 @@
             <!-- The widget is added directly by the app, and does not need to appear in
                  the global list of available widgets -->
             <flag name="hide_from_picker" value="0x2" />
+              <!-- The widget provides a default configuration. The host may decide not to launch
+                   the provided configuration activity. -->
+           <flag name="configuration_optional" value="0x3" />
         </attr>
+        <!-- A resource identifier for a string containing a short description of the widget. -->
+        <attr name="description" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -8280,6 +8285,23 @@
              android.content.pm.PackageInfo#getLongVersionCode()} for the target package.
         -->
         <attr name="maxLongVersionCode" format="string" />
+    </declare-styleable>
+
+    <!-- =============================== -->
+    <!-- System Speech Recognition attributes -->
+    <!-- =============================== -->
+    <eat-comment />
+
+    <!-- Use <code>on-device-recognition-service</code> as the root tag of the XML resource that
+         describes a {@link android.service.speech.RecognitionService}, which is referenced
+         from its {@link android.service.speech.RecognitionService#SERVICE_META_DATA} meta-data
+         entry.
+         @hide @SystemApi
+    -->
+    <declare-styleable name="OnDeviceRecognitionService">
+        <!-- Fully qualified class name of an activity that allows the user to modify
+             the settings for this service. -->
+        <attr name="settingsActivity" />
     </declare-styleable>
 
     <!-- =============================== -->
@@ -9254,6 +9276,12 @@
              {@deprecated Use app:fontProviderCerts with Jetpack Core library instead.}
          -->
         <attr name="fontProviderCerts" format="reference" />
+        <!-- Provides the system font family name to check before downloading the font. For example
+        if the fontProviderQuery asked for "Sans Serif", it is possible to define
+        fontProviderSystemFontFamily as "sans-serif" to tell the system to use "sans-serif" font
+        family if it exists on the system.
+         -->
+        <attr name="fontProviderSystemFontFamily" format="string" />
     </declare-styleable>
 
     <!-- Attributes that are read when parsing a  tag. -->

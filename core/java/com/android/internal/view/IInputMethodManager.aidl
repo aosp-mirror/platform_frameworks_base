@@ -41,22 +41,24 @@ interface IInputMethodManager {
             int untrustedDisplayId);
 
     // TODO: Use ParceledListSlice instead
-    void getInputMethodList(int userId, in IInputMethodInfoListResultCallback resultCallback);
-    // TODO: Use ParceledListSlice instead
-    void getEnabledInputMethodList(int userId,
+    oneway void getInputMethodList(int userId,
             in IInputMethodInfoListResultCallback resultCallback);
-    void getEnabledInputMethodSubtypeList(in String imiId, boolean allowsImplicitlySelectedSubtypes,
+    // TODO: Use ParceledListSlice instead
+    oneway void getEnabledInputMethodList(int userId,
+            in IInputMethodInfoListResultCallback resultCallback);
+    oneway void getEnabledInputMethodSubtypeList(in String imiId,
+            boolean allowsImplicitlySelectedSubtypes,
             in IInputMethodSubtypeListResultCallback resultCallback);
-    void getLastInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
+    oneway void getLastInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
 
-    void showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
+    oneway void showSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver, in IBooleanResultCallback resultCallback);
-    void hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
+    oneway void hideSoftInput(in IInputMethodClient client, IBinder windowToken, int flags,
             in ResultReceiver resultReceiver, in IBooleanResultCallback resultCallback);
     // If windowToken is null, this just does startInput().  Otherwise this reports that a window
     // has gained focus, and if 'attribute' is non-null then also does startInput.
     // @NonNull
-    void startInputOrWindowGainedFocus(
+    oneway void startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken,
             /* @StartInputFlags */ int startInputFlags,
@@ -66,29 +68,31 @@ interface IInputMethodManager {
             int unverifiedTargetSdkVersion,
             in IInputBindResultResultCallback inputBindResult);
 
-    void showInputMethodPickerFromClient(in IInputMethodClient client,
+    oneway void showInputMethodPickerFromClient(in IInputMethodClient client,
             int auxiliarySubtypeMode, in IVoidResultCallback resultCallback);
-    void showInputMethodPickerFromSystem(in IInputMethodClient client, int auxiliarySubtypeMode,
-            int displayId, in IVoidResultCallback resultCallback);
-    void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client, String topId,
+    oneway void showInputMethodPickerFromSystem(in IInputMethodClient client,
+            int auxiliarySubtypeMode, int displayId, in IVoidResultCallback resultCallback);
+    oneway void showInputMethodAndSubtypeEnablerFromClient(in IInputMethodClient client,
+            String topId, in IVoidResultCallback resultCallback);
+    oneway void isInputMethodPickerShownForTest(in IBooleanResultCallback resultCallback);
+    oneway void getCurrentInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
+    oneway void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes,
             in IVoidResultCallback resultCallback);
-    void isInputMethodPickerShownForTest(in IBooleanResultCallback resultCallback);
-    void getCurrentInputMethodSubtype(in IInputMethodSubtypeResultCallback resultCallback);
-    void setAdditionalInputMethodSubtypes(String id, in InputMethodSubtype[] subtypes);
     // This is kept due to @UnsupportedAppUsage.
     // TODO(Bug 113914148): Consider removing this.
-    void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback);
+    oneway void getInputMethodWindowVisibleHeight(IIntResultCallback resultCallback);
 
-    void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
+    oneway void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues, in IVoidResultCallback resultCallback);
 
     oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
     /** Remove the IME surface. Requires INTERNAL_SYSTEM_WINDOW permission. */
-    void removeImeSurface();
+    oneway void removeImeSurface(in IVoidResultCallback resultCallback);
     /** Remove the IME surface. Requires passing the currently focused window. */
-    void removeImeSurfaceFromWindow(in IBinder windowToken);
+    oneway void removeImeSurfaceFromWindow(in IBinder windowToken,
+            in IVoidResultCallback resultCallback);
     void startProtoDump(in byte[] protoDump, int source, String where);
-    void isImeTraceEnabled(in IBooleanResultCallback resultCallback);
+    oneway void isImeTraceEnabled(in IBooleanResultCallback resultCallback);
 
     // Starts an ime trace.
     void startImeTrace();
