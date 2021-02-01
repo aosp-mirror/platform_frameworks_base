@@ -544,6 +544,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
+        mNavigationBarView.setBehavior(mBehavior);
         mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
         mPipOptional.ifPresent(mNavigationBarView::registerPipExclusionBoundsChangeListener);
 
@@ -918,6 +919,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         if (mBehavior != behavior) {
             mBehavior = behavior;
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setBehavior(behavior);
+            }
             updateSystemUiStateFlags(-1);
         }
     }
