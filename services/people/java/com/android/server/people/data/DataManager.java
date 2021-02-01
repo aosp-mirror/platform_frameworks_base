@@ -264,7 +264,8 @@ public class DataManager {
         return new ConversationChannel(shortcutInfo, uid, parentChannel,
                 parentChannelGroup,
                 conversationInfo.getLastEventTimestamp(),
-                hasActiveNotifications(packageName, userId, shortcutId));
+                hasActiveNotifications(packageName, userId, shortcutId), false,
+                getStatuses(conversationInfo));
     }
 
     /** Returns the cached non-customized recent conversations. */
@@ -404,6 +405,10 @@ public class DataManager {
             String conversationId) {
         ConversationStore cs = getConversationStoreOrThrow(packageName, userId);
         ConversationInfo conversationInfo = getConversationInfoOrThrow(cs, conversationId);
+        return getStatuses(conversationInfo);
+    }
+
+    private @NonNull List<ConversationStatus> getStatuses(ConversationInfo conversationInfo) {
         Collection<ConversationStatus> statuses = conversationInfo.getStatuses();
         if (statuses != null) {
             final ArrayList<ConversationStatus> list = new ArrayList<>(statuses.size());
