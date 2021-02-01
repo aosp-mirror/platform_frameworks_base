@@ -1344,6 +1344,13 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(DropBoxManagerService.class);
             t.traceEnd();
 
+            // Grants default permissions and defines roles
+            t.traceBegin("StartRoleManagerService");
+            LocalManagerRegistry.addManager(RoleServicePlatformHelper.class,
+                    new RoleServicePlatformHelperImpl(mSystemContext));
+            mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
+            t.traceEnd();
+
             t.traceBegin("StartVibratorManagerService");
             mSystemServiceManager.startService(VibratorManagerService.Lifecycle.class);
             t.traceEnd();
@@ -2059,13 +2066,6 @@ public final class SystemServer implements Dumpable {
                 mSystemServiceManager.startService(APPWIDGET_SERVICE_CLASS);
                 t.traceEnd();
             }
-
-            // Grants default permissions and defines roles
-            t.traceBegin("StartRoleManagerService");
-            LocalManagerRegistry.addManager(RoleServicePlatformHelper.class,
-                    new RoleServicePlatformHelperImpl(mSystemContext));
-            mSystemServiceManager.startService(ROLE_SERVICE_CLASS);
-            t.traceEnd();
 
             // We need to always start this service, regardless of whether the
             // FEATURE_VOICE_RECOGNIZERS feature is set, because it needs to take care
