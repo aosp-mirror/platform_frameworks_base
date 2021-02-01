@@ -192,14 +192,14 @@ public class ScreenshotView extends FrameLayout implements
         if (DEBUG_SCROLL) {
             Log.d(TAG, "Showing Scroll option");
         }
+        mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_IMPRESSION);
         mScrollChip.setVisibility(VISIBLE);
         mScrollChip.setOnClickListener((v) -> {
             if (DEBUG_INPUT) {
                 Log.d(TAG, "scroll chip tapped");
             }
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_REQUESTED);
             onClick.run();
-            // TODO Logging, store event consumer to a field
-            //onElementTapped.accept(ScreenshotEvent.SCREENSHOT_SCROLL_TAPPED);
         });
     }
 

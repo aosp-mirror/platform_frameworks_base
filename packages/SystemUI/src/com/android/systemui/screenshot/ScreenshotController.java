@@ -602,7 +602,7 @@ public class ScreenshotController {
     private void runScrollCapture(ScrollCaptureClient.Connection connection) {
         cancelTimeout();
         ScrollCaptureController controller = new ScrollCaptureController(mContext, connection,
-                mMainExecutor, mBgExecutor, mImageExporter);
+                mMainExecutor, mBgExecutor, mImageExporter, mUiEventLogger);
         controller.attach(mWindow);
         controller.start(new TakeScreenshotService.RequestCallback() {
             @Override
