@@ -2180,12 +2180,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** @return Root task of this activity, null if there is no task. */
+    @Nullable
     Task getRootTask() {
         return task != null ? task.getRootTask() : null;
     }
 
     int getRootTaskId() {
         return task != null ? task.getRootTaskId() : INVALID_TASK_ID;
+    }
+
+    /** @return the first organized parent task. */
+    @Nullable
+    Task getOrganizedTask() {
+        return task != null ? task.getOrganizedTask() : null;
     }
 
     @Override

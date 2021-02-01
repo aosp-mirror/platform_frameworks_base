@@ -42,6 +42,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
+import static com.android.server.wm.Task.ActivityState.RESUMED;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowContainer.SYNC_STATE_READY;
 
@@ -55,6 +56,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningTaskInfo;
@@ -1242,6 +1244,54 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mAtm.mWindowOrganizerController.applyTransaction(wct);
 
         assertEquals(splitPrimaryRootTask, activity.getRootTask());
+    }
+
+    @Test
+    public void testSizeCompatModeChangedOnFirstOrganizedTask() throws RemoteException {
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final Task rootTask = createStack();
+        final Task task = createTask(rootTask);
+        final ActivityRecord activity = createActivityRecord(rootTask.mDisplayContent, task);
+        final ArgumentCaptor<RunningTaskInfo> infoCaptor =
+                ArgumentCaptor.forClass(RunningTaskInfo.class);
+
+        assertTrue(rootTask.isOrganized());
+
+        spyOn(activity);
+        doReturn(true).when(activity).inSizeCompatMode();
+        doReturn(true).when(activity).isState(RESUMED);
+
+        // Ensure task info show top activity in size compat.
+        rootTask.onSizeCompatActivityChanged();
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskInfoChanged(infoCaptor.capture());
+        RunningTaskInfo info = infoCaptor.getValue();
+        assertEquals(rootTask.mTaskId, info.taskId);
+        assertEquals(activity.appToken, info.topActivityToken);
+        assertTrue(info.topActivityInSizeCompat);
+
+        // Ensure task info show top activity that is not in foreground as not in size compat.
+        clearInvocations(organizer);
+        doReturn(false).when(activity).isState(RESUMED);
+        rootTask.onSizeCompatActivityChanged();
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskInfoChanged(infoCaptor.capture());
+        info = infoCaptor.getValue();
+        assertEquals(rootTask.mTaskId, info.taskId);
+        assertEquals(activity.appToken, info.topActivityToken);
+        assertFalse(info.topActivityInSizeCompat);
+
+        // Ensure task info show non size compat top activity as not in size compat.
+        clearInvocations(organizer);
+        doReturn(true).when(activity).isState(RESUMED);
+        doReturn(false).when(activity).inSizeCompatMode();
+        rootTask.onSizeCompatActivityChanged();
+        mWm.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
+        verify(organizer).onTaskInfoChanged(infoCaptor.capture());
+        info = infoCaptor.getValue();
+        assertEquals(rootTask.mTaskId, info.taskId);
+        assertEquals(activity.appToken, info.topActivityToken);
+        assertFalse(info.topActivityInSizeCompat);
     }
 
     /**
