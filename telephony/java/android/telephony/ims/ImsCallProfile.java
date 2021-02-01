@@ -138,6 +138,8 @@ public final class ImsCallProfile implements Parcelable {
      * Indicates if the session is for a conference call or not. If not defined, should be
      * considered {@code false}.
      * Boolean extra properties - {@code true} / {@code false}.
+     *
+     * This extra is set on an instance of {@link ImsCallProfile} via {@link #setCallExtraBoolean}.
      * @hide
      */
     @SystemApi
@@ -174,6 +176,8 @@ public final class ImsCallProfile implements Parcelable {
      * Indicates if the session can be extended to a conference call. If not defined, should be
      * considered {@code false}.
      * Boolean extra properties - {@code true} / {@code false}.
+     *
+     * This extra is set on an instance of {@link ImsCallProfile} via {@link #setCallExtraBoolean}.
      * @hide
      */
     @SystemApi
