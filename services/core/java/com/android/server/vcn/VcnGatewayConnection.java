@@ -963,18 +963,18 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static NetworkCapabilities buildNetworkCapabilities(
             @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig) {
-        final NetworkCapabilities caps = new NetworkCapabilities();
+        final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
-        caps.addTransportType(TRANSPORT_CELLULAR);
-        caps.addCapability(NET_CAPABILITY_NOT_CONGESTED);
-        caps.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        builder.addTransportType(TRANSPORT_CELLULAR);
+        builder.addCapability(NET_CAPABILITY_NOT_CONGESTED);
+        builder.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
 
         // Add exposed capabilities
         for (int cap : gatewayConnectionConfig.getAllExposedCapabilities()) {
-            caps.addCapability(cap);
+            builder.addCapability(cap);
         }
 
-        return caps;
+        return builder.build();
     }
 
     private static LinkProperties buildConnectedLinkProperties(
