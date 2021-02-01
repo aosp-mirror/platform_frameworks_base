@@ -15,7 +15,10 @@
 android_test {
     name: "WMShellUnitTests",
 
-    srcs: ["**/*.java"],
+    srcs: [
+        "**/*.java",
+        "**/*.kt",
+    ],
 
     static_libs: [
         "WindowManager-Shell",

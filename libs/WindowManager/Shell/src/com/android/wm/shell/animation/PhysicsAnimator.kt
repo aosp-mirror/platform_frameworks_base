@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.animation
 
-import android.os.Looper
 import android.util.ArrayMap
 import android.util.Log
 import android.view.View
@@ -847,7 +846,7 @@ class PhysicsAnimator<T> private constructor (target: T) {
      * pass to [spring].
      */
     data class SpringConfig internal constructor(
-        internal var stiffness: Float,
+        var stiffness: Float,
         internal var dampingRatio: Float,
         internal var startVelocity: Float = 0f,
         internal var finalPosition: Float = UNSET
@@ -879,8 +878,8 @@ class PhysicsAnimator<T> private constructor (target: T) {
      */
     data class FlingConfig internal constructor(
         internal var friction: Float,
-        internal var min: Float,
-        internal var max: Float,
+        var min: Float,
+        var max: Float,
         internal var startVelocity: Float
     ) {
 
