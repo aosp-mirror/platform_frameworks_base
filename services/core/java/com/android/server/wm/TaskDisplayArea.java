@@ -47,6 +47,7 @@ import android.content.Intent;
 import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.WindowContainerTransaction;
 
@@ -903,6 +904,13 @@ final class TaskDisplayArea extends DisplayArea<WindowContainer> {
             default:
                 return mAppAnimationLayer;
         }
+    }
+
+    @Override
+    RemoteAnimationTarget createRemoteAnimationTarget(
+            RemoteAnimationController.RemoteAnimationRecord record) {
+        final ActivityRecord activity = getTopMostActivity();
+        return activity != null ? activity.createRemoteAnimationTarget(record) : null;
     }
 
     SurfaceControl getSplitScreenDividerAnchor() {
