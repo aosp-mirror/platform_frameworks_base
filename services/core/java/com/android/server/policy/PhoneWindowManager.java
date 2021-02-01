@@ -188,7 +188,6 @@ import android.view.WindowManagerPolicyConstants;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.autofill.AutofillManagerInternal;
 
@@ -201,7 +200,9 @@ import com.android.internal.os.RoSystemProperties;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
 import com.android.internal.policy.KeyInterceptionInfo;
+import com.android.internal.policy.LogDecelerateInterpolator;
 import com.android.internal.policy.PhoneWindow;
+import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.ExtconStateObserver;
@@ -228,7 +229,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashSet;
-import java.util.List;
 
 /**
  * WindowManagerPolicy implementation for the Android phone UI.  This
@@ -582,7 +582,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private final SparseArray<KeyCharacterMap.FallbackAction> mFallbackActions =
             new SparseArray<KeyCharacterMap.FallbackAction>();
 
-    private final LogDecelerateInterpolator mLogDecelerateInterpolator
+    private final com.android.internal.policy.LogDecelerateInterpolator mLogDecelerateInterpolator
             = new LogDecelerateInterpolator(100, 0);
 
     private final MutableBoolean mTmpBoolean = new MutableBoolean(false);
@@ -2484,28 +2484,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     @Override
     public Animation createHiddenByKeyguardExit(boolean onWallpaper,
             boolean goingToNotificationShade, boolean subtleAnimation) {
-        if (goingToNotificationShade) {
-            return AnimationUtils.loadAnimation(mContext, R.anim.lock_screen_behind_enter_fade_in);
-        }
-
-        final int resource;
-        if (subtleAnimation) {
-            resource = R.anim.lock_screen_behind_enter_subtle;
-        } else if (onWallpaper) {
-            resource = R.anim.lock_screen_behind_enter_wallpaper;
-        } else  {
-            resource = R.anim.lock_screen_behind_enter;
-        }
-
-        AnimationSet set = (AnimationSet) AnimationUtils.loadAnimation(mContext, resource);
-
-        // TODO: Use XML interpolators when we have log interpolators available in XML.
-        final List<Animation> animations = set.getAnimations();
-        for (int i = animations.size() - 1; i >= 0; --i) {
-            animations.get(i).setInterpolator(mLogDecelerateInterpolator);
-        }
-
-        return set;
+        return TransitionAnimation.createHiddenByKeyguardExit(mContext,
+                mLogDecelerateInterpolator, onWallpaper, goingToNotificationShade, subtleAnimation);
     }
 
 
