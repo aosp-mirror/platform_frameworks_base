@@ -110,7 +110,6 @@ public class Watchdog extends Thread {
     };
 
     public static final List<String> HAL_INTERFACES_OF_INTEREST = Arrays.asList(
-            "android.hardware.audio@2.0::IDevicesFactory",
             "android.hardware.audio@4.0::IDevicesFactory",
             "android.hardware.audio@5.0::IDevicesFactory",
             "android.hardware.audio@6.0::IDevicesFactory",
