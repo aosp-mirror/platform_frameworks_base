@@ -14721,9 +14721,8 @@ public final class Settings {
          *     touch, allow the UID to propagate the touch.
          * </ul>
          *
-         * @see android.hardware.input.InputManager#getMaximumObscuringOpacityForTouch(Context)
-         * @see android.hardware.input.InputManager#setMaximumObscuringOpacityForTouch(Context,
-         * float)
+         * @see android.hardware.input.InputManager#getMaximumObscuringOpacityForTouch()
+         * @see android.hardware.input.InputManager#setMaximumObscuringOpacityForTouch(float)
          *
          * @hide
          */

@@ -18500,6 +18500,7 @@ package android.hardware.input {
   public final class InputManager {
     method public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
+    method public float getMaximumObscuringOpacityForTouch();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     method @Nullable public android.view.VerifiedInputEvent verifyInputEvent(@NonNull android.view.InputEvent);
