@@ -114,7 +114,7 @@ public class LingerMonitor {
 
     private int getNotificationSource(NetworkAgentInfo toNai) {
         for (int i = 0; i < mNotifications.size(); i++) {
-            if (mNotifications.valueAt(i) == toNai.network.netId) {
+            if (mNotifications.valueAt(i) == toNai.network.getNetId()) {
                 return mNotifications.keyAt(i);
             }
         }
@@ -122,7 +122,7 @@ public class LingerMonitor {
     }
 
     private boolean everNotified(NetworkAgentInfo nai) {
-        return mEverNotified.get(nai.network.netId, false);
+        return mEverNotified.get(nai.network.getNetId(), false);
     }
 
     @VisibleForTesting
@@ -153,7 +153,7 @@ public class LingerMonitor {
     }
 
     private void showNotification(NetworkAgentInfo fromNai, NetworkAgentInfo toNai) {
-        mNotifier.showNotification(fromNai.network.netId, NotificationType.NETWORK_SWITCH,
+        mNotifier.showNotification(fromNai.network.getNetId(), NotificationType.NETWORK_SWITCH,
                 fromNai, toNai, createNotificationIntent(), true);
     }
 
@@ -208,8 +208,8 @@ public class LingerMonitor {
                     + " type=" + sNotifyTypeNames.get(notifyType, "unknown(" + notifyType + ")"));
         }
 
-        mNotifications.put(fromNai.network.netId, toNai.network.netId);
-        mEverNotified.put(fromNai.network.netId, true);
+        mNotifications.put(fromNai.network.getNetId(), toNai.network.getNetId());
+        mEverNotified.put(fromNai.network.getNetId(), true);
     }
 
     /**
@@ -295,8 +295,8 @@ public class LingerMonitor {
     }
 
     public void noteDisconnect(NetworkAgentInfo nai) {
-        mNotifications.delete(nai.network.netId);
-        mEverNotified.delete(nai.network.netId);
+        mNotifications.delete(nai.network.getNetId());
+        mEverNotified.delete(nai.network.getNetId());
         maybeStopNotifying(nai);
         // No need to cancel notifications on nai: NetworkMonitor does that on disconnect.
     }

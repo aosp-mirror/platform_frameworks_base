@@ -345,7 +345,6 @@ public final class SmsManager {
      * where this operation may fail.
      * </p>
      *
-     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
      *  the current default SMSC
@@ -357,7 +356,6 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -472,7 +470,6 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -862,21 +859,19 @@ public final class SmsManager {
      * where this operation may fail.
      * </p>
      *
-     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
-     *   the current default SMSC
+     *  the current default SMSC
      * @param parts an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
+     *  comprise the original message
      * @param sentIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been sent.
-     *   The result code will be <code>Activity.RESULT_OK</code> for success,
-     *   or one of these errors:<br>
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been sent.
+     *  The result code will be <code>Activity.RESULT_OK</code> for success,
+     *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -933,14 +928,14 @@ public final class SmsManager {
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
-     *   The per-application based SMS control checks sentIntent. If sentIntent
-     *   is NULL the caller will be checked against all unknown applications,
-     *   which cause smaller number of SMS to be sent in checking period.
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applications,
+     *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been delivered
-     *   to the recipient.  The raw pdu of the status report is in the
-     *   extended data ("pdu").
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been delivered
+     *  to the recipient.  The raw pdu of the status report is in the
+     *  extended data ("pdu").
      *
      * @throws IllegalArgumentException if destinationAddress or data are empty
      */
@@ -1123,21 +1118,20 @@ public final class SmsManager {
      * boolean value {@code true}. See {@link #getDefault()} for more information on the conditions
      * where this operation may fail.
      * </p>
-
+     *
      * @param destinationAddress the address to send the message to
      * @param scAddress is the service center address or null to use
-     *   the current default SMSC
+     *  the current default SMSC
      * @param parts an <code>ArrayList</code> of strings that, in order,
-     *   comprise the original message
+     *  comprise the original message
      * @param sentIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been sent.
-     *   The result code will be <code>Activity.RESULT_OK</code> for success,
-     *   or one of these errors:<br>
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been sent.
+     *  The result code will be <code>Activity.RESULT_OK</code> for success,
+     *  or one of these errors:<br>
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>
@@ -1194,14 +1188,14 @@ public final class SmsManager {
      *  For <code>RESULT_ERROR_GENERIC_FAILURE</code> or any of the RESULT_RIL errors,
      *  the sentIntent may include the extra "errorCode" containing a radio technology specific
      *  value, generally only useful for troubleshooting.<br>
-     *   The per-application based SMS control checks sentIntent. If sentIntent
-     *   is NULL the caller will be checked against all unknown applications,
-     *   which cause smaller number of SMS to be sent in checking period.
+     *  The per-application based SMS control checks sentIntent. If sentIntent
+     *  is NULL the caller will be checked against all unknown applications,
+     *  which cause smaller number of SMS to be sent in checking period.
      * @param deliveryIntents if not null, an <code>ArrayList</code> of
-     *   <code>PendingIntent</code>s (one for each message part) that is
-     *   broadcast when the corresponding message part has been delivered
-     *   to the recipient.  The raw pdu of the status report is in the
-     *   extended data ("pdu").
+     *  <code>PendingIntent</code>s (one for each message part) that is
+     *  broadcast when the corresponding message part has been delivered
+     *  to the recipient.  The raw pdu of the status report is in the
+     *  extended data ("pdu").
      * @param priority Priority level of the message
      *  Refer specification See 3GPP2 C.S0015-B, v2.0, table 4.5.9-1
      *  ---------------------------------
@@ -1339,7 +1333,6 @@ public final class SmsManager {
      *  <code>RESULT_ERROR_GENERIC_FAILURE</code><br>
      *  <code>RESULT_ERROR_RADIO_OFF</code><br>
      *  <code>RESULT_ERROR_NULL_PDU</code><br>
-     *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_NO_SERVICE</code><br>
      *  <code>RESULT_ERROR_LIMIT_EXCEEDED</code><br>
      *  <code>RESULT_ERROR_FDN_CHECK_FAILURE</code><br>

@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 import android.os.IBinder;
@@ -44,17 +45,22 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+@SystemApi
 @SystemService(Context.UWB_SERVICE)
 public final class UwbManager {
     private IUwbAdapter mUwbAdapter;
     private static final String SERVICE_NAME = "uwb";
 
-    private AdapterStateListener mAdapterStateListener;
+    private final AdapterStateListener mAdapterStateListener;
+    private final RangingManager mRangingManager;
 
     /**
      * Interface for receiving UWB adapter state changes
      */
     public interface AdapterStateCallback {
+        /**
+         * @hide
+         */
         @Retention(RetentionPolicy.SOURCE)
         @IntDef(value = {
                 STATE_CHANGED_REASON_SESSION_STARTED,
@@ -116,6 +122,7 @@ public final class UwbManager {
     private UwbManager(IUwbAdapter adapter) {
         mUwbAdapter = adapter;
         mAdapterStateListener = new AdapterStateListener(adapter);
+        mRangingManager = new RangingManager(adapter);
     }
 
     /**
@@ -195,6 +202,9 @@ public final class UwbManager {
         }
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
             ANGLE_OF_ARRIVAL_SUPPORT_TYPE_NONE,
@@ -361,13 +371,13 @@ public final class UwbManager {
 
     /**
      * Open a {@link RangingSession} with the given parameters
-     * <p>This function is asynchronous and will return before ranging begins. The
-     * {@link RangingSession.Callback#onOpenSuccess(RangingSession, PersistableBundle)} function is
-     * called with a {@link RangingSession} object used to control ranging when the session is
-     * successfully opened.
+     * <p>The {@link RangingSession.Callback#onOpened(RangingSession)} function is called with a
+     * {@link RangingSession} object used to control ranging when the session is successfully
+     * opened.
      *
-     * <p>If a session cannot be opened, then {@link RangingSession.Callback#onClosed(int)} will be
-     * invoked with the appropriate {@link RangingSession.Callback.CloseReason}.
+     * <p>If a session cannot be opened, then
+     * {@link RangingSession.Callback#onClosed(int, PersistableBundle)} will be invoked with the
+     * appropriate {@link RangingSession.Callback.Reason}.
      *
      * <p>An open {@link RangingSession} will be automatically closed if client application process
      * dies.
@@ -383,12 +393,12 @@ public final class UwbManager {
      * @return an {@link AutoCloseable} that is able to be used to close or cancel the opening of a
      *         {@link RangingSession} that has been requested through {@link #openRangingSession}
      *         but has not yet been made available by
-     *         {@link RangingSession.Callback#onOpenSuccess}.
+     *         {@link RangingSession.Callback#onOpened(RangingSession)}.
      */
     @NonNull
     public AutoCloseable openRangingSession(@NonNull PersistableBundle parameters,
-            @NonNull Executor executor,
+            @NonNull @CallbackExecutor Executor executor,
             @NonNull RangingSession.Callback callbacks) {
-        throw new UnsupportedOperationException();
+        return mRangingManager.openSession(parameters, executor, callbacks);
     }
 }

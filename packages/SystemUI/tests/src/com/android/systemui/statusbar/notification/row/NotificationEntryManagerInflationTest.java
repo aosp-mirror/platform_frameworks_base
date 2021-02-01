@@ -44,6 +44,7 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
+import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -204,6 +205,7 @@ public class NotificationEntryManagerInflationTest extends SysuiTestCase {
                 () -> mock(SmartReplyConstants.class),
                 () -> mock(SmartReplyController.class),
                 mock(ConversationNotificationProcessor.class),
+                mock(MediaFeatureFlag.class),
                 mBgExecutor);
         mRowContentBindStage = new RowContentBindStage(
                 binder,

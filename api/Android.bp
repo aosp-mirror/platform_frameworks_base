@@ -28,6 +28,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-current.txt",
     srcs: [
+        ":art.module.public.api{.public.api.txt}",
         ":conscrypt.module.public.api{.public.api.txt}",
         ":framework-media{.public.api.txt}",
         ":framework-mediaprovider{.public.api.txt}",
@@ -36,6 +37,7 @@ genrule {
         ":framework-statsd{.public.api.txt}",
         ":framework-tethering{.public.api.txt}",
         ":framework-wifi{.public.api.txt}",
+        ":i18n.module.public.api{.public.api.txt}",
         ":non-updatable-current.txt",
     ],
     out: ["current.txt"],
@@ -60,6 +62,7 @@ genrule {
     name: "frameworks-base-api-current.srcjar",
     srcs: [
         ":api-stubs-docs-non-updatable",
+        ":art.module.public.api{.public.stubs.source}",
         ":conscrypt.module.public.api{.public.stubs.source}",
         ":framework-media{.public.stubs.source}",
         ":framework-mediaprovider{.public.stubs.source}",
@@ -68,6 +71,7 @@ genrule {
         ":framework-statsd{.public.stubs.source}",
         ":framework-tethering{.public.stubs.source}",
         ":framework-wifi{.public.stubs.source}",
+        ":i18n.module.public.api{.public.stubs.source}",
     ],
     out: ["current.srcjar"],
     tools: ["merge_zips"],
@@ -78,6 +82,7 @@ genrule {
 genrule {
     name: "frameworks-base-api-removed.txt",
     srcs: [
+        ":art.module.public.api{.public.removed-api.txt}",
         ":conscrypt.module.public.api{.public.removed-api.txt}",
         ":framework-media{.public.removed-api.txt}",
         ":framework-mediaprovider{.public.removed-api.txt}",
@@ -86,6 +91,7 @@ genrule {
         ":framework-statsd{.public.removed-api.txt}",
         ":framework-tethering{.public.removed-api.txt}",
         ":framework-wifi{.public.removed-api.txt}",
+        ":i18n.module.public.api{.public.removed-api.txt}",
         ":non-updatable-removed.txt",
     ],
     out: ["removed.txt"],
@@ -95,6 +101,11 @@ genrule {
         {
             targets: ["droidcore"],
             dir: "api",
+            dest: "removed.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/public/api",
             dest: "removed.txt",
         },
     ],
@@ -151,6 +162,11 @@ genrule {
             dir: "api",
             dest: "system-removed.txt",
         },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "removed.txt",
+        },
     ],
     visibility: ["//visibility:public"],
 }
@@ -204,6 +220,11 @@ genrule {
             targets: ["droidcore"],
             dir: "api",
             dest: "module-lib-removed.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "removed.txt",
         },
     ],
 }

@@ -58,10 +58,8 @@ import android.net.Network;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkStack;
 import android.net.NetworkStats;
-import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.TetherStatsParcel;
-import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.shared.NetdUtils;
 import android.net.shared.RouteUtils;
@@ -92,7 +90,6 @@ import android.util.SparseIntArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.HexDump;
 import com.android.internal.util.Preconditions;
 
@@ -190,10 +187,10 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     /** Set of interfaces with active alerts. */
     @GuardedBy("mQuotaLock")
     private HashMap<String, Long> mActiveAlerts = Maps.newHashMap();
-    /** Set of UIDs denylisted on metered networks. */
+    /** Set of UIDs denied on metered networks. */
     @GuardedBy("mRulesLock")
     private SparseBooleanArray mUidRejectOnMetered = new SparseBooleanArray();
-    /** Set of UIDs allowlisted on metered networks. */
+    /** Set of UIDs allowed on metered networks. */
     @GuardedBy("mRulesLock")
     private SparseBooleanArray mUidAllowOnMetered = new SparseBooleanArray();
     /** Set of UIDs with cleartext penalties. */
@@ -399,30 +396,21 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
      * Notify our observers of a change in the data activity state of the interface
      */
     private void notifyInterfaceClassActivity(int type, boolean isActive, long tsNanos,
-            int uid, boolean fromRadio) {
+            int uid) {
         final boolean isMobile = ConnectivityManager.isNetworkTypeMobile(type);
         int powerState = isActive
                 ? DataConnectionRealTimeInfo.DC_POWER_STATE_HIGH
                 : DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
         if (isMobile) {
-            if (!fromRadio) {
-                if (mMobileActivityFromRadio) {
-                    // If this call is not coming from a report from the radio itself, but we
-                    // have previously received reports from the radio, then we will take the
-                    // power state to just be whatever the radio last reported.
-                    powerState = mLastPowerStateFromRadio;
-                }
-            } else {
-                mMobileActivityFromRadio = true;
-            }
             if (mLastPowerStateFromRadio != powerState) {
                 mLastPowerStateFromRadio = powerState;
                 try {
+                    // TODO: The interface changes that comes from netd are handled by BSS itself.
+                    // There are still events caused by setting or removing idle timer, so keep
+                    // reporting from here until setting idler timer moved to CS.
                     getBatteryStats().noteMobileRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
-                FrameworkStatsLog.write_non_chained(
-                        FrameworkStatsLog.MOBILE_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
             }
         }
 
@@ -430,23 +418,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             if (mLastPowerStateFromWifi != powerState) {
                 mLastPowerStateFromWifi = powerState;
                 try {
+                    // TODO: The interface changes that comes from netd are handled by BSS itself.
+                    // There are still events caused by setting or removing idle timer, so keep
+                    // reporting from here until setting idler timer moved to CS.
                     getBatteryStats().noteWifiRadioPowerState(powerState, tsNanos, uid);
                 } catch (RemoteException e) {
                 }
-                FrameworkStatsLog.write_non_chained(
-                        FrameworkStatsLog.WIFI_RADIO_POWER_STATE_CHANGED, uid, null, powerState);
             }
         }
 
-        if (!isMobile || fromRadio || !mMobileActivityFromRadio) {
-            // Report the change in data activity.  We don't do this if this is a change
-            // on the mobile network, that is not coming from the radio itself, and we
-            // have previously seen change reports from the radio.  In that case only
-            // the radio is the authority for the current state.
-            final boolean active = isActive;
-            invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
-                    Integer.toString(type), active, tsNanos));
-        }
+        final boolean active = isActive;
+        invokeForAllObservers(o -> o.interfaceClassDataActivityChanged(
+                type, active, tsNanos, uid));
 
         boolean report = false;
         synchronized (mIdleTimerLock) {
@@ -584,13 +567,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
             if (uidRejectOnQuota != null) {
                 for (int i = 0; i < uidRejectOnQuota.size(); i++) {
-                    setUidMeteredNetworkDenylist(uidRejectOnQuota.keyAt(i),
+                    setUidOnMeteredNetworkDenylist(uidRejectOnQuota.keyAt(i),
                             uidRejectOnQuota.valueAt(i));
                 }
             }
             if (uidAcceptOnQuota != null) {
                 for (int i = 0; i < uidAcceptOnQuota.size(); i++) {
-                    setUidMeteredNetworkAllowlist(uidAcceptOnQuota.keyAt(i),
+                    setUidOnMeteredNetworkAllowlist(uidAcceptOnQuota.keyAt(i),
                             uidAcceptOnQuota.valueAt(i));
                 }
             }
@@ -678,7 +661,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 timestampNanos = timestamp;
             }
             mDaemonHandler.post(() ->
-                    notifyInterfaceClassActivity(label, isActive, timestampNanos, uid, false));
+                    notifyInterfaceClassActivity(label, isActive, timestampNanos, uid));
         }
 
         @Override
@@ -803,7 +786,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         InterfaceConfiguration cfg = new InterfaceConfiguration();
         cfg.setHardwareAddress(p.hwAddr);
 
-        final InetAddress addr = NetworkUtils.numericToInetAddress(p.ipv4Addr);
+        final InetAddress addr = InetAddresses.parseNumericAddress(p.ipv4Addr);
         cfg.setLinkAddress(new LinkAddress(addr, p.prefixLength));
         for (String flag : p.flags) {
             cfg.setFlag(flag);
@@ -1164,7 +1147,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 mNetworkActive = false;
             }
             mDaemonHandler.post(() -> notifyInterfaceClassActivity(type, true,
-                    SystemClock.elapsedRealtimeNanos(), -1, false));
+                    SystemClock.elapsedRealtimeNanos(), -1));
         }
     }
 
@@ -1188,7 +1171,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             }
             mActiveIdleTimers.remove(iface);
             mDaemonHandler.post(() -> notifyInterfaceClassActivity(params.type, false,
-                    SystemClock.elapsedRealtimeNanos(), -1, false));
+                    SystemClock.elapsedRealtimeNanos(), -1));
         }
     }
 
@@ -1311,14 +1294,14 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
         }
     }
 
-    private void setUidOnMeteredNetworkList(int uid, boolean denylist, boolean enable) {
+    private void setUidOnMeteredNetworkList(int uid, boolean allowlist, boolean enable) {
         NetworkStack.checkNetworkStackPermission(mContext);
 
         synchronized (mQuotaLock) {
             boolean oldEnable;
             SparseBooleanArray quotaList;
             synchronized (mRulesLock) {
-                quotaList = denylist ? mUidRejectOnMetered : mUidAllowOnMetered;
+                quotaList = allowlist ?  mUidAllowOnMetered : mUidRejectOnMetered;
                 oldEnable = quotaList.get(uid, false);
             }
             if (oldEnable == enable) {
@@ -1328,17 +1311,17 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
 
             Trace.traceBegin(Trace.TRACE_TAG_NETWORK, "inetd bandwidth");
             try {
-                if (denylist) {
-                    if (enable) {
-                        mNetdService.bandwidthAddNaughtyApp(uid);
-                    } else {
-                        mNetdService.bandwidthRemoveNaughtyApp(uid);
-                    }
-                } else {
+                if (allowlist) {
                     if (enable) {
                         mNetdService.bandwidthAddNiceApp(uid);
                     } else {
                         mNetdService.bandwidthRemoveNiceApp(uid);
+                    }
+                } else {
+                    if (enable) {
+                        mNetdService.bandwidthAddNaughtyApp(uid);
+                    } else {
+                        mNetdService.bandwidthRemoveNaughtyApp(uid);
                     }
                 }
                 synchronized (mRulesLock) {
@@ -1357,13 +1340,13 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void setUidMeteredNetworkDenylist(int uid, boolean enable) {
-        setUidOnMeteredNetworkList(uid, true, enable);
+    public void setUidOnMeteredNetworkDenylist(int uid, boolean enable) {
+        setUidOnMeteredNetworkList(uid, false, enable);
     }
 
     @Override
-    public void setUidMeteredNetworkAllowlist(int uid, boolean enable) {
-        setUidOnMeteredNetworkList(uid, false, enable);
+    public void setUidOnMeteredNetworkAllowlist(int uid, boolean enable) {
+        setUidOnMeteredNetworkList(uid, true, enable);
     }
 
     @Override
@@ -1391,38 +1374,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             } finally {
                 Trace.traceEnd(Trace.TRACE_TAG_NETWORK);
             }
-        }
-    }
-
-    private static UidRangeParcel makeUidRangeParcel(int start, int stop) {
-        UidRangeParcel range = new UidRangeParcel();
-        range.start = start;
-        range.stop = stop;
-        return range;
-    }
-
-    private static UidRangeParcel[] toStableParcels(UidRange[] ranges) {
-        UidRangeParcel[] stableRanges = new UidRangeParcel[ranges.length];
-        for (int i = 0; i < ranges.length; i++) {
-            stableRanges[i] = makeUidRangeParcel(ranges[i].start, ranges[i].stop);
-        }
-        return stableRanges;
-    }
-
-    @Override
-    public void setAllowOnlyVpnForUids(boolean add, UidRange[] uidRanges)
-            throws ServiceSpecificException {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
-            mNetdService.networkRejectNonSecureVpn(add, toStableParcels(uidRanges));
-        } catch (ServiceSpecificException e) {
-            Log.w(TAG, "setAllowOnlyVpnForUids(" + add + ", " + Arrays.toString(uidRanges) + ")"
-                    + ": netd command failed", e);
-            throw e;
-        } catch (RemoteException e) {
-            Log.w(TAG, "setAllowOnlyVpnForUids(" + add + ", " + Arrays.toString(uidRanges) + ")"
-                    + ": netd command failed", e);
-            throw e.rethrowAsRuntimeException();
         }
     }
 
@@ -1554,27 +1505,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     }
 
     @Override
-    public void addVpnUidRanges(int netId, UidRange[] ranges) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-
-        try {
-            mNetdService.networkAddUidRanges(netId, toStableParcels(ranges));
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
-    public void removeVpnUidRanges(int netId, UidRange[] ranges) {
-        NetworkStack.checkNetworkStackPermission(mContext);
-        try {
-            mNetdService.networkRemoveUidRanges(netId, toStableParcels(ranges));
-        } catch (RemoteException | ServiceSpecificException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    @Override
     public void setFirewallEnabled(boolean enabled) {
         enforceSystemUid();
         try {
@@ -1617,7 +1547,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             ranges = new UidRangeParcel[] {
                 // TODO: is there a better way of finding all existing users? If so, we could
                 // specify their ranges here.
-                makeUidRangeParcel(Process.FIRST_APPLICATION_UID, Integer.MAX_VALUE),
+                new UidRangeParcel(Process.FIRST_APPLICATION_UID, Integer.MAX_VALUE),
             };
             // ... except for the UIDs that have allow rules.
             synchronized (mRulesLock) {
@@ -1648,7 +1578,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
                 for (int i = 0; i < ranges.length; i++) {
                     if (rules.valueAt(i) == FIREWALL_RULE_DENY) {
                         int uid = rules.keyAt(i);
-                        ranges[numUids] = makeUidRangeParcel(uid, uid);
+                        ranges[numUids] = new UidRangeParcel(uid, uid);
                         numUids++;
                     }
                 }
@@ -1839,7 +1769,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             } else {
                 ruleName = "deny";
             }
-        } else { // Denylist mode
+        } else { // Deny mode
             if (rule == FIREWALL_RULE_DENY) {
                 ruleName = "deny";
             } else {
@@ -1926,8 +1856,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
             pw.print("Active alert ifaces: "); pw.println(mActiveAlerts.toString());
             pw.print("Data saver mode: "); pw.println(mDataSaverMode);
             synchronized (mRulesLock) {
-                dumpUidRuleOnQuotaLocked(pw, "denylist", mUidRejectOnMetered);
-                dumpUidRuleOnQuotaLocked(pw, "allowlist", mUidAllowOnMetered);
+                dumpUidRuleOnQuotaLocked(pw, "denied UIDs", mUidRejectOnMetered);
+                dumpUidRuleOnQuotaLocked(pw, "allowed UIDs", mUidAllowOnMetered);
             }
         }
 
@@ -1980,7 +1910,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub {
     private void dumpUidRuleOnQuotaLocked(PrintWriter pw, String name, SparseBooleanArray list) {
         pw.print("UID bandwith control ");
         pw.print(name);
-        pw.print(" rule: [");
+        pw.print(": [");
         final int size = list.size();
         for (int i = 0; i < size; i++) {
             pw.print(list.keyAt(i));

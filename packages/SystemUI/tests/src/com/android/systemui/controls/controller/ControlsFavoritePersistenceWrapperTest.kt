@@ -25,6 +25,7 @@ import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -77,5 +78,16 @@ class ControlsFavoritePersistenceWrapperTest : SysuiTestCase() {
         executor.runAllReady()
 
         assertEquals(list, wrapper.readFavorites())
+    }
+
+    @Test
+    fun testSaveEmptyOnNonExistingFile() {
+        if (file.exists()) {
+            file.delete()
+        }
+
+        wrapper.storeFavorites(emptyList())
+
+        assertFalse(file.exists())
     }
 }

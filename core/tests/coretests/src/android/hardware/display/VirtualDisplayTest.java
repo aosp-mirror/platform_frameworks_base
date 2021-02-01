@@ -247,6 +247,25 @@ public class VirtualDisplayTest extends AndroidTestCase {
         assertDisplayUnregistered(display);
     }
 
+    /**
+     * Ensures that an application can create a trusted virtual display with the permission
+     * {@code ADD_TRUSTED_DISPLAY}.
+     */
+    public void testTrustedVirtualDisplay() throws Exception {
+        VirtualDisplay virtualDisplay = mDisplayManager.createVirtualDisplay(NAME,
+                WIDTH, HEIGHT, DENSITY, mSurface,
+                DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED);
+        assertNotNull("virtual display must not be null", virtualDisplay);
+
+        Display display = virtualDisplay.getDisplay();
+        try {
+            assertDisplayRegistered(display, Display.FLAG_PRIVATE | Display.FLAG_TRUSTED);
+        } finally {
+            virtualDisplay.release();
+        }
+        assertDisplayUnregistered(display);
+    }
+
     private void assertDisplayRegistered(Display display, int flags) {
         assertNotNull("display object must not be null", display);
         assertTrue("display must be valid", display.isValid());

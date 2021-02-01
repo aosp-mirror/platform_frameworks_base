@@ -74,4 +74,16 @@ public final class TimeDetectorImpl implements TimeDetector {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    @Override
+    public void suggestGnssTime(GnssTimeSuggestion timeSuggestion) {
+        if (DEBUG) {
+            Log.d(TAG, "suggestGnssTime called: " + timeSuggestion);
+        }
+        try {
+            mITimeDetectorService.suggestGnssTime(timeSuggestion);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
 }

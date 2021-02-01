@@ -63,8 +63,8 @@ public class RangingMeasurementTest {
         assertEquals(status, measurement.getStatus());
         assertEquals(address, measurement.getRemoteDeviceAddress());
         assertEquals(time, measurement.getElapsedRealtimeNanos());
-        assertEquals(angleMeasurement, measurement.getAngleOfArrival());
-        assertEquals(distanceMeasurement, measurement.getDistance());
+        assertEquals(angleMeasurement, measurement.getAngleOfArrivalMeasurement());
+        assertEquals(distanceMeasurement, measurement.getDistanceMeasurement());
     }
 
     private RangingMeasurement tryBuild(RangingMeasurement.Builder builder,

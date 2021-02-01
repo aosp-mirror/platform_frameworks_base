@@ -1586,6 +1586,7 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
 
                 record.mRequest = locationRequest;
+                record.mReceiver.updateMonitoring(true);
                 requests.add(locationRequest);
                 if (!locationRequest.isLowPowerMode()) {
                     providerRequest.setLowPowerMode(false);
@@ -2063,10 +2064,12 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
+    @Nullable
     @Override
-    public boolean getCurrentLocation(LocationRequest locationRequest,
-            ICancellationSignal remoteCancellationSignal, ILocationListener listener,
-            String packageName, String featureId, String listenerId) {
+    public ICancellationSignal getCurrentLocation(LocationRequest locationRequest,
+            ILocationListener listener, String packageName, String featureId, String listenerId) {
+        ICancellationSignal remoteCancellationSignal = CancellationSignal.createTransport();
+
         // side effect of validating locationRequest and packageName
         Location lastLocation = getLastLocation(locationRequest, packageName, featureId);
         if (lastLocation != null) {
@@ -2076,17 +2079,17 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (locationAgeMs < MAX_CURRENT_LOCATION_AGE_MS) {
                 try {
                     listener.onLocationChanged(lastLocation);
-                    return true;
+                    return remoteCancellationSignal;
                 } catch (RemoteException e) {
                     Log.w(TAG, e);
-                    return false;
+                    return null;
                 }
             }
 
             if (!mAppForegroundHelper.isAppForeground(Binder.getCallingUid())) {
                 if (locationAgeMs < mSettingsHelper.getBackgroundThrottleIntervalMs()) {
                     // not allowed to request new locations, so we can't return anything
-                    return false;
+                    return null;
                 }
             }
         }
@@ -2094,11 +2097,8 @@ public class LocationManagerService extends ILocationManager.Stub {
         requestLocationUpdates(locationRequest, listener, null, packageName, featureId, listenerId);
         CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
                 remoteCancellationSignal);
-        if (cancellationSignal != null) {
-            cancellationSignal.setOnCancelListener(
-                    () -> removeUpdates(listener, null));
-        }
-        return true;
+        cancellationSignal.setOnCancelListener(() -> removeUpdates(listener, null));
+        return remoteCancellationSignal;
     }
 
     @Override

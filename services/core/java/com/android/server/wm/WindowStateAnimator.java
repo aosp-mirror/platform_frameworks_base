@@ -38,6 +38,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG;
@@ -1478,7 +1479,7 @@ class WindowStateAnimator {
             mWin.getDisplayContent().adjustForImeIfNeeded();
         }
 
-        return mWin.isAnimating(PARENTS);
+        return mWin.isAnimating(0 /* flags */, ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
     void dumpDebug(ProtoOutputStream proto, long fieldId) {

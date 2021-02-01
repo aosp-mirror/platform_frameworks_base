@@ -295,6 +295,7 @@ filegroup {
     srcs: [
         // Java/AIDL sources under frameworks/base
         ":framework-blobstore-sources",
+        ":framework-connectivity-sources", // framework-connectivity is not yet a module
         ":framework-core-sources",
         ":framework-drm-sources",
         ":framework-graphics-sources",
@@ -314,6 +315,7 @@ filegroup {
         ":framework-telecomm-sources",
         ":framework-telephony-common-sources",
         ":framework-telephony-sources",
+        ":framework-vcn-util-sources",
         ":framework-wifi-annotations",
         ":framework-wifi-non-updatable-sources",
         ":PacProcessor-aidl-sources",
@@ -348,6 +350,7 @@ filegroup {
         // etc.
         ":framework-javastream-protos",
         ":statslog-framework-java-gen", // FrameworkStatsLog.java
+        ":audio_policy_configuration_V7_0",
     ],
 }
 
@@ -479,6 +482,8 @@ java_library {
         "android.hardware.vibrator-V1.1-java",
         "android.hardware.vibrator-V1.2-java",
         "android.hardware.vibrator-V1.3-java",
+        "android.security.apc-java",
+        "android.security.authorization-java",
         "android.system.keystore2-java",
         "android.system.suspend.control.internal-java",
         "devicepolicyprotosnano",
@@ -1237,6 +1242,7 @@ java_library {
     visibility: [
         "//frameworks/base/wifi",
         "//frameworks/base/services/net",
+        "//packages/modules/Wifi/framework",
     ],
 }
 
@@ -1261,13 +1267,16 @@ filegroup {
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
     ],
-    visibility: ["//frameworks/opt/net/wifi/service"],
+    visibility: [
+        "//frameworks/opt/net/wifi/service",
+        "//packages/modules/Wifi/service",
+    ],
 }
 
 // TODO(b/145644363): move this to under StubLibraries.bp or ApiDocs.bp
 metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.xml) " +
-    "--ignore-classes-on-classpath " +
     "--hide-package com.android.server " +
+    "--hide-package android.audio.policy.configuration.V7_0 " +
     "--error UnhiddenSystemApi " +
     "--hide RequiresPermission " +
     "--hide CallbackInterface " +

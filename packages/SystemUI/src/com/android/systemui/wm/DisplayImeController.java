@@ -228,16 +228,40 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         mHandler.post(() -> {
                             final Point lastSurfacePosition = mImeSourceControl != null
                                     ? mImeSourceControl.getSurfacePosition() : null;
+                            final boolean positionChanged =
+                                    !activeControl.getSurfacePosition().equals(lastSurfacePosition);
+                            final boolean leashChanged =
+                                    !haveSameLeash(mImeSourceControl, activeControl);
                             mImeSourceControl = activeControl;
-                            if (!activeControl.getSurfacePosition().equals(lastSurfacePosition)
-                                    && mAnimation != null) {
-                                startAnimation(mImeShowing, true /* forceRestart */);
-                            } else if (!mImeShowing) {
-                                removeImeSurface();
+                            if (mAnimation != null) {
+                                if (positionChanged) {
+                                    startAnimation(mImeShowing, true /* forceRestart */);
+                                }
+                            } else {
+                                if (leashChanged) {
+                                    applyVisibilityToLeash();
+                                }
+                                if (!mImeShowing) {
+                                    removeImeSurface();
+                                }
                             }
                         });
                     }
                 }
+            }
+        }
+
+        private void applyVisibilityToLeash() {
+            SurfaceControl leash = mImeSourceControl.getLeash();
+            if (leash != null) {
+                SurfaceControl.Transaction t = mTransactionPool.acquire();
+                if (mImeShowing) {
+                    t.show(leash);
+                } else {
+                    t.hide(leash);
+                }
+                t.apply();
+                mTransactionPool.release(t);
             }
         }
 
@@ -257,6 +281,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
             if (DEBUG) Slog.d(TAG, "Got hideInsets for ime");
             mHandler.post(() -> startAnimation(false /* show */, false /* forceRestart */));
+        }
+
+        @Override
+        public void topFocusedWindowChanged(String packageName) {
+            // no-op
         }
 
         /**
@@ -486,5 +515,21 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
     public IInputMethodManager getImms() {
         return IInputMethodManager.Stub.asInterface(
                 ServiceManager.getService(Context.INPUT_METHOD_SERVICE));
+    }
+
+    private static boolean haveSameLeash(InsetsSourceControl a, InsetsSourceControl b) {
+        if (a == b) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        if (a.getLeash() == b.getLeash()) {
+            return true;
+        }
+        if (a.getLeash() == null || b.getLeash() == null) {
+            return false;
+        }
+        return a.getLeash().isSameSurface(b.getLeash());
     }
 }

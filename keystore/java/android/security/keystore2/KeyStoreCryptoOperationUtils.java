@@ -57,7 +57,7 @@ abstract class KeyStoreCryptoOperationUtils {
         for (Authorization p : key.getAuthorizations()) {
             switch(p.keyParameter.tag) {
                 case KeymasterDefs.KM_TAG_USER_SECURE_ID:
-                    keySids.add(p.keyParameter.longInteger);
+                    keySids.add(p.keyParameter.value.getLongInteger());
                     break;
                 default:
                     break;
@@ -120,6 +120,7 @@ abstract class KeyStoreCryptoOperationUtils {
                 return new KeyPermanentlyInvalidatedException();
             case ResponseCode.LOCKED:
             case ResponseCode.UNINITIALIZED:
+            case KeymasterDefs.KM_ERROR_KEY_USER_NOT_AUTHENTICATED:
                 // TODO b/173111727 remove response codes LOCKED and UNINITIALIZED
                 return new UserNotAuthenticatedException();
             default:

@@ -39,6 +39,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.inspector.InspectableProperty;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
 
 import java.util.ArrayList;
@@ -776,17 +777,23 @@ public abstract class AbsSeekBar extends ProgressBar {
 
     /**
      * Grows {@code r} from its center such that each dimension is at least {@code minimumSize}.
+     *
+     * The result will still have the same {@link Rect#centerX()} and {@link Rect#centerY()} as the
+     * input.
+     *
+     * @hide
      */
-    private void growRectTo(Rect r, int minimumSize) {
-        int dy = (minimumSize - r.height()) / 2;
+    @VisibleForTesting
+    public void growRectTo(Rect r, int minimumSize) {
+        int dy = minimumSize - r.height();
         if (dy > 0) {
-            r.top -= dy;
-            r.bottom += dy;
+            r.top -= (dy + 1) / 2;
+            r.bottom += dy / 2;
         }
-        int dx = (minimumSize - r.width()) / 2;
+        int dx = minimumSize - r.width();
         if (dx > 0) {
-            r.left -= dx;
-            r.right += dx;
+            r.left -= (dx + 1) / 2;
+            r.right += dx / 2;
         }
     }
 

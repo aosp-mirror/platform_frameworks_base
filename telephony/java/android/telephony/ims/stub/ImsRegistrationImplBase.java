@@ -38,6 +38,9 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Controls IMS registration for this ImsService and notifies the framework when the IMS
  * registration for this ImsService has changed status.
+ * <p>
+ * Note: There is no guarantee on the thread that the calls from the framework will be called on. It
+ * is the implementors responsibility to handle moving the calls to a working thread if required.
  * @hide
  */
 @SystemApi
@@ -92,6 +95,21 @@ public class ImsRegistrationImplBase {
         public void removeRegistrationCallback(IImsRegistrationCallback c) throws RemoteException {
             ImsRegistrationImplBase.this.removeRegistrationCallback(c);
         }
+
+        @Override
+        public void triggerFullNetworkRegistration(int sipCode, String sipReason) {
+            ImsRegistrationImplBase.this.triggerFullNetworkRegistration(sipCode, sipReason);
+        }
+
+        @Override
+        public void triggerUpdateSipDelegateRegistration() {
+            ImsRegistrationImplBase.this.updateSipDelegateRegistration();
+        }
+
+        @Override
+        public void triggerSipDelegateDeregistration() {
+            ImsRegistrationImplBase.this.triggerSipDelegateDeregistration();
+        }
     };
 
     private final RemoteCallbackListExt<IImsRegistrationCallback> mCallbacks =
@@ -133,7 +151,6 @@ public class ImsRegistrationImplBase {
      * If the SIP delegate feature tag configuration has changed, then this method will be
      * called in order to let the ImsService know that it can pick up these changes in the IMS
      * registration.
-     * @hide
      */
     public void updateSipDelegateRegistration() {
         // Stub implementation, ImsService should implement this
@@ -150,7 +167,6 @@ public class ImsRegistrationImplBase {
      * <p>
      * This should not affect the registration of features managed by the ImsService itself, such as
      * feature tags related to MMTEL registration.
-     * @hide
      */
     public void triggerSipDelegateDeregistration() {
         // Stub implementation, ImsService should implement this
@@ -169,9 +185,8 @@ public class ImsRegistrationImplBase {
      *    be carrier specific.
      * @param sipReason The reason associated with the SIP error code. {@code null} if there was no
      *    reason associated with the error.
-     * @hide
      */
-    public void triggerNetworkReregistration(@IntRange(from = 100, to = 699) int sipCode,
+    public void triggerFullNetworkRegistration(@IntRange(from = 100, to = 699) int sipCode,
             @Nullable String sipReason) {
         // Stub implementation, ImsService should implement this
     }

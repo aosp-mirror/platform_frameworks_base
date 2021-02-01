@@ -74,7 +74,7 @@ public class TunerResourceManagerServiceTest {
             mReclaimed = true;
         }
 
-        public boolean isRelaimed() {
+        public boolean isReclaimed() {
             return mReclaimed;
         }
     }
@@ -379,13 +379,13 @@ public class TunerResourceManagerServiceTest {
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBT);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isFalse();
-        assertThat(listener.isRelaimed()).isFalse();
+        assertThat(listener.isReclaimed()).isFalse();
 
         request =
                 new TunerFrontendRequest(clientId1[0] /*clientId*/, FrontendSettings.TYPE_DVBS);
         assertThat(mTunerResourceManagerService
                 .requestFrontendInternal(request, frontendHandle)).isFalse();
-        assertThat(listener.isRelaimed()).isFalse();
+        assertThat(listener.isReclaimed()).isFalse();
     }
 
     @Test
@@ -444,7 +444,7 @@ public class TunerResourceManagerServiceTest {
                 .getOwnerClientId()).isEqualTo(clientId1[0]);
         assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
                 .getOwnerClientId()).isEqualTo(clientId1[0]);
-        assertThat(listener.isRelaimed()).isTrue();
+        assertThat(listener.isReclaimed()).isTrue();
     }
 
     @Test
@@ -478,7 +478,7 @@ public class TunerResourceManagerServiceTest {
 
         // Release frontend
         mTunerResourceManagerService.releaseFrontendInternal(mTunerResourceManagerService
-                .getFrontendResource(frontendId));
+                .getFrontendResource(frontendId), clientId[0]);
         assertThat(mTunerResourceManagerService
                 .getFrontendResource(frontendId).isInUse()).isFalse();
         assertThat(mTunerResourceManagerService
@@ -540,7 +540,7 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.getCasResource(1)
                 .getOwnerClientIds()).isEqualTo(new HashSet<Integer>(Arrays.asList(clientId1[0])));
         assertThat(mTunerResourceManagerService.getCasResource(1).isFullyUsed()).isFalse();
-        assertThat(listener.isRelaimed()).isTrue();
+        assertThat(listener.isReclaimed()).isTrue();
     }
 
     @Test
@@ -625,7 +625,7 @@ public class TunerResourceManagerServiceTest {
                 .isInUse()).isTrue();
         assertThat(mTunerResourceManagerService.getLnbResource(lnbIds[0])
                 .getOwnerClientId()).isEqualTo(clientId1[0]);
-        assertThat(listener.isRelaimed()).isTrue();
+        assertThat(listener.isReclaimed()).isTrue();
         assertThat(mTunerResourceManagerService.getClientProfile(clientId0[0])
                 .getInUseLnbIds().size()).isEqualTo(0);
     }
@@ -752,5 +752,294 @@ public class TunerResourceManagerServiceTest {
         assertThat(mTunerResourceManagerService.isHigherPriorityInternal(backgroundPlaybackProfile,
                 backgroundRecordProfile)).isEqualTo(
                         (backgroundPlaybackPriority > backgroundRecordPriority));
+    }
+
+    @Test
+    public void shareFrontendTest_FrontendWithExclusiveGroupReadyToShare() {
+        /**** Register Clients and Set Priority ****/
+
+        // Int array to save the returned client ids
+        int[] ownerClientId0 = new int[1];
+        int[] ownerClientId1 = new int[1];
+        int[] shareClientId0 = new int[1];
+        int[] shareClientId1 = new int[1];
+
+        // Predefined client profiles
+        ResourceClientProfile[] ownerProfiles = new ResourceClientProfile[2];
+        ResourceClientProfile[] shareProfiles = new ResourceClientProfile[2];
+        ownerProfiles[0] = new ResourceClientProfile(
+                "0" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE);
+        ownerProfiles[1] = new ResourceClientProfile(
+                "1" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_LIVE);
+        shareProfiles[0] = new ResourceClientProfile(
+                "2" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
+        shareProfiles[1] = new ResourceClientProfile(
+                "3" /*sessionId*/,
+                TvInputService.PRIORITY_HINT_USE_CASE_TYPE_RECORD);
+
+        // Predefined client reclaim listeners
+        TestResourcesReclaimListener ownerListener0 = new TestResourcesReclaimListener();
+        TestResourcesReclaimListener shareListener0 = new TestResourcesReclaimListener();
+        TestResourcesReclaimListener ownerListener1 = new TestResourcesReclaimListener();
+        TestResourcesReclaimListener shareListener1 = new TestResourcesReclaimListener();
+        // Register clients and validate the returned client ids
+        mTunerResourceManagerService
+                .registerClientProfileInternal(ownerProfiles[0], ownerListener0, ownerClientId0);
+        mTunerResourceManagerService
+                .registerClientProfileInternal(shareProfiles[0], shareListener0, shareClientId0);
+        mTunerResourceManagerService
+                .registerClientProfileInternal(ownerProfiles[1], ownerListener1, ownerClientId1);
+        mTunerResourceManagerService
+                .registerClientProfileInternal(shareProfiles[1], shareListener1, shareClientId1);
+        assertThat(ownerClientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        assertThat(shareClientId0[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        assertThat(ownerClientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+        assertThat(shareClientId1[0]).isNotEqualTo(TunerResourceManagerService.INVALID_CLIENT_ID);
+
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                ownerClientId0[0],
+                100/*priority*/,
+                0/*niceValue*/);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                shareClientId0[0],
+                200/*priority*/,
+                0/*niceValue*/);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                ownerClientId1[0],
+                300/*priority*/,
+                0/*niceValue*/);
+        mTunerResourceManagerService.updateClientPriorityInternal(
+                shareClientId1[0],
+                400/*priority*/,
+                0/*niceValue*/);
+
+        /**** Init Frontend Resources ****/
+
+        // Predefined frontend info
+        TunerFrontendInfo[] infos = new TunerFrontendInfo[2];
+        infos[0] = new TunerFrontendInfo(
+                0 /*id*/,
+                FrontendSettings.TYPE_DVBT,
+                1 /*exclusiveGroupId*/);
+        infos[1] = new TunerFrontendInfo(
+                1 /*id*/,
+                FrontendSettings.TYPE_DVBS,
+                1 /*exclusiveGroupId*/);
+
+        /**** Init Lnb Resources ****/
+        int[] lnbIds = {1};
+        mTunerResourceManagerService.setLnbInfoListInternal(lnbIds);
+
+        // Update frontend list in TRM
+        mTunerResourceManagerService.setFrontendInfoListInternal(infos);
+
+        /**** Request Frontend ****/
+
+        // Predefined frontend request and array to save returned frontend handle
+        int[] frontendHandle = new int[1];
+        TunerFrontendRequest request = new TunerFrontendRequest(
+                ownerClientId0[0] /*clientId*/,
+                FrontendSettings.TYPE_DVBT);
+
+        // Request call and validate granted resource and internal mapping
+        assertThat(mTunerResourceManagerService
+                .requestFrontendInternal(request, frontendHandle))
+                .isTrue();
+        assertThat(mTunerResourceManagerService
+                .getResourceIdFromHandle(frontendHandle[0]))
+                .isEqualTo(infos[0].getId());
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId0[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+
+        /**** Share Frontend ****/
+
+        // Share frontend call and validate the internal mapping
+        mTunerResourceManagerService.shareFrontendInternal(
+                shareClientId0[0]/*selfClientId*/,
+                ownerClientId0[0]/*targetClientId*/);
+        mTunerResourceManagerService.shareFrontendInternal(
+                shareClientId1[0]/*selfClientId*/,
+                ownerClientId0[0]/*targetClientId*/);
+        // Verify fe in use status
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
+                .isInUse()).isTrue();
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
+                .isInUse()).isTrue();
+        // Verify fe owner status
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
+                .getOwnerClientId()).isEqualTo(ownerClientId0[0]);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
+                .getOwnerClientId()).isEqualTo(ownerClientId0[0]);
+        // Verify share fe client status in the primary owner client
+        assertThat(mTunerResourceManagerService.getClientProfile(ownerClientId0[0])
+                .getShareFeClientIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        shareClientId0[0],
+                        shareClientId1[0])));
+        // Verify in use frontend list in all the primary owner and share owner clients
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId0[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId0[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId1[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+
+        /**** Remove Frontend Share Owner ****/
+
+        // Unregister the second share fe client
+        mTunerResourceManagerService.unregisterClientProfileInternal(shareClientId1[0]);
+
+        // Validate the internal mapping
+        assertThat(mTunerResourceManagerService.getClientProfile(ownerClientId0[0])
+                .getShareFeClientIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        shareClientId0[0])));
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId0[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId0[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+
+        /**** Request Shared Frontend with Higher Priority Client ****/
+
+        // Predefined second frontend request
+        request = new TunerFrontendRequest(
+                ownerClientId1[0] /*clientId*/,
+                FrontendSettings.TYPE_DVBT);
+
+        // Second request call
+        assertThat(mTunerResourceManagerService
+                .requestFrontendInternal(request, frontendHandle))
+                .isTrue();
+
+        // Validate granted resource and internal mapping
+        assertThat(mTunerResourceManagerService
+                .getResourceIdFromHandle(frontendHandle[0]))
+                .isEqualTo(infos[0].getId());
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
+                .getOwnerClientId()).isEqualTo(ownerClientId1[0]);
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
+                .getOwnerClientId()).isEqualTo(ownerClientId1[0]);
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId1[0])
+                .getInUseFrontendIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        infos[0].getId(),
+                        infos[1].getId())));
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId0[0])
+                .getInUseFrontendIds()
+                .isEmpty())
+                .isTrue();
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId0[0])
+                .getInUseFrontendIds()
+                .isEmpty())
+                .isTrue();
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId0[0])
+                .getShareFeClientIds()
+                .isEmpty())
+                .isTrue();
+        assertThat(ownerListener0.isReclaimed()).isTrue();
+        assertThat(shareListener0.isReclaimed()).isTrue();
+
+        /**** Release Frontend Resource From Primary Owner ****/
+
+        // Reshare the frontend
+        mTunerResourceManagerService.shareFrontendInternal(
+                shareClientId0[0]/*selfClientId*/,
+                ownerClientId1[0]/*targetClientId*/);
+
+        // Release the frontend resource from the primary owner
+        mTunerResourceManagerService.releaseFrontendInternal(mTunerResourceManagerService
+                .getFrontendResource(infos[0].getId()), ownerClientId1[0]);
+
+        // Validate the internal mapping
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
+                .isInUse()).isFalse();
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
+                .isInUse()).isFalse();
+        // Verify client status
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId1[0])
+                .getInUseFrontendIds()
+                .isEmpty())
+                .isTrue();
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId0[0])
+                .getInUseFrontendIds()
+                .isEmpty())
+                .isTrue();
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(ownerClientId1[0])
+                .getShareFeClientIds()
+                .isEmpty())
+                .isTrue();
+
+        /**** Unregister Primary Owner when the Share owner owns an Lnb ****/
+
+        // Predefined Lnb request and handle array
+        TunerLnbRequest requestLnb = new TunerLnbRequest(shareClientId0[0]);
+        int[] lnbHandle = new int[1];
+
+        // Request for an Lnb
+        assertThat(mTunerResourceManagerService
+                .requestLnbInternal(requestLnb, lnbHandle))
+                .isTrue();
+
+        // Request and share the frontend resource again
+        assertThat(mTunerResourceManagerService
+                .requestFrontendInternal(request, frontendHandle))
+                .isTrue();
+        mTunerResourceManagerService.shareFrontendInternal(
+                shareClientId0[0]/*selfClientId*/,
+                ownerClientId1[0]/*targetClientId*/);
+
+        // Unregister the primary owner of the shared frontend
+        mTunerResourceManagerService.unregisterClientProfileInternal(ownerClientId1[0]);
+
+        // Validate the internal mapping
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[0].getId())
+                .isInUse()).isFalse();
+        assertThat(mTunerResourceManagerService.getFrontendResource(infos[1].getId())
+                .isInUse()).isFalse();
+        // Verify client status
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId0[0])
+                .getInUseFrontendIds()
+                .isEmpty())
+                .isTrue();
+        assertThat(mTunerResourceManagerService
+                .getClientProfile(shareClientId0[0])
+                .getInUseLnbIds())
+                .isEqualTo(new HashSet<Integer>(Arrays.asList(
+                        lnbIds[0])));
     }
 }

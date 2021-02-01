@@ -36,6 +36,7 @@ import android.net.SocketKeepalive.InvalidSocketException;
 import android.net.TcpKeepalivePacketData;
 import android.net.TcpKeepalivePacketDataParcelable;
 import android.net.TcpRepairWindow;
+import android.net.util.KeepalivePacketDataUtil;
 import android.os.Handler;
 import android.os.MessageQueue;
 import android.os.Messenger;
@@ -112,7 +113,7 @@ public class TcpKeepaliveController {
             throws InvalidPacketException, InvalidSocketException {
         try {
             final TcpKeepalivePacketDataParcelable tcpDetails = switchToRepairMode(fd);
-            return TcpKeepalivePacketData.tcpKeepalivePacket(tcpDetails);
+            return KeepalivePacketDataUtil.fromStableParcelable(tcpDetails);
         } catch (InvalidPacketException | InvalidSocketException e) {
             switchOutOfRepairMode(fd);
             throw e;
@@ -122,7 +123,7 @@ public class TcpKeepaliveController {
      * Switch the tcp socket to repair mode and query detail tcp information.
      *
      * @param fd the fd of socket on which to use keepalive offload.
-     * @return a {@link TcpKeepalivePacketData#TcpKeepalivePacketDataParcelable} object for current
+     * @return a {@link TcpKeepalivePacketDataParcelable} object for current
      * tcp/ip information.
      */
     private static TcpKeepalivePacketDataParcelable switchToRepairMode(FileDescriptor fd)

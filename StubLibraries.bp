@@ -47,11 +47,11 @@ stubs_defaults {
         "core/java/**/*.logtags",
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
-        ":art.module.public.api{.public.stubs.source}",
-        ":android_icu4j_public_api_files",
         "**/package.html",
     ],
-    sdk_version: "core_platform",
+    sdk_version: "none",
+    system_modules: "none",
+    java_version: "1.8",
     arg_files: ["core/res/AndroidManifest.xml"],
     // TODO(b/147699819): remove below aidl includes.
     aidl: {
@@ -78,6 +78,7 @@ stubs_defaults {
         "android.hardware.usb.gadget-V1.0-java",
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
+        "stable.core.platform.api.stubs",
         // There are a few classes from modules used as type arguments that
         // need to be resolved by metalava. For now, we can use a previously
         // finalized stub library to resolve them. If a new class gets added,
@@ -112,13 +113,27 @@ droidstubs {
         last_released: {
             api_file: ":android-non-updatable.api.public.latest",
             removed_api_file: ":android-non-updatable-removed.api.public.latest",
-            baseline_file: ":public-api-incompatibilities-with-last-released",
+            baseline_file: ":android-incompatibilities.api.public.latest",
         },
         api_lint: {
             enabled: true,
             new_since: ":android-non-updatable.api.public.latest",
         },
     },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/public/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 priv_apps =
@@ -150,7 +165,7 @@ droidstubs {
         last_released: {
             api_file: ":android-non-updatable.api.system.latest",
             removed_api_file: ":android-non-updatable-removed.api.system.latest",
-            baseline_file: ":system-api-incompatibilities-with-last-released"
+            baseline_file: ":android-incompatibilities.api.system.latest"
         },
         api_lint: {
             enabled: true,
@@ -158,6 +173,20 @@ droidstubs {
             baseline_file: "core/api/system-lint-baseline.txt",
         },
     },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/system/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 droidstubs {
@@ -174,11 +203,32 @@ droidstubs {
             baseline_file: "core/api/test-lint-baseline.txt",
         },
     },
-    dist: {
-        targets: ["sdk", "win_sdk"],
-        dir: "apistubs/android/test/api",
-        dest: "android.txt",
-    },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "removed.txt",
+            tag: ".removed-api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/test/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 droidstubs {
@@ -199,6 +249,20 @@ droidstubs {
             new_since: ":android-non-updatable.api.module-lib.latest",
         },
     },
+    dists: [
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "android-non-updatable.txt",
+            tag: ".api.txt",
+        },
+        {
+            targets: ["sdk", "win_sdk"],
+            dir: "apistubs/android/module-lib/api",
+            dest: "android-non-updatable-removed.txt",
+            tag: ".removed-api.txt",
+        },
+    ],
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -238,6 +302,7 @@ java_library_static {
     name: "android_stubs_current",
     srcs: [ ":api-stubs-docs-non-updatable" ],
     static_libs: [
+        "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-media.stubs",
         "framework-mediaprovider.stubs",
@@ -246,6 +311,7 @@ java_library_static {
         "framework-statsd.stubs",
         "framework-tethering.stubs",
         "framework-wifi.stubs",
+        "i18n.module.public.api.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: ["android_defaults_stubs_current"],
@@ -255,6 +321,7 @@ java_library_static {
     name: "android_system_stubs_current",
     srcs: [ ":system-api-stubs-docs-non-updatable" ],
     static_libs: [
+        "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",
@@ -263,6 +330,7 @@ java_library_static {
         "framework-statsd.stubs.system",
         "framework-tethering.stubs.system",
         "framework-wifi.stubs.system",
+        "i18n.module.public.api.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: [
@@ -288,6 +356,7 @@ java_library_static {
     static_libs: [
         // Modules do not have test APIs, but we want to include their SystemApis, like we include
         // the SystemApi of framework-non-updatable-sources.
+        "art.module.public.api.stubs",
         "conscrypt.module.public.api.stubs",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",
@@ -296,6 +365,7 @@ java_library_static {
         "framework-statsd.stubs.system",
         "framework-tethering.stubs.system",
         "framework-wifi.stubs.system",
+        "i18n.module.public.api.stubs",
         "private-stub-annotations-jar",
     ],
     defaults: [
@@ -323,23 +393,10 @@ java_library_static {
         "android_stubs_dists_default",
     ],
     libs: ["sdk_system_29_android"],
+    static_libs: ["art.module.public.api.stubs"],
     dist: {
         dir: "apistubs/android/module-lib",
     },
-}
-
-java_library_static {
-    name: "android_non_updatable_stubs_current",
-    srcs: [":api-stubs-docs-non-updatable"],
-    defaults: ["android_defaults_stubs_current"],
-    libs: ["sdk_system_29_android"],
-}
-
-java_library_static {
-    name: "android_system_non_updatable_stubs_current",
-    srcs: [":system-api-stubs-docs-non-updatable"],
-    defaults: ["android_defaults_stubs_current"],
-    libs: ["sdk_system_29_android"],
 }
 
 /////////////////////////////////////////////////////////////////////

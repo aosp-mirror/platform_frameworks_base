@@ -493,6 +493,11 @@ public class MockContext extends Context {
     }
 
     @Override
+    public void sendStickyBroadcast(Intent intent, Bundle options) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void sendStickyOrderedBroadcast(Intent intent,
             BroadcastReceiver resultReceiver, Handler scheduler, int initialCode, String initialData,
            Bundle initialExtras) {

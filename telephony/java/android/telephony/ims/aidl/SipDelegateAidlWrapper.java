@@ -28,6 +28,10 @@ import android.telephony.ims.SipDelegateImsConfiguration;
 import android.telephony.ims.SipDelegateManager;
 import android.telephony.ims.SipMessage;
 import android.telephony.ims.stub.SipDelegate;
+import android.text.TextUtils;
+import android.util.Log;
+
+import com.android.internal.telephony.SipMessageParsingUtils;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -40,6 +44,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMessageCallback {
+    private static final String LOG_TAG = "SipDelegateAW";
 
     private final ISipDelegate.Stub mDelegateBinder = new ISipDelegate.Stub() {
         @Override
@@ -183,11 +188,15 @@ public class SipDelegateAidlWrapper implements DelegateStateCallback, DelegateMe
     }
 
     private void notifyLocalMessageFailedToBeReceived(SipMessage m, int reason) {
-        //TODO: parse transaction ID or throw IllegalArgumentException if the SipMessage
-        // transaction ID can not be parsed.
+        String transactionId = SipMessageParsingUtils.getTransactionId(m.getHeaderSection());
+        if (TextUtils.isEmpty(transactionId)) {
+            Log.w(LOG_TAG, "failure to parse SipMessage.");
+            throw new IllegalArgumentException("Malformed SipMessage, can not determine "
+                    + "transaction ID.");
+        }
         SipDelegate d = mDelegate;
         if (d != null) {
-            mExecutor.execute(() -> d.notifyMessageReceiveError(null, reason));
+            mExecutor.execute(() -> d.notifyMessageReceiveError(transactionId, reason));
         }
     }
 }

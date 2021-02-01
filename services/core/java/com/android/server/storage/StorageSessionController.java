@@ -338,11 +338,12 @@ public final class StorageSessionController {
     }
 
     /**
-     * Returns {@code true} if {@code vol} is an emulated or public volume,
+     * Returns {@code true} if {@code vol} is an emulated or visible public volume,
      * {@code false} otherwise
      **/
     public static boolean isEmulatedOrPublic(VolumeInfo vol) {
-        return vol.type == VolumeInfo.TYPE_EMULATED || vol.type == VolumeInfo.TYPE_PUBLIC;
+        return vol.type == VolumeInfo.TYPE_EMULATED
+                || (vol.type == VolumeInfo.TYPE_PUBLIC && vol.isVisible());
     }
 
     /** Exception thrown when communication with the {@link ExternalStorageService} fails. */
@@ -360,7 +361,11 @@ public final class StorageSessionController {
         }
     }
 
+    private static boolean isSupportedVolume(VolumeInfo vol) {
+        return isEmulatedOrPublic(vol) || vol.type == VolumeInfo.TYPE_STUB;
+    }
+
     private boolean shouldHandle(@Nullable VolumeInfo vol) {
-        return mIsFuseEnabled && !mIsResetting && (vol == null || isEmulatedOrPublic(vol));
+        return mIsFuseEnabled && !mIsResetting && (vol == null || isSupportedVolume(vol));
     }
 }

@@ -102,7 +102,8 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                         insideSecureHardware =
                                 KeyStore2ParameterUtils.isSecureHardware(a.securityLevel);
                         securityLevel = a.securityLevel;
-                        origin = KeyProperties.Origin.fromKeymaster(a.keyParameter.integer);
+                        origin = KeyProperties.Origin.fromKeymaster(
+                                a.keyParameter.value.getOrigin());
                         break;
                     case KeymasterDefs.KM_TAG_KEY_SIZE:
                         long keySizeUnsigned = KeyStore2ParameterUtils.getUnsignedInt(a);
@@ -113,45 +114,51 @@ public class AndroidKeyStoreSecretKeyFactorySpi extends SecretKeyFactorySpi {
                         keySize = (int) keySizeUnsigned;
                         break;
                     case KeymasterDefs.KM_TAG_PURPOSE:
-                        purposes |= KeyProperties.Purpose.fromKeymaster(a.keyParameter.integer);
+                        purposes |= KeyProperties.Purpose.fromKeymaster(
+                                a.keyParameter.value.getKeyPurpose());
                         break;
                     case KeymasterDefs.KM_TAG_PADDING:
+                        int paddingMode = a.keyParameter.value.getPaddingMode();
                         try {
-                            if (a.keyParameter.integer == KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN
-                                    || a.keyParameter.integer == KeymasterDefs.KM_PAD_RSA_PSS) {
+                            if (paddingMode == KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN
+                                    || paddingMode == KeymasterDefs.KM_PAD_RSA_PSS) {
                                 @KeyProperties.SignaturePaddingEnum String padding =
                                         KeyProperties.SignaturePadding.fromKeymaster(
-                                                a.keyParameter.integer);
+                                                paddingMode);
                                 signaturePaddingsList.add(padding);
                             } else {
                                 @KeyProperties.EncryptionPaddingEnum String jcaPadding =
                                         KeyProperties.EncryptionPadding.fromKeymaster(
-                                                a.keyParameter.integer);
+                                                paddingMode);
                                 encryptionPaddingsList.add(jcaPadding);
                             }
                         } catch (IllegalArgumentException e) {
                             throw new ProviderException("Unsupported padding: "
-                                                + a.keyParameter.integer);
+                                                + paddingMode);
                         }
                         break;
                     case KeymasterDefs.KM_TAG_DIGEST:
-                        digestsList.add(KeyProperties.Digest.fromKeymaster(a.keyParameter.integer));
+                        digestsList.add(KeyProperties.Digest.fromKeymaster(
+                                a.keyParameter.value.getDigest()));
                         break;
                     case KeymasterDefs.KM_TAG_BLOCK_MODE:
                         blockModesList.add(
-                                KeyProperties.BlockMode.fromKeymaster(a.keyParameter.integer)
+                                KeyProperties.BlockMode.fromKeymaster(
+                                        a.keyParameter.value.getBlockMode())
                         );
                         break;
                     case KeymasterDefs.KM_TAG_USER_AUTH_TYPE:
+                        int authenticatorType = a.keyParameter.value.getHardwareAuthenticatorType();
                         if (KeyStore2ParameterUtils.isSecureHardware(a.securityLevel)) {
-                            keymasterHwEnforcedUserAuthenticators = a.keyParameter.integer;
+                            keymasterHwEnforcedUserAuthenticators = authenticatorType;
                         } else {
-                            keymasterSwEnforcedUserAuthenticators = a.keyParameter.integer;
+                            keymasterSwEnforcedUserAuthenticators = authenticatorType;
                         }
                         break;
                     case KeymasterDefs.KM_TAG_USER_SECURE_ID:
                         keymasterSecureUserIds.add(
-                                KeymasterArguments.toUint64(a.keyParameter.longInteger));
+                                KeymasterArguments.toUint64(
+                                        a.keyParameter.value.getLongInteger()));
                         break;
                     case KeymasterDefs.KM_TAG_ACTIVE_DATETIME:
                         keyValidityStart = KeyStore2ParameterUtils.getDate(a);

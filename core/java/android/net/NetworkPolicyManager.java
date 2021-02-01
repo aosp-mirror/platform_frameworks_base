@@ -32,8 +32,8 @@ import android.content.pm.Signature;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Build;
+import android.os.Process;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.telephony.SubscriptionPlan;
 import android.util.DebugUtils;
 import android.util.Pair;
@@ -122,17 +122,26 @@ public class NetworkPolicyManager {
      * @hide
      */
     public static final int RULE_REJECT_ALL = 1 << 6;
+    /**
+     * Reject traffic on all networks for restricted networking mode.
+     */
+    public static final int RULE_REJECT_RESTRICTED_MODE = 1 << 10;
 
     /**
      * Mask used to get the {@code RULE_xxx_METERED} rules
      * @hide
      */
-    public static final int MASK_METERED_NETWORKS = 0b00001111;
+    public static final int MASK_METERED_NETWORKS = 0b000000001111;
     /**
      * Mask used to get the {@code RULE_xxx_ALL} rules
      * @hide
      */
-    public static final int MASK_ALL_NETWORKS     = 0b11110000;
+    public static final int MASK_ALL_NETWORKS     = 0b000011110000;
+    /**
+     * Mask used to get the {@code RULE_xxx_RESTRICTED_MODE} rules
+     * @hide
+     */
+    public static final int MASK_RESTRICTED_MODE_NETWORKS     = 0b111100000000;
 
     /** @hide */
     public static final int FIREWALL_RULE_DEFAULT = 0;
@@ -432,6 +441,51 @@ public class NetworkPolicyManager {
         }
     }
 
+    /**
+     * Check that networking is blocked for the given uid.
+     *
+     * @param uid The target uid.
+     * @param meteredNetwork True if the network is metered.
+     * @return true if networking is blocked for the given uid according to current networking
+     *         policies.
+     *
+     * @hide
+     */
+    public boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork) {
+        try {
+            return mService.isUidNetworkingBlocked(uid, meteredNetwork);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Check that the given uid is restricted from doing networking on metered networks.
+     *
+     * @param uid The target uid.
+     * @return true if the given uid is restricted from doing networking on metered networks.
+     *
+     * @hide
+     */
+    public boolean isUidRestrictedOnMeteredNetworks(int uid) {
+        try {
+            return mService.isUidRestrictedOnMeteredNetworks(uid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get multipath preference for the given network.
+     */
+    public int getMultipathPreference(Network network) {
+        try {
+            return mService.getMultipathPreference(network);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /** {@hide} */
     @Deprecated
     public static Iterator<Pair<ZonedDateTime, ZonedDateTime>> cycleIterator(NetworkPolicy policy) {
@@ -462,7 +516,7 @@ public class NetworkPolicyManager {
     @Deprecated
     public static boolean isUidValidForPolicy(Context context, int uid) {
         // first, quick-reject non-applications
-        if (!UserHandle.isApp(uid)) {
+        if (!Process.isApplicationUid(uid)) {
             return false;
         }
 

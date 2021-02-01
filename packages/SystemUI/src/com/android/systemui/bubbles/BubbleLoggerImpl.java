@@ -30,10 +30,6 @@ public class BubbleLoggerImpl extends UiEventLoggerImpl implements BubbleLogger 
      * @param e UI event
      */
     public void log(Bubble b, UiEventEnum e) {
-        if (b.getInstanceId() == null) {
-            // Added from persistence -- TODO log this with specific event?
-            return;
-        }
         logWithInstanceId(e, b.getAppUid(), b.getPackageName(), b.getInstanceId());
     }
 

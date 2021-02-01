@@ -257,7 +257,17 @@ jobject JHwBlob::NewObject(JNIEnv *env, size_t size) {
     // XXX Again cannot refer to gFields.constructID because InitClass may
     // not have been called yet.
 
-    return env->NewObject(clazz.get(), constructID, size);
+    // Cases:
+    // - this originates from another process (something so large should not fit
+    //   in the binder buffer, and it should be rejected by the binder driver)
+    // - if this is used in process, this code makes too many heap copies (in
+    //   order to retrofit HIDL's scatter-gather format to java types) to
+    //   justify passing such a large amount of data over this path. So the
+    //   alternative (updating the constructor and other code to accept other
+    //   types, should also probably not be taken in this case).
+    CHECK_LE(size, std::numeric_limits<jint>::max());
+
+    return env->NewObject(clazz.get(), constructID, static_cast<jint>(size));
 }
 
 }  // namespace android

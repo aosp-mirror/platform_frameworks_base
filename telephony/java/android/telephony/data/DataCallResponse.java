@@ -109,10 +109,10 @@ public final class DataCallResponse implements Parcelable {
     public static final int HANDOVER_FAILURE_MODE_NO_FALLBACK_RETRY_SETUP_NORMAL = 3;
 
     /**
-     * Indicates that data retry interval is not specified. Platform can determine when to
+     * Indicates that data retry duration is not specified. Platform can determine when to
      * perform data setup appropriately.
      */
-    public static final int RETRY_INTERVAL_UNDEFINED = -1;
+    public static final int RETRY_DURATION_UNDEFINED = -1;
 
     /**
      * Indicates that the pdu session id is not set.
@@ -136,6 +136,7 @@ public final class DataCallResponse implements Parcelable {
     private final int mPduSessionId;
     private final Qos mDefaultQos;
     private final List<QosSession> mQosSessions;
+    private final SliceInfo mSliceInfo;
 
     /**
      * @param cause Data call fail cause. {@link DataFailCause#NONE} indicates no error.
@@ -186,6 +187,7 @@ public final class DataCallResponse implements Parcelable {
         mPduSessionId = PDU_SESSION_ID_NOT_SET;
         mDefaultQos = null;
         mQosSessions = new ArrayList<>();
+        mSliceInfo = null;
     }
 
     private DataCallResponse(@DataFailureCause int cause, long suggestedRetryTime, int id,
@@ -194,7 +196,8 @@ public final class DataCallResponse implements Parcelable {
             @Nullable List<InetAddress> dnsAddresses, @Nullable List<InetAddress> gatewayAddresses,
             @Nullable List<InetAddress> pcscfAddresses, int mtu, int mtuV4, int mtuV6,
             @HandoverFailureMode int handoverFailureMode, int pduSessionId,
-            @Nullable Qos defaultQos, @Nullable List<QosSession> qosSessions) {
+            @Nullable Qos defaultQos, @Nullable List<QosSession> qosSessions,
+            @Nullable SliceInfo sliceInfo) {
         mCause = cause;
         mSuggestedRetryTime = suggestedRetryTime;
         mId = id;
@@ -216,6 +219,7 @@ public final class DataCallResponse implements Parcelable {
         mPduSessionId = pduSessionId;
         mDefaultQos = defaultQos;
         mQosSessions = qosSessions;
+        mSliceInfo = sliceInfo;
     }
 
     /** @hide */
@@ -243,6 +247,7 @@ public final class DataCallResponse implements Parcelable {
         mDefaultQos = source.readParcelable(Qos.class.getClassLoader());
         mQosSessions = new ArrayList<>();
         source.readList(mQosSessions, QosSession.class.getClassLoader());
+        mSliceInfo = source.readParcelable(SliceInfo.class.getClassLoader());
     }
 
     /**
@@ -254,19 +259,26 @@ public final class DataCallResponse implements Parcelable {
     /**
      * @return The suggested data retry time in milliseconds.
      *
-     * @deprecated Use {@link #getRetryIntervalMillis()} instead.
+     * @deprecated Use {@link #getRetryDurationMillis()} instead.
      */
     @Deprecated
     public int getSuggestedRetryTime() {
+
+        // To match the pre-deprecated getSuggestedRetryTime() behavior.
+        if (mSuggestedRetryTime == RETRY_DURATION_UNDEFINED) {
+            return 0;
+        } else if (mSuggestedRetryTime > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
         return (int) mSuggestedRetryTime;
     }
 
     /**
-     * @return The network suggested data retry interval in milliseconds. {@code Long.MAX_VALUE}
-     * indicates data retry should not occur. {@link #RETRY_INTERVAL_UNDEFINED} indicates network
-     * did not suggest any retry interval.
+     * @return The network suggested data retry duration in milliseconds. {@code Long.MAX_VALUE}
+     * indicates data retry should not occur. {@link #RETRY_DURATION_UNDEFINED} indicates network
+     * did not suggest any retry duration.
      */
-    public long getRetryIntervalMillis() {
+    public long getRetryDurationMillis() {
         return mSuggestedRetryTime;
     }
 
@@ -361,7 +373,7 @@ public final class DataCallResponse implements Parcelable {
     }
 
     /**
-     * @return default QOS of the data call received from the network
+     * @return default QOS of the data connection received from the network
      *
      * @hide
      */
@@ -372,14 +384,22 @@ public final class DataCallResponse implements Parcelable {
     }
 
     /**
-     * @return All the dedicated bearer QOS sessions of the data call received from the network
+     * @return All the dedicated bearer QOS sessions of the data connection received from the
+     * network.
      *
      * @hide
      */
-
     @NonNull
     public List<QosSession> getQosSessions() {
         return mQosSessions;
+    }
+
+    /**
+     * @return The slice info related to this data connection.
+     */
+    @Nullable
+    public SliceInfo getSliceInfo() {
+        return mSliceInfo;
     }
 
     @NonNull
@@ -404,6 +424,7 @@ public final class DataCallResponse implements Parcelable {
            .append(" pduSessionId=").append(getPduSessionId())
            .append(" defaultQos=").append(mDefaultQos)
            .append(" qosSessions=").append(mQosSessions)
+           .append(" sliceInfo=").append(mSliceInfo)
            .append("}");
         return sb.toString();
     }
@@ -447,7 +468,8 @@ public final class DataCallResponse implements Parcelable {
                 && mHandoverFailureMode == other.mHandoverFailureMode
                 && mPduSessionId == other.mPduSessionId
                 && isQosSame
-                && isQosSessionsSame;
+                && isQosSessionsSame
+                && Objects.equals(mSliceInfo, other.mSliceInfo);
     }
 
     @Override
@@ -455,7 +477,7 @@ public final class DataCallResponse implements Parcelable {
         return Objects.hash(mCause, mSuggestedRetryTime, mId, mLinkStatus, mProtocolType,
                 mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses, mPcscfAddresses,
                 mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId, mDefaultQos,
-                mQosSessions);
+                mQosSessions, mSliceInfo);
     }
 
     @Override
@@ -486,6 +508,7 @@ public final class DataCallResponse implements Parcelable {
             dest.writeParcelable((NrQos)mDefaultQos, flags);
         }
         dest.writeList(mQosSessions);
+        dest.writeParcelable(mSliceInfo, flags);
     }
 
     public static final @android.annotation.NonNull Parcelable.Creator<DataCallResponse> CREATOR =
@@ -537,7 +560,7 @@ public final class DataCallResponse implements Parcelable {
     public static final class Builder {
         private @DataFailureCause int mCause;
 
-        private long mSuggestedRetryTime = RETRY_INTERVAL_UNDEFINED;
+        private long mSuggestedRetryTime = RETRY_DURATION_UNDEFINED;
 
         private int mId;
 
@@ -569,6 +592,8 @@ public final class DataCallResponse implements Parcelable {
 
         private List<QosSession> mQosSessions = new ArrayList<>();
 
+        private SliceInfo mSliceInfo;
+
         /**
          * Default constructor for Builder.
          */
@@ -592,7 +617,7 @@ public final class DataCallResponse implements Parcelable {
          * @param suggestedRetryTime The suggested data retry time in milliseconds.
          * @return The same instance of the builder.
          *
-         * @deprecated Use {@link #setRetryIntervalMillis(long)} instead.
+         * @deprecated Use {@link #setRetryDurationMillis(long)} instead.
          */
         @Deprecated
         public @NonNull Builder setSuggestedRetryTime(int suggestedRetryTime) {
@@ -601,13 +626,13 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
-         * Set the network suggested data retry interval.
+         * Set the network suggested data retry duration.
          *
-         * @param retryIntervalMillis The suggested data retry interval in milliseconds.
+         * @param retryDurationMillis The suggested data retry duration in milliseconds.
          * @return The same instance of the builder.
          */
-        public @NonNull Builder setRetryIntervalMillis(long retryIntervalMillis) {
-            mSuggestedRetryTime = retryIntervalMillis;
+        public @NonNull Builder setRetryDurationMillis(long retryDurationMillis) {
+            mSuggestedRetryTime = retryDurationMillis;
             return this;
         }
 
@@ -792,6 +817,21 @@ public final class DataCallResponse implements Parcelable {
         }
 
         /**
+         * The Slice used for this data connection.
+         * <p/>
+         * If a handover occurs from EPDG to 5G,
+         * this is the {@link SliceInfo} used in {@link DataService#setupDataCall}.
+         *
+         * @param sliceInfo the slice info for the data call
+         *
+         * @return The same instance of the builder.
+         */
+        public @NonNull Builder setSliceInfo(@Nullable SliceInfo sliceInfo) {
+            mSliceInfo = sliceInfo;
+            return this;
+        }
+
+        /**
          * Build the DataCallResponse.
          *
          * @return the DataCallResponse object.
@@ -800,7 +840,7 @@ public final class DataCallResponse implements Parcelable {
             return new DataCallResponse(mCause, mSuggestedRetryTime, mId, mLinkStatus,
                     mProtocolType, mInterfaceName, mAddresses, mDnsAddresses, mGatewayAddresses,
                     mPcscfAddresses, mMtu, mMtuV4, mMtuV6, mHandoverFailureMode, mPduSessionId,
-                    mDefaultQos, mQosSessions);
+                    mDefaultQos, mQosSessions, mSliceInfo);
         }
     }
 }

@@ -113,6 +113,7 @@ public class DctConstants {
     public static final int EVENT_NR_TIMER_WATCHDOG = BASE + 53;
     public static final int EVENT_CARRIER_CONFIG_CHANGED = BASE + 54;
     public static final int EVENT_SIM_STATE_UPDATED = BASE + 55;
+    public static final int EVENT_APN_UNTHROTTLED = BASE + 56;
 
     /***** Constants *****/
 

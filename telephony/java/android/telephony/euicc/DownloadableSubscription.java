@@ -15,6 +15,7 @@
  */
 package android.telephony.euicc;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
@@ -102,44 +103,81 @@ public final class DownloadableSubscription implements Parcelable {
         this.accessRules = accessRules;
     }
 
-    /** @hide */
-    @SystemApi
     public static final class Builder {
         @Nullable private String encodedActivationCode;
         @Nullable private String confirmationCode;
         @Nullable private String carrierName;
         List<UiccAccessRule> accessRules;
 
+        /** @hide */
+        @SystemApi
         public Builder() {}
 
-        public Builder(DownloadableSubscription baseSubscription) {
+        public Builder(@NonNull DownloadableSubscription baseSubscription) {
             encodedActivationCode = baseSubscription.getEncodedActivationCode();
             confirmationCode = baseSubscription.getConfirmationCode();
             carrierName = baseSubscription.getCarrierName();
             accessRules = baseSubscription.getAccessRules();
         }
 
+        public Builder(@NonNull String encodedActivationCode) {
+            this.encodedActivationCode = encodedActivationCode;
+        }
+
+        /**
+         * Builds a {@link DownloadableSubscription} object.
+         * @return a non-null {@link DownloadableSubscription} object.
+         */
+        @NonNull
         public DownloadableSubscription build() {
             return new DownloadableSubscription(encodedActivationCode, confirmationCode,
                     carrierName, accessRules);
         }
 
-        public Builder setEncodedActivationCode(String value) {
+        /**
+         * Sets the encoded activation code.
+         * @param value the activation code to use. An activation code can be parsed from a user
+         *              scanned QR code. The format of activation code is defined in SGP.22. For
+         *              example, "1$SMDP.GSMA.COM$04386-AGYFT-A74Y8-3F815$1.3.6.1.4.1.31746". For
+         *              detail, see {@code com.android.euicc.data.ActivationCode}. Must not be null.
+         */
+        @NonNull
+        public Builder setEncodedActivationCode(@NonNull String value) {
             encodedActivationCode = value;
             return this;
         }
 
-        public Builder setConfirmationCode(String value) {
+        /**
+         * Sets the confirmation code.
+         * @param value the confirmation code to use to authenticate the carrier server got
+         *              subscription download.
+         */
+        @NonNull
+        public Builder setConfirmationCode(@NonNull String value) {
             confirmationCode = value;
             return this;
         }
 
-        public Builder setCarrierName(String value) {
+        /**
+         * Sets the user-visible carrier name.
+         * @param value carrier name.
+         * @hide
+         */
+        @NonNull
+        @SystemApi
+        public Builder setCarrierName(@NonNull String value) {
             carrierName = value;
             return this;
         }
 
-        public Builder setAccessRules(List<UiccAccessRule> value) {
+        /**
+         * Sets the {@link UiccAccessRule}s dictating access to this subscription.
+         * @param value A list of {@link UiccAccessRule}s.
+         * @hide
+         */
+        @NonNull
+        @SystemApi
+        public Builder setAccessRules(@NonNull List<UiccAccessRule> value) {
             accessRules = value;
             return this;
         }

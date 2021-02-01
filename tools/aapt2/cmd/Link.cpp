@@ -730,22 +730,6 @@ static bool LoadStableIdMap(IDiagnostics* diag, const std::string& path,
   return true;
 }
 
-static android::ApkAssetsCookie FindFrameworkAssetManagerCookie(
-    const android::AssetManager2& assets) {
-  using namespace android;
-
-  // Find the system package (0x01). AAPT always generates attributes with the type 0x01, so
-  // we're looking for the first attribute resource in the system package.
-  Res_value val{};
-  ResTable_config config{};
-  uint32_t type_spec_flags;
-  ApkAssetsCookie idx = assets.GetResource(0x01010000, true /** may_be_bag */,
-                                           0 /** density_override */, &val, &config,
-                                           &type_spec_flags);
-
-  return idx;
-}
-
 class Linker {
  public:
   Linker(LinkContext* context, const LinkOptions& options)
@@ -758,8 +742,12 @@ class Linker {
   void ExtractCompileSdkVersions(android::AssetManager2* assets) {
     using namespace android;
 
-    android::ApkAssetsCookie cookie = FindFrameworkAssetManagerCookie(*assets);
-    if (cookie == android::kInvalidCookie) {
+    // Find the system package (0x01). AAPT always generates attributes with the type 0x01, so
+    // we're looking for the first attribute resource in the system package.
+    android::ApkAssetsCookie cookie;
+    if (auto value = assets->GetResource(0x01010000, true /** may_be_bag */); value.has_value()) {
+      cookie = value->cookie;
+    } else {
       // No Framework assets loaded. Not a failure.
       return;
     }

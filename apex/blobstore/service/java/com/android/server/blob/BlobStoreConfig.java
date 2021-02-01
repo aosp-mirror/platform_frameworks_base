@@ -128,7 +128,7 @@ class BlobStoreConfig {
          */
         public static final String KEY_USE_REVOCABLE_FD_FOR_READS =
                 "use_revocable_fd_for_reads";
-        public static final boolean DEFAULT_USE_REVOCABLE_FD_FOR_READS = true;
+        public static final boolean DEFAULT_USE_REVOCABLE_FD_FOR_READS = false;
         public static boolean USE_REVOCABLE_FD_FOR_READS =
                 DEFAULT_USE_REVOCABLE_FD_FOR_READS;
 

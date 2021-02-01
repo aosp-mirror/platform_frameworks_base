@@ -482,20 +482,21 @@
     <!-- The size of the gesture span needed to activate the "pull" notification expansion -->
     <dimen name="pull_span_min">25dp</dimen>
 
-    <dimen name="qs_tile_height">106dp</dimen>
+    <dimen name="qs_tile_height">96dp</dimen>
     <!--notification_side_paddings + notification_content_margin_start - (qs_quick_tile_size - qs_tile_background_size) / 2 -->
     <dimen name="qs_tile_layout_margin_side">18dp</dimen>
     <dimen name="qs_tile_margin_horizontal">18dp</dimen>
     <dimen name="qs_tile_margin_horizontal_two_line">2dp</dimen>
-    <dimen name="qs_tile_margin_vertical">24dp</dimen>
+    <dimen name="qs_tile_margin_vertical">2dp</dimen>
     <dimen name="qs_tile_margin_top_bottom">12dp</dimen>
     <dimen name="qs_tile_margin_top_bottom_negative">-12dp</dimen>
     <!-- The height of the qs customize header. Should be
-         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (18dp)) -
+         (qs_panel_padding_top (48dp) +  brightness_mirror_height (48dp) + qs_tile_margin_top (0dp)) -
          (Toolbar_minWidth (56dp) + qs_tile_margin_top_bottom (12dp))
     -->
-    <dimen name="qs_customize_header_min_height">46dp</dimen>
-    <dimen name="qs_tile_margin_top">18dp</dimen>
+    <dimen name="qs_customize_header_min_height">28dp</dimen>
+    <dimen name="qs_tile_margin_top">0dp</dimen>
+    <dimen name="qs_tile_icon_background_stroke_width">-1dp</dimen>
     <dimen name="qs_tile_background_size">44dp</dimen>
     <dimen name="qs_quick_tile_size">48dp</dimen>
     <dimen name="qs_quick_tile_padding">12dp</dimen>
@@ -1175,6 +1176,23 @@
 
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
+
+    <!-- Height of the Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_height">32dp</dimen>
+    <!-- Padding between background of Ongoing App Ops chip and content -->
+    <dimen name="ongoing_appops_chip_bg_padding">8dp</dimen>
+    <!-- Side padding between background of Ongoing App Ops chip and content -->
+    <dimen name="ongoing_appops_chip_side_padding">8dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip when QQS-->
+    <dimen name="ongoing_appops_chip_icon_margin_collapsed">0dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip when QS-->
+    <dimen name="ongoing_appops_chip_icon_margin_expanded">2dp</dimen>
+    <!-- Icon size of Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_icon_size">@dimen/status_bar_icon_drawing_size</dimen>
+    <!-- Radius of Ongoing App Ops chip corners -->
+    <dimen name="ongoing_appops_chip_bg_corner_radius">16dp</dimen>
+
+
     <!-- How much each bubble is elevated. -->
     <dimen name="bubble_elevation">1dp</dimen>
     <!-- How much the bubble flyout text container is elevated. -->
@@ -1278,6 +1296,8 @@
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
     <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
     <dimen name="qs_media_enabled_seekbar_height">3dp</dimen>
+    <dimen name="qs_media_enabled_seekbar_vertical_padding">15dp</dimen>
+    <dimen name="qs_media_disabled_seekbar_vertical_padding">16dp</dimen>
 
     <dimen name="magnification_border_size">5dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>
@@ -1333,15 +1353,19 @@
     <dimen name="controls_management_side_padding">16dp</dimen>
     <dimen name="controls_management_titles_margin">16dp</dimen>
     <dimen name="controls_management_footer_side_margin">8dp</dimen>
+    <dimen name="controls_management_footer_top_margin">@dimen/controls_management_footer_side_margin</dimen>
     <dimen name="controls_management_list_margin">16dp</dimen>
+    <dimen name="controls_management_indicator_top_margin">@dimen/controls_management_list_margin</dimen>
     <dimen name="controls_management_apps_list_margin">64dp</dimen>
     <dimen name="controls_management_editing_list_margin">48dp</dimen>
     <dimen name="controls_management_editing_divider_margin">24dp</dimen>
     <dimen name="controls_management_apps_extra_side_margin">8dp</dimen>
     <dimen name="controls_management_zone_top_margin">32dp</dimen>
+    <dimen name="controls_management_favorites_top_margin">@dimen/controls_management_zone_top_margin</dimen>
     <dimen name="controls_management_status_side_margin">16dp</dimen>
     <dimen name="controls_management_page_indicator_height">24dp</dimen>
     <dimen name="controls_management_checkbox_size">25dp</dimen>
+    <dimen name="controls_management_footer_height">72dp</dimen>
     <dimen name="controls_title_size">24sp</dimen>
     <dimen name="controls_subtitle_size">16sp</dimen>
 
@@ -1354,7 +1378,7 @@
     <dimen name="controls_app_divider_height">2dp</dimen>
     <dimen name="controls_app_divider_side_margin">32dp</dimen>
 
-    <dimen name="controls_card_margin">2dp</dimen>
+    <dimen name="controls_card_margin">@dimen/control_base_item_margin</dimen>
     <item name="control_card_elevation" type="dimen" format="float">15</item>
 
     <dimen name="controls_dialog_padding">32dp</dimen>

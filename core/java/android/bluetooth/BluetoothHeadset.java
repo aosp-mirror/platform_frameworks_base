@@ -80,7 +80,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
 
     /**
      * Intent used to broadcast the change in the Audio Connection state of the
-     * A2DP profile.
+     * HFP profile.
      *
      * <p>This intent will have 3 extras:
      * <ul>
@@ -113,7 +113,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     public static final String ACTION_ACTIVE_DEVICE_CHANGED =
             "android.bluetooth.headset.profile.action.ACTIVE_DEVICE_CHANGED";
 
@@ -682,6 +682,48 @@ public final class BluetoothHeadset implements BluetoothProfile {
     }
 
     /**
+     * Checks whether the headset supports some form of noise reduction
+     *
+     * @param device Bluetooth device
+     * @return true if echo cancellation and/or noise reduction is supported, false otherwise
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public boolean isNoiseReductionSupported(@NonNull BluetoothDevice device) {
+        if (DBG) log("isNoiseReductionSupported()");
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return service.isNoiseReductionSupported(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
+     * Checks whether the headset supports voice recognition
+     *
+     * @param device Bluetooth device
+     * @return true if voice recognition is supported, false otherwise
+     */
+    @RequiresPermission(Manifest.permission.BLUETOOTH)
+    public boolean isVoiceRecognitionSupported(@NonNull BluetoothDevice device) {
+        if (DBG) log("isVoiceRecognitionSupported()");
+        final IBluetoothHeadset service = mService;
+        if (service != null && isEnabled() && isValidDevice(device)) {
+            try {
+                return service.isVoiceRecognitionSupported(device);
+            } catch (RemoteException e) {
+                Log.e(TAG, Log.getStackTraceString(new Throwable()));
+            }
+        }
+        if (service == null) Log.w(TAG, "Proxy not attached to service");
+        return false;
+    }
+
+    /**
      * Start Bluetooth voice recognition. This methods sends the voice
      * recognition AT command to the headset and establishes the
      * audio connection.
@@ -1130,7 +1172,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.BLUETOOTH_ADMIN)
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     public boolean setActiveDevice(@Nullable BluetoothDevice device) {
         if (DBG) {
             Log.d(TAG, "setActiveDevice: " + device);
@@ -1156,7 +1198,7 @@ public final class BluetoothHeadset implements BluetoothProfile {
      * is active.
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     @Nullable
     @RequiresPermission(Manifest.permission.BLUETOOTH)
     public BluetoothDevice getActiveDevice() {

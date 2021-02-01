@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Greška u konfiguraciji IP-a"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Niste povezani zbog slabog kvaliteta mreže"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Greška pri povezivanju na WiFi"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problem pri autentifikaciji."</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"Problem pri autentifikaciji"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"Nije se moguće povezati"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"Nije se moguće povezati na aplikaciju \'<xliff:g id="AP_NAME">%1$s</xliff:g>\'"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"Provjerite lozinku i pokušajte ponovo"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Onemogući apsolutnu jačinu zvuka"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Omogući Gabeldorsche"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Poboljšana povezivost"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP verzija"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Odaberite Bluetooth AVRCP verziju"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP verzija"</string>
@@ -474,7 +473,7 @@
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"Najveći"</string>
     <string name="screen_zoom_summary_custom" msgid="3468154096832912210">"Prilagodi (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
     <string name="content_description_menu_button" msgid="6254844309171779931">"Meni"</string>
-    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Unesite lozinku da izvršite vraćanje na fabričke postavke u načinu demonstracije"</string>
+    <string name="retail_demo_reset_message" msgid="5392824901108195463">"Unesite lozinku da izvršite vraćanje na fabričke postavke u načinu rada za demonstraciju"</string>
     <string name="retail_demo_reset_next" msgid="3688129033843885362">"Naprijed"</string>
     <string name="retail_demo_reset_title" msgid="1866911701095959800">"Potrebna je lozinka"</string>
     <string name="active_input_method_subtypes" msgid="4232680535471633046">"Aktivne metode unosa"</string>

@@ -172,6 +172,8 @@ static struct {
     jmethodID postRecordConfigEventFromNative;
 } gAudioPolicyEventHandlerMethods;
 
+static struct { jmethodID add; } gListMethods;
+
 //
 // JNI Initialization for OpenSLES routing
 //
@@ -292,25 +294,30 @@ static sp<JNIAudioPortCallback> setJniCallback(JNIEnv* env,
     return old;
 }
 
-#define check_AudioSystem_Command(status) _check_AudioSystem_Command(__func__, (status))
+#define check_AudioSystem_Command(...) _check_AudioSystem_Command(__func__, __VA_ARGS__)
 
-static int _check_AudioSystem_Command(const char* caller, status_t status)
-{
-    ALOGE_IF(status, "Command failed for %s: %d", caller, status);
+static int _check_AudioSystem_Command(const char *caller, status_t status,
+                                      std::vector<status_t> ignoredErrors = {}) {
+    int jniStatus = kAudioStatusOk;
     switch (status) {
     case DEAD_OBJECT:
-        return kAudioStatusMediaServerDied;
+        jniStatus = kAudioStatusMediaServerDied;
+        break;
     case NO_ERROR:
-        return kAudioStatusOk;
+        break;
     default:
+        if (std::find(begin(ignoredErrors), end(ignoredErrors), status) == end(ignoredErrors)) {
+            jniStatus = kAudioStatusError;
+        }
         break;
     }
-    return kAudioStatusError;
+    ALOGE_IF(jniStatus != kAudioStatusOk, "Command failed for %s: %d", caller, status);
+    return jniStatus;
 }
 
 static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
                                            jobjectArray deviceAddresses,
-                                           Vector<AudioDeviceTypeAddr> &audioDeviceTypeAddrVector) {
+                                           AudioDeviceTypeAddrVector &audioDeviceTypeAddrVector) {
     if (deviceTypes == nullptr || deviceAddresses == nullptr) {
         return (jint)AUDIO_JAVA_BAD_VALUE;
     }
@@ -337,7 +344,7 @@ static jint getVectorOfAudioDeviceTypeAddr(JNIEnv *env, jintArray deviceTypes,
         }
         const char *address = env->GetStringUTFChars((jstring)addrJobj, NULL);
         AudioDeviceTypeAddr dev = AudioDeviceTypeAddr((audio_devices_t)typesPtr[i], address);
-        audioDeviceTypeAddrVector.add(dev);
+        audioDeviceTypeAddrVector.push_back(dev);
         env->ReleaseStringUTFChars((jstring)addrJobj, address);
     }
     env->ReleaseIntArrayElements(deviceTypes, typesPtr, 0);
@@ -2063,7 +2070,7 @@ exit:
 
 static jint android_media_AudioSystem_setUidDeviceAffinities(JNIEnv *env, jobject clazz,
         jint uid, jintArray deviceTypes, jobjectArray deviceAddresses) {
-    Vector<AudioDeviceTypeAddr> deviceVector;
+    AudioDeviceTypeAddrVector deviceVector;
     jint results = getVectorOfAudioDeviceTypeAddr(env, deviceTypes, deviceAddresses, deviceVector);
     if (results != NO_ERROR) {
         return results;
@@ -2081,7 +2088,7 @@ static jint android_media_AudioSystem_removeUidDeviceAffinities(JNIEnv *env, job
 static jint android_media_AudioSystem_setUserIdDeviceAffinities(JNIEnv *env, jobject clazz,
                                                                 jint userId, jintArray deviceTypes,
                                                                 jobjectArray deviceAddresses) {
-    Vector<AudioDeviceTypeAddr> deviceVector;
+    AudioDeviceTypeAddrVector deviceVector;
     jint results = getVectorOfAudioDeviceTypeAddr(env, deviceTypes, deviceAddresses, deviceVector);
     if (results != NO_ERROR) {
         return results;
@@ -2362,48 +2369,124 @@ android_media_AudioSystem_isCallScreeningModeSupported(JNIEnv *env, jobject thiz
     return AudioSystem::isCallScreenModeSupported();
 }
 
-static jint
-android_media_AudioSystem_setPreferredDeviceForStrategy(JNIEnv *env, jobject thiz,
-        jint strategy, jint deviceType, jstring deviceAddress) {
-
-    const char *c_address = env->GetStringUTFChars(deviceAddress, NULL);
+static jint android_media_AudioSystem_setDevicesRoleForStrategy(JNIEnv *env, jobject thiz,
+                                                                jint strategy, jint role,
+                                                                jintArray jDeviceTypes,
+                                                                jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
     int status = check_AudioSystem_Command(
-            AudioSystem::setPreferredDeviceForStrategy((product_strategy_t)strategy,
-                                                       AudioDeviceTypeAddr((audio_devices_t)
-                                                                                   deviceType,
-                                                                           c_address)));
-    env->ReleaseStringUTFChars(deviceAddress, c_address);
+            AudioSystem::setDevicesRoleForStrategy((product_strategy_t)strategy,
+                                                   (device_role_t)role, nDevices));
     return (jint) status;
 }
 
-static jint
-android_media_AudioSystem_removePreferredDeviceForStrategy(JNIEnv *env, jobject thiz, jint strategy)
-{
-    return (jint) check_AudioSystem_Command(
-            AudioSystem::removePreferredDeviceForStrategy((product_strategy_t) strategy));
+static jint android_media_AudioSystem_removeDevicesRoleForStrategy(JNIEnv *env, jobject thiz,
+                                                                   jint strategy, jint role) {
+    return (jint)
+            check_AudioSystem_Command(AudioSystem::removeDevicesRoleForStrategy((product_strategy_t)
+                                                                                        strategy,
+                                                                                (device_role_t)
+                                                                                        role),
+                                      {NAME_NOT_FOUND});
 }
 
-static jint
-android_media_AudioSystem_getPreferredDeviceForStrategy(JNIEnv *env, jobject thiz,
-        jint strategy, jobjectArray jDeviceArray)
-{
-    if (jDeviceArray == nullptr || env->GetArrayLength(jDeviceArray) != 1) {
-        ALOGE("%s invalid array to store AudioDeviceAttributes", __FUNCTION__);
-        return (jint)AUDIO_JAVA_BAD_VALUE;
-    }
-
-    AudioDeviceTypeAddr elDevice;
+static jint android_media_AudioSystem_getDevicesForRoleAndStrategy(JNIEnv *env, jobject thiz,
+                                                                   jint strategy, jint role,
+                                                                   jobject jDevices) {
+    AudioDeviceTypeAddrVector nDevices;
     status_t status = check_AudioSystem_Command(
-            AudioSystem::getPreferredDeviceForStrategy((product_strategy_t) strategy, elDevice));
+            AudioSystem::getDevicesForRoleAndStrategy((product_strategy_t)strategy,
+                                                      (device_role_t)role, nDevices));
     if (status != NO_ERROR) {
         return (jint) status;
     }
-    jobject jAudioDeviceAttributes = NULL;
-    jint jStatus = createAudioDeviceAttributesFromNative(env, &jAudioDeviceAttributes, &elDevice);
-    if (jStatus == AUDIO_JAVA_SUCCESS) {
-        env->SetObjectArrayElement(jDeviceArray, 0, jAudioDeviceAttributes);
+    for (const auto &device : nDevices) {
+        jobject jAudioDeviceAttributes = NULL;
+        jint jStatus = createAudioDeviceAttributesFromNative(env, &jAudioDeviceAttributes, &device);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jDevices, gListMethods.add, jAudioDeviceAttributes);
+        env->DeleteLocalRef(jAudioDeviceAttributes);
     }
-    return jStatus;
+    return AUDIO_JAVA_SUCCESS;
+}
+
+static jint android_media_AudioSystem_setDevicesRoleForCapturePreset(
+        JNIEnv *env, jobject thiz, jint capturePreset, jint role, jintArray jDeviceTypes,
+        jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::setDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                        (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_addDevicesRoleForCapturePreset(
+        JNIEnv *env, jobject thiz, jint capturePreset, jint role, jintArray jDeviceTypes,
+        jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::addDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                        (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_removeDevicesRoleForCapturePreset(
+        JNIEnv *env, jobject thiz, jint capturePreset, jint role, jintArray jDeviceTypes,
+        jobjectArray jDeviceAddresses) {
+    AudioDeviceTypeAddrVector nDevices;
+    jint results = getVectorOfAudioDeviceTypeAddr(env, jDeviceTypes, jDeviceAddresses, nDevices);
+    if (results != NO_ERROR) {
+        return results;
+    }
+    int status = check_AudioSystem_Command(
+            AudioSystem::removeDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                           (device_role_t)role, nDevices));
+    return (jint)status;
+}
+
+static jint android_media_AudioSystem_clearDevicesRoleForCapturePreset(JNIEnv *env, jobject thiz,
+                                                                       jint capturePreset,
+                                                                       jint role) {
+    return (jint)check_AudioSystem_Command(
+            AudioSystem::clearDevicesRoleForCapturePreset((audio_source_t)capturePreset,
+                                                          (device_role_t)role));
+}
+
+static jint android_media_AudioSystem_getDevicesForRoleAndCapturePreset(JNIEnv *env, jobject thiz,
+                                                                        jint capturePreset,
+                                                                        jint role,
+                                                                        jobject jDevices) {
+    AudioDeviceTypeAddrVector nDevices;
+    status_t status = check_AudioSystem_Command(
+            AudioSystem::getDevicesForRoleAndCapturePreset((audio_source_t)capturePreset,
+                                                           (device_role_t)role, nDevices));
+    if (status != NO_ERROR) {
+        return (jint)status;
+    }
+    for (const auto &device : nDevices) {
+        jobject jAudioDeviceAttributes = NULL;
+        jint jStatus = createAudioDeviceAttributesFromNative(env, &jAudioDeviceAttributes, &device);
+        if (jStatus != AUDIO_JAVA_SUCCESS) {
+            return jStatus;
+        }
+        env->CallBooleanMethod(jDevices, gListMethods.add, jAudioDeviceAttributes);
+        env->DeleteLocalRef(jAudioDeviceAttributes);
+    }
+    return AUDIO_JAVA_SUCCESS;
 }
 
 static jint
@@ -2551,12 +2634,22 @@ static const JNINativeMethod gMethods[] =
          {"setAudioHalPids", "([I)I", (void *)android_media_AudioSystem_setAudioHalPids},
          {"isCallScreeningModeSupported", "()Z",
           (void *)android_media_AudioSystem_isCallScreeningModeSupported},
-         {"setPreferredDeviceForStrategy", "(IILjava/lang/String;)I",
-          (void *)android_media_AudioSystem_setPreferredDeviceForStrategy},
-         {"removePreferredDeviceForStrategy", "(I)I",
-          (void *)android_media_AudioSystem_removePreferredDeviceForStrategy},
-         {"getPreferredDeviceForStrategy", "(I[Landroid/media/AudioDeviceAttributes;)I",
-          (void *)android_media_AudioSystem_getPreferredDeviceForStrategy},
+         {"setDevicesRoleForStrategy", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_setDevicesRoleForStrategy},
+         {"removeDevicesRoleForStrategy", "(II)I",
+          (void *)android_media_AudioSystem_removeDevicesRoleForStrategy},
+         {"getDevicesForRoleAndStrategy", "(IILjava/util/List;)I",
+          (void *)android_media_AudioSystem_getDevicesForRoleAndStrategy},
+         {"setDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_setDevicesRoleForCapturePreset},
+         {"addDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_addDevicesRoleForCapturePreset},
+         {"removeDevicesRoleForCapturePreset", "(II[I[Ljava/lang/String;)I",
+          (void *)android_media_AudioSystem_removeDevicesRoleForCapturePreset},
+         {"clearDevicesRoleForCapturePreset", "(II)I",
+          (void *)android_media_AudioSystem_clearDevicesRoleForCapturePreset},
+         {"getDevicesForRoleAndCapturePreset", "(IILjava/util/List;)I",
+          (void *)android_media_AudioSystem_getDevicesForRoleAndCapturePreset},
          {"getDevicesForAttributes",
           "(Landroid/media/AudioAttributes;[Landroid/media/AudioDeviceAttributes;)I",
           (void *)android_media_AudioSystem_getDevicesForAttributes},
@@ -2757,6 +2850,9 @@ int register_android_media_AudioSystem(JNIEnv *env)
             android::GetMethodIDOrDie(env, gClsAudioRecordRoutingProxy, "<init>", "(J)V");
     gMidAudioRecordRoutingProxy_release =
             android::GetMethodIDOrDie(env, gClsAudioRecordRoutingProxy, "native_release", "()V");
+
+    jclass listClass = FindClassOrDie(env, "java/util/List");
+    gListMethods.add = GetMethodIDOrDie(env, listClass, "add", "(Ljava/lang/Object;)Z");
 
     AudioSystem::addErrorCallback(android_media_AudioSystem_error_callback);
 

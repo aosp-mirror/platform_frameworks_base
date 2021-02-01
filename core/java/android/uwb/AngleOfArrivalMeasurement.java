@@ -18,6 +18,7 @@ package android.uwb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +29,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class AngleOfArrivalMeasurement implements Parcelable {
     private final AngleMeasurement mAzimuthAngleMeasurement;
     private final AngleMeasurement mAltitudeAngleMeasurement;
@@ -105,7 +107,7 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(mAzimuthAngleMeasurement, flags);
         dest.writeParcelable(mAltitudeAngleMeasurement, flags);
     }
@@ -116,11 +118,9 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
                 public AngleOfArrivalMeasurement createFromParcel(Parcel in) {
                     Builder builder = new Builder();
 
-                    builder.setAzimuthAngleMeasurement(
-                            in.readParcelable(AngleMeasurement.class.getClassLoader()));
+                    builder.setAzimuth(in.readParcelable(AngleMeasurement.class.getClassLoader()));
 
-                    builder.setAltitudeAngleMeasurement(
-                            in.readParcelable(AngleMeasurement.class.getClassLoader()));
+                    builder.setAltitude(in.readParcelable(AngleMeasurement.class.getClassLoader()));
 
                     return builder.build();
                 }
@@ -143,7 +143,8 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
          *
          * @param azimuthAngle azimuth angle
          */
-        public Builder setAzimuthAngleMeasurement(@NonNull AngleMeasurement azimuthAngle) {
+        @NonNull
+        public Builder setAzimuth(@NonNull AngleMeasurement azimuthAngle) {
             mAzimuthAngleMeasurement = azimuthAngle;
             return this;
         }
@@ -153,7 +154,8 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
          *
          * @param altitudeAngle altitude angle
          */
-        public Builder setAltitudeAngleMeasurement(@NonNull AngleMeasurement altitudeAngle) {
+        @NonNull
+        public Builder setAltitude(@NonNull AngleMeasurement altitudeAngle) {
             mAltitudeAngleMeasurement = altitudeAngle;
             return this;
         }
@@ -163,6 +165,7 @@ public final class AngleOfArrivalMeasurement implements Parcelable {
          *
          * @throws IllegalStateException if the required azimuth angle is not provided
          */
+        @NonNull
         public AngleOfArrivalMeasurement build() {
             if (mAzimuthAngleMeasurement == null) {
                 throw new IllegalStateException("Azimuth angle measurement is not set");

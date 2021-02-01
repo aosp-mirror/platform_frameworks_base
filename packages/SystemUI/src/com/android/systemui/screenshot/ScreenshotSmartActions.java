@@ -39,14 +39,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 /**
  * Collects the static functions for retrieving and acting on smart actions.
  */
+@Singleton
 public class ScreenshotSmartActions {
     private static final String TAG = "ScreenshotSmartActions";
 
+    @Inject
+    public ScreenshotSmartActions() {}
+
     @VisibleForTesting
-    static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
+    CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
             String screenshotId, Uri screenshotUri, Bitmap image,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
             boolean smartActionsEnabled, UserHandle userHandle) {
@@ -86,7 +93,7 @@ public class ScreenshotSmartActions {
     }
 
     @VisibleForTesting
-    static List<Notification.Action> getSmartActions(String screenshotId,
+    List<Notification.Action> getSmartActions(String screenshotId,
             CompletableFuture<List<Notification.Action>> smartActionsFuture, int timeoutMs,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider) {
         long startTimeMs = SystemClock.uptimeMillis();
@@ -116,7 +123,7 @@ public class ScreenshotSmartActions {
         }
     }
 
-    static void notifyScreenshotOp(String screenshotId,
+    void notifyScreenshotOp(String screenshotId,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
             ScreenshotNotificationSmartActionsProvider.ScreenshotOp op,
             ScreenshotNotificationSmartActionsProvider.ScreenshotOpStatus status, long durationMs) {
@@ -127,7 +134,7 @@ public class ScreenshotSmartActions {
         }
     }
 
-    static void notifyScreenshotAction(Context context, String screenshotId, String action,
+    void notifyScreenshotAction(Context context, String screenshotId, String action,
             boolean isSmartAction) {
         try {
             ScreenshotNotificationSmartActionsProvider provider =

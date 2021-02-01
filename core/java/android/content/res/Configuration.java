@@ -45,7 +45,6 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
-import android.app.UiModeManager;
 import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.LocaleProto;
@@ -928,7 +927,13 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         fontScale = o.fontScale;
         mcc = o.mcc;
         mnc = o.mnc;
-        locale = o.locale == null ? null : (Locale) o.locale.clone();
+        if (o.locale == null) {
+            locale = null;
+        } else if (!o.locale.equals(locale)) {
+            // Only clone a new Locale instance if we need to:  the clone() is
+            // both CPU and GC intensive.
+            locale = (Locale) o.locale.clone();
+        }
         o.fixUpLocaleList();
         mLocaleList = o.mLocaleList;
         userSetLocale = o.userSetLocale;
@@ -1624,7 +1629,10 @@ public final class Configuration implements Parcelable, Comparable<Configuration
         if ((mask & ActivityInfo.CONFIG_LOCALE) != 0) {
             mLocaleList = delta.mLocaleList;
             if (!mLocaleList.isEmpty()) {
-                locale = (Locale) delta.locale.clone();
+                if (!delta.locale.equals(locale)) {
+                    // Don't churn a new Locale clone unless we're actually changing it
+                    locale = (Locale) delta.locale.clone();
+                }
             }
         }
         if ((mask & ActivityInfo.CONFIG_LAYOUT_DIRECTION) != 0) {

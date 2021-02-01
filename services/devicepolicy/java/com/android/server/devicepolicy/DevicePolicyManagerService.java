@@ -195,7 +195,6 @@ import android.media.AudioManager;
 import android.media.IAudioService;
 import android.net.ConnectivityManager;
 import android.net.IIpConnectivityMetrics;
-import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.Uri;
 import android.net.metrics.IpConnectivityLog;
@@ -267,6 +266,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.net.NetworkUtilsInternal;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.statusbar.IStatusBarService;
@@ -285,6 +285,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.LockscreenCredential;
 import com.android.internal.widget.PasswordValidationError;
+import com.android.net.module.util.ProxyUtils;
 import com.android.server.LocalServices;
 import com.android.server.LockGuard;
 import com.android.server.PersistentDataBlockManagerInternal;
@@ -7759,7 +7760,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         exclusionList = exclusionList.trim();
 
-        ProxyInfo proxyProperties = new ProxyInfo(data[0], proxyPort, exclusionList);
+        ProxyInfo proxyProperties = ProxyInfo.buildDirectProxy(data[0], proxyPort,
+                ProxyUtils.exclusionStringAsList(exclusionList));
         if (!proxyProperties.isValid()) {
             Slog.e(LOG_TAG, "Invalid proxy properties, ignoring: " + proxyProperties.toString());
             return;
@@ -15540,7 +15542,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 return PRIVATE_DNS_SET_NO_ERROR;
             case PRIVATE_DNS_MODE_PROVIDER_HOSTNAME:
                 if (TextUtils.isEmpty(privateDnsHost)
-                        || !NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
+                        || !NetworkUtilsInternal.isWeaklyValidatedHostname(privateDnsHost)) {
                     throw new IllegalArgumentException(
                             String.format("Provided hostname %s is not valid", privateDnsHost));
                 }

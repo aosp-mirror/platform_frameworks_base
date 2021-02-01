@@ -18,6 +18,7 @@ package android.uwb;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,6 +31,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class RangingReport implements Parcelable {
     private final List<RangingMeasurement> mRangingMeasurements;
 
@@ -83,7 +85,7 @@ public final class RangingReport implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeTypedList(mRangingMeasurements);
     }
 
@@ -113,6 +115,7 @@ public final class RangingReport implements Parcelable {
          *
          * @param rangingMeasurement a ranging measurement
          */
+        @NonNull
         public Builder addMeasurement(@NonNull RangingMeasurement rangingMeasurement) {
             mMeasurements.add(rangingMeasurement);
             return this;
@@ -123,6 +126,7 @@ public final class RangingReport implements Parcelable {
          *
          * @param rangingMeasurements {@link List} of {@link RangingMeasurement}s to add
          */
+        @NonNull
         public Builder addMeasurements(@NonNull List<RangingMeasurement> rangingMeasurements) {
             mMeasurements.addAll(rangingMeasurements);
             return this;
@@ -133,6 +137,7 @@ public final class RangingReport implements Parcelable {
          *
          * @throws IllegalStateException if measurements are not in monotonically increasing order
          */
+        @NonNull
         public RangingReport build() {
             // Verify that all measurement timestamps are monotonically increasing
             RangingMeasurement prevMeasurement = null;

@@ -92,6 +92,13 @@ public final class DeviceConfig {
     public static final String NAMESPACE_APP_COMPAT = "app_compat";
 
     /**
+     * Namespace for all app hibernation related features.
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_APP_HIBERNATION = "app_hibernation";
+
+    /**
      * Namespace for AttentionManagerService related features.
      *
      * @hide
@@ -401,6 +408,14 @@ public final class DeviceConfig {
      */
     @SystemApi
     public static final String NAMESPACE_PERMISSIONS = "permissions";
+
+    /**
+     * Namespace for ota related features.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String NAMESPACE_OTA = "ota";
 
     /**
      * Namespace for all widget related features.

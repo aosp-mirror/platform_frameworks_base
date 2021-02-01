@@ -78,6 +78,7 @@ public class NetworkPolicyLogger {
     static final int NTWK_BLOCKED_BG_RESTRICT = 5;
     static final int NTWK_ALLOWED_DEFAULT = 6;
     static final int NTWK_ALLOWED_SYSTEM = 7;
+    static final int NTWK_BLOCKED_RESTRICTED_MODE = 8;
 
     private final LogBuffer mNetworkBlockedBuffer = new LogBuffer(MAX_NETWORK_BLOCKED_LOG_SIZE);
     private final LogBuffer mUidStateChangeBuffer = new LogBuffer(MAX_LOG_SIZE);
@@ -281,6 +282,8 @@ public class NetworkPolicyLogger {
                 return "blocked when background is restricted";
             case NTWK_ALLOWED_DEFAULT:
                 return "allowed by default";
+            case NTWK_BLOCKED_RESTRICTED_MODE:
+                return "blocked by restricted networking mode";
             default:
                 return String.valueOf(reason);
         }

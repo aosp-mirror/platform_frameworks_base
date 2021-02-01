@@ -212,7 +212,7 @@ public class FormatterTest {
 
         // Make sure it works on different locales.
         setLocale(new Locale("ru", "RU"));
-        assertEquals("1 мин.", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
+        assertEquals("1 мин", Formatter.formatShortElapsedTimeRoundingUpToMinutes(
                 mContext, 1 * SECOND));
     }
 

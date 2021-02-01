@@ -38,9 +38,10 @@ public class AndroidKeyStoreECPublicKey extends AndroidKeyStorePublicKey impleme
 
     public AndroidKeyStoreECPublicKey(@NonNull KeyDescriptor descriptor,
             @NonNull KeyMetadata metadata,
+            @NonNull byte[] x509EncodedForm,
             @NonNull KeyStoreSecurityLevel securityLevel,
             @NonNull ECParameterSpec params, @NonNull ECPoint w) {
-        super(descriptor, metadata, KeyProperties.KEY_ALGORITHM_EC, securityLevel);
+        super(descriptor, metadata, x509EncodedForm, KeyProperties.KEY_ALGORITHM_EC, securityLevel);
         mParams = params;
         mW = w;
     }
@@ -48,7 +49,7 @@ public class AndroidKeyStoreECPublicKey extends AndroidKeyStorePublicKey impleme
     public AndroidKeyStoreECPublicKey(@NonNull KeyDescriptor descriptor,
             @NonNull KeyMetadata metadata,
             @NonNull KeyStoreSecurityLevel securityLevel, @NonNull ECPublicKey info) {
-        this(descriptor, metadata, securityLevel, info.getParams(), info.getW());
+        this(descriptor, metadata, info.getEncoded(), securityLevel, info.getParams(), info.getW());
         if (!"X.509".equalsIgnoreCase(info.getFormat())) {
             throw new IllegalArgumentException(
                     "Unsupported key export format: " + info.getFormat());

@@ -13,7 +13,7 @@ java_library_static {
         ":services.net-sources",
     ],
     static_libs: [
-        "netd_aidl_interfaces-platform-java",
+        "netd-client",
         "netlink-client",
         "networkstack-client",
         "net-utils-services-common",
@@ -37,7 +37,6 @@ java_library {
         "java/android/net/util/NetworkConstants.java",
         "java/android/net/IpMemoryStore.java",
         "java/android/net/NetworkMonitorManager.java",
-        "java/android/net/TcpKeepalivePacketData.java",
     ],
     sdk_version: "module_current",
     min_sdk_version: "30",
@@ -58,6 +57,8 @@ java_library {
     visibility: [
         "//frameworks/opt/net/wifi/service",
         "//frameworks/opt/net/wifi/tests/wifitests",
+        "//packages/modules/Wifi/service",
+        "//packages/modules/Wifi/service/tests/wifitests",
     ],
 }
 

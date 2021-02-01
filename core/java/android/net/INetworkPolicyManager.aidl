@@ -17,6 +17,7 @@
 package android.net;
 
 import android.net.INetworkPolicyListener;
+import android.net.Network;
 import android.net.NetworkPolicy;
 import android.net.NetworkQuotaInfo;
 import android.net.NetworkState;
@@ -67,6 +68,8 @@ interface INetworkPolicyManager {
     void setDeviceIdleMode(boolean enabled);
     void setWifiMeteredOverride(String networkId, int meteredOverride);
 
+    int getMultipathPreference(in Network network);
+
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     NetworkQuotaInfo getNetworkQuotaInfo(in NetworkState state);
 
@@ -78,4 +81,5 @@ interface INetworkPolicyManager {
     void factoryReset(String subscriber);
 
     boolean isUidNetworkingBlocked(int uid, boolean meteredNetwork);
+    boolean isUidRestrictedOnMeteredNetworks(int uid);
 }

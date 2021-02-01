@@ -144,7 +144,7 @@
     <protected-broadcast android:name="android.bluetooth.adapter.action.CONNECTION_STATE_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.UUID" />
     <protected-broadcast android:name="android.bluetooth.device.action.MAS_INSTANCE" />
-    <protected-broadcast android:name="android.bluetooth.action.ALIAS_CHANGED" />
+    <protected-broadcast android:name="android.bluetooth.device.action.ALIAS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
     <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.ACL_CONNECTED" />
@@ -309,9 +309,14 @@
 
     <protected-broadcast android:name="android.net.nsd.STATE_CHANGED" />
 
+    <!-- For OMAPI -->
+    <protected-broadcast android:name="android.se.omapi.action.SECURE_ELEMENT_STATE_CHANGED" />
+
     <protected-broadcast android:name="android.nfc.action.ADAPTER_STATE_CHANGED" />
+    <protected-broadcast android:name="android.nfc.action.ALWAYS_ON_STATE_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.PREFERRED_PAYMENT_CHANGED" />
     <protected-broadcast android:name="android.nfc.action.TRANSACTION_DETECTED" />
+    <protected-broadcast android:name="android.nfc.action.REQUIRE_UNLOCK_FOR_NFC" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_UP" />
     <protected-broadcast android:name="com.android.nfc.action.LLCP_DOWN" />
     <protected-broadcast android:name="com.android.nfc.cardemulation.action.CLOSE_TAP_DIALOG" />
@@ -1345,7 +1350,7 @@
         android:priority="800" />
 
     <!-- Allows an application to access data from sensors that the user uses to
-         measure what is happening inside his/her body, such as heart rate.
+         measure what is happening inside their body, such as heart rate.
          <p>Protection level: dangerous -->
     <permission android:name="android.permission.BODY_SENSORS"
         android:permissionGroup="android.permission-group.UNDEFINED"
@@ -1622,7 +1627,7 @@
     <permission android:name="android.permission.MANAGE_IPSEC_TUNNELS"
         android:protectionLevel="signature|appop" />
 
-    <!-- @hide Allows apps to create and manage Test Networks.
+    <!-- @SystemApi @hide Allows apps to create and manage Test Networks.
          <p>Granted only to shell. CTS tests will use
          UiAutomation.AdoptShellPermissionIdentity() to gain access.
     -->
@@ -1663,6 +1668,12 @@
          <p>Not for use by third-party applications. @hide -->
     <permission android:name="android.permission.REQUEST_NETWORK_SCORES"
         android:protectionLevel="signature|setup" />
+
+    <!-- Allows applications to restart the Wi-Fi subsystem.
+     @SystemApi
+     <p>Not for use by third-party applications. @hide -->
+    <permission android:name="android.permission.RESTART_WIFI_SUBSYSTEM"
+                android:protectionLevel="signature|setup" />
 
     <!-- @SystemApi @hide Allows applications to toggle airplane mode.
          <p>Not for use by third-party or privileged applications.
@@ -1768,6 +1779,16 @@
          <p>Not for use by third-party applications. -->
     <permission android:name="android.permission.WIFI_UPDATE_USABILITY_STATS_SCORE"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi @hide Allows system APK to update Wifi coex channels to avoid.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS"
+                android:protectionLevel="signature" />
+
+    <!-- @SystemApi @hide Allows applications to access Wifi coex channels being avoided.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS"
+                android:protectionLevel="signature|privileged" />
 
     <!-- ======================================= -->
     <!-- Permissions for short range, peripheral networks -->
@@ -2196,7 +2217,9 @@
     <!-- Allows to query ongoing call details and manage ongoing calls
      <p>Protection level: signature|appop -->
     <permission android:name="android.permission.MANAGE_ONGOING_CALLS"
-        android:protectionLevel="signature|appop" />
+        android:protectionLevel="signature|appop"
+        android:label="@string/permlab_manageOngoingCalls"
+        android:description="@string/permdesc_manageOngoingCalls" />
 
     <!-- Allows the app to request network scans from telephony.
          <p>Not for use by third-party applications.
@@ -2321,6 +2344,14 @@
          @hide
     -->
     <permission android:name="android.permission.READ_CARRIER_APP_INFO"
+        android:protectionLevel="signature" />
+
+    <!-- Required by a GbaService to ensure that only the system can bind to it.
+         <p>Protection level: signature
+         @SystemApi
+         @hide
+    -->
+    <permission android:name="android.permission.BIND_GBA_SERVICE"
         android:protectionLevel="signature" />
 
     <!-- ================================== -->
@@ -2958,6 +2989,12 @@
          @hide -->
     <permission android:name="android.permission.RECOVERY"
         android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to do certain operations needed for
+         resume on reboot feature.
+         @hide -->
+    <permission android:name="android.permission.BIND_RESUME_ON_REBOOT_SERVICE"
+        android:protectionLevel="signature" />
 
     <!-- @SystemApi Allows an application to read system update info.
          @hide -->
@@ -4470,7 +4507,7 @@
     <!-- Allows access to keyguard secure storage.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.ACCESS_KEYGUARD_SECURE_STORAGE"
-        android:protectionLevel="signature" />
+        android:protectionLevel="signature|setup" />
 
     <!-- Allows applications to set the initial lockscreen state.
          <p>Not for use by third-party applications. @hide -->
@@ -5066,6 +5103,10 @@
     <!-- @hide @SystemApi Allows an application to access locusId events in the usage stats. -->
     <permission android:name="android.permission.ACCESS_LOCUS_ID_USAGE_STATS"
                 android:protectionLevel="signature|appPredictor" />
+
+    <!-- @hide Allows an application to create/destroy input consumer. -->
+    <permission android:name="android.permission.INPUT_CONSUMER"
+                android:protectionLevel="signature" />
 
     <!-- Attribution for Country Detector. -->
     <attribution android:tag="CountryDetector" android:label="@string/country_detector"/>

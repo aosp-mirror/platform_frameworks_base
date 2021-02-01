@@ -2046,7 +2046,13 @@ public class CarrierConfigManager {
      * via {@link android.telecom.PhoneAccount#CAPABILITY_VIDEO_CALLING_RELIES_ON_PRESENCE}
      * and can choose to hide or show the video calling icon based on whether a contact supports
      * video.
+     *
+     * @deprecated No longer used in framework code, however it may still be used by applications
+     * that have not updated their code. This config should still be set to {@code true} if
+     * {@link Ims#KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL} is set to {@code true} and
+     * {@link Ims#KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL} is set to {@code true}.
      */
+    @Deprecated
     public static final String KEY_USE_RCS_PRESENCE_BOOL = "use_rcs_presence_bool";
 
     /**
@@ -2766,6 +2772,30 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String IMSI_KEY_DOWNLOAD_URL_STRING = "imsi_key_download_url_string";
+
+    /**
+     * String representation of a carrier's public key used for IMSI encryption for ePDG. If this
+     * is provided, the device will use it as a fallback when no key exists on device, but the key
+     * download will still initiate.
+     * Example string:
+     *         "-----BEGIN CERTIFICATE-----\nabcde12345abcde12345abcde12345abcde1234
+     * 5abcde12345abcde12345\nabcde12345abcde12345abcde12345abcde12345a\n-----END CERTIFICATE-----"
+     * @hide
+     */
+    public static final String IMSI_CARRIER_PUBLIC_KEY_EPDG_STRING =
+            "imsi_carrier_public_key_epdg_string";
+
+    /**
+     * String representation of a carrier's public key used for IMSI encryption for WLAN. If this
+     * is provided, the device will use it as a fallback when no key exists on device, but the key
+     * download will still initiate.
+     * Example string:
+     *         "-----BEGIN CERTIFICATE-----\nabcde12345abcde12345abcde12345abcde1234
+     * 5abcde12345abcde12345\nabcde12345abcde12345abcde12345abcde12345a\n-----END CERTIFICATE-----"
+     * @hide
+     */
+    public static final String IMSI_CARRIER_PUBLIC_KEY_WLAN_STRING =
+            "imsi_carrier_public_key_wlan_string";
 
     /**
      * Identifies if the key is available for WLAN or EPDG or both. The value is a bitmask.
@@ -3862,12 +3892,50 @@ public class CarrierConfigManager {
          * <p>
          * If this key's value is set to false, the procedure for RCS contact capability exchange
          * via SIP SUBSCRIBE/NOTIFY will also be disabled internally, and
-         * {@link #KEY_USE_RCS_PRESENCE_BOOL} must also be set to false to ensure apps do not
-         * improperly think that capability exchange via SIP PUBLISH is enabled.
+         * {@link Ims#KEY_ENABLE_PRESENCE_PUBLISH_BOOL} must also be set to false to ensure
+         * apps do not improperly think that capability exchange via SIP PUBLISH is enabled.
          * <p> The default value for this key is {@code false}.
          */
         public static final String KEY_ENABLE_PRESENCE_PUBLISH_BOOL =
                 KEY_PREFIX + "enable_presence_publish_bool";
+
+        /**
+         * Flag indicating whether or not this carrier supports the exchange of phone numbers with
+         * the carrier's RCS presence server in order to retrieve the RCS capabilities of requested
+         * contacts used in the RCS User Capability Exchange (UCE) procedure. See RCC.71, section 3
+         * for more information.
+         * <p>
+         * When presence is supported, the device uses the SIP SUBSCRIBE/NOTIFY procedure internally
+         * to retrieve the requested RCS capabilities. See
+         * {@link android.telephony.ims.RcsUceAdapter} for more information on how RCS capabilities
+         * can be retrieved from the carrier's network.
+         */
+        public static final String KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL =
+                KEY_PREFIX + "enable_presence_capability_exchange_bool";
+
+
+        /**
+         * Flag indicating whether or not the carrier expects the RCS UCE service to periodically
+         * refresh the RCS capabilities cache of the user's contacts as well as request the
+         * capabilities of call contacts when the SIM card is first inserted or when a new contact
+         * is added, removed, or modified. This corresponds to the RCC.07 A.19
+         * "DISABLE INITIAL ADDRESS BOOK SCAN" parameter.
+         * <p>
+         * If this flag is disabled, the capabilities cache will not be refreshed internally at all
+         * and will only be updated if the cached capabilities are stale when an application
+         * requests them.
+         */
+        public static final String KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL =
+                KEY_PREFIX + "rcs_bulk_capability_exchange_bool";
+
+        /**
+         * Flag indicating whether or not the carrier supports capability exchange with a list of
+         * contacts. When {@code true}, the device will batch together multiple requests and
+         * construct a RLMI document in the SIP SUBSCRIBE request (see RFC 4662). If {@code false},
+         * the request will be split up into one SIP SUBSCRIBE request per contact.
+         */
+        public static final String KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL =
+                KEY_PREFIX + "enable_presence_group_subscribe_bool";
 
         private Ims() {}
 
@@ -3876,6 +3944,9 @@ public class CarrierConfigManager {
             defaults.putInt(KEY_WIFI_OFF_DEFERRING_TIME_MILLIS_INT, 4000);
             defaults.putBoolean(KEY_IMS_SINGLE_REGISTRATION_REQUIRED_BOOL, false);
             defaults.putBoolean(KEY_ENABLE_PRESENCE_PUBLISH_BOOL, false);
+            defaults.putBoolean(KEY_ENABLE_PRESENCE_CAPABILITY_EXCHANGE_BOOL, false);
+            defaults.putBoolean(KEY_RCS_BULK_CAPABILITY_EXCHANGE_BOOL, false);
+            defaults.putBoolean(KEY_ENABLE_PRESENCE_GROUP_SUBSCRIBE_BOOL, true);
             return defaults;
         }
     }
@@ -4009,6 +4080,17 @@ public class CarrierConfigManager {
             "default_preferred_apn_name_string";
 
     /**
+     * Indicates if the carrier supports call composer.
+     */
+    public static final String KEY_SUPPORTS_CALL_COMPOSER_BOOL = "supports_call_composer_bool";
+
+    /**
+     * Indicates the carrier server url that serves the call composer picture.
+     */
+    public static final String KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING =
+            "call_composer_picture_server_url_string";
+
+    /**
      * For Android 11, provide a temporary solution for OEMs to use the lower of the two MTU values
      * for IPv4 and IPv6 if both are sent.
      * TODO: remove in later release
@@ -4017,6 +4099,30 @@ public class CarrierConfigManager {
      */
     public static final String KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED =
             "use_lower_mtu_value_if_both_received";
+
+    /**
+     * Determines the default RTT mode.
+     *
+     * Upon first boot, when the user has not yet set a value for their preferred RTT mode,
+     * the value of this config will be sent to the IMS stack. Valid values are the same as for
+     * {@link Settings.Secure#RTT_CALLING_MODE}.
+     *
+     * @hide
+     */
+    public static final String KEY_DEFAULT_RTT_MODE_INT =
+            "default_rtt_mode_int";
+
+    /**
+     * Indicates whether RTT is supported while roaming.
+     */
+    public static final String KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL =
+            "rtt_supported_while_roaming_bool";
+
+    /**
+     * Indicates if auto-configuration server is used for the RCS config
+     * Reference: GSMA RCC.14
+     */
+    public static final String KEY_USE_ACS_FOR_RCS_BOOL = "use_acs_for_rcs_bool";
 
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
@@ -4369,6 +4475,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_DISABLE_VOICE_BARRING_NOTIFICATION_BOOL, false);
         sDefaults.putInt(IMSI_KEY_AVAILABILITY_INT, 0);
         sDefaults.putString(IMSI_KEY_DOWNLOAD_URL_STRING, null);
+        sDefaults.putString(IMSI_CARRIER_PUBLIC_KEY_EPDG_STRING, null);
+        sDefaults.putString(IMSI_CARRIER_PUBLIC_KEY_WLAN_STRING, null);
         sDefaults.putBoolean(KEY_CONVERT_CDMA_CALLER_ID_MMI_CODES_WHILE_ROAMING_ON_3GPP_BOOL,
                 false);
         sDefaults.putStringArray(KEY_NON_ROAMING_OPERATOR_STRING_ARRAY, null);
@@ -4377,6 +4485,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_RTT_SUPPORTED_BOOL, false);
         sDefaults.putBoolean(KEY_TTY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_HIDE_TTY_HCO_VCO_WITH_RTT_BOOL, false);
+        sDefaults.putBoolean(KEY_RTT_SUPPORTED_WHILE_ROAMING_BOOL, false);
         sDefaults.putBoolean(KEY_DISABLE_CHARGE_INDICATION_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_NO_REPLY_TIMER_FOR_CFNRY_BOOL, true);
         sDefaults.putStringArray(KEY_FEATURE_ACCESS_CODES_STRING_ARRAY, null);
@@ -4560,7 +4669,11 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
         sDefaults.putBoolean(KEY_DISABLE_DUN_APN_WHILE_ROAMING_WITH_PRESET_APN_BOOL, false);
         sDefaults.putString(KEY_DEFAULT_PREFERRED_APN_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_SUPPORTS_CALL_COMPOSER_BOOL, false);
+        sDefaults.putString(KEY_CALL_COMPOSER_PICTURE_SERVER_URL_STRING, "");
         sDefaults.putBoolean(KEY_USE_LOWER_MTU_VALUE_IF_BOTH_RECEIVED, false);
+        sDefaults.putBoolean(KEY_USE_ACS_FOR_RCS_BOOL, false);
+        sDefaults.putInt(KEY_DEFAULT_RTT_MODE_INT, 0);
     }
 
     /**

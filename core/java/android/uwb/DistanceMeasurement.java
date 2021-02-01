@@ -17,7 +17,9 @@
 package android.uwb;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -31,6 +33,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class DistanceMeasurement implements Parcelable {
     private final double mMeters;
     private final double mErrorMeters;
@@ -106,7 +109,7 @@ public final class DistanceMeasurement implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeDouble(mMeters);
         dest.writeDouble(mErrorMeters);
         dest.writeDouble(mConfidenceLevel);
@@ -143,6 +146,7 @@ public final class DistanceMeasurement implements Parcelable {
          * @param meters distance in meters
          * @throws IllegalArgumentException if meters is NaN
          */
+        @NonNull
         public Builder setMeters(double meters) {
             if (Double.isNaN(meters)) {
                 throw new IllegalArgumentException("meters cannot be NaN");
@@ -157,6 +161,7 @@ public final class DistanceMeasurement implements Parcelable {
          * @param errorMeters distance error in meters
          * @throws IllegalArgumentException if error is negative or NaN
          */
+        @NonNull
         public Builder setErrorMeters(double errorMeters) {
             if (Double.isNaN(errorMeters) || errorMeters < 0.0) {
                 throw new IllegalArgumentException(
@@ -172,6 +177,7 @@ public final class DistanceMeasurement implements Parcelable {
          * @param confidenceLevel the confidence level in the distance measurement
          * @throws IllegalArgumentException if confidence level is not in the range of [0.0, 1.0]
          */
+        @NonNull
         public Builder setConfidenceLevel(double confidenceLevel) {
             if (confidenceLevel < 0.0 || confidenceLevel > 1.0) {
                 throw new IllegalArgumentException(
@@ -186,6 +192,7 @@ public final class DistanceMeasurement implements Parcelable {
          *
          * @throws IllegalStateException if meters, error, or confidence are not set
          */
+        @NonNull
         public DistanceMeasurement build() {
             if (Double.isNaN(mMeters)) {
                 throw new IllegalStateException("Meters cannot be NaN");

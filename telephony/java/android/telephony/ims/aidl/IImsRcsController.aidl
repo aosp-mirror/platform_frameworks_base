@@ -52,7 +52,7 @@ interface IImsRcsController {
     // ImsUceAdapter specific
     void requestCapabilities(int subId, String callingPackage, String callingFeatureId,
             in List<Uri> contactNumbers, IRcsUceControllerCallback c);
-    void requestNetworkAvailability(int subId, String callingPackage,
+    void requestAvailability(int subId, String callingPackage,
             String callingFeatureId, in Uri contactNumber,
             IRcsUceControllerCallback c);
     int getUcePublishState(int subId);
@@ -67,6 +67,8 @@ interface IImsRcsController {
             ISipDelegateConnectionStateCallback delegateState,
             ISipDelegateMessageCallback delegateMessage);
     void destroySipDelegate(int subId, ISipDelegate connection, int reason);
+    void triggerNetworkRegistration(int subId, ISipDelegate connection, int sipCode,
+            String sipReason);
 
     // Internal commands that should not be made public
     void registerRcsFeatureCallback(int slotId, in IImsServiceFeatureCallback callback);

@@ -58,7 +58,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.UserInfo;
 import android.net.INetd;
 import android.net.UidRange;
 import android.os.Build;
@@ -123,10 +122,10 @@ public class PermissionMonitorTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mContext.getSystemService(eq(Context.USER_SERVICE))).thenReturn(mUserManager);
-        when(mUserManager.getAliveUsers()).thenReturn(
-                Arrays.asList(new UserInfo[] {
-                        new UserInfo(MOCK_USER1, "", 0),
-                        new UserInfo(MOCK_USER2, "", 0),
+        when(mUserManager.getUserHandles(eq(true))).thenReturn(
+                Arrays.asList(new UserHandle[] {
+                        new UserHandle(MOCK_USER1),
+                        new UserHandle(MOCK_USER2),
                 }));
 
         mPermissionMonitor = spy(new PermissionMonitor(mContext, mNetdService, mDeps));

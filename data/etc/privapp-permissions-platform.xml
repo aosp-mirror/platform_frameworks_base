@@ -143,6 +143,10 @@ applications that come with the platform
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME" />
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
+        <permission name="android.permission.MODIFY_AUDIO_ROUTING" />
+
+        <!-- For permission hub 2 debugging only -->
+        <permission name="android.permission.GET_ACCOUNTS_PRIVILEGED"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -339,6 +343,8 @@ applications that come with the platform
         <permission name="android.permission.MOUNT_FORMAT_FILESYSTEMS"/>
         <permission name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
         <permission name="android.permission.MOVE_PACKAGE"/>
+        <!-- Needed for test only -->
+        <permission name="android.permission.RESTART_WIFI_SUBSYSTEM"/>
         <permission name="android.permission.OBSERVE_APP_USAGE"/>
         <permission name="android.permission.NETWORK_SCAN"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
@@ -432,6 +438,14 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_DEBUGGING" />
         <!-- Permissions required for CTS test - TimeManagerTest -->
         <permission name="android.permission.MANAGE_TIME_AND_ZONE_DETECTION" />
+        <!-- Permissions required for CTS test - CtsHdmiCecHostTestCases -->
+        <permission name="android.permission.HDMI_CEC"/>
+        <!-- Permission needed for CTS test - WifiManagerTest -->
+        <permission name="android.permission.WIFI_ACCESS_COEX_UNSAFE_CHANNELS" />
+        <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
+        <!-- Permission required for GTS test - GtsAssistIntentTestCases -->
+        <permission name="android.permission.MANAGE_SOUND_TRIGGER" />
+        <permission name="android.permission.CAPTURE_AUDIO_HOTWORD" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -441,6 +455,8 @@ applications that come with the platform
     <privapp-permissions package="com.android.traceur">
         <!-- Permissions required to receive BUGREPORT_STARTED intent -->
         <permission name="android.permission.DUMP"/>
+        <!-- Permissions required to start/stop tracing -->
+        <permission name="android.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND"/>
         <!-- Permissions required for quick settings tile -->
         <permission name="android.permission.STATUS_BAR"/>
     </privapp-permissions>

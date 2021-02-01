@@ -53,6 +53,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.security.Authorization;
 import android.security.KeyStore;
 import android.service.trust.TrustAgentService;
 import android.text.TextUtils;
@@ -123,6 +124,8 @@ public class TrustManagerService extends SystemService {
     private static final String TRUST_TIMEOUT_ALARM_TAG = "TrustManagerService.trustTimeoutForUser";
     private static final long TRUST_TIMEOUT_IN_MILLIS = 4 * 60 * 60 * 1000;
 
+    private static final String PRIV_NAMESPACE = "http://schemas.android.com/apk/prv/res/android";
+
     private final ArraySet<AgentInfo> mActiveAgents = new ArraySet<>();
     private final ArrayList<ITrustListener> mTrustListeners = new ArrayList<>();
     private final Receiver mReceiver = new Receiver();
@@ -183,6 +186,8 @@ public class TrustManagerService extends SystemService {
     private boolean mTrustAgentsCanRun = false;
     private int mCurrentUser = UserHandle.USER_SYSTEM;
 
+    private Authorization mAuthorizationService;
+
     public TrustManagerService(Context context) {
         super(context);
         mContext = context;
@@ -192,6 +197,7 @@ public class TrustManagerService extends SystemService {
         mStrongAuthTracker = new StrongAuthTracker(context);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         mSettingsObserver = new SettingsObserver(mHandler);
+        mAuthorizationService = new Authorization();
     }
 
     @Override
@@ -694,11 +700,13 @@ public class TrustManagerService extends SystemService {
         if (changed) {
             dispatchDeviceLocked(userId, locked);
 
+            mAuthorizationService.onLockScreenEvent(locked, userId, null);
             KeyStore.getInstance().onUserLockedStateChanged(userId, locked);
             // Also update the user's profiles who have unified challenge, since they
             // share the same unlocked state (see {@link #isDeviceLocked(int)})
             for (int profileHandle : mUserManager.getEnabledProfileIds(userId)) {
                 if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(profileHandle)) {
+                    mAuthorizationService.onLockScreenEvent(locked, profileHandle, null);
                     KeyStore.getInstance().onUserLockedStateChanged(profileHandle, locked);
                 }
             }
@@ -808,8 +816,8 @@ public class TrustManagerService extends SystemService {
             TypedArray sa = res
                     .obtainAttributes(attrs, com.android.internal.R.styleable.TrustAgent);
             cn = sa.getString(com.android.internal.R.styleable.TrustAgent_settingsActivity);
-            canUnlockProfile = sa.getBoolean(
-                    com.android.internal.R.styleable.TrustAgent_unlockProfile, false);
+            canUnlockProfile = attrs.getAttributeBooleanValue(
+                    PRIV_NAMESPACE, "unlockProfile", false);
             sa.recycle();
         } catch (PackageManager.NameNotFoundException e) {
             caughtException = e;
@@ -1250,6 +1258,7 @@ public class TrustManagerService extends SystemService {
                         mDeviceLockedForUser.put(userId, locked);
                     }
 
+                    mAuthorizationService.onLockScreenEvent(locked, userId, null);
                     KeyStore.getInstance().onUserLockedStateChanged(userId, locked);
 
                     if (locked) {

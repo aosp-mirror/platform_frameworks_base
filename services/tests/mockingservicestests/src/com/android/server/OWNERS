@@ -1,0 +1,3 @@
+per-file *Alarm* = file:/apex/jobscheduler/OWNERS
+per-file *AppStateTracker* = file:/apex/jobscheduler/OWNERS
+per-file *DeviceIdleController* = file:/apex/jobscheduler/OWNERS
