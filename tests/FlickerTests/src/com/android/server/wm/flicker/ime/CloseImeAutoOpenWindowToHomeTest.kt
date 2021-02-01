@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -47,7 +46,6 @@ import org.junit.runners.Parameterized
  * Test IME window closing back to app window transitions.
  * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToHomeTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -65,7 +63,7 @@ class CloseImeAutoOpenWindowToHomeTest(
                     val testApp = ImeAppAutoFocusHelper(instrumentation,
                         configuration.startRotation)
                     withTestName {
-                        buildTestTag("imeToHomeAutoOpen", configuration)
+                        buildTestTag(configuration)
                     }
                     repeat { configuration.repetitions }
                     setup {
@@ -90,32 +88,50 @@ class CloseImeAutoOpenWindowToHomeTest(
                         wmHelper.waitImeWindowGone()
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE))
+                        val isRotated = configuration.startRotation.isRotated()
 
-                            imeWindowBecomesInvisible()
-                            imeAppWindowBecomesInvisible(testApp)
+                        presubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry(
+                                    listOf(IME_WINDOW_TITLE))
+
+                                imeWindowBecomesInvisible()
+                                imeAppWindowBecomesInvisible(testApp)
+                            }
+
+                            layersTrace {
+                                noUncoveredRegions(configuration.startRotation, Surface.ROTATION_0)
+                                imeLayerBecomesInvisible()
+                                imeAppLayerBecomesInvisible(testApp)
+
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    navBarLayerIsAlwaysVisible()
+                                    statusBarLayerIsAlwaysVisible()
+                                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                                        listOf(IME_WINDOW_TITLE))
+                                }
+                            }
                         }
 
-                        layersTrace {
-                            noUncoveredRegions(configuration.startRotation, Surface.ROTATION_0)
-                            navBarLayerRotatesAndScales(configuration.startRotation,
-                                Surface.ROTATION_0,
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerRotatesScales(configuration.startRotation,
-                                Surface.ROTATION_0,
-                                enabled = !configuration.startRotation.isRotated())
-                            navBarLayerIsAlwaysVisible(
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerIsAlwaysVisible(
-                                enabled = !configuration.startRotation.isRotated())
-                            visibleLayersShownMoreThanOneConsecutiveEntry(listOf(IME_WINDOW_TITLE),
-                                enabled = !configuration.startRotation.isRotated())
-
-                            imeLayerBecomesInvisible()
-                            imeAppLayerBecomesInvisible(testApp)
+                        flaky {
+                            layersTrace {
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    navBarLayerIsAlwaysVisible()
+                                    statusBarLayerIsAlwaysVisible()
+                                    visibleLayersShownMoreThanOneConsecutiveEntry(
+                                        listOf(IME_WINDOW_TITLE))
+                                }
+                            }
                         }
                     }
                 }

@@ -16,8 +16,6 @@
 
 package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -48,11 +46,9 @@ import org.junit.runners.Parameterized
  * Test IME window closing back to app window transitions.
  * To run this test: `atest FlickerTests:CloseImeAutoOpenWindowToAppTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 178015460)
 class CloseImeAutoOpenWindowToAppTest(
     testSpec: FlickerTestRunnerFactory.TestSpec
 ) : FlickerTestRunner(testSpec) {
@@ -66,7 +62,7 @@ class CloseImeAutoOpenWindowToAppTest(
                 .buildTest(instrumentation, repetitions = 5) { configuration ->
                     val testApp = ImeAppAutoFocusHelper(instrumentation,
                         configuration.startRotation)
-                    withTestName { buildTestTag("imeToAppAutoOpen", configuration) }
+                    withTestName { buildTestTag(configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
@@ -89,26 +85,39 @@ class CloseImeAutoOpenWindowToAppTest(
                         testApp.closeIME(device, wmHelper)
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(listOf("InputMethod"))
+                        val isRotated = configuration.startRotation.isRotated()
 
-                            imeAppWindowIsAlwaysVisible(testApp)
+                        postsubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry(
+                                    listOf(IME_WINDOW_TITLE))
+                                imeAppWindowIsAlwaysVisible(testApp)
+                            }
+
+                            layersTrace {
+                                navBarLayerIsAlwaysVisible()
+                                statusBarLayerIsAlwaysVisible()
+                                noUncoveredRegions(configuration.startRotation)
+                                imeLayerBecomesInvisible()
+                                imeAppLayerIsAlwaysVisible(testApp)
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation)
+                                    statusBarLayerRotatesScales(configuration.startRotation)
+                                }
+                            }
                         }
 
-                        layersTrace {
-                            navBarLayerIsAlwaysVisible()
-                            statusBarLayerIsAlwaysVisible()
-                            noUncoveredRegions(configuration.startRotation)
-                            navBarLayerRotatesAndScales(configuration.startRotation,
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerRotatesScales(configuration.startRotation,
-                                enabled = !configuration.startRotation.isRotated())
-                            visibleLayersShownMoreThanOneConsecutiveEntry()
+                        flaky {
+                            layersTrace {
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
 
-                            imeLayerBecomesInvisible()
-                            imeAppLayerIsAlwaysVisible(testApp)
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation)
+                                    statusBarLayerRotatesScales(configuration.startRotation)
+                                }
+                            }
                         }
                     }
                 }
