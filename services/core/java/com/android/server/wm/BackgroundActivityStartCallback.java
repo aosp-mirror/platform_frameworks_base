@@ -31,7 +31,8 @@ public interface BackgroundActivityStartCallback {
      * Note that if the start was allowed due to a mechanism other than tokens (eg. permission),
      * this won't be called.
      *
-     * This will be called holding the WM lock, don't do anything costly here.
+     * This will be called holding the WM and local lock, don't do anything costly or invoke AM/WM
+     * methods here directly.
      */
     boolean isActivityStartAllowed(Collection<IBinder> tokens, int uid, String packageName);
 
@@ -40,7 +41,8 @@ public interface BackgroundActivityStartCallback {
      * #ACTION_CLOSE_SYSTEM_DIALOGS}, presumably to start activities, based on the originating
      * tokens {@code tokens} currently associated with potential activity starts.
      *
-     * This will be called holding the AM and WM lock, don't do anything costly here.
+     * This will be called holding the AM and local lock, don't do anything costly or invoke AM/WM
+     * methods here directly.
      */
     boolean canCloseSystemDialogs(Collection<IBinder> tokens, int uid);
 }

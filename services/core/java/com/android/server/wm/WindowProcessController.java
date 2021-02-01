@@ -24,13 +24,11 @@ import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.internal.protolog.ProtoLogGroup.WM_DEBUG_CONFIGURATION;
 import static com.android.internal.util.Preconditions.checkArgument;
 import static com.android.server.am.ActivityManagerService.MY_PID;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ACTIVITY_STARTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskManagerService.ACTIVITY_BG_START_GRACE_PERIOD_MS;
 import static com.android.server.wm.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MILLIS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.Task.ActivityState.DESTROYED;
@@ -61,8 +59,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
-import android.os.SystemClock;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -103,10 +99,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     final String mName;
     final int mUid;
 
-    // A set of tokens that currently contribute to this process being temporarily allowed
-    // to start activities even if it's not in the foreground. The values of this map are optional
-    // (can be null) and are used to trace back the grant to the notification token mechanism.
-    private final ArrayMap<Binder, IBinder> mBackgroundActivityStartTokens = new ArrayMap<>();
     // The process of this application; 0 if none
     private volatile int mPid;
     // user of process.
@@ -118,6 +110,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     final ArraySet<String> mPkgList = new ArraySet<>();
     private final WindowProcessListener mListener;
     private final ActivityTaskManagerService mAtm;
+    private final BackgroundLaunchProcessController mBgLaunchController;
     // The actual proc...  may be null only if 'persistent' is true (in which case we are in the
     // process of launching the app)
     private IApplicationThread mThread;
@@ -169,8 +162,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
-    // Set of UIDs of clients currently bound to this process
-    private volatile ArraySet<Integer> mBoundClientUids = new ArraySet<Integer>();
 
     // Thread currently set for VR scheduling
     int mVrThreadTid;
@@ -191,10 +182,10 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     // The most recent top-most activity that was resumed in the process for pre-Q app.
     private ActivityRecord mPreQTopResumedActivity = null;
     // The last time an activity was launched in the process
-    private long mLastActivityLaunchTime;
+    private volatile long mLastActivityLaunchTime;
     // The last time an activity was finished in the process while the process participated
     // in a visible task
-    private long mLastActivityFinishTime;
+    private volatile long mLastActivityFinishTime;
 
     // Last configuration that was reported to the process.
     private final Configuration mLastReportedConfiguration = new Configuration();
@@ -227,9 +218,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     /** Whether our process is currently running a {@link IRemoteAnimationRunner} */
     private boolean mRunningRemoteAnimation;
 
-    @Nullable
-    private final BackgroundActivityStartCallback mBackgroundActivityStartCallback;
-
     // The bits used for mActivityStateFlags.
     private static final int ACTIVITY_STATE_FLAG_IS_VISIBLE = 1 << 16;
     private static final int ACTIVITY_STATE_FLAG_IS_PAUSING_OR_PAUSED = 1 << 17;
@@ -246,8 +234,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      */
     private volatile int mActivityStateFlags = ACTIVITY_STATE_FLAG_MASK_MIN_TASK_LAYER;
 
-    public WindowProcessController(@NonNull ActivityTaskManagerService atm, ApplicationInfo info,
-            String name, int uid, int userId, Object owner,
+    public WindowProcessController(@NonNull ActivityTaskManagerService atm,
+            @NonNull ApplicationInfo info, String name, int uid, int userId, Object owner,
             @NonNull WindowProcessListener listener) {
         mInfo = info;
         mName = name;
@@ -256,7 +244,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mOwner = owner;
         mListener = listener;
         mAtm = atm;
-        mBackgroundActivityStartCallback = mAtm.getBackgroundActivityStartCallback();
+        mBgLaunchController = new BackgroundLaunchProcessController(
+                atm::hasActiveVisibleWindow, atm.getBackgroundActivityStartCallback());
 
         boolean isSysUiPackage = info.packageName.equals(
                 mAtm.getSysUiServiceComponentLocked().getPackageName());
@@ -489,162 +478,59 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void setLastActivityFinishTimeIfNeeded(long finishTime) {
-        if (finishTime <= mLastActivityFinishTime || !hasActivityInVisibleTask()) {
+        if (finishTime <= mLastActivityFinishTime || !hasVisibleActivities()) {
             return;
         }
         mLastActivityFinishTime = finishTime;
     }
 
     /**
-     * Allows background activity starts using token {@code entity}. Optionally, you can provide
-     * {@code originatingToken} if you have one such originating token, this is useful for tracing
-     * back the grant in the case of the notification token.
-     *
-     * If {@code entity} is already added, this method will update its {@code originatingToken}.
+     * @see BackgroundLaunchProcessController#addOrUpdateAllowBackgroundActivityStartsToken(Binder,
+     * IBinder)
      */
     public void addOrUpdateAllowBackgroundActivityStartsToken(Binder entity,
             @Nullable IBinder originatingToken) {
-        synchronized (mAtm.mGlobalLock) {
-            mBackgroundActivityStartTokens.put(entity, originatingToken);
-        }
+        mBgLaunchController.addOrUpdateAllowBackgroundActivityStartsToken(entity, originatingToken);
     }
 
-    /**
-     * Removes token {@code entity} that allowed background activity starts added via {@link
-     * #addOrUpdateAllowBackgroundActivityStartsToken(Binder, IBinder)}.
-     */
+    /** @see BackgroundLaunchProcessController#removeAllowBackgroundActivityStartsToken(Binder) */
     public void removeAllowBackgroundActivityStartsToken(Binder entity) {
-        synchronized (mAtm.mGlobalLock) {
-            mBackgroundActivityStartTokens.remove(entity);
-        }
+        mBgLaunchController.removeAllowBackgroundActivityStartsToken(entity);
     }
 
     /**
      * Is this WindowProcessController in the state of allowing background FGS start?
      */
+    @HotPath(caller = HotPath.START_SERVICE)
     public boolean areBackgroundFgsStartsAllowed() {
-        synchronized (mAtm.mGlobalLock) {
-            return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed(), true);
-        }
+        return areBackgroundActivityStartsAllowed(mAtm.getBalAppSwitchesAllowed(),
+                true /* isCheckingForFgsStart */);
     }
 
     boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed) {
-        return areBackgroundActivityStartsAllowed(appSwitchAllowed, false);
+        return areBackgroundActivityStartsAllowed(appSwitchAllowed,
+                false /* isCheckingForFgsStart */);
     }
 
-    boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed,
+    private boolean areBackgroundActivityStartsAllowed(boolean appSwitchAllowed,
             boolean isCheckingForFgsStart) {
-        // If app switching is not allowed, we ignore all the start activity grace period
-        // exception so apps cannot start itself in onPause() after pressing home button.
-        if (appSwitchAllowed) {
-            // allow if any activity in the caller has either started or finished very recently, and
-            // it must be started or finished after last stop app switches time.
-            final long now = SystemClock.uptimeMillis();
-            if (now - mLastActivityLaunchTime < ACTIVITY_BG_START_GRACE_PERIOD_MS
-                    || now - mLastActivityFinishTime < ACTIVITY_BG_START_GRACE_PERIOD_MS) {
-                // if activity is started and finished before stop app switch time, we should not
-                // let app to be able to start background activity even it's in grace period.
-                if (mLastActivityLaunchTime > mAtm.getLastStopAppSwitchesTime()
-                        || mLastActivityFinishTime > mAtm.getLastStopAppSwitchesTime()) {
-                    if (DEBUG_ACTIVITY_STARTS) {
-                        Slog.d(TAG, "[WindowProcessController(" + mPid
-                                + ")] Activity start allowed: within "
-                                + ACTIVITY_BG_START_GRACE_PERIOD_MS + "ms grace period");
-                    }
-                    return true;
-                }
-                if (DEBUG_ACTIVITY_STARTS) {
-                    Slog.d(TAG, "[WindowProcessController(" + mPid + ")] Activity start within "
-                            + ACTIVITY_BG_START_GRACE_PERIOD_MS
-                            + "ms grace period but also within stop app switch window");
-                }
-
-            }
-        }
-        // allow if the proc is instrumenting with background activity starts privs
-        if (mInstrumentingWithBackgroundActivityStartPrivileges) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid
-                        + ")] Activity start allowed: process instrumenting with background "
-                        + "activity starts privileges");
-            }
-            return true;
-        }
-        // allow if the caller has an activity in any foreground task
-        if (appSwitchAllowed && hasActivityInVisibleTask()) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid
-                        + ")] Activity start allowed: process has activity in foreground task");
-            }
-            return true;
-        }
-        // allow if the caller is bound by a UID that's currently foreground
-        if (isBoundByForegroundUid()) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid
-                        + ")] Activity start allowed: process bound by foreground uid");
-            }
-            return true;
-        }
-        // allow if the flag was explicitly set
-        if (isBackgroundStartAllowedByToken(isCheckingForFgsStart)) {
-            if (DEBUG_ACTIVITY_STARTS) {
-                Slog.d(TAG, "[WindowProcessController(" + mPid
-                        + ")] Activity start allowed: process allowed by token");
-            }
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * If there are no tokens, we don't allow *by token*. If there are tokens and
-     * isCheckingForFgsStart is false, we ask the callback if the start is allowed for these tokens,
-     * otherwise if there is no callback we allow.
-     */
-    private boolean isBackgroundStartAllowedByToken(boolean isCheckingForFgsStart) {
-        if (mBackgroundActivityStartTokens.isEmpty()) {
-            return false;
-        }
-
-        if (isCheckingForFgsStart) {
-            /// The checking is for BG-FGS-start.
-            return true;
-        }
-
-        if (mBackgroundActivityStartCallback == null) {
-            // We have tokens but no callback to decide => allow
-            return true;
-        }
-        // The callback will decide
-        return mBackgroundActivityStartCallback.isActivityStartAllowed(
-                mBackgroundActivityStartTokens.values(), mInfo.uid, mInfo.packageName);
+        return mBgLaunchController.areBackgroundActivityStartsAllowed(mPid, mUid, mInfo.packageName,
+                appSwitchAllowed, isCheckingForFgsStart, hasVisibleActivities(),
+                mInstrumentingWithBackgroundActivityStartPrivileges,
+                mAtm.getLastStopAppSwitchesTime(),
+                mLastActivityLaunchTime, mLastActivityFinishTime);
     }
 
     /**
      * Returns whether this process is allowed to close system dialogs via a background activity
      * start token that allows the close system dialogs operation (eg. notification).
      */
-    public boolean canCloseSystemDialogsByToken() {
-        synchronized (mAtm.mGlobalLock) {
-            return !mBackgroundActivityStartTokens.isEmpty()
-                    && mBackgroundActivityStartCallback != null
-                    && mBackgroundActivityStartCallback.canCloseSystemDialogs(
-                            mBackgroundActivityStartTokens.values(), mInfo.uid);
-        }
-    }
-
-    private boolean isBoundByForegroundUid() {
-        for (int i = mBoundClientUids.size() - 1; i >= 0; --i) {
-            if (mAtm.hasActiveVisibleWindow(mBoundClientUids.valueAt(i))) {
-                return true;
-            }
-        }
-        return false;
+    boolean canCloseSystemDialogsByToken() {
+        return mBgLaunchController.canCloseSystemDialogsByToken(mUid);
     }
 
     public void setBoundClientUids(ArraySet<Integer> boundClientUids) {
-        mBoundClientUids = boundClientUids;
+        mBgLaunchController.setBoundClientUids(boundClientUids);
     }
 
     /**
@@ -791,20 +677,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
 
         return displayArea;
-    }
-
-    private boolean hasActivityInVisibleTask() {
-        for (int i = mActivities.size() - 1; i >= 0; --i) {
-            Task task = mActivities.get(i).getTask();
-            if (task == null) {
-                continue;
-            }
-            ActivityRecord topActivity = task.getTopNonFinishingActivity();
-            if (topActivity != null && topActivity.mVisibleRequested) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -1701,17 +1573,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             if (mVrThreadTid != 0) {
                 pw.print(prefix); pw.print("mVrThreadTid="); pw.println(mVrThreadTid);
             }
-            if (mBackgroundActivityStartTokens.size() > 0) {
-                pw.print(prefix);
-                pw.println("Background activity start tokens (token: originating token):");
-                for (int i = 0; i < mBackgroundActivityStartTokens.size(); i++) {
-                    pw.print(prefix); pw.print("  - ");
-                    pw.print(mBackgroundActivityStartTokens.keyAt(i));
-                    pw.print(": ");
-                    pw.println(mBackgroundActivityStartTokens.valueAt(i));
 
-                }
-            }
+            mBgLaunchController.dump(pw, prefix);
         }
         pw.println(prefix + " Configuration=" + getConfiguration());
         pw.println(prefix + " OverrideConfiguration=" + getRequestedOverrideConfiguration());
