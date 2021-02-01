@@ -21,7 +21,6 @@ import android.util.Log;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
-import com.android.systemui.people.widget.PeopleSpaceWidgetManager;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.notification.collection.NotifCollection;
@@ -50,7 +49,6 @@ public class NotifPipelineInitializer implements Dumpable {
     private final ShadeListBuilder mListBuilder;
     private final NotifCoordinators mNotifPluggableCoordinators;
     private final NotifInflaterImpl mNotifInflater;
-    private final PeopleSpaceWidgetManager mPeopleSpaceWidgetManager;
     private final DumpManager mDumpManager;
     private final ShadeViewManagerFactory mShadeViewManagerFactory;
     private final FeatureFlags mFeatureFlags;
@@ -64,7 +62,6 @@ public class NotifPipelineInitializer implements Dumpable {
             ShadeListBuilder listBuilder,
             NotifCoordinators notifCoordinators,
             NotifInflaterImpl notifInflater,
-            PeopleSpaceWidgetManager peopleSpaceWidgetManager,
             DumpManager dumpManager,
             ShadeViewManagerFactory shadeViewManagerFactory,
             FeatureFlags featureFlags) {
@@ -75,7 +72,6 @@ public class NotifPipelineInitializer implements Dumpable {
         mNotifPluggableCoordinators = notifCoordinators;
         mDumpManager = dumpManager;
         mNotifInflater = notifInflater;
-        mPeopleSpaceWidgetManager = peopleSpaceWidgetManager;
         mShadeViewManagerFactory = shadeViewManagerFactory;
         mFeatureFlags = featureFlags;
     }
@@ -103,7 +99,6 @@ public class NotifPipelineInitializer implements Dumpable {
         mListBuilder.attach(mNotifCollection);
         mNotifCollection.attach(mGroupCoalescer);
         mGroupCoalescer.attach(notificationService);
-        mPeopleSpaceWidgetManager.attach(notificationService);
 
         Log.d(TAG, "Notif pipeline initialized");
     }
