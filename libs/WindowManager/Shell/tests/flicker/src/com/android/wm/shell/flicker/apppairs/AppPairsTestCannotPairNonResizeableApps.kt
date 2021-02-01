@@ -21,7 +21,6 @@ import android.platform.test.annotations.Presubmit
 import android.os.SystemClock
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -46,10 +45,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class AppPairsTestCannotPairNonResizeableApps(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object : AppPairsTransition(InstrumentationRegistry.getInstrumentation()) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -83,9 +80,8 @@ class AppPairsTestCannotPairNonResizeableApps(
                 }
             }
 
-            return FlickerTestRunnerFactory(instrumentation,
-                repetitions = AppPairsHelper.TEST_REPETITIONS)
-                .buildTest(transition, testSpec)
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                transition, testSpec, repetitions = AppPairsHelper.TEST_REPETITIONS)
         }
     }
 }
