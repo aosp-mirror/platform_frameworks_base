@@ -14062,9 +14062,13 @@ package android.view.translation {
 
   public final class UiTranslationManager {
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void finishTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void pauseTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void resumeTranslation(@NonNull android.app.assist.ActivityId);
     method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, int);
+    method @RequiresPermission(android.Manifest.permission.MANAGE_UI_TRANSLATION) public void startTranslation(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.autofill.AutofillId>, @NonNull android.app.assist.ActivityId);
   }
 
 }
