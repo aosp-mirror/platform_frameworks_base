@@ -954,6 +954,9 @@ package android.app.admin {
 
 package android.app.assist {
 
+  public class ActivityId {
+  }
+
   public static class AssistStructure.ViewNode {
     ctor public AssistStructure.ViewNode();
   }
@@ -13996,6 +13999,7 @@ package android.view.contentcapture {
 
   public final class ContentCaptureContext implements android.os.Parcelable {
     method @Nullable public android.content.ComponentName getActivityComponent();
+    method @Nullable public android.app.assist.ActivityId getActivityId();
     method public int getDisplayId();
     method public int getFlags();
     method @Nullable public android.view.contentcapture.ContentCaptureSessionId getParentSessionId();

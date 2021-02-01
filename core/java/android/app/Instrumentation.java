@@ -1247,7 +1247,8 @@ public class Instrumentation {
                 info, title, parent, id,
                 (Activity.NonConfigurationInstances)lastNonConfigurationInstance,
                 new Configuration(), null /* referrer */, null /* voiceInteractor */,
-                null /* window */, null /* activityConfigCallback */, null /*assistToken*/);
+                null /* window */, null /* activityConfigCallback */, null /*assistToken*/,
+                null /*shareableActivityToken*/);
         return activity;
     }
 

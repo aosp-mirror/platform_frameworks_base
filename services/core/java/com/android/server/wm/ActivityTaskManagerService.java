@@ -5550,7 +5550,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return null;
                 }
                 return new ActivityTokens(activity.appToken, activity.assistToken,
-                        activity.app.getThread());
+                        activity.app.getThread(), activity.shareableActivityToken);
             }
         }
 

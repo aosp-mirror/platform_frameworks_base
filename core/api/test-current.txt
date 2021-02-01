@@ -544,6 +544,15 @@ package android.app.admin {
 
 }
 
+package android.app.assist {
+
+  public class ActivityId {
+    method public int getTaskId();
+    method @Nullable public android.os.IBinder getToken();
+  }
+
+}
+
 package android.app.blob {
 
   public class BlobStoreManager {

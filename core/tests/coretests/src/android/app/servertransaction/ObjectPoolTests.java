@@ -148,13 +148,15 @@ public class ObjectPoolTests {
         PersistableBundle persistableBundle = new PersistableBundle();
         persistableBundle.putInt("k", 4);
         IBinder assistToken = new Binder();
+        IBinder shareableActivityToken = new Binder();
 
         Supplier<LaunchActivityItem> itemSupplier = () -> new LaunchActivityItemBuilder()
                 .setIntent(intent).setIdent(ident).setInfo(activityInfo).setCurConfig(config())
                 .setOverrideConfig(overrideConfig).setCompatInfo(compat).setReferrer(referrer)
                 .setProcState(procState).setState(bundle).setPersistentState(persistableBundle)
                 .setPendingResults(resultInfoList()).setPendingNewIntents(referrerIntentList())
-                .setIsForward(true).setAssistToken(assistToken).build();
+                .setIsForward(true).setAssistToken(assistToken)
+                .setShareableActivityToken(shareableActivityToken).build();
 
         LaunchActivityItem emptyItem = new LaunchActivityItemBuilder().build();
         LaunchActivityItem item = itemSupplier.get();

@@ -825,7 +825,7 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
                         r.getSavedState(), r.getPersistentSavedState(), results, newIntents,
                         r.takeOptions(), dc.isNextTransitionForward(),
                         proc.createProfilerInfoIfNeeded(), r.assistToken, activityClientController,
-                        r.createFixedRotationAdjustmentsIfNeeded()));
+                        r.createFixedRotationAdjustmentsIfNeeded(), r.shareableActivityToken));
 
                 // Set desired final state.
                 final ActivityLifecycleItem lifecycleItem;
