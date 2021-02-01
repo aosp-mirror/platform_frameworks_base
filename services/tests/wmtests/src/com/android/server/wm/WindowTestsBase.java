@@ -88,8 +88,8 @@ import android.view.WindowManager.DisplayImePolicy;
 import android.window.ITaskOrganizer;
 import android.window.StartingWindowInfo;
 
+import com.android.internal.policy.AttributeCache;
 import com.android.internal.util.ArrayUtils;
-import com.android.server.AttributeCache;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
