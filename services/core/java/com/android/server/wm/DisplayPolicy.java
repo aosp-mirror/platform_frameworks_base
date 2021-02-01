@@ -42,6 +42,8 @@ import static android.view.WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_STATUS_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
 import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
@@ -2693,34 +2695,17 @@ public class DisplayPolicy {
     private int updateSystemBarsLw(WindowState win, int disableFlags) {
         final boolean dockedRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
                 .isRootTaskVisible(WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
-        final boolean freeformRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
-                .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
         final boolean resizing = mDisplayContent.getDockedDividerController().isResizing();
 
         // We need to force system bars when the docked root task is visible, when the freeform
         // root task is focused but also when we are resizing for the transitions when docked
         // root task visibility changes.
         mForceShowSystemBars = dockedRootTaskVisible || win.inFreeformWindowingMode() || resizing;
-        final boolean forceOpaqueStatusBar = mForceShowSystemBars && !isKeyguardShowing();
-
-        final boolean fullscreenDrawsStatusBarBackground =
-                drawsStatusBarBackground(mTopFullscreenOpaqueWindowState);
-        final boolean dockedDrawsStatusBarBackground =
-                drawsStatusBarBackground(mTopDockedOpaqueWindowState);
-        final boolean fullscreenDrawsNavBarBackground =
-                drawsNavigationBarBackground(mTopFullscreenOpaqueWindowState);
-        final boolean dockedDrawsNavigationBarBackground =
-                drawsNavigationBarBackground(mTopDockedOpaqueWindowState);
 
         int appearance = APPEARANCE_OPAQUE_NAVIGATION_BARS | APPEARANCE_OPAQUE_STATUS_BARS;
 
-        if (fullscreenDrawsStatusBarBackground && dockedDrawsStatusBarBackground) {
-            appearance &= ~APPEARANCE_OPAQUE_STATUS_BARS;
-        }
-
-        appearance = configureNavBarOpacity(appearance, dockedRootTaskVisible,
-                freeformRootTaskVisible, resizing, fullscreenDrawsNavBarBackground,
-                dockedDrawsNavigationBarBackground);
+        appearance = configureStatusBarOpacity(appearance);
+        appearance = configureNavBarOpacity(appearance, dockedRootTaskVisible, resizing);
 
         final boolean requestHideNavBar = !win.getRequestedVisibility(ITYPE_NAVIGATION_BAR);
         final long now = SystemClock.uptimeMillis();
@@ -2755,9 +2740,6 @@ public class DisplayPolicy {
     }
 
     private boolean drawsBarBackground(WindowState win, BarController controller) {
-        if (!controller.isTransparentAllowed(win)) {
-            return false;
-        }
         if (win == null) {
             return true;
         }
@@ -2778,15 +2760,40 @@ public class DisplayPolicy {
         return drawsBarBackground(win, mNavigationBarController);
     }
 
+    /** @return the current visibility flags with the status bar opacity related flags toggled. */
+    private int configureStatusBarOpacity(int appearance) {
+        final boolean fullscreenDrawsBackground =
+                drawsStatusBarBackground(mTopFullscreenOpaqueWindowState);
+        final boolean dockedDrawsBackground =
+                drawsStatusBarBackground(mTopDockedOpaqueWindowState);
+
+        if (fullscreenDrawsBackground && dockedDrawsBackground) {
+            appearance &= ~APPEARANCE_OPAQUE_STATUS_BARS;
+        }
+
+        if (!mStatusBarController.isFullyTransparentAllowed(mTopFullscreenOpaqueWindowState)
+                || !mStatusBarController.isFullyTransparentAllowed(mTopDockedOpaqueWindowState)) {
+            appearance |= APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS;
+        }
+
+        return appearance;
+    }
+
     /**
      * @return the current visibility flags with the nav-bar opacity related flags toggled based
      *         on the nav bar opacity rules chosen by {@link #mNavBarOpacityMode}.
      */
     private int configureNavBarOpacity(int appearance, boolean dockedRootTaskVisible,
-            boolean freeformRootTaskVisible, boolean isDockedDividerResizing,
-            boolean fullscreenDrawsBackground, boolean dockedDrawsNavigationBarBackground) {
+            boolean isDockedDividerResizing) {
+        final boolean freeformRootTaskVisible = mDisplayContent.getDefaultTaskDisplayArea()
+                .isRootTaskVisible(WINDOWING_MODE_FREEFORM);
+        final boolean fullscreenDrawsBackground =
+                drawsNavigationBarBackground(mTopFullscreenOpaqueWindowState);
+        final boolean dockedDrawsBackground =
+                drawsNavigationBarBackground(mTopDockedOpaqueWindowState);
+
         if (mNavBarOpacityMode == NAV_BAR_FORCE_TRANSPARENT) {
-            if (fullscreenDrawsBackground && dockedDrawsNavigationBarBackground) {
+            if (fullscreenDrawsBackground && dockedDrawsBackground) {
                 appearance = clearNavBarOpaqueFlag(appearance);
             } else if (dockedRootTaskVisible) {
                 appearance = setNavBarOpaqueFlag(appearance);
@@ -2809,6 +2816,12 @@ public class DisplayPolicy {
             } else {
                 appearance = setNavBarOpaqueFlag(appearance);
             }
+        }
+
+        if (!mNavigationBarController.isFullyTransparentAllowed(mTopFullscreenOpaqueWindowState)
+                || !mNavigationBarController.isFullyTransparentAllowed(
+                        mTopDockedOpaqueWindowState)) {
+            appearance |= APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
         }
 
         return appearance;

@@ -607,7 +607,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The activity doesn't fill the display, so the letterbox of the rotated activity is
         // overlapped with the rotated content frame of status bar. Hence the status bar shouldn't
         // be transparent.
-        assertFalse(statusBarController.isTransparentAllowed(w));
+        assertFalse(statusBarController.isFullyTransparentAllowed(w));
 
         // Make the activity fill the display.
         prepareUnresizable(mActivity, 10 /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
@@ -617,7 +617,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // The letterbox should only cover the notch area, so status bar can be transparent.
         assertEquals(new Rect(notchHeight, 0, 0, 0), mActivity.getLetterboxInsets());
-        assertTrue(statusBarController.isTransparentAllowed(w));
+        assertTrue(statusBarController.isFullyTransparentAllowed(w));
     }
 
     @Test
