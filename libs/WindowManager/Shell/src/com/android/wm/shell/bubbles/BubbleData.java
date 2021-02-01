@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -117,6 +118,7 @@ public class BubbleData {
 
     private final Context mContext;
     private final BubblePositioner mPositioner;
+    private final Executor mMainExecutor;
     /** Bubbles that are actively in the stack. */
     private final List<Bubble> mBubbles;
     /** Bubbles that aged out to overflow. */
@@ -155,10 +157,12 @@ public class BubbleData {
      */
     private HashMap<String, String> mSuppressedGroupKeys = new HashMap<>();
 
-    public BubbleData(Context context, BubbleLogger bubbleLogger, BubblePositioner positioner) {
+    public BubbleData(Context context, BubbleLogger bubbleLogger, BubblePositioner positioner,
+            Executor mainExecutor) {
         mContext = context;
         mLogger = bubbleLogger;
         mPositioner = positioner;
+        mMainExecutor = mainExecutor;
         mOverflow = new BubbleOverflow(context, positioner);
         mBubbles = new ArrayList<>();
         mOverflowBubbles = new ArrayList<>();
@@ -264,7 +268,8 @@ public class BubbleData {
                 bubbleToReturn = mPendingBubbles.get(key);
             } else if (entry != null) {
                 // New bubble
-                bubbleToReturn = new Bubble(entry, mSuppressionListener, mCancelledListener);
+                bubbleToReturn = new Bubble(entry, mSuppressionListener, mCancelledListener,
+                        mMainExecutor);
             } else {
                 // Persisted bubble being promoted
                 bubbleToReturn = persistedBubble;

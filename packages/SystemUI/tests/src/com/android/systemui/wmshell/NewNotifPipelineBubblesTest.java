@@ -83,8 +83,6 @@ import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
-import com.android.systemui.util.concurrency.FakeExecutor;
-import com.android.systemui.util.time.FakeSystemClock;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -203,6 +201,9 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
 
+        // For the purposes of this test, just run everything synchronously
+        ShellExecutor syncExecutor = new SyncExecutor();
+
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
         mNotificationShadeWindowController = new NotificationShadeWindowControllerImpl(mContext,
@@ -227,7 +228,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
 
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
-        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
@@ -241,7 +242,7 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                         mock(Handler.class)
                 );
         when(mFeatureFlagsNewPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
-        when(mShellTaskOrganizer.getExecutor()).thenReturn(new FakeExecutor(new FakeSystemClock()));
+        when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
                 mContext,
                 mBubbleData,
@@ -254,12 +255,13 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mBubbleLogger,
                 mShellTaskOrganizer,
                 mPositioner,
-                mock(ShellExecutor.class));
+                syncExecutor,
+                mock(Handler.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         mBubblesManager = new BubblesManager(
                 mContext,
-                mBubbleController,
+                mBubbleController.getImpl(),
                 mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,
@@ -274,7 +276,8 @@ public class NewNotifPipelineBubblesTest extends SysuiTestCase {
                 mNotifPipeline,
                 mSysUiState,
                 mFeatureFlagsNewPipeline,
-                mDumpManager);
+                mDumpManager,
+                syncExecutor);
         mBubblesManager.addNotifCallback(mNotifCallback);
 
         // Get a reference to the BubbleController's entry listener

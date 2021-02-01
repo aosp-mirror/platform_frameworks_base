@@ -23,6 +23,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Looper;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.view.View;
@@ -37,6 +38,9 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.IntConsumer;
 
 /**
@@ -86,13 +90,14 @@ public interface Bubbles {
     /** @return {@code true} if stack of bubbles is expanded or not. */
     boolean isStackExpanded();
 
-    /** @return {@code true} if the summary for the provided group key is suppressed. */
-    boolean isSummarySuppressed(String groupKey);
-
     /**
-     * Removes a group key indicating that summary for this group should no longer be suppressed.
+     * Removes a group key indicating that the summary for this group should no longer be
+     * suppressed.
+     *
+     * @param callback If removed, this callback will be called with the summary key of the group
      */
-    void removeSuppressedSummary(String groupKey);
+    void removeSuppressedSummaryIfNecessary(String groupKey, Consumer<String> callback,
+            Executor callbackExecutor);
 
     /** Tell the stack of bubbles to collapse. */
     void collapseStack();
@@ -134,19 +139,16 @@ public interface Bubbles {
     boolean handleDismissalInterception(BubbleEntry entry, @Nullable List<BubbleEntry> children,
             IntConsumer removeCallback);
 
-    /**
-     * Retrieves the notif entry key of the summary associated with the provided group key.
-     *
-     * @param groupKey the group to look up
-     * @return the key for the notification that is the summary of this group.
-     */
-    String getSummaryKey(String groupKey);
-
     /** Set the proxy to commnuicate with SysUi side components. */
     void setSysuiProxy(SysuiProxy proxy);
 
-    /** Set the scrim view for bubbles. */
-    void setBubbleScrim(View view);
+    /**
+     * Set the scrim view for bubbles.
+     *
+     * @param callback The callback made with the executor and the executor's looper that the view
+     *                 will be running on.
+     **/
+    void setBubbleScrim(View view, BiConsumer<Executor, Looper> callback);
 
     /** Set a listener to be notified of bubble expand events. */
     void setExpandListener(BubbleExpandListener listener);

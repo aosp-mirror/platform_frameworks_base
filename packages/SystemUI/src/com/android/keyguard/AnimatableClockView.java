@@ -38,7 +38,7 @@ import kotlin.Unit;
  * The time's text color is a gradient that changes its colors based on its controller.
  */
 public class AnimatableClockView extends TextView {
-    private static final CharSequence FORMAT_12_HOUR = "h\nmm";
+    private static final CharSequence FORMAT_12_HOUR = "hh\nmm";
     private static final CharSequence FORMAT_24_HOUR = "HH\nmm";
     private static final long ANIM_DURATION = 300;
 

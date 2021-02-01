@@ -166,6 +166,7 @@ public class BubblesTest extends SysuiTestCase {
     private ArgumentCaptor<NotificationRemoveInterceptor> mRemoveInterceptorCaptor;
 
     private BubblesManager mBubblesManager;
+    // TODO(178618782): Move tests on the controller directly to the shell
     private TestableBubbleController mBubbleController;
     private NotificationShadeWindowControllerImpl mNotificationShadeWindowController;
     private NotificationEntryListener mEntryListener;
@@ -221,6 +222,9 @@ public class BubblesTest extends SysuiTestCase {
 
         mTestableLooper = TestableLooper.get(this);
 
+        // For the purposes of this test, just run everything synchronously
+        ShellExecutor syncExecutor = new SyncExecutor();
+
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
@@ -257,8 +261,9 @@ public class BubblesTest extends SysuiTestCase {
                 mSysUiStateBubblesExpanded =
                         (sysUiFlags & QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED) != 0);
 
+        // TODO: Fix
         mPositioner = new TestableBubblePositioner(mContext, mWindowManager);
-        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner);
+        mBubbleData = new BubbleData(mContext, mBubbleLogger, mPositioner, syncExecutor);
 
         TestableNotificationInterruptStateProviderImpl interruptionStateProvider =
                 new TestableNotificationInterruptStateProviderImpl(mContext.getContentResolver(),
@@ -273,7 +278,7 @@ public class BubblesTest extends SysuiTestCase {
                 );
 
         when(mFeatureFlagsOldPipeline.isNewNotifPipelineRenderingEnabled()).thenReturn(false);
-        when(mShellTaskOrganizer.getExecutor()).thenReturn(new FakeExecutor(new FakeSystemClock()));
+        when(mShellTaskOrganizer.getExecutor()).thenReturn(syncExecutor);
         mBubbleController = new TestableBubbleController(
                 mContext,
                 mBubbleData,
@@ -286,12 +291,13 @@ public class BubblesTest extends SysuiTestCase {
                 mBubbleLogger,
                 mShellTaskOrganizer,
                 mPositioner,
-                mock(ShellExecutor.class));
+                syncExecutor,
+                mock(Handler.class));
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         mBubblesManager = new BubblesManager(
                 mContext,
-                mBubbleController,
+                mBubbleController.getImpl(),
                 mNotificationShadeWindowController,
                 mStatusBarStateController,
                 mShadeController,
@@ -306,7 +312,8 @@ public class BubblesTest extends SysuiTestCase {
                 mNotifPipeline,
                 mSysUiState,
                 mFeatureFlagsOldPipeline,
-                mDumpManager);
+                mDumpManager,
+                syncExecutor);
 
         // Get a reference to the BubbleController's entry listener
         verify(mNotificationEntryManager, atLeastOnce())
