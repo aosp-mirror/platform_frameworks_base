@@ -6951,11 +6951,15 @@ package android.net {
   }
 
   public final class IpSecManager {
-    method @Deprecated @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
+    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void applyTunnelModeTransform(@NonNull android.net.IpSecManager.IpSecTunnelInterface, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
+    method @NonNull @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull java.net.InetAddress, @NonNull java.net.InetAddress, @NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
   }
 
   public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
+    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void addAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
+    method public void close();
     method @NonNull public String getInterfaceName();
+    method @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS) public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public static class IpSecTransform.Builder {
