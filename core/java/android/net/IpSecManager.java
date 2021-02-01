@@ -705,7 +705,7 @@ public final class IpSecManager {
     }
 
     /**
-     * This class represents an IpSecTunnelInterface.
+     * This class represents an IpSecTunnelInterface
      *
      * <p>IpSecTunnelInterface objects track tunnel interfaces that serve as
      * local endpoints for IPsec tunnels.
@@ -714,7 +714,9 @@ public final class IpSecManager {
      * applied to provide IPsec security to packets sent through the tunnel. While a tunnel
      * cannot be used in standalone mode within Android, the higher layers may use the tunnel
      * to create Network objects which are accessible to the Android system.
+     * @hide
      */
+    @SystemApi
     public static final class IpSecTunnelInterface implements AutoCloseable {
         private final String mOpPackageName;
         private final IIpSecService mService;
@@ -725,26 +727,23 @@ public final class IpSecManager {
         private String mInterfaceName;
         private int mResourceId = INVALID_RESOURCE_ID;
 
-        /**
-         * Get the underlying SPI held by this object.
-         *
-         * @hide
-         */
-        @SystemApi
+        /** Get the underlying SPI held by this object. */
         @NonNull
         public String getInterfaceName() {
             return mInterfaceName;
         }
 
         /**
-         * Add an address to the IpSecTunnelInterface.
+         * Add an address to the IpSecTunnelInterface
          *
          * <p>Add an address which may be used as the local inner address for
          * tunneled traffic.
          *
          * @param address the local address for traffic inside the tunnel
          * @param prefixLen length of the InetAddress prefix
+         * @hide
          */
+        @SystemApi
         @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void addAddress(@NonNull InetAddress address, int prefixLen) throws IOException {
@@ -759,13 +758,15 @@ public final class IpSecManager {
         }
 
         /**
-         * Remove an address from the IpSecTunnelInterface.
+         * Remove an address from the IpSecTunnelInterface
          *
-         * <p>Remove an address which was previously added to the IpSecTunnelInterface.
+         * <p>Remove an address which was previously added to the IpSecTunnelInterface
          *
          * @param address to be removed
          * @param prefixLen length of the InetAddress prefix
+         * @hide
          */
+        @SystemApi
         @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
         @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
         public void removeAddress(@NonNull InetAddress address, int prefixLen) throws IOException {
@@ -816,7 +817,7 @@ public final class IpSecManager {
         }
 
         /**
-         * Delete an IpSecTunnelInterface.
+         * Delete an IpSecTunnelInterface
          *
          * <p>Calling close will deallocate the IpSecTunnelInterface and all of its system
          * resources. Any packets bound for this interface either inbound or outbound will
@@ -838,12 +839,7 @@ public final class IpSecManager {
             }
         }
 
-
-        /**
-         * Check that the Interface was closed properly.
-         *
-         * @hide
-         */
+        /** Check that the Interface was closed properly. */
         @Override
         protected void finalize() throws Throwable {
             if (mCloseGuard != null) {
@@ -875,52 +871,17 @@ public final class IpSecManager {
      * Create a new IpSecTunnelInterface as a local endpoint for tunneled IPsec traffic.
      *
      * <p>An application that creates tunnels is responsible for cleaning up the tunnel when the
-     * underlying network disconnects, and the {@link
-     * ConnectivityManager.NetworkCallback#onLost(Network)} callback is received.
+     * underlying network goes away, and the onLost() callback is received.
      *
-     * @param underlyingNetwork the {@link Network} that will carry traffic for this tunnel. Packets
-     *     that go through the tunnel will need a underlying network to transit to the IPsec peer.
-     *     This network should almost certainly be a physical network such as WiFi.
-     * @return a new {@link IpSecTunnelInterface} with the specified properties
-     * @throws IOException indicating that the tunnel could not be created due to a lower-layer
-     *     error
-     * @throws ResourceUnavailableException indicating that the number of opening tunnels has
-     *     reached the limit.
-     */
-    @NonNull
-    @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
-    @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
-    public IpSecTunnelInterface createIpSecTunnelInterface(@NonNull Network underlyingNetwork)
-            throws ResourceUnavailableException, IOException {
-
-        // TODO: Remove the need for adding two unused addresses with IPsec tunnels when {@link
-        // #createIpSecTunnelInterface(localAddress, remoteAddress, underlyingNetwork)} can be
-        // safely removed.
-        final InetAddress address = InetAddress.getLocalHost();
-        return createIpSecTunnelInterface(address, address, underlyingNetwork);
-    }
-
-    /**
-     * Create a new IpSecTunnelInterface as a local endpoint for tunneled IPsec traffic.
-     *
-     * <p>An application that creates tunnels is responsible for cleaning up the tunnel when the
-     * underlying network disconnects, and the {@link
-     * ConnectivityManager.NetworkCallback#onLost(Network)} callback is received.
-     *
-     * @param localAddress The local address of the tunnel
-     * @param remoteAddress The local address of the tunnel
-     * @param underlyingNetwork the {@link Network} that will carry traffic for this tunnel. Packets
-     *     that go through the tunnel will need a underlying network to transit to the IPsec peer.
-     *     This network should almost certainly be a physical network such as WiFi.
-     * @return a new {@link IpSecTunnelInterface} with the specified properties
-     * @throws IOException indicating that the tunnel could not be created due to a lower-layer
-     *     error
-     * @throws ResourceUnavailableException indicating that the number of opening tunnels has
-     *     reached the limit.
+     * @param localAddress The local addres of the tunnel
+     * @param remoteAddress The local addres of the tunnel
+     * @param underlyingNetwork the {@link Network} that will carry traffic for this tunnel.
+     *        This network should almost certainly be a network such as WiFi with an L2 address.
+     * @return a new {@link IpSecManager#IpSecTunnelInterface} with the specified properties
+     * @throws IOException indicating that the socket could not be opened or bound
+     * @throws ResourceUnavailableException indicating that too many encapsulation sockets are open
      * @hide
-     * @deprecated Callers should use {@link #createIpSecTunnelInterface(Network)}
      */
-    @Deprecated
     @SystemApi
     @NonNull
     @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
@@ -944,14 +905,16 @@ public final class IpSecManager {
      * <p>Applications should probably not use this API directly.
      *
      *
-     * @param tunnel The {@link IpSecTunnelInterface} that will use the supplied
+     * @param tunnel The {@link IpSecManager#IpSecTunnelInterface} that will use the supplied
      *        transform.
-     * @param direction the direction, {@link #DIRECTION_OUT} or {@link #DIRECTION_IN} in which
+     * @param direction the direction, {@link DIRECTION_OUT} or {@link #DIRECTION_IN} in which
      *        the transform will be used.
      * @param transform an {@link IpSecTransform} created in tunnel mode
-     * @throws IOException indicating that the transform could not be applied due to a lower-layer
-     *     error
+     * @throws IOException indicating that the transform could not be applied due to a lower
+     *         layer failure.
+     * @hide
      */
+    @SystemApi
     @RequiresFeature(PackageManager.FEATURE_IPSEC_TUNNELS)
     @RequiresPermission(android.Manifest.permission.MANAGE_IPSEC_TUNNELS)
     public void applyTunnelModeTransform(@NonNull IpSecTunnelInterface tunnel,
