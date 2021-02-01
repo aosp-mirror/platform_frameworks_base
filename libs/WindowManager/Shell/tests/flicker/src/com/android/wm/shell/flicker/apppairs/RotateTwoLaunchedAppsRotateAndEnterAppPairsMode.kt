@@ -62,7 +62,7 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
         fun getParams(): Collection<Array<Any>> {
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
-                    buildTestTag("testRotateAndEnterAppPairsMode", configuration)
+                    buildTestTag(configuration)
                 }
                 transitions {
                     this.setRotation(configuration.endRotation)
@@ -71,22 +71,37 @@ class RotateTwoLaunchedAppsRotateAndEnterAppPairsMode(
                     SystemClock.sleep(AppPairsHelper.TIMEOUT_MS)
                 }
                 assertions {
-                    layersTrace {
-                        navBarLayerRotatesAndScales(Surface.ROTATION_0, configuration.endRotation,
-                            enabled = !configuration.startRotation.isRotated())
-                        statusBarLayerRotatesScales(Surface.ROTATION_0, configuration.endRotation)
-                        appPairsDividerIsVisible()
-                        appPairsPrimaryBoundsIsVisible(configuration.endRotation,
-                            primaryApp.defaultWindowName, 172776659)
-                        appPairsSecondaryBoundsIsVisible(configuration.endRotation,
-                            secondaryApp.defaultWindowName, 172776659)
+                    val isRotated = configuration.startRotation.isRotated()
+                    presubmit {
+                        layersTrace {
+                            statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                configuration.endRotation)
+                            appPairsDividerIsVisible()
+                            if (!isRotated) {
+                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                    configuration.endRotation)
+                            }
+                        }
+                        windowManagerTrace {
+                            navBarWindowIsAlwaysVisible()
+                            statusBarWindowIsAlwaysVisible()
+                            end("bothAppWindowsVisible") {
+                                isVisible(primaryApp.defaultWindowName)
+                                isVisible(secondaryApp.defaultWindowName)
+                            }
+                        }
                     }
-                    windowManagerTrace {
-                        navBarWindowIsAlwaysVisible()
-                        statusBarWindowIsAlwaysVisible()
-                        end("bothAppWindowsVisible") {
-                            isVisible(primaryApp.defaultWindowName)
-                            isVisible(secondaryApp.defaultWindowName)
+                    flaky {
+                        layersTrace {
+                            appPairsPrimaryBoundsIsVisible(configuration.endRotation,
+                                primaryApp.defaultWindowName, 172776659)
+                            appPairsSecondaryBoundsIsVisible(configuration.endRotation,
+                                secondaryApp.defaultWindowName, 172776659)
+
+                            if (isRotated) {
+                                navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                    configuration.endRotation)
+                            }
                         }
                     }
                 }
