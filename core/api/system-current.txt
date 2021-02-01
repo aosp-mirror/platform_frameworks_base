@@ -9851,6 +9851,7 @@ package android.service.notification {
     method public void onNotificationDirectReplied(@NonNull String);
     method @Nullable public abstract android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification);
     method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel);
+    method @Nullable public android.service.notification.Adjustment onNotificationEnqueued(@NonNull android.service.notification.StatusBarNotification, @NonNull android.app.NotificationChannel, @NonNull android.service.notification.NotificationListenerService.RankingMap);
     method public void onNotificationExpansionChanged(@NonNull String, boolean, boolean);
     method public abstract void onNotificationSnoozedUntilContext(@NonNull android.service.notification.StatusBarNotification, @NonNull String);
     method public void onNotificationVisibilityChanged(@NonNull String, boolean);
