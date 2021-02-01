@@ -110,10 +110,12 @@ static struct {
 static struct {
     jfieldID pixelFormat;
     jfieldID sourceCrop;
-    jfieldID frameScale;
+    jfieldID frameScaleX;
+    jfieldID frameScaleY;
     jfieldID captureSecureLayers;
     jfieldID allowProtected;
     jfieldID uid;
+    jfieldID grayscale;
 } gCaptureArgsClassInfo;
 
 static struct {
@@ -380,13 +382,17 @@ static void getCaptureArgs(JNIEnv* env, jobject captureArgsObject, CaptureArgs& 
     captureArgs.sourceCrop =
             rectFromObj(env,
                         env->GetObjectField(captureArgsObject, gCaptureArgsClassInfo.sourceCrop));
-    captureArgs.frameScale =
-            env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScale);
+    captureArgs.frameScaleX =
+            env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScaleX);
+    captureArgs.frameScaleY =
+            env->GetFloatField(captureArgsObject, gCaptureArgsClassInfo.frameScaleY);
     captureArgs.captureSecureLayers =
             env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.captureSecureLayers);
     captureArgs.allowProtected =
             env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.allowProtected);
     captureArgs.uid = env->GetLongField(captureArgsObject, gCaptureArgsClassInfo.uid);
+    captureArgs.grayscale =
+            env->GetBooleanField(captureArgsObject, gCaptureArgsClassInfo.grayscale);
 }
 
 static DisplayCaptureArgs displayCaptureArgsFromObject(JNIEnv* env,
@@ -2032,12 +2038,14 @@ int register_android_view_SurfaceControl(JNIEnv* env)
     gCaptureArgsClassInfo.pixelFormat = GetFieldIDOrDie(env, captureArgsClazz, "mPixelFormat", "I");
     gCaptureArgsClassInfo.sourceCrop =
             GetFieldIDOrDie(env, captureArgsClazz, "mSourceCrop", "Landroid/graphics/Rect;");
-    gCaptureArgsClassInfo.frameScale = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScale", "F");
+    gCaptureArgsClassInfo.frameScaleX = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScaleX", "F");
+    gCaptureArgsClassInfo.frameScaleY = GetFieldIDOrDie(env, captureArgsClazz, "mFrameScaleY", "F");
     gCaptureArgsClassInfo.captureSecureLayers =
             GetFieldIDOrDie(env, captureArgsClazz, "mCaptureSecureLayers", "Z");
     gCaptureArgsClassInfo.allowProtected =
             GetFieldIDOrDie(env, captureArgsClazz, "mAllowProtected", "Z");
     gCaptureArgsClassInfo.uid = GetFieldIDOrDie(env, captureArgsClazz, "mUid", "J");
+    gCaptureArgsClassInfo.grayscale = GetFieldIDOrDie(env, captureArgsClazz, "mGrayscale", "Z");
 
     jclass displayCaptureArgsClazz =
             FindClassOrDie(env, "android/view/SurfaceControl$DisplayCaptureArgs");
