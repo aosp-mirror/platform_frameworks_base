@@ -750,18 +750,22 @@ public final class SurfaceControl implements Parcelable {
     private abstract static class CaptureArgs {
         private final int mPixelFormat;
         private final Rect mSourceCrop = new Rect();
-        private final float mFrameScale;
+        private final float mFrameScaleX;
+        private final float mFrameScaleY;
         private final boolean mCaptureSecureLayers;
         private final boolean mAllowProtected;
         private final long mUid;
+        private final boolean mGrayscale;
 
         private CaptureArgs(Builder<? extends Builder<?>> builder) {
             mPixelFormat = builder.mPixelFormat;
             mSourceCrop.set(builder.mSourceCrop);
-            mFrameScale = builder.mFrameScale;
+            mFrameScaleX = builder.mFrameScaleX;
+            mFrameScaleY = builder.mFrameScaleY;
             mCaptureSecureLayers = builder.mCaptureSecureLayers;
             mAllowProtected = builder.mAllowProtected;
             mUid = builder.mUid;
+            mGrayscale = builder.mGrayscale;
         }
 
         /**
@@ -772,10 +776,12 @@ public final class SurfaceControl implements Parcelable {
         abstract static class Builder<T extends Builder<T>> {
             private int mPixelFormat = PixelFormat.RGBA_8888;
             private final Rect mSourceCrop = new Rect();
-            private float mFrameScale = 1;
+            private float mFrameScaleX = 1;
+            private float mFrameScaleY = 1;
             private boolean mCaptureSecureLayers;
             private boolean mAllowProtected;
             private long mUid = -1;
+            private boolean mGrayscale;
 
             /**
              * The desired pixel format of the returned buffer.
@@ -798,7 +804,18 @@ public final class SurfaceControl implements Parcelable {
              * The desired scale of the returned buffer. The raw screen will be scaled up/down.
              */
             public T setFrameScale(float frameScale) {
-                mFrameScale = frameScale;
+                mFrameScaleX = frameScale;
+                mFrameScaleY = frameScale;
+                return getThis();
+            }
+
+            /**
+             * The desired scale of the returned buffer, allowing separate values for x and y scale.
+             * The raw screen will be scaled up/down.
+             */
+            public T setFrameScale(float frameScaleX, float frameScaleY) {
+                mFrameScaleX = frameScaleX;
+                mFrameScaleY = frameScaleY;
                 return getThis();
             }
 
@@ -830,6 +847,14 @@ public final class SurfaceControl implements Parcelable {
              */
             public T setUid(long uid) {
                 mUid = uid;
+                return getThis();
+            }
+
+            /**
+             * Set whether the screenshot should use grayscale or not.
+             */
+            public T setGrayscale(boolean grayscale) {
+                mGrayscale = grayscale;
                 return getThis();
             }
 
@@ -929,7 +954,7 @@ public final class SurfaceControl implements Parcelable {
     /**
      * The arguments class used to make layer capture requests.
      *
-     * @see #nativeCaptureLayers(LayerCaptureArgs)
+     * @see #nativeCaptureLayers(LayerCaptureArgs, ScreenCaptureListener)
      * @hide
      */
     public static class LayerCaptureArgs extends CaptureArgs {
