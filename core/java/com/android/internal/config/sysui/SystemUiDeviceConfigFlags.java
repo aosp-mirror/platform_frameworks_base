@@ -62,6 +62,11 @@ public final class SystemUiDeviceConfigFlags {
      */
     public static final String ENABLE_NAS_FEEDBACK = "enable_nas_feedback";
 
+    /**
+     * Whether the Notification Assistant can label a notification not a conversation
+     */
+    public static final String ENABLE_NAS_NOT_CONVERSATION = "enable_nas_not_conversation";
+
     // Flags related to screenshot intelligence
 
     /**
