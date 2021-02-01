@@ -20,12 +20,12 @@ package android.accessibilityservice;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SINGLE_TAP;
-import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_DOWN;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_LEFT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_RIGHT;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_SWIPE_UP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_TRIPLE_TAP;
+import static android.accessibilityservice.AccessibilityService.GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_DOUBLE_TAP_AND_HOLD;
 import static android.accessibilityservice.AccessibilityService.GESTURE_3_FINGER_SINGLE_TAP;
@@ -97,10 +97,10 @@ public final class AccessibilityGestureEvent implements Parcelable {
           GESTURE_UNKNOWN,
           GESTURE_TOUCH_EXPLORATION,
             GESTURE_2_FINGER_SINGLE_TAP,
-            GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD,
             GESTURE_2_FINGER_DOUBLE_TAP,
             GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD,
             GESTURE_2_FINGER_TRIPLE_TAP,
+            GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD,
             GESTURE_3_FINGER_SINGLE_TAP,
             GESTURE_3_FINGER_SINGLE_TAP_AND_HOLD,
             GESTURE_3_FINGER_DOUBLE_TAP,
@@ -232,8 +232,8 @@ public final class AccessibilityGestureEvent implements Parcelable {
             case GESTURE_PASSTHROUGH: return "GESTURE_PASSTHROUGH";
             case GESTURE_TOUCH_EXPLORATION: return "GESTURE_TOUCH_EXPLORATION";
             case GESTURE_2_FINGER_SINGLE_TAP: return "GESTURE_2_FINGER_SINGLE_TAP";
-            case GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD:
-                return "GESTURE_2_FINGER_SINGLE_TAP_AND_HOLD";
+            case GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD:
+                return "GESTURE_2_FINGER_TRIPLE_TAP_AND_HOLD";
             case GESTURE_2_FINGER_DOUBLE_TAP: return "GESTURE_2_FINGER_DOUBLE_TAP";
             case GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD:
                 return "GESTURE_2_FINGER_DOUBLE_TAP_AND_HOLD";
