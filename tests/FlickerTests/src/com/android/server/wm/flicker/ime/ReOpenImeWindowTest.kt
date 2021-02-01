@@ -20,7 +20,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
@@ -58,18 +57,16 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ReOpenImeWindowTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testAppComponentName = ActivityOptions.IME_ACTIVITY_AUTO_FOCUS_COMPONENT_NAME
-            return FlickerTestRunnerFactory(instrumentation, repetitions = 1)
-                    .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance()
+                .buildTest(instrumentation, repetitions = 1) { configuration ->
                         val testApp = ImeAppAutoFocusHelper(instrumentation,
                             configuration.startRotation)
                         withTestName { buildTestTag("reOpenImeAutoFocus", configuration) }
@@ -90,7 +87,6 @@ class ReOpenImeWindowTest(
                         transitions {
                             device.reopenAppFromOverview()
                             wmHelper.waitImeWindowShown()
-                            // wmHelper.waitForFullScreenApp(testAppComponentName)
                         }
                         teardown {
                             test {

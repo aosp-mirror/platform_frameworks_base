@@ -20,7 +20,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.helpers.SimpleAppHelper
@@ -56,18 +55,16 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class CloseAppBackButtonTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = SimpleAppHelper(instrumentation)
-            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
-                .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance()
+                .buildTest(instrumentation, repetitions = 5) { configuration ->
                     withTestName { buildTestTag("closeAppBackButton", configuration) }
                     repeat { configuration.repetitions }
                     setup {

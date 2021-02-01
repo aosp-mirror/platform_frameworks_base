@@ -20,7 +20,6 @@ import android.view.Surface
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.focusChanges
@@ -53,18 +52,16 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 152738416)
 class PipToHomeTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): List<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val testApp = PipAppHelper(instrumentation)
-            return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
-                .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0)) { configuration ->
                     withTestName { buildTestTag("exitPipModeToApp", testApp, configuration) }
                     repeat { configuration.repetitions }
                     setup {
