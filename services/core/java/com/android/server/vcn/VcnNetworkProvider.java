@@ -21,9 +21,9 @@ import android.content.Context;
 import android.net.NetworkProvider;
 import android.net.NetworkRequest;
 import android.os.Looper;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
-import android.util.SparseArray;
 
 import java.util.Objects;
 import java.util.Set;
@@ -40,7 +40,13 @@ public class VcnNetworkProvider extends NetworkProvider {
     private static final String TAG = VcnNetworkProvider.class.getSimpleName();
 
     private final Set<NetworkRequestListener> mListeners = new ArraySet<>();
-    private final SparseArray<NetworkRequestEntry> mRequests = new SparseArray<>();
+
+    /**
+     * Cache of NetworkRequest(s), scores and network providers, keyed by NetworkRequest
+     *
+     * <p>NetworkRequests are immutable once created, and therefore can be used as stable keys.
+     */
+    private final ArrayMap<NetworkRequest, NetworkRequestEntry> mRequests = new ArrayMap<>();
 
     public VcnNetworkProvider(Context context, Looper looper) {
         super(context, looper, VcnNetworkProvider.class.getSimpleName());
@@ -51,8 +57,8 @@ public class VcnNetworkProvider extends NetworkProvider {
         mListeners.add(listener);
 
         // Send listener all cached requests
-        for (int i = 0; i < mRequests.size(); i++) {
-            notifyListenerForEvent(listener, mRequests.valueAt(i));
+        for (NetworkRequestEntry entry : mRequests.values()) {
+            notifyListenerForEvent(listener, entry);
         }
     }
 
@@ -75,7 +81,9 @@ public class VcnNetworkProvider extends NetworkProvider {
                         request, score, providerId));
 
         final NetworkRequestEntry entry = new NetworkRequestEntry(request, score, providerId);
-        mRequests.put(request.requestId, entry);
+
+        // NetworkRequests are immutable once created, and therefore can be used as stable keys.
+        mRequests.put(request, entry);
 
         // TODO(b/176939047): Intelligently route requests to prioritized VcnInstances (based on
         // Default Data Sub, or similar)
@@ -86,7 +94,7 @@ public class VcnNetworkProvider extends NetworkProvider {
 
     @Override
     public void onNetworkRequestWithdrawn(@NonNull NetworkRequest request) {
-        mRequests.remove(request.requestId);
+        mRequests.remove(request);
     }
 
     private static class NetworkRequestEntry {
