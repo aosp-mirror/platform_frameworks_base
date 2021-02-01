@@ -416,10 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Képernyő rögzítése"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Indítás"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Leállítás"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"A folytatáshoz a(z) &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; alkalmazásnak hozzáférésre van szüksége az eszköze mikrofonjához."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"A folytatáshoz a(z) &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; alkalmazásnak hozzáférésre van szüksége az eszköze kamerájához."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Eszköz"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Váltás az alkalmazások között felfelé csúsztatással"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Húzza jobbra az ujját az alkalmazások közötti gyors váltáshoz"</string>
@@ -442,8 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Koppintson ismét a megnyitáshoz"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Csúsztasson felfelé a megnyitáshoz"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Az újrapróbálkozáshoz csúsztassa felfelé az ujját"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Az NFC használatához oldja fel a képernyőzárat"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Ez az eszköz az Ön szervezetének tulajdonában van"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Ez az eszköz a(z) <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tulajdonában van"</string>
     <string name="phone_hint" msgid="6682125338461375925">"A telefonhoz csúsztasson az ikonról"</string>
@@ -970,6 +967,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Több alkalmazás használja a következőket: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" és "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"A(z) <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> használja a következőt: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"A(z) <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> nemrég használta a következőt: <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(vállalati)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Telefonhívás"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(a következőn keresztül: <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"kamera"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"helyadatok"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"mikrofon"</string>

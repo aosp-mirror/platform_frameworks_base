@@ -416,10 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ဖန်သားပြင် မှတ်တမ်းတင်ရန်"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"စတင်ရန်"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ရပ်ရန်"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"ဆက်လက်လုပ်ဆောင်ရန် &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; က သင့်စက်၏ မိုက်ခရိုဖုန်းကို အသုံးပြုခွင့်ရရန် လိုအပ်သည်။"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"ဆက်လက်လုပ်ဆောင်ရန် &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; က သင့်စက်၏ ကင်မရာကို အသုံးပြုခွင့်ရရန် လိုအပ်သည်။"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"စက်"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"အက်ပ်များကို ဖွင့်ရန် အပေါ်သို့ ပွတ်ဆွဲပါ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"အက်ပ်များကို ပြောင်းရန် ညာဘက်သို့ ဖိဆွဲပါ"</string>
@@ -442,8 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ဖွင့်ရန် ထပ်ပြီး ပုတ်ပါ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ဖွင့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"ထပ်စမ်းကြည့်ရန် အပေါ်သို့ပွတ်ဆွဲပါ"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC ကို အသုံးပြုရန် လော့ခ်ဖွင့်ပါ"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ဤစက်ကို သင့်အဖွဲ့အစည်းက ပိုင်ဆိုင်သည်"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ဤစက်ကို <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> က ပိုင်ဆိုင်သည်"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ဖုန်းအတွက် သင်္ကေတပုံအား ပွတ်ဆွဲပါ"</string>
@@ -970,6 +967,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"အပလီကေးရှင်းများက သင်၏ <xliff:g id="TYPES_LIST">%s</xliff:g> ကို အသုံးပြုနေသည်။"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"၊ "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" နှင့် "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> က <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ကို အသုံးပြုနေသည်"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> က <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> ကို မကြာသေးမီက အသုံးပြုထားသည်"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(လုပ်ငန်းသုံး)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"ဖုန်းခေါ်ဆိုမှု"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(<xliff:g id="ATTRIBUTION">%s</xliff:g> မှတစ်ဆင့်)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"ကင်မရာ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"တည်နေရာ"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"မိုက်ခရိုဖုန်း"</string>
