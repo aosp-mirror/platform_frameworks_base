@@ -392,8 +392,6 @@ package android.app.admin {
     method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, int);
     method @NonNull public static String unsafeOperationReasonToString(int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
-    field public static final String ACTION_MANAGED_PROFILE_CREATED = "android.app.action.MANAGED_PROFILE_CREATED";
-    field public static final String ACTION_PROVISIONED_MANAGED_DEVICE = "android.app.action.PROVISIONED_MANAGED_DEVICE";
     field public static final int CODE_ACCOUNTS_NOT_EMPTY = 6; // 0x6
     field public static final int CODE_CANNOT_ADD_MANAGED_PROFILE = 11; // 0xb
     field public static final int CODE_DEVICE_ADMIN_NOT_SUPPORTED = 13; // 0xd

@@ -5469,26 +5469,6 @@ public class DevicePolicyManager {
             "android.app.action.ACTION_SHOW_NEW_USER_DISCLAIMER";
 
     /**
-     * Broadcast action: notify managed provisioning that the device has been provisioned.
-     *
-     * @hide
-     */
-    @TestApi
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_PROVISIONED_MANAGED_DEVICE =
-            "android.app.action.PROVISIONED_MANAGED_DEVICE";
-
-    /**
-     * Broadcast action: notify managed provisioning that a new managed profile is created.
-     *
-     * @hide
-     */
-    @TestApi
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_MANAGED_PROFILE_CREATED =
-            "android.app.action.MANAGED_PROFILE_CREATED";
-
-    /**
      * Widgets are enabled in keyguard
      */
     public static final int KEYGUARD_DISABLE_FEATURES_NONE = 0;

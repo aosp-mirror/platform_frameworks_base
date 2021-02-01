@@ -16012,15 +16012,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 restrictRemovalOfManagedProfile(admin, userInfo.id);
             }
 
-            final Intent intent = new Intent(DevicePolicyManager.ACTION_MANAGED_PROFILE_CREATED)
-                    .putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id)
-                    .putExtra(
-                            DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
-                            provisioningParams.isLeaveAllSystemAppsEnabled())
-                    .setPackage(getManagedProvisioningPackage(mContext))
-                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
-
             return userInfo.getUserHandle();
         } catch (Exception e) {
             DevicePolicyEventLogger
@@ -16313,15 +16304,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
 
             disallowAddUser();
-
-            final Intent intent = new Intent(DevicePolicyManager.ACTION_PROVISIONED_MANAGED_DEVICE)
-                    .putExtra(Intent.EXTRA_USER_HANDLE, caller.getUserId())
-                    .putExtra(
-                            DevicePolicyManager.EXTRA_PROVISIONING_LEAVE_ALL_SYSTEM_APPS_ENABLED,
-                            provisioningParams.isLeaveAllSystemAppsEnabled())
-                    .setPackage(getManagedProvisioningPackage(mContext))
-                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-            mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
         } catch (Exception e) {
             DevicePolicyEventLogger
                     .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)
