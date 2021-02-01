@@ -435,6 +435,7 @@ cc_defaults {
         "canvas/CanvasFrontend.cpp",
         "canvas/CanvasOpBuffer.cpp",
         "canvas/CanvasOpRasterizer.cpp",
+        "effects/StretchEffect.cpp",
         "pipeline/skia/SkiaDisplayList.cpp",
         "pipeline/skia/SkiaRecordingCanvas.cpp",
         "pipeline/skia/RenderNodeDrawable.cpp",

@@ -20,6 +20,8 @@
 #include "SkiaDisplayList.h"
 #include "utils/TraceUtils.h"
 
+#include <include/effects/SkImageFilters.h>
+
 #include <optional>
 
 namespace android {
@@ -172,11 +174,25 @@ static bool layerNeedsPaint(const LayerProperties& properties, float alphaMultip
     paint->setFilterQuality(kLow_SkFilterQuality);
     if (alphaMultiplier < 1.0f || properties.alpha() < 255 ||
         properties.xferMode() != SkBlendMode::kSrcOver || properties.getColorFilter() != nullptr ||
-        properties.getImageFilter() != nullptr) {
+        properties.getImageFilter() != nullptr || !properties.getStretchEffect().isEmpty()) {
         paint->setAlpha(properties.alpha() * alphaMultiplier);
         paint->setBlendMode(properties.xferMode());
         paint->setColorFilter(sk_ref_sp(properties.getColorFilter()));
-        paint->setImageFilter(sk_ref_sp(properties.getImageFilter()));
+
+        sk_sp<SkImageFilter> imageFilter = sk_ref_sp(properties.getImageFilter());
+        sk_sp<SkImageFilter> stretchFilter = properties.getStretchEffect().getImageFilter();
+        sk_sp<SkImageFilter> filter;
+        if (imageFilter && stretchFilter) {
+            filter = SkImageFilters::Compose(
+                  std::move(stretchFilter),
+                  std::move(imageFilter)
+            );
+        } else if (stretchFilter) {
+            filter = std::move(stretchFilter);
+        } else {
+            filter = std::move(imageFilter);
+        }
+        paint->setImageFilter(std::move(filter));
         return true;
     }
     return false;
