@@ -59,12 +59,17 @@ public class VcnGatewayConnectionConfigTest {
 
     // Public for use in VcnGatewayConnectionTest
     public static VcnGatewayConnectionConfig buildTestConfig() {
+        return buildTestConfigWithExposedCaps(EXPOSED_CAPS);
+    }
+
+    // Public for use in VcnGatewayConnectionTest
+    public static VcnGatewayConnectionConfig buildTestConfigWithExposedCaps(int... exposedCaps) {
         final VcnGatewayConnectionConfig.Builder builder =
                 new VcnGatewayConnectionConfig.Builder()
                         .setRetryInterval(RETRY_INTERVALS_MS)
                         .setMaxMtu(MAX_MTU);
 
-        for (int caps : EXPOSED_CAPS) {
+        for (int caps : exposedCaps) {
             builder.addExposedCapability(caps);
         }
 

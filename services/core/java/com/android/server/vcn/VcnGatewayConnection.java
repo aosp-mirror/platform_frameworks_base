@@ -69,6 +69,7 @@ import com.android.internal.util.StateMachine;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerCallback;
+import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -412,6 +413,7 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull private final ParcelUuid mSubscriptionGroup;
     @NonNull private final UnderlyingNetworkTracker mUnderlyingNetworkTracker;
     @NonNull private final VcnGatewayConnectionConfig mConnectionConfig;
+    @NonNull private final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull private final Dependencies mDeps;
 
     @NonNull private final VcnUnderlyingNetworkTrackerCallback mUnderlyingNetworkTrackerCallback;
@@ -487,8 +489,15 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
-            @NonNull VcnGatewayConnectionConfig connectionConfig) {
-        this(vcnContext, subscriptionGroup, snapshot, connectionConfig, new Dependencies());
+            @NonNull VcnGatewayConnectionConfig connectionConfig,
+            @NonNull VcnGatewayStatusCallback gatewayStatusCallback) {
+        this(
+                vcnContext,
+                subscriptionGroup,
+                snapshot,
+                connectionConfig,
+                gatewayStatusCallback,
+                new Dependencies());
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -497,11 +506,14 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
+            @NonNull VcnGatewayStatusCallback gatewayStatusCallback,
             @NonNull Dependencies deps) {
         super(TAG, Objects.requireNonNull(vcnContext, "Missing vcnContext").getLooper());
         mVcnContext = vcnContext;
         mSubscriptionGroup = Objects.requireNonNull(subscriptionGroup, "Missing subscriptionGroup");
         mConnectionConfig = Objects.requireNonNull(connectionConfig, "Missing connectionConfig");
+        mGatewayStatusCallback =
+                Objects.requireNonNull(gatewayStatusCallback, "Missing gatewayStatusCallback");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
         synchronized (mLock) {
