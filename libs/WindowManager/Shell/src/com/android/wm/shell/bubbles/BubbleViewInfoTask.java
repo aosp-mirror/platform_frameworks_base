@@ -217,10 +217,16 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     static Drawable loadSenderAvatar(@NonNull final Context context, @Nullable final Icon icon) {
         Objects.requireNonNull(context);
         if (icon == null) return null;
-        if (icon.getType() == Icon.TYPE_URI || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
-            context.grantUriPermission(context.getPackageName(),
-                    icon.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        try {
+            if (icon.getType() == Icon.TYPE_URI
+                    || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+                context.grantUriPermission(context.getPackageName(),
+                        icon.getUri(), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            }
+            return icon.loadDrawable(context);
+        } catch (Exception e) {
+            Log.w(TAG, "loadSenderAvatar failed: " + e.getMessage());
+            return null;
         }
-        return icon.loadDrawable(context);
     }
 }

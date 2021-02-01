@@ -21,12 +21,14 @@ import static java.lang.annotation.ElementType.LOCAL_VARIABLE;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Looper;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.IntDef;
@@ -212,6 +214,13 @@ public interface Bubbles {
      * @param newUserId the new user's id.
      */
     void onUserChanged(int newUserId);
+
+    /**
+     * Called when the current user profiles change.
+     *
+     * @param currentProfiles the user infos for the current profile.
+     */
+    void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles);
 
     /**
      * Called when config changed.

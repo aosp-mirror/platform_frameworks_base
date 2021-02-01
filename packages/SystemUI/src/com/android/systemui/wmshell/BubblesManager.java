@@ -38,6 +38,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -48,6 +49,7 @@ import android.service.notification.ZenModeConfig;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -247,6 +249,12 @@ public class BubblesManager implements Dumpable {
                     public void onUserChanged(int userId) {
                         mBubbles.onUserChanged(userId);
                     }
+
+                    @Override
+                    public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
+                        mBubbles.onCurrentProfilesChanged(currentProfiles);
+                    }
+
                 });
 
         mSysuiProxy = new Bubbles.SysuiProxy() {
