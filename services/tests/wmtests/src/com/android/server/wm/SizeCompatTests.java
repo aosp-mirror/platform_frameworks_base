@@ -26,6 +26,7 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -602,12 +603,11 @@ public class SizeCompatTests extends WindowTestsBase {
         assertEquals(new Rect(mActivity.getBounds().left, 0, dh - mActivity.getBounds().right, 0),
                 mActivity.getLetterboxInsets());
 
-        final BarController statusBarController =
-                mActivity.mDisplayContent.getDisplayPolicy().getStatusBarController();
+        final DisplayPolicy displayPolicy = mActivity.mDisplayContent.getDisplayPolicy();
         // The activity doesn't fill the display, so the letterbox of the rotated activity is
         // overlapped with the rotated content frame of status bar. Hence the status bar shouldn't
         // be transparent.
-        assertFalse(statusBarController.isFullyTransparentAllowed(w));
+        assertFalse(displayPolicy.isFullyTransparentAllowed(w, TYPE_STATUS_BAR));
 
         // Make the activity fill the display.
         prepareUnresizable(mActivity, 10 /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
@@ -617,7 +617,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // The letterbox should only cover the notch area, so status bar can be transparent.
         assertEquals(new Rect(notchHeight, 0, 0, 0), mActivity.getLetterboxInsets());
-        assertTrue(statusBarController.isFullyTransparentAllowed(w));
+        assertTrue(displayPolicy.isFullyTransparentAllowed(w, TYPE_STATUS_BAR));
     }
 
     @Test
@@ -977,9 +977,9 @@ public class SizeCompatTests extends WindowTestsBase {
         displayPolicy.onConfigurationChanged();
 
         final TestWindowToken token = createTestWindowToken(
-                WindowManager.LayoutParams.TYPE_STATUS_BAR, displayContent);
+                TYPE_STATUS_BAR, displayContent);
         final WindowManager.LayoutParams attrs =
-                new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_STATUS_BAR);
+                new WindowManager.LayoutParams(TYPE_STATUS_BAR);
         attrs.gravity = android.view.Gravity.TOP;
         attrs.layoutInDisplayCutoutMode =
                 WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
