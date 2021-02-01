@@ -22,6 +22,8 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Light.Dialog" parent="Theme.Material.Light.BaseDialog">
@@ -32,6 +34,8 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Settings.Dialog" parent="Theme.Material.Settings.BaseDialog">
@@ -42,6 +46,8 @@
         <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
         <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
         <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Dialog.Alert" parent="Theme.Material.Dialog.BaseAlert">
@@ -52,6 +58,8 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Light.Dialog.Alert" parent="Theme.Material.Light.Dialog.BaseAlert">
@@ -62,6 +70,8 @@
       <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
       <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
       <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+      <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+      <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Settings.Dialog.Alert" parent="Theme.Material.Settings.Dialog.BaseAlert">
@@ -72,6 +82,8 @@
         <item name="timePickerStyle">@style/Widget.Leanback.TimePicker</item>
         <item name="datePickerStyle">@style/Widget.Leanback.DatePicker</item>
         <item name="numberPickerStyle">@style/Widget.Leanback.NumberPicker</item>
+        <item name="buttonBarButtonStyle">@style/Widget.Leanback.Button.ButtonBar</item>
+        <item name="buttonBarStyle">@style/Widget.Leanback.ButtonBar</item>
     </style>
 
     <style name="Theme.Leanback.Dialog.AppError" parent="Theme.Leanback.Dialog">
