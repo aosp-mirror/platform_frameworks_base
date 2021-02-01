@@ -36,7 +36,6 @@ import android.window.TaskSnapshot;
 import android.window.WindowContainerToken;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -178,6 +177,19 @@ public class TaskInfo {
      */
     @Nullable
     public ActivityInfo topActivityInfo;
+
+    /**
+     * The top activity in this task.
+     * @hide
+     */
+    @Nullable
+    public IBinder topActivityToken;
+
+    /**
+     * Whether the direct top activity is in size compat mode on foreground.
+     * @hide
+     */
+    public boolean topActivityInSizeCompat;
 
     /**
      * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
@@ -356,6 +368,8 @@ public class TaskInfo {
         parentTaskId = source.readInt();
         isFocused = source.readBoolean();
         isVisible = source.readBoolean();
+        topActivityToken = source.readStrongBinder();
+        topActivityInSizeCompat = source.readBoolean();
     }
 
     /**
@@ -391,6 +405,8 @@ public class TaskInfo {
         dest.writeInt(parentTaskId);
         dest.writeBoolean(isFocused);
         dest.writeBoolean(isVisible);
+        dest.writeStrongBinder(topActivityToken);
+        dest.writeBoolean(topActivityInSizeCompat);
     }
 
     @Override
@@ -415,6 +431,8 @@ public class TaskInfo {
                 + " parentTaskId=" + parentTaskId
                 + " isFocused=" + isFocused
                 + " isVisible=" + isVisible
+                + " topActivityToken=" + topActivityToken
+                + " topActivityInSizeCompat=" + topActivityInSizeCompat
                 + "}";
     }
 }
