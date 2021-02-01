@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.close
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -50,7 +49,6 @@ import org.junit.runners.Parameterized
  * Test app closes by pressing back button
  * To run this test: `atest FlickerTests:CloseAppBackButtonTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -65,7 +63,7 @@ class CloseAppBackButtonTest(
             val testApp = SimpleAppHelper(instrumentation)
             return FlickerTestRunnerFactory.getInstance()
                 .buildTest(instrumentation, repetitions = 5) { configuration ->
-                    withTestName { buildTestTag("closeAppBackButton", configuration) }
+                    withTestName { buildTestTag(configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
@@ -89,29 +87,47 @@ class CloseAppBackButtonTest(
                         }
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173684672)
+                        val isRotated = configuration.startRotation.isRotated()
 
-                            launcherReplacesAppWindowAsTopWindow(testApp)
-                            wallpaperWindowBecomesVisible()
+                        presubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                launcherReplacesAppWindowAsTopWindow(testApp)
+                                wallpaperWindowBecomesVisible()
+                            }
+
+                            layersTrace {
+                                noUncoveredRegions(configuration.startRotation,
+                                    Surface.ROTATION_0)
+                                navBarLayerIsAlwaysVisible()
+                                statusBarLayerIsAlwaysVisible()
+                                wallpaperLayerReplacesAppLayer(testApp)
+
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                }
+                            }
                         }
 
-                        layersTrace {
-                            noUncoveredRegions(configuration.startRotation,
-                                Surface.ROTATION_0)
-                            navBarLayerRotatesAndScales(configuration.startRotation,
-                                Surface.ROTATION_0,
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerRotatesScales(configuration.startRotation,
-                                Surface.ROTATION_0,
-                                enabled = !configuration.startRotation.isRotated())
-                            navBarLayerIsAlwaysVisible()
-                            statusBarLayerIsAlwaysVisible()
-                            visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173684672)
+                        flaky {
+                            windowManagerTrace {
+                                visibleWindowsShownMoreThanOneConsecutiveEntry(bugId = 173684672)
+                            }
 
-                            wallpaperLayerReplacesAppLayer(testApp)
+                            layersTrace {
+                                visibleLayersShownMoreThanOneConsecutiveEntry(bugId = 173684672)
+
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                    statusBarLayerRotatesScales(configuration.startRotation,
+                                        Surface.ROTATION_0)
+                                }
+                            }
                         }
                     }
                 }
