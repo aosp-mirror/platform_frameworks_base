@@ -388,12 +388,6 @@ public class ScreenshotController {
             }
         });
 
-        // ignore system bar insets for the purpose of window layout
-        mScreenshotView.setOnApplyWindowInsetsListener((v, insets) -> v.onApplyWindowInsets(
-                new WindowInsets.Builder(insets)
-                        .setInsets(WindowInsets.Type.all(), Insets.NONE)
-                        .build()));
-
         // TODO(159460485): Remove this when focus is handled properly in the system
         mScreenshotView.setOnTouchListener((v, event) -> {
             if (event.getActionMasked() == MotionEvent.ACTION_OUTSIDE) {
@@ -533,9 +527,6 @@ public class ScreenshotController {
 
 
         attachWindow();
-        if (DEBUG_WINDOW) {
-            Log.d(TAG, "setContentView: " + mScreenshotView);
-        }
         mScreenshotView.getViewTreeObserver().addOnPreDrawListener(
                 new ViewTreeObserver.OnPreDrawListener() {
                     @Override
@@ -549,7 +540,13 @@ public class ScreenshotController {
                     }
                 });
         mScreenshotView.setScreenshot(mScreenBitmap, screenInsets);
+        if (DEBUG_WINDOW) {
+            Log.d(TAG, "setContentView: " + mScreenshotView);
+        }
         setContentView(mScreenshotView);
+        // ignore system bar insets for the purpose of window layout
+        mWindow.getDecorView().setOnApplyWindowInsetsListener(
+                (v, insets) -> WindowInsets.CONSUMED);
         cancelTimeout(); // restarted after animation
     }
 
