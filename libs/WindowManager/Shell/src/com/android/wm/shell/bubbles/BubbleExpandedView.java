@@ -85,6 +85,19 @@ public class BubbleExpandedView extends LinearLayout {
     private boolean mImeVisible;
     private boolean mNeedsNewHeight;
 
+    /**
+     * Whether we want the TaskView's content to be visible (alpha = 1f). If
+     * {@link #mIsAlphaAnimating} is true, this may not reflect the TaskView's actual alpha value
+     * until the animation ends.
+     */
+    private boolean mIsContentVisible = false;
+
+    /**
+     * Whether we're animating the TaskView's alpha value. If so, we will hold off on applying alpha
+     * changes from {@link #setContentVisibility} until the animation ends.
+     */
+    private boolean mIsAlphaAnimating = false;
+
     private int mMinHeight;
     private int mOverflowHeight;
     private int mSettingsIconHeight;
@@ -465,6 +478,29 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     /**
+     * Whether we are currently animating the TaskView's alpha value. If this is set to true, calls
+     * to {@link #setContentVisibility} will not be applied until this is set to false again.
+     */
+    void setAlphaAnimating(boolean animating) {
+        mIsAlphaAnimating = animating;
+
+        // If we're done animating, apply the correct
+        if (!animating) {
+            setContentVisibility(mIsContentVisible);
+        }
+    }
+
+    /**
+     * Sets the alpha of the underlying TaskView, since changing the expanded view's alpha does not
+     * affect the TaskView since it uses a Surface.
+     */
+    void setTaskViewAlpha(float alpha) {
+        if (mTaskView != null) {
+            mTaskView.setAlpha(alpha);
+        }
+    }
+
+    /**
      * Set visibility of contents in the expanded state.
      *
      * @param visibility {@code true} if the contents should be visible on the screen.
@@ -477,16 +513,19 @@ public class BubbleExpandedView extends LinearLayout {
             Log.d(TAG, "setContentVisibility: visibility=" + visibility
                     + " bubble=" + getBubbleKey());
         }
+        mIsContentVisible = visibility;
+
         final float alpha = visibility ? 1f : 0f;
 
         mPointerView.setAlpha(alpha);
-        if (mTaskView != null) {
+        if (mTaskView != null && !mIsAlphaAnimating) {
             mTaskView.setAlpha(alpha);
         }
     }
 
+
     @Nullable
-    View getTaskView() {
+    TaskView getTaskView() {
         return mTaskView;
     }
 
