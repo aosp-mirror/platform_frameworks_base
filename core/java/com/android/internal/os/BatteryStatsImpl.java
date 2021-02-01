@@ -173,7 +173,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 191 + (USE_OLD_HISTORY ? 1000 : 0);
+    static final int VERSION = 192 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -362,7 +362,6 @@ public class BatteryStatsImpl extends BatteryStats {
 
     public interface PlatformIdleStateCallback {
         public void fillLowPowerStats(RpmStats rpmStats);
-        public String getPlatformLowPowerStats();
         public String getSubsystemLowPowerStats();
     }
 
@@ -3482,11 +3481,6 @@ public class BatteryStatsImpl extends BatteryStats {
         }
         if (computeStepDetails) {
             if (mPlatformIdleStateCallback != null) {
-                mCurHistoryStepDetails.statPlatformIdleState =
-                        mPlatformIdleStateCallback.getPlatformLowPowerStats();
-                if (DEBUG) Slog.i(TAG, "WRITE PlatformIdleState:" +
-                        mCurHistoryStepDetails.statPlatformIdleState);
-
                 mCurHistoryStepDetails.statSubsystemPowerState =
                         mPlatformIdleStateCallback.getSubsystemLowPowerStats();
                 if (DEBUG) Slog.i(TAG, "WRITE SubsystemPowerState:" +
