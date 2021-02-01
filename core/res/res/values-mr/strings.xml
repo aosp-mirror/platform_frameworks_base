@@ -146,11 +146,11 @@
     <string name="wfc_mode_wifi_preferred_summary" msgid="1035175836270943089">"वाय-फायवरून कॉल करा"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="4958965609212575619">"मोबाइल नेटवर्कवरून कॉल करा"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="104951993894678665">"केवळ वाय-फाय"</string>
-    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
+    <string name="cfTemplateNotForwarded" msgid="862202427794270501">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="cfTemplateForwarded" msgid="9132506315842157860">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
     <string name="cfTemplateForwardedTime" msgid="735042369233323609">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="TIME_DELAY">{2}</xliff:g> सेकंदांनंतर <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
-    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
-    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: अग्रेषित केला नाही"</string>
+    <string name="cfTemplateRegistered" msgid="5619930473441550596">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
+    <string name="cfTemplateRegisteredTime" msgid="5222794399642525045">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: फॉरवर्ड केला नाही"</string>
     <string name="fcComplete" msgid="1080909484660507044">"वैशिष्ट्य कोड पूर्ण."</string>
     <string name="fcError" msgid="5325116502080221346">"कनेक्शन समस्या किंवा अवैध फीचर कोड."</string>
     <string name="httpErrorOk" msgid="6206751415788256357">"ठीक"</string>

@@ -1574,7 +1574,7 @@
     <string name="display_manager_built_in_display_name" msgid="1015775198829722440">"Pantaila integratua"</string>
     <string name="display_manager_hdmi_display_name" msgid="1022758026251534975">"HDMI pantaila"</string>
     <string name="display_manager_overlay_display_name" msgid="5306088205181005861">"<xliff:g id="ID">%1$d</xliff:g>. gainjartzea"</string>
-    <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> x <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
+    <string name="display_manager_overlay_display_title" msgid="1480158037150469170">"<xliff:g id="NAME">%1$s</xliff:g>: <xliff:g id="WIDTH">%2$d</xliff:g> × <xliff:g id="HEIGHT">%3$d</xliff:g>, <xliff:g id="DPI">%4$d</xliff:g> dpi"</string>
     <string name="display_manager_overlay_display_secure_suffix" msgid="2810034719482834679">", segurua"</string>
     <string name="kg_forgot_pattern_button_text" msgid="406145459223122537">"Eredua ahaztu zaizu"</string>
     <string name="kg_wrong_pattern" msgid="1342812634464179931">"Eredu okerra"</string>
