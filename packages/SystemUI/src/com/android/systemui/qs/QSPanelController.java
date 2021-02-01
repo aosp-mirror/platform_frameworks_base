@@ -19,7 +19,6 @@ package com.android.systemui.qs;
 import static com.android.systemui.media.dagger.MediaModule.QS_PANEL;
 import static com.android.systemui.qs.QSPanel.QS_SHOW_BRIGHTNESS;
 import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_SIDE_LABELS;
 import static com.android.systemui.qs.dagger.QSFragmentModule.QS_USING_MEDIA_PLAYER;
 
 import android.annotation.NonNull;
@@ -93,8 +92,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
             DumpManager dumpManager, MetricsLogger metricsLogger, UiEventLogger uiEventLogger,
             QSLogger qsLogger, BrightnessController.Factory brightnessControllerFactory,
             BrightnessSlider.Factory brightnessSliderFactory,
-            @Named(QS_LABELS_FLAG) boolean qsLabelsFlag,
-            @Named(QS_SIDE_LABELS) boolean useSideLabels) {
+            @Named(QS_LABELS_FLAG) boolean qsLabelsFlag) {
         super(view, qstileHost, qsCustomizerController, usingMediaPlayer, mediaHost,
                 metricsLogger, uiEventLogger, qsLogger, dumpManager);
         mQsSecurityFooter = qsSecurityFooter;
@@ -110,7 +108,7 @@ public class QSPanelController extends QSPanelControllerBase<QSPanel> {
         mBrightnessController = brightnessControllerFactory.create(mBrightnessSlider);
 
         mQsLabelsFlag = qsLabelsFlag;
-        mSideLabels = useSideLabels;
+        mSideLabels = qsLabelsFlag;
     }
 
     @Override
