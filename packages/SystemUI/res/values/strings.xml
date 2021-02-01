@@ -2556,8 +2556,8 @@
     <!-- Text for privacy dialog, indicating that the application is the enterprise version [CHAR LIMIT=NONE] -->
     <string name="ongoing_privacy_dialog_enterprise">(enterprise)</string>
 
-    <!-- Text for privacy dialog, identifying the phonecall app [CHAR LIMIT=NONE]-->
-    <string name="ongoing_privacy_dialog_phonecall">Phonecall</string>
+    <!-- Text for privacy dialog, identifying the phone call app [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_dialog_phonecall">Phone call</string>
 
     <!-- Text for privacy dialog, indicating that an app is using an op on behalf of another [CHAR LIMIT=NONE] -->
     <string name="ongoing_privacy_dialog_attribution_text">(through <xliff:g id="attribution" example="Special app">%s</xliff:g>)</string>
