@@ -16,7 +16,6 @@
 
 package com.android.server.wm.flicker.launch
 
-import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
@@ -51,7 +50,6 @@ import org.junit.runners.Parameterized
  * Test cold launch app from launcher.
  * To run this test: `atest FlickerTests:OpenAppColdTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -66,7 +64,7 @@ class OpenAppColdTest(
             val testApp = SimpleAppHelper(instrumentation)
             return FlickerTestRunnerFactory.getInstance()
                 .buildTest(instrumentation) { configuration ->
-                    withTestName { buildTestTag("openAppCold", testApp, configuration) }
+                    withTestName { buildTestTag(configuration) }
                     repeat { configuration.repetitions }
                     setup {
                         test {
@@ -88,33 +86,48 @@ class OpenAppColdTest(
                         }
                     }
                     assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry()
+                        val isRotated = configuration.startRotation.isRotated()
 
-                            appWindowReplacesLauncherAsTopWindow(testApp)
-                            wallpaperWindowBecomesInvisible()
+                        presubmit {
+                            windowManagerTrace {
+                                navBarWindowIsAlwaysVisible()
+                                statusBarWindowIsAlwaysVisible()
+                                visibleWindowsShownMoreThanOneConsecutiveEntry()
+                                appWindowReplacesLauncherAsTopWindow(testApp)
+                                wallpaperWindowBecomesInvisible()
+                            }
+
+                            layersTrace {
+                                // During testing the launcher is always in portrait mode
+                                noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation)
+                                navBarLayerIsAlwaysVisible()
+                                statusBarLayerIsAlwaysVisible()
+                                appLayerReplacesWallpaperLayer(testApp.`package`)
+
+                                if (!isRotated) {
+                                    navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                    statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                }
+                            }
+
+                            eventLog {
+                                focusChanges("NexusLauncherActivity", testApp.`package`)
+                            }
                         }
 
-                        layersTrace {
-                            // During testing the launcher is always in portrait mode
-                            noUncoveredRegions(Surface.ROTATION_0, configuration.endRotation)
-                            navBarLayerRotatesAndScales(Surface.ROTATION_0,
-                                configuration.endRotation,
-                                enabled = !configuration.startRotation.isRotated())
-                            statusBarLayerRotatesScales(Surface.ROTATION_0,
-                                configuration.endRotation,
-                                enabled = !configuration.startRotation.isRotated())
-                            navBarLayerIsAlwaysVisible()
-                            statusBarLayerIsAlwaysVisible()
-                            visibleLayersShownMoreThanOneConsecutiveEntry(enabled = false)
+                        flaky {
+                            layersTrace {
+                                visibleLayersShownMoreThanOneConsecutiveEntry()
 
-                            appLayerReplacesWallpaperLayer(testApp.`package`)
-                        }
-
-                        eventLog {
-                            focusChanges("NexusLauncherActivity", testApp.`package`)
+                                if (isRotated) {
+                                    navBarLayerRotatesAndScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                    statusBarLayerRotatesScales(Surface.ROTATION_0,
+                                        configuration.endRotation)
+                                }
+                            }
                         }
                     }
                 }
