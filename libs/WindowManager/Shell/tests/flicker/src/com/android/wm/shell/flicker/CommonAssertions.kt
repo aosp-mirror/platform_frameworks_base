@@ -18,11 +18,115 @@ package com.android.wm.shell.flicker
 
 import android.graphics.Region
 import android.view.Surface
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
 import com.android.server.wm.flicker.dsl.LayersAssertionBuilderLegacy
 import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
+
+@JvmOverloads
+fun LayersAssertionBuilder.appPairsDividerIsVisible(bugId: Int = 0) {
+    end("appPairsDividerIsVisible", bugId) {
+        this.isVisible(APP_PAIR_SPLIT_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.appPairsDividerIsInvisible(bugId: Int = 0) {
+    end("appPairsDividerIsInVisible", bugId) {
+        this.notExists(APP_PAIR_SPLIT_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.appPairsDividerBecomesVisible(bugId: Int = 0) {
+    all("dividerLayerBecomesVisible", bugId) {
+        this.hidesLayer(DOCKED_STACK_DIVIDER)
+            .then()
+            .showsLayer(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackDividerIsVisible(bugId: Int = 0) {
+    end("dockedStackDividerIsVisible", bugId) {
+        this.isVisible(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackDividerBecomesVisible(bugId: Int = 0) {
+    all("dividerLayerBecomesVisible", bugId) {
+        this.hidesLayer(DOCKED_STACK_DIVIDER)
+            .then()
+            .showsLayer(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackDividerBecomesInvisible(bugId: Int = 0) {
+    all("dividerLayerBecomesInvisible", bugId) {
+        this.showsLayer(DOCKED_STACK_DIVIDER)
+            .then()
+            .hidesLayer(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackDividerIsInvisible(bugId: Int = 0) {
+    end("dockedStackDividerIsInvisible", bugId) {
+        this.notExists(DOCKED_STACK_DIVIDER)
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.appPairsPrimaryBoundsIsVisible(
+    rotation: Int,
+    primaryLayerName: String,
+    bugId: Int = 0
+) {
+    end("PrimaryAppBounds", bugId) {
+        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
+        this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.appPairsSecondaryBoundsIsVisible(
+    rotation: Int,
+    secondaryLayerName: String,
+    bugId: Int = 0
+) {
+    end("SecondaryAppBounds", bugId) {
+        val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
+        this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackPrimaryBoundsIsVisible(
+    rotation: Int,
+    primaryLayerName: String,
+    bugId: Int = 0
+) {
+    end("PrimaryAppBounds", bugId) {
+        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
+        this.hasVisibleRegion(primaryLayerName, getPrimaryRegion(dividerRegion, rotation))
+    }
+}
+
+@JvmOverloads
+fun LayersAssertionBuilder.dockedStackSecondaryBoundsIsVisible(
+    rotation: Int,
+    secondaryLayerName: String,
+    bugId: Int = 0
+) {
+    end("SecondaryAppBounds", bugId) {
+        val dividerRegion = entry.getVisibleBounds(DOCKED_STACK_DIVIDER)
+        this.hasVisibleRegion(secondaryLayerName, getSecondaryRegion(dividerRegion, rotation))
+    }
+}
 
 @JvmOverloads
 fun LayersAssertionBuilderLegacy.appPairsDividerIsVisible(
@@ -51,8 +155,8 @@ fun LayersAssertionBuilderLegacy.appPairsDividerBecomesVisible(
 ) {
     all("dividerLayerBecomesVisible", bugId, enabled) {
         this.hidesLayer(DOCKED_STACK_DIVIDER)
-                .then()
-                .showsLayer(DOCKED_STACK_DIVIDER)
+            .then()
+            .showsLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
@@ -73,8 +177,8 @@ fun LayersAssertionBuilderLegacy.dockedStackDividerBecomesVisible(
 ) {
     all("dividerLayerBecomesVisible", bugId, enabled) {
         this.hidesLayer(DOCKED_STACK_DIVIDER)
-                .then()
-                .showsLayer(DOCKED_STACK_DIVIDER)
+            .then()
+            .showsLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
@@ -85,8 +189,8 @@ fun LayersAssertionBuilderLegacy.dockedStackDividerBecomesInvisible(
 ) {
     all("dividerLayerBecomesInvisible", bugId, enabled) {
         this.showsLayer(DOCKED_STACK_DIVIDER)
-                .then()
-                .hidesLayer(DOCKED_STACK_DIVIDER)
+            .then()
+            .hidesLayer(DOCKED_STACK_DIVIDER)
     }
 }
 
