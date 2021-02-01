@@ -18,11 +18,15 @@ package com.android.settingslib.widget;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.mockito.Mockito.mock;
+
 import android.content.Context;
 import android.text.SpannedString;
 import android.text.style.RelativeSizeSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -96,5 +100,31 @@ public class UsageProgressBarPreferenceTest {
         final ProgressBar progressBar = (ProgressBar) mViewHolder
                 .findViewById(android.R.id.progress);
         assertThat(progressBar.getProgress()).isEqualTo((int) (31.0f / 80 * 100));
+    }
+
+    @Test
+    public void setCustomContent_setNullImageView_noChild() {
+        mUsageProgressBarPreference.setCustomContent(null /* imageView */);
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final FrameLayout customContent =
+                (FrameLayout) mViewHolder.findViewById(R.id.custom_content);
+        assertThat(customContent.getChildCount()).isEqualTo(0);
+        assertThat(customContent.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void setCustomContent_setImageView_oneChild() {
+        final ImageView imageView = mock(ImageView.class);
+        mUsageProgressBarPreference.setCustomContent(imageView);
+
+        mUsageProgressBarPreference.onBindViewHolder(mViewHolder);
+
+        final FrameLayout customContent =
+                (FrameLayout) mViewHolder.findViewById(R.id.custom_content);
+        assertThat(customContent.getChildCount()).isEqualTo(1);
+        assertThat(customContent.getChildAt(0)).isEqualTo(imageView);
+        assertThat(customContent.getVisibility()).isEqualTo(View.VISIBLE);
     }
 }
