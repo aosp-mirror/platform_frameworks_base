@@ -1172,7 +1172,6 @@ public class DisplayModeDirector {
         // changeable and low power mode off. After initialization, these states will
         // be updated from the same handler thread.
         private int mDefaultDisplayState = Display.STATE_UNKNOWN;
-        private boolean mIsDeviceActive = false;
         private boolean mRefreshRateChangeable = false;
         private boolean mLowPowerModeEnabled = false;
 
@@ -1362,7 +1361,6 @@ public class DisplayModeDirector {
             pw.println("    mAmbientLux: " + mAmbientLux);
             pw.println("    mBrightness: " + mBrightness);
             pw.println("    mDefaultDisplayState: " + mDefaultDisplayState);
-            pw.println("    mIsDeviceActive: " + mIsDeviceActive);
             pw.println("    mLowPowerModeEnabled: " + mLowPowerModeEnabled);
             pw.println("    mRefreshRateChangeable: " + mRefreshRateChangeable);
             pw.println("    mShouldObserveDisplayLowChange: " + mShouldObserveDisplayLowChange);
@@ -1639,9 +1637,7 @@ public class DisplayModeDirector {
         }
 
         private boolean isDeviceActive() {
-            mIsDeviceActive = mInjector.isDeviceInteractive(mContext);
-            return (mDefaultDisplayState == Display.STATE_ON)
-                    && mIsDeviceActive;
+            return mDefaultDisplayState == Display.STATE_ON;
         }
 
         private final class LightSensorEventListener implements SensorEventListener {
@@ -1915,8 +1911,6 @@ public class DisplayModeDirector {
 
         void registerPeakRefreshRateObserver(@NonNull ContentResolver cr,
                 @NonNull ContentObserver observer);
-
-        boolean isDeviceInteractive(@NonNull Context context);
     }
 
     @VisibleForTesting
@@ -1946,11 +1940,6 @@ public class DisplayModeDirector {
                 @NonNull ContentObserver observer) {
             cr.registerContentObserver(PEAK_REFRESH_RATE_URI, false /*notifyDescendants*/,
                     observer, UserHandle.USER_SYSTEM);
-        }
-
-        @Override
-        public boolean isDeviceInteractive(@NonNull Context ctx) {
-            return ctx.getSystemService(PowerManager.class).isInteractive();
         }
     }
 
