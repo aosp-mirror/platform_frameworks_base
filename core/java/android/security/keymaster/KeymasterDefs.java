@@ -129,6 +129,15 @@ public final class KeymasterDefs {
     public static final int KM_TAG_ASSOCIATED_DATA = Tag.ASSOCIATED_DATA; // KM_BYTES | 1000;
     public static final int KM_TAG_NONCE = Tag.NONCE; // KM_BYTES | 1001;
     public static final int KM_TAG_MAC_LENGTH = Tag.MAC_LENGTH; // KM_UINT | 1003;
+    public static final int KM_TAG_RESET_SINCE_ID_ROTATION =
+            Tag.RESET_SINCE_ID_ROTATION;     // KM_BOOL | 1004
+    public static final int KM_TAG_CONFIRMATION_TOKEN = Tag.CONFIRMATION_TOKEN; // KM_BYTES | 1005;
+    public static final int KM_TAG_CERTIFICATE_SERIAL = Tag.CERTIFICATE_SERIAL; // KM_UINT | 1006;
+    public static final int KM_TAG_CERTIFICATE_SUBJECT = Tag.CERTIFICATE_SUBJECT; // KM_UINT | 1007;
+    public static final int KM_TAG_CERTIFICATE_NOT_BEFORE =
+            Tag.CERTIFICATE_NOT_BEFORE; // KM_DATE | 1008;
+    public static final int KM_TAG_CERTIFICATE_NOT_AFTER =
+            Tag.CERTIFICATE_NOT_AFTER; // KM_DATE | 1009;
 
     // Algorithm values.
     public static final int KM_ALGORITHM_RSA = Algorithm.RSA;
@@ -316,6 +325,10 @@ public final class KeymasterDefs {
             ErrorCode.HARDWARE_TYPE_UNAVAILABLE; // -68;
     public static final int KM_ERROR_DEVICE_LOCKED =
             ErrorCode.DEVICE_LOCKED; // -72;
+    public static final int KM_ERROR_MISSING_NOT_BEFORE =
+            ErrorCode.MISSING_NOT_BEFORE; // -80;
+    public static final int KM_ERROR_MISSING_NOT_AFTER =
+            ErrorCode.MISSING_NOT_AFTER; // -80;
     public static final int KM_ERROR_UNIMPLEMENTED =
             ErrorCode.UNIMPLEMENTED; // -100;
     public static final int KM_ERROR_VERSION_MISMATCH =

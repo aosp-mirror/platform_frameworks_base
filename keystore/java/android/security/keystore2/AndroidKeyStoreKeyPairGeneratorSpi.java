@@ -585,6 +585,30 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
                     mSpec.getKeyValidityForConsumptionEnd()
             ));
         }
+        if (mSpec.getCertificateNotAfter() != null) {
+            params.add(KeyStore2ParameterUtils.makeDate(
+                    KeymasterDefs.KM_TAG_CERTIFICATE_NOT_AFTER,
+                    mSpec.getCertificateNotAfter()
+            ));
+        }
+        if (mSpec.getCertificateNotBefore() != null) {
+            params.add(KeyStore2ParameterUtils.makeDate(
+                    KeymasterDefs.KM_TAG_CERTIFICATE_NOT_BEFORE,
+                    mSpec.getCertificateNotBefore()
+            ));
+        }
+        if (mSpec.getCertificateSerialNumber() != null) {
+            params.add(KeyStore2ParameterUtils.makeBignum(
+                    KeymasterDefs.KM_TAG_CERTIFICATE_SERIAL,
+                    mSpec.getCertificateSerialNumber()
+            ));
+        }
+        if (mSpec.getCertificateSubject() != null) {
+            params.add(KeyStore2ParameterUtils.makeBytes(
+                    KeymasterDefs.KM_TAG_CERTIFICATE_SUBJECT,
+                    mSpec.getCertificateSubject().getEncoded()
+            ));
+        }
 
         addAlgorithmSpecificParameters(params);
 
