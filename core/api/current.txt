@@ -25632,8 +25632,6 @@ package android.net {
     method public void applyTransportModeTransform(@NonNull java.net.Socket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
     method public void applyTransportModeTransform(@NonNull java.net.DatagramSocket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
     method public void applyTransportModeTransform(@NonNull java.io.FileDescriptor, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void applyTunnelModeTransform(@NonNull android.net.IpSecManager.IpSecTunnelInterface, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @NonNull @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket(int) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket() throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method public void removeTransportModeTransforms(@NonNull java.net.Socket) throws java.io.IOException;
@@ -25641,12 +25639,6 @@ package android.net {
     method public void removeTransportModeTransforms(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     field public static final int DIRECTION_IN = 0; // 0x0
     field public static final int DIRECTION_OUT = 1; // 0x1
-  }
-
-  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void addAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
-    method public void close();
-    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public static final class IpSecManager.ResourceUnavailableException extends android.util.AndroidException {
