@@ -1,0 +1,8 @@
+Source code and tests for Wifi module APIs have moved to
+packages/modules/Wifi/framework.
+
+- frameworks/base/wifi/java -> packages/modules/Wifi/framework/java
+- frameworks/base/wifi/tests -> packages/modules/Wifi/framework/tests
+
+What remains in frameworks/base/wifi are Wifi APIs that
+are not part of the Wifi module.

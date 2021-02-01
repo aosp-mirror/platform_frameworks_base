@@ -829,7 +829,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"Druk op \'Menu\' om te ontgrendelen of noodoproep te plaatsen."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"Druk op \'Menu\' om te ontgrendelen."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"Patroon tekenen om te ontgrendelen"</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"Noodgeval"</string>
+    <string name="lockscreen_emergency_call" msgid="7549683825868928636">"Noodoproep"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"Terug naar gesprek"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"Juist!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"Opnieuw proberen"</string>
@@ -954,7 +954,7 @@
     <string name="permdesc_readHistoryBookmarks" msgid="2323799501008967852">"Hiermee kan de app de geschiedenis lezen van alle URL\'s die in de systeemeigen browser zijn bezocht, en alle bookmarks in de systeemeigen browser. Let op: deze rechten kunnen niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_writeHistoryBookmarks" msgid="6090259925187986937">"webbookmarks en -geschiedenis schrijven"</string>
     <string name="permdesc_writeHistoryBookmarks" product="tablet" msgid="573341025292489065">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je tablet. Deze rechten kunnen niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
-    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Hiermee kan de app de browsergeschiedenis of opgeslagen bookmarks bewerken op je Android TV-apparaat. Hierdoor kan de app mogelijk browsergegevens wissen of aanpassen. Opmerking: Dit recht kan niet worden afgedwongen door andere browsers of andere apps met internetmogelijkheden."</string>
+    <string name="permdesc_writeHistoryBookmarks" product="tv" msgid="88642768580408561">"Hiermee kan de app de browsergeschiedenis of opgeslagen bookmarks bewerken op je Android TV-apparaat. Hierdoor kan de app mogelijk browsegegevens wissen of aanpassen. Opmerking: Dit recht kan niet worden afgedwongen door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"Hiermee kan de app de webgeschiedenis wijzigen in de systeemeigen browser en de bookmarks die zijn opgeslagen op je telefoon. Deze rechten kunnen niet worden geforceerd door andere browsers of andere apps met internetmogelijkheden."</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"een wekker instellen"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"Hiermee kan de app een wekker instellen in een geïnstalleerde wekker-app. Deze functie wordt door sommige wekker-apps niet geïmplementeerd."</string>
@@ -1792,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Geüpdatet door je beheerder"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Verwijderd door je beheerder"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n\n•Het donkere thema aanzetten\n•Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitzetten of beperken\n\n"<annotation id="url">"Meer informatie"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n\n•Het donkere thema aanzetten\n•Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitzetten of beperken"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="4424488535318105801">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n\n• Het donkere thema inschakelen\n• Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitschakelen of beperken\n\n"<annotation id="url">"Meer informatie"</annotation></string>
+    <string name="battery_saver_description" msgid="6794188153647295212">"Batterijbesparing doet het volgende om de batterijduur te verlengen:\n\n• Het donkere thema inschakelen.\n• Achtergrondactiviteit, bepaalde visuele effecten en andere functies (zoals \'Hey Google\') uitschakelen of beperken."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Databesparing beperkt het datagebruik door te voorkomen dat sommige apps gegevens verzenden of ontvangen op de achtergrond. De apps die je open hebt, kunnen nog steeds data verbruiken, maar doen dit minder vaak. Afbeeldingen worden dan bijvoorbeeld niet weergegeven totdat je erop tikt."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Databesparing aanzetten?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Inschakelen"</string>

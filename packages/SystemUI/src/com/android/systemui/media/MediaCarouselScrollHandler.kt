@@ -56,6 +56,7 @@ class MediaCarouselScrollHandler(
     private val mainExecutor: DelayableExecutor,
     private val dismissCallback: () -> Unit,
     private var translationChangedListener: () -> Unit,
+    private val closeGuts: () -> Unit,
     private val falsingManager: FalsingManager
 ) {
     /**
@@ -452,6 +453,7 @@ class MediaCarouselScrollHandler(
         val nowScrolledIn = scrollIntoCurrentMedia != 0
         if (newIndex != activeMediaIndex || wasScrolledIn != nowScrolledIn) {
             activeMediaIndex = newIndex
+            closeGuts()
             updatePlayerVisibilities()
         }
         val relativeLocation = activeMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)

@@ -33,6 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         style="@style/Keyguard.TextView"
+        android:layout_marginBottom="8dp"
         android:singleLine="true"
         android:ellipsize="marquee"
         android:visibility="gone"
@@ -42,11 +43,9 @@
     <com.android.keyguard.EmergencyButton
         android:id="@+id/emergency_call_button"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:layout_marginTop="@dimen/eca_overlap"
+        android:layout_height="32dp"
+        android:layout_marginBottom="12dp"
         android:text="@*android:string/lockscreen_emergency_call"
-        style="@style/Keyguard.TextView.EmergencyButton"
-        android:textAllCaps="@bool/kg_use_all_caps" />
+        style="@style/Keyguard.TextView.EmergencyButton" />
 
 </com.android.keyguard.EmergencyCarrierArea>

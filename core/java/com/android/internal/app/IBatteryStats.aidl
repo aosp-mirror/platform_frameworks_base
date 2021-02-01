@@ -129,7 +129,7 @@ interface IBatteryStats {
     void noteWifiBatchedScanStartedFromSource(in WorkSource ws, int csph);
     void noteWifiBatchedScanStoppedFromSource(in WorkSource ws);
     void noteWifiRadioPowerState(int powerState, long timestampNs, int uid);
-    void noteNetworkInterfaceType(String iface, int type);
+    void noteNetworkInterfaceForTransports(String iface, in int[] transportTypes);
     void noteNetworkStatsEnabled();
     void noteDeviceIdleMode(int mode, String activeReason, int activeUid);
     void setBatteryState(int status, int health, int plugType, int level, int temp, int volt,

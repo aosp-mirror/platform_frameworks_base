@@ -43,7 +43,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
 import android.platform.test.annotations.Presubmit;
-import android.util.IntArray;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.test.InsetsModeSession;
@@ -172,8 +171,9 @@ public class InsetsPolicyTest extends WindowTestsBase {
     }
 
     @Test
-    public void testControlsForDispatch_forceShowSystemBarsFromExternal_appHasNoControl() {
-        mDisplayContent.getDisplayPolicy().setForceShowSystemBars(true);
+    public void testControlsForDispatch_remoteInsetsControllerControlsBars_appHasNoControl() {
+        mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
+        mDisplayContent.getInsetsPolicy().setRemoteInsetsControllerControlsSystemBars(true);
         addWindow(TYPE_STATUS_BAR, "statusBar");
         addWindow(TYPE_NAVIGATION_BAR, "navBar");
 
@@ -240,8 +240,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         }).when(policy).startAnimation(anyBoolean(), any(), any());
 
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(
-                IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR});
         waitUntilWindowAnimatorIdle();
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
@@ -268,8 +267,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
         doNothing().when(policy).startAnimation(anyBoolean(), any(), any());
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(
-                IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR});
         waitUntilWindowAnimatorIdle();
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
@@ -297,8 +295,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
         doNothing().when(policy).startAnimation(anyBoolean(), any(), any());
         policy.updateBarControlTarget(mAppWindow);
-        policy.showTransient(
-                IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR});
         waitUntilWindowAnimatorIdle();
         InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(mAppWindow);
@@ -336,8 +333,7 @@ public class InsetsPolicyTest extends WindowTestsBase {
         final InsetsPolicy policy = spy(mDisplayContent.getInsetsPolicy());
         doNothing().when(policy).startAnimation(anyBoolean(), any(), any());
         policy.updateBarControlTarget(app);
-        policy.showTransient(
-                IntArray.wrap(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
+        policy.showTransient(new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR});
         final InsetsSourceControl[] controls =
                 mDisplayContent.getInsetsStateController().getControlsForDispatch(app);
         policy.updateBarControlTarget(app2);

@@ -65,10 +65,10 @@ public class ScreenshotActionChip extends FrameLayout {
     }
 
     void setIcon(Icon icon, boolean tint) {
-        if (tint) {
-            icon.setTint(mIconColor);
-        }
         mIcon.setImageIcon(icon);
+        if (!tint) {
+            mIcon.setImageTintList(null);
+        }
     }
 
     void setText(CharSequence text) {

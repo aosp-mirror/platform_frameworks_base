@@ -333,7 +333,7 @@ android_media_AudioEffect_native_setup(JNIEnv *env, jobject thiz, jobject weak_t
     if (deviceType != AUDIO_DEVICE_NONE) {
         device.mType = (audio_devices_t)deviceType;
         ScopedUtfChars address(env, deviceAddress);
-        device.mAddress = address.c_str();
+        device.setAddress(address.c_str());
     }
 
     // create the native AudioEffect object

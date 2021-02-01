@@ -808,7 +808,8 @@ public class AudioTrack extends PlayerBase
         int initResult = native_setup(new WeakReference<AudioTrack>(this), mAttributes,
                 sampleRate, mChannelMask, mChannelIndexMask, mAudioFormat,
                 mNativeBufferSizeInBytes, mDataLoadMode, session, 0 /*nativeTrackInJavaObj*/,
-                offload, encapsulationMode, tunerConfiguration);
+                offload, encapsulationMode, tunerConfiguration,
+                getCurrentOpPackageName());
         if (initResult != SUCCESS) {
             loge("Error code "+initResult+" when initializing AudioTrack.");
             return; // with mState == STATE_UNINITIALIZED
@@ -894,7 +895,8 @@ public class AudioTrack extends PlayerBase
                     nativeTrackInJavaObj,
                     false /*offload*/,
                     ENCAPSULATION_MODE_NONE,
-                    null /* tunerConfiguration */);
+                    null /* tunerConfiguration */,
+                    "" /* opPackagename */);
             if (initResult != SUCCESS) {
                 loge("Error code "+initResult+" when initializing AudioTrack.");
                 return; // with mState == STATE_UNINITIALIZED
@@ -1267,10 +1269,12 @@ public class AudioTrack extends PlayerBase
             // native code figure out the minimum buffer size.
             if (mMode == MODE_STREAM && mBufferSizeInBytes == 0) {
                 int bytesPerSample = 1;
-                try {
-                    bytesPerSample = mFormat.getBytesPerSample(mFormat.getEncoding());
-                } catch (IllegalArgumentException e) {
-                    // do nothing
+                if (AudioFormat.isEncodingLinearFrames(mFormat.getEncoding())) {
+                    try {
+                        bytesPerSample = mFormat.getBytesPerSample(mFormat.getEncoding());
+                    } catch (IllegalArgumentException e) {
+                        // do nothing
+                    }
                 }
                 mBufferSizeInBytes = mFormat.getChannelCount() * bytesPerSample;
             }
@@ -4069,7 +4073,8 @@ public class AudioTrack extends PlayerBase
             Object /*AudioAttributes*/ attributes,
             int[] sampleRate, int channelMask, int channelIndexMask, int audioFormat,
             int buffSizeInBytes, int mode, int[] sessionId, long nativeAudioTrack,
-            boolean offload, int encapsulationMode, Object tunerConfiguration);
+            boolean offload, int encapsulationMode, Object tunerConfiguration,
+            @NonNull String opPackageName);
 
     private native final void native_finalize();
 

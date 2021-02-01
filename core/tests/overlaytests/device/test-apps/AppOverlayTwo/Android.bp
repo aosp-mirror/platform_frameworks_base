@@ -15,6 +15,6 @@
 android_test {
     name: "OverlayDeviceTests_AppOverlayTwo",
     sdk_version: "current",
-
+    certificate: "platform",
     aaptflags: ["--no-resource-removal"],
 }

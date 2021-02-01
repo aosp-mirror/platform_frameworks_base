@@ -46,6 +46,8 @@
 #include <utils/misc.h>
 #include <utils/Log.h>
 
+#include <android-base/strings.h>
+
 using android::hardware::hidl_vec;
 using android::hardware::Return;
 using android::hardware::Void;
@@ -200,67 +202,13 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
         return 0;
     }
 
-    char* mergedreasonpos = mergedreason;
-    int i = 0;
-    for (auto wakeupReason : wakeupReasons) {
-        auto reasonline = const_cast<char*>(wakeupReason.c_str());
-        char* pos = reasonline;
-        char* endPos;
-        int len;
-        // First field is the index or 'Abort'.
-        int irq = (int)strtol(pos, &endPos, 10);
-        if (pos != endPos) {
-            // Write the irq number to the merged reason string.
-            len = snprintf(mergedreasonpos, remainreasonlen, i == 0 ? "%d" : ":%d", irq);
-        } else {
-            // The first field is not an irq, it may be the word Abort.
-            const size_t abortPrefixLen = strlen("Abort:");
-            if (strncmp(pos, "Abort:", abortPrefixLen) != 0) {
-                // Ooops.
-                ALOGE("Bad reason line: %s", reasonline);
-                continue;
-            }
+    std::string mergedReasonStr = ::android::base::Join(wakeupReasons, ":");
+    strncpy(mergedreason, mergedReasonStr.c_str(), remainreasonlen);
+    mergedreason[remainreasonlen - 1] = '\0';
 
-            // Write 'Abort' to the merged reason string.
-            len = snprintf(mergedreasonpos, remainreasonlen, i == 0 ? "Abort" : ":Abort");
-            endPos = pos + abortPrefixLen;
-        }
-        pos = endPos;
+    ALOGV("Got %d reasons", (int)wakeupReasons.size());
 
-        if (len >= 0 && len < remainreasonlen) {
-            mergedreasonpos += len;
-            remainreasonlen -= len;
-        }
-
-        // Skip whitespace; rest of the buffer is the reason string.
-        while (*pos == ' ') {
-            pos++;
-        }
-
-        // Chop newline at end.
-        char* endpos = pos;
-        while (*endpos != 0) {
-            if (*endpos == '\n') {
-                *endpos = 0;
-                break;
-            }
-            endpos++;
-        }
-
-        len = snprintf(mergedreasonpos, remainreasonlen, ":%s", pos);
-        if (len >= 0 && len < remainreasonlen) {
-            mergedreasonpos += len;
-            remainreasonlen -= len;
-        }
-        i++;
-    }
-
-    ALOGV("Got %d reasons", i);
-    if (i > 0) {
-        *mergedreasonpos = 0;
-    }
-
-    return mergedreasonpos - mergedreason;
+    return strlen(mergedreason);
 }
 
 // The caller must be holding gPowerHalMutex.

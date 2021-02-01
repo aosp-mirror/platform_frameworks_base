@@ -25,8 +25,8 @@ import static android.view.Gravity.BOTTOM;
 import static android.view.Gravity.LEFT;
 import static android.view.Gravity.RIGHT;
 import static android.view.Gravity.TOP;
-import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
-import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.InsetsState.ITYPE_CLIMATE_BAR;
+import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
@@ -68,6 +68,7 @@ import com.android.compatibility.common.util.SystemUtil;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -142,6 +143,9 @@ public class ScreenDecorWindowTests {
         assertInsetGreaterOrEqual(mTestActivity, RIGHT, mDecorThickness);
     }
 
+    // Decor windows (i.e windows using PRIVATE_FLAG_IS_SCREEN_DECOR) are no longer supported.
+    // PRIVATE_FLAG_IS_SCREEN_DECOR and related code will be deprecated/removed soon.
+    @Ignore
     @Test
     public void testMultipleDecors() {
         // Test 2 decor windows on-top.
@@ -190,7 +194,7 @@ public class ScreenDecorWindowTests {
 
     @Test
     public void testProvidesInsetsTypes() {
-        int[] providesInsetsTypes = new int[]{ITYPE_STATUS_BAR};
+        int[] providesInsetsTypes = new int[]{ITYPE_CLIMATE_BAR};
         final View win = createWindow("StatusBarSubPanel", TOP, MATCH_PARENT, mDecorThickness, RED,
                 FLAG_LAYOUT_IN_SCREEN, 0, providesInsetsTypes);
 
@@ -199,7 +203,7 @@ public class ScreenDecorWindowTests {
 
     private View createDecorWindow(int gravity, int width, int height) {
         int[] providesInsetsTypes =
-                new int[]{gravity == TOP ? ITYPE_STATUS_BAR : ITYPE_NAVIGATION_BAR};
+                new int[]{gravity == TOP ? ITYPE_CLIMATE_BAR : ITYPE_EXTRA_NAVIGATION_BAR};
         return createWindow("decorWindow", gravity, width, height, RED,
                 FLAG_LAYOUT_IN_SCREEN, PRIVATE_FLAG_IS_SCREEN_DECOR, providesInsetsTypes);
     }

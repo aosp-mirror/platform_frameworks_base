@@ -3716,9 +3716,9 @@ android.media.IRemoteVolumeObserver
 android.media.IRingtonePlayer$Stub$Proxy
 android.media.IRingtonePlayer$Stub
 android.media.IRingtonePlayer
-android.media.IStrategyPreferredDeviceDispatcher$Stub$Proxy
-android.media.IStrategyPreferredDeviceDispatcher$Stub
-android.media.IStrategyPreferredDeviceDispatcher
+android.media.IStrategyPreferredDevicesDispatcher$Stub$Proxy
+android.media.IStrategyPreferredDevicesDispatcher$Stub
+android.media.IStrategyPreferredDevicesDispatcher
 android.media.IVolumeController$Stub$Proxy
 android.media.IVolumeController$Stub
 android.media.IVolumeController
@@ -11759,7 +11759,6 @@ libcore.util.XmlObjectFactory
 libcore.util.ZoneInfo$CheckedArithmeticException
 libcore.util.ZoneInfo$WallTime
 libcore.util.ZoneInfo
-org.apache.harmony.dalvik.NativeTestTarget
 org.apache.harmony.dalvik.ddmc.Chunk
 org.apache.harmony.dalvik.ddmc.ChunkHandler
 org.apache.harmony.dalvik.ddmc.DdmServer

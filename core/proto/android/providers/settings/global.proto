@@ -433,35 +433,36 @@ message GlobalSettingsProto {
         // Ordered GPU debug layer list for GLES
         // i.e. <layer1>:<layer2>:...:<layerN>
         optional SettingProto debug_layers_gles = 7;
-        // Game Driver - global preference for all Apps
+        // Updatable Driver - global preference for all Apps
         // 0 = Default
-        // 1 = All Apps use Game Driver
-        // 2 = All Apps use system graphics driver
-        optional SettingProto game_driver_all_apps = 8;
-        // Game Driver - List of Apps selected to use Game Driver
+        // 1 = All Apps use updatable production driver
+        // 2 = All apps use updatable prerelease driver
+        // 3 = All Apps use system graphics driver
+        optional SettingProto updatable_driver_all_apps = 8;
+        // Updatable Driver - List of Apps selected to use updatable production driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto game_driver_opt_in_apps = 9;
-        // Game Driver - List of Apps selected not to use Game Driver
+        optional SettingProto updatable_driver_production_opt_in_apps = 9;
+        // Updatable Driver - List of Apps selected not to use updatable production driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto game_driver_opt_out_apps = 10;
-        // Game Driver - List of Apps that are forbidden to use Game Driver
-        optional SettingProto game_driver_denylist = 11;
-        // Game Driver - List of Apps that are allowed to use Game Driver
-        optional SettingProto game_driver_allowlist = 12;
+        optional SettingProto updatable_driver_production_opt_out_apps = 10;
+        // Updatable Driver - List of Apps that are forbidden to use updatable production driver
+        optional SettingProto updatable_driver_production_denylist = 11;
+        // Updatable Driver - List of Apps that are allowed to use updatable production driver
+        optional SettingProto updatable_driver_production_allowlist = 12;
         // ANGLE - List of Apps that can check ANGLE rules
         optional SettingProto angle_allowlist = 13;
-        // Game Driver - List of denylists, each denylist is a denylist for
-        // a specific Game Driver version
-        optional SettingProto game_driver_denylists = 14;
+        // Updatable Driver - List of denylists, each denylist is a denylist for
+        // a specific updatable production driver version
+        optional SettingProto updatable_driver_production_denylists = 14;
         // ANGLE - Show a dialog box when ANGLE is selected for the currently running PKG
         optional SettingProto show_angle_in_use_dialog = 15;
-        // Game Driver - List of libraries in sphal accessible by Game Driver
-        optional SettingProto game_driver_sphal_libraries = 16;
+        // Updatable Driver - List of libraries in sphal accessible by updatable driver
+        optional SettingProto updatable_driver_sphal_libraries = 16;
         // ANGLE - External package containing ANGLE libraries
         optional SettingProto angle_debug_package = 17;
-        // Game Driver - List of Apps selected to use prerelease Game Driver
+        // Updatable Driver - List of Apps selected to use updatable prerelease driver
         // i.e. <pkg1>,<pkg2>,...,<pkgN>
-        optional SettingProto game_driver_prerelease_opt_in_apps = 18;
+        optional SettingProto updatable_driver_prerelease_opt_in_apps = 18;
     }
     optional Gpu gpu = 59;
 

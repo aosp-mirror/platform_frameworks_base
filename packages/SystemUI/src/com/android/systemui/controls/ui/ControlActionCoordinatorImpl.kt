@@ -92,7 +92,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
     override fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float) {
         bouncerOrRun(Action(cvh.cws.ci.controlId, {
             cvh.action(FloatAction(templateId, newValue))
-        }, true /* blockable */))
+        }, false /* blockable */))
     }
 
     override fun longPress(cvh: ControlViewHolder) {

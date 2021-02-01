@@ -8,5 +8,16 @@
         }
       ]
     }
+  ],
+
+  "carsysui-presubmit": [
+    {
+      "name": "CarSystemUITests",
+      "options" : [
+        {
+          "include-annotation": "com.android.systemui.car.CarSystemUiTest"
+        }
+      ]
+    }
   ]
 }

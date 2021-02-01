@@ -1992,13 +1992,16 @@ public class UserManager {
     }
 
     /**
-     * Checks if specified user can have restricted profile.
+     * Checks if the calling context user can have a restricted profile.
+     * @return whether the context user can have a restricted profile.
      * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public boolean canHaveRestrictedProfile(@UserIdInt int userId) {
+    @UserHandleAware
+    public boolean canHaveRestrictedProfile() {
         try {
-            return mService.canHaveRestrictedProfile(userId);
+            return mService.canHaveRestrictedProfile(mUserId);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2017,6 +2020,25 @@ public class UserManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Get the parent of a restricted profile.
+     *
+     * @return the parent of the user or {@code null} if the user is not restricted profile
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
+            Manifest.permission.CREATE_USERS})
+    @UserHandleAware
+    public @Nullable UserHandle getRestrictedProfileParent() {
+        final UserInfo info = getUserInfo(mUserId);
+        if (info == null) return null;
+        if (!info.isRestricted()) return null;
+        final int parent = info.restrictedProfileParentId;
+        if (parent == UserHandle.USER_NULL) return null;
+        return UserHandle.of(parent);
     }
 
     /**

@@ -53,7 +53,6 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
-import android.net.NetworkUtils;
 import android.net.PrivateDnsConnectivityChecker;
 import android.net.ProxyInfo;
 import android.net.Uri;
@@ -86,10 +85,13 @@ import android.security.keystore.StrongBoxUnavailableException;
 import android.service.restrictions.RestrictionsReceiver;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.net.NetworkUtilsInternal;
 import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
@@ -4524,30 +4526,10 @@ public class DevicePolicyManager {
                     if (!proxySpec.type().equals(Proxy.Type.HTTP)) {
                         throw new IllegalArgumentException();
                     }
-                    InetSocketAddress sa = (InetSocketAddress)proxySpec.address();
-                    String hostName = sa.getHostName();
-                    int port = sa.getPort();
-                    StringBuilder hostBuilder = new StringBuilder();
-                    hostSpec = hostBuilder.append(hostName)
-                        .append(":").append(Integer.toString(port)).toString();
-                    if (exclusionList == null) {
-                        exclSpec = "";
-                    } else {
-                        StringBuilder listBuilder = new StringBuilder();
-                        boolean firstDomain = true;
-                        for (String exclDomain : exclusionList) {
-                            if (!firstDomain) {
-                                listBuilder = listBuilder.append(",");
-                            } else {
-                                firstDomain = false;
-                            }
-                            listBuilder = listBuilder.append(exclDomain.trim());
-                        }
-                        exclSpec = listBuilder.toString();
-                    }
-                    if (android.net.Proxy.validate(hostName, Integer.toString(port), exclSpec)
-                            != android.net.Proxy.PROXY_VALID)
-                        throw new IllegalArgumentException();
+                    final Pair<String, String> proxyParams =
+                            getProxyParameters(proxySpec, exclusionList);
+                    hostSpec = proxyParams.first;
+                    exclSpec = proxyParams.second;
                 }
                 return mService.setGlobalProxy(admin, hostSpec, exclSpec);
             } catch (RemoteException e) {
@@ -4555,6 +4537,35 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Build HTTP proxy parameters for {@link IDevicePolicyManager#setGlobalProxy}.
+     * @throws IllegalArgumentException Invalid proxySpec
+     * @hide
+     */
+    @VisibleForTesting
+    public Pair<String, String> getProxyParameters(Proxy proxySpec, List<String> exclusionList) {
+        InetSocketAddress sa = (InetSocketAddress) proxySpec.address();
+        String hostName = sa.getHostName();
+        int port = sa.getPort();
+        final List<String> trimmedExclList;
+        if (exclusionList == null) {
+            trimmedExclList = Collections.emptyList();
+        } else {
+            trimmedExclList = new ArrayList<>(exclusionList.size());
+            for (String exclDomain : exclusionList) {
+                trimmedExclList.add(exclDomain.trim());
+            }
+        }
+        final ProxyInfo info = ProxyInfo.buildDirectProxy(hostName, port, trimmedExclList);
+        // The hostSpec is built assuming that there is a specified port and hostname,
+        // but ProxyInfo.isValid() accepts 0 / empty as unspecified: also reject them.
+        if (port == 0 || TextUtils.isEmpty(hostName) || !info.isValid()) {
+            throw new IllegalArgumentException();
+        }
+
+        return new Pair<>(hostName + ":" + port, TextUtils.join(",", trimmedExclList));
     }
 
     /**
@@ -11466,7 +11477,7 @@ public class DevicePolicyManager {
             return PRIVATE_DNS_SET_ERROR_FAILURE_SETTING;
         }
 
-        if (NetworkUtils.isWeaklyValidatedHostname(privateDnsHost)) {
+        if (NetworkUtilsInternal.isWeaklyValidatedHostname(privateDnsHost)) {
             if (!PrivateDnsConnectivityChecker.canConnectToPrivateDnsServer(privateDnsHost)) {
                 return PRIVATE_DNS_SET_ERROR_HOST_NOT_SERVING;
             }

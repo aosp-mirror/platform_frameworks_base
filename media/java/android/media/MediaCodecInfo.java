@@ -25,6 +25,7 @@ import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
+import android.os.Process;
 import android.os.SystemProperties;
 import android.util.Log;
 import android.util.Pair;
@@ -188,13 +189,14 @@ public final class MediaCodecInfo {
 
     // COMMON CONSTANTS
     private static final Range<Integer> POSITIVE_INTEGERS =
-        Range.create(1, Integer.MAX_VALUE);
+            Range.create(1, Integer.MAX_VALUE);
     private static final Range<Long> POSITIVE_LONGS =
-        Range.create(1l, Long.MAX_VALUE);
+            Range.create(1L, Long.MAX_VALUE);
     private static final Range<Rational> POSITIVE_RATIONALS =
-        Range.create(new Rational(1, Integer.MAX_VALUE),
-                     new Rational(Integer.MAX_VALUE, 1));
-    private static final Range<Integer> SIZE_RANGE = Range.create(1, 32768);
+            Range.create(new Rational(1, Integer.MAX_VALUE),
+                         new Rational(Integer.MAX_VALUE, 1));
+    private static final Range<Integer> SIZE_RANGE =
+            Process.is64Bit() ? Range.create(1, 32768) : Range.create(1, 4096);
     private static final Range<Integer> FRAME_RATE_RANGE = Range.create(0, 960);
     private static final Range<Integer> BITRATE_RANGE = Range.create(0, 500000000);
     private static final int DEFAULT_MAX_SUPPORTED_INSTANCES = 32;
@@ -1399,6 +1401,9 @@ public final class MediaCodecInfo {
 
         /**
          * Returns the range of supported video widths.
+         * <p class=note>
+         * 32-bit processes will not support resolutions larger than 4096x4096 due to
+         * the limited address space.
          */
         public Range<Integer> getSupportedWidths() {
             return mWidthRange;
@@ -1406,6 +1411,9 @@ public final class MediaCodecInfo {
 
         /**
          * Returns the range of supported video heights.
+         * <p class=note>
+         * 32-bit processes will not support resolutions larger than 4096x4096 due to
+         * the limited address space.
          */
         public Range<Integer> getSupportedHeights() {
             return mHeightRange;
@@ -1997,6 +2005,12 @@ public final class MediaCodecInfo {
          * Performance points assume a single active codec. For use cases where multiple
          * codecs are active, should use that highest pixel count, and add the frame rates of
          * each individual codec.
+         * <p class=note>
+         * 32-bit processes will not support resolutions larger than 4096x4096 due to
+         * the limited address space, but performance points will be presented as is.
+         * In other words, even though a component publishes a performance point for
+         * a resolution higher than 4096x4096, it does not mean that the resolution is supported
+         * for 32-bit processes.
          */
         @Nullable
         public List<PerformancePoint> getSupportedPerformancePoints() {
@@ -2164,6 +2178,12 @@ public final class MediaCodecInfo {
                 if (size == null || size.getWidth() * size.getHeight() <= 0) {
                     continue;
                 }
+                if (size.getWidth() > SIZE_RANGE.getUpper()
+                        || size.getHeight() > SIZE_RANGE.getUpper()) {
+                    size = new Size(
+                            Math.min(size.getWidth(), SIZE_RANGE.getUpper()),
+                            Math.min(size.getHeight(), SIZE_RANGE.getUpper()));
+                }
                 Range<Long> range = Utils.parseLongRange(map.get(key), null);
                 if (range == null || range.getLower() < 0 || range.getUpper() < 0) {
                     continue;
@@ -2193,6 +2213,7 @@ public final class MediaCodecInfo {
                                (a.getMaxMacroBlockRate() < b.getMaxMacroBlockRate() ? -1 : 1) :
                        (a.getMaxFrameRate() != b.getMaxFrameRate()) ?
                                (a.getMaxFrameRate() < b.getMaxFrameRate() ? -1 : 1) : 0));
+
             return Collections.unmodifiableList(ret);
         }
 

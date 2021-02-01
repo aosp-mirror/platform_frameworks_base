@@ -37,6 +37,8 @@ import android.widget.RemoteViews;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.ImageMessageConsumer;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.media.MediaDataManagerKt;
+import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.SmartReplyController;
@@ -71,6 +73,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     public static final String TAG = "NotifContentInflater";
 
     private boolean mInflateSynchronously = false;
+    private final boolean mIsMediaInQS;
     private final NotificationRemoteInputManager mRemoteInputManager;
     private final NotifRemoteViewCache mRemoteViewCache;
     private final Lazy<SmartReplyConstants> mSmartReplyConstants;
@@ -85,12 +88,14 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             Lazy<SmartReplyConstants> smartReplyConstants,
             Lazy<SmartReplyController> smartReplyController,
             ConversationNotificationProcessor conversationProcessor,
+            MediaFeatureFlag mediaFeatureFlag,
             @Background Executor bgExecutor) {
         mRemoteViewCache = remoteViewCache;
         mRemoteInputManager = remoteInputManager;
         mSmartReplyConstants = smartReplyConstants;
         mSmartReplyController = smartReplyController;
         mConversationProcessor = conversationProcessor;
+        mIsMediaInQS = mediaFeatureFlag.getEnabled();
         mBgExecutor = bgExecutor;
     }
 
@@ -135,7 +140,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 bindParams.usesIncreasedHeight,
                 bindParams.usesIncreasedHeadsUpHeight,
                 callback,
-                mRemoteInputManager.getRemoteViewsOnClickHandler());
+                mRemoteInputManager.getRemoteViewsOnClickHandler(),
+                mIsMediaInQS);
         if (mInflateSynchronously) {
             task.onPostExecute(task.doInBackground());
         } else {
@@ -711,6 +717,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         private RemoteViews.OnClickHandler mRemoteViewClickHandler;
         private CancellationSignal mCancellationSignal;
         private final ConversationNotificationProcessor mConversationProcessor;
+        private final boolean mIsMediaInQS;
 
         private AsyncInflationTask(
                 Executor bgExecutor,
@@ -726,7 +733,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 boolean usesIncreasedHeight,
                 boolean usesIncreasedHeadsUpHeight,
                 InflationCallback callback,
-                RemoteViews.OnClickHandler remoteViewClickHandler) {
+                RemoteViews.OnClickHandler remoteViewClickHandler,
+                boolean isMediaFlagEnabled) {
             mEntry = entry;
             mRow = row;
             mSmartReplyConstants = smartReplyConstants;
@@ -742,6 +750,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
             mRemoteViewClickHandler = remoteViewClickHandler;
             mCallback = callback;
             mConversationProcessor = conversationProcessor;
+            mIsMediaInQS = isMediaFlagEnabled;
             entry.setInflationTask(this);
         }
 
@@ -765,7 +774,8 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                     packageContext = new RtlEnabledContext(packageContext);
                 }
                 Notification notification = sbn.getNotification();
-                if (notification.isMediaNotification()) {
+                if (notification.isMediaNotification() && !(mIsMediaInQS
+                        && MediaDataManagerKt.isMediaNotification(sbn))) {
                     MediaNotificationProcessor processor = new MediaNotificationProcessor(mContext,
                             packageContext);
                     processor.processNotification(notification, recoveredBuilder);

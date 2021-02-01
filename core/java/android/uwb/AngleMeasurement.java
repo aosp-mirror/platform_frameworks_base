@@ -17,6 +17,8 @@
 package android.uwb;
 
 import android.annotation.FloatRange;
+import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -30,6 +32,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class AngleMeasurement implements Parcelable {
     private final double mRadians;
     private final double mErrorRadians;
@@ -109,7 +112,7 @@ public final class AngleMeasurement implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeDouble(mRadians);
         dest.writeDouble(mErrorRadians);
         dest.writeDouble(mConfidenceLevel);
@@ -146,6 +149,7 @@ public final class AngleMeasurement implements Parcelable {
          * @param radians angle in radians
          * @throws IllegalArgumentException if angle exceeds allowed limits of [-Math.PI, +Math.PI]
          */
+        @NonNull
         public Builder setRadians(double radians) {
             if (radians < -Math.PI || radians > Math.PI) {
                 throw new IllegalArgumentException("Invalid radians: " + radians);
@@ -160,6 +164,7 @@ public final class AngleMeasurement implements Parcelable {
          * @param errorRadians error of the angle in radians
          * @throws IllegalArgumentException if the error exceeds the allowed limits of [0, +Math.PI]
          */
+        @NonNull
         public Builder setErrorRadians(double errorRadians) {
             if (errorRadians < 0.0 || errorRadians > Math.PI) {
                 throw new IllegalArgumentException(
@@ -175,6 +180,7 @@ public final class AngleMeasurement implements Parcelable {
          * @param confidenceLevel level of confidence of the angle measurement
          * @throws IllegalArgumentException if the error exceeds the allowed limits of [0.0, 1.0]
          */
+        @NonNull
         public Builder setConfidenceLevel(double confidenceLevel) {
             if (confidenceLevel < 0.0 || confidenceLevel > 1.0) {
                 throw new IllegalArgumentException(
@@ -189,6 +195,7 @@ public final class AngleMeasurement implements Parcelable {
          *
          * @throws IllegalStateException if angle, error, or confidence values are missing
          */
+        @NonNull
         public AngleMeasurement build() {
             if (Double.isNaN(mRadians)) {
                 throw new IllegalStateException("Angle is not set");

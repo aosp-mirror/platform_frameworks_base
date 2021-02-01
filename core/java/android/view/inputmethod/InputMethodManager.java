@@ -611,7 +611,8 @@ public final class InputMethodManager {
         @Override
         public void startInputAsyncOnWindowFocusGain(View focusedView,
                 @SoftInputModeFlags int softInputMode, int windowFlags, boolean forceNewFocus) {
-            final int startInputFlags = getStartInputFlags(focusedView, 0);
+            int startInputFlags = getStartInputFlags(focusedView, 0);
+            startInputFlags |= StartInputFlags.WINDOW_GAINED_FOCUS;
 
             final ImeFocusController controller = getFocusController();
             if (controller == null) {

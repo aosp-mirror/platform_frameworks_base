@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Bluetooth құрылғыларын атаусыз көрсету"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"Абсолютті дыбыс деңгейін өшіру"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche функциясын іске қосу"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"Жетілдірілген байланыс"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"Bluetooth AVRCP нұсқасы"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Bluetooth AVRCP нұсқасын таңдау"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Bluetooth MAP нұсқасы"</string>

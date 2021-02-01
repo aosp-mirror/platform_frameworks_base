@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
+import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
@@ -33,6 +34,7 @@ import java.util.Objects;
  *
  * @hide
  */
+@SystemApi
 public final class RangingMeasurement implements Parcelable {
     private final UwbAddress mRemoteDeviceAddress;
     private final @Status int mStatus;
@@ -60,6 +62,9 @@ public final class RangingMeasurement implements Parcelable {
         return mRemoteDeviceAddress;
     }
 
+    /**
+     * @hide
+     */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(value = {
             RANGING_STATUS_SUCCESS,
@@ -115,7 +120,7 @@ public final class RangingMeasurement implements Parcelable {
      *         {@link #RANGING_STATUS_SUCCESS}
      */
     @Nullable
-    public DistanceMeasurement getDistance() {
+    public DistanceMeasurement getDistanceMeasurement() {
         return mDistanceMeasurement;
     }
 
@@ -126,7 +131,7 @@ public final class RangingMeasurement implements Parcelable {
      *         {@link #RANGING_STATUS_SUCCESS}
      */
     @Nullable
-    public AngleOfArrivalMeasurement getAngleOfArrival() {
+    public AngleOfArrivalMeasurement getAngleOfArrivalMeasurement() {
         return mAngleOfArrivalMeasurement;
     }
 
@@ -144,8 +149,8 @@ public final class RangingMeasurement implements Parcelable {
             return mRemoteDeviceAddress.equals(other.getRemoteDeviceAddress())
                     && mStatus == other.getStatus()
                     && mElapsedRealtimeNanos == other.getElapsedRealtimeNanos()
-                    && mDistanceMeasurement.equals(other.getDistance())
-                    && mAngleOfArrivalMeasurement.equals(other.getAngleOfArrival());
+                    && mDistanceMeasurement.equals(other.getDistanceMeasurement())
+                    && mAngleOfArrivalMeasurement.equals(other.getAngleOfArrivalMeasurement());
         }
         return false;
     }
@@ -165,7 +170,7 @@ public final class RangingMeasurement implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeParcelable(mRemoteDeviceAddress, flags);
         dest.writeInt(mStatus);
         dest.writeLong(mElapsedRealtimeNanos);
@@ -210,6 +215,7 @@ public final class RangingMeasurement implements Parcelable {
          *
          * @param remoteDeviceAddress remote device's address
          */
+        @NonNull
         public Builder setRemoteDeviceAddress(@NonNull UwbAddress remoteDeviceAddress) {
             mRemoteDeviceAddress = remoteDeviceAddress;
             return this;
@@ -220,6 +226,7 @@ public final class RangingMeasurement implements Parcelable {
          *
          * @param status the status of the ranging measurement
          */
+        @NonNull
         public Builder setStatus(@Status int status) {
             mStatus = status;
             return this;
@@ -230,6 +237,7 @@ public final class RangingMeasurement implements Parcelable {
          *
          * @param elapsedRealtimeNanos time the ranging measurement occurred
          */
+        @NonNull
         public Builder setElapsedRealtimeNanos(long elapsedRealtimeNanos) {
             if (elapsedRealtimeNanos < 0) {
                 throw new IllegalArgumentException("elapsedRealtimeNanos must be >= 0");
@@ -243,6 +251,7 @@ public final class RangingMeasurement implements Parcelable {
          *
          * @param distanceMeasurement the distance measurement for this ranging measurement
          */
+        @NonNull
         public Builder setDistanceMeasurement(@NonNull DistanceMeasurement distanceMeasurement) {
             mDistanceMeasurement = distanceMeasurement;
             return this;
@@ -254,6 +263,7 @@ public final class RangingMeasurement implements Parcelable {
          * @param angleOfArrivalMeasurement the angle of arrival measurement for this ranging
          *                                  measurement
          */
+        @NonNull
         public Builder setAngleOfArrivalMeasurement(
                 @NonNull AngleOfArrivalMeasurement angleOfArrivalMeasurement) {
             mAngleOfArrivalMeasurement = angleOfArrivalMeasurement;
@@ -268,6 +278,7 @@ public final class RangingMeasurement implements Parcelable {
          *                               elapsedRealtimeNanos of the measurement is invalid, or
          *                               if no remote device address is set
          */
+        @NonNull
         public RangingMeasurement build() {
             if (mStatus != RANGING_STATUS_SUCCESS) {
                 if (mDistanceMeasurement != null) {

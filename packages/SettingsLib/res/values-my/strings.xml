@@ -28,7 +28,7 @@
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP ပြုပြင်ခြင်း မအောင်မြင်ပါ"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"ကွန်ရက်ချိတ်ဆက်မှု အားနည်းသည့်အတွက် ချိတ်ဆက်ထားခြင်း မရှိပါ"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"WiFi ချိတ်ဆက်မှု မအောင်မြင်ပါ"</string>
-    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"စစ်မှန်ကြောင်းအတည်ပြုရန်၌ ပြသနာရှိခြင်း"</string>
+    <string name="wifi_disabled_password_failure" msgid="6892387079613226738">"အထောက်အထားစိစစ်မှု ပြဿနာ"</string>
     <string name="wifi_cant_connect" msgid="5718417542623056783">"ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_cant_connect_to_ap" msgid="3099667989279700135">"\'<xliff:g id="AP_NAME">%1$s</xliff:g>\' နှင့် ချိတ်ဆက်၍ မရပါ"</string>
     <string name="wifi_check_password_try_again" msgid="8817789642851605628">"စကားဝှက်ကို စစ်ဆေးပြီး ထပ်လုပ်ကြည့်ပါ"</string>
@@ -257,7 +257,6 @@
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"အမည်မရှိသော ဘလူးတုသ်စက်ပစ္စည်းများကို ပြသရန်"</string>
     <string name="bluetooth_disable_absolute_volume" msgid="1452342324349203434">"ပကတိ အသံနှုန်း သတ်မှတ်ချက် ပိတ်ရန်"</string>
     <string name="bluetooth_enable_gabeldorsche" msgid="9131730396242883416">"Gabeldorsche ကို ဖွင့်ရန်"</string>
-    <string name="enhanced_connectivity" msgid="7201127377781666804">"အရည်အသွေးမြှင့်တင်ထားသော ချိတ်ဆက်နိုင်မှု"</string>
     <string name="bluetooth_select_avrcp_version_string" msgid="1710571610177659127">"ဘလူးတုသ် AVRCP ဗားရှင်း"</string>
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"ဘလူးတုသ် AVRCP ဗားရှင်းကို ရွေးပါ"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"ဘလူးတုသ် MAP ဗားရှင်း"</string>

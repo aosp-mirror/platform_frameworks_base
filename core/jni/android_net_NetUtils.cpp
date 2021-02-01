@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, The Android Open Source Project
+ * Copyright 2020, The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 
 #include <vector>
 
+#include <android/file_descriptor_jni.h>
 #include <arpa/inet.h>
 #include <linux/filter.h>
 #include <linux/if_arp.h>
@@ -28,7 +29,6 @@
 #include <netinet/udp.h>
 
 #include <DnsProxydProtocol.h> // NETID_USE_LOCAL_NAMESERVERS
-#include <android_runtime/AndroidRuntime.h>
 #include <cutils/properties.h>
 #include <nativehelper/JNIPlatformHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
@@ -84,7 +84,7 @@ static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz,
         filter_code,
     };
 
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    int fd = AFileDescriptor_getFD(env, javaFd);
     if (setsockopt(fd, SOL_SOCKET, SO_ATTACH_FILTER, &filter, sizeof(filter)) != 0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
                 "setsockopt(SO_ATTACH_FILTER): %s", strerror(errno));
@@ -94,7 +94,7 @@ static void android_net_utils_attachDropAllBPFFilter(JNIEnv *env, jobject clazz,
 static void android_net_utils_detachBPFFilter(JNIEnv *env, jobject clazz, jobject javaFd)
 {
     int optval_ignored = 0;
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    int fd = AFileDescriptor_getFD(env, javaFd);
     if (setsockopt(fd, SOL_SOCKET, SO_DETACH_FILTER, &optval_ignored, sizeof(optval_ignored)) !=
         0) {
         jniThrowExceptionFmt(env, "java/net/SocketException",
@@ -118,15 +118,18 @@ static jboolean android_net_utils_bindProcessToNetworkForHostResolution(JNIEnv *
     return (jboolean) !setNetworkForResolv(netId);
 }
 
-static jint android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jint socket,
-        jint netId)
-{
-    return setNetworkForSocket(netId, socket);
+static jint android_net_utils_bindSocketToNetwork(JNIEnv *env, jobject thiz, jobject javaFd,
+                                                  jint netId) {
+    return setNetworkForSocket(netId, AFileDescriptor_getFD(env, javaFd));
 }
 
 static jboolean android_net_utils_protectFromVpn(JNIEnv *env, jobject thiz, jint socket)
 {
     return (jboolean) !protectFromVpn(socket);
+}
+
+static jboolean android_net_utils_protectFromVpnWithFd(JNIEnv *env, jobject thiz, jobject javaFd) {
+    return android_net_utils_protectFromVpn(env, thiz, AFileDescriptor_getFD(env, javaFd));
 }
 
 static jboolean android_net_utils_queryUserAccess(JNIEnv *env, jobject thiz, jint uid, jint netId)
@@ -179,7 +182,7 @@ static jobject android_net_utils_resNetworkSend(JNIEnv *env, jobject thiz, jint 
 }
 
 static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, jobject javaFd) {
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    int fd = AFileDescriptor_getFD(env, javaFd);
     int rcode;
     std::vector<uint8_t> buf(MAXPACKETSIZE, 0);
 
@@ -206,7 +209,7 @@ static jobject android_net_utils_resNetworkResult(JNIEnv *env, jobject thiz, job
 }
 
 static void android_net_utils_resNetworkCancel(JNIEnv *env, jobject thiz, jobject javaFd) {
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    int fd = AFileDescriptor_getFD(env, javaFd);
     resNetworkCancel(fd);
     jniSetFileDescriptorOfFD(env, javaFd, -1);
 }
@@ -226,18 +229,13 @@ static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
             class_Network, ctor, dnsNetId & ~NETID_USE_LOCAL_NAMESERVERS, privateDnsBypass);
 }
 
-static void android_net_utils_setAllowNetworkingForProcess(JNIEnv *env, jobject thiz,
-                                                           jboolean hasConnectivity) {
-    setAllowNetworkingForProcess(hasConnectivity == JNI_TRUE);
-}
-
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
     if (javaFd == NULL) {
         jniThrowNullPointerException(env, NULL);
         return NULL;
     }
 
-    int fd = jniGetFDFromFileDescriptor(env, javaFd);
+    int fd = AFileDescriptor_getFD(env, javaFd);
     struct tcp_repair_window trw = {};
     socklen_t size = sizeof(trw);
 
@@ -277,8 +275,9 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
     { "getBoundNetworkForProcess", "()I", (void*) android_net_utils_getBoundNetworkForProcess },
     { "bindProcessToNetworkForHostResolution", "(I)Z", (void*) android_net_utils_bindProcessToNetworkForHostResolution },
-    { "bindSocketToNetwork", "(II)I", (void*) android_net_utils_bindSocketToNetwork },
-    { "protectFromVpn", "(I)Z", (void*)android_net_utils_protectFromVpn },
+    { "bindSocketToNetwork", "(Ljava/io/FileDescriptor;I)I", (void*) android_net_utils_bindSocketToNetwork },
+    { "protectFromVpn", "(I)Z", (void*) android_net_utils_protectFromVpn },
+    { "protectFromVpn", "(Ljava/io/FileDescriptor;)Z", (void*) android_net_utils_protectFromVpnWithFd },
     { "queryUserAccess", "(II)Z", (void*)android_net_utils_queryUserAccess },
     { "attachDropAllBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_attachDropAllBPFFilter },
     { "detachBPFFilter", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_detachBPFFilter },
@@ -288,7 +287,6 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
     { "getDnsNetwork", "()Landroid/net/Network;", (void*) android_net_utils_getDnsNetwork },
-    { "setAllowNetworkingForProcess", "(Z)V", (void *)android_net_utils_setAllowNetworkingForProcess },
 };
 // clang-format on
 

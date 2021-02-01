@@ -18,9 +18,9 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.hardware.biometrics.BiometricManager;
-import android.hardware.keymint.HardwareAuthenticatorType;
-import android.hardware.keymint.KeyParameter;
-import android.hardware.keymint.SecurityLevel;
+import android.hardware.security.keymint.HardwareAuthenticatorType;
+import android.hardware.security.keymint.KeyParameter;
+import android.hardware.security.keymint.SecurityLevel;
 import android.security.GateKeeper;
 import android.security.KeyStore2;
 import android.security.KeyStoreParameter;
@@ -219,7 +219,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
         return null;
     }
 
-    private static X509Certificate toCertificate(byte[] bytes) {
+    static X509Certificate toCertificate(byte[] bytes) {
         try {
             final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
             return (X509Certificate) certFactory.generateCertificate(
@@ -250,13 +250,10 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             return null;
         }
 
-
-        // TODO add modification time to key metadata.
-        return null;
-        // if (response.metadata.modificationTime == -1) {
-        //     return null;
-        // }
-        // return new Date(response.metadata.modificationTime);
+        if (response.metadata.modificationTimeMs == -1) {
+            return null;
+        }
+        return new Date(response.metadata.modificationTimeMs);
     }
 
     @Override
@@ -493,7 +490,7 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
             int[] keymasterEncryptionPaddings =
                     KeyProperties.EncryptionPadding.allToKeymaster(
                             spec.getEncryptionPaddings());
-            if (((spec.getPurposes() & KeyProperties.PURPOSE_DECRYPT) != 0)
+            if (((spec.getPurposes() & KeyProperties.PURPOSE_ENCRYPT) != 0)
                     && (spec.isRandomizedEncryptionRequired())) {
                 for (int keymasterPadding : keymasterEncryptionPaddings) {
                     if (!KeymasterUtils

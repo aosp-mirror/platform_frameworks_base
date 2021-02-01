@@ -299,7 +299,10 @@ public abstract class PackageManager {
     /**
      * {@link PackageInfo} flag: return information about the
      * intent filters supported by the activity.
+     *
+     * @deprecated The platform does not support getting {@link IntentFilter}s for the package.
      */
+    @Deprecated
     public static final int GET_INTENT_FILTERS          = 0x00000020;
 
     /**
@@ -1036,6 +1039,60 @@ public abstract class PackageManager {
      * @hide
      */
     public static final int INSTALL_REASON_ROLLBACK = 5;
+
+    /** @hide */
+    @IntDef(prefix = { "INSTALL_SCENARIO_" }, value = {
+            INSTALL_SCENARIO_DEFAULT,
+            INSTALL_SCENARIO_FAST,
+            INSTALL_SCENARIO_BULK,
+            INSTALL_SCENARIO_BULK_SECONDARY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallScenario {}
+
+    /**
+     * A value to indicate the lack of CUJ information, disabling all installation scenario logic.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_DEFAULT = 0;
+
+    /**
+     * Installation scenario providing the fastest “install button to launch" experience possible.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_FAST = 1;
+
+    /**
+     * Installation scenario indicating a bulk operation with the desired result of a fully
+     * optimized application.  If the system is busy or resources are scarce the system will
+     * perform less work to avoid impacting system health.
+     *
+     * Examples of bulk installation scenarios might include device restore, background updates of
+     * multiple applications, or user-triggered updates for all applications.
+     *
+     * The decision to use BULK or BULK_SECONDARY should be based on the desired user experience.
+     * BULK_SECONDARY operations may take less time to complete but, when they do, will produce
+     * less optimized applications.  The device state (e.g. memory usage or battery status) should
+     * not be considered when making this decision as those factors are taken into account by the
+     * Package Manager when acting on the installation scenario.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_BULK = 2;
+
+    /**
+     * Installation scenario indicating a bulk operation that prioritizes minimal system health
+     * impact over application optimization.  The application may undergo additional optimization
+     * if the system is idle and system resources are abundant.  The more elements of a bulk
+     * operation that are marked BULK_SECONDARY, the faster the entire bulk operation will be.
+     *
+     * See the comments for INSTALL_SCENARIO_BULK for more information.
+     *
+     * @hide
+     */
+    public static final int INSTALL_SCENARIO_BULK_SECONDARY = 3;
 
     /** @hide */
     @IntDef(prefix = { "UNINSTALL_REASON_" }, value = {
@@ -2068,6 +2125,35 @@ public abstract class PackageManager {
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
+     * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
+     * at the given feature version.
+     *
+     * <p>Known feature versions include:
+     * <ul>
+     * <li><code>202009</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 11.
+     * <li><code>202101</code>: corresponds to the features included in the Identity Credential
+     * API shipped in Android 12.
+     * </ul>
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE =
+            "android.hardware.identity_credential";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the device supports
+     * {@link android.security.identity.IdentityCredentialStore} implemented in secure hardware
+     * with direct access at the given feature version.
+     * See {@link #FEATURE_IDENTITY_CREDENTIAL_HARDWARE} for known feature versions.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_IDENTITY_CREDENTIAL_HARDWARE_DIRECT_ACCESS =
+            "android.hardware.identity_credential_direct_access";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
      * {@link #hasSystemFeature}: The device supports one or more methods of
      * reporting current location.
      */
@@ -2310,6 +2396,23 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_VULKAN_DEQP_LEVEL = "android.software.vulkan.deqp.level";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and
+     * {@link #hasSystemFeature(String, int)}: If this feature is supported, the feature version
+     * specifies a date such that the device is known to pass the OpenGLES dEQP test suite
+     * associated with that date.  The date is encoded as follows:
+     * <ul>
+     * <li>Year in bits 31-16</li>
+     * <li>Month in bits 15-8</li>
+     * <li>Day in bits 7-0</li>
+     * </ul>
+     * <p>
+     * Example: 2021-03-01 is encoded as 0x07E50301, and would indicate that the device passes the
+     * OpenGL ES dEQP test suite version that was current on 2021-03-01.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_OPENGLES_DEQP_LEVEL = "android.software.opengles.deqp.level";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and

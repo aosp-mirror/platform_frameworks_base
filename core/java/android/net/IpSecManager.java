@@ -15,6 +15,8 @@
  */
 package android.net;
 
+import static android.annotation.SystemApi.Client.MODULE_LIBRARIES;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
@@ -628,7 +630,7 @@ public final class IpSecManager {
         }
 
         /** @hide */
-        @VisibleForTesting
+        @SystemApi(client = MODULE_LIBRARIES)
         public int getResourceId() {
             return mResourceId;
         }

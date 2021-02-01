@@ -1114,28 +1114,30 @@ public class AppOpsManager {
     public static final int OP_NO_ISOLATED_STORAGE = AppProtoEnums.APP_OP_NO_ISOLATED_STORAGE;
 
     /**
-     * Reserved key for 100
+     * Phone call is using microphone
      *
      * @hide
      */
-    public static final int OP_RESERVED_100 = 100;
+    // TODO: Add as AppProtoEnums
+    public static final int OP_PHONE_CALL_MICROPHONE = 100;
+    /**
+     * Phone call is using camera
+     *
+     * @hide
+     */
+    // TODO: Add as AppProtoEnums
+    public static final int OP_PHONE_CALL_CAMERA = 101;
 
     /**
-     * Reserved key for 101
+     * Audio is being recorded for hotword detection.
      *
      * @hide
      */
-    public static final int OP_RESERVED_101 = 101;
-
-    /**
-     * Reserved key for 102
-     *
-     * @hide
-     */
-    public static final int OP_RESERVED_102 = 102;
+    // TODO: Add as AppProtoEnums
+    public static final int OP_RECORD_AUDIO_HOTWORD = 102;
 
     /** @hide */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
+    @UnsupportedAppUsage
     public static final int _NUM_OP = 104;
 
     /** Access to coarse location information. */
@@ -1464,25 +1466,24 @@ public class AppOpsManager {
     public static final String OPSTR_NO_ISOLATED_STORAGE = "android:no_isolated_storage";
 
     /**
-     * Reserved for 100
+     * Phone call is using microphone
      *
      * @hide
      */
-    public static final String OPSTR_RESERVED_100 = "android:opstr_reserved_100";
+    public static final String OPSTR_PHONE_CALL_MICROPHONE = "android:phone_call_microphone";
+    /**
+     * Phone call is using camera
+     *
+     * @hide
+     */
+    public static final String OPSTR_PHONE_CALL_CAMERA = "android:phone_call_camera";
 
     /**
-     * Reserved for 101
+     * Audio is being recorded for hotword detection.
      *
      * @hide
      */
-    public static final String OPSTR_RESERVED_101 = "android:opstr_reserved_101";
-
-    /**
-     * Reserved for 102
-     *
-     * @hide
-     */
-    public static final String OPSTR_RESERVED_102 = "android:opstr_reserved_102";
+    public static final String OPSTR_RECORD_AUDIO_HOTWORD = "android:record_audio_hotword";
 
     /** {@link #sAppOpsToNote} not initialized yet for this op */
     private static final byte SHOULD_COLLECT_NOTE_OP_NOT_INITIALIZED = 0;
@@ -1674,9 +1675,9 @@ public class AppOpsManager {
             OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED, //AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             OP_AUTO_REVOKE_MANAGED_BY_INSTALLER, //OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             OP_NO_ISOLATED_STORAGE,             // NO_ISOLATED_STORAGE
-            OP_RESERVED_100,                    // OP_RESERVED_100
-            OP_RESERVED_101,                    // OP_RESERVED_101
-            OP_RESERVED_102,                    // OP_RESERVED_102
+            OP_PHONE_CALL_MICROPHONE,           // OP_PHONE_CALL_MICROPHONE
+            OP_PHONE_CALL_CAMERA,               // OP_PHONE_CALL_CAMERA
+            OP_RECORD_AUDIO_HOTWORD,            // RECORD_AUDIO_HOTWORD
             OP_MANAGE_ONGOING_CALLS,            // MANAGE_ONGOING_CALLS
     };
 
@@ -1784,9 +1785,9 @@ public class AppOpsManager {
             OPSTR_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
             OPSTR_AUTO_REVOKE_MANAGED_BY_INSTALLER,
             OPSTR_NO_ISOLATED_STORAGE,
-            OPSTR_RESERVED_100,
-            OPSTR_RESERVED_101,
-            OPSTR_RESERVED_102,
+            OPSTR_PHONE_CALL_MICROPHONE,
+            OPSTR_PHONE_CALL_CAMERA,
+            OPSTR_RECORD_AUDIO_HOTWORD,
             OPSTR_MANAGE_ONGOING_CALLS,
     };
 
@@ -1895,9 +1896,9 @@ public class AppOpsManager {
             "AUTO_REVOKE_PERMISSIONS_IF_UNUSED",
             "AUTO_REVOKE_MANAGED_BY_INSTALLER",
             "NO_ISOLATED_STORAGE",
-            "RESERVED_100",
-            "RESERVED_101",
-            "RESERVED_102",
+            "PHONE_CALL_MICROPHONE",
+            "PHONE_CALL_CAMERA",
+            "RECORD_AUDIO_HOTWORD",
             "MANAGE_ONGOING_CALLS",
     };
 
@@ -2007,9 +2008,9 @@ public class AppOpsManager {
             null, // no permission for OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // no permission for OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // no permission for OP_NO_ISOLATED_STORAGE
-            null, // OP_RESERVED_100
-            null, // OP_RESERVED_101
-            null, // OP_RESERVED_102
+            null, // no permission for OP_PHONE_CALL_MICROPHONE
+            null, // no permission for OP_PHONE_CALL_CAMERA
+            null, // no permission for OP_RECORD_AUDIO_HOTWORD
             Manifest.permission.MANAGE_ONGOING_CALLS,
     };
 
@@ -2119,9 +2120,9 @@ public class AppOpsManager {
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // NO_ISOLATED_STORAGE
-            null, // OP_RESERVED_100
-            null, // OP_RESERVED_101
-            null, // OP_RESERVED_102
+            null, // PHONE_CALL_MICROPHONE
+            null, // PHONE_CALL_MICROPHONE
+            null, // RECORD_AUDIO_HOTWORD
             null, // MANAGE_ONGOING_CALLS
     };
 
@@ -2230,9 +2231,9 @@ public class AppOpsManager {
             null, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             null, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             null, // NO_ISOLATED_STORAGE
-            null, // OP_RESERVED_100
-            null, // OP_RESERVED_101
-            null, // OP_RESERVED_102
+            null, // PHONE_CALL_MICROPHONE
+            null, // PHONE_CALL_CAMERA
+            null, // RECORD_AUDIO_HOTWORD
             null, // MANAGE_ONGOING_CALLS
     };
 
@@ -2340,9 +2341,9 @@ public class AppOpsManager {
             AppOpsManager.MODE_DEFAULT, // OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             AppOpsManager.MODE_ALLOWED, // OP_AUTO_REVOKE_MANAGED_BY_INSTALLER
             AppOpsManager.MODE_ERRORED, // OP_NO_ISOLATED_STORAGE
-            AppOpsManager.MODE_ERRORED, // OP_RESERVED_100
-            AppOpsManager.MODE_ERRORED, // OP_RESERVED_101
-            AppOpsManager.MODE_ERRORED, // OP_RESERVED_102
+            AppOpsManager.MODE_ALLOWED, // PHONE_CALL_MICROPHONE
+            AppOpsManager.MODE_ALLOWED, // PHONE_CALL_CAMERA
+            AppOpsManager.MODE_ALLOWED, // OP_RECORD_AUDIO_HOTWORD
             AppOpsManager.MODE_DEFAULT, // MANAGE_ONGOING_CALLS
     };
 
@@ -2454,9 +2455,9 @@ public class AppOpsManager {
             false, // AUTO_REVOKE_PERMISSIONS_IF_UNUSED
             false, // AUTO_REVOKE_MANAGED_BY_INSTALLER
             true, // NO_ISOLATED_STORAGE
-            false, // OP_RESERVED_100
-            false, // OP_RESERVED_101
-            false, // OP_RESERVED_102
+            false, // PHONE_CALL_MICROPHONE
+            false, // PHONE_CALL_CAMERA
+            false, // RECORD_AUDIO_HOTWORD
             true, // MANAGE_ONGOING_CALLS
     };
 

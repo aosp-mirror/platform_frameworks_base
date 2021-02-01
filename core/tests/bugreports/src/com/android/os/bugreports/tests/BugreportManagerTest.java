@@ -23,7 +23,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.BugreportManager;
 import android.os.BugreportManager.BugreportCallback;
 import android.os.BugreportParams;
@@ -31,7 +34,9 @@ import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.ParcelFileDescriptor;
+import android.os.Process;
 import android.os.StrictMode;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -53,9 +58,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-
 
 /**
  * Tests for BugreportManager API.
@@ -67,7 +73,21 @@ public class BugreportManagerTest {
 
     private static final String TAG = "BugreportManagerTest";
     private static final long BUGREPORT_TIMEOUT_MS = TimeUnit.MINUTES.toMillis(10);
+    private static final long DUMPSTATE_STARTUP_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
     private static final long UIAUTOMATOR_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(10);
+
+
+    // A small timeout used when waiting for the result of a BugreportCallback to be received.
+    // This value must be at least 1000ms since there is an intentional delay in
+    // BugreportManagerServiceImpl in the error case.
+    private static final long CALLBACK_RESULT_TIMEOUT_MS = 1500;
+
+    // Sent by Shell when its bugreport finishes (contains final bugreport/screenshot file name
+    // associated with the bugreport).
+    private static final String INTENT_BUGREPORT_FINISHED =
+            "com.android.internal.intent.action.BUGREPORT_FINISHED";
+    private static final String EXTRA_BUGREPORT = "android.intent.extra.BUGREPORT";
+    private static final String EXTRA_SCREENSHOT = "android.intent.extra.SCREENSHOT";
 
     private Handler mHandler;
     private Executor mExecutor;
@@ -118,6 +138,7 @@ public class BugreportManagerTest {
         // Wifi bugreports should not receive any progress.
         assertThat(callback.hasReceivedProgress()).isFalse();
         assertThat(mBugreportFile.length()).isGreaterThan(0L);
+        assertThat(callback.hasEarlyReportFinished()).isTrue();
         assertFdsAreClosed(mBugreportFd);
     }
 
@@ -135,6 +156,7 @@ public class BugreportManagerTest {
         // Interactive bugreports show progress updates.
         assertThat(callback.hasReceivedProgress()).isTrue();
         assertThat(mBugreportFile.length()).isGreaterThan(0L);
+        assertThat(callback.hasEarlyReportFinished()).isTrue();
         assertFdsAreClosed(mBugreportFd);
     }
 
@@ -169,7 +191,7 @@ public class BugreportManagerTest {
         ParcelFileDescriptor bugreportFd2 = parcelFd(bugreportFile2);
         ParcelFileDescriptor screenshotFd2 = parcelFd(screenshotFile2);
         mBrm.startBugreport(bugreportFd2, screenshotFd2, wifi(), mExecutor, callback2);
-        Thread.sleep(500 /* .5s */);
+        Thread.sleep(CALLBACK_RESULT_TIMEOUT_MS);
 
         // Verify #2 encounters an error.
         assertThat(callback2.getErrorCode()).isEqualTo(
@@ -178,7 +200,7 @@ public class BugreportManagerTest {
 
         // Cancel #1 so we can move on to the next test.
         mBrm.cancelBugreport();
-        Thread.sleep(500 /* .5s */);
+        waitTillDoneOrTimeout(callback);
         assertThat(callback.isDone()).isTrue();
         assertFdsAreClosed(mBugreportFd, mScreenshotFd);
     }
@@ -204,9 +226,51 @@ public class BugreportManagerTest {
         // Try again, with DUMP permission.
         getPermissions();
         mBrm.cancelBugreport();
-        Thread.sleep(500 /* .5s */);
+        waitTillDoneOrTimeout(callback);
         assertThat(callback.isDone()).isTrue();
         assertFdsAreClosed(mBugreportFd, mScreenshotFd);
+    }
+
+    @Test
+    public void cancelBugreport_noReportStarted() throws Exception {
+        // Without the native DumpstateService running, we don't get a SecurityException.
+        mBrm.cancelBugreport();
+    }
+
+    @LargeTest
+    @Test
+    public void cancelBugreport_fromDifferentUid() throws Exception {
+        assertThat(Process.myUid()).isNotEqualTo(Process.SHELL_UID);
+
+        // Start a bugreport through ActivityManager's shell command - this starts a BR from the
+        // shell UID rather than our own.
+        BugreportBroadcastReceiver br = new BugreportBroadcastReceiver();
+        InstrumentationRegistry.getContext()
+                .registerReceiver(br, new IntentFilter(INTENT_BUGREPORT_FINISHED));
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                .executeShellCommand("am bug-report");
+
+        // The command triggers the report through a broadcast, so wait until dumpstate actually
+        // starts up, which may take a bit.
+        waitTillDumpstateRunningOrTimeout();
+
+        try {
+            mBrm.cancelBugreport();
+            fail("Expected cancelBugreport to throw SecurityException when report started by "
+                    + "different UID");
+        } catch (SecurityException expected) {
+        } finally {
+            // Do this in the finally block so that even if this test case fails, we don't break
+            // other test cases unexpectedly due to the still-running shell report.
+            try {
+                // The shell's BR is still running and should complete successfully.
+                br.waitForBugreportFinished();
+            } finally {
+                // The latch may fail for a number of reasons but we still need to unregister the
+                // BroadcastReceiver.
+                InstrumentationRegistry.getContext().unregisterReceiver(br);
+            }
+        }
     }
 
     @Test
@@ -246,6 +310,7 @@ public class BugreportManagerTest {
         private int mErrorCode = -1;
         private boolean mSuccess = false;
         private boolean mReceivedProgress = false;
+        private boolean mEarlyReportFinished = false;
         private final Object mLock = new Object();
 
         @Override
@@ -271,6 +336,13 @@ public class BugreportManagerTest {
             }
         }
 
+        @Override
+        public void onEarlyReportFinished() {
+            synchronized (mLock) {
+                mEarlyReportFinished = true;
+            }
+        }
+
         /* Indicates completion; and ended up with a success or error. */
         public boolean isDone() {
             synchronized (mLock) {
@@ -293,6 +365,12 @@ public class BugreportManagerTest {
         public boolean hasReceivedProgress() {
             synchronized (mLock) {
                 return mReceivedProgress;
+            }
+        }
+
+        public boolean hasEarlyReportFinished() {
+            synchronized (mLock) {
+                return mEarlyReportFinished;
             }
         }
     }
@@ -330,6 +408,28 @@ public class BugreportManagerTest {
                 .adoptShellPermissionIdentity(Manifest.permission.DUMP);
     }
 
+    private static boolean isDumpstateRunning() {
+        String[] output;
+        try {
+            output =
+                    UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+                            .executeShellCommand("ps -A -o NAME | grep dumpstate")
+                            .trim()
+                            .split("\n");
+        } catch (IOException e) {
+            Log.w(TAG, "Failed to check if dumpstate is running", e);
+            return false;
+        }
+        for (String line : output) {
+            // Check for an exact match since there may be other things that contain "dumpstate" as
+            // a substring (e.g. the dumpstate HAL).
+            if (TextUtils.equals("dumpstate", line)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static void assertFdIsClosed(ParcelFileDescriptor pfd) {
         try {
             int fd = pfd.getFd();
@@ -348,18 +448,25 @@ public class BugreportManagerTest {
         return System.currentTimeMillis();
     }
 
-    private static boolean shouldTimeout(long startTimeMs) {
-        return now() - startTimeMs >= BUGREPORT_TIMEOUT_MS;
+    private static void waitTillDumpstateRunningOrTimeout() throws Exception {
+        long startTimeMs = now();
+        while (!isDumpstateRunning()) {
+            Thread.sleep(500 /* .5s */);
+            if (now() - startTimeMs >= DUMPSTATE_STARTUP_TIMEOUT_MS) {
+                break;
+            }
+            Log.d(TAG, "Waited " + (now() - startTimeMs) + "ms for dumpstate to start");
+        }
     }
 
     private static void waitTillDoneOrTimeout(BugreportCallbackImpl callback) throws Exception {
         long startTimeMs = now();
         while (!callback.isDone()) {
             Thread.sleep(1000 /* 1s */);
-            if (shouldTimeout(startTimeMs)) {
+            if (now() - startTimeMs >= BUGREPORT_TIMEOUT_MS) {
                 break;
             }
-            Log.d(TAG, "Waited " + (now() - startTimeMs) + "ms");
+            Log.d(TAG, "Waited " + (now() - startTimeMs) + "ms for bugreport to finish");
         }
     }
 
@@ -432,6 +539,36 @@ public class BugreportManagerTest {
 
         Log.d(TAG, "Wait for the dialog to be dismissed");
         assertTrue(device.wait(Until.gone(consentTitleObj), UIAUTOMATOR_TIMEOUT_MS));
+    }
+
+    private class BugreportBroadcastReceiver extends BroadcastReceiver {
+        Intent mBugreportFinishedIntent = null;
+        final CountDownLatch mLatch;
+
+        BugreportBroadcastReceiver() {
+            mLatch = new CountDownLatch(1);
+        }
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            setBugreportFinishedIntent(intent);
+            mLatch.countDown();
+        }
+
+        private void setBugreportFinishedIntent(Intent intent) {
+            mBugreportFinishedIntent = intent;
+        }
+
+        public Intent getBugreportFinishedIntent() {
+            return mBugreportFinishedIntent;
+        }
+
+        public void waitForBugreportFinished() throws Exception {
+            if (!mLatch.await(BUGREPORT_TIMEOUT_MS, TimeUnit.MILLISECONDS)) {
+                throw new Exception("Failed to receive BUGREPORT_FINISHED in "
+                        + BUGREPORT_TIMEOUT_MS + " ms.");
+            }
+        }
     }
 
     /**

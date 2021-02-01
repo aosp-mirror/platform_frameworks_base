@@ -17,7 +17,7 @@
 package android.security.keystore2;
 
 import android.annotation.NonNull;
-import android.hardware.keymint.KeyParameter;
+import android.hardware.security.keymint.KeyParameter;
 import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
@@ -41,6 +41,11 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
     public final static class NONE extends AndroidKeyStoreECDSASignatureSpi {
         public NONE() {
             super(KeymasterDefs.KM_DIGEST_NONE);
+        }
+
+        @Override
+        protected String getAlgorithm() {
+            return "NONEwithECDSA";
         }
 
         @Override
@@ -113,11 +118,19 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         public SHA1() {
             super(KeymasterDefs.KM_DIGEST_SHA1);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA1withECDSA";
+        }
     }
 
     public final static class SHA224 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA224() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_224);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA224withECDSA";
         }
     }
 
@@ -125,17 +138,29 @@ abstract class AndroidKeyStoreECDSASignatureSpi extends AndroidKeyStoreSignature
         public SHA256() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_256);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA256withECDSA";
+        }
     }
 
     public final static class SHA384 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA384() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_384);
         }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA384withECDSA";
+        }
     }
 
     public final static class SHA512 extends AndroidKeyStoreECDSASignatureSpi {
         public SHA512() {
             super(KeymasterDefs.KM_DIGEST_SHA_2_512);
+        }
+        @Override
+        protected String getAlgorithm() {
+            return "SHA512withECDSA";
         }
     }
 

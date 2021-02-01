@@ -22,11 +22,11 @@ import java.security.KeyStore.ProtectionParameter;
 /**
  * @hide
  */
-class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStoreParameter {
+public class AndroidKeyStoreLoadStoreParameter implements KeyStore.LoadStoreParameter {
 
     private final int mNamespace;
 
-    AndroidKeyStoreLoadStoreParameter(int namespace) {
+    public AndroidKeyStoreLoadStoreParameter(int namespace) {
         mNamespace = namespace;
     }
 

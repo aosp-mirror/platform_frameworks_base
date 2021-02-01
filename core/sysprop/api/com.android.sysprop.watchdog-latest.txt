@@ -7,13 +7,13 @@ props {
     prop_name: "framework_watchdog.fatal_count"
   }
   prop {
-    api_name: "fatal_window_second"
+    api_name: "fatal_window_seconds"
     type: Integer
     scope: Internal
     prop_name: "framework_watchdog.fatal_window.second"
   }
   prop {
-    api_name: "is_fatal_ignore"
+    api_name: "should_ignore_fatal_count"
     scope: Internal
     prop_name: "persist.debug.framework_watchdog.fatal_ignore"
   }

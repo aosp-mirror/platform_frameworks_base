@@ -18,7 +18,7 @@ package android.security.keystore2;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.keymint.KeyParameter;
+import android.hardware.security.keymint.KeyParameter;
 import android.security.KeyStoreException;
 import android.security.KeyStoreOperation;
 import android.security.keymaster.KeymasterDefs;
@@ -61,6 +61,11 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
 
         GCM(int keymasterPadding) {
             super(KeymasterDefs.KM_MODE_GCM, keymasterPadding);
+        }
+
+        @Override
+        protected final String getTransform() {
+            return "AES/GCM/NoPadding";
         }
 
         @Override
@@ -325,7 +330,7 @@ abstract class AndroidKeyStoreAuthenticatedAESCipherSpi extends AndroidKeyStoreC
         if (parameters != null) {
             for (KeyParameter p : parameters) {
                 if (p.tag == KeymasterDefs.KM_TAG_NONCE) {
-                    returnedIv = p.blob;
+                    returnedIv = p.value.getBlob();
                     break;
                 }
             }

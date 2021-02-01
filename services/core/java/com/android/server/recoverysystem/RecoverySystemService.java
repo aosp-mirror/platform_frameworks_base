@@ -16,8 +16,11 @@
 
 package com.android.server.recoverysystem;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.hardware.boot.V1_0.IBootControl;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.os.Binder;
@@ -30,8 +33,11 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.internal.widget.RebootEscrowListener;
@@ -68,6 +74,8 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     static final String INIT_SERVICE_SETUP_BCB = "init.svc.setup-bcb";
     @VisibleForTesting
     static final String INIT_SERVICE_CLEAR_BCB = "init.svc.clear-bcb";
+    @VisibleForTesting
+    static final String AB_UPDATE = "ro.build.ab_update";
 
     private static final Object sRequestLock = new Object();
 
@@ -76,9 +84,53 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     private final Injector mInjector;
     private final Context mContext;
 
-    private boolean mPreparedForReboot;
-    private String mUnattendedRebootToken;
-    private IntentSender mPreparedForRebootIntentSender;
+    @GuardedBy("this")
+    private final ArrayMap<String, IntentSender> mCallerPendingRequest = new ArrayMap<>();
+    @GuardedBy("this")
+    private final ArraySet<String> mCallerPreparedForReboot = new ArraySet<>();
+
+    /**
+     * Need to prepare for resume on reboot.
+     */
+    private static final int ROR_NEED_PREPARATION = 0;
+    /**
+     * Resume on reboot has been prepared, notify the caller.
+     */
+    private static final int ROR_SKIP_PREPARATION_AND_NOTIFY = 1;
+    /**
+     * Resume on reboot has been requested. Caller won't be notified until the preparation is done.
+     */
+    private static final int ROR_SKIP_PREPARATION_NOT_NOTIFY = 2;
+
+    /**
+     * The caller never requests for resume on reboot, no need for clear.
+     */
+    private static final int ROR_NOT_REQUESTED = 0;
+    /**
+     * Clear the resume on reboot preparation state.
+     */
+    private static final int ROR_REQUESTED_NEED_CLEAR = 1;
+    /**
+     * The caller has requested for resume on reboot. No need for clear since other callers may
+     * exist.
+     */
+    private static final int ROR_REQUESTED_SKIP_CLEAR = 2;
+
+    /**
+     * The action to perform upon new resume on reboot prepare request for a given client.
+     */
+    @IntDef({ ROR_NEED_PREPARATION,
+            ROR_SKIP_PREPARATION_AND_NOTIFY,
+            ROR_SKIP_PREPARATION_NOT_NOTIFY })
+    private @interface ResumeOnRebootActionsOnRequest {}
+
+    /**
+     * The action to perform upon resume on reboot clear request for a given client.
+     */
+    @IntDef({ROR_NOT_REQUESTED,
+            ROR_REQUESTED_NEED_CLEAR,
+            ROR_REQUESTED_SKIP_CLEAR})
+    private @interface ResumeOnRebootActionsOnClear{}
 
     static class Injector {
         protected final Context mContext;
@@ -126,6 +178,25 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
                 return null;
             }
             return socket;
+        }
+
+        /**
+         * Throws remote exception if there's an error getting the boot control HAL.
+         * Returns null if the boot control HAL's version is older than V1_2.
+         */
+        public android.hardware.boot.V1_2.IBootControl getBootControl() throws RemoteException {
+            IBootControl bootControlV10 = IBootControl.getService(true);
+            if (bootControlV10 == null) {
+                throw new RemoteException("Failed to get boot control HAL V1_0.");
+            }
+
+            android.hardware.boot.V1_2.IBootControl bootControlV12 =
+                    android.hardware.boot.V1_2.IBootControl.castFrom(bootControlV10);
+            if (bootControlV12 == null) {
+                Slog.w(TAG, "Device doesn't implement boot control HAL V1_2.");
+                return null;
+            }
+            return bootControlV12;
         }
 
         public void threadSleep(long millis) throws InterruptedException {
@@ -286,47 +357,95 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
         }
     }
 
-    @Override // Binder call
-    public boolean requestLskf(String updateToken, IntentSender intentSender) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+    private void enforcePermissionForResumeOnReboot() {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.RECOVERY)
+                != PackageManager.PERMISSION_GRANTED
+                && mContext.checkCallingOrSelfPermission(android.Manifest.permission.REBOOT)
+                        != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Caller must have " + android.Manifest.permission.RECOVERY
+                    + " or " + android.Manifest.permission.REBOOT + " for resume on reboot.");
+        }
+    }
 
-        if (updateToken == null) {
+    @Override // Binder call
+    public boolean requestLskf(String packageName, IntentSender intentSender) {
+        enforcePermissionForResumeOnReboot();
+
+        if (packageName == null) {
+            Slog.w(TAG, "Missing packageName when requesting lskf.");
             return false;
         }
 
-        // No need to prepare again for the same token.
-        if (mPreparedForReboot && updateToken.equals(mUnattendedRebootToken)) {
-            return true;
+        @ResumeOnRebootActionsOnRequest int action = updateRoRPreparationStateOnNewRequest(
+                packageName, intentSender);
+        switch (action) {
+            case ROR_SKIP_PREPARATION_AND_NOTIFY:
+                // We consider the preparation done if someone else has prepared.
+                sendPreparedForRebootIntentIfNeeded(intentSender);
+                return true;
+            case ROR_SKIP_PREPARATION_NOT_NOTIFY:
+                return true;
+            case ROR_NEED_PREPARATION:
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    mInjector.getLockSettingsService().prepareRebootEscrow();
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+                return true;
+            default:
+                throw new IllegalStateException("Unsupported action type on new request " + action);
+        }
+    }
+
+    // Checks and updates the resume on reboot preparation state.
+    private synchronized @ResumeOnRebootActionsOnRequest int updateRoRPreparationStateOnNewRequest(
+            String packageName, IntentSender intentSender) {
+        if (!mCallerPreparedForReboot.isEmpty()) {
+            if (mCallerPreparedForReboot.contains(packageName)) {
+                Slog.i(TAG, "RoR already has prepared for " + packageName);
+            }
+
+            // Someone else has prepared. Consider the preparation done, and send back the intent.
+            mCallerPreparedForReboot.add(packageName);
+            return ROR_SKIP_PREPARATION_AND_NOTIFY;
         }
 
-        mPreparedForReboot = false;
-        mUnattendedRebootToken = updateToken;
-        mPreparedForRebootIntentSender = intentSender;
-
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            mInjector.getLockSettingsService().prepareRebootEscrow();
-        } finally {
-            Binder.restoreCallingIdentity(origId);
+        boolean needPreparation = mCallerPendingRequest.isEmpty();
+        if (mCallerPendingRequest.containsKey(packageName)) {
+            Slog.i(TAG, "Duplicate RoR preparation request for " + packageName);
         }
-
-        return true;
+        // Update the request with the new intentSender.
+        mCallerPendingRequest.put(packageName, intentSender);
+        return needPreparation ? ROR_NEED_PREPARATION : ROR_SKIP_PREPARATION_NOT_NOTIFY;
     }
 
     @Override
     public void onPreparedForReboot(boolean ready) {
-        if (mUnattendedRebootToken == null) {
-            Slog.w(TAG, "onPreparedForReboot called when mUnattendedRebootToken is null");
+        if (!ready) {
+            return;
         }
-
-        mPreparedForReboot = ready;
-        if (ready) {
-            sendPreparedForRebootIntentIfNeeded();
-        }
+        updateRoRPreparationStateOnPreparedForReboot();
     }
 
-    private void sendPreparedForRebootIntentIfNeeded() {
-        final IntentSender intentSender = mPreparedForRebootIntentSender;
+    private synchronized void updateRoRPreparationStateOnPreparedForReboot() {
+        if (!mCallerPreparedForReboot.isEmpty()) {
+            Slog.w(TAG, "onPreparedForReboot called when some clients have prepared.");
+        }
+
+        if (mCallerPendingRequest.isEmpty()) {
+            Slog.w(TAG, "onPreparedForReboot called but no client has requested.");
+        }
+
+        // Send intents to notify callers
+        for (int i = 0; i < mCallerPendingRequest.size(); i++) {
+            sendPreparedForRebootIntentIfNeeded(mCallerPendingRequest.valueAt(i));
+            mCallerPreparedForReboot.add(mCallerPendingRequest.keyAt(i));
+        }
+        mCallerPendingRequest.clear();
+    }
+
+    private void sendPreparedForRebootIntentIfNeeded(IntentSender intentSender) {
         if (intentSender != null) {
             try {
                 intentSender.sendIntent(null, 0, null, null, null);
@@ -337,37 +456,112 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
     }
 
     @Override // Binder call
-    public boolean clearLskf() {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
-
-        mPreparedForReboot = false;
-        mUnattendedRebootToken = null;
-        mPreparedForRebootIntentSender = null;
-
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            mInjector.getLockSettingsService().clearRebootEscrow();
-        } finally {
-            Binder.restoreCallingIdentity(origId);
+    public boolean clearLskf(String packageName) {
+        enforcePermissionForResumeOnReboot();
+        if (packageName == null) {
+            Slog.w(TAG, "Missing packageName when clearing lskf.");
+            return false;
         }
 
+        @ResumeOnRebootActionsOnClear int action = updateRoRPreparationStateOnClear(packageName);
+        switch (action) {
+            case ROR_NOT_REQUESTED:
+                Slog.w(TAG, "RoR clear called before preparation for caller " + packageName);
+                return true;
+            case ROR_REQUESTED_SKIP_CLEAR:
+                return true;
+            case ROR_REQUESTED_NEED_CLEAR:
+                final long origId = Binder.clearCallingIdentity();
+                try {
+                    mInjector.getLockSettingsService().clearRebootEscrow();
+                } finally {
+                    Binder.restoreCallingIdentity(origId);
+                }
+                return true;
+            default:
+                throw new IllegalStateException("Unsupported action type on clear " + action);
+        }
+    }
+
+    private synchronized @ResumeOnRebootActionsOnClear int updateRoRPreparationStateOnClear(
+            String packageName) {
+        if (!mCallerPreparedForReboot.contains(packageName) && !mCallerPendingRequest.containsKey(
+                packageName)) {
+            Slog.w(TAG, packageName + " hasn't prepared for resume on reboot");
+            return ROR_NOT_REQUESTED;
+        }
+        mCallerPendingRequest.remove(packageName);
+        mCallerPreparedForReboot.remove(packageName);
+
+        // Check if others have prepared ROR.
+        boolean needClear = mCallerPendingRequest.isEmpty() && mCallerPreparedForReboot.isEmpty();
+        return needClear ? ROR_REQUESTED_NEED_CLEAR : ROR_REQUESTED_SKIP_CLEAR;
+    }
+
+    private boolean isAbDevice() {
+        return "true".equalsIgnoreCase(mInjector.systemPropertiesGet(AB_UPDATE));
+    }
+
+    private boolean verifySlotForNextBoot(boolean slotSwitch) {
+        if (!isAbDevice()) {
+            Slog.w(TAG, "Device isn't a/b, skipping slot verification.");
+            return true;
+        }
+
+        android.hardware.boot.V1_2.IBootControl bootControl;
+        try {
+            bootControl = mInjector.getBootControl();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to get the boot control HAL " + e);
+            return false;
+        }
+
+        // TODO(xunchang) enforce boot control V1_2 HAL on devices using multi client RoR
+        if (bootControl == null) {
+            Slog.w(TAG, "Cannot get the boot control HAL, skipping slot verification.");
+            return true;
+        }
+
+        int current_slot;
+        int next_active_slot;
+        try {
+            current_slot = bootControl.getCurrentSlot();
+            if (current_slot != 0 && current_slot != 1) {
+                throw new IllegalStateException("Current boot slot should be 0 or 1, got "
+                        + current_slot);
+            }
+            next_active_slot = bootControl.getActiveBootSlot();
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to query the active slots", e);
+            return false;
+        }
+
+        int expected_active_slot = current_slot;
+        if (slotSwitch) {
+            expected_active_slot = current_slot == 0 ? 1 : 0;
+        }
+        if (next_active_slot != expected_active_slot) {
+            Slog.w(TAG, "The next active boot slot doesn't match the expected value, "
+                    + "expected " + expected_active_slot + ", got " + next_active_slot);
+            return false;
+        }
         return true;
     }
 
-    @Override // Binder call
-    public boolean rebootWithLskf(String updateToken, String reason) {
-        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
-
-        if (!mPreparedForReboot) {
-            Slog.i(TAG, "Reboot requested before prepare completed");
+    private boolean rebootWithLskfImpl(String packageName, String reason, boolean slotSwitch) {
+        if (packageName == null) {
+            Slog.w(TAG, "Missing packageName when rebooting with lskf.");
+            return false;
+        }
+        if (!isLskfCaptured(packageName)) {
             return false;
         }
 
-        if (updateToken != null && !updateToken.equals(mUnattendedRebootToken)) {
-            Slog.i(TAG, "Reboot requested after preparation, but with mismatching token");
+        if (!verifySlotForNextBoot(slotSwitch)) {
             return false;
         }
 
+        // TODO(xunchang) write the vbmeta digest along with the escrowKey before reboot.
         if (!mInjector.getLockSettingsService().armRebootEscrow()) {
             Slog.w(TAG, "Failure to escrow key for reboot");
             return false;
@@ -375,6 +569,34 @@ public class RecoverySystemService extends IRecoverySystem.Stub implements Reboo
 
         PowerManager pm = mInjector.getPowerManager();
         pm.reboot(reason);
+        return true;
+    }
+
+    @Override // Binder call for the legacy rebootWithLskf
+    public boolean rebootWithLskfAssumeSlotSwitch(String packageName, String reason) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.RECOVERY, null);
+        return rebootWithLskfImpl(packageName, reason, true);
+    }
+
+    @Override // Binder call
+    public boolean rebootWithLskf(String packageName, String reason, boolean slotSwitch) {
+        enforcePermissionForResumeOnReboot();
+        return rebootWithLskfImpl(packageName, reason, slotSwitch);
+    }
+
+    @Override // Binder call
+    public boolean isLskfCaptured(String packageName) {
+        enforcePermissionForResumeOnReboot();
+        boolean captured;
+        synchronized (this) {
+            captured = mCallerPreparedForReboot.contains(packageName);
+        }
+
+        if (!captured) {
+            Slog.i(TAG, "Reboot requested before prepare completed for caller "
+                    + packageName);
+            return false;
+        }
         return true;
     }
 

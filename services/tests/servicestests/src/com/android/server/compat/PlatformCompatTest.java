@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.testng.Assert.assertThrows;
 
+import android.compat.Compatibility.ChangeConfig;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
@@ -35,6 +36,7 @@ import android.os.Build;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.compat.AndroidBuildClassifier;
+import com.android.internal.compat.CompatibilityChangeConfig;
 import com.android.internal.compat.CompatibilityChangeInfo;
 import com.android.server.LocalServices;
 
@@ -43,6 +45,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @RunWith(AndroidJUnit4.class)
 public class PlatformCompatTest {
@@ -70,9 +75,12 @@ public class PlatformCompatTest {
                 new PackageManager.NameNotFoundException());
         when(mPackageManagerInternal.getPackageUid(eq(PACKAGE_NAME), eq(0), anyInt()))
             .thenReturn(-1);
+        when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
+            .thenThrow(new PackageManager.NameNotFoundException());
         mCompatConfig = new CompatConfig(mBuildClassifier, mContext);
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         // Assume userdebug/eng non-final build
+        mCompatConfig.forceNonDebuggableFinalForTest(false);
         when(mBuildClassifier.isDebuggableBuild()).thenReturn(true);
         when(mBuildClassifier.isFinalBuild()).thenReturn(false);
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
@@ -89,17 +97,22 @@ public class PlatformCompatTest {
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
                 .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
+                .addOverridableChangeWithId(8L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listAllChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
-                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
+                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
+                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
                 new CompatibilityChangeInfo(3L, "", Build.VERSION_CODES.O, -1, false, false,
-                        "desc"),
-                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, -1, false, false, ""),
-                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, -1, false, false, ""),
-                new CompatibilityChangeInfo(6L, "", Build.VERSION_CODES.R, -1, false, false, ""),
-                new CompatibilityChangeInfo(7L, "", -1, -1, false, true, ""));
+                        "desc", false),
+                new CompatibilityChangeInfo(
+                        4L, "", Build.VERSION_CODES.P, -1, false, false, "", false),
+                new CompatibilityChangeInfo(
+                        5L, "", Build.VERSION_CODES.Q, -1, false, false, "", false),
+                new CompatibilityChangeInfo(
+                        6L, "", Build.VERSION_CODES.R, -1, false, false, "", false),
+                new CompatibilityChangeInfo(7L, "", -1, -1, false, true, "", false),
+                new CompatibilityChangeInfo(8L, "", -1, -1, false, true, "", true));
     }
 
     @Test
@@ -107,18 +120,52 @@ public class PlatformCompatTest {
         mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
                 .addEnabledChangeWithId(1L)
                 .addDisabledChangeWithIdAndName(2L, "change2")
-                .addEnableAfterSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.P, 4L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
-                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.R, 6L)
+                .addEnableSinceSdkChangeWithIdAndDescription(Build.VERSION_CODES.O, 3L, "desc")
+                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.P, 4L)
+                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.Q, 5L)
+                .addEnableSinceSdkChangeWithId(Build.VERSION_CODES.R, 6L)
                 .addLoggingOnlyChangeWithId(7L)
                 .build();
         mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
         assertThat(mPlatformCompat.listUIChanges()).asList().containsExactly(
-                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, ""),
-                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, ""),
-                new CompatibilityChangeInfo(4L, "", Build.VERSION_CODES.P, -1, false, false, ""),
-                new CompatibilityChangeInfo(5L, "", Build.VERSION_CODES.Q, -1, false, false, ""));
+                new CompatibilityChangeInfo(1L, "", -1, -1, false, false, "", false),
+                new CompatibilityChangeInfo(2L, "change2", -1, -1, true, false, "", false),
+                new CompatibilityChangeInfo(
+                        5L, "", Build.VERSION_CODES.P, -1, false, false, "", false),
+                new CompatibilityChangeInfo(
+                        6L, "", Build.VERSION_CODES.Q, -1, false, false, "", false));
+    }
+
+    @Test
+    public void testOverrideAtInstallTime() throws Exception {
+        mCompatConfig = CompatConfigBuilder.create(mBuildClassifier, mContext)
+                .addEnabledChangeWithId(1L)
+                .addDisabledChangeWithId(2L)
+                .addEnableAfterSdkChangeWithId(Build.VERSION_CODES.O, 3L)
+                .build();
+        mCompatConfig.forceNonDebuggableFinalForTest(true);
+        mPlatformCompat = new PlatformCompat(mContext, mCompatConfig);
+
+        // Before adding overrides.
+        assertThat(mPlatformCompat.isChangeEnabledByPackageName(1, PACKAGE_NAME, 0)).isTrue();
+        assertThat(mPlatformCompat.isChangeEnabledByPackageName(2, PACKAGE_NAME, 0)).isFalse();
+        assertThat(mPlatformCompat.isChangeEnabledByPackageName(3, PACKAGE_NAME, 0)).isTrue();
+
+        // Add overrides.
+        Set<Long> enabled = new HashSet<>();
+        enabled.add(2L);
+        Set<Long> disabled = new HashSet<>();
+        disabled.add(1L);
+        disabled.add(3L);
+        ChangeConfig changeConfig = new ChangeConfig(enabled, disabled);
+        CompatibilityChangeConfig compatibilityChangeConfig =
+                new CompatibilityChangeConfig(changeConfig);
+        mPlatformCompat.setOverridesForTest(compatibilityChangeConfig, PACKAGE_NAME);
+
+        // After adding overrides.
+        assertThat(mPlatformCompat.isChangeEnabledByPackageName(1, PACKAGE_NAME, 0)).isFalse();
+        assertThat(mPlatformCompat.isChangeEnabledByPackageName(2, PACKAGE_NAME, 0)).isTrue();
+        assertThat(mPlatformCompat.isChangeEnabledByPackageName(3, PACKAGE_NAME, 0)).isFalse();
     }
 
     @Test

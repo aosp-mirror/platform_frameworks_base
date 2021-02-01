@@ -37,6 +37,8 @@ oneway interface IImsCallSessionListener {
     /**
      * Notifies the result of the basic session operation (setup / terminate).
      */
+    void callSessionInitiating(in ImsCallProfile profile);
+    void callSessionInitiatingFailed(in ImsReasonInfo reasonInfo);
     void callSessionProgressing(in ImsStreamMediaProfile profile);
     void callSessionInitiated(in ImsCallProfile profile);
     void callSessionInitiatedFailed(in ImsReasonInfo reasonInfo);

@@ -273,8 +273,6 @@ public class ChooserActivity extends ResolverActivity implements
     private int mLastNumberOfChildren = -1;
 
     private static final String TARGET_DETAILS_FRAGMENT_TAG = "targetDetailsFragment";
-    // TODO: Update to handle landscape instead of using static value
-    private static final int MAX_RANKED_TARGETS = 4;
 
     private final List<ChooserTargetServiceConnection> mServiceConnections = new ArrayList<>();
     private final Set<Pair<ComponentName, UserHandle>> mServicesRequested = new HashSet<>();
@@ -784,8 +782,8 @@ public class ChooserActivity extends ResolverActivity implements
                 FrameworkStatsLog.SHARESHEET_STARTED,
                 getReferrerPackageName(),
                 target.getType(),
-                initialIntents == null ? 0 : initialIntents.length,
                 mCallerChooserTargets == null ? 0 : mCallerChooserTargets.length,
+                initialIntents == null ? 0 : initialIntents.length,
                 isWorkProfile(),
                 findPreferredContentPreview(getTargetIntent(), getContentResolver()),
                 target.getAction()
@@ -2641,7 +2639,10 @@ public class ChooserActivity extends ResolverActivity implements
         }
         RecyclerView recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
         ChooserGridAdapter gridAdapter = mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
-        if (gridAdapter == null || recyclerView == null) {
+        // Skip height calculation if recycler view was scrolled to prevent it inaccurately
+        // calculating the height, as the logic below does not account for the scrolled offset.
+        if (gridAdapter == null || recyclerView == null
+                || recyclerView.computeVerticalScrollOffset() != 0) {
             return;
         }
 
@@ -3128,6 +3129,13 @@ public class ChooserActivity extends ResolverActivity implements
         ChooserGridAdapter currentRootAdapter =
                 mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
         currentRootAdapter.updateDirectShareExpansion();
+        // This fixes an edge case where after performing a variety of gestures, vertical scrolling
+        // ends up disabled. That's because at some point the old tab's vertical scrolling is
+        // disabled and the new tab's is enabled. For context, see b/159997845
+        setVerticalScrollEnabled(true);
+        if (mResolverDrawerLayout != null) {
+            mResolverDrawerLayout.scrollNestedScrollableChildBackToTop();
+        }
     }
 
     @Override
@@ -3286,9 +3294,8 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         /**
-         * Returns either {@code 0} or {@code 1} depending on whether we want to show the list item
-         * content preview. Not to be confused with the sticky content preview which is above the
-         * personal and work tabs.
+         * Whether the "system" row of targets is displayed.
+         * This area includes the content preview (if present) and action row.
          */
         public int getSystemRowCount() {
             // For the tabbed case we show the sticky content preview above the tabs,
@@ -3296,6 +3303,7 @@ public class ChooserActivity extends ResolverActivity implements
             if (shouldShowTabs()) {
                 return 0;
             }
+
             if (!isSendAction(getTargetIntent())) {
                 return 0;
             }

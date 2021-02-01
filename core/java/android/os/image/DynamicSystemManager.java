@@ -269,4 +269,16 @@ public class DynamicSystemManager {
             throw new RuntimeException(e.toString());
         }
     }
+
+    /**
+     * Returns the suggested scratch partition size for overlayFS.
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_DYNAMIC_SYSTEM)
+    public long suggestScratchSize() {
+        try {
+            return mService.suggestScratchSize();
+        } catch (RemoteException e) {
+            throw new RuntimeException(e.toString());
+        }
+    }
 }

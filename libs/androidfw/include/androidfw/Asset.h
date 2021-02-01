@@ -23,17 +23,17 @@
 
 #include <stdio.h>
 #include <sys/types.h>
-
 #include <memory>
+#include <optional>
 
 #include <android-base/unique_fd.h>
+#include <util/map_ptr.h>
+
 #include <utils/Compat.h>
 #include <utils/Errors.h>
 #include <utils/String8.h>
 
 namespace android {
-
-class FileMap;
 
 /*
  * Instances of this class provide read-only operations on a byte stream.
@@ -49,6 +49,8 @@ class FileMap;
 class Asset {
 public:
     virtual ~Asset(void) = default;
+    Asset(const Asset& src) = delete;
+    Asset& operator=(const Asset& src) = delete;
 
     static int32_t getGlobalCount();
     static String8 getAssetAllocations();
@@ -87,8 +89,19 @@ public:
 
     /*
      * Get a pointer to a buffer with the entire contents of the file.
+     * If `aligned` is true, the buffer data will be aligned to a 4-byte boundary.
+     *
+     * Use this function if the asset can never reside on IncFs.
      */
-    virtual const void* getBuffer(bool wordAligned) = 0;
+    virtual const void* getBuffer(bool aligned) = 0;
+
+    /*
+     * Get a incfs::map_ptr<void> to a buffer with the entire contents of the file.
+     * If `aligned` is true, the buffer data will be aligned to a 4-byte boundary.
+     *
+     * Use this function if the asset can potentially reside on IncFs.
+     */
+    virtual incfs::map_ptr<void> getIncFsBuffer(bool aligned) = 0;
 
     /*
      * Get the total amount of data that can be read.
@@ -152,10 +165,6 @@ protected:
     AccessMode getAccessMode(void) const { return mAccessMode; }
 
 private:
-    /* these operations are not implemented */
-    Asset(const Asset& src);
-    Asset& operator=(const Asset& src);
-
     /* AssetManager needs access to our "create" functions */
     friend class AssetManager;
     friend class ApkAssets;
@@ -169,8 +178,7 @@ private:
     /*
      * Create the asset from a named, compressed file on disk (e.g. ".gz").
      */
-    static Asset* createFromCompressedFile(const char* fileName,
-        AccessMode mode);
+    static Asset* createFromCompressedFile(const char* fileName, AccessMode mode);
 
 #if 0
     /*
@@ -200,31 +208,21 @@ private:
     /*
      * Create the asset from a memory-mapped file segment.
      *
-     * The asset takes ownership of the FileMap.
+     * The asset takes ownership of the incfs::IncFsFileMap and the file descriptor "fd". The
+     * file descriptor is used to request new file descriptors using "openFileDescriptor".
      */
-    static Asset* createFromUncompressedMap(FileMap* dataMap, AccessMode mode);
-
-    /*
-     * Create the asset from a memory-mapped file segment.
-     *
-     * The asset takes ownership of the FileMap and the file descriptor "fd". The file descriptor is
-     * used to request new file descriptors using "openFileDescriptor".
-     */
-    static std::unique_ptr<Asset> createFromUncompressedMap(std::unique_ptr<FileMap> dataMap,
-        base::unique_fd fd, AccessMode mode);
+    static std::unique_ptr<Asset> createFromUncompressedMap(incfs::IncFsFileMap&& dataMap,
+                                                            AccessMode mode,
+                                                            base::unique_fd fd = {});
 
     /*
      * Create the asset from a memory-mapped file segment with compressed
      * data.
      *
-     * The asset takes ownership of the FileMap.
+     * The asset takes ownership of the incfs::IncFsFileMap.
      */
-    static Asset* createFromCompressedMap(FileMap* dataMap,
-        size_t uncompressedLen, AccessMode mode);
-
-    static std::unique_ptr<Asset> createFromCompressedMap(std::unique_ptr<FileMap> dataMap,
-        size_t uncompressedLen, AccessMode mode);
-
+    static std::unique_ptr<Asset> createFromCompressedMap(incfs::IncFsFileMap&& dataMap,
+                                                          size_t uncompressedLen, AccessMode mode);
 
     /*
      * Create from a reference-counted chunk of shared memory.
@@ -252,7 +250,7 @@ private:
 class _FileAsset : public Asset {
 public:
     _FileAsset(void);
-    virtual ~_FileAsset(void);
+    ~_FileAsset(void) override;
 
     /*
      * Use a piece of an already-open file.
@@ -266,21 +264,24 @@ public:
      *
      * On success, the object takes ownership of "dataMap" and "fd".
      */
-    status_t openChunk(FileMap* dataMap, base::unique_fd fd);
+    status_t openChunk(incfs::IncFsFileMap&& dataMap, base::unique_fd fd);
 
     /*
      * Standard Asset interfaces.
      */
-    virtual ssize_t read(void* buf, size_t count);
-    virtual off64_t seek(off64_t offset, int whence);
-    virtual void close(void);
-    virtual const void* getBuffer(bool wordAligned);
-    virtual off64_t getLength(void) const { return mLength; }
-    virtual off64_t getRemainingLength(void) const { return mLength-mOffset; }
-    virtual int openFileDescriptor(off64_t* outStart, off64_t* outLength) const;
-    virtual bool isAllocated(void) const { return mBuf != NULL; }
+    ssize_t read(void* buf, size_t count) override;
+    off64_t seek(off64_t offset, int whence) override;
+    void close(void) override;
+    const void* getBuffer(bool aligned) override;
+    incfs::map_ptr<void> getIncFsBuffer(bool aligned) override;
+    off64_t getLength(void) const override { return mLength; }
+    off64_t getRemainingLength(void) const override { return mLength-mOffset; }
+    int openFileDescriptor(off64_t* outStart, off64_t* outLength) const override;
+    bool isAllocated(void) const override { return mBuf != NULL; }
 
 private:
+    incfs::map_ptr<void> ensureAlignment(const incfs::IncFsFileMap& map);
+
     off64_t         mStart;         // absolute file offset of start of chunk
     off64_t         mLength;        // length of the chunk
     off64_t         mOffset;        // current local offset, 0 == mStart
@@ -295,10 +296,8 @@ private:
      */
     enum { kReadVsMapThreshold = 4096 };
 
-    FileMap*    mMap;           // for memory map
-    unsigned char* mBuf;        // for read
-
-    const void* ensureAlignment(FileMap* map);
+    unsigned char*                      mBuf;     // for read
+    std::optional<incfs::IncFsFileMap>  mMap;     // for memory map
 };
 
 
@@ -323,7 +322,7 @@ public:
      *
      * On success, the object takes ownership of "fd".
      */
-    status_t openChunk(FileMap* dataMap, size_t uncompressedLen);
+    status_t openChunk(incfs::IncFsFileMap&& dataMap, size_t uncompressedLen);
 
     /*
      * Standard Asset interfaces.
@@ -331,24 +330,23 @@ public:
     virtual ssize_t read(void* buf, size_t count);
     virtual off64_t seek(off64_t offset, int whence);
     virtual void close(void);
-    virtual const void* getBuffer(bool wordAligned);
+    virtual const void* getBuffer(bool aligned);
+    virtual incfs::map_ptr<void> getIncFsBuffer(bool aligned);
     virtual off64_t getLength(void) const { return mUncompressedLen; }
     virtual off64_t getRemainingLength(void) const { return mUncompressedLen-mOffset; }
     virtual int openFileDescriptor(off64_t* /* outStart */, off64_t* /* outLength */) const { return -1; }
     virtual bool isAllocated(void) const { return mBuf != NULL; }
 
 private:
-    off64_t     mStart;         // offset to start of compressed data
-    off64_t     mCompressedLen; // length of the compressed data
-    off64_t     mUncompressedLen; // length of the uncompressed data
-    off64_t     mOffset;        // current offset, 0 == start of uncomp data
+    off64_t mStart;           // offset to start of compressed data
+    off64_t mCompressedLen;   // length of the compressed data
+    off64_t mUncompressedLen; // length of the uncompressed data
+    off64_t mOffset;          // current offset, 0 == start of uncomp data
+    int     mFd;              // for file input
 
-    FileMap*    mMap;           // for memory-mapped input
-    int         mFd;            // for file input
-
-    class StreamingZipInflater* mZipInflater;  // for streaming large compressed assets
-
-    unsigned char*  mBuf;       // for getBuffer()
+    class StreamingZipInflater*         mZipInflater; // for streaming large compressed assets
+    unsigned char*                      mBuf;         // for getBuffer()
+    std::optional<incfs::IncFsFileMap>  mMap;         // for memory-mapped input
 };
 
 // need: shared mmap version?

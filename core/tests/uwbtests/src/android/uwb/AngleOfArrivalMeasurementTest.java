@@ -42,10 +42,10 @@ public class AngleOfArrivalMeasurementTest {
         AngleOfArrivalMeasurement.Builder builder = new AngleOfArrivalMeasurement.Builder();
         tryBuild(builder, false);
 
-        builder.setAltitudeAngleMeasurement(altitude);
+        builder.setAltitude(altitude);
         tryBuild(builder, false);
 
-        builder.setAzimuthAngleMeasurement(azimuth);
+        builder.setAzimuth(azimuth);
         AngleOfArrivalMeasurement measurement = tryBuild(builder, true);
 
         assertEquals(azimuth, measurement.getAzimuth());

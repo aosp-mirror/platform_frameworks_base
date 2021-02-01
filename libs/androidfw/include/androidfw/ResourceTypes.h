@@ -20,7 +20,10 @@
 #ifndef _LIBS_UTILS_RESOURCE_TYPES_H
 #define _LIBS_UTILS_RESOURCE_TYPES_H
 
+#include <android-base/expected.h>
+
 #include <androidfw/Asset.h>
+#include <androidfw/Errors.h>
 #include <androidfw/LocaleData.h>
 #include <androidfw/StringPiece.h>
 #include <utils/Errors.h>
@@ -497,7 +500,7 @@ public:
     virtual ~ResStringPool();
 
     void setToEmpty();
-    status_t setTo(const void* data, size_t size, bool copyData=false);
+    status_t setTo(incfs::map_ptr<void> data, size_t size, bool copyData=false);
 
     status_t getError() const;
 
@@ -505,48 +508,49 @@ public:
 
     // Return string entry as UTF16; if the pool is UTF8, the string will
     // be converted before returning.
-    inline const char16_t* stringAt(const ResStringPool_ref& ref, size_t* outLen) const {
-        return stringAt(ref.index, outLen);
+    inline base::expected<StringPiece16, NullOrIOError> stringAt(
+            const ResStringPool_ref& ref) const {
+        return stringAt(ref.index);
     }
-    virtual const char16_t* stringAt(size_t idx, size_t* outLen) const;
+    virtual base::expected<StringPiece16, NullOrIOError> stringAt(size_t idx) const;
 
     // Note: returns null if the string pool is not UTF8.
-    virtual const char* string8At(size_t idx, size_t* outLen) const;
+    virtual base::expected<StringPiece, NullOrIOError> string8At(size_t idx) const;
 
     // Return string whether the pool is UTF8 or UTF16.  Does not allow you
     // to distinguish null.
-    const String8 string8ObjectAt(size_t idx) const;
+    base::expected<String8, IOError> string8ObjectAt(size_t idx) const;
 
-    const ResStringPool_span* styleAt(const ResStringPool_ref& ref) const;
-    const ResStringPool_span* styleAt(size_t idx) const;
+    base::expected<incfs::map_ptr<ResStringPool_span>, NullOrIOError> styleAt(
+        const ResStringPool_ref& ref) const;
+    base::expected<incfs::map_ptr<ResStringPool_span>, NullOrIOError> styleAt(size_t idx) const;
 
-    ssize_t indexOfString(const char16_t* str, size_t strLen) const;
+    base::expected<size_t, NullOrIOError> indexOfString(const char16_t* str, size_t strLen) const;
 
     virtual size_t size() const;
     size_t styleCount() const;
     size_t bytes() const;
-    const void* data() const;
-
+    incfs::map_ptr<void> data() const;
 
     bool isSorted() const;
     bool isUTF8() const;
 
 private:
-    status_t                    mError;
-    void*                       mOwnedData;
-    const ResStringPool_header* mHeader;
-    size_t                      mSize;
-    mutable Mutex               mDecodeLock;
-    const uint32_t*             mEntries;
-    const uint32_t*             mEntryStyles;
-    const void*                 mStrings;
-    char16_t mutable**          mCache;
-    uint32_t                    mStringPoolSize;    // number of uint16_t
-    const uint32_t*             mStyles;
-    uint32_t                    mStylePoolSize;    // number of uint32_t
+    status_t                                      mError;
+    void*                                         mOwnedData;
+    incfs::verified_map_ptr<ResStringPool_header> mHeader;
+    size_t                                        mSize;
+    mutable Mutex                                 mDecodeLock;
+    incfs::map_ptr<uint32_t>                      mEntries;
+    incfs::map_ptr<uint32_t>                      mEntryStyles;
+    incfs::map_ptr<void>                          mStrings;
+    char16_t mutable**                            mCache;
+    uint32_t                                      mStringPoolSize;    // number of uint16_t
+    incfs::map_ptr<uint32_t>                      mStyles;
+    uint32_t                                      mStylePoolSize;    // number of uint32_t
 
-    const char* stringDecodeAt(size_t idx, const uint8_t* str, const size_t encLen,
-                               size_t* outLen) const;
+    base::expected<StringPiece, NullOrIOError> stringDecodeAt(
+        size_t idx, incfs::map_ptr<uint8_t> str, size_t encLen) const;
 };
 
 /**
@@ -558,8 +562,8 @@ public:
  StringPoolRef() = default;
  StringPoolRef(const ResStringPool* pool, uint32_t index);
 
- const char* string8(size_t* outLen) const;
- const char16_t* string16(size_t* outLen) const;
+ base::expected<StringPiece, NullOrIOError> string8() const;
+ base::expected<StringPiece16, NullOrIOError> string16() const;
 
 private:
  const ResStringPool* mPool = nullptr;
@@ -1796,6 +1800,16 @@ private:
 };
 
 bool U16StringToInt(const char16_t* s, size_t len, Res_value* outValue);
+
+template<typename TChar, typename E>
+static const TChar* UnpackOptionalString(base::expected<BasicStringPiece<TChar>, E>&& result,
+                                         size_t* outLen) {
+  if (result.has_value()) {
+    *outLen = result->size();
+    return result->data();
+  }
+  return NULL;
+}
 
 /**
  * Convenience class for accessing data in a ResTable resource.

@@ -188,6 +188,15 @@ public final class PhoneAccount implements Parcelable {
         "android.telecom.extra.SKIP_CALL_FILTERING";
 
     /**
+     * Boolean {@link PhoneAccount} extras key (see {@link PhoneAccount#getExtras()}) which
+     * indicates whether a Self-managed {@link PhoneAccount} want to expose its calls to all
+     * {@link InCallService} which declares the metadata
+     * {@link TelecomManager#METADATA_INCLUDE_SELF_MANAGED_CALLS}.
+     */
+    public static final String EXTRA_ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE =
+            "android.telecom.extra.ADD_SELF_MANAGED_CALLS_TO_INCALLSERVICE";
+
+    /**
      * Flag indicating that this {@code PhoneAccount} can act as a connection manager for
      * other connections. The {@link ConnectionService} associated with this {@code PhoneAccount}
      * will be allowed to manage phone calls including using its own proprietary phone-call
@@ -361,7 +370,13 @@ public final class PhoneAccount implements Parcelable {
      */
     public static final int CAPABILITY_ADHOC_CONFERENCE_CALLING = 0x4000;
 
-    /* NEXT CAPABILITY: 0x8000 */
+    /**
+     * Flag indicating whether this {@link PhoneAccount} is capable of supporting the call composer
+     * functionality for enriched calls.
+     */
+    public static final int CAPABILITY_CALL_COMPOSER = 0x8000;
+
+    /* NEXT CAPABILITY: 0x10000 */
 
     /**
      * URI scheme for telephone number URIs.
@@ -1087,6 +1102,9 @@ public final class PhoneAccount implements Parcelable {
         }
         if (hasCapabilities(CAPABILITY_ADHOC_CONFERENCE_CALLING)) {
             sb.append("AdhocConf");
+        }
+        if (hasCapabilities(CAPABILITY_CALL_COMPOSER)) {
+            sb.append("CallComposer ");
         }
         return sb.toString();
     }

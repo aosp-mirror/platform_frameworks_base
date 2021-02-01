@@ -17,16 +17,19 @@
 package com.android.server.compat;
 
 import static com.android.internal.compat.OverrideAllowedState.ALLOWED;
+import static com.android.internal.compat.OverrideAllowedState.DEFERRED_VERIFICATION;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NON_TARGET_SDK;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_NOT_DEBUGGABLE;
 import static com.android.internal.compat.OverrideAllowedState.DISABLED_TARGET_SDK_TOO_HIGH;
 import static com.android.internal.compat.OverrideAllowedState.LOGGING_ONLY_CHANGE;
-import static com.android.internal.compat.OverrideAllowedState.PACKAGE_DOES_NOT_EXIST;
 
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.database.ContentObserver;
+import android.os.Handler;
+import android.provider.Settings;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.compat.AndroidBuildClassifier;
@@ -41,6 +44,20 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
     private AndroidBuildClassifier mAndroidBuildClassifier;
     private Context mContext;
     private CompatConfig mCompatConfig;
+    private boolean mForceNonDebuggableFinalBuild;
+
+    private class SettingsObserver extends ContentObserver {
+        SettingsObserver() {
+            super(new Handler());
+        }
+        @Override
+        public void onChange(boolean selfChange) {
+            mForceNonDebuggableFinalBuild = Settings.Global.getInt(
+                mContext.getContentResolver(),
+                Settings.Global.FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT,
+                0) == 1;
+        }
+    }
 
     @VisibleForTesting
     OverrideValidatorImpl(AndroidBuildClassifier androidBuildClassifier,
@@ -48,6 +65,7 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
         mAndroidBuildClassifier = androidBuildClassifier;
         mContext = context;
         mCompatConfig = config;
+        mForceNonDebuggableFinalBuild = false;
     }
 
     @Override
@@ -56,8 +74,10 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
             return new OverrideAllowedState(LOGGING_ONLY_CHANGE, -1, -1);
         }
 
-        boolean debuggableBuild = mAndroidBuildClassifier.isDebuggableBuild();
-        boolean finalBuild = mAndroidBuildClassifier.isFinalBuild();
+        boolean debuggableBuild = mAndroidBuildClassifier.isDebuggableBuild()
+                                    && !mForceNonDebuggableFinalBuild;
+        boolean finalBuild = mAndroidBuildClassifier.isFinalBuild()
+                                || mForceNonDebuggableFinalBuild;
         int maxTargetSdk = mCompatConfig.maxTargetSdkForChangeIdOptIn(changeId);
         boolean disabled = mCompatConfig.isDisabled(changeId);
 
@@ -73,7 +93,7 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
         try {
             applicationInfo = packageManager.getApplicationInfo(packageName, 0);
         } catch (NameNotFoundException e) {
-            return new OverrideAllowedState(PACKAGE_DOES_NOT_EXIST, -1, -1);
+            return new OverrideAllowedState(DEFERRED_VERIFICATION, -1, -1);
         }
         int appTargetSdk = applicationInfo.targetSdkVersion;
         // Only allow overriding debuggable apps.
@@ -94,4 +114,17 @@ public class OverrideValidatorImpl extends IOverrideValidator.Stub {
         }
         return new OverrideAllowedState(DISABLED_TARGET_SDK_TOO_HIGH, appTargetSdk, maxTargetSdk);
     }
+
+    void registerContentObserver() {
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Global.getUriFor(
+                    Settings.Global.FORCE_NON_DEBUGGABLE_FINAL_BUILD_FOR_COMPAT),
+                false,
+                new SettingsObserver());
+    }
+
+    void forceNonDebuggableFinalForTest(boolean value) {
+        mForceNonDebuggableFinalBuild = value;
+    }
+
 }

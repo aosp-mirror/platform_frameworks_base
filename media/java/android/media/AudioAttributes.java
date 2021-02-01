@@ -20,6 +20,8 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
+import android.audio.policy.configuration.V7_0.AudioUsage;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.media.audiopolicy.AudioProductStrategy;
 import android.os.Build;
@@ -34,7 +36,9 @@ import android.util.proto.ProtoOutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -1278,6 +1282,97 @@ public final class AudioAttributes implements Parcelable {
                 return new String("USAGE_ANNOUNCEMENT");
             default:
                 return new String("unknown usage " + usage);
+        }
+    }
+
+    /** @hide **/
+    @TestApi
+    @NonNull
+    public static String usageToXsdString(@AttributeUsage int usage) {
+        switch (usage) {
+            case AudioAttributes.USAGE_UNKNOWN:
+                return AudioUsage.AUDIO_USAGE_UNKNOWN.toString();
+            case AudioAttributes.USAGE_MEDIA:
+                return AudioUsage.AUDIO_USAGE_MEDIA.toString();
+            case AudioAttributes.USAGE_VOICE_COMMUNICATION:
+                return AudioUsage.AUDIO_USAGE_VOICE_COMMUNICATION.toString();
+            case AudioAttributes.USAGE_VOICE_COMMUNICATION_SIGNALLING:
+                return AudioUsage.AUDIO_USAGE_VOICE_COMMUNICATION_SIGNALLING.toString();
+            case AudioAttributes.USAGE_ALARM:
+                return AudioUsage.AUDIO_USAGE_ALARM.toString();
+            case AudioAttributes.USAGE_NOTIFICATION:
+                return AudioUsage.AUDIO_USAGE_NOTIFICATION.toString();
+            case AudioAttributes.USAGE_NOTIFICATION_RINGTONE:
+                return AudioUsage.AUDIO_USAGE_NOTIFICATION_TELEPHONY_RINGTONE.toString();
+            case AudioAttributes.USAGE_ASSISTANCE_ACCESSIBILITY:
+                return AudioUsage.AUDIO_USAGE_ASSISTANCE_ACCESSIBILITY.toString();
+            case AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+                return AudioUsage.AUDIO_USAGE_ASSISTANCE_NAVIGATION_GUIDANCE.toString();
+            case AudioAttributes.USAGE_ASSISTANCE_SONIFICATION:
+                return AudioUsage.AUDIO_USAGE_ASSISTANCE_SONIFICATION.toString();
+            case AudioAttributes.USAGE_GAME:
+                return AudioUsage.AUDIO_USAGE_GAME.toString();
+            case AudioAttributes.USAGE_VIRTUAL_SOURCE:
+                return AudioUsage.AUDIO_USAGE_VIRTUAL_SOURCE.toString();
+            case AudioAttributes.USAGE_ASSISTANT:
+                return AudioUsage.AUDIO_USAGE_ASSISTANT.toString();
+            case AudioAttributes.USAGE_CALL_ASSISTANT:
+                return AudioUsage.AUDIO_USAGE_CALL_ASSISTANT.toString();
+            case AudioAttributes.USAGE_EMERGENCY:
+                return AudioUsage.AUDIO_USAGE_EMERGENCY.toString();
+            case AudioAttributes.USAGE_SAFETY:
+                return AudioUsage.AUDIO_USAGE_SAFETY.toString();
+            case AudioAttributes.USAGE_VEHICLE_STATUS:
+                return AudioUsage.AUDIO_USAGE_VEHICLE_STATUS.toString();
+            case AudioAttributes.USAGE_ANNOUNCEMENT:
+                return AudioUsage.AUDIO_USAGE_ANNOUNCEMENT.toString();
+            default:
+                Log.w(TAG, "Unknown usage value " + usage);
+                return AudioUsage.AUDIO_USAGE_UNKNOWN.toString();
+        }
+    }
+
+    private static final Map<String, Integer> sXsdStringToUsage = new HashMap<>();
+
+    static {
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_UNKNOWN.toString(), USAGE_UNKNOWN);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_UNKNOWN.toString(), USAGE_UNKNOWN);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_MEDIA.toString(), USAGE_MEDIA);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_VOICE_COMMUNICATION.toString(),
+                USAGE_VOICE_COMMUNICATION);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_VOICE_COMMUNICATION_SIGNALLING.toString(),
+                USAGE_VOICE_COMMUNICATION_SIGNALLING);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_ALARM.toString(), USAGE_ALARM);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_NOTIFICATION.toString(), USAGE_NOTIFICATION);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_NOTIFICATION_TELEPHONY_RINGTONE.toString(),
+                USAGE_NOTIFICATION_RINGTONE);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_ASSISTANCE_ACCESSIBILITY.toString(),
+                USAGE_ASSISTANCE_ACCESSIBILITY);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_ASSISTANCE_NAVIGATION_GUIDANCE.toString(),
+                USAGE_ASSISTANCE_NAVIGATION_GUIDANCE);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_ASSISTANCE_SONIFICATION.toString(),
+                USAGE_ASSISTANCE_SONIFICATION);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_GAME.toString(), USAGE_GAME);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_VIRTUAL_SOURCE.toString(),
+                USAGE_VIRTUAL_SOURCE);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_ASSISTANT.toString(), USAGE_ASSISTANT);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_CALL_ASSISTANT.toString(),
+                USAGE_CALL_ASSISTANT);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_EMERGENCY.toString(), USAGE_EMERGENCY);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_SAFETY.toString(), USAGE_SAFETY);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_VEHICLE_STATUS.toString(),
+                USAGE_VEHICLE_STATUS);
+        sXsdStringToUsage.put(AudioUsage.AUDIO_USAGE_ANNOUNCEMENT.toString(), USAGE_ANNOUNCEMENT);
+    }
+
+    /** @hide **/
+    @TestApi
+    public static @AttributeUsage int xsdStringToUsage(@NonNull String xsdUsage) {
+        if (sXsdStringToUsage.containsKey(xsdUsage)) {
+            return sXsdStringToUsage.get(xsdUsage);
+        } else {
+            Log.w(TAG, "Usage name not found in AudioUsage enum: " + xsdUsage);
+            return USAGE_UNKNOWN;
         }
     }
 

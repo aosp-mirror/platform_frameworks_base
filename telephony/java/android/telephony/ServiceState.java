@@ -2111,4 +2111,23 @@ public class ServiceState implements Parcelable {
         }
         return false;
     }
+
+    /**
+     * The frequency range is valid or not.
+     *
+     * @param frequencyRange The frequency range {@link FrequencyRange}.
+     * @return {@code true} if valid, {@code false} otherwise.
+     *
+     * @hide
+     */
+    public static boolean isFrequencyRangeValid(int frequencyRange) {
+        if (frequencyRange == FREQUENCY_RANGE_LOW
+                || frequencyRange == FREQUENCY_RANGE_MID
+                || frequencyRange == FREQUENCY_RANGE_HIGH
+                || frequencyRange == FREQUENCY_RANGE_MMWAVE) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

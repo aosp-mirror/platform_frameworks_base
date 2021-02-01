@@ -180,7 +180,7 @@
     <!-- Default state of tap to wake -->
     <bool name="def_double_tap_to_wake">true</bool>
 
-    <!-- Default for Settings.Secure.NFC_PAYMENT_COMPONENT -->
+    <!-- Default for Settings.Secure.NFC_PAYMENT_DEFAULT_COMPONENT -->
     <string name="def_nfc_payment_component"></string>
 
     <!-- Default setting for ability to add users from the lock screen -->

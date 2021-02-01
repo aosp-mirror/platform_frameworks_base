@@ -125,4 +125,9 @@ interface IDynamicSystemService
      *                      valid VBMeta block to retrieve the AVB key from.
      */
     boolean getAvbPublicKey(out AvbPublicKey dst);
+
+    /**
+     * Returns the suggested scratch partition size for overlayFS.
+     */
+    long suggestScratchSize();
 }

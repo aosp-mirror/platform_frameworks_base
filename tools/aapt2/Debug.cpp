@@ -436,9 +436,9 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   for (size_t i=0; i<N; i++) {
     size_t len;
     if (pool->isUTF8()) {
-      uniqueStrings.add(pool->string8At(i, &len));
+      uniqueStrings.add(UnpackOptionalString(pool->string8At(i), &len));
     } else {
-      uniqueStrings.add(pool->stringAt(i, &len));
+      uniqueStrings.add(UnpackOptionalString(pool->stringAt(i), &len));
     }
   }
 
@@ -450,8 +450,8 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
 
   const size_t NS = pool->size();
   for (size_t s=0; s<NS; s++) {
-    String8 str = pool->string8ObjectAt(s);
-    printer->Print(StringPrintf("String #%zd : %s\n", s, str.string()));
+    auto str = pool->string8ObjectAt(s);
+    printer->Print(StringPrintf("String #%zd : %s\n", s, str.has_value() ? str->string() : ""));
   }
 }
 

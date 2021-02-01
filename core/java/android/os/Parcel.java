@@ -33,11 +33,12 @@ import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.util.ArrayUtils;
+
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 import dalvik.system.VMRuntime;
 
-import libcore.util.ArrayUtils;
 import libcore.util.SneakyThrow;
 
 import java.io.ByteArrayInputStream;

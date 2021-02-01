@@ -27,25 +27,38 @@ import android.net.IDnsResolver;
 import android.net.INetd;
 import android.net.INetworkMonitor;
 import android.net.LinkProperties;
+import android.net.NattKeepalivePacketData;
 import android.net.Network;
+import android.net.NetworkAgent;
 import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkMonitorManager;
 import android.net.NetworkRequest;
 import android.net.NetworkState;
+import android.net.QosCallbackException;
+import android.net.QosFilter;
+import android.net.QosFilterParcelable;
+import android.net.QosSession;
+import android.net.TcpKeepalivePacketData;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.INetworkManagementService;
-import android.os.Messenger;
+import android.os.RemoteException;
 import android.os.SystemClock;
+import android.telephony.data.EpsBearerQosSessionAttributes;
 import android.util.Log;
+import android.util.Pair;
 import android.util.SparseArray;
 
-import com.android.internal.util.AsyncChannel;
+import com.android.connectivity.aidl.INetworkAgent;
+import com.android.connectivity.aidl.INetworkAgentRegistry;
 import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -126,21 +139,26 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // This Network object should always be used if possible, so as to encourage reuse of the
     // enclosed socket factory and connection pool.  Avoid creating other Network objects.
     // This Network object is always valid.
-    public final Network network;
-    public LinkProperties linkProperties;
+    @NonNull public final Network network;
+    @NonNull public LinkProperties linkProperties;
     // This should only be modified by ConnectivityService, via setNetworkCapabilities().
     // TODO: make this private with a getter.
-    public NetworkCapabilities networkCapabilities;
-    public final NetworkAgentConfig networkAgentConfig;
+    @NonNull public NetworkCapabilities networkCapabilities;
+    @NonNull public final NetworkAgentConfig networkAgentConfig;
 
     // Underlying networks declared by the agent. Only set if supportsUnderlyingNetworks is true.
     // The networks in this list might be declared by a VPN app using setUnderlyingNetworks and are
     // not guaranteed to be current or correct, or even to exist.
-    public @Nullable Network[] declaredUnderlyingNetworks;
+    //
+    // This array is read and iterated on multiple threads with no locking so its contents must
+    // never be modified. When the list of networks changes, replace with a new array, on the
+    // handler thread.
+    public @Nullable volatile Network[] declaredUnderlyingNetworks;
 
-    // Whether this network is always metered even if its underlying networks are unmetered.
-    // Only relevant if #supportsUnderlyingNetworks is true.
-    public boolean declaredMetered;
+    // The capabilities originally announced by the NetworkAgent, regardless of any capabilities
+    // that were added or removed due to this network's underlying networks.
+    // Only set if #supportsUnderlyingNetworks is true.
+    public @Nullable NetworkCapabilities declaredCapabilities;
 
     // Indicates if netd has been told to create this Network. From this point on the appropriate
     // routing rules are setup and routes are added so packets can begin flowing over the Network.
@@ -174,12 +192,17 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // Set to true when partial connectivity was detected.
     public boolean partialConnectivity;
 
-    // Captive portal info of the network, if any.
+    // Captive portal info of the network from RFC8908, if any.
     // Obtained by ConnectivityService and merged into NetworkAgent-provided information.
-    public CaptivePortalData captivePortalData;
+    public CaptivePortalData capportApiData;
 
     // The UID of the remote entity that created this Network.
     public final int creatorUid;
+
+    // Network agent portal info of the network, if any. This information is provided from
+    // non-RFC8908 sources, such as Wi-Fi Passpoint, which can provide information such as Venue
+    // URL, Terms & Conditions URL, and network friendly name.
+    public CaptivePortalData networkAgentPortalData;
 
     // Networks are lingered when they become unneeded as a result of their NetworkRequests being
     // satisfied by a higher-scoring network. so as to allow communication to wrap up before the
@@ -187,28 +210,28 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // either the linger timeout expiring and the network being taken down, or the network
     // satisfying a request again.
     public static class LingerTimer implements Comparable<LingerTimer> {
-        public final NetworkRequest request;
+        public final int requestId;
         public final long expiryMs;
 
-        public LingerTimer(NetworkRequest request, long expiryMs) {
-            this.request = request;
+        public LingerTimer(int requestId, long expiryMs) {
+            this.requestId = requestId;
             this.expiryMs = expiryMs;
         }
         public boolean equals(Object o) {
             if (!(o instanceof LingerTimer)) return false;
             LingerTimer other = (LingerTimer) o;
-            return (request.requestId == other.request.requestId) && (expiryMs == other.expiryMs);
+            return (requestId == other.requestId) && (expiryMs == other.expiryMs);
         }
         public int hashCode() {
-            return Objects.hash(request.requestId, expiryMs);
+            return Objects.hash(requestId, expiryMs);
         }
         public int compareTo(LingerTimer other) {
             return (expiryMs != other.expiryMs) ?
                     Long.compare(expiryMs, other.expiryMs) :
-                    Integer.compare(request.requestId, other.request.requestId);
+                    Integer.compare(requestId, other.requestId);
         }
         public String toString() {
-            return String.format("%s, expires %dms", request.toString(),
+            return String.format("%s, expires %dms", requestId,
                     expiryMs - SystemClock.elapsedRealtime());
         }
     }
@@ -219,6 +242,31 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * obj = this NetworkAgentInfo
      */
     public static final int EVENT_NETWORK_LINGER_COMPLETE = 1001;
+
+    /**
+     * Inform ConnectivityService that the agent is half-connected.
+     * arg1 = ARG_AGENT_SUCCESS or ARG_AGENT_FAILURE
+     * obj = NetworkAgentInfo
+     * @hide
+     */
+    public static final int EVENT_AGENT_REGISTERED = 1002;
+
+    /**
+     * Inform ConnectivityService that the agent was disconnected.
+     * obj = NetworkAgentInfo
+     * @hide
+     */
+    public static final int EVENT_AGENT_DISCONNECTED = 1003;
+
+    /**
+     * Argument for EVENT_AGENT_HALF_CONNECTED indicating failure.
+     */
+    public static final int ARG_AGENT_FAILURE = 0;
+
+    /**
+     * Argument for EVENT_AGENT_HALF_CONNECTED indicating success.
+     */
+    public static final int ARG_AGENT_SUCCESS = 1;
 
     // All linger timers for this network, sorted by expiry time. A linger timer is added whenever
     // a request is moved to a network with a better score, regardless of whether the network is or
@@ -261,8 +309,9 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     // report is generated. Once non-null, it will never be null again.
     @Nullable private ConnectivityReport mConnectivityReport;
 
-    public final Messenger messenger;
-    public final AsyncChannel asyncChannel;
+    public final INetworkAgent networkAgent;
+    // Only accessed from ConnectivityService handler thread
+    private final AgentDeathMonitor mDeathMonitor = new AgentDeathMonitor();
 
     public final int factorySerialNumber;
 
@@ -277,14 +326,21 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     private final ConnectivityService mConnService;
     private final Context mContext;
     private final Handler mHandler;
+    private final QosCallbackTracker mQosCallbackTracker;
 
-    public NetworkAgentInfo(Messenger messenger, AsyncChannel ac, Network net, NetworkInfo info,
-            LinkProperties lp, NetworkCapabilities nc, int score, Context context,
+    public NetworkAgentInfo(INetworkAgent na, Network net, NetworkInfo info,
+            @NonNull LinkProperties lp, @NonNull NetworkCapabilities nc, int score, Context context,
             Handler handler, NetworkAgentConfig config, ConnectivityService connService, INetd netd,
             IDnsResolver dnsResolver, INetworkManagementService nms, int factorySerialNumber,
-            int creatorUid) {
-        this.messenger = messenger;
-        asyncChannel = ac;
+            int creatorUid, QosCallbackTracker qosCallbackTracker) {
+        Objects.requireNonNull(net);
+        Objects.requireNonNull(info);
+        Objects.requireNonNull(lp);
+        Objects.requireNonNull(nc);
+        Objects.requireNonNull(context);
+        Objects.requireNonNull(config);
+        Objects.requireNonNull(qosCallbackTracker);
+        networkAgent = na;
         network = net;
         networkInfo = info;
         linkProperties = lp;
@@ -297,6 +353,287 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         networkAgentConfig = config;
         this.factorySerialNumber = factorySerialNumber;
         this.creatorUid = creatorUid;
+        mQosCallbackTracker = qosCallbackTracker;
+    }
+
+    private class AgentDeathMonitor implements IBinder.DeathRecipient {
+        @Override
+        public void binderDied() {
+            notifyDisconnected();
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that it was registered, and should be unregistered if it dies.
+     *
+     * Must be called from the ConnectivityService handler thread. A NetworkAgent can only be
+     * registered once.
+     */
+    public void notifyRegistered() {
+        try {
+            networkAgent.asBinder().linkToDeath(mDeathMonitor, 0);
+            networkAgent.onRegistered(new NetworkAgentMessageHandler(mHandler));
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error registering NetworkAgent", e);
+            maybeUnlinkDeathMonitor();
+            mHandler.obtainMessage(EVENT_AGENT_REGISTERED, ARG_AGENT_FAILURE, 0, this)
+                    .sendToTarget();
+            return;
+        }
+
+        mHandler.obtainMessage(EVENT_AGENT_REGISTERED, ARG_AGENT_SUCCESS, 0, this).sendToTarget();
+    }
+
+    /**
+     * Disconnect the NetworkAgent. Must be called from the ConnectivityService handler thread.
+     */
+    public void disconnect() {
+        try {
+            networkAgent.onDisconnected();
+        } catch (RemoteException e) {
+            Log.i(TAG, "Error disconnecting NetworkAgent", e);
+            // Fall through: it's fine if the remote has died
+        }
+
+        notifyDisconnected();
+        maybeUnlinkDeathMonitor();
+    }
+
+    private void maybeUnlinkDeathMonitor() {
+        try {
+            networkAgent.asBinder().unlinkToDeath(mDeathMonitor, 0);
+        } catch (NoSuchElementException e) {
+            // Was not linked: ignore
+        }
+    }
+
+    private void notifyDisconnected() {
+        // Note this may be called multiple times if ConnectivityService disconnects while the
+        // NetworkAgent also dies. ConnectivityService ignores disconnects of already disconnected
+        // agents.
+        mHandler.obtainMessage(EVENT_AGENT_DISCONNECTED, this).sendToTarget();
+    }
+
+    /**
+     * Notify the NetworkAgent that bandwidth update was requested.
+     */
+    public void onBandwidthUpdateRequested() {
+        try {
+            networkAgent.onBandwidthUpdateRequested();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending bandwidth update request event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that validation status has changed.
+     */
+    public void onValidationStatusChanged(int validationStatus, @Nullable String captivePortalUrl) {
+        try {
+            networkAgent.onValidationStatusChanged(validationStatus, captivePortalUrl);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending validation status change event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that the acceptUnvalidated setting should be saved.
+     */
+    public void onSaveAcceptUnvalidated(boolean acceptUnvalidated) {
+        try {
+            networkAgent.onSaveAcceptUnvalidated(acceptUnvalidated);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending accept unvalidated event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that NATT socket keepalive should be started.
+     */
+    public void onStartNattSocketKeepalive(int slot, int intervalDurationMs,
+            @NonNull NattKeepalivePacketData packetData) {
+        try {
+            networkAgent.onStartNattSocketKeepalive(slot, intervalDurationMs, packetData);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending NATT socket keepalive start event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that TCP socket keepalive should be started.
+     */
+    public void onStartTcpSocketKeepalive(int slot, int intervalDurationMs,
+            @NonNull TcpKeepalivePacketData packetData) {
+        try {
+            networkAgent.onStartTcpSocketKeepalive(slot, intervalDurationMs, packetData);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending TCP socket keepalive start event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that socket keepalive should be stopped.
+     */
+    public void onStopSocketKeepalive(int slot) {
+        try {
+            networkAgent.onStopSocketKeepalive(slot);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending TCP socket keepalive stop event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that signal strength thresholds should be updated.
+     */
+    public void onSignalStrengthThresholdsUpdated(@NonNull int[] thresholds) {
+        try {
+            networkAgent.onSignalStrengthThresholdsUpdated(thresholds);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending signal strength thresholds event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that automatic reconnect should be prevented.
+     */
+    public void onPreventAutomaticReconnect() {
+        try {
+            networkAgent.onPreventAutomaticReconnect();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending prevent automatic reconnect event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that a NATT keepalive packet filter should be added.
+     */
+    public void onAddNattKeepalivePacketFilter(int slot,
+            @NonNull NattKeepalivePacketData packetData) {
+        try {
+            networkAgent.onAddNattKeepalivePacketFilter(slot, packetData);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending add NATT keepalive packet filter event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that a TCP keepalive packet filter should be added.
+     */
+    public void onAddTcpKeepalivePacketFilter(int slot,
+            @NonNull TcpKeepalivePacketData packetData) {
+        try {
+            networkAgent.onAddTcpKeepalivePacketFilter(slot, packetData);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending add TCP keepalive packet filter event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that a keepalive packet filter should be removed.
+     */
+    public void onRemoveKeepalivePacketFilter(int slot) {
+        try {
+            networkAgent.onRemoveKeepalivePacketFilter(slot);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error sending remove keepalive packet filter event", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that the qos filter should be registered against the given qos
+     * callback id.
+     */
+    public void onQosFilterCallbackRegistered(final int qosCallbackId,
+            final QosFilter qosFilter) {
+        try {
+            networkAgent.onQosFilterCallbackRegistered(qosCallbackId,
+                    new QosFilterParcelable(qosFilter));
+        } catch (final RemoteException e) {
+            Log.e(TAG, "Error registering a qos callback id against a qos filter", e);
+        }
+    }
+
+    /**
+     * Notify the NetworkAgent that the given qos callback id should be unregistered.
+     */
+    public void onQosCallbackUnregistered(final int qosCallbackId) {
+        try {
+            networkAgent.onQosCallbackUnregistered(qosCallbackId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error unregistering a qos callback id", e);
+        }
+    }
+
+    // TODO: consider moving out of NetworkAgentInfo into its own class
+    private class NetworkAgentMessageHandler extends INetworkAgentRegistry.Stub {
+        private final Handler mHandler;
+
+        private NetworkAgentMessageHandler(Handler handler) {
+            mHandler = handler;
+        }
+
+        @Override
+        public void sendNetworkCapabilities(@NonNull NetworkCapabilities nc) {
+            Objects.requireNonNull(nc);
+            mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_CAPABILITIES_CHANGED,
+                    new Pair<>(NetworkAgentInfo.this, nc)).sendToTarget();
+        }
+
+        @Override
+        public void sendLinkProperties(@NonNull LinkProperties lp) {
+            Objects.requireNonNull(lp);
+            mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_PROPERTIES_CHANGED,
+                    new Pair<>(NetworkAgentInfo.this, lp)).sendToTarget();
+        }
+
+        @Override
+        public void sendNetworkInfo(@NonNull NetworkInfo info) {
+            Objects.requireNonNull(info);
+            mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_INFO_CHANGED,
+                    new Pair<>(NetworkAgentInfo.this, info)).sendToTarget();
+        }
+
+        @Override
+        public void sendScore(int score) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_NETWORK_SCORE_CHANGED, score, 0,
+                    new Pair<>(NetworkAgentInfo.this, null)).sendToTarget();
+        }
+
+        @Override
+        public void sendExplicitlySelected(boolean explicitlySelected, boolean acceptPartial) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_SET_EXPLICITLY_SELECTED,
+                    explicitlySelected ? 1 : 0, acceptPartial ? 1 : 0,
+                    new Pair<>(NetworkAgentInfo.this, null)).sendToTarget();
+        }
+
+        @Override
+        public void sendSocketKeepaliveEvent(int slot, int reason) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_SOCKET_KEEPALIVE,
+                    slot, reason, new Pair<>(NetworkAgentInfo.this, null)).sendToTarget();
+        }
+
+        @Override
+        public void sendUnderlyingNetworks(@Nullable List<Network> networks) {
+            mHandler.obtainMessage(NetworkAgent.EVENT_UNDERLYING_NETWORKS_CHANGED,
+                    new Pair<>(NetworkAgentInfo.this, networks)).sendToTarget();
+        }
+
+        @Override
+        public void sendEpsQosSessionAvailable(final int qosCallbackId, final QosSession session,
+                final EpsBearerQosSessionAttributes attributes) {
+            mQosCallbackTracker.sendEventQosSessionAvailable(qosCallbackId, session, attributes);
+        }
+
+        @Override
+        public void sendQosSessionLost(final int qosCallbackId, final QosSession session) {
+            mQosCallbackTracker.sendEventQosSessionLost(qosCallbackId, session);
+        }
+
+        @Override
+        public void sendQosCallbackError(final int qosCallbackId,
+                @QosCallbackException.ExceptionType final int exceptionType) {
+            mQosCallbackTracker.sendEventQosCallbackError(qosCallbackId, exceptionType);
+        }
     }
 
     /**
@@ -315,7 +652,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      *
      * @return the old capabilities of this network.
      */
-    public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
+    @NonNull public synchronized NetworkCapabilities getAndSetNetworkCapabilities(
             @NonNull final NetworkCapabilities nc) {
         final NetworkCapabilities oldNc = networkCapabilities;
         networkCapabilities = nc;
@@ -410,7 +747,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         updateRequestCounts(REMOVE, existing);
         mNetworkRequests.remove(requestId);
         if (existing.isRequest()) {
-            unlingerRequest(existing);
+            unlingerRequest(existing.requestId);
         }
     }
 
@@ -556,33 +893,33 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
     }
 
     /**
-     * Sets the specified request to linger on this network for the specified time. Called by
+     * Sets the specified requestId to linger on this network for the specified time. Called by
      * ConnectivityService when the request is moved to another network with a higher score.
      */
-    public void lingerRequest(NetworkRequest request, long now, long duration) {
-        if (mLingerTimerForRequest.get(request.requestId) != null) {
+    public void lingerRequest(int requestId, long now, long duration) {
+        if (mLingerTimerForRequest.get(requestId) != null) {
             // Cannot happen. Once a request is lingering on a particular network, we cannot
             // re-linger it unless that network becomes the best for that request again, in which
             // case we should have unlingered it.
-            Log.wtf(TAG, toShortString() + ": request " + request.requestId + " already lingered");
+            Log.wtf(TAG, toShortString() + ": request " + requestId + " already lingered");
         }
         final long expiryMs = now + duration;
-        LingerTimer timer = new LingerTimer(request, expiryMs);
+        LingerTimer timer = new LingerTimer(requestId, expiryMs);
         if (VDBG) Log.d(TAG, "Adding LingerTimer " + timer + " to " + toShortString());
         mLingerTimers.add(timer);
-        mLingerTimerForRequest.put(request.requestId, timer);
+        mLingerTimerForRequest.put(requestId, timer);
     }
 
     /**
      * Cancel lingering. Called by ConnectivityService when a request is added to this network.
-     * Returns true if the given request was lingering on this network, false otherwise.
+     * Returns true if the given requestId was lingering on this network, false otherwise.
      */
-    public boolean unlingerRequest(NetworkRequest request) {
-        LingerTimer timer = mLingerTimerForRequest.get(request.requestId);
+    public boolean unlingerRequest(int requestId) {
+        LingerTimer timer = mLingerTimerForRequest.get(requestId);
         if (timer != null) {
             if (VDBG) Log.d(TAG, "Removing LingerTimer " + timer + " from " + toShortString());
             mLingerTimers.remove(timer);
-            mLingerTimerForRequest.remove(request.requestId);
+            mLingerTimerForRequest.remove(requestId);
             return true;
         }
         return false;
@@ -610,7 +947,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
         if (newExpiry > 0) {
             mLingerMessage = new WakeupMessage(
                     mContext, mHandler,
-                    "NETWORK_LINGER_COMPLETE." + network.netId /* cmdName */,
+                    "NETWORK_LINGER_COMPLETE." + network.getNetId() /* cmdName */,
                     EVENT_NETWORK_LINGER_COMPLETE /* cmd */,
                     0 /* arg1 (unused) */, 0 /* arg2 (unused) */,
                     this /* obj (NetworkAgentInfo) */);
@@ -701,7 +1038,7 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
      * This represents the network with something like "[100 WIFI|VPN]" or "[108 MOBILE]".
      */
     public String toShortString() {
-        return "[" + network.netId + " "
+        return "[" + network.getNetId() + " "
                 + transportNamesOf(networkCapabilities.getTransportTypes()) + "]";
     }
 

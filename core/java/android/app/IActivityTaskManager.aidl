@@ -223,7 +223,7 @@ interface IActivityTaskManager {
      */
     IBinder requestStartActivityPermissionToken(in IBinder delegatorToken);
 
-    void releaseSomeActivities(in IApplicationThread app);
+    oneway void releaseSomeActivities(in IApplicationThread app);
     Bitmap getTaskDescriptionIcon(in String filename, int userId);
     void registerTaskStackListener(in ITaskStackListener listener);
     void unregisterTaskStackListener(in ITaskStackListener listener);

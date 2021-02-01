@@ -17,7 +17,7 @@
 package android.security;
 
 import android.annotation.NonNull;
-import android.hardware.keymint.KeyParameter;
+import android.hardware.security.keymint.KeyParameter;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.security.keymaster.KeymasterDefs;
@@ -73,8 +73,7 @@ public class KeyStoreOperation {
                     );
                 }
                 default:
-                    // TODO Human readable string. Use something like KeyStore.getKeyStoreException
-                    throw new KeyStoreException(e.errorCode, "");
+                    throw KeyStore2.getKeyStoreException(e.errorCode);
             }
         } catch (RemoteException e) {
             // Log exception and report invalid operation handle.

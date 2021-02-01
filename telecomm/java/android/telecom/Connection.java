@@ -109,6 +109,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public abstract class Connection extends Conferenceable {
 
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "STATE_", value = {
+            STATE_INITIALIZING,
+            STATE_NEW,
+            STATE_RINGING,
+            STATE_DIALING,
+            STATE_ACTIVE,
+            STATE_HOLDING,
+            STATE_DISCONNECTED,
+            STATE_PULLING_CALL
+    })
+    public @interface ConnectionState {}
+
     /**
      * The connection is initializing. This is generally the first state for a {@code Connection}
      * returned by a {@link ConnectionService}.
@@ -2989,6 +3003,26 @@ public abstract class Connection extends Conferenceable {
      * @param state The new connection audio state.
      */
     public void onCallAudioStateChanged(CallAudioState state) {}
+
+    /**
+     * Inform this Connection when it will or will not be tracked by an {@link InCallService} which
+     * can provide an InCall UI.
+     * This is primarily intended for use by Connections reported by self-managed
+     * {@link ConnectionService} which typically maintain their own UI.
+     *
+     * @param isUsingAlternativeUi Indicates whether an InCallService that can provide InCall UI is
+     *                             currently tracking the self-managed call.
+     */
+    public void onUsingAlternativeUi(boolean isUsingAlternativeUi) {}
+
+    /**
+     * Inform this Conenection when it will or will not be tracked by an non-UI
+     * {@link InCallService}.
+     *
+     * @param isTracked Indicates whether an non-UI InCallService is currently tracking the
+     *                 self-managed call.
+     */
+    public void onTrackedByNonUiService(boolean isTracked) {}
 
     /**
      * Notifies this Connection of an internal state change. This method is called after the

@@ -37,6 +37,8 @@ import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
 import android.telephony.ClientRequestStats;
 import android.telephony.ThermalMitigationRequest;
+import android.telephony.gba.UaSecurityProtocolIdentifier;
+import android.telephony.IBootstrapAuthenticationCallback;
 import android.telephony.IccOpenLogicalChannelResponse;
 import android.telephony.ICellInfoCallback;
 import android.telephony.ModemActivityInfo;
@@ -47,9 +49,11 @@ import android.telephony.RadioAccessFamily;
 import android.telephony.RadioAccessSpecifier;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
+import android.telephony.SignalStrengthUpdateRequest;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
 import android.telephony.emergency.EmergencyNumber;
+import android.telephony.ims.RcsClientConfiguration;
 import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsConfigCallback;
@@ -57,6 +61,7 @@ import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
+import android.telephony.ims.aidl.IRcsConfigCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.IBooleanConsumer;
@@ -124,6 +129,15 @@ interface ITelephony {
      */
     boolean isRadioOnForSubscriberWithFeature(int subId, String callingPackage, String callingFeatureId);
 
+    /**
+     * Set the user-set status for enriched calling with call composer.
+     */
+    void setCallComposerStatus(int subId, int status);
+
+    /**
+     * Get the user-set status for enriched calling with call composer.
+     */
+    int getCallComposerStatus(int subId);
 
     /**
      * Supply a pin to unlock the SIM for particular subId.
@@ -616,7 +630,7 @@ interface ITelephony {
      *            successful iccOpenLogicalChannel.
      * @return true if the channel was closed successfully.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     boolean iccCloseLogicalChannel(int subId, int channel);
 
     /**
@@ -658,7 +672,7 @@ interface ITelephony {
      * @return The APDU response from the ICC card with the status appended at
      *            the end.
      */
-    @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
+    @UnsupportedAppUsage(trackingBug = 171933273)
     String iccTransmitApduLogicalChannel(int subId, int channel, int cla, int instruction,
             int p1, int p2, int p3, String data);
 
@@ -1674,8 +1688,17 @@ interface ITelephony {
      * @param slotIndex SIM slot id
      * @param state  State of SIM (power down, power up, pass through)
      * @hide
-     * */
+     */
     void setSimPowerStateForSlot(int slotIndex, int state);
+
+    /**
+     * Set SIM card power state.
+     * @param slotIndex SIM slot id
+     * @param state  State of SIM (power down, power up, pass through)
+     * @param callback callback to receive result info
+     * @hide
+     */
+    void setSimPowerStateForSlotWithCallback(int slotIndex, int state, IIntegerConsumer callback);
 
     /**
      * Returns a list of Forbidden PLMNs from the specified SIM App
@@ -2257,6 +2280,14 @@ interface ITelephony {
     CarrierBandwidth getCarrierBandwidth(int subId);
 
     /**
+     * Checks whether the device supports the given capability on the radio interface.
+     *
+     * @param capability the name of the capability
+     * @return the availability of the capability
+     */
+    boolean isRadioInterfaceCapabilitySupported(String capability);
+
+    /**
      * Thermal mitigation request to control functionalities at modem.
      *
      * @param subId the id of the subscription
@@ -2265,4 +2296,112 @@ interface ITelephony {
      */
     int sendThermalMitigationRequest(int subId,
             in ThermalMitigationRequest thermalMitigationRequest);
+
+    /**
+     * Get the Generic Bootstrapping Architecture authentication keys
+     */
+    void bootstrapAuthenticationRequest(int subId, int appType, in Uri nafUrl,
+            in UaSecurityProtocolIdentifier securityProtocol,
+            boolean forceBootStrapping, IBootstrapAuthenticationCallback callback);
+
+    /**
+     * Set the GbaService Package Name that Telephony will bind to.
+     */
+    boolean setBoundGbaServiceOverride(int subId, String packageName);
+
+    /**
+     * Return the package name of the currently bound GbaService.
+     */
+    String getBoundGbaService(int subId);
+
+    /**
+     * Set the release time for telephony to unbind GbaService.
+     */
+    boolean setGbaReleaseTimeOverride(int subId, int interval);
+
+    /**
+     * Return the release time for telephony to unbind GbaService.
+     */
+    int getGbaReleaseTime(int subId);
+
+    /**
+     * Provide the client configuration parameters of the RCS application.
+     */
+    void setRcsClientConfiguration(int subId, in RcsClientConfiguration rcc);
+
+    /**
+     * return value to indicate whether the device and the carrier can support RCS VoLTE
+     * single registration.
+     */
+    boolean isRcsVolteSingleRegistrationCapable(int subId);
+
+    /**
+     * Register RCS provisioning callback.
+     */
+    void registerRcsProvisioningChangedCallback(int subId,
+            IRcsConfigCallback callback);
+
+    /**
+     * Unregister RCS provisioning callback.
+     */
+    void unregisterRcsProvisioningChangedCallback(int subId, IRcsConfigCallback callback);
+
+    /**
+     * trigger RCS reconfiguration.
+     */
+    void triggerRcsReconfiguration(int subId);
+
+    /**
+     * Overrides the config of RCS VoLTE single registration enabled for the device.
+     */
+    void setDeviceSingleRegistrationEnabledOverride(String enabled);
+
+    /**
+     * Gets the config of RCS VoLTE single registration enabled for the device.
+     */
+    boolean getDeviceSingleRegistrationEnabled();
+
+    /**
+     * Overrides the config of RCS VoLTE single registration enabled for the carrier/subscription.
+     */
+    boolean setCarrierSingleRegistrationEnabledOverride(int subId, String enabled);
+
+    /**
+     * Sends a device to device message; only for use through shell.
+     */
+    void sendDeviceToDeviceMessage(int message, int value);
+
+    /**
+     * Gets the config of RCS VoLTE single registration enabled for the carrier/subscription.
+     */
+    boolean getCarrierSingleRegistrationEnabled(int subId);
+
+    /**
+     *  Return the mobile provisioning url that is used to launch a browser to allow users to manage
+     *  their mobile plan.
+     */
+    String getMobileProvisioningUrl();
+
+    /*
+     * Remove the EAB contacts from the EAB database.
+     */
+    int removeContactFromEab(int subId, String contacts);
+
+    /**
+     * Get the EAB contact from the EAB database.
+     */
+    String getContactFromEab(String contact);
+
+    /**
+     * Set a SignalStrengthUpdateRequest to receive notification when Signal Strength breach the
+     * specified thresholds.
+     */
+    void setSignalStrengthUpdateRequest(int subId, in SignalStrengthUpdateRequest request,
+            String callingPackage);
+
+    /**
+     * Clear a SignalStrengthUpdateRequest from system.
+     */
+    void clearSignalStrengthUpdateRequest(int subId, in SignalStrengthUpdateRequest request,
+            String callingPackage);
 }

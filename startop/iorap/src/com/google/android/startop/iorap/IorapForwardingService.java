@@ -34,6 +34,7 @@ import android.os.Parcel;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.provider.DeviceConfig;
 import android.util.ArraySet;
 import android.util.Log;
 
@@ -154,9 +155,27 @@ public class IorapForwardingService extends SystemService {
 
     @VisibleForTesting
     protected boolean isIorapEnabled() {
+        // These two mendel flags should match those in iorapd native process
+        // system/iorapd/src/common/property.h
+        boolean isTracingEnabled =
+            getMendelFlag("iorap_perfetto_enable", "iorapd.perfetto.enable", false);
+        boolean isReadAheadEnabled =
+            getMendelFlag("iorap_readahead_enable", "iorapd.readahead.enable", false);
         // Same as the property in iorapd.rc -- disabling this will mean the 'iorapd' binder process
         // never comes up, so all binder connections will fail indefinitely.
-        return IS_ENABLED;
+        return IS_ENABLED && (isTracingEnabled || isReadAheadEnabled);
+    }
+
+    private boolean getMendelFlag(String mendelFlag, String sysProperty, boolean defaultValue) {
+        // TODO(yawanng) use DeviceConfig to get mendel property.
+        // DeviceConfig doesn't work and the reason is not clear.
+        // Provider service is already up before IORapForwardService.
+        String mendelProperty = "persist.device_config."
+            + DeviceConfig.NAMESPACE_RUNTIME_NATIVE_BOOT
+            + "."
+            + mendelFlag;
+        return SystemProperties.getBoolean(mendelProperty,
+            SystemProperties.getBoolean(sysProperty, defaultValue));
     }
 
     //</editor-fold>
@@ -239,7 +258,9 @@ public class IorapForwardingService extends SystemService {
         //
         // TODO: it would be good to get nodified of 'adb shell stop iorapd' to avoid
         // printing this warning.
-        Log.w(TAG, "Failed to connect to iorapd, is it down? Delay for " + sleepTime);
+        if (DEBUG) {
+            Log.v(TAG, "Failed to connect to iorapd, is it down? Delay for " + sleepTime);
+        }
 
         // Use a handler instead of Thread#sleep to avoid backing up the binder thread
         // when this is called from the death recipient callback.
@@ -275,7 +296,9 @@ public class IorapForwardingService extends SystemService {
         // Connect to the native binder service.
         mIorapRemote = provideIorapRemote();
         if (mIorapRemote == null) {
-            Log.e(TAG, "connectToRemoteAndConfigure - null iorap remote. check for Log.wtf?");
+            if (DEBUG) {
+                Log.e(TAG, "connectToRemoteAndConfigure - null iorap remote. check for Log.wtf?");
+            }
             return false;
         }
         invokeRemote(mIorapRemote,
