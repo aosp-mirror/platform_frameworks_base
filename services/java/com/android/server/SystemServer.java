@@ -359,6 +359,9 @@ public final class SystemServer implements Dumpable {
             "com.android.server.ConnectivityServiceInitializer";
     private static final String IP_CONNECTIVITY_METRICS_CLASS =
             "com.android.server.connectivity.IpConnectivityMetrics";
+    private static final String MEDIA_COMMUNICATION_SERVICE_CLASS =
+            "com.android.server.media.MediaCommunicationService";
+
     private static final String ROLE_SERVICE_CLASS = "com.android.role.RoleService";
     private static final String GAME_MANAGER_SERVICE_CLASS =
             "com.android.server.graphics.GameManagerService$Lifecycle";
@@ -2526,6 +2529,10 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("AppSearchManagerService");
         mSystemServiceManager.startService(APP_SEARCH_MANAGER_SERVICE_CLASS);
+        t.traceEnd();
+
+        t.traceBegin("StartMediaCommunicationService");
+        mSystemServiceManager.startService(MEDIA_COMMUNICATION_SERVICE_CLASS);
         t.traceEnd();
 
         ConcurrentUtils.waitForFutureNoInterrupt(mBlobStoreServiceStart,
