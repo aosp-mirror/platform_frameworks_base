@@ -3183,6 +3183,7 @@ package android.hardware.location {
 
   public class ContextHubClientCallback {
     ctor public ContextHubClientCallback();
+    method public void onClientAuthorizationChanged(@NonNull android.hardware.location.ContextHubClient, long, int);
     method public void onHubReset(android.hardware.location.ContextHubClient);
     method public void onMessageFromNanoApp(android.hardware.location.ContextHubClient, android.hardware.location.NanoAppMessage);
     method public void onNanoAppAborted(android.hardware.location.ContextHubClient, long, int);
@@ -3219,6 +3220,7 @@ package android.hardware.location {
 
   public class ContextHubIntentEvent {
     method @NonNull public static android.hardware.location.ContextHubIntentEvent fromIntent(@NonNull android.content.Intent);
+    method public int getClientAuthorizationState();
     method @NonNull public android.hardware.location.ContextHubInfo getContextHubInfo();
     method public int getEventType();
     method public int getNanoAppAbortCode();
@@ -3227,8 +3229,10 @@ package android.hardware.location {
   }
 
   public final class ContextHubManager {
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@Nullable android.content.Context, @NonNull android.hardware.location.ContextHubInfo, @NonNull java.util.concurrent.Executor, @NonNull android.hardware.location.ContextHubClientCallback);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.ContextHubClientCallback, @NonNull java.util.concurrent.Executor);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.hardware.location.ContextHubClientCallback);
+    method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@Nullable android.content.Context, @NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubClient createClient(@NonNull android.hardware.location.ContextHubInfo, @NonNull android.app.PendingIntent, long);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> disableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> enableNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
@@ -3246,6 +3250,10 @@ package android.hardware.location {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public int unloadNanoApp(int);
     method @NonNull @RequiresPermission(anyOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.ACCESS_CONTEXT_HUB}) public android.hardware.location.ContextHubTransaction<java.lang.Void> unloadNanoApp(@NonNull android.hardware.location.ContextHubInfo, long);
     method @Deprecated public int unregisterCallback(@NonNull android.hardware.location.ContextHubManager.Callback);
+    field public static final int AUTHORIZATION_DENIED = 0; // 0x0
+    field public static final int AUTHORIZATION_DENIED_GRACE_PERIOD = 1; // 0x1
+    field public static final int AUTHORIZATION_GRANTED = 2; // 0x2
+    field public static final int EVENT_CLIENT_AUTHORIZATION = 7; // 0x7
     field public static final int EVENT_HUB_RESET = 6; // 0x6
     field public static final int EVENT_NANOAPP_ABORTED = 4; // 0x4
     field public static final int EVENT_NANOAPP_DISABLED = 3; // 0x3
@@ -3253,6 +3261,7 @@ package android.hardware.location {
     field public static final int EVENT_NANOAPP_LOADED = 0; // 0x0
     field public static final int EVENT_NANOAPP_MESSAGE = 5; // 0x5
     field public static final int EVENT_NANOAPP_UNLOADED = 1; // 0x1
+    field public static final String EXTRA_CLIENT_AUTHORIZATION_STATE = "android.hardware.location.extra.CLIENT_AUTHORIZATION_STATE";
     field public static final String EXTRA_CONTEXT_HUB_INFO = "android.hardware.location.extra.CONTEXT_HUB_INFO";
     field public static final String EXTRA_EVENT_TYPE = "android.hardware.location.extra.EVENT_TYPE";
     field public static final String EXTRA_MESSAGE = "android.hardware.location.extra.MESSAGE";
@@ -3491,8 +3500,10 @@ package android.hardware.location {
 
   public final class NanoAppState implements android.os.Parcelable {
     ctor public NanoAppState(long, int, boolean);
+    ctor public NanoAppState(long, int, boolean, @NonNull java.util.List<java.lang.String>);
     method public int describeContents();
     method public long getNanoAppId();
+    method @NonNull public java.util.List<java.lang.String> getNanoAppPermissions();
     method public long getNanoAppVersion();
     method public boolean isEnabled();
     method public void writeToParcel(android.os.Parcel, int);
