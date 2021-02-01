@@ -118,8 +118,8 @@ public class BackgroundDexOptService extends JobService {
         // Schedule a one-off job which scans installed packages and updates
         // out-of-date oat files.
         js.schedule(new JobInfo.Builder(JOB_POST_BOOT_UPDATE, sDexoptServiceName)
-                    .setMinimumLatency(TimeUnit.MINUTES.toMillis(1))
-                    .setOverrideDeadline(TimeUnit.MINUTES.toMillis(1))
+                    .setMinimumLatency(TimeUnit.MINUTES.toMillis(10))
+                    .setOverrideDeadline(TimeUnit.MINUTES.toMillis(60))
                     .build());
 
         // Schedule a daily job which scans installed packages and compiles
