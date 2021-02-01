@@ -1781,8 +1781,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * @param viewId The fully qualified resource name of the view id to find.
      * @return A list of node info.
      */
-    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(String viewId) {
+    public List<AccessibilityNodeInfo> findAccessibilityNodeInfosByViewId(@NonNull String viewId) {
         enforceSealed();
+        if (viewId == null) {
+            Log.e(TAG, "returns empty list due to null viewId.");
+            return Collections.emptyList();
+        }
         if (!canPerformRequestOverConnection(mConnectionId, mWindowId, mSourceNodeId)) {
             return Collections.emptyList();
         }
