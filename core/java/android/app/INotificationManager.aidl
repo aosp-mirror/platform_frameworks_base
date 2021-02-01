@@ -85,6 +85,7 @@ interface INotificationManager
 
     void setBubblesAllowed(String pkg, int uid, int bubblePreference);
     boolean areBubblesAllowed(String pkg);
+    boolean areBubblesEnabled(in UserHandle user);
     int getBubblePreferenceForPackage(String pkg, int uid);
 
     void createNotificationChannelGroups(String pkg, in ParceledListSlice channelGroupList);
