@@ -17,7 +17,6 @@
 package com.android.server.wm.flicker.rotation
 
 import android.os.Bundle
-import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
@@ -51,7 +50,6 @@ import org.junit.runners.Parameterized
  * Cycle through supported app rotations using seamless rotations.
  * To run this test: `atest FlickerTests:SeamlessAppRotationTest`
  */
-@Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -97,63 +95,67 @@ class SeamlessAppRotationTest(
                     } else {
                         ""
                     }
-                    buildTestTag("seamlessRotation", configuration, extraInfo = extra)
+                    buildTestTag(configuration, extraInfo = extra)
                 }
                 assertions {
-                    windowManagerTrace {
-                        navBarWindowIsAlwaysVisible(bugId = 140855415)
-                        statusBarWindowIsAlwaysVisible(bugId = 140855415)
-                        visibleWindowsShownMoreThanOneConsecutiveEntry()
-                        appWindowAlwaysVisibleOnTop(testApp.`package`)
-                    }
+                    val startingBounds = WindowUtils.getDisplayBounds(configuration.startRotation)
+                    val endingBounds = WindowUtils.getDisplayBounds(configuration.endRotation)
 
-                    layersTrace {
-                        navBarLayerIsAlwaysVisible(bugId = 140855415)
-                        statusBarLayerIsAlwaysVisible(bugId = 140855415)
-                        noUncoveredRegions(configuration.startRotation,
-                            configuration.endRotation, allStates = false, bugId = 147659548)
-                        navBarLayerRotatesAndScales(configuration.startRotation,
-                            configuration.endRotation,
-                            enabled = false)
-                        statusBarLayerRotatesScales(configuration.startRotation,
-                            configuration.endRotation, enabled = false)
-                        visibleLayersShownMoreThanOneConsecutiveEntry(
-                                enabled = configuration.startRotation == configuration.endRotation)
-                        layerAlwaysVisible(testApp.`package`)
-                    }
-
-                    layersTrace {
-                        val startingBounds = WindowUtils
-                            .getDisplayBounds(configuration.startRotation)
-                        val endingBounds = WindowUtils
-                            .getDisplayBounds(configuration.endRotation)
-
-                        all("appLayerRotates", bugId = 147659548) {
-                            if (startingBounds == endingBounds) {
-                                this.hasVisibleRegion(
-                                    testApp.`package`, startingBounds)
-                            } else {
-                                this.hasVisibleRegion(testApp.`package`,
-                                    startingBounds)
-                                    .then()
-                                    .hasVisibleRegion(testApp.`package`,
-                                        endingBounds)
-                            }
+                    presubmit {
+                        windowManagerTrace {
+                            visibleWindowsShownMoreThanOneConsecutiveEntry()
+                            appWindowAlwaysVisibleOnTop(testApp.`package`)
                         }
 
-                        all("noUncoveredRegions", bugId = 147659548) {
-                            if (startingBounds == endingBounds) {
-                                this.coversAtLeastRegion(startingBounds)
-                            } else {
-                                this.coversAtLeastRegion(startingBounds)
-                                    .then()
-                                    .coversAtLeastRegion(endingBounds)
-                            }
+                        layersTrace {
+                            layerAlwaysVisible(testApp.`package`)
                         }
                     }
 
-                    eventLog {
-                        focusDoesNotChange(bugId = 151179149)
+                    flaky {
+                        windowManagerTrace {
+                            navBarWindowIsAlwaysVisible(bugId = 140855415)
+                            statusBarWindowIsAlwaysVisible(bugId = 140855415)
+                        }
+
+                        layersTrace {
+                            navBarLayerIsAlwaysVisible(bugId = 140855415)
+                            statusBarLayerIsAlwaysVisible(bugId = 140855415)
+                            noUncoveredRegions(configuration.startRotation,
+                                configuration.endRotation, allStates = false, bugId = 147659548)
+                            navBarLayerRotatesAndScales(configuration.startRotation,
+                                configuration.endRotation)
+                            statusBarLayerRotatesScales(configuration.startRotation,
+                                configuration.endRotation)
+                            visibleLayersShownMoreThanOneConsecutiveEntry()
+
+                            all("appLayerRotates", bugId = 147659548) {
+                                if (startingBounds == endingBounds) {
+                                    this.hasVisibleRegion(
+                                        testApp.`package`, startingBounds)
+                                } else {
+                                    this.hasVisibleRegion(testApp.`package`,
+                                        startingBounds)
+                                        .then()
+                                        .hasVisibleRegion(testApp.`package`,
+                                            endingBounds)
+                                }
+                            }
+
+                            all("noUncoveredRegions", bugId = 147659548) {
+                                if (startingBounds == endingBounds) {
+                                    this.coversAtLeastRegion(startingBounds)
+                                } else {
+                                    this.coversAtLeastRegion(startingBounds)
+                                        .then()
+                                        .coversAtLeastRegion(endingBounds)
+                                }
+                            }
+                        }
+
+                        eventLog {
+                            focusDoesNotChange(bugId = 151179149)
+                        }
                     }
                 }
             }
