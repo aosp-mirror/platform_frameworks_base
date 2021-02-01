@@ -83,8 +83,7 @@ public final class AppHibernationServiceTest {
         MockitoAnnotations.initMocks(this);
         doReturn(mContext).when(mContext).createContextAsUser(any(), anyInt());
 
-        mAppHibernationService = new AppHibernationService(mContext, mIPackageManager,
-                mIActivityManager, mUserManager);
+        mAppHibernationService = new AppHibernationService(new MockInjector(mContext));
 
         verify(mContext).registerReceiver(mReceiverCaptor.capture(), any());
         mBroadcastReceiver = mReceiverCaptor.getValue();
@@ -186,5 +185,33 @@ public final class AppHibernationServiceTest {
         PackageInfo pkg = new PackageInfo();
         pkg.packageName = packageName;
         return pkg;
+    }
+
+    private class MockInjector implements AppHibernationService.Injector {
+        private final Context mContext;
+
+        MockInjector(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public IActivityManager getActivityManager() {
+            return mIActivityManager;
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
+        }
+
+        @Override
+        public IPackageManager getPackageManager() {
+            return mIPackageManager;
+        }
+
+        @Override
+        public UserManager getUserManager() {
+            return mUserManager;
+        }
     }
 }

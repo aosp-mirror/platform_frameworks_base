@@ -88,19 +88,16 @@ public final class AppHibernationService extends SystemService {
      * @param context The system server context.
      */
     public AppHibernationService(@NonNull Context context) {
-        this(context, IPackageManager.Stub.asInterface(ServiceManager.getService("package")),
-                ActivityManager.getService(),
-                context.getSystemService(UserManager.class));
+        this(new InjectorImpl(context));
     }
 
     @VisibleForTesting
-    AppHibernationService(@NonNull Context context, IPackageManager packageManager,
-            IActivityManager activityManager, UserManager userManager) {
-        super(context);
-        mContext = context;
-        mIPackageManager = packageManager;
-        mIActivityManager = activityManager;
-        mUserManager = userManager;
+    AppHibernationService(@NonNull Injector injector) {
+        super(injector.getContext());
+        mContext = injector.getContext();
+        mIPackageManager = injector.getPackageManager();
+        mIActivityManager = injector.getActivityManager();
+        mUserManager = injector.getUserManager();
 
         final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
 
@@ -182,9 +179,9 @@ public final class AppHibernationService extends SystemService {
             }
 
             if (isHibernating) {
-                hibernatePackageForUserL(packageName, userId, pkgState);
+                hibernatePackageForUser(packageName, userId, pkgState);
             } else {
-                unhibernatePackageForUserL(packageName, userId, pkgState);
+                unhibernatePackageForUser(packageName, userId, pkgState);
             }
         }
     }
@@ -200,9 +197,9 @@ public final class AppHibernationService extends SystemService {
         if (isHibernating != mGloballyHibernatedPackages.contains(packageName)) {
             synchronized (mLock) {
                 if (isHibernating) {
-                    hibernatePackageGloballyL(packageName);
+                    hibernatePackageGlobally(packageName);
                 } else {
-                    unhibernatePackageGloballyL(packageName);
+                    unhibernatePackageGlobally(packageName);
                 }
             }
         }
@@ -210,11 +207,11 @@ public final class AppHibernationService extends SystemService {
 
     /**
      * Put an app into hibernation for a given user, allowing user-level optimizations to occur.
-     * The caller should hold {@link #mLock}
      *
      * @param pkgState package hibernation state
      */
-    private void hibernatePackageForUserL(@NonNull String packageName, int userId,
+    @GuardedBy("mLock")
+    private void hibernatePackageForUser(@NonNull String packageName, int userId,
             @NonNull UserPackageState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackage");
         final long caller = Binder.clearCallingIdentity();
@@ -233,11 +230,12 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Remove a package from hibernation for a given user. The caller should hold {@link #mLock}.
+     * Remove a package from hibernation for a given user.
      *
      * @param pkgState package hibernation state
      */
-    private void unhibernatePackageForUserL(@NonNull String packageName, int userId,
+    @GuardedBy("mLock")
+    private void unhibernatePackageForUser(@NonNull String packageName, int userId,
             UserPackageState pkgState) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackage");
         final long caller = Binder.clearCallingIdentity();
@@ -255,9 +253,9 @@ public final class AppHibernationService extends SystemService {
 
     /**
      * Put a package into global hibernation, optimizing its storage at a package / APK level.
-     * The caller should hold {@link #mLock}.
      */
-    private void hibernatePackageGloballyL(@NonNull String packageName) {
+    @GuardedBy("mLock")
+    private void hibernatePackageGlobally(@NonNull String packageName) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "hibernatePackageGlobally");
         // TODO(175830194): Delete vdex/odex when DexManager API is built out
         mGloballyHibernatedPackages.add(packageName);
@@ -265,21 +263,22 @@ public final class AppHibernationService extends SystemService {
     }
 
     /**
-     * Unhibernate a package from global hibernation. The caller should hold {@link #mLock}.
+     * Unhibernate a package from global hibernation.
      */
-    private void unhibernatePackageGloballyL(@NonNull String packageName) {
+    @GuardedBy("mLock")
+    private void unhibernatePackageGlobally(@NonNull String packageName) {
         Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, "unhibernatePackageGlobally");
         mGloballyHibernatedPackages.remove(packageName);
         Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);
     }
 
     /**
-     * Populates {@link #mUserStates} with the users installed packages. The caller should hold
-     * {@link #mLock}.
+     * Populates {@link #mUserStates} with the users installed packages.
      *
      * @param userId user id to add installed packages for
      */
-    private void addUserPackageStatesL(int userId) {
+    @GuardedBy("mLock")
+    private void addUserPackageStates(int userId) {
         Map<String, UserPackageState> packages = new ArrayMap<>();
         List<PackageInfo> packageList;
         try {
@@ -298,7 +297,7 @@ public final class AppHibernationService extends SystemService {
     public void onUserUnlocking(@NonNull TargetUser user) {
         // TODO: Pull from persistent disk storage. For now, just make from scratch.
         synchronized (mLock) {
-            addUserPackageStatesL(user.getUserIdentifier());
+            addUserPackageStates(user.getUserIdentifier());
         }
     }
 
@@ -430,5 +429,46 @@ public final class AppHibernationService extends SystemService {
     private static final class UserPackageState {
         public boolean hibernated;
         // TODO: Track whether hibernation is exempted by the user
+    }
+
+    /**
+     * Dependency injector for {@link #AppHibernationService)}.
+     */
+    interface Injector {
+        Context getContext();
+
+        IPackageManager getPackageManager();
+
+        IActivityManager getActivityManager();
+
+        UserManager getUserManager();
+    }
+
+    private static final class InjectorImpl implements Injector {
+        private final Context mContext;
+
+        InjectorImpl(Context context) {
+            mContext = context;
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
+        }
+
+        @Override
+        public IPackageManager getPackageManager() {
+            return IPackageManager.Stub.asInterface(ServiceManager.getService("package"));
+        }
+
+        @Override
+        public IActivityManager getActivityManager() {
+            return ActivityManager.getService();
+        }
+
+        @Override
+        public UserManager getUserManager() {
+            return mContext.getSystemService(UserManager.class);
+        }
     }
 }
