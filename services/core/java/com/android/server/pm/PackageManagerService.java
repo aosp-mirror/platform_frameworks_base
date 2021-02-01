@@ -18819,9 +18819,11 @@ public class PackageManagerService extends IPackageManager.Stub
                     final VersionInfo versionInfo = request.versionInfos.get(installPackageName);
                     final boolean compareCompat = isCompatSignatureUpdateNeeded(versionInfo);
                     final boolean compareRecover = isRecoverSignatureUpdateNeeded(versionInfo);
+                    final boolean isRollback = installArgs != null
+                            && installArgs.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
                     final boolean compatMatch = verifySignatures(signatureCheckPs,
                             disabledPkgSetting, parsedPackage.getSigningDetails(), compareCompat,
-                            compareRecover);
+                            compareRecover, isRollback);
                     // The new KeySets will be re-added later in the scanning process.
                     if (compatMatch) {
                         removeAppKeySetData = true;
@@ -19791,6 +19793,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean fullApp = ((installFlags & PackageManager.INSTALL_FULL_APP) != 0);
         final boolean virtualPreload =
                 ((installFlags & PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0);
+        final boolean isRollback = args.installReason == PackageManager.INSTALL_REASON_ROLLBACK;
         @ScanFlags int scanFlags = SCAN_NEW_INSTALL | SCAN_UPDATE_SIGNATURE;
         if (args.move != null) {
             // moving a complete application; perform an initial scan on the new install location
@@ -19971,7 +19974,8 @@ public class PackageManagerService extends IPackageManager.Stub
                                 parsedPackage);
                         // We don't care about disabledPkgSetting on install for now.
                         final boolean compatMatch = verifySignatures(signatureCheckPs, null,
-                                parsedPackage.getSigningDetails(), compareCompat, compareRecover);
+                                parsedPackage.getSigningDetails(), compareCompat, compareRecover,
+                                isRollback);
                         // The new KeySets will be re-added later in the scanning process.
                         if (compatMatch) {
                             synchronized (mLock) {
@@ -20248,15 +20252,23 @@ public class PackageManagerService extends IPackageManager.Stub
                                             + pkgName11);
                         }
                     } else {
+                        SigningDetails parsedPkgSigningDetails = parsedPackage.getSigningDetails();
+                        SigningDetails oldPkgSigningDetails = oldPackage.getSigningDetails();
                         // default to original signature matching
-                        if (!parsedPackage.getSigningDetails().checkCapability(
-                                oldPackage.getSigningDetails(),
+                        if (!parsedPkgSigningDetails.checkCapability(oldPkgSigningDetails,
                                 SigningDetails.CertCapabilities.INSTALLED_DATA)
-                                && !oldPackage.getSigningDetails().checkCapability(
-                                parsedPackage.getSigningDetails(),
+                                && !oldPkgSigningDetails.checkCapability(parsedPkgSigningDetails,
                                 SigningDetails.CertCapabilities.ROLLBACK)) {
-                            throw new PrepareFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                    "New package has a different signature: " + pkgName11);
+                            // Allow the update to proceed if this is a rollback and the parsed
+                            // package's current signing key is the current signer or in the lineage
+                            // of the old package; this allows a rollback to a previously installed
+                            // version after an app's signing key has been rotated without requiring
+                            // the rollback capability on the previous signing key.
+                            if (!isRollback || !oldPkgSigningDetails.hasAncestorOrSelf(
+                                    parsedPkgSigningDetails)) {
+                                throw new PrepareFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
+                                        "New package has a different signature: " + pkgName11);
+                            }
                         }
                     }
 
