@@ -386,7 +386,6 @@ public class StatusBarTest extends SysuiTestCase {
                 () -> mAssistManager,
                 configurationController,
                 mNotificationShadeWindowController,
-                mLockscreenLockIconController,
                 mDozeParameters,
                 mScrimController,
                 mKeyguardLiftController,
@@ -436,6 +435,7 @@ public class StatusBarTest extends SysuiTestCase {
         // initialized automatically.
         mStatusBar.mNotificationShadeWindowView = mNotificationShadeWindowView;
         mStatusBar.mNotificationPanelViewController = mNotificationPanelViewController;
+        mStatusBar.mLockscreenLockIconController = mLockscreenLockIconController;
         mStatusBar.mDozeScrimController = mDozeScrimController;
         mStatusBar.mPresenter = mNotificationPresenter;
         mStatusBar.mKeyguardIndicationController = mKeyguardIndicationController;

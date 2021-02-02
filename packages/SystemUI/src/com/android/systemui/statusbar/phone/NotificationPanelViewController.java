@@ -910,7 +910,7 @@ public class NotificationPanelViewController extends PanelViewController {
                     clockPreferredY, hasCustomClock(),
                     hasVisibleNotifications, mInterpolatedDarkAmount, mEmptyDragAmount,
                     bypassEnabled, getUnlockedStackScrollerPadding(),
-                    mUpdateMonitor.shouldShowLockIcon(),
+                    mUpdateMonitor.canShowLockIcon(),
                     getQsExpansionFraction(),
                     mDisplayCutoutTopInset);
             mClockPositionAlgorithm.run(mClockPositionResult);
