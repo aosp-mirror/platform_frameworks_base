@@ -314,6 +314,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.musicrecognition.MusicRecognitionManagerService";
     private static final String SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS =
             "com.android.server.systemcaptions.SystemCaptionsManagerService";
+    private static final String TEXT_TO_SPEECH_MANAGER_SERVICE_CLASS =
+            "com.android.server.texttospeech.TextToSpeechManagerService";
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
             "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
@@ -1641,6 +1643,7 @@ public final class SystemServer implements Dumpable {
             startAttentionService(context, t);
             startRotationResolverService(context, t);
             startSystemCaptionsManagerService(context, t);
+            startTextToSpeechManagerService(context, t);
 
             // System Speech Recognition Service
             if (deviceHasConfigString(context,
@@ -2818,6 +2821,13 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("StartSystemCaptionsManagerService");
         mSystemServiceManager.startService(SYSTEM_CAPTIONS_MANAGER_SERVICE_CLASS);
+        t.traceEnd();
+    }
+
+    private void startTextToSpeechManagerService(@NonNull Context context,
+            @NonNull TimingsTraceAndSlog t) {
+        t.traceBegin("StartTextToSpeechManagerService");
+        mSystemServiceManager.startService(TEXT_TO_SPEECH_MANAGER_SERVICE_CLASS);
         t.traceEnd();
     }
 

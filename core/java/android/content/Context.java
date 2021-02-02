@@ -4562,6 +4562,14 @@ public abstract class Context {
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
+     * Official published name of the (internal) text to speech manager service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    public static final String TEXT_TO_SPEECH_MANAGER_SERVICE = "texttospeech";
+
+    /**
      * Official published name of the content capture service.
      *
      * @hide
