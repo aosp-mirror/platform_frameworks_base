@@ -138,6 +138,11 @@ public class Vibration {
         return mStatus != Status.RUNNING;
     }
 
+    /** Return true is effect is a repeating vibration. */
+    public boolean isRepeating() {
+        return mEffect.getDuration() == Long.MAX_VALUE;
+    }
+
     /** Return the effect that should be played by this vibration. */
     @Nullable
     public CombinedVibrationEffect getEffect() {
