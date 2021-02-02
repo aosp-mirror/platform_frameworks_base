@@ -45,8 +45,8 @@ import android.security.keystore.KeystoreResponse;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
 
-import com.android.org.bouncycastle.asn1.ASN1InputStream;
-import com.android.org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import com.android.internal.org.bouncycastle.asn1.ASN1InputStream;
+import com.android.internal.org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
