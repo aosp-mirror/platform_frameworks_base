@@ -1629,6 +1629,12 @@ public final class PowerManager {
      * <p>
      * Requires the {@link android.Manifest.permission#REBOOT} permission.
      * </p>
+     * <p>
+     * If the {@code reason} string contains ",quiescent", then the screen stays off during reboot
+     * and is not turned on again until the user triggers the device to wake up (for example,
+     * by pressing the power key).
+     * This behavior applies to Android TV devices launched on Android 11 (API level 30) or higher.
+     * </p>
      *
      * @param reason code to pass to the kernel (e.g., "recovery") to
      *               request special boot modes, or null.
