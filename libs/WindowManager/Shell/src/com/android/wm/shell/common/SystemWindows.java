@@ -40,9 +40,11 @@ import android.view.IWindowSessionCallback;
 import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 import android.view.SurfaceControl;
+import android.view.SurfaceSession;
 import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.WindowManager;
 import android.view.WindowlessWindowManager;
 import android.window.ClientWindowFrames;
@@ -251,6 +253,8 @@ public class SystemWindows {
     public class SysUiWindowManager extends WindowlessWindowManager {
         final int mDisplayId;
         ContainerWindow mContainerWindow;
+        final HashMap<IBinder, SurfaceControl> mLeashForWindow =
+                new HashMap<IBinder, SurfaceControl>();
         public SysUiWindowManager(int displayId, Context ctx, SurfaceControl rootSurface,
                 ContainerWindow container) {
             super(ctx.getResources().getConfiguration(), rootSurface, null /* hostInputToken */);
@@ -263,7 +267,33 @@ public class SystemWindows {
         }
 
         SurfaceControl getSurfaceControlForWindow(View rootView) {
-            return getSurfaceControl(rootView);
+            synchronized (this) {
+                return mLeashForWindow.get(getWindowBinder(rootView));
+            }
+        }
+
+        protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
+            SurfaceControl leash = new SurfaceControl.Builder(new SurfaceSession())
+                  .setContainerLayer()
+                  .setName("SystemWindowLeash")
+                  .setHidden(false)
+                  .setParent(mRootSurface)
+                  .setCallsite("SysUiWIndowManager#attachToParentSurface").build();
+            synchronized (this) {
+                mLeashForWindow.put(window.asBinder(), leash);
+            }
+            b.setParent(leash);
+        }
+
+        @Override
+        public void remove(android.view.IWindow window) throws RemoteException {
+            super.remove(window);
+            synchronized(this) {
+                IBinder token = window.asBinder();
+                new SurfaceControl.Transaction().remove(mLeashForWindow.get(token))
+                    .apply();
+                mLeashForWindow.remove(token);
+            }
         }
 
         void setTouchableRegionForWindow(View rootView, Region region) {

@@ -87,7 +87,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
     }
 
     @Override
-    protected void attachToParentSurface(SurfaceControl.Builder b) {
+    protected void attachToParentSurface(IWindow window, SurfaceControl.Builder b) {
         mParentContainerCallbacks.attachToParentSurface(b);
     }
 

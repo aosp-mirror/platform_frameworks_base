@@ -198,8 +198,7 @@ public class PhonePipMenuController implements PipMenuController {
      * {@code null}), it will get the leash that the WindowlessWM has assigned to it.
      */
     public SurfaceControl getSurfaceControl() {
-        SurfaceControl sf = mPipMenuView.getWindowSurfaceControl();
-        return sf != null ? sf : mSystemWindows.getViewSurface(mPipMenuView);
+        return mSystemWindows.getViewSurface(mPipMenuView);
     }
 
     /**
