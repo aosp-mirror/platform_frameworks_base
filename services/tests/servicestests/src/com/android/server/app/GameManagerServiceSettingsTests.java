@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.graphics;
+package com.android.server.app;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
