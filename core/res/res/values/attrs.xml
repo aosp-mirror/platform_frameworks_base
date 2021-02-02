@@ -9193,6 +9193,9 @@
         <!-- @hide From Theme.colorBackground, used for the TaskDescription background
                    color. -->
         <attr name="colorBackground" />
+        <!-- @hide From Theme.colorBackgroundFloating, used for the TaskDescription background
+                   color floating. -->
+        <attr name="colorBackgroundFloating" />
         <!-- @hide From Theme.statusBarColor, used for the TaskDescription status bar color. -->
         <attr name="statusBarColor"/>
         <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar

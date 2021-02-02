@@ -4636,6 +4636,23 @@
          corners of the activity won't be rounded. -->
     <integer name="config_letterboxActivityCornersRadius">0</integer>
 
+    <!-- Corners appearance of the letterbox background.
+            0 - Solid background using color specified in R.color.config_letterboxBackgroundColor.
+            1 - Color specified in R.attr.colorBackground for the letterboxed application.
+            2 - Color specified in R.attr.colorBackgroundFloating for the letterboxed application.
+        If given value is outside of this range, the option 0 will be assummed. -->
+    <integer name="config_letterboxBackgroundType">0</integer>
+
+    <!-- Color of the letterbox background if one following conditions is true
+            - Option 0 is selected for R.integer.config_letterboxBackgroundType.
+            - Option 1 is selected for R.integer.config_letterboxBackgroundType and
+            R.attr.colorBackground isn't specified for the app.
+            - Option 2 is selected for R.integer.config_letterboxBackgroundType and
+            R.attr.colorBackgroundFloating isn't specified for the app.
+        Defaults to black if not specified.
+     -->
+    <color name="config_letterboxBackgroundColor">#000</color>
+
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 

@@ -204,6 +204,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STARTING_WINDOW_VERBOSE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND;
+import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING;
+import static com.android.server.wm.WindowManagerService.LETTERBOX_BACKGROUND_SOLID_COLOR;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowState.LEGACY_POLICY_VISIBILITY;
@@ -249,6 +252,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -321,6 +325,7 @@ import com.android.server.wm.ActivityMetricsLogger.TransitionInfoSnapshot;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.Task.ActivityState;
 import com.android.server.wm.WindowManagerService.H;
+import com.android.server.wm.WindowManagerService.LetterboxBackgroundType;
 import com.android.server.wm.utils.InsetUtils;
 
 import com.google.android.collect.Sets;
@@ -859,6 +864,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         pw.print(Integer.toHexString(taskDescription.getStatusBarColor()));
                         pw.print(" navigationBarColor=");
                         pw.println(Integer.toHexString(taskDescription.getNavigationBarColor()));
+                        pw.print(" backgroundColorFloating=");
+                        pw.println(Integer.toHexString(
+                                taskDescription.getBackgroundColorFloating()));
             }
         }
         if (results != null) {
@@ -1361,7 +1369,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (mLetterbox == null) {
                 mLetterbox = new Letterbox(() -> makeChildSurface(null),
                         mWmService.mTransactionFactory,
-                        mWmService::isLetterboxActivityCornersRounded);
+                        mWmService::isLetterboxActivityCornersRounded,
+                        this::getLetterboxBackgroundColor);
                 mLetterbox.attachInput(w);
             }
             getPosition(mTmpPoint);
@@ -1379,6 +1388,31 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         } else if (mLetterbox != null) {
             mLetterbox.hide();
         }
+    }
+
+    private Color getLetterboxBackgroundColor() {
+        final WindowState w = findMainWindow();
+        if (w == null || w.isLetterboxedForDisplayCutout()) {
+            return Color.valueOf(Color.BLACK);
+        }
+        @LetterboxBackgroundType int letterboxBackgroundType =
+                mWmService.getLetterboxBackgroundType();
+        switch (letterboxBackgroundType) {
+            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING:
+                if (taskDescription != null && taskDescription.getBackgroundColorFloating() != 0) {
+                    return Color.valueOf(taskDescription.getBackgroundColorFloating());
+                }
+                return mWmService.getLetterboxBackgroundColor();
+            case LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND:
+                if (taskDescription != null && taskDescription.getBackgroundColor() != 0) {
+                    return Color.valueOf(taskDescription.getBackgroundColor());
+                }
+                // Falling through
+            case LETTERBOX_BACKGROUND_SOLID_COLOR:
+                return mWmService.getLetterboxBackgroundColor();
+        }
+        throw new AssertionError(
+                "Unexpected letterbox background type: " + letterboxBackgroundType);
     }
 
     /** @return {@code true} when main window is letterboxed and activity isn't transparent. */

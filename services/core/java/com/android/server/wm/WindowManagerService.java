@@ -160,6 +160,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -1010,10 +1011,30 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Aspect ratio of task level letterboxing, values <= MIN_TASK_LETTERBOX_ASPECT_RATIO will be
     // ignored.
-    private float mTaskLetterboxAspectRatio;
+    private volatile float mTaskLetterboxAspectRatio;
+
+    /** Enum for Letterbox background type. */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
+            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING})
+    @interface LetterboxBackgroundType {};
+    /** Solid background using color specified in R.color.config_letterboxBackgroundColor. */
+    static final int LETTERBOX_BACKGROUND_SOLID_COLOR = 0;
+
+    /** Color specified in R.attr.colorBackground for the letterboxed application. */
+    static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND = 1;
+
+    /** Color specified in R.attr.colorBackgroundFloating for the letterboxed application. */
+    static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING = 2;
 
     // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
-    private int mLetterboxActivityCornersRadius;
+    private volatile int mLetterboxActivityCornersRadius;
+
+    // Color for {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} letterbox background type.
+    private volatile Color mLetterboxBackgroundColor;
+
+    @LetterboxBackgroundType
+    private volatile int mLetterboxBackgroundType;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -1240,10 +1261,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
+
         mTaskLetterboxAspectRatio = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
         mLetterboxActivityCornersRadius = context.getResources().getInteger(
                 com.android.internal.R.integer.config_letterboxActivityCornersRadius);
+        mLetterboxBackgroundColor = Color.valueOf(context.getResources().getColor(
+                com.android.internal.R.color.config_letterboxBackgroundColor));
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(context);
+
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
@@ -3901,14 +3927,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * the framework implementation will be used to determine the aspect ratio.
      */
     void setTaskLetterboxAspectRatio(float aspectRatio) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mTaskLetterboxAspectRatio = aspectRatio;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mTaskLetterboxAspectRatio = aspectRatio;
     }
 
     /**
@@ -3916,29 +3935,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * com.android.internal.R.dimen.config_taskLetterboxAspectRatio}.
      */
     void resetTaskLetterboxAspectRatio() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
-                            com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
     }
 
     /**
      * Gets the aspect ratio of task level letterboxing.
      */
     float getTaskLetterboxAspectRatio() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                return mTaskLetterboxAspectRatio;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        return mTaskLetterboxAspectRatio;
     }
 
     /**
@@ -3948,14 +3953,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * and corners of the activity won't be rounded.
      */
     void setLetterboxActivityCornersRadius(int cornersRadius) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mLetterboxActivityCornersRadius = cornersRadius;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mLetterboxActivityCornersRadius = cornersRadius;
     }
 
     /**
@@ -3963,15 +3961,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
      */
     void resetLetterboxActivityCornersRadius() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
-                            com.android.internal.R.integer.config_letterboxActivityCornersRadius);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
     }
 
     /**
@@ -3985,14 +3976,67 @@ public class WindowManagerService extends IWindowManager.Stub
      * Gets corners raidus for activities presented in the letterbox mode.
      */
     int getLetterboxActivityCornersRadius() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                return mLetterboxActivityCornersRadius;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        return mLetterboxActivityCornersRadius;
+    }
+
+    /**
+     * Gets color of letterbox background which is  used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other backfround types.
+     */
+    Color getLetterboxBackgroundColor() {
+        return mLetterboxBackgroundColor;
+    }
+
+
+    /**
+     * Sets color of letterbox background which is used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other backfround types.
+     */
+    void setLetterboxBackgroundColor(Color color) {
+        mLetterboxBackgroundColor = color;
+    }
+
+    /**
+     * Resets color of letterbox background to {@link
+     * com.android.internal.R.color.config_letterboxBackgroundColor}.
+     */
+    void resetLetterboxBackgroundColor() {
+        mLetterboxBackgroundColor = Color.valueOf(mContext.getResources().getColor(
+                com.android.internal.R.color.config_letterboxBackgroundColor));
+    }
+
+    /**
+     * Gets {@link LetterboxBackgroundType} specified in {@link
+     * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
+     */
+    @LetterboxBackgroundType
+    int getLetterboxBackgroundType() {
+        return mLetterboxBackgroundType;
+    }
+
+    /** Sets letterbox background type. */
+    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
+        mLetterboxBackgroundType = backgroundType;
+    }
+
+    /**
+     * Resets cletterbox background type to {@link
+     * com.android.internal.R.integer.config_letterboxBackgroundType}.
+     */
+    void resetLetterboxBackgroundType() {
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
+    }
+
+    @LetterboxBackgroundType
+    private static int readLetterboxBackgroundTypeFromConfig(Context context) {
+        int backgroundType = context.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxBackgroundType);
+        return backgroundType == LETTERBOX_BACKGROUND_SOLID_COLOR
+                    || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND
+                    || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING
+                    ? backgroundType : LETTERBOX_BACKGROUND_SOLID_COLOR;
     }
 
     @Override

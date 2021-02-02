@@ -1072,13 +1072,15 @@ public class ActivityManager {
         private static final String ATTR_TASKDESCRIPTIONCOLOR_PRIMARY =
                 ATTR_TASKDESCRIPTION_PREFIX + "color";
         private static final String ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND =
-                ATTR_TASKDESCRIPTION_PREFIX + "colorBackground";
+                ATTR_TASKDESCRIPTION_PREFIX + "color_background";
         private static final String ATTR_TASKDESCRIPTIONICON_FILENAME =
                 ATTR_TASKDESCRIPTION_PREFIX + "icon_filename";
         private static final String ATTR_TASKDESCRIPTIONICON_RESOURCE =
                 ATTR_TASKDESCRIPTION_PREFIX + "icon_resource";
         private static final String ATTR_TASKDESCRIPTIONICON_RESOURCE_PACKAGE =
                 ATTR_TASKDESCRIPTION_PREFIX + "icon_package";
+        private static final String ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND_FLOATING =
+                ATTR_TASKDESCRIPTION_PREFIX + "color_background_floating";
 
         private String mLabel;
         @Nullable
@@ -1086,6 +1088,7 @@ public class ActivityManager {
         private String mIconFilename;
         private int mColorPrimary;
         private int mColorBackground;
+        private int mColorBackgroundFloating;
         private int mStatusBarColor;
         private int mNavigationBarColor;
         private boolean mEnsureStatusBarContrastWhenTransparent;
@@ -1106,7 +1109,7 @@ public class ActivityManager {
          */
         public TaskDescription(String label, @DrawableRes int iconRes, int colorPrimary) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    colorPrimary, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+                    colorPrimary, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1121,7 +1124,7 @@ public class ActivityManager {
          */
         public TaskDescription(String label, @DrawableRes int iconRes) {
             this(label, Icon.createWithResource(ActivityThread.currentPackageName(), iconRes),
-                    0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+                    0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1130,14 +1133,14 @@ public class ActivityManager {
          * @param label A label and description of the current state of this activity.
          */
         public TaskDescription(String label) {
-            this(label, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+            this(label, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
          * Creates an empty TaskDescription.
          */
         public TaskDescription() {
-            this(null, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+            this(null, null, 0, 0, 0, 0, false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /**
@@ -1152,7 +1155,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, Bitmap icon, int colorPrimary) {
             this(label, icon != null ? Icon.createWithBitmap(icon) : null, colorPrimary, 0, 0, 0,
-                    false, false, RESIZE_MODE_RESIZEABLE, -1, -1);
+                    false, false, RESIZE_MODE_RESIZEABLE, -1, -1, 0);
             if ((colorPrimary != 0) && (Color.alpha(colorPrimary) != 255)) {
                 throw new RuntimeException("A TaskDescription's primary color should be opaque");
             }
@@ -1168,7 +1171,7 @@ public class ActivityManager {
         @Deprecated
         public TaskDescription(String label, Bitmap icon) {
             this(label, icon != null ? Icon.createWithBitmap(icon) : null, 0, 0, 0, 0, false, false,
-                    RESIZE_MODE_RESIZEABLE, -1, -1);
+                    RESIZE_MODE_RESIZEABLE, -1, -1, 0);
         }
 
         /** @hide */
@@ -1177,7 +1180,7 @@ public class ActivityManager {
                 int statusBarColor, int navigationBarColor,
                 boolean ensureStatusBarContrastWhenTransparent,
                 boolean ensureNavigationBarContrastWhenTransparent, int resizeMode, int minWidth,
-                int minHeight) {
+                int minHeight, int colorBackgroundFloating) {
             mLabel = label;
             mIcon = icon;
             mColorPrimary = colorPrimary;
@@ -1190,6 +1193,7 @@ public class ActivityManager {
             mResizeMode = resizeMode;
             mMinWidth = minWidth;
             mMinHeight = minHeight;
+            mColorBackgroundFloating = colorBackgroundFloating;
         }
 
         /**
@@ -1217,6 +1221,7 @@ public class ActivityManager {
             mResizeMode = other.mResizeMode;
             mMinWidth = other.mMinWidth;
             mMinHeight = other.mMinHeight;
+            mColorBackgroundFloating = other.mColorBackgroundFloating;
         }
 
         /**
@@ -1252,6 +1257,9 @@ public class ActivityManager {
             }
             if (other.mMinHeight != -1) {
                 mMinHeight = other.mMinHeight;
+            }
+            if (other.mColorBackgroundFloating != 0) {
+                mColorBackgroundFloating = other.mColorBackgroundFloating;
             }
         }
 
@@ -1289,6 +1297,19 @@ public class ActivityManager {
                 throw new RuntimeException("A TaskDescription's background color should be opaque");
             }
             mColorBackground = backgroundColor;
+        }
+
+        /**
+         * Sets the background color floating for this task description.
+         * @hide
+         */
+        public void setBackgroundColorFloating(int backgroundColor) {
+            // Ensure that the given color is valid
+            if ((backgroundColor != 0) && (Color.alpha(backgroundColor) != 255)) {
+                throw new RuntimeException(
+                        "A TaskDescription's background color floating should be opaque");
+            }
+            mColorBackgroundFloating = backgroundColor;
         }
 
         /**
@@ -1461,6 +1482,14 @@ public class ActivityManager {
         }
 
         /**
+         * @return The background color floating.
+         * @hide
+         */
+        public int getBackgroundColorFloating() {
+            return mColorBackgroundFloating;
+        }
+
+        /**
          * @hide
          */
         public int getStatusBarColor() {
@@ -1537,6 +1566,10 @@ public class ActivityManager {
             if (mColorBackground != 0) {
                 out.attributeIntHex(null, ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND, mColorBackground);
             }
+            if (mColorBackgroundFloating != 0) {
+                out.attributeIntHex(null, ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND_FLOATING,
+                        mColorBackgroundFloating);
+            }
             if (mIconFilename != null) {
                 out.attribute(null, ATTR_TASKDESCRIPTIONICON_FILENAME, mIconFilename);
             }
@@ -1562,6 +1595,11 @@ public class ActivityManager {
                     ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND, 0);
             if (colorBackground != 0) {
                 setBackgroundColor(colorBackground);
+            }
+            final int colorBackgroundFloating = in.getAttributeIntHex(null,
+                    ATTR_TASKDESCRIPTIONCOLOR_BACKGROUND_FLOATING, 0);
+            if (colorBackgroundFloating != 0) {
+                setBackgroundColorFloating(colorBackgroundFloating);
             }
             final String iconFilename = in.getAttributeValue(null,
                     ATTR_TASKDESCRIPTIONICON_FILENAME);
@@ -1615,6 +1653,7 @@ public class ActivityManager {
                 dest.writeInt(1);
                 dest.writeString(mIconFilename);
             }
+            dest.writeInt(mColorBackgroundFloating);
         }
 
         public void readFromParcel(Parcel source) {
@@ -1632,6 +1671,7 @@ public class ActivityManager {
             mMinWidth = source.readInt();
             mMinHeight = source.readInt();
             mIconFilename = source.readInt() > 0 ? source.readString() : null;
+            mColorBackgroundFloating = source.readInt();
         }
 
         public static final @android.annotation.NonNull Creator<TaskDescription> CREATOR
@@ -1655,7 +1695,8 @@ public class ActivityManager {
                     + (mEnsureNavigationBarContrastWhenTransparent
                             ? " (contrast when transparent)" : "")
                     + " resizeMode: " + ActivityInfo.resizeModeToString(mResizeMode)
-                    + " minWidth: " + mMinWidth + " minHeight: " + mMinHeight;
+                    + " minWidth: " + mMinWidth + " minHeight: " + mMinHeight
+                    + " colorBackgrounFloating: " + mColorBackgroundFloating;
         }
 
         @Override
@@ -1678,7 +1719,8 @@ public class ActivityManager {
                             == other.mEnsureNavigationBarContrastWhenTransparent
                     && mResizeMode == other.mResizeMode
                     && mMinWidth == other.mMinWidth
-                    && mMinHeight == other.mMinHeight;
+                    && mMinHeight == other.mMinHeight
+                    && mColorBackgroundFloating == other.mColorBackgroundFloating;
         }
 
         /** @hide */
@@ -1826,6 +1868,8 @@ public class ActivityManager {
                 pw.print(ActivityInfo.resizeModeToString(td.getResizeMode()));
                 pw.print(" minWidth="); pw.print(td.getMinWidth());
                 pw.print(" minHeight="); pw.print(td.getMinHeight());
+                pw.print(" colorBackgroundFloating=#");
+                pw.print(Integer.toHexString(td.getBackgroundColorFloating()));
                 pw.println(" }");
             }
         }
