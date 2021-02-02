@@ -2678,7 +2678,8 @@ public final class SmsManager {
      * @throws IllegalArgumentException if contentUri is empty
      */
     public void sendMultimediaMessage(@NonNull Context context, @NonNull Uri contentUri,
-            @Nullable String locationUrl, @Nullable Bundle configOverrides,
+            @Nullable String locationUrl,
+            @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
             @Nullable PendingIntent sentIntent, long messageId) {
         if (contentUri == null) {
             throw new IllegalArgumentException("Uri contentUri null");
@@ -2754,7 +2755,8 @@ public final class SmsManager {
      * @throws IllegalArgumentException if locationUrl or contentUri is empty
      */
     public void downloadMultimediaMessage(@NonNull Context context, @NonNull String locationUrl,
-            @NonNull Uri contentUri, @Nullable Bundle configOverrides,
+            @NonNull Uri contentUri,
+            @SuppressWarnings("NullableCollection") @Nullable Bundle configOverrides,
             @Nullable PendingIntent downloadedIntent, long messageId) {
         if (TextUtils.isEmpty(locationUrl)) {
             throw new IllegalArgumentException("Empty MMS location URL");
