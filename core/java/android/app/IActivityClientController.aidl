@@ -96,7 +96,14 @@ interface IActivityClientController {
     oneway void setInheritShowWhenLocked(in IBinder token, boolean setInheritShownWhenLocked);
     oneway void setTurnScreenOn(in IBinder token, boolean turnScreenOn);
     oneway void reportActivityFullyDrawn(in IBinder token, boolean restoredFromBundle);
-    oneway void overridePendingTransition(in IBinder token, in String packageName,
+    /**
+     * Overrides the animation of activity pending transition. This call is not one-way because
+     * the method is usually used after startActivity or Activity#finish. If this is non-blocking,
+     * the calling activity may proceed to complete pause and become stopping state, which will
+     * cause the request to be ignored. Besides, startActivity and Activity#finish are blocking
+     * calls, so this method should be the same as them to keep the invocation order.
+     */
+    void overridePendingTransition(in IBinder token, in String packageName,
             int enterAnim, int exitAnim);
     int setVrMode(in IBinder token, boolean enabled, in ComponentName packageName);
 
