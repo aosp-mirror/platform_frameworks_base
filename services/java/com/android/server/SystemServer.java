@@ -342,6 +342,8 @@ public final class SystemServer implements Dumpable {
             "com.android.server.contentsuggestions.ContentSuggestionsManagerService";
     private static final String SEARCH_UI_MANAGER_SERVICE_CLASS =
             "com.android.server.searchui.SearchUiManagerService";
+    private static final String SMARTSPACE_MANAGER_SERVICE_CLASS =
+            "com.android.server.smartspace.SmartspaceManagerService";
     private static final String DEVICE_IDLE_CONTROLLER_CLASS =
             "com.android.server.DeviceIdleController";
     private static final String BLOB_STORE_MANAGER_SERVICE_CLASS =
@@ -1674,6 +1676,12 @@ public final class SystemServer implements Dumpable {
             // TODO: add deviceHasConfigString(context, R.string.config_defaultSearchUiService)
             t.traceBegin("StartSearchUiService");
             mSystemServiceManager.startService(SEARCH_UI_MANAGER_SERVICE_CLASS);
+            t.traceEnd();
+
+            // Smartspace manager service
+            // TODO: add deviceHasConfigString(context, R.string.config_defaultSmartspaceService)
+            t.traceBegin("StartSmartspaceService");
+            mSystemServiceManager.startService(SMARTSPACE_MANAGER_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("InitConnectivityModuleConnector");

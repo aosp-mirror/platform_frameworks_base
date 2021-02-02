@@ -138,6 +138,7 @@ package android {
     field public static final String MANAGE_ROTATION_RESOLVER = "android.permission.MANAGE_ROTATION_RESOLVER";
     field public static final String MANAGE_SEARCH_UI = "android.permission.MANAGE_SEARCH_UI";
     field public static final String MANAGE_SENSOR_PRIVACY = "android.permission.MANAGE_SENSOR_PRIVACY";
+    field public static final String MANAGE_SMARTSPACE = "android.permission.MANAGE_SMARTSPACE";
     field public static final String MANAGE_SOUND_TRIGGER = "android.permission.MANAGE_SOUND_TRIGGER";
     field public static final String MANAGE_SUBSCRIPTION_PLANS = "android.permission.MANAGE_SUBSCRIPTION_PLANS";
     field public static final String MANAGE_TEST_NETWORKS = "android.permission.MANAGE_TEST_NETWORKS";
@@ -1493,6 +1494,169 @@ package android.app.search {
 
 }
 
+package android.app.smartspace {
+
+  public final class SmartspaceAction implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public CharSequence getContentDescription();
+    method @Nullable public android.os.Bundle getExtras();
+    method @Nullable public android.graphics.drawable.Icon getIcon();
+    method @NonNull public String getId();
+    method @Nullable public android.content.Intent getIntent();
+    method @Nullable public android.app.PendingIntent getPendingIntent();
+    method @Nullable public CharSequence getSubtitle();
+    method @NonNull public CharSequence getTitle();
+    method @Nullable public android.os.UserHandle getUserHandle();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.SmartspaceAction> CREATOR;
+  }
+
+  public static final class SmartspaceAction.Builder {
+    ctor public SmartspaceAction.Builder(@NonNull String, @NonNull String);
+    method @NonNull public android.app.smartspace.SmartspaceAction build();
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setContentDescription(@Nullable CharSequence);
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setExtras(@Nullable android.os.Bundle);
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setIcon(@Nullable android.graphics.drawable.Icon);
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setIntent(@Nullable android.content.Intent);
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setPendingIntent(@Nullable android.app.PendingIntent);
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setSubtitle(@Nullable CharSequence);
+    method @NonNull public android.app.smartspace.SmartspaceAction.Builder setUserHandle(@Nullable android.os.UserHandle);
+  }
+
+  public final class SmartspaceConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public android.os.Bundle getExtras();
+    method @NonNull public String getPackageName();
+    method @NonNull public int getSmartspaceTargetCount();
+    method @NonNull public String getUiSurface();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.SmartspaceConfig> CREATOR;
+  }
+
+  public static final class SmartspaceConfig.Builder {
+    ctor public SmartspaceConfig.Builder(@NonNull android.content.Context, @NonNull String);
+    method @NonNull public android.app.smartspace.SmartspaceConfig build();
+    method @NonNull public android.app.smartspace.SmartspaceConfig.Builder setExtras(@NonNull android.os.Bundle);
+    method @NonNull public android.app.smartspace.SmartspaceConfig.Builder setSmartspaceTargetCount(int);
+  }
+
+  public final class SmartspaceManager {
+    method @NonNull public android.app.smartspace.SmartspaceSession createSmartspaceSession(@NonNull android.app.smartspace.SmartspaceConfig);
+  }
+
+  public final class SmartspaceSession implements java.lang.AutoCloseable {
+    method public void close();
+    method public void destroy();
+    method protected void finalize();
+    method public void notifySmartspaceEvent(@NonNull android.app.smartspace.SmartspaceTargetEvent);
+    method public void registerSmartspaceUpdates(@NonNull java.util.concurrent.Executor, @NonNull android.app.smartspace.SmartspaceSession.Callback);
+    method public void requestSmartspaceUpdate();
+    method public void unregisterSmartspaceUpdates(@NonNull android.app.smartspace.SmartspaceSession.Callback);
+  }
+
+  public static interface SmartspaceSession.Callback {
+    method public void onTargetsAvailable(@NonNull java.util.List<android.app.smartspace.SmartspaceTarget>);
+  }
+
+  public final class SmartspaceSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method @Nullable public String getId();
+    method @NonNull public int getUserId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.SmartspaceSessionId> CREATOR;
+  }
+
+  public final class SmartspaceTarget implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.List<android.app.smartspace.SmartspaceAction> getActionChips();
+    method @Nullable public String getAssociatedSmartspaceTargetId();
+    method @Nullable public android.app.smartspace.SmartspaceAction getBaseAction();
+    method @NonNull public android.content.ComponentName getComponentName();
+    method @NonNull public long getCreationTimeMillis();
+    method @NonNull public long getExpiryTimeMillis();
+    method @NonNull public int getFeatureType();
+    method @Nullable public android.app.smartspace.SmartspaceAction getHeaderAction();
+    method @NonNull public java.util.List<android.app.smartspace.SmartspaceAction> getIconGrid();
+    method @NonNull public float getScore();
+    method @Nullable public android.net.Uri getSliceUri();
+    method @NonNull public String getSmartspaceTargetId();
+    method @Nullable public String getSourceNotificationKey();
+    method @NonNull public android.os.UserHandle getUserHandle();
+    method @Nullable public android.appwidget.AppWidgetProviderInfo getWidgetId();
+    method @NonNull public boolean isSensitive();
+    method @NonNull public boolean shouldShowExpanded();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.SmartspaceTarget> CREATOR;
+    field public static final int FEATURE_ALARM = 7; // 0x7
+    field public static final int FEATURE_BEDTIME_ROUTINE = 16; // 0x10
+    field public static final int FEATURE_CALENDAR = 2; // 0x2
+    field public static final int FEATURE_COMMUTE_TIME = 3; // 0x3
+    field public static final int FEATURE_CONSENT = 11; // 0xb
+    field public static final int FEATURE_ETA_MONITORING = 18; // 0x12
+    field public static final int FEATURE_FITNESS_TRACKING = 17; // 0x11
+    field public static final int FEATURE_FLIGHT = 4; // 0x4
+    field public static final int FEATURE_LOYALTY_CARD = 14; // 0xe
+    field public static final int FEATURE_MEDIA = 15; // 0xf
+    field public static final int FEATURE_MISSED_CALL = 19; // 0x13
+    field public static final int FEATURE_ONBOARDING = 8; // 0x8
+    field public static final int FEATURE_PACKAGE_TRACKING = 20; // 0x14
+    field public static final int FEATURE_REMINDER = 6; // 0x6
+    field public static final int FEATURE_SHOPPING_LIST = 13; // 0xd
+    field public static final int FEATURE_SPORTS = 9; // 0x9
+    field public static final int FEATURE_STOCK_PRICE_CHANGE = 12; // 0xc
+    field public static final int FEATURE_STOPWATCH = 22; // 0x16
+    field public static final int FEATURE_TIMER = 21; // 0x15
+    field public static final int FEATURE_TIPS = 5; // 0x5
+    field public static final int FEATURE_UNDEFINED = 0; // 0x0
+    field public static final int FEATURE_UPCOMING_ALARM = 23; // 0x17
+    field public static final int FEATURE_WEATHER = 1; // 0x1
+    field public static final int FEATURE_WEATHER_ALERT = 10; // 0xa
+  }
+
+  public static final class SmartspaceTarget.Builder {
+    ctor public SmartspaceTarget.Builder(@NonNull String, @NonNull android.content.ComponentName, @NonNull android.os.UserHandle);
+    method @NonNull public android.app.smartspace.SmartspaceTarget build();
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setActionChips(@NonNull java.util.List<android.app.smartspace.SmartspaceAction>);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setAssociatedSmartspaceTargetId(@NonNull String);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setBaseAction(@NonNull android.app.smartspace.SmartspaceAction);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setCreationTimeMillis(@NonNull long);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setExpiryTimeMillis(@NonNull long);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setFeatureType(@NonNull int);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setHeaderAction(@NonNull android.app.smartspace.SmartspaceAction);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setIconGrid(@NonNull java.util.List<android.app.smartspace.SmartspaceAction>);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setScore(@NonNull float);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setSensitive(@NonNull boolean);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setShouldShowExpanded(@NonNull boolean);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setSliceUri(@NonNull android.net.Uri);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setSourceNotificationKey(@NonNull String);
+    method @NonNull public android.app.smartspace.SmartspaceTarget.Builder setWidgetId(@NonNull android.appwidget.AppWidgetProviderInfo);
+  }
+
+  public final class SmartspaceTargetEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public int getEventType();
+    method @Nullable public String getSmartspaceActionId();
+    method @Nullable public android.app.smartspace.SmartspaceTarget getSmartspaceTarget();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.app.smartspace.SmartspaceTargetEvent> CREATOR;
+    field public static final int EVENT_TARGET_BLOCK = 5; // 0x5
+    field public static final int EVENT_TARGET_DISMISS = 4; // 0x4
+    field public static final int EVENT_TARGET_INTERACTION = 1; // 0x1
+    field public static final int EVENT_TARGET_IN_VIEW = 2; // 0x2
+    field public static final int EVENT_TARGET_OUT_OF_VIEW = 3; // 0x3
+    field public static final int EVENT_UI_SURFACE_IN_VIEW = 6; // 0x6
+    field public static final int EVENT_UI_SURFACE_OUT_OF_VIEW = 7; // 0x7
+  }
+
+  public static final class SmartspaceTargetEvent.Builder {
+    ctor public SmartspaceTargetEvent.Builder(int);
+    method @NonNull public android.app.smartspace.SmartspaceTargetEvent build();
+    method @NonNull public android.app.smartspace.SmartspaceTargetEvent.Builder setSmartspaceActionId(@NonNull String);
+    method @NonNull public android.app.smartspace.SmartspaceTargetEvent.Builder setSmartspaceTarget(@NonNull android.app.smartspace.SmartspaceTarget);
+  }
+
+}
+
 package android.app.time {
 
   public final class TimeManager {
@@ -1955,6 +2119,7 @@ package android.content {
     field public static final String ROLLBACK_SERVICE = "rollback";
     field public static final String SEARCH_UI_SERVICE = "search_ui";
     field public static final String SECURE_ELEMENT_SERVICE = "secure_element";
+    field public static final String SMARTSPACE_SERVICE = "smartspace";
     field public static final String STATS_MANAGER = "stats";
     field public static final String STATUS_BAR_SERVICE = "statusbar";
     field public static final String SYSTEM_CONFIG_SERVICE = "system_config";
@@ -10084,6 +10249,21 @@ package android.service.settings.suggestions {
     method public abstract java.util.List<android.service.settings.suggestions.Suggestion> onGetSuggestions();
     method public abstract void onSuggestionDismissed(android.service.settings.suggestions.Suggestion);
     method public abstract void onSuggestionLaunched(android.service.settings.suggestions.Suggestion);
+  }
+
+}
+
+package android.service.smartspace {
+
+  public abstract class SmartspaceService extends android.app.Service {
+    ctor public SmartspaceService();
+    method @MainThread public abstract void notifySmartspaceEvent(@NonNull android.app.smartspace.SmartspaceSessionId, @NonNull android.app.smartspace.SmartspaceTargetEvent);
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method public abstract void onCreateSmartspaceSession(@NonNull android.app.smartspace.SmartspaceConfig, @NonNull android.app.smartspace.SmartspaceSessionId);
+    method @MainThread public abstract void onDestroy(@NonNull android.app.smartspace.SmartspaceSessionId);
+    method public abstract void onDestroySmartspaceSession(@NonNull android.app.smartspace.SmartspaceSessionId);
+    method @MainThread public abstract void onRequestSmartspaceUpdate(@NonNull android.app.smartspace.SmartspaceSessionId);
+    method public final void updateSmartspaceTargets(@NonNull android.app.smartspace.SmartspaceSessionId, @NonNull java.util.List<android.app.smartspace.SmartspaceTarget>);
   }
 
 }
