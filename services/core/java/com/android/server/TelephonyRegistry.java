@@ -1164,17 +1164,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         remove(r.binder);
                     }
                 }
-                if (events.contains(
-                        TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED)) {
-                    updateReportSignalStrengthDecision(r.subId);
-                    try {
-                        if (mSignalStrength[r.phoneId] != null) {
-                            r.callback.onSignalStrengthsChanged(mSignalStrength[r.phoneId]);
-                        }
-                    } catch (RemoteException ex) {
-                        remove(r.binder);
-                    }
-                }
                 if (validateEventAndUserLocked(
                         r, TelephonyCallback.EVENT_CELL_INFO_CHANGED)) {
                     try {
@@ -1353,27 +1342,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    private void updateReportSignalStrengthDecision(int subscriptionId) {
-        synchronized (mRecords) {
-            TelephonyManager telephonyManager = (TelephonyManager) mContext
-                    .getSystemService(Context.TELEPHONY_SERVICE);
-            for (Record r : mRecords) {
-                // If any of the system clients wants to always listen to signal strength,
-                // we need to set it on.
-                if (r.matchTelephonyCallbackEvent(
-                        TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED)) {
-                    telephonyManager.createForSubscriptionId(subscriptionId)
-                            .setAlwaysReportSignalStrength(true);
-                    return;
-                }
-            }
-            // If none of the system clients wants to always listen to signal strength,
-            // we need to set it off.
-            telephonyManager.createForSubscriptionId(subscriptionId)
-                    .setAlwaysReportSignalStrength(false);
-        }
-    }
-
     private String getCallIncomingNumber(Record record, int phoneId) {
         // Only reveal the incoming number if the record has read call log permission.
         return record.canReadCallLog() ? mCallIncomingNumber[phoneId] : "";
@@ -1457,14 +1425,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     }
 
                     mRecords.remove(i);
-
-                    // Every time a client that is registrating to always receive the signal
-                    // strength is removed from registry records, we need to check if
-                    // the signal strength decision needs to update on its slot.
-                    if (r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED)) {
-                        updateReportSignalStrengthDecision(r.subId);
-                    }
                     return;
                 }
             }
@@ -1696,10 +1656,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         log("notifySignalStrengthForPhoneId: r=" + r + " subId=" + subId
                                 + " phoneId=" + phoneId + " ss=" + signalStrength);
                     }
-                    if ((r.matchTelephonyCallbackEvent(
+                    if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_SIGNAL_STRENGTHS_CHANGED)
-                            || r.matchTelephonyCallbackEvent(
-                            TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED))
                             && idMatch(r, subId, phoneId)) {
                         try {
                             if (DBG) {
@@ -3119,11 +3077,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     android.Manifest.permission.READ_ACTIVE_EMERGENCY_SESSION, null);
         }
 
-        if ((events.contains(TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED))) {
-            mContext.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.LISTEN_ALWAYS_REPORTED_SIGNAL_STRENGTH, null);
-        }
-
         if (isPrivilegedPhoneStatePermissionRequired(events)) {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
@@ -3284,9 +3237,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             }
         }
 
-        if (events.contains(TelephonyCallback.EVENT_SIGNAL_STRENGTHS_CHANGED)
-                || events.contains(
-                TelephonyCallback.EVENT_ALWAYS_REPORTED_SIGNAL_STRENGTH_CHANGED)) {
+        if (events.contains(TelephonyCallback.EVENT_SIGNAL_STRENGTHS_CHANGED)) {
             try {
                 if (mSignalStrength[phoneId] != null) {
                     SignalStrength signalStrength = mSignalStrength[phoneId];
