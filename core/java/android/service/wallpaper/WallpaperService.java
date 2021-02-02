@@ -880,8 +880,8 @@ public abstract class WallpaperService extends Service {
                         InputChannel inputChannel = new InputChannel();
 
                         if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
-                                mDisplay.getDisplayId(), mInsetsState, mWinFrames.frame,
-                                inputChannel, mInsetsState, mTempControls) < 0) {
+                                mDisplay.getDisplayId(), mInsetsState, inputChannel, mInsetsState,
+                                mTempControls) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }

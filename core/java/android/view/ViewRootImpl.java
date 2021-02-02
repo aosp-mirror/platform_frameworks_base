@@ -139,6 +139,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.sysprop.DisplayProperties;
 import android.util.AndroidRuntimeException;
+import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
@@ -158,6 +159,7 @@ import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
 import android.view.Window.OnContentApplyWindowInsetsListener;
+import android.view.WindowInsets.Side.InsetsSide;
 import android.view.WindowInsets.Type;
 import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
@@ -934,6 +936,33 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    // TODO(b/161810301): Make this private after window layout is moved to the client side.
+    public static void computeWindowBounds(WindowManager.LayoutParams attrs, InsetsState state,
+            Rect displayFrame, Rect outBounds) {
+        final @InsetsType int typesToFit = attrs.getFitInsetsTypes();
+        final @InsetsSide int sidesToFit = attrs.getFitInsetsSides();
+        final ArraySet<Integer> types = InsetsState.toInternalType(typesToFit);
+        final Rect df = displayFrame;
+        Insets insets = Insets.of(0, 0, 0, 0);
+        for (int i = types.size() - 1; i >= 0; i--) {
+            final InsetsSource source = state.peekSource(types.valueAt(i));
+            if (source == null) {
+                continue;
+            }
+            insets = Insets.max(insets, source.calculateInsets(
+                    df, attrs.isFitInsetsIgnoringVisibility()));
+        }
+        final int left = (sidesToFit & WindowInsets.Side.LEFT) != 0 ? insets.left : 0;
+        final int top = (sidesToFit & WindowInsets.Side.TOP) != 0 ? insets.top : 0;
+        final int right = (sidesToFit & WindowInsets.Side.RIGHT) != 0 ? insets.right : 0;
+        final int bottom = (sidesToFit & WindowInsets.Side.BOTTOM) != 0 ? insets.bottom : 0;
+        outBounds.set(df.left + left, df.top + top, df.right - right, df.bottom - bottom);
+    }
+
+    private Configuration getConfiguration() {
+        return mContext.getResources().getConfiguration();
+    }
+
     /**
      * We have one child
      */
@@ -1065,18 +1094,15 @@ public final class ViewRootImpl implements ViewParent,
                     controlInsetsForCompatibility(mWindowAttributes);
                     res = mWindowSession.addToDisplayAsUser(mWindow, mWindowAttributes,
                             getHostVisibility(), mDisplay.getDisplayId(), userId,
-                            mInsetsController.getRequestedVisibility(), mTmpFrames.frame,
-                            inputChannel, mTempInsets, mTempControls);
+                            mInsetsController.getRequestedVisibility(), inputChannel, mTempInsets,
+                            mTempControls);
                     if (mTranslator != null) {
-                        mTranslator.translateRectInScreenToAppWindow(mTmpFrames.frame);
                         mTranslator.translateInsetsStateInScreenToAppWindow(mTempInsets);
                     }
-                    setFrame(mTmpFrames.frame);
                 } catch (RemoteException e) {
                     mAdded = false;
                     mView = null;
                     mAttachInfo.mRootView = null;
-                    inputChannel = null;
                     mFallbackEventHandler.setView(null);
                     unscheduleTraversals();
                     setAccessibilityFocus(null, null);
@@ -1092,6 +1118,9 @@ public final class ViewRootImpl implements ViewParent,
                 mPendingAlwaysConsumeSystemBars = mAttachInfo.mAlwaysConsumeSystemBars;
                 mInsetsController.onStateChanged(mTempInsets);
                 mInsetsController.onControlsChanged(mTempControls);
+                computeWindowBounds(mWindowAttributes, mInsetsController.getState(),
+                        getConfiguration().windowConfiguration.getBounds(), mTmpFrames.frame);
+                setFrame(mTmpFrames.frame);
                 if (DEBUG_LAYOUT) Log.v(mTag, "Added window " + mWindow);
                 if (res < WindowManagerGlobal.ADD_OKAY) {
                     mAttachInfo.mRootView = null;
@@ -1365,7 +1394,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     private int getNightMode() {
-        return mContext.getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        return getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
     }
 
     private void updateForceDarkMode() {
@@ -2341,7 +2370,7 @@ public final class ViewRootImpl implements ViewParent,
 
     /* package */ WindowInsets getWindowInsets(boolean forceConstruct) {
         if (mLastWindowInsets == null || forceConstruct) {
-            final Configuration config = mContext.getResources().getConfiguration();
+            final Configuration config = getConfiguration();
             mLastWindowInsets = mInsetsController.calculateInsets(
                     config.isScreenRound(), mAttachInfo.mAlwaysConsumeSystemBars,
                     mWindowAttributes.type, config.windowConfiguration.getWindowingMode(),
@@ -2477,7 +2506,7 @@ public final class ViewRootImpl implements ViewParent,
             mFullRedrawNeeded = true;
             mLayoutRequested = true;
 
-            final Configuration config = mContext.getResources().getConfiguration();
+            final Configuration config = getConfiguration();
             if (shouldUseDisplaySize(lp)) {
                 // NOTE -- system code, won't try to do compat mode.
                 Point size = new Point();
@@ -4770,7 +4799,7 @@ public final class ViewRootImpl implements ViewParent,
         }
         // TODO: Centralize this sanitization? Why do we let setting bad modes?
         // Alternatively, can we just let HWUI figure it out? Do we need to care here?
-        if (!mContext.getResources().getConfiguration().isScreenWideColorGamut()) {
+        if (!getConfiguration().isScreenWideColorGamut()) {
             colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
         }
         mAttachInfo.mThreadedRenderer.setColorMode(colorMode);

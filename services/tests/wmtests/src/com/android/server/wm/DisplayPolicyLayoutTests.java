@@ -55,7 +55,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.expectThrows;
 
-import android.app.WindowConfiguration;
 import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -664,77 +663,13 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     public void layoutHint_appWindow() {
         mWindow.mAttrs.setFitInsetsTypes(0);
 
-        final Rect outFrame = new Rect();
         final DisplayCutout.ParcelableWrapper outDisplayCutout =
                 new DisplayCutout.ParcelableWrapper();
         final InsetsState outState = new InsetsState();
 
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, null /* windowToken */, outFrame,
-                outState, true /* localClient */);
-
-        assertThat(outFrame, is(outState.getDisplayFrame()));
-        assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
-        assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
-                is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
-        assertThat(outState.getSource(ITYPE_NAVIGATION_BAR).getFrame(),
-                is(new Rect(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT)));
-    }
-
-    @Test
-    public void layoutHint_appWindowInTask() {
-        mWindow.mAttrs.setFitInsetsTypes(0);
-
-        final Rect taskBounds = new Rect(100, 100, 200, 200);
-        final Task task = mWindow.getTask();
-        // Force the bounds because the task may resolve different bounds from Task#setBounds.
-        task.getWindowConfiguration().setBounds(taskBounds);
-
-        final Rect outFrame = new Rect();
-        final DisplayCutout.ParcelableWrapper outDisplayCutout =
-                new DisplayCutout.ParcelableWrapper();
-        final InsetsState outState = new InsetsState();
-
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outState,
+        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, null /* windowToken */, outState,
                 true /* localClient */);
 
-        assertThat(outFrame, is(taskBounds));
-        assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
-        assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
-                is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
-        assertThat(outState.getSource(ITYPE_NAVIGATION_BAR).getFrame(),
-                is(new Rect(0, DISPLAY_HEIGHT - NAV_BAR_HEIGHT, DISPLAY_WIDTH, DISPLAY_HEIGHT)));
-    }
-
-    @Test
-    public void layoutHint_appWindowInTask_outsideContentFrame() {
-        mWindow.mAttrs.setFitInsetsTypes(0);
-
-        final InsetsState state =
-                mDisplayContent.getInsetsStateController().getRawInsetsState();
-        final Rect contentFrame = new Rect(state.getDisplayFrame());
-        contentFrame.inset(state.calculateInsets(contentFrame, Type.systemBars(),
-                false /* ignoreVisibility */));
-
-        // Task is in the nav bar area (usually does not happen, but this is similar enough to
-        // the possible overlap with the IME)
-        final Rect taskBounds = new Rect(100, contentFrame.bottom + 1,
-                200, contentFrame.bottom + 10);
-
-        final Task task = mWindow.getTask();
-        // Make the task floating.
-        task.setWindowingMode(WindowConfiguration.WINDOWING_MODE_FREEFORM);
-        // Force the bounds because the task may resolve different bounds from Task#setBounds.
-        task.getWindowConfiguration().setBounds(taskBounds);
-
-        final Rect outFrame = new Rect();
-        final DisplayCutout.ParcelableWrapper outDisplayCutout =
-                new DisplayCutout.ParcelableWrapper();
-        final InsetsState outState = new InsetsState();
-
-        mDisplayPolicy.getLayoutHint(mWindow.mAttrs, mWindow.mToken, outFrame, outState,
-                true /* localClient */);
-
-        assertThat(outFrame, is(taskBounds));
         assertThat(outDisplayCutout, is(new DisplayCutout.ParcelableWrapper()));
         assertThat(outState.getSource(ITYPE_STATUS_BAR).getFrame(),
                 is(new Rect(0, 0, DISPLAY_WIDTH, STATUS_BAR_HEIGHT)));
