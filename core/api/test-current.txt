@@ -401,10 +401,10 @@ package android.app.admin {
     field public static final int CODE_MANAGED_USERS_NOT_SUPPORTED = 9; // 0x9
     field public static final int CODE_NONSYSTEM_USER_EXISTS = 5; // 0x5
     field public static final int CODE_NOT_SYSTEM_USER = 7; // 0x7
-    field public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12; // 0xc
+    field @Deprecated public static final int CODE_NOT_SYSTEM_USER_SPLIT = 12; // 0xc
     field public static final int CODE_OK = 0; // 0x0
     field public static final int CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS = 15; // 0xf
-    field public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
+    field @Deprecated public static final int CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER = 14; // 0xe
     field public static final int CODE_SYSTEM_USER = 10; // 0xa
     field public static final int CODE_USER_HAS_PROFILE_OWNER = 2; // 0x2
     field public static final int CODE_USER_NOT_RUNNING = 3; // 0x3
