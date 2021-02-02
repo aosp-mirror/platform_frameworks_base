@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.app.timedetector;
+package android.app.time;
 
 import static android.app.timezonedetector.ParcelableTestSupport.assertRoundTripParcelable;
 import static android.app.timezonedetector.ParcelableTestSupport.roundTripParcelable;
