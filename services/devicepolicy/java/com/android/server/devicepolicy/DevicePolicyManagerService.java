@@ -35,10 +35,8 @@ import static android.app.admin.DevicePolicyManager.CODE_HAS_PAIRED;
 import static android.app.admin.DevicePolicyManager.CODE_MANAGED_USERS_NOT_SUPPORTED;
 import static android.app.admin.DevicePolicyManager.CODE_NONSYSTEM_USER_EXISTS;
 import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER;
-import static android.app.admin.DevicePolicyManager.CODE_NOT_SYSTEM_USER_SPLIT;
 import static android.app.admin.DevicePolicyManager.CODE_OK;
 import static android.app.admin.DevicePolicyManager.CODE_PROVISIONING_NOT_ALLOWED_FOR_NON_DEVELOPER_USERS;
-import static android.app.admin.DevicePolicyManager.CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.CODE_SYSTEM_USER;
 import static android.app.admin.DevicePolicyManager.CODE_USER_HAS_PROFILE_OWNER;
 import static android.app.admin.DevicePolicyManager.CODE_USER_NOT_RUNNING;
@@ -1378,11 +1376,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
         void systemPropertiesSet(String key, String value) {
             SystemProperties.set(key, value);
-        }
-
-        // TODO (b/137101239): clean up split system user codes
-        boolean userManagerIsSplitSystemUser() {
-            return UserManager.isSplitSystemUser();
         }
 
         boolean userManagerIsHeadlessSystemUserMode() {
@@ -7404,48 +7397,18 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return mInjector.settingsGlobalGetInt(Global.AUTO_TIME_ZONE, 0) > 0;
     }
 
+    // TODO (b/137101239): remove this method in follow-up CL
+    // since it's only used for split system user.
     @Override
     public void setForceEphemeralUsers(ComponentName who, boolean forceEphemeralUsers) {
-        if (!mHasFeature) {
-            return;
-        }
-        Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
-
-        // Allow setting this policy to true only if there is a split system user.
-        if (forceEphemeralUsers && !mInjector.userManagerIsSplitSystemUser()) {
-            throw new UnsupportedOperationException(
-                    "Cannot force ephemeral users on systems without split system user.");
-        }
-        boolean removeAllUsers = false;
-        synchronized (getLockObject()) {
-            final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            if (deviceOwner.forceEphemeralUsers != forceEphemeralUsers) {
-                deviceOwner.forceEphemeralUsers = forceEphemeralUsers;
-                saveSettingsLocked(caller.getUserId());
-                mUserManagerInternal.setForceEphemeralUsers(forceEphemeralUsers);
-                removeAllUsers = forceEphemeralUsers;
-            }
-        }
-        if (removeAllUsers) {
-            mInjector.binderWithCleanCallingIdentity(() -> mUserManagerInternal.removeAllUsers());
-        }
+        throw new UnsupportedOperationException("This method was used by split system user only.");
     }
 
+    // TODO (b/137101239): remove this method in follow-up CL
+    // since it's only used for split system user.
     @Override
     public boolean getForceEphemeralUsers(ComponentName who) {
-        if (!mHasFeature) {
-            return false;
-        }
-        Objects.requireNonNull(who, "ComponentName is null");
-        final CallerIdentity caller = getCallerIdentity(who);
-        Preconditions.checkCallAuthorization(isDeviceOwner(caller));
-
-        synchronized (getLockObject()) {
-            final ActiveAdmin deviceOwner = getDeviceOwnerAdminLocked();
-            return deviceOwner.forceEphemeralUsers;
-        }
+        throw new UnsupportedOperationException("This method was used by split system user only.");
     }
 
     @Override
@@ -12733,13 +12696,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 case DevicePolicyManager.ACTION_PROVISION_MANAGED_DEVICE:
                 case DevicePolicyManager.ACTION_PROVISION_FINANCED_DEVICE:
                     return checkDeviceOwnerProvisioningPreCondition(callingUserId);
-                // TODO (b/137101239): clean up split system user codes
-                //  ACTION_PROVISION_MANAGED_USER and ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE
-                //  only supported on split-user systems.
-                case DevicePolicyManager.ACTION_PROVISION_MANAGED_USER:
-                    return checkManagedUserProvisioningPreCondition(callingUserId);
-                case DevicePolicyManager.ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE:
-                    return checkManagedShareableDeviceProvisioningPreCondition(callingUserId);
             }
         }
         throw new IllegalArgumentException("Unknown provisioning action " + action);
@@ -12775,14 +12731,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
 
-        // TODO (b/137101239): clean up split system user codes
         if (isAdb) {
             // If shell command runs after user setup completed check device status. Otherwise, OK.
             if (mIsWatch || hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
                 // In non-headless system user mode, DO can be setup only if
                 // there's no non-system user
                 if (!mInjector.userManagerIsHeadlessSystemUserMode()
-                        && !mInjector.userManagerIsSplitSystemUser()
                         && mUserManager.getUserCount() > 1) {
                     return CODE_NONSYSTEM_USER_EXISTS;
                 }
@@ -12801,16 +12755,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             return CODE_OK;
         } else {
-            if (!mInjector.userManagerIsSplitSystemUser()) {
-                // In non-split user mode, DO has to be user 0
-                if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
-                    return CODE_NOT_SYSTEM_USER;
-                }
-                // Only provision DO before setup wizard completes
-                // TODO (b/171423186): implement deferred DO setup for headless system user mode
-                if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
-                    return CODE_USER_SETUP_COMPLETED;
-                }
+            // DO has to be user 0
+            if (deviceOwnerUserId != UserHandle.USER_SYSTEM) {
+                return CODE_NOT_SYSTEM_USER;
+            }
+            // Only provision DO before setup wizard completes
+            if (hasUserSetupCompleted(UserHandle.USER_SYSTEM)) {
+                return CODE_USER_SETUP_COMPLETED;
             }
             return CODE_OK;
         }
@@ -12831,16 +12782,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    // TODO (b/137101239): clean up split system user codes
     private int checkManagedProfileProvisioningPreCondition(String packageName,
             @UserIdInt int callingUserId) {
         if (!hasFeatureManagedUsers()) {
             return CODE_MANAGED_USERS_NOT_SUPPORTED;
-        }
-        if (callingUserId == UserHandle.USER_SYSTEM
-                && mInjector.userManagerIsSplitSystemUser()) {
-            // Managed-profiles cannot be setup on the system user.
-            return CODE_SPLIT_SYSTEM_USER_DEVICE_SYSTEM_USER;
         }
         if (getProfileOwnerAsUser(callingUserId) != null) {
             // Managed user cannot have a managed profile.
@@ -12915,37 +12860,6 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
         }
         return null;
-    }
-
-    // TODO (b/137101239): clean up split system user codes
-    private int checkManagedUserProvisioningPreCondition(int callingUserId) {
-        if (!hasFeatureManagedUsers()) {
-            return CODE_MANAGED_USERS_NOT_SUPPORTED;
-        }
-        if (!mInjector.userManagerIsSplitSystemUser()) {
-            // ACTION_PROVISION_MANAGED_USER only supported on split-user systems.
-            return CODE_NOT_SYSTEM_USER_SPLIT;
-        }
-        if (callingUserId == UserHandle.USER_SYSTEM) {
-            // System user cannot be a managed user.
-            return CODE_SYSTEM_USER;
-        }
-        if (hasUserSetupCompleted(callingUserId)) {
-            return CODE_USER_SETUP_COMPLETED;
-        }
-        if (mIsWatch && hasPaired(UserHandle.USER_SYSTEM)) {
-            return CODE_HAS_PAIRED;
-        }
-        return CODE_OK;
-    }
-
-    // TODO (b/137101239): clean up split system user codes
-    private int checkManagedShareableDeviceProvisioningPreCondition(int callingUserId) {
-        if (!mInjector.userManagerIsSplitSystemUser()) {
-            // ACTION_PROVISION_MANAGED_SHAREABLE_DEVICE only supported on split-user systems.
-            return CODE_NOT_SYSTEM_USER_SPLIT;
-        }
-        return checkDeviceOwnerProvisioningPreCondition(callingUserId);
     }
 
     private boolean hasFeatureManagedUsers() {
