@@ -213,6 +213,7 @@ import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.WindowManager.DisplayImePolicy;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
+import android.window.IDisplayAreaOrganizer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -1074,6 +1075,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
         // Sets the display content for the children.
         onDisplayChanged(this);
+        updateDisplayAreaOrganizers();
 
         mInputMonitor = new InputMonitor(mWmService, this);
         mInsetsPolicy = new InsetsPolicy(mInsetsStateController, this);
@@ -2712,6 +2714,30 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     TaskDisplayArea getDefaultTaskDisplayArea() {
         return mDisplayAreaPolicy.getDefaultTaskDisplayArea();
+    }
+
+    /**
+     * Checks for all non-organized {@link DisplayArea}s for if there is any existing organizer for
+     * their features. If so, registers them with the matched organizer.
+     */
+    @VisibleForTesting
+    void updateDisplayAreaOrganizers() {
+        if (!isTrusted()) {
+            // No need to update for untrusted display.
+            return;
+        }
+        forAllDisplayAreas(displayArea -> {
+            if (displayArea.isOrganized()) {
+                return;
+            }
+            // Check if we have a registered organizer for the DA feature.
+            final IDisplayAreaOrganizer organizer =
+                    mAtmService.mWindowOrganizerController.mDisplayAreaOrganizerController
+                            .getOrganizerByFeature(displayArea.mFeatureId);
+            if (organizer != null) {
+                displayArea.setOrganizer(organizer);
+            }
+        });
     }
 
     /**
