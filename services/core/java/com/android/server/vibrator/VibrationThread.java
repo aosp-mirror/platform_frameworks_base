@@ -114,10 +114,6 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
         }
     }
 
-    public Vibration getVibration() {
-        return mVibration;
-    }
-
     @Override
     public void binderDied() {
         cancel();
@@ -154,6 +150,10 @@ public final class VibrationThread extends Thread implements IBinder.DeathRecipi
                 mCurrentVibrateStep.vibratorComplete(vibratorId);
             }
         }
+    }
+
+    public Vibration getVibration() {
+        return mVibration;
     }
 
     @VisibleForTesting
