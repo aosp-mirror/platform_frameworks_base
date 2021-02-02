@@ -102,7 +102,6 @@ public class AppTransitionController {
     private final DisplayContent mDisplayContent;
     private final WallpaperController mWallpaperControllerLocked;
     private RemoteAnimationDefinition mRemoteAnimationDefinition = null;
-    private static final int KEYGUARD_GOING_AWAY_ANIMATION_DURATION = 400;
 
     private final ArrayMap<WindowContainer, Integer> mTempTransitionReasons = new ArrayMap<>();
 
@@ -438,14 +437,10 @@ public class AppTransitionController {
                 return adapter;
             }
         }
-        if (mRemoteAnimationDefinition != null) {
-            final RemoteAnimationAdapter adapter = mRemoteAnimationDefinition.getAdapter(
-                    transit, activityTypes);
-            if (adapter != null) {
-                return adapter;
-            }
+        if (mRemoteAnimationDefinition == null) {
+            return null;
         }
-        return null;
+        return mRemoteAnimationDefinition.getAdapter(transit, activityTypes);
     }
 
     /**
