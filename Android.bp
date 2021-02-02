@@ -632,6 +632,7 @@ java_defaults {
     ],
     sdk_version: "core_platform",
     static_libs: [
+        "bouncycastle-repackaged-unbundled",
         "framework-internal-utils",
         // If MimeMap ever becomes its own APEX, then this dependency would need to be removed
         // in favor of an API stubs dependency in java_library "framework" below.
