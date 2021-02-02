@@ -846,6 +846,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Slog.i(TAG,
                     ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
         }
+        // Send any pending task-info changes that were queued-up during a layout deferment
+        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "applySurfaceChanges");
         mWmService.openSurfaceTransaction();
         try {
@@ -862,8 +864,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        // Send any pending task-info changes that were queued-up during a layout deferment
-        mWmService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         mWmService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
         checkAppTransitionReady(surfacePlacer);
