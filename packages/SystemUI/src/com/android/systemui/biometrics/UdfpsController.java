@@ -62,7 +62,7 @@ import javax.inject.Inject;
  */
 @SuppressWarnings("deprecation")
 @SysUISingleton
-public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
+public class UdfpsController implements DozeReceiver, HbmCallback {
     private static final String TAG = "UdfpsController";
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
@@ -374,9 +374,8 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
 
     // This method can be called from the UI thread.
     private void onFingerDown(int x, int y, float minor, float major) {
-        mView.setOnIlluminatedRunnable(
-                () -> mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major));
-        mView.startIllumination();
+        mView.startIllumination(() ->
+                mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major));
     }
 
     // This method can be called from the UI thread.
@@ -386,13 +385,13 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
     }
 
     @Override
-    public void enableHbm(Surface surface) {
+    public void enableHbm(@NonNull Surface surface) {
         // Do nothing. This method can be implemented for devices that require the high-brightness
         // mode for fingerprint illumination.
     }
 
     @Override
-    public void disableHbm(Surface surface) {
+    public void disableHbm(@NonNull Surface surface) {
         // Do nothing. This method can be implemented for devices that require the high-brightness
         // mode for fingerprint illumination.
     }
