@@ -2315,12 +2315,9 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        final boolean windowingModeChanged = prevWindowingMode != getWindowingMode();
-        final int overrideWindowingMode = getRequestedOverrideWindowingMode();
-        // Update bounds if applicable
-        boolean hasNewOverrideBounds = false;
         // Use override windowing mode to prevent extra bounds changes if inheriting the mode.
-        if ((overrideWindowingMode != WINDOWING_MODE_PINNED)
+        final int overrideWindowingMode = getRequestedOverrideWindowingMode();
+        if (overrideWindowingMode != WINDOWING_MODE_PINNED
                 && !getRequestedOverrideBounds().isEmpty()) {
             // If the parent (display) has rotated, rotate our bounds to best-fit where their
             // bounds were on the pre-rotated display.
@@ -2330,22 +2327,10 @@ class Task extends WindowContainer<WindowContainer> {
                 mDisplayContent.rotateBounds(
                         newParentConfig.windowConfiguration.getBounds(), prevRotation, newRotation,
                         newBounds);
-                hasNewOverrideBounds = true;
+                setBounds(newBounds);
             }
         }
 
-        if (windowingModeChanged) {
-            taskDisplayArea.onRootTaskWindowingModeChanged(this);
-        }
-        if (hasNewOverrideBounds) {
-            if (inSplitScreenWindowingMode()) {
-                setBounds(newBounds);
-            } else if (overrideWindowingMode != WINDOWING_MODE_PINNED) {
-                // For root pinned task, resize is now part of the {@link
-                // WindowContainerTransaction}
-                resize(new Rect(newBounds), PRESERVE_WINDOWS, true /* deferResume */);
-            }
-        }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
             // Since always on top is only on when the root task is freeform or pinned, the state
             // can be toggled when the windowing mode changes. We must make sure the root task is

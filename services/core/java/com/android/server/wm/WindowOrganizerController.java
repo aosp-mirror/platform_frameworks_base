@@ -405,11 +405,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                         new Configuration(container.getRequestedOverrideConfiguration());
                 c.setTo(change.getConfiguration(), configMask, windowMask);
                 container.onRequestedOverrideConfigurationChanged(c);
-                // TODO(b/145675353): remove the following once we could apply new bounds to the
-                // root pinned task together with its children.
             }
-            resizeRootPinnedTaskIfNeeded(container, configMask, windowMask,
-                    container.getRequestedOverrideConfiguration());
             effects |= TRANSACT_EFFECTS_CLIENT_CONFIG;
         }
         if ((change.getChangeMask() & WindowContainerTransaction.Change.CHANGE_FOCUSABLE) != 0) {
@@ -657,19 +653,6 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         }
 
         return effects;
-    }
-
-    private void resizeRootPinnedTaskIfNeeded(ConfigurationContainer container, int configMask,
-            int windowMask, Configuration config) {
-        if ((container instanceof Task)
-                && ((configMask & ActivityInfo.CONFIG_WINDOW_CONFIGURATION) != 0)
-                && ((windowMask & WindowConfiguration.WINDOW_CONFIG_BOUNDS) != 0)) {
-            final Task rootTask = (Task) container;
-            if (rootTask.inPinnedWindowingMode()) {
-                rootTask.resize(config.windowConfiguration.getBounds(),
-                        PRESERVE_WINDOWS, true /* deferResume */);
-            }
-        }
     }
 
     @Override
