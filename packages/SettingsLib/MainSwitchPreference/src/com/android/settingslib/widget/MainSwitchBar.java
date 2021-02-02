@@ -136,10 +136,8 @@ public class MainSwitchBar extends LinearLayout implements CompoundButton.OnChec
      * Show the MainSwitchBar
      */
     public void show() {
-        if (!isShowing()) {
-            setVisibility(View.VISIBLE);
-            mSwitch.setOnCheckedChangeListener(this);
-        }
+        setVisibility(View.VISIBLE);
+        mSwitch.setOnCheckedChangeListener(this);
     }
 
     /**
