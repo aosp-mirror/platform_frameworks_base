@@ -20,6 +20,7 @@ import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.AlarmManager;
@@ -948,8 +949,9 @@ public class WifiNl80211Manager {
      * has been set up).
      */
     public boolean startScan(@NonNull String ifaceName, @WifiAnnotations.ScanType int scanType,
-            @Nullable Set<Integer> freqs, @Nullable List<byte[]> hiddenNetworkSSIDs,
-            @Nullable Bundle extraScanningParams) {
+            @SuppressLint("NullableCollection") @Nullable Set<Integer> freqs,
+            @SuppressLint("NullableCollection") @Nullable List<byte[]> hiddenNetworkSSIDs,
+            @SuppressLint("NullableCollection") @Nullable Bundle extraScanningParams) {
         IWifiScannerImpl scannerImpl = getScannerImpl(ifaceName);
         if (scannerImpl == null) {
             Log.e(TAG, "No valid wificond scanner interface handler for iface=" + ifaceName);

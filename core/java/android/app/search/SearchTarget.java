@@ -17,6 +17,7 @@ package android.app.search;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.pm.ShortcutInfo;
@@ -224,6 +225,7 @@ public final class SearchTarget implements Parcelable {
      * Return extra bundle.
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public Bundle getExtras() {
         return mExtras;
     }
@@ -386,7 +388,7 @@ public final class SearchTarget implements Parcelable {
          * TODO: add comment
          */
         @NonNull
-        public Builder setExtras(@Nullable Bundle extras) {
+        public Builder setExtras(@SuppressLint("NullableCollection") @Nullable Bundle extras) {
             mExtras = extras;
             return this;
         }
