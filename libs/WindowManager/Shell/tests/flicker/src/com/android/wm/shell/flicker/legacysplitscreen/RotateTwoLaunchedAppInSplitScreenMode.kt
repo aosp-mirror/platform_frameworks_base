@@ -28,6 +28,7 @@ import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -65,8 +66,8 @@ class RotateTwoLaunchedAppInSplitScreenMode(
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
                 setup {
                     eachRun {
-                        device.launchSplitScreen()
-                        splitScreenApp.reopenAppFromOverview()
+                        device.launchSplitScreen(wmHelper)
+                        device.reopenAppFromOverview(wmHelper)
                         this.setRotation(configuration.startRotation)
                     }
                 }

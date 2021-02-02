@@ -63,7 +63,7 @@ class RotateOneLaunchedAppAndEnterSplitScreen(
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
                 transitions {
-                    device.launchSplitScreen()
+                    device.launchSplitScreen(wmHelper)
                     this.setRotation(configuration.startRotation)
                 }
                 assertions {

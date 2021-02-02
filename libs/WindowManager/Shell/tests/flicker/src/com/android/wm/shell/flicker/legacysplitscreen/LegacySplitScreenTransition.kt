@@ -21,7 +21,10 @@ import android.os.Bundle
 import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import com.android.server.wm.flicker.dsl.FlickerBuilder
+import com.android.server.wm.flicker.helpers.exitSplitScreen
+import com.android.server.wm.flicker.helpers.isInSplitScreen
 import com.android.server.wm.flicker.helpers.openQuickStepAndClearRecentAppsFromOverview
+import com.android.server.wm.flicker.helpers.openQuickstep
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.helpers.wakeUpAndGoToHomeScreen
 import com.android.server.wm.flicker.startRotation
@@ -46,7 +49,7 @@ abstract class LegacySplitScreenTransition(
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    device.openQuickStepAndClearRecentAppsFromOverview()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     secondaryApp.launchViaIntent(wmHelper)
                     splitScreenApp.launchViaIntent(wmHelper)
                     this.setRotation(configuration.startRotation)
@@ -54,8 +57,12 @@ abstract class LegacySplitScreenTransition(
             }
             teardown {
                 eachRun {
-                    splitScreenApp.exit()
-                    secondaryApp.exit()
+                    // TODO(b/175687842) Workaround for exit legacy split screen
+                    device.openQuickstep(wmHelper)
+                    if (device.isInSplitScreen()) {
+                        device.exitSplitScreen()
+                    }
+                    device.pressHome()
                     this.setRotation(Surface.ROTATION_0)
                 }
             }
@@ -66,13 +73,18 @@ abstract class LegacySplitScreenTransition(
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    device.openQuickStepAndClearRecentAppsFromOverview()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     this.setRotation(configuration.startRotation)
                 }
             }
             teardown {
                 eachRun {
-                    nonResizeableApp.exit()
+                    // TODO(b/175687842) Workaround for exit legacy split screen
+                    device.openQuickstep(wmHelper)
+                    if (device.isInSplitScreen()) {
+                        device.exitSplitScreen()
+                    }
+                    device.pressHome()
                     this.setRotation(Surface.ROTATION_0)
                 }
             }
@@ -83,15 +95,19 @@ abstract class LegacySplitScreenTransition(
             setup {
                 eachRun {
                     device.wakeUpAndGoToHomeScreen()
-                    device.openQuickStepAndClearRecentAppsFromOverview()
+                    device.openQuickStepAndClearRecentAppsFromOverview(wmHelper)
                     secondaryApp.launchViaIntent(wmHelper)
                     splitScreenApp.launchViaIntent(wmHelper)
                 }
             }
             teardown {
                 eachRun {
-                    splitScreenApp.exit()
-                    secondaryApp.exit()
+                    // TODO(b/175687842) Workaround for exit legacy split screen
+                    device.openQuickstep(wmHelper)
+                    if (device.isInSplitScreen()) {
+                        device.exitSplitScreen()
+                    }
+                    device.pressHome()
                     this.setRotation(Surface.ROTATION_0)
                 }
             }

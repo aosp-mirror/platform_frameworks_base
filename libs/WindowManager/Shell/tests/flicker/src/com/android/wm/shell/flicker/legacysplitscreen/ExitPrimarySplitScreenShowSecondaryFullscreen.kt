@@ -26,6 +26,7 @@ import com.android.server.wm.flicker.appWindowBecomesInVisible
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.helpers.launchSplitScreen
+import com.android.server.wm.flicker.helpers.reopenAppFromOverview
 import com.android.server.wm.flicker.layerBecomesInvisible
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
@@ -58,11 +59,18 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
                     buildTestTag("testExitPrimarySplitScreenShowSecondaryFullscreen", configuration)
                 }
                 repeat { SplitScreenHelper.TEST_REPETITIONS }
+                teardown {
+                    eachRun {
+                        secondaryApp.exit(wmHelper)
+                    }
+                }
                 transitions {
-                    device.launchSplitScreen()
-                    secondaryApp.reopenAppFromOverview()
+                    splitScreenApp.launchViaIntent(wmHelper)
+                    secondaryApp.launchViaIntent(wmHelper)
+                    device.launchSplitScreen(wmHelper)
+                    device.reopenAppFromOverview(wmHelper)
                     // TODO(b/175687842) Can not find Split screen divider, use exit() instead
-                    splitScreenApp.exit()
+                    splitScreenApp.exit(wmHelper)
                 }
                 assertions {
                     layersTrace {
