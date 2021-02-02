@@ -372,10 +372,12 @@ public class PackageWatchdog {
      * even from a previous boot.
      */
     public void unregisterHealthObserver(PackageHealthObserver observer) {
-        synchronized (mLock) {
-            mAllObservers.remove(observer.getName());
-        }
-        syncState("unregistering observer: " + observer.getName());
+        mLongTaskHandler.post(() -> {
+            synchronized (mLock) {
+                mAllObservers.remove(observer.getName());
+            }
+            syncState("unregistering observer: " + observer.getName());
+        });
     }
 
     /**
@@ -982,7 +984,11 @@ public class PackageWatchdog {
                     if (!DeviceConfig.NAMESPACE_ROLLBACK.equals(properties.getNamespace())) {
                         return;
                     }
-                    updateConfigs();
+                    try {
+                        updateConfigs();
+                    } catch (Exception ignore) {
+                        Slog.w(TAG, "Failed to reload device config changes");
+                    }
                 });
     }
 
@@ -990,7 +996,8 @@ public class PackageWatchdog {
      * Health check is enabled or disabled after reading the flags
      * from DeviceConfig.
      */
-    private void updateConfigs() {
+    @VisibleForTesting
+    void updateConfigs() {
         synchronized (mLock) {
             mTriggerFailureCount = DeviceConfig.getInt(
                     DeviceConfig.NAMESPACE_ROLLBACK,
