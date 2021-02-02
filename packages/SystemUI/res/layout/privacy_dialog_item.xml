@@ -16,19 +16,22 @@
   -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/privacy_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:minHeight="48dp"
     android:orientation="horizontal"
-    android:layout_marginTop="8dp"
+    android:layout_marginTop="4dp"
+    android:importantForAccessibility="yes"
+    android:focusable="true"
     >
+    <!-- 4dp marginTop makes 20dp minimum between icons -->
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="@dimen/ongoing_appops_dialog_circle_size"
+        android:layout_height="@dimen/ongoing_appops_dialog_circle_size"
         android:layout_gravity="center_vertical"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
+        android:importantForAccessibility="no"
     />
 
     <TextView
@@ -38,25 +41,21 @@
         android:layout_width="0dp"
         android:layout_weight="1"
         android:layout_gravity="center_vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:textDirection="locale"
+        android:textAlignment="viewStart"
         android:gravity="start | center_vertical"
-        android:textAppearance="@style/TextAppearance.QS.TileLabel"
+        android:textAppearance="@style/TextAppearance.PrivacyDialog"
+        android:lineHeight="20sp"
     />
 
-    <FrameLayout
-        android:id="@+id/link"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+    <ImageView
+        android:layout_height="24dp"
+        android:layout_width="24dp"
         android:layout_gravity="center_vertical"
-        android:background="?android:attr/selectableItemBackground"
-    >
-
-        <ImageView
-            android:layout_height="24dp"
-            android:layout_width="24dp"
-            android:layout_gravity="center"
-            android:src="@*android:drawable/ic_chevron_end"
-            android:tint="?android:attr/textColorPrimary"
-            />
-    </FrameLayout>
+        android:src="@*android:drawable/ic_chevron_end"
+        android:tint="?android:attr/textColorPrimary"
+        />
 
 </LinearLayout>

@@ -21,16 +21,16 @@
           >
         <shape android:shape="oval">
             <size
-                android:height="28dp"
-                android:width="28dp"
+                android:height="@dimen/ongoing_appops_dialog_circle_size"
+                android:width="@dimen/ongoing_appops_dialog_circle_size"
             />
             <solid android:color="@color/privacy_circle_camera" />
         </shape>
     </item>
     <item android:id="@id/icon"
           android:gravity="center"
-          android:width="20dp"
-          android:height="20dp"
+          android:width="@dimen/ongoing_appops_dialog_icon_size"
+          android:height="@dimen/ongoing_appops_dialog_icon_size"
           android:drawable="@*android:drawable/perm_group_camera"
     />
 </layer-list>
