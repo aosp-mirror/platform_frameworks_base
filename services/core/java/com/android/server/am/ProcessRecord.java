@@ -643,7 +643,7 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     public void makeActive(IApplicationThread _thread, ProcessStatsService tracker) {
-        mProfile.onProcessActive(thread, tracker);
+        mProfile.onProcessActive(_thread, tracker);
         thread = _thread;
         mWindowProcessController.setThread(thread);
     }

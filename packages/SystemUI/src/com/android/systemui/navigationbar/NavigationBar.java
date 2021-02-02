@@ -28,6 +28,7 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowInsetsController.APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
@@ -994,6 +995,8 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
             return MODE_LIGHTS_OUT_TRANSPARENT;
         } else if ((appearance & APPEARANCE_OPAQUE_NAVIGATION_BARS) != 0) {
             return MODE_OPAQUE;
+        } else if ((appearance & APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS) != 0) {
+            return MODE_SEMI_TRANSPARENT;
         } else {
             return MODE_TRANSPARENT;
         }

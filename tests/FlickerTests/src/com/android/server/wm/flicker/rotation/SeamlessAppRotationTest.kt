@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
@@ -32,7 +31,6 @@ import com.android.server.wm.flicker.helpers.StandardAppHelper
 import com.android.server.wm.flicker.layerAlwaysVisible
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.navBarLayerIsAlwaysVisible
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
@@ -58,10 +56,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class SeamlessAppRotationTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object : RotationTransition(InstrumentationRegistry.getInstrumentation()) {
         override val testApp: StandardAppHelper
             get() = SeamlessRotationAppHelper(instrumentation)
@@ -69,6 +65,8 @@ class SeamlessAppRotationTest(
         override fun getAppLaunchParams(configuration: Bundle): Map<String, String> = mapOf(
             ActivityOptions.EXTRA_STARVE_UI_THREAD to configuration.starveUiThread.toString()
         )
+
+        private val testFactory = FlickerTestRunnerFactory.getInstance()
 
         private val Bundle.starveUiThread
             get() = this.getBoolean(ActivityOptions.EXTRA_STARVE_UI_THREAD, false)
@@ -80,8 +78,8 @@ class SeamlessAppRotationTest(
         }
 
         @JvmStatic
-        private fun FlickerTestRunnerFactory.getConfigurations(): List<Bundle> {
-            return this.getConfigRotationTests().flatMap {
+        private fun getConfigurations(): List<Bundle> {
+            return testFactory.getConfigRotationTests().flatMap {
                 val defaultRun = it.createConfig(starveUiThread = false)
                 val busyUiRun = it.createConfig(starveUiThread = true)
                 listOf(defaultRun, busyUiRun)
@@ -91,8 +89,7 @@ class SeamlessAppRotationTest(
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
-            val factory = FlickerTestRunnerFactory(instrumentation, repetitions = 2)
-            val configurations = factory.getConfigurations()
+            val configurations = getConfigurations()
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
                 withTestName {
                     val extra = if (configuration.starveUiThread) {
@@ -161,7 +158,8 @@ class SeamlessAppRotationTest(
                 }
             }
 
-            return factory.buildRotationTest(transition, testSpec, configurations)
+            return testFactory.buildRotationTest(instrumentation, transition, testSpec,
+                deviceConfigurations = configurations, repetitions = 2)
         }
     }
 }

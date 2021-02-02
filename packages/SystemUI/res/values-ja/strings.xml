@@ -416,10 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"スクリーン レコード"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"開始"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"停止"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"続行するには、&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; にデバイスのマイクへのアクセスを許可する必要があります。"</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"続行するには、&lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; にデバイスのカメラへのアクセスを許可する必要があります。"</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"デバイス"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"アプリを切り替えるには上にスワイプ"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"右にドラッグするとアプリを素早く切り替えることができます"</string>
@@ -442,8 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFC を使用するには、ロックを解除してください"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"これは組織が所有するデバイスです"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"これは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が所有するデバイスです"</string>
     <string name="phone_hint" msgid="6682125338461375925">"右にスワイプして通話"</string>
@@ -970,6 +967,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"アプリは<xliff:g id="TYPES_LIST">%s</xliff:g>を使用しています。"</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">"、 "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" 、 "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> は <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> を使用しています"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> は最近 <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> を使用しました"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"（エンタープライズ版）"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"電話"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"（<xliff:g id="ATTRIBUTION">%s</xliff:g> 経由）"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"カメラ"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"現在地情報"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"マイク"</string>

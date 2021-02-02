@@ -284,6 +284,12 @@ public class Filter implements AutoCloseable {
     /**
      * Configures the filter.
      *
+     * <p>Recofiguring must happen after stopping the filter.
+     *
+     * <p>When stopping, reconfiguring and restarting the filter, the client should discard all
+     * coming events until it receives {@link RestartEvent} through {@link FilterCallback} to avoid
+     * using the events from the previous configuration.
+     *
      * @param config the configuration of the filter.
      * @return result status of the operation.
      */
@@ -393,6 +399,10 @@ public class Filter implements AutoCloseable {
      *
      * <p>Does nothing if the filter is already started.
      *
+     * <p>When stopping, reconfiguring and restarting the filter, the client should discard all
+     * coming events until it receives {@link RestartEvent} through {@link FilterCallback} to avoid
+     * using the events from the previous configuration.
+     *
      * @return result status of the operation.
      */
     @Result
@@ -408,6 +418,12 @@ public class Filter implements AutoCloseable {
      * Stops filtering data.
      *
      * <p>Does nothing if the filter is stopped or not started.
+     *
+     * <p>Filter must be stopped to reconfigure.
+     *
+     * <p>When stopping, reconfiguring and restarting the filter, the client should discard all
+     * coming events until it receives {@link RestartEvent} through {@link FilterCallback} to avoid
+     * using the events from the previous configuration.
      *
      * @return result status of the operation.
      */

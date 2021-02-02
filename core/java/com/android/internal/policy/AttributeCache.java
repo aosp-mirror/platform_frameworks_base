@@ -1,21 +1,20 @@
 /*
-**
-** Copyright 2007, The Android Open Source Project
-**
-** Licensed under the Apache License, Version 2.0 (the "License"); 
-** you may not use this file except in compliance with the License. 
-** You may obtain a copy of the License at 
-**
-**     http://www.apache.org/licenses/LICENSE-2.0 
-**
-** Unless required by applicable law or agreed to in writing, software 
-** distributed under the License is distributed on an "AS IS" BASIS, 
-** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-** See the License for the specific language governing permissions and 
-** limitations under the License.
-*/
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-package com.android.server;
+package com.android.internal.policy;
 
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -34,6 +33,7 @@ import com.android.internal.annotations.GuardedBy;
  * TODO: This should be better integrated into the system so it doesn't need
  * special calls from the activity manager to clear it.
  */
+/** @hide */
 public final class AttributeCache {
     private static final int CACHE_SIZE = 4;
     private static AttributeCache sInstance = null;
@@ -54,11 +54,11 @@ public final class AttributeCache {
             context = c;
         }
     }
-    
+
     public final static class Entry {
         public final Context context;
         public final TypedArray array;
-        
+
         public Entry(Context c, TypedArray ta) {
             context = c;
             array = ta;
@@ -70,17 +70,17 @@ public final class AttributeCache {
             }
         }
     }
-    
+
     public static void init(Context context) {
         if (sInstance == null) {
             sInstance = new AttributeCache(context);
         }
     }
-    
+
     public static AttributeCache instance() {
         return sInstance;
     }
-    
+
     public AttributeCache(Context context) {
         mContext = context;
     }
@@ -115,7 +115,11 @@ public final class AttributeCache {
             }
         }
     }
-    
+
+    public Entry get(String packageName, int resId, int[] styleable) {
+        return get(packageName, resId, styleable, UserHandle.USER_CURRENT);
+    }
+
     public Entry get(String packageName, int resId, int[] styleable, int userId) {
         synchronized (this) {
             Package pkg = mPackages.get(packageName);
@@ -143,12 +147,12 @@ public final class AttributeCache {
                 pkg = new Package(context);
                 mPackages.put(packageName, pkg);
             }
-            
+
             if (map == null) {
                 map = new ArrayMap<>();
                 pkg.mMap.put(resId, map);
             }
-            
+
             try {
                 ent = new Entry(pkg.context,
                         pkg.context.obtainStyledAttributes(resId, styleable));
@@ -156,7 +160,7 @@ public final class AttributeCache {
             } catch (Resources.NotFoundException e) {
                 return null;
             }
-            
+
             return ent;
         }
     }

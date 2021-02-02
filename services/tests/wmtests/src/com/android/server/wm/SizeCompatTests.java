@@ -480,10 +480,13 @@ public class SizeCompatTests extends WindowTestsBase {
     /**
      * Ensures that {@link TaskStackListener} can receive callback about the activity in size
      * compatibility mode.
+     *
+     * TODO(b/178327644) Remove after update DC#handleActivitySizeCompatModeIfNeeded
      */
     @Test
     public void testHandleActivitySizeCompatMode() {
         setUpDisplaySizeWithApp(1000, 2000);
+        doReturn(true).when(mTask).isOrganized();
         ActivityRecord activity = mActivity;
         activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
         prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
@@ -518,6 +521,46 @@ public class SizeCompatTests extends WindowTestsBase {
         // Expect null token when switching to non-size-compat mode activity.
         assertEquals(1, compatTokens.size());
         assertEquals(null, compatTokens.get(0));
+    }
+
+    /**
+     * Ensures that {@link TaskOrganizerController} can receive callback about the activity in size
+     * compatibility mode.
+     */
+    @Test
+    public void testHandleActivitySizeCompatModeChanged() {
+        setUpDisplaySizeWithApp(1000, 2000);
+        doReturn(true).when(mTask).isOrganized();
+        ActivityRecord activity = mActivity;
+        activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
+        assertFitted();
+
+        // Resize the display so that the activity exercises size-compat mode.
+        resizeDisplay(mTask.mDisplayContent, 1000, 2500);
+
+        // Expect the exact token when the activity is in size compatibility mode.
+        verify(mTask).onSizeCompatActivityChanged();
+        ActivityManager.RunningTaskInfo taskInfo = mTask.getTaskInfo();
+
+        assertEquals(mActivity.appToken, taskInfo.topActivityToken);
+        assertTrue(taskInfo.topActivityInSizeCompat);
+
+        // Make the activity resizable again by restarting it
+        clearInvocations(mTask);
+        activity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
+        activity.mVisibleRequested = true;
+        activity.restartProcessIfVisible();
+        // The full lifecycle isn't hooked up so manually set state to resumed
+        activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatModeChanged");
+        mTask.mDisplayContent.handleActivitySizeCompatModeIfNeeded(activity);
+
+        // Expect null token when switching to non-size-compat mode activity.
+        verify(mTask).onSizeCompatActivityChanged();
+        taskInfo = mTask.getTaskInfo();
+
+        assertEquals(mActivity.appToken, taskInfo.topActivityToken);
+        assertFalse(taskInfo.topActivityInSizeCompat);
     }
 
     @Test
@@ -607,7 +650,7 @@ public class SizeCompatTests extends WindowTestsBase {
         // The activity doesn't fill the display, so the letterbox of the rotated activity is
         // overlapped with the rotated content frame of status bar. Hence the status bar shouldn't
         // be transparent.
-        assertFalse(statusBarController.isTransparentAllowed(w));
+        assertFalse(statusBarController.isFullyTransparentAllowed(w));
 
         // Make the activity fill the display.
         prepareUnresizable(mActivity, 10 /* maxAspect */, SCREEN_ORIENTATION_LANDSCAPE);
@@ -617,7 +660,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // The letterbox should only cover the notch area, so status bar can be transparent.
         assertEquals(new Rect(notchHeight, 0, 0, 0), mActivity.getLetterboxInsets());
-        assertTrue(statusBarController.isTransparentAllowed(w));
+        assertTrue(statusBarController.isFullyTransparentAllowed(w));
     }
 
     @Test

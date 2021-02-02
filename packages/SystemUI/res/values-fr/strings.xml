@@ -416,10 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"Enregistrement de l\'écran"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"Démarrer"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"Arrêter"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"Pour continuer, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a besoin d\'accéder au micro de votre appareil."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"Pour continuer, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt; a besoin d\'accéder à l\'appareil photo de votre appareil."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"Appareil"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Balayer l\'écran vers le haut pour changer d\'application"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Déplacer vers la droite pour changer rapidement d\'application"</string>
@@ -442,8 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Appuyer à nouveau pour ouvrir"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Balayer vers le haut pour ouvrir"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Balayez l\'écran vers le haut pour réessayer"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"Déverrouillez l\'écran pour pouvoir utiliser NFC"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Cet appareil appartient à votre organisation"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"Cet appareil appartient à <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Balayer pour téléphoner"</string>
@@ -970,6 +967,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"Des applications utilisent votre <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" et "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> utilise <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"<xliff:g id="APPLICATION_NAME">%1$s</xliff:g> a utilisé <xliff:g id="APP_OPP_NAME">%2$s</xliff:g> récemment"</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(Enterprise)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Appel téléphonique"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(via <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"appareil photo"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"position"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"micro"</string>
