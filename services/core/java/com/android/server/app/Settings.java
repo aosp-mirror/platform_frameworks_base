@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.server.graphics;
+package com.android.server.app;
 
-import android.graphics.GameManager;
+import android.app.GameManager;
 import android.os.FileUtils;
 import android.util.ArrayMap;
 import android.util.AtomicFile;
