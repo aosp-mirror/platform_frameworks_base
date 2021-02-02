@@ -11802,6 +11802,7 @@ package android.telephony.ims {
     field public static final String IPTYPE_IPV6 = "IPV6";
     field public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
     field public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
+    field public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
     field public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
     field public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
     field public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
@@ -11834,6 +11835,7 @@ package android.telephony.ims {
     field public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
     field public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
     field public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
+    field public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
     field public static final String SIP_TRANSPORT_TCP = "TCP";
     field public static final String SIP_TRANSPORT_UDP = "UDP";
   }
