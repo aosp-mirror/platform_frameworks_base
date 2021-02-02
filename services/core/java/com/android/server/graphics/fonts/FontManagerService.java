@@ -64,6 +64,7 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String TAG = "FontManagerService";
 
     private static final String FONT_FILES_DIR = "/data/fonts/files";
+    private static final String CRASH_MARKER_FILE = "/data/fonts/config/crash.txt";
 
     @Override
     public FontConfig getFontConfig() throws RemoteException {
@@ -179,6 +180,13 @@ public final class FontManagerService extends IFontManager.Stub {
         }
     }
 
+    @NonNull
+    private final Context mContext;
+
+    @GuardedBy("FontManagerService.this")
+    @NonNull
+    private final FontCrashDetector mFontCrashDetector;
+
     @Nullable
     private final UpdatableFontDir mUpdatableFontDir;
 
@@ -188,7 +196,9 @@ public final class FontManagerService extends IFontManager.Stub {
 
     private FontManagerService(Context context) {
         mContext = context;
+        mFontCrashDetector = new FontCrashDetector(new File(CRASH_MARKER_FILE));
         mUpdatableFontDir = createUpdatableFontDir();
+        initialize();
     }
 
     @Nullable
@@ -201,20 +211,35 @@ public final class FontManagerService extends IFontManager.Stub {
                 new OtfFontFileParser(), new FsverityUtilImpl());
     }
 
-
-    @NonNull
-    private final Context mContext;
+    private void initialize() {
+        synchronized (FontManagerService.this) {
+            if (mUpdatableFontDir == null) {
+                mSerializedFontMap = buildNewSerializedFontMap();
+                return;
+            }
+            if (mFontCrashDetector.hasCrashed()) {
+                Slog.i(TAG, "Crash detected. Clearing font updates.");
+                try {
+                    mUpdatableFontDir.clearUpdates();
+                } catch (SystemFontException e) {
+                    Slog.e(TAG, "Failed to clear updates.", e);
+                }
+                mFontCrashDetector.clear();
+            }
+            try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
+                mUpdatableFontDir.loadFontFileMap();
+                mSerializedFontMap = buildNewSerializedFontMap();
+            }
+        }
+    }
 
     @NonNull
     public Context getContext() {
         return mContext;
     }
 
-    @NonNull /* package */ SharedMemory getCurrentFontMap() {
+    @Nullable /* package */ SharedMemory getCurrentFontMap() {
         synchronized (FontManagerService.this) {
-            if (mSerializedFontMap == null) {
-                mSerializedFontMap = buildNewSerializedFontMap();
-            }
             return mSerializedFontMap;
         }
     }
@@ -234,9 +259,10 @@ public final class FontManagerService extends IFontManager.Stub {
                         FontManager.RESULT_ERROR_VERSION_MISMATCH,
                         "The base config version is older than current.");
             }
-            mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
-            // Create updated font map in the next getSerializedSystemFontMap() call.
-            mSerializedFontMap = null;
+            try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
+                mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
+                mSerializedFontMap = buildNewSerializedFontMap();
+            }
         }
     }
 
@@ -246,7 +272,12 @@ public final class FontManagerService extends IFontManager.Stub {
                     FontManager.RESULT_ERROR_FONT_UPDATER_DISABLED,
                     "The font updater is disabled.");
         }
-        mUpdatableFontDir.clearUpdates();
+        synchronized (FontManagerService.this) {
+            try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
+                mUpdatableFontDir.clearUpdates();
+                mSerializedFontMap = buildNewSerializedFontMap();
+            }
+        }
     }
 
     /* package */ Map<String, File> getFontFileMap() {
