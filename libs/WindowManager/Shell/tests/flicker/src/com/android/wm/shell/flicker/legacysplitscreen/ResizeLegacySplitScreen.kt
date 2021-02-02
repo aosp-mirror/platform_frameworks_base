@@ -58,7 +58,7 @@ import org.junit.runners.Parameterized
 
 /**
  * Test split screen resizing window transitions.
- * To run this test: `atest WMShellFlickerTests:ResizeLegacySplitScreenTest`
+ * To run this test: `atest WMShellFlickerTests:ResizeLegacySplitScreen`
  *
  * Currently it runs only in 0 degrees because of b/156100803
  */
@@ -67,7 +67,7 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 159096424)
-class ResizeLegacySplitScreenTest(
+class ResizeLegacySplitScreen(
     testSpec: FlickerTestRunnerFactory.TestSpec
 ) : FlickerTestRunner(testSpec) {
     companion object {

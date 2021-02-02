@@ -135,12 +135,4 @@ abstract class FlickerTestBase {
             throw RuntimeException(e)
         }
     }
-
-    companion object {
-        const val NAVIGATION_BAR_WINDOW_TITLE = "NavigationBar"
-        const val STATUS_BAR_WINDOW_TITLE = "StatusBar"
-        const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
-        const val APP_PAIR_SPLIT_DIVIDER = "AppPairSplitDivider"
-        const val IMAGE_WALLPAPER = "ImageWallpaper"
-    }
 }

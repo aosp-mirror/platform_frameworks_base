@@ -41,6 +41,9 @@ fun Flicker.setRotation(rotation: Int) {
         wmHelper.waitForRotation(rotation)
         wmHelper.waitForNavBarStatusBarVisible()
         wmHelper.waitForAppTransitionIdle()
+
+        // Ensure WindowManagerService wait until all animations have completed
+        instrumentation.getUiAutomation().syncInputTransactions()
     } catch (e: RemoteException) {
         throw RuntimeException(e)
     }

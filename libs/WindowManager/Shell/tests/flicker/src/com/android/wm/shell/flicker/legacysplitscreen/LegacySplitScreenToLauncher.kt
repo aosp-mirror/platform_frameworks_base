@@ -52,13 +52,13 @@ import org.junit.runners.Parameterized
 
 /**
  * Test open app to split screen.
- * To run this test: `atest WMShellFlickerTests:LegacySplitScreenToLauncherTest`
+ * To run this test: `atest WMShellFlickerTests:LegacySplitScreenToLauncher`
  */
 @Presubmit
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class LegacySplitScreenToLauncherTest(
+class LegacySplitScreenToLauncher(
     testSpec: FlickerTestRunnerFactory.TestSpec
 ) : FlickerTestRunner(testSpec) {
     companion object {
@@ -67,68 +67,68 @@ class LegacySplitScreenToLauncherTest(
         fun getParams(): Collection<Array<Any>> {
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val launcherPackageName = LauncherStrategyFactory.getInstance(instrumentation)
-                    .launcherStrategy.supportedLauncherPackage
+                .launcherStrategy.supportedLauncherPackage
             val testApp = SimpleAppHelper(instrumentation)
 
             // b/161435597 causes the test not to work on 90 degrees
             return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
                 supportedRotations = listOf(Surface.ROTATION_0)) { configuration ->
-                    withTestName {
-                        buildTestTag("splitScreenToLauncher", configuration)
+                withTestName {
+                    buildTestTag("splitScreenToLauncher", configuration)
+                }
+                repeat { configuration.repetitions }
+                setup {
+                    test {
+                        device.wakeUpAndGoToHomeScreen()
+                        device.openQuickStepAndClearRecentAppsFromOverview()
                     }
-                    repeat { configuration.repetitions }
-                    setup {
-                        test {
-                            device.wakeUpAndGoToHomeScreen()
-                            device.openQuickStepAndClearRecentAppsFromOverview()
-                        }
-                        eachRun {
-                            testApp.launchViaIntent(wmHelper)
-                            this.setRotation(configuration.endRotation)
-                            device.launchSplitScreen()
-                            device.waitForIdle()
-                        }
+                    eachRun {
+                        testApp.launchViaIntent(wmHelper)
+                        this.setRotation(configuration.endRotation)
+                        device.launchSplitScreen()
+                        device.waitForIdle()
                     }
-                    teardown {
-                        eachRun {
-                            testApp.exit()
-                        }
-                        test {
-                            if (device.isInSplitScreen()) {
-                                device.exitSplitScreen()
-                            }
-                        }
+                }
+                teardown {
+                    eachRun {
+                        testApp.exit()
                     }
-                    transitions {
-                        device.exitSplitScreen()
-                    }
-                    assertions {
-                        windowManagerTrace {
-                            navBarWindowIsAlwaysVisible()
-                            statusBarWindowIsAlwaysVisible()
-                            visibleWindowsShownMoreThanOneConsecutiveEntry()
-                        }
-
-                        layersTrace {
-                            navBarLayerIsAlwaysVisible()
-                            statusBarLayerIsAlwaysVisible()
-                            noUncoveredRegions(configuration.endRotation)
-                            navBarLayerRotatesAndScales(configuration.endRotation)
-                            statusBarLayerRotatesScales(configuration.endRotation)
-                            visibleLayersShownMoreThanOneConsecutiveEntry(
-                                    listOf(launcherPackageName))
-
-                            // b/161435597 causes the test not to work on 90 degrees
-                            dockedStackDividerBecomesInvisible()
-
-                            layerBecomesInvisible(testApp.getPackage())
-                        }
-
-                        eventLog {
-                            focusDoesNotChange(bugId = 151179149)
+                    test {
+                        if (device.isInSplitScreen()) {
+                            device.exitSplitScreen()
                         }
                     }
                 }
+                transitions {
+                    device.exitSplitScreen()
+                }
+                assertions {
+                    windowManagerTrace {
+                        navBarWindowIsAlwaysVisible()
+                        statusBarWindowIsAlwaysVisible()
+                        visibleWindowsShownMoreThanOneConsecutiveEntry()
+                    }
+
+                    layersTrace {
+                        navBarLayerIsAlwaysVisible()
+                        statusBarLayerIsAlwaysVisible()
+                        noUncoveredRegions(configuration.endRotation)
+                        navBarLayerRotatesAndScales(configuration.endRotation)
+                        statusBarLayerRotatesScales(configuration.endRotation)
+                        visibleLayersShownMoreThanOneConsecutiveEntry(
+                            listOf(launcherPackageName))
+
+                        // b/161435597 causes the test not to work on 90 degrees
+                        dockedStackDividerBecomesInvisible()
+
+                        layerBecomesInvisible(testApp.getPackage())
+                    }
+
+                    eventLog {
+                        focusDoesNotChange(bugId = 151179149)
+                    }
+                }
+            }
         }
     }
 }
