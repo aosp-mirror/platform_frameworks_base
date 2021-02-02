@@ -86,6 +86,21 @@ public class AppSearchManagerService extends SystemService {
         }
     }
 
+    @Override
+    public void onUserStopping(@NonNull TargetUser user) {
+        synchronized (mUnlockedUserIdsLocked) {
+            mUnlockedUserIdsLocked.remove(user.getUserIdentifier());
+            try {
+                AppSearchImpl impl =
+                        mImplInstanceManager.getAppSearchImpl(
+                                getContext(), user.getUserIdentifier());
+                impl.close();
+            } catch (Throwable t) {
+                Log.e(TAG, "Error handling user stopping.", t);
+            }
+        }
+    }
+
     private class Stub extends IAppSearchManager.Stub {
         @Override
         public void setSchema(
