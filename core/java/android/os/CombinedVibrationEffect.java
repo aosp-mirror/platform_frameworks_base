@@ -364,8 +364,22 @@ public abstract class CombinedVibrationEffect implements Parcelable {
         @Override
         public long getDuration() {
             long maxDuration = Long.MIN_VALUE;
+            boolean hasUnknownStep = false;
             for (int i = 0; i < mEffects.size(); i++) {
-                maxDuration = Math.max(maxDuration, mEffects.valueAt(i).getDuration());
+                long duration = mEffects.valueAt(i).getDuration();
+                if (duration == Long.MAX_VALUE) {
+                    // If any duration is repeating, this combination duration is also repeating.
+                    return duration;
+                }
+                maxDuration = Math.max(maxDuration, duration);
+                // If any step is unknown, this combination duration will also be unknown, unless
+                // any step is repeating. Repeating vibrations take precedence over non-repeating
+                // ones in the service, so continue looping to check for repeating steps.
+                hasUnknownStep |= duration < 0;
+            }
+            if (hasUnknownStep) {
+                // If any step is unknown, this combination duration is also unknown.
+                return -1;
             }
             return maxDuration;
         }
@@ -477,16 +491,25 @@ public abstract class CombinedVibrationEffect implements Parcelable {
 
         @Override
         public long getDuration() {
+            boolean hasUnknownStep = false;
             long durations = 0;
             final int effectCount = mEffects.size();
             for (int i = 0; i < effectCount; i++) {
                 CombinedVibrationEffect effect = mEffects.get(i);
                 long duration = effect.getDuration();
-                if (duration < 0) {
-                    // If any duration is unknown, this combination duration is also unknown.
+                if (duration == Long.MAX_VALUE) {
+                    // If any duration is repeating, this combination duration is also repeating.
                     return duration;
                 }
                 durations += duration;
+                // If any step is unknown, this combination duration will also be unknown, unless
+                // any step is repeating. Repeating vibrations take precedence over non-repeating
+                // ones in the service, so continue looping to check for repeating steps.
+                hasUnknownStep |= duration < 0;
+            }
+            if (hasUnknownStep) {
+                // If any step is unknown, this combination duration is also unknown.
+                return -1;
             }
             long delays = 0;
             for (int i = 0; i < effectCount; i++) {
