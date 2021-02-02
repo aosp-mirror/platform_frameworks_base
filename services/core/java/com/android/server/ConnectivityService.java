@@ -8505,7 +8505,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final Vpn vpn = enforceActiveVpnOrNetworkStackPermission();
 
         // Only VpnService based VPNs should be able to get this information.
-        if (vpn != null && vpn.getActiveAppVpnType() != VpnManager.TYPE_VPN_SERVICE) {
+        if (vpn != null && vpn.getActiveVpnType() != VpnManager.TYPE_VPN_SERVICE) {
             throw new SecurityException(
                     "getConnectionOwnerUid() not allowed for non-VpnService VPNs");
         }
