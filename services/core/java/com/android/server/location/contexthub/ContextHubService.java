@@ -16,6 +16,7 @@
 
 package com.android.server.location.contexthub;
 
+import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -319,6 +320,10 @@ public class ContextHubService extends IContextHubService.Stub {
 
             @Override
             public void onNanoAppDisabled(long nanoAppId) {
+            }
+
+            @Override
+            public void onClientAuthorizationChanged(long nanoAppId, int authorization) {
             }
         };
     }
@@ -697,6 +702,7 @@ public class ContextHubService extends IContextHubService.Stub {
      *
      * @param contextHubId   the ID of the hub this client is attached to
      * @param clientCallback the client interface to register with the service
+     * @param attributionTag an optional attribution tag within the given package
      * @return the generated client interface, null if registration was unsuccessful
      * @throws IllegalArgumentException if contextHubId is not a valid ID
      * @throws IllegalStateException    if max number of clients have already registered
@@ -704,7 +710,8 @@ public class ContextHubService extends IContextHubService.Stub {
      */
     @Override
     public IContextHubClient createClient(
-            int contextHubId, IContextHubClientCallback clientCallback) throws RemoteException {
+            int contextHubId, IContextHubClientCallback clientCallback,
+            @Nullable String attributionTag) throws RemoteException {
         checkPermissions();
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);
@@ -723,13 +730,15 @@ public class ContextHubService extends IContextHubService.Stub {
      * @param contextHubId  the ID of the hub this client is attached to
      * @param pendingIntent the PendingIntent associated with this client
      * @param nanoAppId     the ID of the nanoapp PendingIntent events will be sent for
+     * @param attributionTag an optional attribution tag within the given package
      * @return the generated client interface
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub
      * @throws IllegalStateException    if there were too many registered clients at the service
      */
     @Override
     public IContextHubClient createPendingIntentClient(
-            int contextHubId, PendingIntent pendingIntent, long nanoAppId) throws RemoteException {
+            int contextHubId, PendingIntent pendingIntent, long nanoAppId,
+            @Nullable String attributionTag) throws RemoteException {
         checkPermissions();
         if (!isValidContextHubId(contextHubId)) {
             throw new IllegalArgumentException("Invalid context hub ID " + contextHubId);

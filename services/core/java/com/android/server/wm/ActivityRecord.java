@@ -303,13 +303,13 @@ import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ResolverActivity;
 import com.android.internal.content.ReferrerIntent;
+import com.android.internal.policy.AttributeCache;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.PendingIntentRecord;
@@ -1431,14 +1431,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /**
-     * @return {@code true} if bar shown within a given rectangle is allowed to be transparent
+     * @return {@code true} if bar shown within a given rectangle is allowed to be fully transparent
      *     when the current activity is displayed.
      */
-    boolean isTransparentBarAllowed(Rect rect) {
-        // TODO(b/175482966): Allow status and navigation bars to be semi-transparent black
-        // in letterbox mode.
-        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect)
-                || mWmService.isLetterboxActivityCornersRounded();
+    boolean isFullyTransparentBarAllowed(Rect rect) {
+        return mLetterbox == null || mLetterbox.notIntersectsOrFullyContains(rect);
     }
 
     /**
@@ -2183,12 +2180,19 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     /** @return Root task of this activity, null if there is no task. */
+    @Nullable
     Task getRootTask() {
         return task != null ? task.getRootTask() : null;
     }
 
     int getRootTaskId() {
         return task != null ? task.getRootTaskId() : INVALID_TASK_ID;
+    }
+
+    /** @return the first organized parent task. */
+    @Nullable
+    Task getOrganizedTask() {
+        return task != null ? task.getOrganizedTask() : null;
     }
 
     @Override

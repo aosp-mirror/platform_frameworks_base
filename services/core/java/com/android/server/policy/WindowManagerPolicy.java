@@ -1158,7 +1158,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
      * @param startTime the start time of the animation in uptime milliseconds
      * @param fadeoutDuration the duration of the exit animation, in milliseconds
      */
-    public void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
+    void startKeyguardExitAnimation(long startTime, long fadeoutDuration);
 
     /**
      * Called when System UI has been started.

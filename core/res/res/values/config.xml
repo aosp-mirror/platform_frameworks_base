@@ -3202,6 +3202,10 @@
          panning to scaling the magnification viewport. -->
     <item name="config_screen_magnification_scaling_threshold" format="float" type="dimen">0.3</item>
 
+    <!-- Whether to support magnification area. If not enabled, it would hide the entry in
+         magnification settings and adjust the default magnification capability.  -->
+    <bool name="config_magnification_area">true</bool>
+
     <!-- If true, the display will be shifted around in ambient mode. -->
     <bool name="config_enableBurnInProtection">false</bool>
 

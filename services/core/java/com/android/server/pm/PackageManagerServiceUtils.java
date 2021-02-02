@@ -624,7 +624,7 @@ public class PackageManagerServiceUtils {
      */
     public static boolean verifySignatures(PackageSetting pkgSetting,
             PackageSetting disabledPkgSetting, PackageParser.SigningDetails parsedSignatures,
-            boolean compareCompat, boolean compareRecover)
+            boolean compareCompat, boolean compareRecover, boolean isRollback)
             throws PackageManagerException {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
@@ -656,6 +656,13 @@ public class PackageManagerServiceUtils {
 
             if (!match && isApkVerificationForced(disabledPkgSetting)) {
                 match = matchSignatureInSystem(pkgSetting, disabledPkgSetting);
+            }
+
+            if (!match && isRollback) {
+                // Since a rollback can only be initiated for an APK previously installed on the
+                // device allow rolling back to a previous signing key even if the rollback
+                // capability has not been granted.
+                match = pkgSetting.signatures.mSigningDetails.hasAncestorOrSelf(parsedSignatures);
             }
 
             if (!match) {

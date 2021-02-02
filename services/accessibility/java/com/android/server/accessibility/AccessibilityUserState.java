@@ -118,6 +118,9 @@ class AccessibilityUserState {
     private int mNonInteractiveUiTimeout = 0;
     private int mInteractiveUiTimeout = 0;
     private int mLastSentClientState = -1;
+
+    /** {@code true} if the device config supports magnification area. */
+    private final boolean mSupportMagnificationArea;
     // The magnification mode of default display.
     private int mMagnificationMode = ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN;
     // The magnification capabilities used to know magnification mode could be switched.
@@ -138,6 +141,10 @@ class AccessibilityUserState {
     private int mSoftKeyboardShowMode = SHOW_MODE_AUTO;
 
     boolean isValidMagnificationModeLocked() {
+        if (!mSupportMagnificationArea
+                && mMagnificationMode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
+            return false;
+        }
         return (mMagnificationCapabilities & mMagnificationMode) != 0;
     }
 
@@ -156,6 +163,8 @@ class AccessibilityUserState {
                 R.color.accessibility_focus_highlight_color);
         mFocusStrokeWidth = mFocusStrokeWidthDefaultValue;
         mFocusColor = mFocusColorDefaultValue;
+        mSupportMagnificationArea = mContext.getResources().getBoolean(
+                R.bool.config_magnification_area);
     }
 
     boolean isHandlingAccessibilityEventsLocked() {

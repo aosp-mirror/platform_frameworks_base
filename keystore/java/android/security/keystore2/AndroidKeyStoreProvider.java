@@ -363,6 +363,11 @@ public class AndroidKeyStoreProvider extends Provider {
             }
         }
 
+        if (response.iSecurityLevel == null) {
+            // This seems to be a pure certificate entry, nothing to return here.
+            return null;
+        }
+
         Integer keymasterAlgorithm = null;
         // We just need one digest for the algorithm name
         int keymasterDigest = -1;

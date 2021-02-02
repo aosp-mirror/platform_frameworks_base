@@ -26,9 +26,11 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.IBinder;
 import android.view.Display;
 import android.view.IInputFilter;
+import android.view.IRemoteAnimationFinishedCallback;
 import android.view.IWindow;
 import android.view.InputChannel;
 import android.view.MagnificationSpec;
+import android.view.RemoteAnimationTarget;
 import android.view.WindowInfo;
 import android.view.WindowManager.DisplayImePolicy;
 
@@ -151,6 +153,21 @@ public abstract class WindowManagerInternal {
          * @param token the token for app whose transition has finished
          */
         public void onAppTransitionFinishedLocked(IBinder token) {}
+    }
+
+    /**
+     * An interface to be notified when keyguard exit animation should start.
+     */
+    public interface KeyguardExitAnimationStartListener {
+        /**
+         * Called when keyguard exit animation should start.
+         * @param apps The list of apps to animate.
+         * @param wallpapers The list of wallpapers to animate.
+         * @param finishedCallback The callback to invoke when the animation is finished.
+         */
+        void onAnimationStart(RemoteAnimationTarget[] apps,
+                RemoteAnimationTarget[] wallpapers,
+                IRemoteAnimationFinishedCallback finishedCallback);
     }
 
     /**
@@ -370,6 +387,14 @@ public abstract class WindowManagerInternal {
      * @param listener The listener to register.
      */
     public abstract void registerAppTransitionListener(AppTransitionListener listener);
+
+    /**
+     * Registers a listener to be notified to start the keyguard exit animation.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerKeyguardExitAnimationStartListener(
+            KeyguardExitAnimationStartListener listener);
 
     /**
      * Reports that the password for the given user has changed.

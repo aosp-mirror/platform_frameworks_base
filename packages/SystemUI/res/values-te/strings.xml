@@ -416,10 +416,8 @@
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"స్క్రీన్ రికార్డ్"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"ప్రారంభించు"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"ఆపు"</string>
-    <!-- no translation found for sensor_privacy_start_use_mic_dialog_content (8643239110815357707) -->
-    <skip />
-    <!-- no translation found for sensor_privacy_start_use_camera_dialog_content (7773612142162829116) -->
-    <skip />
+    <string name="sensor_privacy_start_use_mic_dialog_content" msgid="8643239110815357707">"కొనసాగించడానికి, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&gt;కు మీ పరికరం యొక్క మైక్రోఫోన్ యాక్సెస్ అవసరం."</string>
+    <string name="sensor_privacy_start_use_camera_dialog_content" msgid="7773612142162829116">"కొనసాగించడానికి, &lt;b&gt;<xliff:g id="APP">%s</xliff:g>&lt;/b&amp;gtకు మీ పరికరం యొక్క కెమెరా యాక్సెస్ అవసరం."</string>
     <string name="media_seamless_remote_device" msgid="177033467332920464">"పరికరం"</string>
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"యాప్‌లను మార్చడం కోసం ఎగువకు స్వైప్ చేయండి"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"యాప్‌లను శీఘ్రంగా స్విచ్ చేయడానికి కుడి వైపుకు లాగండి"</string>
@@ -442,8 +440,7 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
-    <!-- no translation found for require_unlock_for_nfc (1305686454823018831) -->
-    <skip />
+    <string name="require_unlock_for_nfc" msgid="1305686454823018831">"NFCను ఉపయోగించడానికి అన్‌లాక్ చేయండి"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"ఈ పరికరం మీ సంస్థకు చెందినది"</string>
     <string name="do_disclosure_with_name" msgid="2091641464065004091">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>కు చెందినది"</string>
     <string name="phone_hint" msgid="6682125338461375925">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
@@ -970,6 +967,16 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"అప్లికేషన్‌లు మీ <xliff:g id="TYPES_LIST">%s</xliff:g>ని ఉపయోగిస్తున్నాయి."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" మరియు "</string>
+    <!-- no translation found for ongoing_privacy_dialog_using_op (4125175620929701569) -->
+    <skip />
+    <!-- no translation found for ongoing_privacy_dialog_recent_op (4255923947334262404) -->
+    <skip />
+    <!-- no translation found for ongoing_privacy_dialog_enterprise (4082735415905550729) -->
+    <skip />
+    <!-- no translation found for ongoing_privacy_dialog_phonecall (3526223335298089311) -->
+    <skip />
+    <!-- no translation found for ongoing_privacy_dialog_attribution_text (9186683306719924646) -->
+    <skip />
     <string name="privacy_type_camera" msgid="7974051382167078332">"కెమెరా"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"లొకేషన్"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"మైక్రోఫోన్"</string>

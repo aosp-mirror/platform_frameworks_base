@@ -77,6 +77,7 @@ import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
@@ -1699,20 +1700,29 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public Resources getResourcesForApplication(@NonNull ApplicationInfo app)
             throws NameNotFoundException {
+        return getResourcesForApplication(app, null);
+    }
+
+    @Override
+    public Resources getResourcesForApplication(@NonNull ApplicationInfo app,
+            @Nullable Configuration configuration) throws NameNotFoundException {
         if (app.packageName.equals("system")) {
-            return mContext.mMainThread.getSystemUiContext().getResources();
+            Context sysuiContext = mContext.mMainThread.getSystemUiContext();
+            if (configuration != null) {
+                sysuiContext = sysuiContext.createConfigurationContext(configuration);
+            }
+            return sysuiContext.getResources();
         }
         final boolean sameUid = (app.uid == Process.myUid());
         final Resources r = mContext.mMainThread.getTopLevelResources(
-                    sameUid ? app.sourceDir : app.publicSourceDir,
-                    sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
-                    app.resourceDirs, app.sharedLibraryFiles,
-                    mContext.mPackageInfo);
+                sameUid ? app.sourceDir : app.publicSourceDir,
+                sameUid ? app.splitSourceDirs : app.splitPublicSourceDirs,
+                app.resourceDirs, app.sharedLibraryFiles,
+                mContext.mPackageInfo, configuration);
         if (r != null) {
             return r;
         }
         throw new NameNotFoundException("Unable to open " + app.publicSourceDir);
-
     }
 
     @Override

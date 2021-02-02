@@ -967,6 +967,11 @@
     <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8341216022442383954">"As aplicações estão a utilizar o(a) <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
     <string name="ongoing_privacy_dialog_separator" msgid="1866222499727706187">", "</string>
     <string name="ongoing_privacy_dialog_last_separator" msgid="5615876114268009767">" e "</string>
+    <string name="ongoing_privacy_dialog_using_op" msgid="4125175620929701569">"A app <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> está a utilizar a app <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_recent_op" msgid="4255923947334262404">"Recentemente, a app <xliff:g id="APPLICATION_NAME">%1$s</xliff:g> utilizou a app <xliff:g id="APP_OPP_NAME">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_enterprise" msgid="4082735415905550729">"(empresarial)"</string>
+    <string name="ongoing_privacy_dialog_phonecall" msgid="3526223335298089311">"Chamada telefónica"</string>
+    <string name="ongoing_privacy_dialog_attribution_text" msgid="9186683306719924646">"(através de <xliff:g id="ATTRIBUTION">%s</xliff:g>)"</string>
     <string name="privacy_type_camera" msgid="7974051382167078332">"câmara"</string>
     <string name="privacy_type_location" msgid="7991481648444066703">"localização"</string>
     <string name="privacy_type_microphone" msgid="9136763906797732428">"microfone"</string>

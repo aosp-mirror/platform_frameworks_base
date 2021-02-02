@@ -563,6 +563,7 @@ class Rollback {
                 params.setRequestDowngrade(true);
                 params.setRequiredInstalledVersionCode(
                         pkgRollbackInfo.getVersionRolledBackFrom().getLongVersionCode());
+                params.setInstallReason(PackageManager.INSTALL_REASON_ROLLBACK);
                 if (isStaged()) {
                     params.setStaged();
                 }
