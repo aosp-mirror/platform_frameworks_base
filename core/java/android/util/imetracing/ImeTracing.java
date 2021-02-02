@@ -28,6 +28,8 @@ import android.util.Log;
 import android.util.proto.ProtoOutputStream;
 import android.view.inputmethod.InputMethodManager;
 
+import com.android.internal.inputmethod.Completable;
+import com.android.internal.inputmethod.ResultCallbacks;
 import com.android.internal.view.IInputMethodManager;
 
 import java.io.PrintWriter;
@@ -91,7 +93,9 @@ public abstract class ImeTracing {
      * @param where
      */
     public void sendToService(byte[] protoDump, int source, String where) throws RemoteException {
-        mService.startProtoDump(protoDump, source, where);
+        final Completable.Void value = Completable.createVoid();
+        mService.startProtoDump(protoDump, source, where, ResultCallbacks.of(value));
+        Completable.getResult(value);
     }
 
     /**
