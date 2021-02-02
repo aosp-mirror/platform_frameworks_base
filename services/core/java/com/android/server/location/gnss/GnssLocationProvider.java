@@ -103,7 +103,6 @@ import com.android.server.location.provider.AbstractLocationProvider;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -1489,7 +1488,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
 
         if (locations.length > 0) {
-            reportLocation(LocationResult.create(Arrays.asList(locations)).validate());
+            reportLocation(LocationResult.wrap(locations).validate());
         }
 
         for (Runnable listener : listeners) {

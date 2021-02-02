@@ -25,12 +25,13 @@ import android.annotation.SystemApi;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationResult;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -200,35 +201,29 @@ public abstract class LocationProviderBase {
      * Reports a new location from this provider.
      */
     public void reportLocation(@NonNull Location location) {
-        reportLocation(LocationResult.create(location));
+        ILocationProviderManager manager = mManager;
+        if (manager != null) {
+            try {
+                manager.onReportLocation(stripExtras(location));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            } catch (RuntimeException e) {
+                Log.w(mTag, e);
+            }
+        }
     }
 
     /**
-     * Reports a new location result from this provider.
-     *
-     * <p>May only be used from Android S onwards.
+     * Reports a new batch of locations from this provider. Locations must be ordered in the list
+     * from earliest first to latest last.
      */
-    public void reportLocation(@NonNull LocationResult locationResult) {
+    public void reportLocations(@NonNull List<Location> locations) {
         ILocationProviderManager manager = mManager;
         if (manager != null) {
-            locationResult = locationResult.map(location -> {
-                // remove deprecated extras to save on serialization costs
-                Bundle extras = location.getExtras();
-                if (extras != null && (extras.containsKey(EXTRA_NO_GPS_LOCATION)
-                        || extras.containsKey("coarseLocation"))) {
-                    location = new Location(location);
-                    extras = location.getExtras();
-                    extras.remove(EXTRA_NO_GPS_LOCATION);
-                    extras.remove("coarseLocation");
-                    if (extras.isEmpty()) {
-                        location.setExtras(null);
-                    }
-                }
-                return location;
-            });
+
 
             try {
-                manager.onReportLocation(locationResult);
+                manager.onReportLocations(stripExtras(locations));
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             } catch (RuntimeException e) {
@@ -246,9 +241,9 @@ public abstract class LocationProviderBase {
 
     /**
      * Requests a flush of any pending batched locations. The callback must always be invoked once
-     * per invocation, and should be invoked after {@link #reportLocation(LocationResult)} has been
-     * invoked with any flushed locations. The callback may be invoked immediately if no locations
-     * are flushed.
+     * per invocation, and should be invoked after {@link #reportLocation(Location)} or
+     * {@link #reportLocations(List)} has been invoked with any flushed locations. The callback may
+     * be invoked immediately if no locations are flushed.
      */
     public abstract void onFlush(@NonNull OnFlushCompleteCallback callback);
 
@@ -258,6 +253,49 @@ public abstract class LocationProviderBase {
     public abstract void onSendExtraCommand(@NonNull String command,
             @SuppressLint("NullableCollection")
             @Nullable Bundle extras);
+
+    private static Location stripExtras(Location location) {
+        Bundle extras = location.getExtras();
+        if (extras != null && (extras.containsKey(EXTRA_NO_GPS_LOCATION)
+                || extras.containsKey("indoorProbability")
+                || extras.containsKey("coarseLocation"))) {
+            location = new Location(location);
+            extras = location.getExtras();
+            extras.remove(EXTRA_NO_GPS_LOCATION);
+            extras.remove("indoorProbability");
+            extras.remove("coarseLocation");
+            if (extras.isEmpty()) {
+                location.setExtras(null);
+            }
+        }
+        return location;
+    }
+
+    private static List<Location> stripExtras(List<Location> locations) {
+        List<Location> mapped = locations;
+        final int size = locations.size();
+        int i = 0;
+        for (Location location : locations) {
+            Location newLocation = stripExtras(location);
+            if (mapped != locations) {
+                mapped.add(newLocation);
+            } else if (newLocation != location) {
+                mapped = new ArrayList<>(size);
+                int j = 0;
+                for (Location copiedLocation : locations) {
+                    if (j >= i) {
+                        break;
+                    }
+                    mapped.add(copiedLocation);
+                    j++;
+                }
+                mapped.add(newLocation);
+            }
+            i++;
+        }
+
+        return mapped;
+    }
 
     private final class Service extends ILocationProvider.Stub {
 

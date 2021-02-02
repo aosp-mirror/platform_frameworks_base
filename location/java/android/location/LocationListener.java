@@ -19,6 +19,7 @@ package android.location;
 import android.annotation.NonNull;
 import android.os.Bundle;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -48,15 +49,18 @@ public interface LocationListener {
     /**
      * Called when the location has changed and locations are being delivered in batches. The
      * default implementation calls through to ({@link #onLocationChanged(Location)} with all
-     * locations in the batch, from earliest to latest.
+     * locations in the batch. The list of locations is always guaranteed to be non-empty, and is
+     * always guaranteed to be ordered from earliest location to latest location (so that the
+     * earliest location in the batch is at index 0 in the list, and the latest location in the
+     * batch is at index size-1 in the list).
      *
      * @see LocationRequest#getMaxUpdateDelayMillis()
-     * @param locationResult the location result list
+     * @param locations the location list
      */
-    default void onLocationChanged(@NonNull LocationResult locationResult) {
-        final int size = locationResult.size();
-        for (int i = 0; i < size; ++i) {
-            onLocationChanged(locationResult.get(i));
+    default void onLocationChanged(@NonNull List<Location> locations) {
+        final int size = locations.size();
+        for (int i = 0; i < size; i++) {
+            onLocationChanged(locations.get(i));
         }
     }
 

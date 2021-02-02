@@ -20,8 +20,8 @@ import static android.app.compat.CompatChanges.isChangeEnabled;
 import static android.location.LocationManager.DELIVER_HISTORICAL_LOCATIONS;
 import static android.location.LocationManager.GPS_PROVIDER;
 import static android.location.LocationManager.KEY_FLUSH_COMPLETE;
+import static android.location.LocationManager.KEY_LOCATIONS;
 import static android.location.LocationManager.KEY_LOCATION_CHANGED;
-import static android.location.LocationManager.KEY_LOCATION_RESULT;
 import static android.location.LocationManager.KEY_PROVIDER_ENABLED;
 import static android.location.LocationManager.PASSIVE_PROVIDER;
 import static android.os.IPowerManager.LOCATION_MODE_NO_CHANGE;
@@ -187,7 +187,8 @@ public class LocationProviderManager extends
         @Override
         public void deliverOnLocationChanged(LocationResult locationResult,
                 @Nullable Runnable onCompleteCallback) throws RemoteException {
-            mListener.onLocationChanged(locationResult, SingleUseCallback.wrap(onCompleteCallback));
+            mListener.onLocationChanged(locationResult.asList(),
+                    SingleUseCallback.wrap(onCompleteCallback));
         }
 
         @Override
@@ -222,12 +223,16 @@ public class LocationProviderManager extends
             // allows apps to start a fg service in response to a location PI
             options.setTemporaryAppWhitelistDuration(TEMPORARY_APP_ALLOWLIST_DURATION_MS);
 
+            Intent intent = new Intent().putExtra(KEY_LOCATION_CHANGED,
+                    locationResult.getLastLocation());
+            if (locationResult.size() > 1) {
+                intent.putExtra(KEY_LOCATIONS, locationResult.asList().toArray(new Location[0]));
+            }
+
             mPendingIntent.send(
                     mContext,
                     0,
-                    new Intent()
-                            .putExtra(KEY_LOCATION_CHANGED, locationResult.getLastLocation())
-                            .putExtra(KEY_LOCATION_RESULT, locationResult),
+                    intent,
                     onCompleteCallback != null ? (pI, i, rC, rD, rE) -> onCompleteCallback.run()
                             : null,
                     null,
