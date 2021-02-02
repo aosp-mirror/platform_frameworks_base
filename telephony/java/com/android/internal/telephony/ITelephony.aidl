@@ -2172,7 +2172,7 @@ interface ITelephony {
      */
     String getMmsUAProfUrl(int subId);
 
-    void setMobileDataPolicyEnabledStatus(int subscriptionId, int policy, boolean enabled);
+    void setMobileDataPolicyEnabled(int subscriptionId, int policy, boolean enabled);
 
     boolean isMobileDataPolicyEnabled(int subscriptionId, int policy);
 
