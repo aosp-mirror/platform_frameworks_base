@@ -21370,6 +21370,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
+            // Hacky hack: Reset any stretch effects as those are applied during the draw pass
+            // instead of being "stateful" like other RenderNode properties
+            renderNode.clearStretch();
+
             final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
             try {
@@ -22796,6 +22800,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
+
+        // Hacky hack: Reset any stretch effects as those are applied during the draw pass
+        // instead of being "stateful" like other RenderNode properties
+        renderNode.clearStretch();
+
         final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
         // Reverse left/top translation done by drawable canvas, which will
