@@ -222,7 +222,7 @@ public class PackageInfo implements Parcelable {
      * &lt;attribution&gt;} tags included under &lt;manifest&gt;, or null if there were none. This
      * is only filled if the flag {@link PackageManager#GET_ATTRIBUTIONS} was set.
      */
-    @SuppressWarnings("ArrayReturn")
+    @SuppressWarnings({"ArrayReturn", "NullableCollection"})
     public @Nullable Attribution[] attributions;
 
     /**

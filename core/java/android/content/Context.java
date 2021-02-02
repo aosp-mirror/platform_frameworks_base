@@ -6154,6 +6154,7 @@ public abstract class Context {
     @UiContext
     @NonNull
     public Context createWindowContext(@NonNull Display display, @WindowType int type,
+            @SuppressLint("NullableCollection")
             @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }
