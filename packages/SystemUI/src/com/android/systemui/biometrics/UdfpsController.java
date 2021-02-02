@@ -242,12 +242,15 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         }
     }
 
-    private WindowManager.LayoutParams computeLayoutParams() {
+    private WindowManager.LayoutParams computeLayoutParams(@Nullable UdfpsAnimation animation) {
+        final int paddingX = animation != null ? animation.getPaddingX() : 0;
+        final int paddingY = animation != null ? animation.getPaddingY() : 0;
+
         // Default dimensions assume portrait mode.
-        mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius;
-        mCoreLayoutParams.y = mSensorProps.sensorLocationY - mSensorProps.sensorRadius;
-        mCoreLayoutParams.height = 2 * mSensorProps.sensorRadius;
-        mCoreLayoutParams.width = 2 * mSensorProps.sensorRadius;
+        mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius - paddingX;
+        mCoreLayoutParams.y = mSensorProps.sensorLocationY - mSensorProps.sensorRadius - paddingY;
+        mCoreLayoutParams.height = 2 * mSensorProps.sensorRadius + 2 * paddingX;
+        mCoreLayoutParams.width = 2 * mSensorProps.sensorRadius + 2 * paddingY;
 
         Point p = new Point();
         // Gets the size based on the current rotation of the display.
@@ -289,8 +292,9 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
-                    mView.setUdfpsAnimation(getUdfpsAnimationForReason(reason));
-                    mWindowManager.addView(mView, computeLayoutParams());
+                    final UdfpsAnimation animation = getUdfpsAnimationForReason(reason);
+                    mView.setUdfpsAnimation(animation);
+                    mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
                     mIsOverlayShowing = true;
                 } catch (RuntimeException e) {
