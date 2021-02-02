@@ -532,7 +532,7 @@ public class VcnManagementServiceTest {
                 Collections.singleton(subGroup), Collections.singletonMap(subId, subGroup));
     }
 
-    private void verifyMergedNetworkCapabilities(
+    private void verifyMergedNetworkCapabilitiesIsVcnManaged(
             NetworkCapabilities mergedCapabilities, @Transport int transportType) {
         assertTrue(mergedCapabilities.hasTransport(transportType));
         assertFalse(
@@ -541,7 +541,7 @@ public class VcnManagementServiceTest {
     }
 
     @Test
-    public void testGetUnderlyingNetworkPolicyTransportCell() throws Exception {
+    public void testGetUnderlyingNetworkPolicyCellular() throws Exception {
         setUpVcnSubscription(TEST_SUBSCRIPTION_ID, TEST_UUID_2);
 
         NetworkCapabilities nc =
@@ -554,12 +554,12 @@ public class VcnManagementServiceTest {
                 mVcnMgmtSvc.getUnderlyingNetworkPolicy(nc, new LinkProperties());
 
         assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilities(
+        verifyMergedNetworkCapabilitiesIsVcnManaged(
                 policy.getMergedNetworkCapabilities(), NetworkCapabilities.TRANSPORT_CELLULAR);
     }
 
     @Test
-    public void testGetUnderlyingNetworkPolicyTransportWifi() throws Exception {
+    public void testGetUnderlyingNetworkPolicyWifi() throws Exception {
         setUpVcnSubscription(TEST_SUBSCRIPTION_ID, TEST_UUID_2);
 
         WifiInfo wifiInfo = mock(WifiInfo.class);
@@ -575,7 +575,7 @@ public class VcnManagementServiceTest {
                 mVcnMgmtSvc.getUnderlyingNetworkPolicy(nc, new LinkProperties());
 
         assertFalse(policy.isTeardownRequested());
-        verifyMergedNetworkCapabilities(
+        verifyMergedNetworkCapabilitiesIsVcnManaged(
                 policy.getMergedNetworkCapabilities(), NetworkCapabilities.TRANSPORT_WIFI);
     }
 
