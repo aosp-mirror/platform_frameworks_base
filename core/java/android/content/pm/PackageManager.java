@@ -125,6 +125,19 @@ public abstract class PackageManager {
     }
 
     /**
+     * &lt;application&gt; level {@link android.content.pm.PackageManager.Property} tag specifying
+     * the XML resource ID containing an application's media capabilities XML file
+     *
+     * For example:
+     * &lt;application&gt;
+     *   &lt;property android:name="android.media.PROPERTY_MEDIA_CAPABILITIES"
+     *     android:resource="@xml/media_capabilities"&gt;
+     * &lt;application&gt;
+     */
+    public static final String PROPERTY_MEDIA_CAPABILITIES =
+            "android.media.PROPERTY_MEDIA_CAPABILITIES";
+
+    /**
      * A property value set within the manifest.
      * <p>
      * The value of a property will only have a single type, as defined by
