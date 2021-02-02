@@ -14,7 +14,7 @@
 ** limitations under the License.
 */
 
-package android.graphics;
+package android.app;
 
 /**
  * @hide

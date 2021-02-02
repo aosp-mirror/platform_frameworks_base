@@ -16,7 +16,7 @@
   -->
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.android.graphics.gamemanagertests"
+          package="com.android.app.gamemanagertests"
           android:sharedUserId="android.uid.system" >
 
     <application>
@@ -24,7 +24,7 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-                     android:targetPackage="com.android.graphics.gamemanagertests"
+                     android:targetPackage="com.android.app.gamemanagertests"
                      android:label="Game Manager Tests"/>
 
 </manifest>

@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.graphics;
+package com.android.server.app;
 
 import android.annotation.NonNull;
+import android.app.GameManager;
+import android.app.GameManager.GameMode;
+import android.app.IGameManagerService;
 import android.content.Context;
-import android.graphics.GameManager;
-import android.graphics.GameManager.GameMode;
-import android.graphics.IGameManagerService;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
