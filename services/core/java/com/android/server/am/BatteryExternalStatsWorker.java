@@ -43,6 +43,7 @@ import android.util.SparseIntArray;
 import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.power.MeasuredEnergyArray;
 import com.android.internal.power.MeasuredEnergyStats;
@@ -95,8 +96,6 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
                         t.setPriority(Thread.NORM_PRIORITY);
                         return t;
                     });
-
-    private final Context mContext;
 
     @GuardedBy("mStats")
     private final BatteryStatsImpl mStats;
@@ -168,15 +167,39 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
     @GuardedBy("this")
     private long mLastCollectionTimeStamp;
 
+    final Injector mInjector;
+
+    @VisibleForTesting
+    public static class Injector {
+        private final Context mContext;
+
+        Injector(Context context) {
+            mContext = context;
+        }
+
+        public <T> T getSystemService(Class<T> serviceClass) {
+            return mContext.getSystemService(serviceClass);
+        }
+
+        public <T> T getLocalService(Class<T> serviceClass) {
+            return LocalServices.getService(serviceClass);
+        }
+    }
+
     BatteryExternalStatsWorker(Context context, BatteryStatsImpl stats) {
-        mContext = context;
+        this(new Injector(context), stats);
+    }
+
+    @VisibleForTesting
+    BatteryExternalStatsWorker(Injector injector, BatteryStatsImpl stats) {
+        mInjector = injector;
         mStats = stats;
     }
 
     public void systemServicesReady() {
-        final WifiManager wm = mContext.getSystemService(WifiManager.class);
-        final TelephonyManager tm = mContext.getSystemService(TelephonyManager.class);
-        final PowerStatsInternal psi = LocalServices.getService(PowerStatsInternal.class);
+        final WifiManager wm = mInjector.getSystemService(WifiManager.class);
+        final TelephonyManager tm = mInjector.getSystemService(TelephonyManager.class);
+        final PowerStatsInternal psi = mInjector.getLocalService(PowerStatsInternal.class);
         synchronized (mWorkerLock) {
             mWifiManager = wm;
             mTelephony = tm;
@@ -747,7 +770,8 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
      * EnergyConsumerResult}[]
      */
     @GuardedBy("mWorkerLock")
-    private @Nullable MeasuredEnergyArray getEnergyConsumptionData() {
+    @VisibleForTesting
+    public @Nullable MeasuredEnergyArray getEnergyConsumptionData() {
         final EnergyConsumerResult[] results;
         try {
             results = mPowerStatsInternal.getEnergyConsumedAsync(new int[0])
@@ -761,28 +785,41 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
         final int[] subsystems = new int[size];
         final long[] energyUJ = new long[size];
 
+        int count = 0;
         for (int i = 0; i < size; i++) {
             final EnergyConsumerResult consumer = results[i];
             final int subsystem = mEnergyConsumerToSubsystemMap.get(consumer.id,
                     MeasuredEnergyArray.SUBSYSTEM_UNKNOWN);
             if (subsystem == MeasuredEnergyArray.SUBSYSTEM_UNKNOWN) continue;
-            subsystems[i] = subsystem;
-            energyUJ[i] = consumer.energyUWs;
+            subsystems[count] = subsystem;
+            energyUJ[count] = consumer.energyUWs;
+            count++;
         }
+        final int arraySize = count;
         return new MeasuredEnergyArray() {
             @Override
             public int getSubsystem(int index) {
+                if (index >= size()) {
+                    throw new IllegalArgumentException(
+                            "Out of bounds subsystem index! index : " + index + ", size : "
+                                    + size());
+                }
                 return subsystems[index];
             }
 
             @Override
             public long getEnergy(int index) {
+                if (index >= size()) {
+                    throw new IllegalArgumentException(
+                            "Out of bounds subsystem index! index : " + index + ", size : "
+                                    + size());
+                }
                 return energyUJ[index];
             }
 
             @Override
             public int size() {
-                return size;
+                return arraySize;
             }
         };
     }
