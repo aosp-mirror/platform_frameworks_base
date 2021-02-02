@@ -401,11 +401,18 @@ public final class NetworkCapabilities implements Parcelable {
     public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27;
 
     /**
-     * Indicates that this network is not managed by a Virtual Carrier Network (VCN).
-     *
-     * TODO(b/177299683): Add additional clarifying javadoc.
+     * Indicates that this network is not subsumed by a Virtual Carrier Network (VCN).
+     * <p>
+     * To provide an experience on a VCN similar to a single traditional carrier network, in
+     * some cases the system sets this bit is set by default in application's network requests,
+     * and may choose to remove it at its own discretion when matching the request to a network.
+     * <p>
+     * Applications that want to know about a Virtual Carrier Network's underlying networks,
+     * for example to use them for multipath purposes, should remove this bit from their network
+     * requests ; the system will not add it back once removed.
      * @hide
      */
+    @SystemApi
     public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28;
 
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
