@@ -13393,6 +13393,24 @@ public final class Settings {
                 "euicc_factory_reset_timeout_millis";
 
         /**
+         * Flag to set the waiting time for euicc slot switch.
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String EUICC_SWITCH_SLOT_TIMEOUT_MILLIS =
+                "euicc_switch_slot_timeout_millis";
+
+        /**
+         * Flag to set the waiting time for enabling multi SIM slot.
+         * Type: long
+         *
+         * @hide
+         */
+        public static final String ENABLE_MULTI_SLOT_TIMEOUT_MILLIS =
+                "enable_multi_slot_timeout_millis";
+
+        /**
          * Flag to set the timeout for when to refresh the storage settings cached data.
          * Type: long
          *
