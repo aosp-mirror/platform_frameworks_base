@@ -457,7 +457,8 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     static final float MIN_TASK_LETTERBOX_ASPECT_RATIO = 1.0f;
 
-    final WindowManagerConstants mConstants;
+    @VisibleForTesting
+    WindowManagerConstants mConstants;
 
     final WindowTracing mWindowTracing;
 
