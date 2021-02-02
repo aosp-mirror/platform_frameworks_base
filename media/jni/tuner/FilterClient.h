@@ -71,6 +71,26 @@ public:
 private:
     void getHidlFilterEvent(const vector<TunerFilterEvent>& filterEvents,
             DemuxFilterEvent& event, DemuxFilterEventExt& eventExt);
+    void getHidlMediaEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event);
+    void getHidlSectionEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event);
+    void getHidlPesEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event);
+    void getHidlTsRecordEvent(const vector<TunerFilterEvent>& filterEvents,
+            DemuxFilterEvent& event, DemuxFilterEventExt& eventExt);
+    void getHidlMmtpRecordEvent(const vector<TunerFilterEvent>& filterEvents,
+            DemuxFilterEvent& event, DemuxFilterEventExt& eventExt);
+    void getHidlDownloadEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event);
+    void getHidlIpPayloadEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event);
+    void getHidlTemiEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event);
+    void getHidlMonitorEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEventExt& eventExt);
+    void getHidlRestartEvent(
+            const vector<TunerFilterEvent>& filterEvents, DemuxFilterEventExt& eventExt);
 
     sp<FilterClientCallback> mFilterClientCallback;
 };
