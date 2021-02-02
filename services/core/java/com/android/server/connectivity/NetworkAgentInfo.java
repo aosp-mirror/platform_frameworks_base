@@ -57,6 +57,7 @@ import com.android.internal.util.WakeupMessage;
 import com.android.server.ConnectivityService;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -1025,6 +1026,8 @@ public class NetworkAgentInfo implements Comparable<NetworkAgentInfo> {
                 + (networkAgentConfig.acceptUnvalidated ? " acceptUnvalidated" : "")
                 + (networkAgentConfig.acceptPartialConnectivity ? " acceptPartialConnectivity" : "")
                 + (clatd.isStarted() ? " clat{" + clatd + "} " : "")
+                + (declaredUnderlyingNetworks != null
+                        ? " underlying{" + Arrays.toString(declaredUnderlyingNetworks) + "}" : "")
                 + "  lp{" + linkProperties + "}"
                 + "  nc{" + networkCapabilities + "}"
                 + "}";
