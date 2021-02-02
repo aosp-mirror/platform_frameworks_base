@@ -745,4 +745,9 @@
           * Title: headline, medium 20sp
           * Message: body, 16 sp -->
     <style name="Theme.ControlsRequestDialog" parent="@*android:style/Theme.DeviceDefault.Dialog.Alert"/>
+
+    <style name="TextAppearance.PrivacyDialog">
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@*android:string/config_headlineFontFamily</item>
+    </style>
 </resources>

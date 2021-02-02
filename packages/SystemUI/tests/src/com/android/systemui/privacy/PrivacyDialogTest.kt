@@ -72,7 +72,7 @@ class PrivacyDialogTest : SysuiTestCase() {
         )
         dialog = PrivacyDialog(context, list, starter)
         dialog.show()
-        dialog.requireViewById<View>(R.id.link).callOnClick()
+        dialog.requireViewById<View>(R.id.privacy_item).callOnClick()
         verify(starter).invoke(PrivacyType.TYPE_MICROPHONE.permGroupName)
     }
 
