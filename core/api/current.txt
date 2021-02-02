@@ -46417,6 +46417,7 @@ package android.view {
     field public static final int SOURCE_MOUSE = 8194; // 0x2002
     field public static final int SOURCE_MOUSE_RELATIVE = 131076; // 0x20004
     field public static final int SOURCE_ROTARY_ENCODER = 4194304; // 0x400000
+    field public static final int SOURCE_SENSOR = 67108864; // 0x4000000
     field public static final int SOURCE_STYLUS = 16386; // 0x4002
     field public static final int SOURCE_TOUCHPAD = 1048584; // 0x100008
     field public static final int SOURCE_TOUCHSCREEN = 4098; // 0x1002
