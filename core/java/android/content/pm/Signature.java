@@ -256,6 +256,8 @@ public class Signature implements Parcelable {
         try {
             if (obj != null) {
                 Signature other = (Signature)obj;
+                // Note, some classes, such as PackageParser.SigningDetails, rely on equals
+                // only comparing the mSignature arrays without the flags.
                 return this == other || Arrays.equals(mSignature, other.mSignature);
             }
         } catch (ClassCastException e) {
@@ -268,6 +270,8 @@ public class Signature implements Parcelable {
         if (mHaveHashCode) {
             return mHashCode;
         }
+        // Note, similar to equals some classes rely on the hash code not including
+        // the flags for Set membership checks.
         mHashCode = Arrays.hashCode(mSignature);
         mHaveHashCode = true;
         return mHashCode;

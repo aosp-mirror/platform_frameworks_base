@@ -33,6 +33,7 @@ import android.os.ServiceManager;
 public class MediaServiceManager {
     private static final String MEDIA_SESSION_SERVICE = "media_session";
     private static final String MEDIA_TRANSCODING_SERVICE = "media.transcoding";
+    private static final String MEDIA_COMMUNICATION_SERVICE = "media_communication";
 
     /**
      * @hide
@@ -78,5 +79,13 @@ public class MediaServiceManager {
     @NonNull
     public ServiceRegisterer getMediaTranscodingServiceRegisterer() {
         return new ServiceRegisterer(MEDIA_TRANSCODING_SERVICE);
+    }
+
+    /**
+     * Returns {@link ServiceRegisterer} for MEDIA_COMMUNICATION_SERVICE.
+     */
+    @NonNull
+    public ServiceRegisterer getMediaCommunicationServiceRegisterer() {
+        return new ServiceRegisterer(MEDIA_COMMUNICATION_SERVICE);
     }
 }

@@ -16,6 +16,7 @@
 
 package android.net;
 
+import android.annotation.NonNull;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.os.Build;
 import android.os.Parcel;
@@ -30,7 +31,8 @@ import android.util.Slog;
 public class NetworkState implements Parcelable {
     private static final boolean VALIDATE_ROAMING_STATE = false;
 
-    public static final NetworkState EMPTY = new NetworkState(null, null, null, null, null, null);
+    // TODO: remove and make members @NonNull.
+    public static final NetworkState EMPTY = new NetworkState();
 
     public final NetworkInfo networkInfo;
     public final LinkProperties linkProperties;
@@ -40,9 +42,18 @@ public class NetworkState implements Parcelable {
     public final String subscriberId;
     public final String networkId;
 
-    public NetworkState(NetworkInfo networkInfo, LinkProperties linkProperties,
-            NetworkCapabilities networkCapabilities, Network network, String subscriberId,
-            String networkId) {
+    private NetworkState() {
+        networkInfo = null;
+        linkProperties = null;
+        networkCapabilities = null;
+        network = null;
+        subscriberId = null;
+        networkId = null;
+    }
+
+    public NetworkState(@NonNull NetworkInfo networkInfo, @NonNull LinkProperties linkProperties,
+            @NonNull NetworkCapabilities networkCapabilities, @NonNull Network network,
+            String subscriberId, String networkId) {
         this.networkInfo = networkInfo;
         this.linkProperties = linkProperties;
         this.networkCapabilities = networkCapabilities;

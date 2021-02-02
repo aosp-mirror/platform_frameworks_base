@@ -35,6 +35,8 @@
             android:label="@string/permlab_testDenied"
             android:description="@string/permdesc_testDenied" />
 
+    <uses-permission android:name="com.android.frameworks.coretests.permission.TEST_GRANTED" />
+
     <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER" />
     <uses-permission android:name="android.permission.ACCESS_DOWNLOAD_MANAGER_ADVANCED" />
@@ -76,7 +78,6 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_SMS"/>
-    <uses-permission android:name="android.permission.TEST_GRANTED" />
     <uses-permission android:name="android.permission.CHANGE_COMPONENT_ENABLED_STATE" />
     <uses-permission android:name="com.google.android.googleapps.permission.ACCESS_GOOGLE_PASSWORD" />
     <uses-permission android:name="com.google.android.googleapps.permission.GOOGLE_AUTH" />
@@ -1455,6 +1456,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.RemoteGrantedReceiver"
+                android:process=":remoteReceiver"
                 android:permission="com.android.frameworks.coretests.permission.TEST_GRANTED"
                 android:exported="true">
             <intent-filter android:priority="2">
@@ -1462,6 +1464,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name="android.app.activity.RemoteDeniedReceiver"
+                android:process=":remoteReceiver"
                 android:permission="com.android.frameworks.coretests.permission.TEST_DENIED"
                 android:exported="true">
             <intent-filter android:priority="2">

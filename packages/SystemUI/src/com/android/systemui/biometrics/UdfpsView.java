@@ -28,7 +28,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
+import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.text.TextUtils;
@@ -37,7 +37,6 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.ViewTreeObserver;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
@@ -48,67 +47,63 @@ import com.android.systemui.statusbar.phone.ScrimController;
  * A full screen view with a configurable illumination dot and scrim.
  */
 public class UdfpsView extends SurfaceView implements DozeReceiver,
-        StatusBarStateController.StateListener,  ScrimController.ScrimChangedListener {
+        StatusBarStateController.StateListener, ScrimController.ScrimChangedListener {
     private static final String TAG = "UdfpsView";
 
-    // Values in pixels.
+    /**
+     * Interface for controlling the high-brightness mode (HBM). UdfpsView can use this callback to
+     * enable the HBM while showing the fingerprint illumination, and to disable the HBM after the
+     * illumination is no longer necessary.
+     */
+    interface HbmCallback {
+        /**
+         * UdfpsView will call this to enable the HBM before drawing the illumination dot.
+         *
+         * @param surface A valid surface for which the HBM should be enabled.
+         */
+        void enableHbm(@NonNull Surface surface);
+
+        /**
+         * UdfpsView will call this to disable the HBM when the illumination is not longer needed.
+         *
+         * @param surface A valid surface for which the HBM should be disabled.
+         */
+        void disableHbm(@NonNull Surface surface);
+    }
+
+    /**
+     * This is used instead of {@link android.graphics.drawable.Drawable}, because the latter has
+     * several abstract methods that are not used here but require implementation.
+     */
+    private interface SimpleDrawable {
+        void draw(Canvas canvas);
+    }
+
+    // Radius in pixels.
     private static final float SENSOR_SHADOW_RADIUS = 2.0f;
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
-    @NonNull private final Rect mScrimRect;
-    @NonNull private final Paint mScrimPaint;
-    @NonNull private final Paint mDebugTextPaint;
-
+    @NonNull private final SurfaceHolder mHolder;
     @NonNull private final RectF mSensorRect;
     @NonNull private final Paint mSensorPaint;
-    private final float mSensorTouchAreaCoefficient;
+    @NonNull private final Paint mDebugTextPaint;
+    @NonNull private final SimpleDrawable mIlluminationDotDrawable;
+    @NonNull private final SimpleDrawable mClearSurfaceDrawable;
 
-    // Stores rounded up values from mSensorRect. Necessary for APIs that only take Rect (not RecF).
-    @NonNull private final Rect mTouchableRegion;
-    // mInsetsListener is used to set the touchable region for our window. Our window covers the
-    // whole screen, and by default its touchable region is the whole screen. We use
-    // mInsetsListener to restrict the touchable region and allow the touches outside of the sensor
-    // to propagate to the rest of the UI.
-    @NonNull private final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsListener;
     @Nullable private UdfpsAnimation mUdfpsAnimation;
+    @Nullable private HbmCallback mHbmCallback;
+    @Nullable private Runnable mOnIlluminatedRunnable;
 
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
 
-    private boolean mShowScrimAndDot;
-    private boolean mIsHbmSupported;
+    private final float mSensorTouchAreaCoefficient;
     @Nullable private String mDebugMessage;
+    private boolean mIlluminationRequested;
     private int mStatusBarState;
     private boolean mNotificationShadeExpanded;
     private int mNotificationPanelAlpha;
-
-    // Runnable that will be run after the illumination dot and scrim are shown.
-    // The runnable is reset to null after it's executed once.
-    @Nullable private Runnable mRunAfterShowingScrimAndDot;
-
-    @NonNull private final SurfaceHolder.Callback mSurfaceCallback = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(@NonNull SurfaceHolder holder) {
-            Log.d(TAG, "Surface created");
-            // SurfaceView sets this to true by default. We must set it to false to allow
-            // onDraw to be called
-            setWillNotDraw(false);
-        }
-
-        @Override
-        public void surfaceChanged(@NonNull SurfaceHolder holder, int format,
-                int width, int height) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(@NonNull SurfaceHolder holder) {
-            Log.d(TAG, "Surface destroyed");
-            // Must not draw when the surface is destroyed
-            setWillNotDraw(true);
-        }
-    };
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -126,18 +121,13 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
             a.recycle();
         }
 
-        getHolder().addCallback(mSurfaceCallback);
-        getHolder().setFormat(PixelFormat.TRANSLUCENT);
-
-        mScrimRect = new Rect();
-        mScrimPaint = new Paint(0 /* flags */);
-        mScrimPaint.setColor(Color.BLACK);
+        mHolder = getHolder();
+        mHolder.setFormat(PixelFormat.RGBA_8888);
 
         mSensorRect = new RectF();
         mSensorPaint = new Paint(0 /* flags */);
         mSensorPaint.setAntiAlias(true);
-        mSensorPaint.setColor(Color.WHITE);
-        mSensorPaint.setShadowLayer(SENSOR_SHADOW_RADIUS, 0, 0, Color.BLACK);
+        mSensorPaint.setARGB(255, 255, 255, 255);
         mSensorPaint.setStyle(Paint.Style.FILL);
 
         mDebugTextPaint = new Paint();
@@ -145,16 +135,13 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         mDebugTextPaint.setColor(Color.BLUE);
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
-        mTouchableRegion = new Rect();
-        // When the device is rotated, it's important that mTouchableRegion is updated before
-        // this listener is called. This listener is usually called shortly after onLayout.
-        mInsetsListener = internalInsetsInfo -> {
-            internalInsetsInfo.setTouchableInsets(
-                    ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
-            internalInsetsInfo.touchableRegion.set(mTouchableRegion);
-        };
+        mIlluminationDotDrawable = canvas -> canvas.drawOval(mSensorRect, mSensorPaint);
+        mClearSurfaceDrawable = canvas -> canvas.drawColor(0, PorterDuff.Mode.CLEAR);
 
-        mShowScrimAndDot = false;
+        mIlluminationRequested = false;
+        // SurfaceView sets this to true by default. We must set it to false to allow
+        // onDraw to be called.
+        setWillNotDraw(false);
     }
 
     void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
@@ -165,6 +152,20 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         mUdfpsAnimation = animation;
     }
 
+    /**
+     * Sets a callback that can be used to enable and disable the high-brightness mode (HBM).
+     */
+    void setHbmCallback(@Nullable HbmCallback callback) {
+        mHbmCallback = callback;
+    }
+
+    /**
+     * Sets a runnable that will be run when the first illumination frame reaches the panel.
+     * The runnable is reset to null after it is executed once.
+     */
+    void setOnIlluminatedRunnable(Runnable runnable) {
+        mOnIlluminatedRunnable = runnable;
+    }
 
     @Override
     public void dozeTimeTick() {
@@ -189,50 +190,13 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         postInvalidate();
     }
 
-    // The "h" and "w" are the display's height and width relative to its current rotation.
-    protected void updateSensorRect(int h, int w) {
-        // mSensorProps coordinates assume portrait mode.
-        mSensorRect.set(mSensorProps.sensorLocationX - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY - mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationX + mSensorProps.sensorRadius,
-                mSensorProps.sensorLocationY + mSensorProps.sensorRadius);
-
-        // Transform mSensorRect if the device is in landscape mode.
-        switch (mContext.getDisplay().getRotation()) {
-            case Surface.ROTATION_90:
-                //noinspection SuspiciousNameCombination
-                mSensorRect.set(mSensorRect.top, h - mSensorRect.right, mSensorRect.bottom,
-                        h - mSensorRect.left);
-                break;
-            case Surface.ROTATION_270:
-                //noinspection SuspiciousNameCombination
-                mSensorRect.set(w - mSensorRect.bottom, mSensorRect.left, w - mSensorRect.top,
-                        mSensorRect.right);
-                break;
-            default:
-                // Do nothing to stay in portrait mode.
-        }
-
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.onSensorRectUpdated(new RectF(mSensorRect));
-        }
-    }
-
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        // Always re-compute the layout regardless of whether "changed" is true. It is usually false
-        // when the device goes from landscape to seascape and vice versa, but mSensorRect and
-        // its dependencies need to be recalculated to stay at the same physical location on the
-        // screen.
-        final int w = getLayoutParams().width;
-        final int h = getLayoutParams().height;
-        mScrimRect.set(0 /* left */, 0 /* top */, w, h);
-        updateSensorRect(h, w);
-        // Update mTouchableRegion with the rounded up values from mSensorRect. After "onLayout"
-        // is finished, mTouchableRegion will be used by mInsetsListener to compute the touch
-        // insets.
-        mSensorRect.roundOut(mTouchableRegion);
+        mSensorRect.set(0, 0, 2 * mSensorProps.sensorRadius, 2 * mSensorProps.sensorRadius);
+        if (mUdfpsAnimation != null) {
+            mUdfpsAnimation.onSensorRectUpdated(new RectF(mSensorRect));
+        }
     }
 
     @Override
@@ -242,8 +206,6 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
 
         // Retrieve the colors each time, since it depends on day/night mode
         updateColor();
-
-        getViewTreeObserver().addOnComputeInternalInsetsListener(mInsetsListener);
     }
 
     private void updateColor() {
@@ -256,36 +218,39 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         Log.v(TAG, "onDetachedFromWindow");
-        getViewTreeObserver().removeOnComputeInternalInsetsListener(mInsetsListener);
     }
 
+    /**
+     * Immediately draws the provided drawable on this SurfaceView's surface.
+     */
+    private void drawImmediately(@NonNull SimpleDrawable drawable) {
+        Canvas canvas = null;
+        try {
+            canvas = mHolder.lockCanvas();
+            drawable.draw(canvas);
+        } finally {
+            // Make sure the surface is never left in a bad state.
+            if (canvas != null) {
+                mHolder.unlockCanvasAndPost(canvas);
+            }
+        }
+    }
+
+    /**
+     * This onDraw will not execute if setWillNotDraw(true) is called.
+     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        if (mShowScrimAndDot && mIsHbmSupported) {
-            // Only draw the scrim if HBM is supported.
-            canvas.drawRect(mScrimRect, mScrimPaint);
-        }
-
-        if (!TextUtils.isEmpty(mDebugMessage)) {
-            canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
-        }
-
-        if (mShowScrimAndDot) {
-            // draw dot (white circle)
-            canvas.drawOval(mSensorRect, mSensorPaint);
-        } else {
+        if (!mIlluminationRequested) {
+            if (!TextUtils.isEmpty(mDebugMessage)) {
+                canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
+            }
             if (mUdfpsAnimation != null) {
                 final int alpha = shouldPauseAuth() ? 255 - mNotificationPanelAlpha : 255;
                 mUdfpsAnimation.setAlpha(alpha);
                 mUdfpsAnimation.draw(canvas);
             }
-        }
-
-        if (mShowScrimAndDot && mRunAfterShowingScrimAndDot != null) {
-            post(mRunAfterShowingScrimAndDot);
-            mRunAfterShowingScrimAndDot = null;
         }
     }
 
@@ -293,17 +258,9 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         return new RectF(mSensorRect);
     }
 
-    void setHbmSupported(boolean value) {
-        mIsHbmSupported = value;
-    }
-
     void setDebugMessage(String message) {
         mDebugMessage = message;
         postInvalidate();
-    }
-
-    void setRunAfterShowingScrimAndDot(Runnable runnable) {
-        mRunAfterShowingScrimAndDot = runnable;
     }
 
     boolean isValidTouch(float x, float y, float pressure) {
@@ -332,21 +289,41 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
                 || mStatusBarState == FULLSCREEN_USER_SWITCHER;
     }
 
-    void setScrimAlpha(int alpha) {
-        mScrimPaint.setAlpha(alpha);
+    boolean isIlluminationRequested() {
+        return mIlluminationRequested;
     }
 
-    boolean isShowScrimAndDot() {
-        return mShowScrimAndDot;
+    void startIllumination() {
+        mIlluminationRequested = true;
+
+        // Disable onDraw to prevent overriding the illumination dot with the regular UI.
+        setWillNotDraw(true);
+
+        if (mHbmCallback != null && mHolder.getSurface().isValid()) {
+            mHbmCallback.enableHbm(mHolder.getSurface());
+        }
+        drawImmediately(mIlluminationDotDrawable);
+
+        if (mOnIlluminatedRunnable != null) {
+            // No framework API can reliably tell when a frame reaches the panel. A timeout is the
+            // safest solution. The frame should be displayed within 3 refresh cycles, which on a
+            // 60 Hz panel equates to 50 milliseconds.
+            postDelayed(mOnIlluminatedRunnable, 50 /* delayMillis */);
+            mOnIlluminatedRunnable = null;
+        }
     }
 
-    void showScrimAndDot() {
-        mShowScrimAndDot = true;
-        invalidate();
-    }
+    void stopIllumination() {
+        mIlluminationRequested = false;
 
-    void hideScrimAndDot() {
-        mShowScrimAndDot = false;
+        if (mHbmCallback != null && mHolder.getSurface().isValid()) {
+            mHbmCallback.disableHbm(mHolder.getSurface());
+        }
+        // It may be necessary to clear the surface for the HBM changes to apply.
+        drawImmediately(mClearSurfaceDrawable);
+
+        // Enable onDraw to allow the regular UI to be drawn.
+        setWillNotDraw(false);
         invalidate();
     }
 

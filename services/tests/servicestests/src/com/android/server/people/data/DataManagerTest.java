@@ -535,8 +535,11 @@ public final class DataManagerTest {
         listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
                 mNotificationChannel, NOTIFICATION_CHANNEL_OR_GROUP_UPDATED);
 
-        assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
-                TEST_SHORTCUT_ID)).isNotNull();
+        ConversationChannel result = mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
+                TEST_SHORTCUT_ID);
+        assertThat(result).isNotNull();
+        assertThat(result.hasBirthdayToday()).isFalse();
+        assertThat(result.getStatuses()).isEmpty();
     }
 
     @Test
@@ -550,13 +553,15 @@ public final class DataManagerTest {
         shortcut.setCached(ShortcutInfo.FLAG_PINNED);
         mDataManager.addOrUpdateConversationInfo(shortcut);
         assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
-            TEST_SHORTCUT_ID)).isNotNull();
+                TEST_SHORTCUT_ID)).isNotNull();
         assertThat(mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
                 TEST_SHORTCUT_ID + "1")).isNull();
 
         NotificationListenerService listenerService =
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
         listenerService.onNotificationPosted(mStatusBarNotification);
+        ConversationStatus cs = new ConversationStatus.Builder("id", ACTIVITY_ANNIVERSARY).build();
+        mDataManager.addOrUpdateStatus(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID, cs);
 
         ConversationChannel result = mDataManager.getConversation(TEST_PKG_NAME, USER_ID_PRIMARY,
                 TEST_SHORTCUT_ID);
@@ -568,6 +573,8 @@ public final class DataManagerTest {
                 result.getParentNotificationChannel().getId());
         assertEquals(mStatusBarNotification.getPostTime(), result.getLastEventTimestamp());
         assertTrue(result.hasActiveNotifications());
+        assertFalse(result.hasBirthdayToday());
+        assertThat(result.getStatuses()).containsExactly(cs);
     }
 
     @Test

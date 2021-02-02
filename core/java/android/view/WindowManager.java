@@ -1555,16 +1555,25 @@ public interface WindowManager extends ViewManager {
          *   <li><b>Fully transparent windows</b>: This window has {@link LayoutParams#alpha} equal
          *   to 0.
          *   <li><b>One SAW window with enough transparency</b>: This window is of type {@link
-         *   #TYPE_APPLICATION_OVERLAY}, has {@link LayoutParams#alpha} below or equal to <b>0.8</b>
-         *   and it's the <b>only</b> window of type {@link #TYPE_APPLICATION_OVERLAY} from this UID
-         *   in the touch path.
+         *   #TYPE_APPLICATION_OVERLAY}, has {@link LayoutParams#alpha} below or equal to the
+         *   <a href="#MaximumOpacity">maximum obscuring opacity</a> (see below) and it's the
+         *   <b>only</b> window of type {@link #TYPE_APPLICATION_OVERLAY} from this UID in the touch
+         *   path.
          *   <li><b>Multiple SAW windows with enough transparency</b>: The multiple overlapping
          *   {@link #TYPE_APPLICATION_OVERLAY} windows in the
          *   touch path from this UID have a <b>combined obscuring opacity</b> below or equal to
-         *   <b>0.8</b>. See section below on how to compute this value.
+         *   the <a href="#MaximumOpacity">maximum obscuring opacity</a>. See section
+         *   <a href="#ObscuringOpacity">Combined obscuring opacity</a> below on how to compute this
+         *   value.
          * </ol>
          * <p>If none of these cases hold, the touch will not be delivered and a message will be
          * logged to logcat.</p>
+         *
+         * <a name="MaximumOpacity"></a>
+         * <h3>Maximum obscuring opacity</h3>
+         * <p>This value is <b>0.8</b>. Apps that want to gather this value from the system rather
+         * than hard-coding it might want to use {@link
+         * android.hardware.input.InputManager#getMaximumObscuringOpacityForTouch()}.</p>
          *
          * <a name="ObscuringOpacity"></a>
          * <h3>Combined obscuring opacity</h3>

@@ -4217,6 +4217,7 @@ public final class ActiveServices {
                 Slog.w(TAG, "Forcing bringing down service: " + sr);
                 sr.isolatedProc = null;
                 mPendingServices.remove(i);
+                size = mPendingServices.size();
                 i--;
                 needOomAdj = true;
                 bringDownServiceLocked(sr, true);

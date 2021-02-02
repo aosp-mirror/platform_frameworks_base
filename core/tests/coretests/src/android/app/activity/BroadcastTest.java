@@ -56,6 +56,8 @@ public class BroadcastTest extends ActivityTestsBase {
             "com.android.frameworks.coretests.activity.BROADCAST_MULTI";
     public static final String BROADCAST_ABORT =
             "com.android.frameworks.coretests.activity.BROADCAST_ABORT";
+    public static final String BROADCAST_RESULT =
+            "com.android.frameworks.coretests.activity.BROADCAST_RESULT";
 
     public static final String BROADCAST_STICKY1 =
             "com.android.frameworks.coretests.activity.BROADCAST_STICKY1";
@@ -106,7 +108,14 @@ public class BroadcastTest extends ActivityTestsBase {
     }
 
     public Intent makeBroadcastIntent(String action) {
+        return makeBroadcastIntent(action, false);
+    }
+
+    public Intent makeBroadcastIntent(String action, boolean makeImplicit) {
         Intent intent = new Intent(action, null);
+        if (makeImplicit) {
+            intent.addFlags(intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        }
         intent.putExtra("caller", mCallTarget);
         return intent;
     }
@@ -277,7 +286,7 @@ public class BroadcastTest extends ActivityTestsBase {
             map.putString("foo", "you");
             map.putString("remove", "me");
             getContext().sendOrderedBroadcast(
-                    new Intent("com.android.frameworks.coretests.activity.BROADCAST_RESULT"),
+                    makeBroadcastIntent(BROADCAST_RESULT, true),
                     null, broadcastReceiver, null, 1, "foo", map);
             while (!broadcastReceiver.mHaveResult) {
                 try {
@@ -424,10 +433,13 @@ public class BroadcastTest extends ActivityTestsBase {
 
     public void testLocalReceivePermissionGranted() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_LOCAL});
-        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_LOCAL_GRANTED));
+        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_LOCAL_GRANTED, true));
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
 
+    /*
+    // TODO: multi-package test b/c self-target broadcasts are always allowed
+    // even when gated on ungranted permissions
     public void testLocalReceivePermissionDenied() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_RESULTS});
 
@@ -438,16 +450,17 @@ public class BroadcastTest extends ActivityTestsBase {
         };
 
         getContext().sendOrderedBroadcast(
-                makeBroadcastIntent(BROADCAST_LOCAL_DENIED),
+                makeBroadcastIntent(BROADCAST_LOCAL_DENIED, true),
                 null, finish, null, Activity.RESULT_CANCELED,
                 null, null);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
+    */
 
     public void testLocalBroadcastPermissionGranted() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_LOCAL});
         getContext().sendBroadcast(
-                makeBroadcastIntent(BROADCAST_LOCAL),
+                makeBroadcastIntent(BROADCAST_LOCAL, true),
                 PERMISSION_GRANTED);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
@@ -462,7 +475,7 @@ public class BroadcastTest extends ActivityTestsBase {
         };
 
         getContext().sendOrderedBroadcast(
-                makeBroadcastIntent(BROADCAST_LOCAL),
+                makeBroadcastIntent(BROADCAST_LOCAL, true),
                 PERMISSION_DENIED, finish, null, Activity.RESULT_CANCELED,
                 null, null);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
@@ -470,10 +483,13 @@ public class BroadcastTest extends ActivityTestsBase {
 
     public void testRemoteReceivePermissionGranted() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_REMOTE});
-        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_REMOTE_GRANTED));
+        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_REMOTE_GRANTED, true));
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
 
+    /*
+    // TODO: multi-package test b/c self-target broadcasts are always allowed
+    // even when gated on ungranted permissions
     public void testRemoteReceivePermissionDenied() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_RESULTS});
 
@@ -484,16 +500,17 @@ public class BroadcastTest extends ActivityTestsBase {
         };
 
         getContext().sendOrderedBroadcast(
-                makeBroadcastIntent(BROADCAST_REMOTE_DENIED),
+                makeBroadcastIntent(BROADCAST_REMOTE_DENIED, true),
                 null, finish, null, Activity.RESULT_CANCELED,
                 null, null);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
+    */
 
     public void testRemoteBroadcastPermissionGranted() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_REMOTE});
         getContext().sendBroadcast(
-                makeBroadcastIntent(BROADCAST_REMOTE),
+                makeBroadcastIntent(BROADCAST_REMOTE, true),
                 PERMISSION_GRANTED);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
@@ -508,7 +525,7 @@ public class BroadcastTest extends ActivityTestsBase {
         };
 
         getContext().sendOrderedBroadcast(
-                makeBroadcastIntent(BROADCAST_REMOTE),
+                makeBroadcastIntent(BROADCAST_REMOTE, true),
                 PERMISSION_DENIED, finish, null, Activity.RESULT_CANCELED,
                 null, null);
         waitForResultOrThrow(BROADCAST_TIMEOUT);
@@ -516,13 +533,13 @@ public class BroadcastTest extends ActivityTestsBase {
 
     public void testReceiverCanNotRegister() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_LOCAL});
-        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_FAIL_REGISTER));
+        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_FAIL_REGISTER, true));
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
 
     public void testReceiverCanNotBind() throws Exception {
         setExpectedReceivers(new String[]{RECEIVER_LOCAL});
-        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_FAIL_BIND));
+        getContext().sendBroadcast(makeBroadcastIntent(BROADCAST_FAIL_BIND, true));
         waitForResultOrThrow(BROADCAST_TIMEOUT);
     }
 

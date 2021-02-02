@@ -168,8 +168,8 @@ public class Vcn extends Handler {
             @NonNull NetworkRequest request, int score, int providerId) {
         if (score > getNetworkScore()) {
             Slog.v(getLogTag(),
-                    "Request " + request.requestId + " already satisfied by higher-scoring ("
-                            + score + ") network from provider " + providerId);
+                    "Request already satisfied by higher-scoring (" + score + ") network from "
+                            + "provider " + providerId + ": " + request);
             return;
         }
 
@@ -177,8 +177,7 @@ public class Vcn extends Handler {
         for (VcnGatewayConnectionConfig gatewayConnectionConfig : mVcnGatewayConnections.keySet()) {
             if (requestSatisfiedByGatewayConnectionConfig(request, gatewayConnectionConfig)) {
                 Slog.v(getLogTag(),
-                        "Request " + request.requestId
-                                + " satisfied by existing VcnGatewayConnection");
+                        "Request already satisfied by existing VcnGatewayConnection: " + request);
                 return;
             }
         }
@@ -202,12 +201,12 @@ public class Vcn extends Handler {
 
     private boolean requestSatisfiedByGatewayConnectionConfig(
             @NonNull NetworkRequest request, @NonNull VcnGatewayConnectionConfig config) {
-        final NetworkCapabilities configCaps = new NetworkCapabilities();
+        final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
         for (int cap : config.getAllExposedCapabilities()) {
-            configCaps.addCapability(cap);
+            builder.addCapability(cap);
         }
 
-        return request.networkCapabilities.satisfiedByNetworkCapabilities(configCaps);
+        return request.canBeSatisfiedBy(builder.build());
     }
 
     private String getLogTag() {

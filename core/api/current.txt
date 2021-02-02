@@ -8350,6 +8350,7 @@ package android.appwidget {
     method public android.appwidget.AppWidgetProviderInfo clone();
     method public int describeContents();
     method public final android.os.UserHandle getProfile();
+    method @NonNull public android.content.pm.ActivityInfo getProviderInfo();
     method @Nullable public final String loadDescription(@NonNull android.content.Context);
     method public final android.graphics.drawable.Drawable loadIcon(@NonNull android.content.Context, int);
     method public final String loadLabel(android.content.pm.PackageManager);
@@ -10374,6 +10375,7 @@ package android.content {
     field public static final String LAUNCHER_APPS_SERVICE = "launcherapps";
     field public static final String LAYOUT_INFLATER_SERVICE = "layout_inflater";
     field public static final String LOCATION_SERVICE = "location";
+    field public static final String MEDIA_COMMUNICATION_SERVICE = "media_communication";
     field public static final String MEDIA_METRICS_SERVICE = "media_metrics";
     field public static final String MEDIA_PROJECTION_SERVICE = "media_projection";
     field public static final String MEDIA_ROUTER_SERVICE = "media_router";
@@ -11867,6 +11869,7 @@ package android.content.pm {
   }
 
   public class LauncherActivityInfo {
+    method @NonNull public android.content.pm.ActivityInfo getActivityInfo();
     method public android.content.pm.ApplicationInfo getApplicationInfo();
     method public android.graphics.drawable.Drawable getBadgedIcon(int);
     method public android.content.ComponentName getComponentName();
@@ -12239,6 +12242,7 @@ package android.content.pm {
     method @NonNull public abstract android.content.pm.ActivityInfo getReceiverInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.res.Resources getResourcesForActivity(@NonNull android.content.ComponentName) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.res.Resources getResourcesForApplication(@NonNull android.content.pm.ApplicationInfo) throws android.content.pm.PackageManager.NameNotFoundException;
+    method @NonNull public android.content.res.Resources getResourcesForApplication(@NonNull android.content.pm.ApplicationInfo, @Nullable android.content.res.Configuration) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.res.Resources getResourcesForApplication(@NonNull String) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract android.content.pm.ServiceInfo getServiceInfo(@NonNull android.content.ComponentName, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public abstract java.util.List<android.content.pm.SharedLibraryInfo> getSharedLibraries(int);
@@ -18499,6 +18503,7 @@ package android.hardware.input {
   public final class InputManager {
     method public android.view.InputDevice getInputDevice(int);
     method public int[] getInputDeviceIds();
+    method public float getMaximumObscuringOpacityForTouch();
     method public void registerInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener, android.os.Handler);
     method public void unregisterInputDeviceListener(android.hardware.input.InputManager.InputDeviceListener);
     method @Nullable public android.view.VerifiedInputEvent verifyInputEvent(@NonNull android.view.InputEvent);
@@ -25630,8 +25635,6 @@ package android.net {
     method public void applyTransportModeTransform(@NonNull java.net.Socket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
     method public void applyTransportModeTransform(@NonNull java.net.DatagramSocket, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
     method public void applyTransportModeTransform(@NonNull java.io.FileDescriptor, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void applyTunnelModeTransform(@NonNull android.net.IpSecManager.IpSecTunnelInterface, int, @NonNull android.net.IpSecTransform) throws java.io.IOException;
-    method @NonNull @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public android.net.IpSecManager.IpSecTunnelInterface createIpSecTunnelInterface(@NonNull android.net.Network) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket(int) throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method @NonNull public android.net.IpSecManager.UdpEncapsulationSocket openUdpEncapsulationSocket() throws java.io.IOException, android.net.IpSecManager.ResourceUnavailableException;
     method public void removeTransportModeTransforms(@NonNull java.net.Socket) throws java.io.IOException;
@@ -25639,12 +25642,6 @@ package android.net {
     method public void removeTransportModeTransforms(@NonNull java.io.FileDescriptor) throws java.io.IOException;
     field public static final int DIRECTION_IN = 0; // 0x0
     field public static final int DIRECTION_OUT = 1; // 0x1
-  }
-
-  public static final class IpSecManager.IpSecTunnelInterface implements java.lang.AutoCloseable {
-    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void addAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
-    method public void close();
-    method @RequiresPermission("android.permission.MANAGE_IPSEC_TUNNELS") public void removeAddress(@NonNull java.net.InetAddress, int) throws java.io.IOException;
   }
 
   public static final class IpSecManager.ResourceUnavailableException extends android.util.AndroidException {
