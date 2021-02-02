@@ -268,7 +268,7 @@ public final class VibrationAttributes implements Parcelable {
     }
 
     /** @hide */
-    public String usageToString(int usage) {
+    public static String usageToString(int usage) {
         switch (usage) {
             case USAGE_UNKNOWN:
                 return "UNKNOWN";
