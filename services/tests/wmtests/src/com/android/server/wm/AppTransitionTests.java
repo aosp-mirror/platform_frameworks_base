@@ -265,10 +265,8 @@ public class AppTransitionTests extends WindowTestsBase {
     private class TestRemoteAnimationRunner implements IRemoteAnimationRunner {
         boolean mCancelled = false;
         @Override
-        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
-                RemoteAnimationTarget[] apps,
+        public void onAnimationStart(RemoteAnimationTarget[] apps,
                 RemoteAnimationTarget[] wallpapers,
-                RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback) throws RemoteException {
         }
 

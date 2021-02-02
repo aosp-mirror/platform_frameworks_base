@@ -18,11 +18,9 @@ package com.android.systemui.shared.system;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.WindowManager.TRANSIT_CLOSE;
-import static android.view.WindowManager.TRANSIT_OLD_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
-import static android.view.WindowManager.TransitionOldType;
 
 import android.os.RemoteException;
 import android.util.Log;
@@ -67,17 +65,13 @@ public class RemoteAnimationAdapterCompat {
             final RemoteAnimationRunnerCompat remoteAnimationAdapter) {
         return new IRemoteAnimationRunner.Stub() {
             @Override
-            public void onAnimationStart(@TransitionOldType int transit,
-                    RemoteAnimationTarget[] apps,
+            public void onAnimationStart(RemoteAnimationTarget[] apps,
                     RemoteAnimationTarget[] wallpapers,
-                    RemoteAnimationTarget[] nonApps,
                     final IRemoteAnimationFinishedCallback finishedCallback) {
                 final RemoteAnimationTargetCompat[] appsCompat =
                         RemoteAnimationTargetCompat.wrap(apps);
                 final RemoteAnimationTargetCompat[] wallpapersCompat =
                         RemoteAnimationTargetCompat.wrap(wallpapers);
-                final RemoteAnimationTargetCompat[] nonAppsCompat =
-                        RemoteAnimationTargetCompat.wrap(nonApps);
                 final Runnable animationFinishedCallback = new Runnable() {
                     @Override
                     public void run() {
@@ -89,8 +83,8 @@ public class RemoteAnimationAdapterCompat {
                         }
                     }
                 };
-                remoteAnimationAdapter.onAnimationStart(transit, appsCompat, wallpapersCompat,
-                        nonAppsCompat, animationFinishedCallback);
+                remoteAnimationAdapter.onAnimationStart(appsCompat, wallpapersCompat,
+                        animationFinishedCallback);
             }
 
             @Override
@@ -110,9 +104,6 @@ public class RemoteAnimationAdapterCompat {
                         RemoteAnimationTargetCompat.wrap(info, false /* wallpapers */);
                 final RemoteAnimationTargetCompat[] wallpapersCompat =
                         RemoteAnimationTargetCompat.wrap(info, true /* wallpapers */);
-                // TODO(bc-unlock): Build wrapped object for non-apps target.
-                final RemoteAnimationTargetCompat[] nonAppsCompat =
-                        new RemoteAnimationTargetCompat[0];
                 final Runnable animationFinishedCallback = new Runnable() {
                     @Override
                     public void run() {
@@ -156,10 +147,7 @@ public class RemoteAnimationAdapterCompat {
                     }
                 }
                 t.apply();
-                // TODO(bc-unlcok): Pass correct transit type.
-                remoteAnimationAdapter.onAnimationStart(
-                        TRANSIT_OLD_NONE,
-                        appsCompat, wallpapersCompat, nonAppsCompat,
+                remoteAnimationAdapter.onAnimationStart(appsCompat, wallpapersCompat,
                         animationFinishedCallback);
             }
         };
