@@ -280,6 +280,12 @@ public final class SipDelegateImsConfiguration implements Parcelable {
             "sip_config_path_header_string";
 
     /**
+     * The SIP User-Agent header value used by the IMS stack during IMS registration.
+     */
+    public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING =
+            "sip_config_sip_user_agent_header_string";
+
+    /**
      * SIP User part string in contact header
      */
     public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING =
@@ -292,10 +298,18 @@ public final class SipDelegateImsConfiguration implements Parcelable {
             "sip_config_p_access_network_info_header_string";
 
     /**
-     * SIP P-last-access-network-info header string
+     * The SIP P-last-access-network-info header value, populated for networks that require this
+     * information to be provided in outgoing SIP messages.
      */
     public static final String KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING =
             "sip_config_p_last_access_network_info_header_string";
+
+    /**
+     * The Cellular-Network-Info header value (See 3GPP 24.229, section 7.2.15), populated for
+     * networks that require this information to be provided as part of outgoing SIP messages.
+     */
+    public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING =
+            "sip_config_cellular_network_info_header_string";
 
     /**
      * SIP P-associated-uri header string
@@ -320,9 +334,11 @@ public final class SipDelegateImsConfiguration implements Parcelable {
             KEY_SIP_CONFIG_SERVICE_ROUTE_HEADER_STRING,
             KEY_SIP_CONFIG_SECURITY_VERIFY_HEADER_STRING,
             KEY_SIP_CONFIG_PATH_HEADER_STRING,
+            KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING,
             KEY_SIP_CONFIG_URI_USER_PART_STRING,
             KEY_SIP_CONFIG_P_ACCESS_NETWORK_INFO_HEADER_STRING,
             KEY_SIP_CONFIG_P_LAST_ACCESS_NETWORK_INFO_HEADER_STRING,
+            KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING,
             KEY_SIP_CONFIG_P_ASSOCIATED_URI_HEADER_STRING
     })
     @Retention(RetentionPolicy.SOURCE)

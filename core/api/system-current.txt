@@ -6286,6 +6286,7 @@ package android.net {
     method @Nullable public String getSsid();
     method @NonNull public int[] getTransportTypes();
     method public boolean satisfiedByNetworkCapabilities(@Nullable android.net.NetworkCapabilities);
+    field public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28; // 0x1c
     field public static final int NET_CAPABILITY_OEM_PAID = 22; // 0x16
     field public static final int NET_CAPABILITY_OEM_PRIVATE = 26; // 0x1a
     field public static final int NET_CAPABILITY_PARTIAL_CONNECTIVITY = 24; // 0x18
@@ -9262,6 +9263,33 @@ package android.telecom {
     field @Deprecated public static final int ROUTE_WIRED_OR_EARPIECE = 5; // 0x5
   }
 
+  public final class BluetoothCallQualityReport implements android.os.Parcelable {
+    method public int describeContents();
+    method @IntRange(from=0) public int getNegativeAcknowledgementCount();
+    method @IntRange(from=0) public int getPacketsNotReceivedCount();
+    method @IntRange(from=0) public int getRetransmittedPacketsCount();
+    method @IntRange(from=0xffffff81, to=20) public int getRssiDbm();
+    method public long getSentTimestampMillis();
+    method public int getSnrDb();
+    method public boolean isChoppyVoice();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telecom.BluetoothCallQualityReport> CREATOR;
+    field public static final String EVENT_BLUETOOTH_CALL_QUALITY_REPORT = "android.telecom.event.BLUETOOTH_CALL_QUALITY_REPORT";
+    field public static final String EXTRA_BLUETOOTH_CALL_QUALITY_REPORT = "android.telecom.extra.BLUETOOTH_CALL_QUALITY_REPORT";
+  }
+
+  public static final class BluetoothCallQualityReport.Builder {
+    ctor public BluetoothCallQualityReport.Builder();
+    method @NonNull public android.telecom.BluetoothCallQualityReport build();
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setChoppyVoice(boolean);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setNegativeAcknowledgementCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setPacketsNotReceivedCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setRetransmittedPacketsCount(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setRssiDbm(int);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setSentTimestampMillis(long);
+    method @NonNull public android.telecom.BluetoothCallQualityReport.Builder setSnrDb(int);
+  }
+
   public final class Call {
     method @Deprecated public void addListener(android.telecom.Call.Listener);
     method public void enterBackgroundAudioProcessing();
@@ -10426,6 +10454,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isOffhook();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isOpportunisticNetworkEnabled();
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public boolean isPotentialEmergencyNumber(@NonNull String);
+    method public boolean isRadioInterfaceCapabilitySupported(@NonNull String);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRadioOn();
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isTetheringApnRequired();
@@ -10499,6 +10528,7 @@ package android.telephony {
     field public static final int CALL_WAITING_STATUS_ENABLED = 1; // 0x1
     field public static final int CALL_WAITING_STATUS_NOT_SUPPORTED = 4; // 0x4
     field public static final int CALL_WAITING_STATUS_UNKNOWN_ERROR = 3; // 0x3
+    field public static final String CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE = "CAPABILITY_SECONDARY_LINK_BANDWIDTH_VISIBLE";
     field public static final int CARRIER_PRIVILEGE_STATUS_ERROR_LOADING_RULES = -2; // 0xfffffffe
     field public static final int CARRIER_PRIVILEGE_STATUS_HAS_ACCESS = 1; // 0x1
     field public static final int CARRIER_PRIVILEGE_STATUS_NO_ACCESS = 0; // 0x0
@@ -11959,6 +11989,7 @@ package android.telephony.ims {
     field public static final String IPTYPE_IPV6 = "IPV6";
     field public static final String KEY_SIP_CONFIG_AUTHENTICATION_HEADER_STRING = "sip_config_auhentication_header_string";
     field public static final String KEY_SIP_CONFIG_AUTHENTICATION_NONCE_STRING = "sip_config_authentication_nonce_string";
+    field public static final String KEY_SIP_CONFIG_CELLULAR_NETWORK_INFO_HEADER_STRING = "sip_config_cellular_network_info_header_string";
     field public static final String KEY_SIP_CONFIG_HOME_DOMAIN_STRING = "sip_config_home_domain_string";
     field public static final String KEY_SIP_CONFIG_IMEI_STRING = "sip_config_imei_string";
     field public static final String KEY_SIP_CONFIG_IPTYPE_STRING = "sip_config_iptype_string";
@@ -11991,6 +12022,7 @@ package android.telephony.ims {
     field public static final String KEY_SIP_CONFIG_UE_PUBLIC_PORT_WITH_NAT_INT = "sip_config_ue_public_port_with_nat_int";
     field public static final String KEY_SIP_CONFIG_UE_PUBLIC_USER_ID_STRING = "sip_config_ue_public_user_id_string";
     field public static final String KEY_SIP_CONFIG_URI_USER_PART_STRING = "sip_config_uri_user_part_string";
+    field public static final String KEY_SIP_CONFIG_USER_AGENT_HEADER_STRING = "sip_config_sip_user_agent_header_string";
     field public static final String SIP_TRANSPORT_TCP = "TCP";
     field public static final String SIP_TRANSPORT_UDP = "UDP";
   }

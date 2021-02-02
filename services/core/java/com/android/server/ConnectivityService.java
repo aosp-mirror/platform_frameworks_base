@@ -216,8 +216,6 @@ import com.android.server.net.LockdownVpnTracker;
 import com.android.server.net.NetworkPolicyManagerInternal;
 import com.android.server.utils.PriorityDump;
 
-import com.google.android.collect.Lists;
-
 import libcore.io.IoUtils;
 
 import java.io.FileDescriptor;
@@ -1577,7 +1575,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     @Override
     public NetworkInfo[] getAllNetworkInfo() {
         enforceAccessPermission();
-        final ArrayList<NetworkInfo> result = Lists.newArrayList();
+        final ArrayList<NetworkInfo> result = new ArrayList<>();
         for (int networkType = 0; networkType <= ConnectivityManager.MAX_NETWORK_TYPE;
                 networkType++) {
             NetworkInfo info = getNetworkInfo(networkType);
@@ -1851,7 +1849,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // This contains IMSI details, so make sure the caller is privileged.
         NetworkStack.checkNetworkStackPermission(mContext);
 
-        final ArrayList<NetworkState> result = Lists.newArrayList();
+        final ArrayList<NetworkState> result = new ArrayList<>();
         for (Network network : getAllNetworks()) {
             final NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
             if (nai != null) {
