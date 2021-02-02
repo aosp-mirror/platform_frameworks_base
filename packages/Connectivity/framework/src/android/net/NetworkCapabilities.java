@@ -34,9 +34,9 @@ import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.CollectionUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -767,7 +767,7 @@ public final class NetworkCapabilities implements Parcelable {
         if (originalOwnerUid == creatorUid) {
             setOwnerUid(creatorUid);
         }
-        if (ArrayUtils.contains(originalAdministratorUids, creatorUid)) {
+        if (CollectionUtils.contains(originalAdministratorUids, creatorUid)) {
             setAdministratorUids(new int[] {creatorUid});
         }
         // There is no need to clear the UIDs, they have already been cleared by clearAll() above.
@@ -1873,7 +1873,7 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" OwnerUid: ").append(mOwnerUid);
         }
 
-        if (!ArrayUtils.isEmpty(mAdministratorUids)) {
+        if (mAdministratorUids != null && mAdministratorUids.length != 0) {
             sb.append(" AdminUids: ").append(Arrays.toString(mAdministratorUids));
         }
 
@@ -2506,7 +2506,7 @@ public final class NetworkCapabilities implements Parcelable {
         @NonNull
         public NetworkCapabilities build() {
             if (mCaps.getOwnerUid() != Process.INVALID_UID) {
-                if (!ArrayUtils.contains(mCaps.getAdministratorUids(), mCaps.getOwnerUid())) {
+                if (!CollectionUtils.contains(mCaps.getAdministratorUids(), mCaps.getOwnerUid())) {
                     throw new IllegalStateException("The owner UID must be included in "
                             + " administrator UIDs.");
                 }
