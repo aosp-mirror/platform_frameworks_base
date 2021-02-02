@@ -54,6 +54,7 @@ public class UnderlyingNetworkTracker {
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
+    @NonNull private final Set<Integer> mRequiredUnderlyingNetworkCapabilities;
     @NonNull private final UnderlyingNetworkTrackerCallback mCb;
     @NonNull private final Dependencies mDeps;
     @NonNull private final Handler mHandler;
@@ -62,8 +63,6 @@ public class UnderlyingNetworkTracker {
     @NonNull private final Map<Integer, NetworkCallback> mCellBringupCallbacks = new ArrayMap<>();
     @NonNull private final NetworkCallback mWifiBringupCallback = new NetworkBringupCallback();
     @NonNull private final NetworkCallback mRouteSelectionCallback = new RouteSelectionCallback();
-
-    @NonNull private final Set<Integer> mRequiredUnderlyingNetworkCapabilities;
 
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
     private boolean mIsRunning = true;
