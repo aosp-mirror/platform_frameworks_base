@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
 import android.annotation.TestApi;
@@ -1275,6 +1276,7 @@ public final class PendingIntent implements Parcelable {
      * @param flags MATCH_* flags from {@link android.content.pm.PackageManager}.
      * @hide
      */
+    @SuppressLint("NullableCollection")
     @RequiresPermission(permission.GET_INTENT_SENDER_INTENT)
     @SystemApi(client = Client.MODULE_LIBRARIES)
     @TestApi

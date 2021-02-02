@@ -345,7 +345,8 @@ public class VoiceInteractionService extends Service {
      */
     @SystemApi
     @HotwordConfigResult
-    public final int setHotwordDetectionConfig(@Nullable Bundle options) {
+    public final int setHotwordDetectionConfig(
+            @SuppressLint("NullableCollection") @Nullable Bundle options) {
         if (mSystemService == null) {
             throw new IllegalStateException("Not available until onReady() is called");
         }
