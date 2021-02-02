@@ -2771,13 +2771,6 @@
     <!-- Controls menu, edit [CHAR_LIMIT=30] -->
     <string name="controls_menu_edit">Edit controls</string>
 
-    <!-- Device-specific path to the node for enabling/disabling the high-brightness mode -->
-    <string name="udfps_hbm_sysfs_path" translatable="false"></string>
-    <!-- Device-specific payload for enabling the high-brightness mode -->
-    <string name="udfps_hbm_enable_command" translatable="false"></string>
-    <!-- Device-specific payload for disabling the high-brightness mode -->
-    <string name="udfps_hbm_disable_command" translatable="false"></string>
-
     <!-- Title for the media output group dialog with media related devices [CHAR LIMIT=50] -->
     <string name="media_output_dialog_add_output">Add outputs</string>
     <!-- Title for the media output slice with group devices [CHAR LIMIT=50] -->
