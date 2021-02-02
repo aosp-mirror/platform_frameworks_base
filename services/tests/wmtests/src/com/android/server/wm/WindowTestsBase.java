@@ -340,7 +340,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
 
         final WindowState w = new WindowState(service, session, iWindow, token, parent,
                 OP_NONE, attrs, VISIBLE, ownerId, userId,
-                ownerCanAddInternalSystemWindow, false /* ownerCanUseBackgroundBlur */,
+                ownerCanAddInternalSystemWindow,
                 powerManagerWrapper);
         // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
         // adding it to the token...
@@ -1213,8 +1213,7 @@ class WindowTestsBase extends SystemServiceTestsBase {
         TestWindowState(WindowManagerService service, Session session, IWindow window,
                 WindowManager.LayoutParams attrs, WindowToken token) {
             super(service, session, window, token, null, OP_NONE, attrs, 0, 0, 0,
-                    false /* ownerCanAddInternalSystemWindow */,
-                    false /* ownerCanUseBackgroundBlur */);
+                    false /* ownerCanAddInternalSystemWindow */);
         }
 
         @Override
