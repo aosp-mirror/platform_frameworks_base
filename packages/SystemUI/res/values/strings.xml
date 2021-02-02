@@ -1888,7 +1888,7 @@
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
     <string name="feedback_demoted">This notification was automatically &lt;b>ranked lower&lt;/b> in your shade.</string>
     <!-- Notification Inline controls: prompts the user for feedback [CHAR_LIMIT=NONE] -->
-    <string name="feedback_prompt">Was this correct?</string>
+    <string name="feedback_prompt">Let the developer know your feedback. Was this correct?</string>
     <!-- Notification Inline controls: responds to user provided feedback [CHAR_LIMIT=NONE] -->
     <string name="feedback_response">Thanks for your feedback!</string>
     <string name="feedback_ok">OK</string>
