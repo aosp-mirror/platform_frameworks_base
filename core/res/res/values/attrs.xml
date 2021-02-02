@@ -4069,6 +4069,7 @@
         <attr name="dial" format="reference"/>
         <attr name="hand_hour" format="reference"/>
         <attr name="hand_minute" format="reference"/>
+        <attr name="hand_second" format="reference"/>
     </declare-styleable>
     <declare-styleable name="Button">
     </declare-styleable>
