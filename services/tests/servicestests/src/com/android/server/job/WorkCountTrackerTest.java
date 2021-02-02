@@ -21,9 +21,11 @@ import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
-import android.util.Log;
+import android.annotation.NonNull;
 import android.util.Pair;
+import android.util.SparseIntArray;
 
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -58,106 +60,112 @@ public class WorkCountTrackerTest {
      * Represents running and pending jobs.
      */
     class Jobs {
-        public int runningFg;
-        public int runningBg;
-        public int pendingFg;
-        public int pendingBg;
+        public final SparseIntArray running = new SparseIntArray();
+        public final SparseIntArray pending = new SparseIntArray();
 
         public void maybeEnqueueJobs(double startRatio, double fgJobRatio) {
             while (mRandom.nextDouble() < startRatio) {
                 if (mRandom.nextDouble() < fgJobRatio) {
-                    pendingFg++;
+                    pending.put(WORK_TYPE_TOP, pending.get(WORK_TYPE_TOP) + 1);
                 } else {
-                    pendingBg++;
+                    pending.put(WORK_TYPE_BG, pending.get(WORK_TYPE_BG) + 1);
                 }
             }
         }
 
         public void maybeFinishJobs(double stopRatio) {
-            for (int i = runningBg; i > 0; i--) {
+            for (int i = running.get(WORK_TYPE_BG); i > 0; i--) {
                 if (mRandom.nextDouble() < stopRatio) {
-                    runningBg--;
+                    running.put(WORK_TYPE_BG, running.get(WORK_TYPE_BG) - 1);
                 }
             }
-            for (int i = runningFg; i > 0; i--) {
+            for (int i = running.get(WORK_TYPE_TOP); i > 0; i--) {
                 if (mRandom.nextDouble() < stopRatio) {
-                    runningFg--;
+                    running.put(WORK_TYPE_TOP, running.get(WORK_TYPE_TOP) - 1);
                 }
             }
         }
     }
 
 
-    private void startPendingJobs(Jobs jobs, int totalMax, int maxBg, int minBg) {
-        mWorkCountTracker.setConfig(new JobConcurrencyManager.WorkTypeConfig("critical",
-                totalMax,
-                // defaultMin
-                List.of(Pair.create(WORK_TYPE_TOP, totalMax - maxBg),
-                        Pair.create(WORK_TYPE_BG, minBg)),
-                // defaultMax
-                List.of(Pair.create(WORK_TYPE_BG, maxBg))));
+    private void startPendingJobs(Jobs jobs, int totalMax,
+            @NonNull List<Pair<Integer, Integer>> minLimits,
+            @NonNull List<Pair<Integer, Integer>> maxLimits) {
+        mWorkCountTracker.setConfig(new JobConcurrencyManager.WorkTypeConfig(
+                "test", totalMax, minLimits, maxLimits));
         mWorkCountTracker.resetCounts();
 
-        for (int i = 0; i < jobs.runningFg; i++) {
-            mWorkCountTracker.incrementRunningJobCount(WORK_TYPE_TOP);
-        }
-        for (int i = 0; i < jobs.runningBg; i++) {
-            mWorkCountTracker.incrementRunningJobCount(WORK_TYPE_BG);
-        }
+        for (int i = 0; i < jobs.running.size(); ++i) {
+            final int workType = jobs.running.keyAt(i);
+            final int count = jobs.running.valueAt(i);
 
-        for (int i = 0; i < jobs.pendingFg; i++) {
-            mWorkCountTracker.incrementPendingJobCount(WORK_TYPE_TOP);
+            for (int c = 0; c < count; ++c) {
+                mWorkCountTracker.incrementRunningJobCount(workType);
+            }
         }
-        for (int i = 0; i < jobs.pendingBg; i++) {
-            mWorkCountTracker.incrementPendingJobCount(WORK_TYPE_BG);
+        for (int i = 0; i < jobs.pending.size(); ++i) {
+            final int workType = jobs.pending.keyAt(i);
+            final int count = jobs.pending.valueAt(i);
+
+            for (int c = 0; c < count; ++c) {
+                mWorkCountTracker.incrementPendingJobCount(workType);
+            }
         }
 
         mWorkCountTracker.onCountDone();
 
-        while ((jobs.pendingFg > 0
+        while ((jobs.pending.get(WORK_TYPE_TOP) > 0
                 && mWorkCountTracker.canJobStart(WORK_TYPE_TOP) != WORK_TYPE_NONE)
-                || (jobs.pendingBg > 0
+                || (jobs.pending.get(WORK_TYPE_BG) > 0
                 && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE)) {
             final boolean isStartingFg = mRandom.nextBoolean();
 
             if (isStartingFg) {
-                if (jobs.pendingFg > 0
+                if (jobs.pending.get(WORK_TYPE_TOP) > 0
                         && mWorkCountTracker.canJobStart(WORK_TYPE_TOP) != WORK_TYPE_NONE) {
-                    jobs.pendingFg--;
-                    jobs.runningFg++;
+                    jobs.pending.put(WORK_TYPE_TOP, jobs.pending.get(WORK_TYPE_TOP) - 1);
+                    jobs.running.put(WORK_TYPE_TOP, jobs.running.get(WORK_TYPE_TOP) + 1);
                     mWorkCountTracker.stageJob(WORK_TYPE_TOP);
                     mWorkCountTracker.onJobStarted(WORK_TYPE_TOP);
                 }
             } else {
-                if (jobs.pendingBg > 0
+                if (jobs.pending.get(WORK_TYPE_BG) > 0
                         && mWorkCountTracker.canJobStart(WORK_TYPE_BG) != WORK_TYPE_NONE) {
-                    jobs.pendingBg--;
-                    jobs.runningBg++;
+                    jobs.pending.put(WORK_TYPE_BG, jobs.pending.get(WORK_TYPE_BG) - 1);
+                    jobs.running.put(WORK_TYPE_BG, jobs.running.get(WORK_TYPE_BG) + 1);
                     mWorkCountTracker.stageJob(WORK_TYPE_BG);
                     mWorkCountTracker.onJobStarted(WORK_TYPE_BG);
                 }
             }
         }
-
-        Log.i(TAG, "" + mWorkCountTracker);
     }
 
     /**
      * Used by the following testRandom* tests.
      */
-    private void checkRandom(Jobs jobs, int numTests, int totalMax, int maxBg, int minBg,
+    private void checkRandom(Jobs jobs, int numTests, int totalMax,
+            @NonNull List<Pair<Integer, Integer>> minLimits,
+            @NonNull List<Pair<Integer, Integer>> maxLimits,
             double startRatio, double fgJobRatio, double stopRatio) {
         for (int i = 0; i < numTests; i++) {
-
             jobs.maybeFinishJobs(stopRatio);
             jobs.maybeEnqueueJobs(startRatio, fgJobRatio);
 
-            startPendingJobs(jobs, totalMax, maxBg, minBg);
+            startPendingJobs(jobs, totalMax, minLimits, maxLimits);
 
-            assertThat(jobs.runningFg).isAtMost(totalMax);
-            assertThat(jobs.runningBg).isAtMost(totalMax);
-            assertThat(jobs.runningFg + jobs.runningBg).isAtMost(totalMax);
-            assertThat(jobs.runningBg).isAtMost(maxBg);
+            int totalRunning = 0;
+            for (int r = 0; r < jobs.running.size(); ++r) {
+                final int numRunning = jobs.running.valueAt(r);
+                assertWithMessage(
+                        "Work type " + jobs.running.keyAt(r) + " is running too many jobs")
+                        .that(numRunning).isAtMost(totalMax);
+                totalRunning += numRunning;
+            }
+            assertThat(totalRunning).isAtMost(totalMax);
+            for (Pair<Integer, Integer> maxLimit : maxLimits) {
+                assertWithMessage("Work type " + maxLimit.first + " is running too many jobs")
+                        .that(jobs.running.get(maxLimit.first)).isAtMost(maxLimit.second);
+            }
         }
     }
 
@@ -170,13 +178,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final int maxBg = 4;
-        final int minBg = 2;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.1;
         final double fgJobRatio = 0.5;
         final double startRatio = 0.1;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio , stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -185,13 +194,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 2;
-        final int maxBg = 2;
-        final int minBg = 0;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> minLimits = List.of();
         final double stopRatio = 0.5;
         final double fgJobRatio = 0.5;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -200,13 +210,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 2;
-        final int maxBg = 2;
-        final int minBg = 2;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.5;
         final double fgJobRatio = 0.5;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -215,13 +226,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 10;
-        final int maxBg = 2;
-        final int minBg = 0;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
+        final List<Pair<Integer, Integer>> minLimits = List.of();
         final double stopRatio = 0.5;
         final double fgJobRatio = 0.5;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -230,13 +242,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final int maxBg = 4;
-        final int minBg = 2;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.5;
         final double fgJobRatio = 0.1;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -245,13 +258,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final int maxBg = 4;
-        final int minBg = 2;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.5;
         final double fgJobRatio = 0.9;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -260,13 +274,14 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final int maxBg = 4;
-        final int minBg = 2;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.4;
         final double fgJobRatio = 0.1;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     @Test
@@ -275,53 +290,135 @@ public class WorkCountTrackerTest {
 
         final int numTests = 5000;
         final int totalMax = 6;
-        final int maxBg = 4;
-        final int minBg = 2;
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 4));
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 2));
         final double stopRatio = 0.4;
         final double fgJobRatio = 0.9;
         final double startRatio = 0.5;
 
-        checkRandom(jobs, numTests, totalMax, maxBg, minBg, startRatio, fgJobRatio, stopRatio);
+        checkRandom(jobs, numTests, totalMax, minLimits, maxLimits,
+                startRatio, fgJobRatio, stopRatio);
     }
 
     /** Used by the following tests */
-    private void checkSimple(int totalMax, int maxBg, int minBg,
-            int runningFg, int runningBg, int pendingFg, int pendingBg,
-            int resultRunningFg, int resultRunningBg, int resultPendingFg, int resultPendingBg) {
+    private void checkSimple(int totalMax,
+            @NonNull List<Pair<Integer, Integer>> minLimits,
+            @NonNull List<Pair<Integer, Integer>> maxLimits,
+            @NonNull List<Pair<Integer, Integer>> running,
+            @NonNull List<Pair<Integer, Integer>> pending,
+            @NonNull List<Pair<Integer, Integer>> resultRunning,
+            @NonNull List<Pair<Integer, Integer>> resultPending) {
         final Jobs jobs = new Jobs();
-        jobs.runningFg = runningFg;
-        jobs.runningBg = runningBg;
-        jobs.pendingFg = pendingFg;
-        jobs.pendingBg = pendingBg;
+        for (Pair<Integer, Integer> run : running) {
+            jobs.running.put(run.first, run.second);
+        }
+        for (Pair<Integer, Integer> pend : pending) {
+            jobs.pending.put(pend.first, pend.second);
+        }
 
-        startPendingJobs(jobs, totalMax, maxBg, minBg);
+        startPendingJobs(jobs, totalMax, minLimits, maxLimits);
 
-//        fail(mWorkerCountTracker.toString());
-        assertThat(jobs.runningFg).isEqualTo(resultRunningFg);
-        assertThat(jobs.runningBg).isEqualTo(resultRunningBg);
-
-        assertThat(jobs.pendingFg).isEqualTo(resultPendingFg);
-        assertThat(jobs.pendingBg).isEqualTo(resultPendingBg);
+        for (Pair<Integer, Integer> run : resultRunning) {
+            assertWithMessage("Incorrect running result for work type " + run.first)
+                    .that(jobs.running.get(run.first)).isEqualTo(run.second);
+        }
+        for (Pair<Integer, Integer> pend : resultPending) {
+            assertWithMessage("Incorrect pending result for work type " + pend.first)
+                    .that(jobs.pending.get(pend.first)).isEqualTo(pend.second);
+        }
     }
-
 
     @Test
     public void testBasic() {
-        // Args are:
-        // First 3: Total-max, bg-max, bg-min.
-        // Next 2:  Running FG / BG
-        // Next 2:  Pending FG / BG
-        // Next 4:  Result running FG / BG, pending FG/BG.
-        checkSimple(6, 4, 2, /*run=*/ 0, 0, /*pen=*/ 1, 0, /*res run/pen=*/ 1, 0, 0, 0);
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* run */ List.of(),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 1)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 1)),
+                /* resPen */ List.of());
 
-        checkSimple(6, 4, 2, /*run=*/ 0, 0, /*pen=*/ 10, 0, /*res run/pen=*/ 6, 0, 4, 0);
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* run */ List.of(),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 4)));
 
         // When there are BG jobs pending, 2 (min-BG) jobs should run.
-        checkSimple(6, 4, 2, /*run=*/ 0, 0, /*pen=*/ 10, 1, /*res run/pen=*/ 5, 1, 5, 0);
-        checkSimple(6, 4, 2, /*run=*/ 0, 0, /*pen=*/ 10, 3, /*res run/pen=*/ 4, 2, 6, 1);
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* run */ List.of(),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 1)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 5), Pair.create(WORK_TYPE_BG, 1)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 5)));
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* run */ List.of(),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 2)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 1)));
 
-        checkSimple(8, 6, 2, /*run=*/ 0, 0, /*pen=*/ 0, 49, /*res run/pen=*/ 0, 6, 0, 43);
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* run */ List.of(),
+                /* pen */ List.of(Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_BG, 43)));
 
-        checkSimple(6, 4, 2, /*run=*/ 6, 0, /*pen=*/ 10, 3, /*res run/pen=*/ 6, 0, 10, 3);
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* run */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 4)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_BG, 47)));
+
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 6)),
+                /* run */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 4)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 4), Pair.create(WORK_TYPE_BG, 4)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 8), Pair.create(WORK_TYPE_BG, 49)));
+
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 6)),
+                /* run */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 1)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 2)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 48)));
+
+        checkSimple(8,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 1)),
+                /* max */ List.of(Pair.create(WORK_TYPE_TOP, 6), Pair.create(WORK_TYPE_BG, 2)),
+                /* run */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 49)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 2), Pair.create(WORK_TYPE_BG, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 8), Pair.create(WORK_TYPE_BG, 49)));
+
+        checkSimple(6,
+                /* min */ List.of(Pair.create(WORK_TYPE_BG, 2)),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 4)),
+                /* run */ List.of(Pair.create(WORK_TYPE_TOP, 6)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_TOP, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)));
+
+        // This could happen if we lower the effective config due to higher memory pressure after
+        // we've already started running jobs. We shouldn't stop already running jobs, but also
+        // shouldn't start new ones.
+        checkSimple(5,
+                /* min */ List.of(),
+                /* max */ List.of(Pair.create(WORK_TYPE_BG, 1)),
+                /* run */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)),
+                /* resRun */ List.of(Pair.create(WORK_TYPE_BG, 6)),
+                /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)));
     }
 }
