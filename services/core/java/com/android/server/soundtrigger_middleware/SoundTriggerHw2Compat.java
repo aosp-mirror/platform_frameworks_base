@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
+import android.system.OsConstants;
 
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -125,6 +126,13 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
         }
     }
 
+    private static void handleHalStatusAllowBusy(int status, String methodName) {
+        if (status == -OsConstants.EBUSY) {
+            throw new RecoverableException(Status.RESOURCE_CONTENTION);
+        }
+        handleHalStatus(status, methodName);
+    }
+
     @Override
     public android.hardware.soundtrigger.V2_3.Properties getProperties() {
         try {
@@ -177,7 +185,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
                             retval.set(r);
                             handle.set(h);
                         });
-                handleHalStatus(retval.get(), "loadSoundModel_2_4");
+                handleHalStatusAllowBusy(retval.get(), "loadSoundModel_2_4");
             } catch (NotSupported e) {
                 // Fall-back to the 2.1 version:
                 try {
@@ -213,7 +221,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
                             retval.set(r);
                             handle.set(h);
                         });
-                handleHalStatus(retval.get(), "loadPhraseSoundModel_2_4");
+                handleHalStatusAllowBusy(retval.get(), "loadPhraseSoundModel_2_4");
             } catch (NotSupported e) {
                 // Fall-back to the 2.1 version:
                 try {
@@ -265,7 +273,7 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
         try {
             try {
                 int retval = as2_4().startRecognition_2_4(modelHandle, config);
-                handleHalStatus(retval, "startRecognition_2_4");
+                handleHalStatusAllowBusy(retval, "startRecognition_2_4");
             } catch (NotSupported e) {
                 // Fall-back to the 2.3 version:
                 try {

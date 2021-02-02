@@ -252,6 +252,31 @@ public class SoundTriggerMiddlewareImplTest {
     }
 
     @Test
+    public void testStartRecognitionBusy() throws Exception {
+        initService(true);
+        ISoundTriggerCallback callback = createCallbackMock();
+        ISoundTriggerModule module = mService.attach(0, callback);
+
+        // Load the model.
+        final int hwHandle = 7;
+        int handle = loadGenericModel(module, hwHandle).first;
+
+        // Start the model.
+        doThrow(new RecoverableException(Status.RESOURCE_CONTENTION)).when(
+                mHalDriver).startRecognition(eq(7), any());
+
+        try {
+            RecognitionConfig config = TestUtil.createRecognitionConfig();
+            module.startRecognition(handle, config);
+            fail("Expected an exception");
+        } catch (RecoverableException e) {
+            assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
+        }
+
+        verify(mHalDriver).startRecognition(eq(7), any());
+    }
+
+    @Test
     public void testStartStopPhraseRecognition() throws Exception {
         initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
