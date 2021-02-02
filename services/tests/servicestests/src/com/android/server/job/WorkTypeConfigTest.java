@@ -18,6 +18,9 @@ package com.android.server.job;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_BG;
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_TOP;
 
+import static org.junit.Assert.fail;
+
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.provider.DeviceConfig;
 import android.util.Pair;
@@ -32,6 +35,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -58,42 +62,90 @@ public class WorkTypeConfigTest {
     }
 
     private void check(@Nullable DeviceConfig.Properties config,
-            int defaultTotal, int defaultMaxBg, int defaultMinBg,
-            int expectedTotal, int expectedMaxBg, int expectedMinBg) throws Exception {
+            int defaultTotal,
+            @Nullable Pair<Integer, Integer> defaultTopLimits,
+            @Nullable Pair<Integer, Integer> defaultBgLimits,
+            boolean expectedValid, int expectedTotal,
+            @NonNull Pair<Integer, Integer> expectedTopLimits,
+            @NonNull Pair<Integer, Integer> expectedBgLimits) throws Exception {
         resetConfig();
         if (config != null) {
             DeviceConfig.setProperties(config);
         }
 
-        final WorkTypeConfig counts = new WorkTypeConfig("test",
-                defaultTotal,
-                // defaultMin
-                List.of(Pair.create(WORK_TYPE_TOP, defaultTotal - defaultMaxBg),
-                        Pair.create(WORK_TYPE_BG, defaultMinBg)),
-                // defaultMax
-                List.of(Pair.create(WORK_TYPE_BG, defaultMaxBg)));
+        List<Pair<Integer, Integer>> defaultMin = new ArrayList<>();
+        List<Pair<Integer, Integer>> defaultMax = new ArrayList<>();
+        Integer val;
+        if (defaultTopLimits != null) {
+            if ((val = defaultTopLimits.first) != null) {
+                defaultMin.add(Pair.create(WORK_TYPE_TOP, val));
+            }
+            if ((val = defaultTopLimits.second) != null) {
+                defaultMax.add(Pair.create(WORK_TYPE_TOP, val));
+            }
+        }
+        if (defaultBgLimits != null) {
+            if ((val = defaultBgLimits.first) != null) {
+                defaultMin.add(Pair.create(WORK_TYPE_BG, val));
+            }
+            if ((val = defaultBgLimits.second) != null) {
+                defaultMax.add(Pair.create(WORK_TYPE_BG, val));
+            }
+        }
+
+        final WorkTypeConfig counts;
+        try {
+            counts = new WorkTypeConfig("test",
+                    defaultTotal, defaultMin, defaultMax);
+            if (!expectedValid) {
+                fail("Invalid config successfully created");
+                return;
+            }
+        } catch (IllegalArgumentException e) {
+            if (expectedValid) {
+                throw e;
+            } else {
+                // Success
+                return;
+            }
+        }
 
         counts.update(DeviceConfig.getProperties(DeviceConfig.NAMESPACE_JOB_SCHEDULER));
 
         Assert.assertEquals(expectedTotal, counts.getMaxTotal());
-        Assert.assertEquals(expectedMaxBg, counts.getMax(WORK_TYPE_BG));
-        Assert.assertEquals(expectedMinBg, counts.getMinReserved(WORK_TYPE_BG));
+        Assert.assertEquals((int) expectedTopLimits.first, counts.getMinReserved(WORK_TYPE_TOP));
+        Assert.assertEquals((int) expectedTopLimits.second, counts.getMax(WORK_TYPE_TOP));
+        Assert.assertEquals((int) expectedBgLimits.first, counts.getMinReserved(WORK_TYPE_BG));
+        Assert.assertEquals((int) expectedBgLimits.second, counts.getMax(WORK_TYPE_BG));
     }
 
     @Test
     public void test() throws Exception {
         // Tests with various combinations.
-        check(null, /*default*/ 5, 1, 0, /*expected*/ 5, 1, 0);
-        check(null, /*default*/ 5, 0, 0, /*expected*/ 5, 1, 0);
-        check(null, /*default*/ 0, 0, 0, /*expected*/ 1, 1, 0);
-        check(null, /*default*/ -1, -1, -1, /*expected*/ 1, 1, 0);
-        check(null, /*default*/ 5, 5, 5, /*expected*/ 5, 5, 4);
-        check(null, /*default*/ 6, 5, 6, /*expected*/ 6, 5, 5);
-        check(null, /*default*/ 4, 5, 6, /*expected*/ 4, 4, 3);
-        check(null, /*default*/ 5, 1, 1, /*expected*/ 5, 1, 1);
-        check(null, /*default*/ 15, 15, 15, /*expected*/ 15, 15, 14);
-        check(null, /*default*/ 16, 16, 16, /*expected*/ 16, 16, 15);
-        check(null, /*default*/ 20, 20, 20, /*expected*/ 16, 16, 15);
+        check(null, /*default*/ 5, Pair.create(4, null), Pair.create(0, 1),
+                /*expected*/ true, 5, Pair.create(4, 5), Pair.create(0, 1));
+        check(null, /*default*/ 5, Pair.create(5, null), Pair.create(0, 0),
+                /*expected*/ true, 5, Pair.create(5, 5), Pair.create(0, 1));
+        check(null, /*default*/ 0, Pair.create(5, null), Pair.create(0, 0),
+                /*expected*/ false, 1, Pair.create(1, 1), Pair.create(0, 1));
+        check(null, /*default*/ -1, null, Pair.create(-1, -1),
+                /*expected*/ false, 1, Pair.create(1, 1), Pair.create(0, 1));
+        check(null, /*default*/ 5, null, Pair.create(5, 5),
+                /*expected*/ true, 5, Pair.create(1, 5), Pair.create(4, 5));
+        check(null, /*default*/ 6, Pair.create(1, null), Pair.create(6, 5),
+                /*expected*/ false, 6, Pair.create(1, 6), Pair.create(5, 5));
+        check(null, /*default*/ 4, null, Pair.create(6, 5),
+                /*expected*/ false, 4, Pair.create(1, 4), Pair.create(3, 4));
+        check(null, /*default*/ 5, Pair.create(4, null), Pair.create(1, 1),
+                /*expected*/ true, 5, Pair.create(4, 5), Pair.create(1, 1));
+        check(null, /*default*/ 15, null, Pair.create(15, 15),
+                /*expected*/ true, 15, Pair.create(1, 15), Pair.create(14, 15));
+        check(null, /*default*/ 16, null, Pair.create(16, 16),
+                /*expected*/ true, 16, Pair.create(1, 16), Pair.create(15, 16));
+        check(null, /*default*/ 20, null, Pair.create(20, 20),
+                /*expected*/ false, 16, Pair.create(1, 16), Pair.create(15, 16));
+        check(null, /*default*/ 20, null, Pair.create(16, 16),
+                /*expected*/ true, 16, Pair.create(1, 16), Pair.create(15, 16));
 
         // Test for overriding with a setting string.
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
@@ -101,15 +153,26 @@ public class WorkTypeConfigTest {
                         .setInt(KEY_MAX_BG, 4)
                         .setInt(KEY_MIN_BG, 3)
                         .build(),
-                /*default*/ 9, 9, 9, /*expected*/ 5, 4, 3);
+                /*default*/ 9, null, Pair.create(9, 9),
+                /*expected*/ true, 5, Pair.create(1, 5), Pair.create(3, 4));
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MAX_TOTAL, 5).build(),
-                /*default*/ 9, 9, 9, /*expected*/ 5, 5, 4);
+                /*default*/ 9, null, Pair.create(9, 9),
+                /*expected*/ true, 5, Pair.create(1, 5), Pair.create(4, 5));
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MAX_BG, 4).build(),
-                /*default*/ 9, 9, 9, /*expected*/ 9, 4, 4);
+                /*default*/ 9, null, Pair.create(9, 9),
+                /*expected*/ true, 9, Pair.create(1, 9), Pair.create(4, 4));
         check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
                         .setInt(KEY_MIN_BG, 3).build(),
-                /*default*/ 9, 9, 9, /*expected*/ 9, 9, 3);
+                /*default*/ 9, null, Pair.create(9, 9),
+                /*expected*/ true, 9, Pair.create(1, 9), Pair.create(3, 9));
+        check(new DeviceConfig.Properties.Builder(DeviceConfig.NAMESPACE_JOB_SCHEDULER)
+                        .setInt(KEY_MAX_TOTAL, 20)
+                        .setInt(KEY_MAX_BG, 20)
+                        .setInt(KEY_MIN_BG, 8)
+                        .build(),
+                /*default*/ 9, null, Pair.create(9, 9),
+                /*expected*/ true, 16, Pair.create(1, 16), Pair.create(8, 16));
     }
 }
