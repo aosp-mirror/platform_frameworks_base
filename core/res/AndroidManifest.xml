@@ -5425,6 +5425,11 @@
     <permission android:name="android.permission.MANAGE_TOAST_RATE_LIMITING"
                 android:protectionLevel="signature" />
 
+    <!-- Allows managing the Game Mode
+     @hide Used internally. -->
+    <permission android:name="android.permission.MANAGE_GAME_MODE"
+                android:protectionLevel="signature" />
+
     <!-- Attribution for Geofencing service. -->
     <attribution android:tag="GeofencingService" android:label="@string/geofencing_service"/>
     <!-- Attribution for Country Detector. -->
