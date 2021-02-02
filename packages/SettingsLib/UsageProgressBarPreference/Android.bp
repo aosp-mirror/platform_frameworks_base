@@ -6,6 +6,7 @@ android_library {
 
     static_libs: [
         "androidx.preference_preference",
+        "androidx-constraintlayout_constraintlayout",
     ],
 
     sdk_version: "system_current",
