@@ -151,6 +151,7 @@ class InsetsSourceProvider {
             // animate-out as new one animates-in.
             mWin.cancelAnimation();
             mWin.mPendingPositionChanged = null;
+            mWin.mProvidedInsetsSources.remove(mSource.getType());
         }
         ProtoLog.d(WM_DEBUG_IME, "InsetsSource setWin %s", win);
         mWin = win;
@@ -160,11 +161,14 @@ class InsetsSourceProvider {
             setServerVisible(false);
             mSource.setFrame(new Rect());
             mSource.setVisibleFrame(null);
-        } else if (mControllable) {
-            mWin.setControllableInsetProvider(this);
-            if (mPendingControlTarget != null) {
-                updateControlForTarget(mPendingControlTarget, true /* force */);
-                mPendingControlTarget = null;
+        } else {
+            mWin.mProvidedInsetsSources.put(mSource.getType(), mSource);
+            if (mControllable) {
+                mWin.setControllableInsetProvider(this);
+                if (mPendingControlTarget != null) {
+                    updateControlForTarget(mPendingControlTarget, true /* force */);
+                    mPendingControlTarget = null;
+                }
             }
         }
     }
