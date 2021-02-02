@@ -1245,6 +1245,32 @@ public final class InputManager {
     }
 
     /**
+     * Get the battery status of the input device
+     * @param deviceId The input device ID
+     * @hide
+     */
+    public int getBatteryStatus(int deviceId) {
+        try {
+            return mIm.getBatteryStatus(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the remaining battery capacity of the input device
+     * @param deviceId The input device ID
+     * @hide
+     */
+    public int getBatteryCapacity(int deviceId) {
+        try {
+            return mIm.getBatteryCapacity(deviceId);
+        } catch (RemoteException ex) {
+            throw ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add a runtime association between the input port and the display port. This overrides any
      * static associations.
      * @param inputPort The port of the input device.
@@ -1468,6 +1494,15 @@ public final class InputManager {
             mInputDeviceSensorManager = new InputDeviceSensorManager(this);
         }
         return mInputDeviceSensorManager.getSensorManager(deviceId);
+    }
+
+    /**
+     * Gets a battery object associated with an input device, assuming it has one.
+     * @return The battery, never null.
+     * @hide
+     */
+    public InputDeviceBattery getInputDeviceBattery(int deviceId, boolean hasBattery) {
+        return new InputDeviceBattery(this, deviceId, hasBattery);
     }
 
     /**
