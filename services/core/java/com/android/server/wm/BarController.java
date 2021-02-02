@@ -52,10 +52,19 @@ public class BarController {
         return !win.isLetterboxedOverlappingWith(getContentFrame(win));
     }
 
-    boolean isTransparentAllowed(WindowState win) {
+    /**
+     * @return {@code true} if bar is allowed to be fully transparent when given window is show.
+     *
+     * <p>Prevents showing a transparent bar over a letterboxed activity which can make
+     * notification icons or navigation buttons unreadable due to contrast between letterbox
+     * background and an activity. For instance, this happens when letterbox background is solid
+     * black while activity is white. To resolve this, only semi-transparent bars are allowed to
+     * be drawn over letterboxed activity.
+     */
+    boolean isFullyTransparentAllowed(WindowState win) {
         if (win == null) {
             return true;
         }
-        return win.isTransparentBarAllowed(getContentFrame(win));
+        return win.isFullyTransparentBarAllowed(getContentFrame(win));
     }
 }

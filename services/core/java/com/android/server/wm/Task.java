@@ -3082,6 +3082,20 @@ class Task extends WindowContainer<WindowContainer> {
         return parentTask == null ? this : parentTask.getRootTask();
     }
 
+    /** @return the first organized task. */
+    @Nullable
+    Task getOrganizedTask() {
+        if (isOrganized()) {
+            return this;
+        }
+        final WindowContainer parent = getParent();
+        if (parent == null) {
+            return null;
+        }
+        final Task parentTask = parent.asTask();
+        return parentTask == null ? null : parentTask.getOrganizedTask();
+    }
+
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
     boolean isRootTask() {
         return getRootTask() == this;
@@ -4172,6 +4186,14 @@ class Task extends WindowContainer<WindowContainer> {
         info.topActivityInfo = mReuseActivitiesReport.top != null
                 ? mReuseActivitiesReport.top.info
                 : null;
+        info.topActivityToken = mReuseActivitiesReport.top != null
+                ? mReuseActivitiesReport.top.appToken
+                : null;
+        // Whether the direct top activity is in size compat mode on foreground.
+        info.topActivityInSizeCompat = mReuseActivitiesReport.top != null
+                && mReuseActivitiesReport.top.getOrganizedTask() == this
+                && mReuseActivitiesReport.top.inSizeCompatMode()
+                && mReuseActivitiesReport.top.isState(RESUMED);
         info.launchCookies.clear();
         info.addLaunchCookie(mLaunchCookie);
         forAllActivities(r -> {
@@ -5219,6 +5241,12 @@ class Task extends WindowContainer<WindowContainer> {
         if (inPinnedWindowingMode()) {
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
+    }
+
+    /** Called when the top activity in the Root Task enters or exits size compat mode. */
+    void onSizeCompatActivityChanged() {
+        // Trigger TaskInfoChanged to update the size compat restart button.
+        dispatchTaskInfoChangedIfNeeded(true /* force */);
     }
 
     /**

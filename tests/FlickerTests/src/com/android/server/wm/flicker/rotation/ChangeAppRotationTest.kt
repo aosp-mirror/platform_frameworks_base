@@ -20,7 +20,6 @@ import android.os.Bundle
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
@@ -54,10 +53,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ChangeAppRotationTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object : RotationTransition(InstrumentationRegistry.getInstrumentation()) {
         override val testApp: StandardAppHelper
             get() = SimpleAppHelper(instrumentation)
@@ -66,7 +63,7 @@ class ChangeAppRotationTest(
 
         private const val SCREENSHOT_LAYER = "RotationLayer"
 
-        @Parameterized.Parameters(name = "{0}")
+        @Parameterized.Parameters(name = "{0}1}")
         @JvmStatic
         fun getParams(): Collection<Array<Any>> {
             val testSpec: FlickerBuilder.(Bundle) -> Unit = { configuration ->
@@ -119,8 +116,8 @@ class ChangeAppRotationTest(
                 }
             }
 
-            return FlickerTestRunnerFactory(instrumentation, repetitions = 5)
-                .buildRotationTest(transition, testSpec)
+            return FlickerTestRunnerFactory.getInstance()
+                .buildRotationTest(instrumentation, transition, testSpec, repetitions = 5)
         }
     }
 }

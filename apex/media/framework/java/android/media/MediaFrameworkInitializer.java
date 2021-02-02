@@ -19,9 +19,10 @@ package android.media;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.SystemApi.Client;
-import android.media.MediaTranscodeManager;
 import android.app.SystemServiceRegistry;
 import android.content.Context;
+
+import com.android.modules.utils.build.SdkLevel;
 
 /**
  * Class for performing registration for all media services on com.android.media apex.
@@ -74,5 +75,12 @@ public class MediaFrameworkInitializer {
                 MediaTranscodeManager.class,
                 context -> new MediaTranscodeManager(context)
         );
+        if (SdkLevel.isAtLeastS()) {
+            SystemServiceRegistry.registerContextAwareService(
+                    Context.MEDIA_COMMUNICATION_SERVICE,
+                    MediaCommunicationManager.class,
+                    context -> new MediaCommunicationManager(context)
+            );
+        }
     }
 }

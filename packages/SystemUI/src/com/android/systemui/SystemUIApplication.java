@@ -127,7 +127,7 @@ public class SystemUIApplication extends Application implements
                     }
 
                     // If SHOW_PEOPLE_SPACE is true, enable People Space widget provider.
-                    // TODO(b/170396074): Remove this when we don't need a widget anymore.
+                    // TODO(b/170396074): Migrate to new feature flag (go/silk-flags-howto)
                     try {
                         int showPeopleSpace = Settings.Global.getInt(context.getContentResolver(),
                                 Settings.Global.SHOW_PEOPLE_SPACE, 1);

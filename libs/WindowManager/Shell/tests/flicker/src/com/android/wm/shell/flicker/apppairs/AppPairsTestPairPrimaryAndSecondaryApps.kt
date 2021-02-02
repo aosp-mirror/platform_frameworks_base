@@ -21,13 +21,12 @@ import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.FlickerTestBase
+import com.android.wm.shell.flicker.FlickerTestBase.Companion.APP_PAIR_SPLIT_DIVIDER
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import org.junit.FixMethodOrder
@@ -44,10 +43,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class AppPairsTestPairPrimaryAndSecondaryApps(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object : AppPairsTransition(InstrumentationRegistry.getInstrumentation()) {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -67,8 +64,7 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
                     layersTrace {
                         appPairsDividerIsVisible()
                         end("appsEndingBounds", enabled = false) {
-                            val dividerRegion = entry.getVisibleBounds(
-                                    FlickerTestBase.APP_PAIR_SPLIT_DIVIDER)
+                            val dividerRegion = entry.getVisibleBounds(APP_PAIR_SPLIT_DIVIDER)
                             this.hasVisibleRegion(primaryApp.defaultWindowName,
                                 appPairsHelper.getPrimaryBounds(dividerRegion))
                                 .hasVisibleRegion(secondaryApp.defaultWindowName,
@@ -83,8 +79,8 @@ class AppPairsTestPairPrimaryAndSecondaryApps(
                     }
                 }
             }
-            return FlickerTestRunnerFactory(instrumentation,
-                repetitions = AppPairsHelper.TEST_REPETITIONS).buildTest(transition, testSpec)
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation, transition,
+                testSpec, repetitions = AppPairsHelper.TEST_REPETITIONS)
         }
     }
 }

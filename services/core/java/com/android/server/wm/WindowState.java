@@ -3846,11 +3846,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
-     * @return {@code true} if bar shown within a given frame is allowed to be transparent
+     * @return {@code true} if bar shown within a given frame is allowed to be fully transparent
      *     when the current window is displayed.
      */
-    boolean isTransparentBarAllowed(Rect frame) {
-        return mActivityRecord == null || mActivityRecord.isTransparentBarAllowed(frame);
+    boolean isFullyTransparentBarAllowed(Rect frame) {
+        return mActivityRecord == null || mActivityRecord.isFullyTransparentBarAllowed(frame);
     }
 
     public boolean isLetterboxedOverlappingWith(Rect rect) {

@@ -67,13 +67,26 @@ public interface WindowInsetsController {
     int APPEARANCE_LIGHT_NAVIGATION_BARS = 1 << 4;
 
     /**
+     * Makes status bars semi-transparent with dark background and light foreground.
+     * @hide
+     */
+    int APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS = 1 << 5;
+
+    /**
+     * Makes navigation bars semi-transparent with dark background and light foreground.
+     * @hide
+     */
+    int APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS = 1 << 6;
+
+    /**
      * Determines the appearance of system bars.
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true, value = {APPEARANCE_OPAQUE_STATUS_BARS, APPEARANCE_OPAQUE_NAVIGATION_BARS,
             APPEARANCE_LOW_PROFILE_BARS, APPEARANCE_LIGHT_STATUS_BARS,
-            APPEARANCE_LIGHT_NAVIGATION_BARS})
+            APPEARANCE_LIGHT_NAVIGATION_BARS, APPEARANCE_SEMI_TRANSPARENT_STATUS_BARS,
+            APPEARANCE_SEMI_TRANSPARENT_NAVIGATION_BARS})
     @interface Appearance {
     }
 

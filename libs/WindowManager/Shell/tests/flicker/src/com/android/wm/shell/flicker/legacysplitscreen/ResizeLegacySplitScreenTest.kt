@@ -25,7 +25,6 @@ import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
@@ -69,10 +68,8 @@ import org.junit.runners.Parameterized
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 @FlakyTest(bugId = 159096424)
 class ResizeLegacySplitScreenTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         private const val sSimpleActivity = "SimpleActivity"
         private const val sImeActivity = "ImeActivity"
@@ -86,9 +83,8 @@ class ResizeLegacySplitScreenTest(
             val testAppTop = SimpleAppHelper(instrumentation)
             val testAppBottom = ImeAppHelper(instrumentation)
 
-            return FlickerTestRunnerFactory(instrumentation,
-                supportedRotations = listOf(Surface.ROTATION_0))
-                .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0)) { configuration ->
                     withTestName {
                         val description = (startRatio.toString().replace("/", "-") + "_to_" +
                             stopRatio.toString().replace("/", "-"))
