@@ -64,7 +64,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
-import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
@@ -904,10 +903,8 @@ public class WindowContainerTests extends WindowTestsBase {
         final RemoteAnimationAdapter adapter = new RemoteAnimationAdapter(
                 new IRemoteAnimationRunner.Stub() {
                     @Override
-                    public void onAnimationStart(@WindowManager.TransitionOldType int transit,
-                            RemoteAnimationTarget[] apps,
+                    public void onAnimationStart(RemoteAnimationTarget[] apps,
                             RemoteAnimationTarget[] wallpapers,
-                            RemoteAnimationTarget[] nonApps,
                             IRemoteAnimationFinishedCallback finishedCallback) {
                         try {
                             finishedCallback.onAnimationFinished();

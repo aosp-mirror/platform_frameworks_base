@@ -86,7 +86,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ANIM;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerInternal.AppTransitionListener;
-import static com.android.server.wm.WindowManagerInternal.KeyguardExitAnimationStartListener;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.ROOT_TASK_CLIP_NONE;
 
@@ -264,7 +263,6 @@ public class AppTransition implements Dump {
     private long mLastClipRevealTransitionDuration = DEFAULT_APP_TRANSITION_DURATION;
 
     private final ArrayList<AppTransitionListener> mListeners = new ArrayList<>();
-    private KeyguardExitAnimationStartListener mKeyguardExitAnimationStartListener;
     private final ExecutorService mDefaultExecutor = Executors.newSingleThreadExecutor();
 
     private int mLastClipRevealMaxTranslation;
@@ -452,7 +450,7 @@ public class AppTransition implements Dump {
                 AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
 
         if (mRemoteAnimationController != null) {
-            mRemoteAnimationController.goodToGo(transit);
+            mRemoteAnimationController.goodToGo();
         }
         return redoLayout;
     }
@@ -513,11 +511,6 @@ public class AppTransition implements Dump {
 
     void unregisterListener(AppTransitionListener listener) {
         mListeners.remove(listener);
-    }
-
-    void registerKeygaurdExitAnimationStartListener(
-            KeyguardExitAnimationStartListener listener) {
-        mKeyguardExitAnimationStartListener = listener;
     }
 
     public void notifyAppTransitionFinishedLocked(IBinder token) {
