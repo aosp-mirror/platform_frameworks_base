@@ -665,9 +665,18 @@ class JobConcurrencyManager {
         WorkTypeConfig(@NonNull String configIdentifier, int defaultMaxTotal,
                 List<Pair<Integer, Integer>> defaultMin, List<Pair<Integer, Integer>> defaultMax) {
             mConfigIdentifier = configIdentifier;
-            mDefaultMaxTotal = mMaxTotal = defaultMaxTotal;
+            mDefaultMaxTotal = mMaxTotal = Math.min(defaultMaxTotal, MAX_JOB_CONTEXTS_COUNT);
+            int numReserved = 0;
             for (int i = defaultMin.size() - 1; i >= 0; --i) {
                 mDefaultMinReservedSlots.put(defaultMin.get(i).first, defaultMin.get(i).second);
+                numReserved += defaultMin.get(i).second;
+            }
+            if (mDefaultMaxTotal < 0 || numReserved > mDefaultMaxTotal) {
+                // We only create new configs on boot, so this should trigger during development
+                // (before the code gets checked in), so this makes sure the hard-coded defaults
+                // make sense. DeviceConfig values will be handled gracefully in update().
+                throw new IllegalArgumentException("Invalid default config: t=" + defaultMaxTotal
+                        + " min=" + defaultMin + " max=" + defaultMax);
             }
             for (int i = defaultMax.size() - 1; i >= 0; --i) {
                 mDefaultMaxAllowedSlots.put(defaultMax.get(i).first, defaultMax.get(i).second);
