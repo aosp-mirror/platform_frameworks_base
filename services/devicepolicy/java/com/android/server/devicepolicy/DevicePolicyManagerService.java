@@ -6450,7 +6450,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private void forceWipeUser(int userId, String wipeReasonForUser, boolean wipeSilently) {
         boolean success = false;
         try {
-            if (getCurrentForegroundUser() == userId) {
+            if (getCurrentForegroundUserId() == userId) {
                 mInjector.getIActivityManager().switchUser(UserHandle.USER_SYSTEM);
             }
 
@@ -7910,7 +7910,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slog.i(LOG_TAG, "Device owner set: " + admin + " on user " + userId);
 
             if (mInjector.userManagerIsHeadlessSystemUserMode()) {
-                int currentForegroundUser = getCurrentForegroundUser();
+                int currentForegroundUser = getCurrentForegroundUserId();
                 Slog.i(LOG_TAG, "setDeviceOwner(): setting " + admin
                         + " as profile owner on user " + currentForegroundUser);
                 // Sets profile owner on current foreground user since
@@ -9041,13 +9041,32 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return UserHandle.isSameApp(caller.getUid(), Process.SHELL_UID);
     }
 
-    private @UserIdInt int getCurrentForegroundUser() {
+    private @UserIdInt int getCurrentForegroundUserId() {
         try {
             return mInjector.getIActivityManager().getCurrentUser().id;
         } catch (RemoteException e) {
             Slog.wtf(LOG_TAG, "cannot get current user");
         }
         return UserHandle.USER_NULL;
+    }
+
+    @Override
+    public List<UserHandle> listForegroundAffiliatedUsers() {
+        checkIsDeviceOwner(getCallerIdentity());
+
+        int userId = mInjector.binderWithCleanCallingIdentity(() -> getCurrentForegroundUserId());
+
+        boolean isAffiliated;
+        synchronized (getLockObject()) {
+            isAffiliated = isUserAffiliatedWithDeviceLocked(userId);
+        }
+
+        if (!isAffiliated) return Collections.emptyList();
+
+        List<UserHandle> users = new ArrayList<>(1);
+        users.add(UserHandle.of(userId));
+
+        return users;
     }
 
     protected int getProfileParentId(int userHandle) {
@@ -12861,7 +12880,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     return CODE_NONSYSTEM_USER_EXISTS;
                 }
 
-                int currentForegroundUser = getCurrentForegroundUser();
+                int currentForegroundUser = getCurrentForegroundUserId();
                 if (callingUserId != currentForegroundUser
                         && mInjector.userManagerIsHeadlessSystemUserMode()
                         && currentForegroundUser == UserHandle.USER_SYSTEM) {
@@ -12955,6 +12974,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             mInjector.binderRestoreCallingIdentity(ident);
         }
         return CODE_OK;
+    }
+
+    private void checkIsDeviceOwner(CallerIdentity caller) {
+        Preconditions.checkCallAuthorization(isDeviceOwner(caller), caller.getUid()
+                + " is not device owner");
     }
 
     private ComponentName getOwnerComponent(String packageName, int userId) {
@@ -15447,7 +15471,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private boolean isLockTaskFeatureEnabled(int lockTaskFeature) throws RemoteException {
         //TODO(b/175285301): Explicitly get the user's identity to check.
         int lockTaskFeatures =
-                getUserData(getCurrentForegroundUser()).mLockTaskFeatures;
+                getUserData(getCurrentForegroundUserId()).mLockTaskFeatures;
         return (lockTaskFeatures & lockTaskFeature) == lockTaskFeature;
     }
 
