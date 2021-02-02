@@ -877,6 +877,10 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
 
         synchronized (mSurfaceControlLock) {
             mSurface.release();
+            if (mBlastBufferQueue != null) {
+                mBlastBufferQueue.destroy();
+                mBlastBufferQueue = null;
+            }
 
             if (mRtHandlingPositionUpdates) {
                 mRtReleaseSurfaces = true;
@@ -900,10 +904,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (mBlastSurfaceControl != null) {
             transaction.remove(mBlastSurfaceControl);
             mBlastSurfaceControl = null;
-        }
-        if (mBlastBufferQueue != null) {
-            mBlastBufferQueue.destroy();
-            mBlastBufferQueue = null;
         }
     }
 
