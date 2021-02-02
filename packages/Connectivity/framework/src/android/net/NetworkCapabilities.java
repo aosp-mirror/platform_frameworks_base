@@ -1779,6 +1779,15 @@ public final class NetworkCapabilities implements Parcelable {
         return 0;
     }
 
+    private <T extends Parcelable> void writeParcelableArraySet(Parcel in,
+            @Nullable ArraySet<T> val, int flags) {
+        final int size = (val != null) ? val.size() : -1;
+        in.writeInt(size);
+        for (int i = 0; i < size; i++) {
+            in.writeParcelable(val.valueAt(i), flags);
+        }
+    }
+
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeLong(mNetworkCapabilities);
@@ -1789,7 +1798,7 @@ public final class NetworkCapabilities implements Parcelable {
         dest.writeParcelable((Parcelable) mNetworkSpecifier, flags);
         dest.writeParcelable((Parcelable) mTransportInfo, flags);
         dest.writeInt(mSignalStrength);
-        dest.writeArraySet(mUids);
+        writeParcelableArraySet(dest, mUids, flags);
         dest.writeString(mSSID);
         dest.writeBoolean(mPrivateDnsBroken);
         dest.writeIntArray(getAdministratorUids());
@@ -1812,8 +1821,7 @@ public final class NetworkCapabilities implements Parcelable {
                 netCap.mNetworkSpecifier = in.readParcelable(null);
                 netCap.mTransportInfo = in.readParcelable(null);
                 netCap.mSignalStrength = in.readInt();
-                netCap.mUids = (ArraySet<UidRange>) in.readArraySet(
-                        null /* ClassLoader, null for default */);
+                netCap.mUids = readParcelableArraySet(in, null /* ClassLoader, null for default */);
                 netCap.mSSID = in.readString();
                 netCap.mPrivateDnsBroken = in.readBoolean();
                 netCap.setAdministratorUids(in.createIntArray());
@@ -1825,6 +1833,20 @@ public final class NetworkCapabilities implements Parcelable {
             @Override
             public NetworkCapabilities[] newArray(int size) {
                 return new NetworkCapabilities[size];
+            }
+
+            private @Nullable <T extends Parcelable> ArraySet<T> readParcelableArraySet(Parcel in,
+                    @Nullable ClassLoader loader) {
+                final int size = in.readInt();
+                if (size < 0) {
+                    return null;
+                }
+                final ArraySet<T> result = new ArraySet<>(size);
+                for (int i = 0; i < size; i++) {
+                    final T value = in.readParcelable(loader);
+                    result.append(value);
+                }
+                return result;
             }
         };
 
