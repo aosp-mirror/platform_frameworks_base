@@ -8435,6 +8435,9 @@
         <attr name="errorColor" format="color|reference" />
         <!-- The success color -->
         <attr name="successColor" format="color|reference"/>
+        <!-- The dot color -->
+        <attr name="dotColor" format="color|reference"/>
+
     </declare-styleable>
 
     <!-- =============================== -->

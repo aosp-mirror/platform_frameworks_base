@@ -622,9 +622,9 @@
          aliasing effects). This is only used on circular displays. -->
     <dimen name="circular_display_mask_thickness">1px</dimen>
 
-    <dimen name="lock_pattern_dot_line_width">3dp</dimen>
-    <dimen name="lock_pattern_dot_size">12dp</dimen>
-    <dimen name="lock_pattern_dot_size_activated">28dp</dimen>
+    <dimen name="lock_pattern_dot_line_width">22dp</dimen>
+    <dimen name="lock_pattern_dot_size">14dp</dimen>
+    <dimen name="lock_pattern_dot_size_activated">30dp</dimen>
 
     <dimen name="text_handle_min_size">40dp</dimen>
 
