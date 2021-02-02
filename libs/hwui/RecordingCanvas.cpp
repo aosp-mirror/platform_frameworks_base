@@ -561,7 +561,7 @@ public:
                 return;
             }
             c->concat(invertedMatrix);
-            mLayerSurface->draw(c, deviceBounds.fLeft, deviceBounds.fTop, nullptr);
+            mLayerSurface->draw(c, deviceBounds.fLeft, deviceBounds.fTop);
         } else {
             c->drawDrawable(drawable.get());
         }
