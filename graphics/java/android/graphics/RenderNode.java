@@ -693,6 +693,32 @@ public final class RenderNode {
         throw new IllegalArgumentException("Unrecognized outline?");
     }
 
+    /** @hide */
+    public boolean clearStretch() {
+        return nClearStretch(mNativeRenderNode);
+    }
+
+    /** @hide */
+    public boolean stretch(float left, float top, float right, float bottom,
+            float vecX, float vecY, float maxStretchAmount) {
+        if (1.0 < vecX || vecX < -1.0) {
+            throw new IllegalArgumentException("vecX must be in the range [-1, 1], was " + vecX);
+        }
+        if (1.0 < vecY || vecY < -1.0) {
+            throw new IllegalArgumentException("vecY must be in the range [-1, 1], was " + vecY);
+        }
+        if (top <= bottom || right <= left) {
+            throw new IllegalArgumentException(
+                    "Stretch region must not be empty, got "
+                            + new RectF(left, top, right, bottom).toString());
+        }
+        if (maxStretchAmount <= 0.0f) {
+            throw new IllegalArgumentException(
+                    "The max stretch amount must be >0, got " + maxStretchAmount);
+        }
+        return nStretch(mNativeRenderNode, left, top, right, bottom, vecX, vecY, maxStretchAmount);
+    }
+
     /**
      * Checks if the RenderNode has a shadow. That is, if the combination of {@link #getElevation()}
      * and {@link #getTranslationZ()} is greater than zero, there is an {@link Outline} set with
@@ -1636,6 +1662,13 @@ public final class RenderNode {
 
     @CriticalNative
     private static native boolean nSetOutlineNone(long renderNode);
+
+    @CriticalNative
+    private static native boolean nClearStretch(long renderNode);
+
+    @CriticalNative
+    private static native boolean nStretch(long renderNode, float left, float top, float right,
+            float bottom, float vecX, float vecY, float maxStretch);
 
     @CriticalNative
     private static native boolean nHasShadow(long renderNode);
