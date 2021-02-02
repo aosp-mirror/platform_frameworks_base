@@ -723,10 +723,5 @@ public class DisplayModeDirectorTest {
                         PEAK_REFRESH_RATE_URI);
             }
         }
-
-        @Override
-        public boolean isDeviceInteractive(@NonNull Context context) {
-            return true;
-        }
     }
 }
