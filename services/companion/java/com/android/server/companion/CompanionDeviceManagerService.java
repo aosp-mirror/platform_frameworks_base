@@ -926,7 +926,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         mPermissionControllerManager.getPrivilegesDescriptionStringForProfile(
                 deviceProfile, FgThread.getExecutor(), desc -> {
                         try {
-                            result.complete(requireNonNull(desc));
+                            result.complete(desc);
                         } catch (Exception e) {
                             result.completeExceptionally(e);
                         }
