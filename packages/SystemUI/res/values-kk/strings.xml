@@ -307,8 +307,8 @@
     <string name="accessibility_quick_settings_work_mode_on" msgid="2779253456042059110">"Жұмыс режимі қосулы."</string>
     <string name="accessibility_quick_settings_work_mode_changed_off" msgid="6256690740556798683">"Жұмыс режимі өшірілді."</string>
     <string name="accessibility_quick_settings_work_mode_changed_on" msgid="1105258550138313384">"Жұмыс режимі қосылды."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Data Saver өшірілді."</string>
-    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Data Saver қосылды."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_off" msgid="4910847127871603832">"Трафикті үнемдеу режимі өшірілді."</string>
+    <string name="accessibility_quick_settings_data_saver_changed_on" msgid="6370606590802623078">"Трафикті үнемдеу режимі қосылды."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_off" msgid="7608378211873807353">"Sensor Privacy функциясы өшірулі."</string>
     <string name="accessibility_quick_settings_sensor_privacy_changed_on" msgid="4267393685085328801">"Sensor Privacy функциясы қосулы."</string>
     <string name="accessibility_brightness" msgid="5391187016177823721">"Дисплей жарықтығы"</string>
@@ -399,7 +399,7 @@
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Тетеринг"</string>
     <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Хотспот"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Қосылуда…"</string>
-    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Data Saver қосулы"</string>
+    <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Трафикті үнемдеу режимі қосулы"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
       <item quantity="other">%d құрылғы</item>
       <item quantity="one">%d құрылғы</item>
@@ -822,9 +822,9 @@
     <string name="accessibility_long_click_tile" msgid="210472753156768705">"Параметрлерді ашу"</string>
     <string name="accessibility_status_bar_headphones" msgid="1304082414912647414">"Құлақаспап қосылды"</string>
     <string name="accessibility_status_bar_headset" msgid="2699275863720926104">"Құлақаспап жинағы қосылды"</string>
-    <string name="data_saver" msgid="3484013368530820763">"Data Saver"</string>
-    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Дерек сақтағыш қосулы"</string>
-    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Дерек сақтағышы өшірулі"</string>
+    <string name="data_saver" msgid="3484013368530820763">"Трафикті үнемдеу"</string>
+    <string name="accessibility_data_saver_on" msgid="5394743820189757731">"Трафикті үнемдеу режимі қосулы"</string>
+    <string name="accessibility_data_saver_off" msgid="58339669022107171">"Трафикті үнемдеу режимі өшірулі"</string>
     <string name="switch_bar_on" msgid="1770868129120096114">"Қосулы"</string>
     <string name="switch_bar_off" msgid="5669805115416379556">"Өшірулі"</string>
     <string name="tile_unavailable" msgid="3095879009136616920">"Қолжетімді емес"</string>
