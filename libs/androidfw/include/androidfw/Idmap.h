@@ -149,8 +149,8 @@ class IdmapResMap {
 class LoadedIdmap {
  public:
   // Loads an IDMAP from a chunk of memory. Returns nullptr if the IDMAP data was malformed.
-  static std::unique_ptr<const LoadedIdmap> Load(const StringPiece& idmap_path,
-                                                 const StringPiece& idmap_data);
+  static std::unique_ptr<LoadedIdmap> Load(const StringPiece& idmap_path,
+                                           const StringPiece& idmap_data);
 
   // Returns the path to the IDMAP.
   std::string_view IdmapPath() const {
