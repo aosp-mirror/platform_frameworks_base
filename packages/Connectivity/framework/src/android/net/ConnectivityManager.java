@@ -4609,7 +4609,7 @@ public class ConnectivityManager {
             // Set HTTP proxy system properties to match network.
             // TODO: Deprecate this static method and replace it with a non-static version.
             try {
-                Proxy.setHttpProxySystemProperty(getInstance().getDefaultProxy());
+                Proxy.setHttpProxyConfiguration(getInstance().getDefaultProxy());
             } catch (SecurityException e) {
                 // The process doesn't have ACCESS_NETWORK_STATE, so we can't fetch the proxy.
                 Log.e(TAG, "Can't set proxy properties", e);
