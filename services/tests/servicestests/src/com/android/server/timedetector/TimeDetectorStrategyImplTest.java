@@ -1123,10 +1123,10 @@ public class TimeDetectorStrategyImplTest {
     }
 
     /**
-     * A fake implementation of TimeDetectorStrategy.Callback. Besides tracking changes and behaving
-     * like the real thing should, it also asserts preconditions.
+     * A fake implementation of {@link TimeDetectorStrategyImpl.Environment}. Besides tracking
+     * changes and behaving like the real thing should, it also asserts preconditions.
      */
-    private static class FakeCallback implements TimeDetectorStrategyImpl.Callback {
+    private static class FakeEnvironment implements TimeDetectorStrategyImpl.Environment {
         private boolean mAutoTimeDetectionEnabled;
         private boolean mWakeLockAcquired;
         private long mElapsedRealtimeMillis;
@@ -1254,41 +1254,41 @@ public class TimeDetectorStrategyImplTest {
      */
     private class Script {
 
-        private final FakeCallback mFakeCallback;
+        private final FakeEnvironment mFakeEnvironment;
         private final TimeDetectorStrategyImpl mTimeDetectorStrategy;
 
         Script() {
-            mFakeCallback = new FakeCallback();
-            mTimeDetectorStrategy = new TimeDetectorStrategyImpl(mFakeCallback);
+            mFakeEnvironment = new FakeEnvironment();
+            mTimeDetectorStrategy = new TimeDetectorStrategyImpl(mFakeEnvironment);
         }
 
         Script pokeAutoTimeDetectionEnabled(boolean enabled) {
-            mFakeCallback.pokeAutoTimeDetectionEnabled(enabled);
+            mFakeEnvironment.pokeAutoTimeDetectionEnabled(enabled);
             return this;
         }
 
         Script pokeFakeClocks(TimestampedValue<Instant> timeInfo) {
-            mFakeCallback.pokeElapsedRealtimeMillis(timeInfo.getReferenceTimeMillis());
-            mFakeCallback.pokeSystemClockMillis(timeInfo.getValue().toEpochMilli());
+            mFakeEnvironment.pokeElapsedRealtimeMillis(timeInfo.getReferenceTimeMillis());
+            mFakeEnvironment.pokeSystemClockMillis(timeInfo.getValue().toEpochMilli());
             return this;
         }
 
         Script pokeThresholds(int systemClockUpdateThreshold) {
-            mFakeCallback.pokeSystemClockUpdateThreshold(systemClockUpdateThreshold);
+            mFakeEnvironment.pokeSystemClockUpdateThreshold(systemClockUpdateThreshold);
             return this;
         }
 
         Script pokeAutoOriginPriorities(@Origin int... autoOriginPriorities) {
-            mFakeCallback.pokeAutoOriginPriorities(autoOriginPriorities);
+            mFakeEnvironment.pokeAutoOriginPriorities(autoOriginPriorities);
             return this;
         }
 
         long peekElapsedRealtimeMillis() {
-            return mFakeCallback.peekElapsedRealtimeMillis();
+            return mFakeEnvironment.peekElapsedRealtimeMillis();
         }
 
         long peekSystemClockMillis() {
-            return mFakeCallback.peekSystemClockMillis();
+            return mFakeEnvironment.peekSystemClockMillis();
         }
 
         Script simulateTelephonyTimeSuggestion(TelephonyTimeSuggestion timeSuggestion) {
@@ -1324,13 +1324,13 @@ public class TimeDetectorStrategyImplTest {
         }
 
         Script simulateAutoTimeDetectionToggle() {
-            mFakeCallback.simulateAutoTimeZoneDetectionToggle();
+            mFakeEnvironment.simulateAutoTimeZoneDetectionToggle();
             mTimeDetectorStrategy.handleAutoTimeConfigChanged();
             return this;
         }
 
         Script simulateTimePassing(long clockIncrementMillis) {
-            mFakeCallback.simulateTimePassing(clockIncrementMillis);
+            mFakeEnvironment.simulateTimePassing(clockIncrementMillis);
             return this;
         }
 
@@ -1342,14 +1342,14 @@ public class TimeDetectorStrategyImplTest {
         }
 
         Script verifySystemClockWasNotSetAndResetCallTracking() {
-            mFakeCallback.verifySystemClockNotSet();
-            mFakeCallback.resetCallTracking();
+            mFakeEnvironment.verifySystemClockNotSet();
+            mFakeEnvironment.resetCallTracking();
             return this;
         }
 
         Script verifySystemClockWasSetAndResetCallTracking(long expectedSystemClockMillis) {
-            mFakeCallback.verifySystemClockWasSet(expectedSystemClockMillis);
-            mFakeCallback.resetCallTracking();
+            mFakeEnvironment.verifySystemClockWasSet(expectedSystemClockMillis);
+            mFakeEnvironment.resetCallTracking();
             return this;
         }
 
@@ -1427,7 +1427,7 @@ public class TimeDetectorStrategyImplTest {
         ManualTimeSuggestion generateManualTimeSuggestion(Instant suggestedTime) {
             TimestampedValue<Long> utcTime =
                     new TimestampedValue<>(
-                            mFakeCallback.peekElapsedRealtimeMillis(),
+                            mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new ManualTimeSuggestion(utcTime);
         }
@@ -1461,7 +1461,7 @@ public class TimeDetectorStrategyImplTest {
         NetworkTimeSuggestion generateNetworkTimeSuggestion(Instant suggestedTime) {
             TimestampedValue<Long> utcTime =
                     new TimestampedValue<>(
-                            mFakeCallback.peekElapsedRealtimeMillis(),
+                            mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new NetworkTimeSuggestion(utcTime);
         }
@@ -1473,7 +1473,7 @@ public class TimeDetectorStrategyImplTest {
         GnssTimeSuggestion generateGnssTimeSuggestion(Instant suggestedTime) {
             TimestampedValue<Long> utcTime =
                     new TimestampedValue<>(
-                            mFakeCallback.peekElapsedRealtimeMillis(),
+                            mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new GnssTimeSuggestion(utcTime);
         }
@@ -1485,7 +1485,7 @@ public class TimeDetectorStrategyImplTest {
         ExternalTimeSuggestion generateExternalTimeSuggestion(Instant suggestedTime) {
             TimestampedValue<Long> utcTime =
                     new TimestampedValue<>(
-                            mFakeCallback.peekElapsedRealtimeMillis(),
+                            mFakeEnvironment.peekElapsedRealtimeMillis(),
                             suggestedTime.toEpochMilli());
             return new ExternalTimeSuggestion(utcTime);
         }

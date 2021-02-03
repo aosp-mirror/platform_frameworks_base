@@ -44,30 +44,30 @@ import com.android.server.LocalServices;
 import java.util.Objects;
 
 /**
- * The real implementation of {@link TimeZoneDetectorStrategyImpl.Callback}.
+ * The real implementation of {@link TimeZoneDetectorStrategyImpl.Environment}.
  */
-public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrategyImpl.Callback {
+public final class EnvironmentImpl implements TimeZoneDetectorStrategyImpl.Environment {
 
-    private static final String LOG_TAG = "TimeZoneDetectorCallbackImpl";
+    private static final String LOG_TAG = TimeZoneDetectorService.TAG;
     private static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
     @NonNull private final Context mContext;
     @NonNull private final Handler mHandler;
     @NonNull private final ContentResolver mCr;
     @NonNull private final UserManager mUserManager;
-    @NonNull private final boolean mGeoDetectionFeatureEnabled;
+    @NonNull private final boolean mGeoDetectionSupported;
     @NonNull private final LocationManager mLocationManager;
     // @NonNull after setConfigChangeListener() is called.
     private ConfigurationChangeListener mConfigChangeListener;
 
-    TimeZoneDetectorCallbackImpl(@NonNull Context context, @NonNull Handler handler,
-            boolean geoDetectionFeatureEnabled) {
+    EnvironmentImpl(@NonNull Context context, @NonNull Handler handler,
+            boolean geoDetectionSupported) {
         mContext = Objects.requireNonNull(context);
         mHandler = Objects.requireNonNull(handler);
         mCr = context.getContentResolver();
         mUserManager = context.getSystemService(UserManager.class);
         mLocationManager = context.getSystemService(LocationManager.class);
-        mGeoDetectionFeatureEnabled = geoDetectionFeatureEnabled;
+        mGeoDetectionSupported = geoDetectionSupported;
 
         // Wire up the change listener. All invocations are performed on the mHandler thread.
 
@@ -191,7 +191,7 @@ public final class TimeZoneDetectorCallbackImpl implements TimeZoneDetectorStrat
     }
 
     private boolean isGeoDetectionSupported() {
-        return mGeoDetectionFeatureEnabled;
+        return mGeoDetectionSupported;
     }
 
     private boolean isAutoDetectionEnabled() {
