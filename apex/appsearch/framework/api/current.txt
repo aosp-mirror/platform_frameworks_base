@@ -143,11 +143,11 @@ package android.app.appsearch {
     method public void close();
     method public void getByUri(@NonNull android.app.appsearch.GetByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,android.app.appsearch.GenericDocument>);
     method public void getSchema(@NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.util.Set<android.app.appsearch.AppSearchSchema>>>);
-    method public void putDocuments(@NonNull android.app.appsearch.PutDocumentsRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
-    method @NonNull public android.app.appsearch.SearchResults query(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
-    method public void removeByQuery(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
-    method public void removeByUri(@NonNull android.app.appsearch.RemoveByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
+    method public void put(@NonNull android.app.appsearch.PutDocumentsRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
+    method public void remove(@NonNull android.app.appsearch.RemoveByUriRequest, @NonNull java.util.concurrent.Executor, @NonNull android.app.appsearch.BatchResultCallback<java.lang.String,java.lang.Void>);
+    method public void remove(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
     method @NonNull public void reportUsage(@NonNull android.app.appsearch.ReportUsageRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<java.lang.Void>>);
+    method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
     method public void setSchema(@NonNull android.app.appsearch.SetSchemaRequest, @NonNull java.util.concurrent.Executor, @NonNull java.util.function.Consumer<android.app.appsearch.AppSearchResult<android.app.appsearch.SetSchemaResponse>>);
   }
 
@@ -216,7 +216,7 @@ package android.app.appsearch {
 
   public class GlobalSearchSession implements java.io.Closeable {
     method public void close();
-    method @NonNull public android.app.appsearch.SearchResults query(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
+    method @NonNull public android.app.appsearch.SearchResults search(@NonNull String, @NonNull android.app.appsearch.SearchSpec, @NonNull java.util.concurrent.Executor);
   }
 
   public class PackageIdentifier {
@@ -226,13 +226,13 @@ package android.app.appsearch {
   }
 
   public final class PutDocumentsRequest {
-    method @NonNull public java.util.List<android.app.appsearch.GenericDocument> getDocuments();
+    method @NonNull public java.util.List<android.app.appsearch.GenericDocument> getGenericDocuments();
   }
 
   public static final class PutDocumentsRequest.Builder {
     ctor public PutDocumentsRequest.Builder();
-    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull android.app.appsearch.GenericDocument...);
-    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocument(@NonNull java.util.Collection<? extends android.app.appsearch.GenericDocument>);
+    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocuments(@NonNull android.app.appsearch.GenericDocument...);
+    method @NonNull public android.app.appsearch.PutDocumentsRequest.Builder addGenericDocuments(@NonNull java.util.Collection<? extends android.app.appsearch.GenericDocument>);
     method @NonNull public android.app.appsearch.PutDocumentsRequest build();
   }
 
@@ -290,14 +290,14 @@ package android.app.appsearch {
   }
 
   public final class SearchSpec {
+    method @NonNull public java.util.List<java.lang.String> getFilterNamespaces();
     method @NonNull public java.util.List<java.lang.String> getFilterPackageNames();
+    method @NonNull public java.util.List<java.lang.String> getFilterSchemas();
     method public int getMaxSnippetSize();
-    method @NonNull public java.util.List<java.lang.String> getNamespaces();
     method public int getOrder();
     method @NonNull public java.util.Map<java.lang.String,java.util.List<java.lang.String>> getProjections();
     method public int getRankingStrategy();
     method public int getResultCountPerPage();
-    method @NonNull public java.util.List<java.lang.String> getSchemaTypes();
     method public int getSnippetCount();
     method public int getSnippetCountPerProperty();
     method public int getTermMatch();
@@ -316,14 +316,14 @@ package android.app.appsearch {
 
   public static final class SearchSpec.Builder {
     ctor public SearchSpec.Builder();
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterNamespaces(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterNamespaces(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterPackageNames(@NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterPackageNames(@NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder addNamespace(@NonNull java.lang.String...);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder addNamespace(@NonNull java.util.Collection<java.lang.String>);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterSchemas(@NonNull java.lang.String...);
+    method @NonNull public android.app.appsearch.SearchSpec.Builder addFilterSchemas(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.lang.String...);
     method @NonNull public android.app.appsearch.SearchSpec.Builder addProjection(@NonNull String, @NonNull java.util.Collection<java.lang.String>);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder addSchemaType(@NonNull java.lang.String...);
-    method @NonNull public android.app.appsearch.SearchSpec.Builder addSchemaType(@NonNull java.util.Collection<java.lang.String>);
     method @NonNull public android.app.appsearch.SearchSpec build();
     method @NonNull public android.app.appsearch.SearchSpec.Builder setMaxSnippetSize(@IntRange(from=0, to=android.app.appsearch.SearchSpec.MAX_SNIPPET_SIZE_LIMIT) int);
     method @NonNull public android.app.appsearch.SearchSpec.Builder setOrder(int);
@@ -344,8 +344,8 @@ package android.app.appsearch {
 
   public static final class SetSchemaRequest.Builder {
     ctor public SetSchemaRequest.Builder();
-    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchema(@NonNull android.app.appsearch.AppSearchSchema...);
-    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchema(@NonNull java.util.Collection<android.app.appsearch.AppSearchSchema>);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchemas(@NonNull android.app.appsearch.AppSearchSchema...);
+    method @NonNull public android.app.appsearch.SetSchemaRequest.Builder addSchemas(@NonNull java.util.Collection<android.app.appsearch.AppSearchSchema>);
     method @NonNull public android.app.appsearch.SetSchemaRequest build();
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setForceOverride(boolean);
     method @NonNull public android.app.appsearch.SetSchemaRequest.Builder setMigrator(@NonNull String, @NonNull android.app.appsearch.AppSearchSchema.Migrator);

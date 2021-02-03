@@ -141,10 +141,6 @@ public final class AppSearchSchema {
         }
 
         /** Adds a property to the given type. */
-        // TODO(b/171360120): MissingGetterMatchingBuilder expects a method called getPropertys, but
-        //  we provide the (correct) method getProperties. Once the bug referenced in this TODO is
-        //  fixed, remove this SuppressLint.
-        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public AppSearchSchema.Builder addProperty(@NonNull PropertyConfig propertyConfig) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");

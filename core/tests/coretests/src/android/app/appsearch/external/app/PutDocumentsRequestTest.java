@@ -34,9 +34,9 @@ public class PutDocumentsRequestTest {
                         new AppSearchEmail.Builder("test1").build(),
                         new AppSearchEmail.Builder("test2").build());
         PutDocumentsRequest request =
-                new PutDocumentsRequest.Builder().addGenericDocument(emails).build();
+                new PutDocumentsRequest.Builder().addGenericDocuments(emails).build();
 
-        assertThat(request.getDocuments().get(0).getUri()).isEqualTo("test1");
-        assertThat(request.getDocuments().get(1).getUri()).isEqualTo("test2");
+        assertThat(request.getGenericDocuments().get(0).getUri()).isEqualTo("test1");
+        assertThat(request.getGenericDocuments().get(1).getUri()).isEqualTo("test2");
     }
 }
