@@ -132,12 +132,14 @@ import android.net.RouteInfo;
 import android.net.RouteInfoParcel;
 import android.net.SocketKeepalive;
 import android.net.TetheringManager;
+import android.net.TransportInfo;
 import android.net.UidRange;
 import android.net.UidRangeParcel;
 import android.net.UnderlyingNetworkInfo;
 import android.net.Uri;
 import android.net.VpnManager;
 import android.net.VpnService;
+import android.net.VpnTransportInfo;
 import android.net.metrics.INetdEventListener;
 import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
@@ -8477,22 +8479,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    /**
-     * Caller either needs to be an active VPN, or hold the NETWORK_STACK permission
-     * for testing.
-     */
-    private Vpn enforceActiveVpnOrNetworkStackPermission() {
-        if (checkNetworkStackPermission()) {
-            return null;
-        }
-        synchronized (mVpns) {
-            Vpn vpn = getVpnIfOwner();
-            if (vpn != null) {
-                return vpn;
-            }
-        }
-        throw new SecurityException("App must either be an active VPN or have the NETWORK_STACK "
-                + "permission");
+    private @VpnManager.VpnType int getVpnType(@Nullable NetworkAgentInfo vpn) {
+        if (vpn == null) return VpnManager.TYPE_VPN_NONE;
+        final TransportInfo ti = vpn.networkCapabilities.getTransportInfo();
+        if (!(ti instanceof VpnTransportInfo)) return VpnManager.TYPE_VPN_NONE;
+        return ((VpnTransportInfo) ti).type;
     }
 
     /**
@@ -8502,14 +8493,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
      * connection is not found.
      */
     public int getConnectionOwnerUid(ConnectionInfo connectionInfo) {
-        final Vpn vpn = enforceActiveVpnOrNetworkStackPermission();
-
-        // Only VpnService based VPNs should be able to get this information.
-        if (vpn != null && vpn.getActiveVpnType() != VpnManager.TYPE_VPN_SERVICE) {
-            throw new SecurityException(
-                    "getConnectionOwnerUid() not allowed for non-VpnService VPNs");
-        }
-
         if (connectionInfo.protocol != IPPROTO_TCP && connectionInfo.protocol != IPPROTO_UDP) {
             throw new IllegalArgumentException("Unsupported protocol " + connectionInfo.protocol);
         }
@@ -8517,8 +8500,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final int uid = mDeps.getConnectionOwnerUid(connectionInfo.protocol,
                 connectionInfo.local, connectionInfo.remote);
 
-        /* Filter out Uids not associated with the VPN. */
-        if (vpn != null && !vpn.appliesToUid(uid)) {
+        if (uid == INVALID_UID) return uid;  // Not found.
+
+        // Connection owner UIDs are visible only to the network stack and to the VpnService-based
+        // VPN, if any, that applies to the UID that owns the connection.
+        if (checkNetworkStackPermission()) return uid;
+
+        final NetworkAgentInfo vpn = getVpnForUid(uid);
+        if (vpn == null || getVpnType(vpn) != VpnManager.TYPE_VPN_SERVICE
+                || vpn.networkCapabilities.getOwnerUid() != Binder.getCallingUid()) {
             return INVALID_UID;
         }
 
