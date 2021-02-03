@@ -69,6 +69,8 @@ import com.android.systemui.statusbar.notification.row.ChannelEditorDialogContro
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.OnUserInteractionCallback;
 import com.android.systemui.statusbar.notification.row.PriorityOnboardingDialogController;
+import com.android.systemui.statusbar.notification.stack.NotificationSectionsManager;
+import com.android.systemui.statusbar.notification.stack.StackScrollAlgorithm;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.util.leak.LeakDetector;
@@ -89,6 +91,10 @@ import dagger.Provides;
  */
 @Module(includes = { NotificationSectionHeadersModule.class })
 public interface NotificationsModule {
+    @Binds
+    StackScrollAlgorithm.SectionProvider bindSectionProvider(
+            NotificationSectionsManager impl);
+
     /** Provides an instance of {@link NotificationEntryManager} */
     @SysUISingleton
     @Provides
