@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.RemoteViews.RemoteView;
 
 import com.android.internal.R;
 
@@ -49,6 +50,7 @@ import com.android.internal.R;
  * {@link android.R.styleable#View View Attributes}
  * </p>
  */
+@RemoteView
 public class RadioButton extends CompoundButton {
 
     public RadioButton(Context context) {
