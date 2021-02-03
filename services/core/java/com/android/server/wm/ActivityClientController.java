@@ -963,7 +963,8 @@ class ActivityClientController extends IActivityClientController.Stub {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(token);
             if (r != null && r.isState(Task.ActivityState.RESUMED, Task.ActivityState.PAUSING)) {
                 r.mDisplayContent.mAppTransition.overridePendingAppTransition(
-                        packageName, enterAnim, exitAnim, null, null);
+                        packageName, enterAnim, exitAnim, null, null,
+                        r.mOverrideTaskTransition);
             }
         }
         Binder.restoreCallingIdentity(origId);

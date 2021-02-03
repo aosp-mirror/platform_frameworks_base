@@ -2538,7 +2538,7 @@
     <permission android:name="android.permission.REAL_GET_TASKS"
         android:protectionLevel="signature|privileged" />
 
-    <!-- Allows an application to start a task from a ActivityManager#RecentTaskInfo.
+    <!-- @TestApi Allows an application to start a task from a ActivityManager#RecentTaskInfo.
          @hide -->
     <permission android:name="android.permission.START_TASKS_FROM_RECENTS"
         android:protectionLevel="signature|privileged|recents" />
