@@ -4953,7 +4953,7 @@ package android.media {
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
-    ctor public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
+    ctor @RequiresPermission(android.Manifest.permission.RECORD_AUDIO) public AudioRecord(android.media.AudioAttributes, android.media.AudioFormat, int, int) throws java.lang.IllegalArgumentException;
   }
 
   public static class AudioRecord.Builder {
