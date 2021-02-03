@@ -243,6 +243,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.StatLogger;
 import com.android.internal.util.XmlUtils;
+import com.android.net.module.util.NetworkIdentityUtils;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
@@ -2163,13 +2164,14 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             if (template.matches(probeIdent)) {
                 if (LOGD) {
                     Slog.d(TAG, "Found template " + template + " which matches subscriber "
-                            + NetworkIdentity.scrubSubscriberId(subscriberId));
+                            + NetworkIdentityUtils.scrubSubscriberId(subscriberId));
                 }
                 return false;
             }
         }
 
-        Slog.i(TAG, "No policy for subscriber " + NetworkIdentity.scrubSubscriberId(subscriberId)
+        Slog.i(TAG, "No policy for subscriber "
+                + NetworkIdentityUtils.scrubSubscriberId(subscriberId)
                 + "; generating default policy");
         final NetworkPolicy policy = buildDefaultMobilePolicy(subId, subscriberId);
         addNetworkPolicyAL(policy);
@@ -3614,14 +3616,15 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                     final int subId = mSubIdToSubscriberId.keyAt(i);
                     final String subscriberId = mSubIdToSubscriberId.valueAt(i);
 
-                    fout.println(subId + "=" + NetworkIdentity.scrubSubscriberId(subscriberId));
+                    fout.println(subId + "="
+                            + NetworkIdentityUtils.scrubSubscriberId(subscriberId));
                 }
                 fout.decreaseIndent();
 
                 fout.println();
                 for (String[] mergedSubscribers : mMergedSubscriberIds) {
                     fout.println("Merged subscriptions: " + Arrays.toString(
-                            NetworkIdentity.scrubSubscriberId(mergedSubscribers)));
+                            NetworkIdentityUtils.scrubSubscriberIds(mergedSubscribers)));
                 }
 
                 fout.println();
