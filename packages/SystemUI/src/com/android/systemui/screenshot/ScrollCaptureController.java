@@ -55,7 +55,8 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     // TODO: Support saving without additional action.
     private enum PendingAction {
         SHARE,
-        EDIT
+        EDIT,
+        SAVE
     }
 
     public static final int MAX_PAGES = 5;
@@ -75,7 +76,8 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private RequestCallback mCallback;
     private Window mWindow;
     private ImageView mPreview;
-    private View mClose;
+    private View mSave;
+    private View mCancel;
     private View mEdit;
     private View mShare;
     private CropView mCropView;
@@ -113,12 +115,14 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
                 .addOnComputeInternalInsetsListener(this);
         mPreview = findViewById(R.id.preview);
 
-        mClose = findViewById(R.id.close);
+        mSave = findViewById(R.id.save);
+        mCancel = findViewById(R.id.cancel);
         mEdit = findViewById(R.id.edit);
         mShare = findViewById(R.id.share);
         mCropView = findViewById(R.id.crop_view);
 
-        mClose.setOnClickListener(this::onClicked);
+        mSave.setOnClickListener(this::onClicked);
+        mCancel.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
@@ -133,7 +137,8 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     }
 
     void disableButtons() {
-        mClose.setEnabled(false);
+        mSave.setEnabled(false);
+        mCancel.setEnabled(false);
         mEdit.setEnabled(false);
         mShare.setEnabled(false);
     }
@@ -142,19 +147,17 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         Log.d(TAG, "button clicked!");
 
         int id = v.getId();
-        if (id == R.id.close) {
-            v.setPressed(true);
-            disableButtons();
+        v.setPressed(true);
+        disableButtons();
+        if (id == R.id.save) {
+            startExport(PendingAction.SAVE);
+        } else if (id == R.id.cancel) {
             doFinish();
         } else if (id == R.id.edit) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
-            v.setPressed(true);
-            disableButtons();
             startExport(PendingAction.EDIT);
         } else if (id == R.id.share) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
-            v.setPressed(true);
-            disableButtons();
             startExport(PendingAction.SHARE);
         }
     }
@@ -199,24 +202,21 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         }
         intent.setType("image/png");
         intent.setData(uri);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        Intent sharingChooserIntent = Intent.createChooser(intent, null)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
 
-        mContext.startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
+        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
     }
 
     private void doShare(Uri uri) {
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("image/png");
         intent.setData(uri);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
         Intent sharingChooserIntent = Intent.createChooser(intent, null)
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
-                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
         mContext.startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
     }
