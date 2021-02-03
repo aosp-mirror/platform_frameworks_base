@@ -43,6 +43,7 @@ import android.app.usage.IUsageStatsManager;
 import android.app.usage.NetworkStatsManager;
 import android.app.usage.StorageStatsManager;
 import android.app.usage.UsageStatsManager;
+import android.apphibernation.AppHibernationManager;
 import android.appwidget.AppWidgetManager;
 import android.bluetooth.BluetoothManager;
 import android.companion.CompanionDeviceManager;
@@ -1342,6 +1343,13 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         IBinder b = ServiceManager.getServiceOrThrow(Context.APP_INTEGRITY_SERVICE);
                         return new AppIntegrityManager(IAppIntegrityManager.Stub.asInterface(b));
+                    }});
+        registerService(Context.APP_HIBERNATION_SERVICE, AppHibernationManager.class,
+                new CachedServiceFetcher<AppHibernationManager>() {
+                    @Override
+                    public AppHibernationManager createService(ContextImpl ctx) {
+                        IBinder b = ServiceManager.getService(Context.APP_HIBERNATION_SERVICE);
+                        return b == null ? null : new AppHibernationManager(ctx);
                     }});
         registerService(Context.DREAM_SERVICE, DreamManager.class,
                 new CachedServiceFetcher<DreamManager>() {
