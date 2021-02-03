@@ -27,11 +27,9 @@ import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.endRotation
 import com.android.server.wm.flicker.helpers.buildTestTag
-import com.android.server.wm.flicker.helpers.isRotated
 import com.android.server.wm.flicker.helpers.setRotation
 import com.android.server.wm.flicker.navBarLayerRotatesAndScales
 import com.android.server.wm.flicker.navBarWindowIsAlwaysVisible
-import com.android.server.wm.flicker.startRotation
 import com.android.server.wm.flicker.statusBarLayerRotatesScales
 import com.android.server.wm.flicker.statusBarWindowIsAlwaysVisible
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
@@ -73,13 +71,14 @@ class RotateTwoLaunchedAppsInAppPairsMode(
                 assertions {
                     layersTrace {
                         navBarLayerRotatesAndScales(Surface.ROTATION_0, configuration.endRotation,
-                            enabled = !configuration.startRotation.isRotated())
-                        statusBarLayerRotatesScales(Surface.ROTATION_0, configuration.endRotation)
-                        appPairsDividerIsVisible()
+                            enabled = false)
+                        statusBarLayerRotatesScales(Surface.ROTATION_0, configuration.endRotation,
+                            enabled = false)
+                        appPairsDividerIsVisible(enabled = false)
                         appPairsPrimaryBoundsIsVisible(configuration.endRotation,
-                            primaryApp.defaultWindowName, 172776659)
+                            primaryApp.defaultWindowName, bugId = 172776659)
                         appPairsSecondaryBoundsIsVisible(configuration.endRotation,
-                            secondaryApp.defaultWindowName, 172776659)
+                            secondaryApp.defaultWindowName, bugId = 172776659)
                     }
                     windowManagerTrace {
                         navBarWindowIsAlwaysVisible()
