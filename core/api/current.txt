@@ -22978,10 +22978,12 @@ package android.media {
     method @Deprecated public int getStreamType();
     method public String getTitle(android.content.Context);
     method public float getVolume();
+    method public boolean isHapticGeneratorEnabled();
     method public boolean isLooping();
     method public boolean isPlaying();
     method public void play();
     method public void setAudioAttributes(android.media.AudioAttributes) throws java.lang.IllegalArgumentException;
+    method public boolean setHapticGeneratorEnabled(boolean);
     method public void setLooping(boolean);
     method @Deprecated public void setStreamType(int);
     method public void setVolume(float);
