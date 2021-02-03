@@ -113,6 +113,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     @NonNull private final HalResultController mHalResultController;
     @Nullable private IUdfpsOverlayController mUdfpsOverlayController;
     private int mCurrentUserId = UserHandle.USER_NULL;
+    private boolean mIsUdfps = false;
     private final int mSensorId;
 
     private final class BiometricTaskStackListener extends TaskStackListener {
@@ -335,22 +336,22 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         }
 
         final IBiometricsFingerprint daemon = getDaemon();
-        boolean isUdfps = false;
+        mIsUdfps = false;
         android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
                 android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
                         daemon);
         if (extension != null) {
             try {
-                isUdfps = extension.isUdfps(sensorId);
+                mIsUdfps = extension.isUdfps(sensorId);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Remote exception while quering udfps", e);
-                isUdfps = false;
+                mIsUdfps = false;
             }
         }
 
         final @FingerprintSensorProperties.SensorType int sensorType =
-                isUdfps ? FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
-                        : FingerprintSensorProperties.TYPE_REAR;
+                mIsUdfps ? FingerprintSensorProperties.TYPE_UDFPS_OPTICAL
+                         : FingerprintSensorProperties.TYPE_REAR;
         // resetLockout is controlled by the framework, so hardwareAuthToken is not required
         final boolean resetLockoutRequiresHardwareAuthToken = false;
         final int maxEnrollmentsPerUser = mContext.getResources()
@@ -414,7 +415,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         Slog.d(TAG, "Daemon was null, reconnecting, current operation: "
                 + mScheduler.getCurrentClient());
         try {
-            mDaemon = IBiometricsFingerprint.getService();
+            mDaemon = IBiometricsFingerprint.getService(true /* retry */);
         } catch (java.util.NoSuchElementException e) {
             // Service doesn't exist or cannot be opened.
             Slog.w(TAG, "NoSuchElementException", e);
@@ -799,6 +800,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         JSONObject dump = new JSONObject();
         try {
             dump.put("service", TAG);
+            dump.put("isUdfps", mIsUdfps);
 
             JSONArray sets = new JSONArray();
             for (UserInfo user : UserManager.get(mContext).getUsers()) {
