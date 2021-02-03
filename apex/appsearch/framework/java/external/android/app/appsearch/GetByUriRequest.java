@@ -96,7 +96,7 @@ public final class GetByUriRequest {
      * @hide
      */
     @NonNull
-    public Map<String, List<String>> getProjectionsVisibleToPackagesInternal() {
+    public Map<String, List<String>> getProjectionsInternal() {
         return mTypePropertyPathsMap;
     }
 
