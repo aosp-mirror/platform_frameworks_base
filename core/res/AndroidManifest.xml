@@ -5406,7 +5406,7 @@
     <permission android:name="android.permission.INPUT_CONSUMER"
                 android:protectionLevel="signature" />
 
-    <!-- @hide Allows an application to control the system's device state managed by the
+    <!-- @hide @TestApi Allows an application to control the system's device state managed by the
          {@link android.service.devicestate.DeviceStateManagerService}. For example, on foldable
          devices this would grant access to toggle between the folded and unfolded states. -->
     <permission android:name="android.permission.CONTROL_DEVICE_STATE"

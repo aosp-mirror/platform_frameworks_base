@@ -12,6 +12,7 @@ package android {
     field public static final String CLEAR_APP_USER_DATA = "android.permission.CLEAR_APP_USER_DATA";
     field public static final String CONFIGURE_DISPLAY_BRIGHTNESS = "android.permission.CONFIGURE_DISPLAY_BRIGHTNESS";
     field public static final String CONTROL_DEVICE_LIGHTS = "android.permission.CONTROL_DEVICE_LIGHTS";
+    field public static final String CONTROL_DEVICE_STATE = "android.permission.CONTROL_DEVICE_STATE";
     field public static final String FORCE_STOP_PACKAGES = "android.permission.FORCE_STOP_PACKAGES";
     field @Deprecated public static final String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final String MANAGE_ACTIVITY_TASKS = "android.permission.MANAGE_ACTIVITY_TASKS";
@@ -891,6 +892,40 @@ package android.hardware.camera2 {
   public abstract static class CameraManager.AvailabilityCallback {
     method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraClosed(@NonNull String);
     method @RequiresPermission(android.Manifest.permission.CAMERA_OPEN_CLOSE_LISTENER) public void onCameraOpened(@NonNull String, @NonNull String);
+  }
+
+}
+
+package android.hardware.devicestate {
+
+  public final class DeviceStateManager {
+    method public void addDeviceStateListener(@NonNull java.util.concurrent.Executor, @NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateListener);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void cancelRequest(@NonNull android.hardware.devicestate.DeviceStateRequest);
+    method @NonNull public int[] getSupportedStates();
+    method public void removeDeviceStateListener(@NonNull android.hardware.devicestate.DeviceStateManager.DeviceStateListener);
+    method @RequiresPermission(android.Manifest.permission.CONTROL_DEVICE_STATE) public void requestState(@NonNull android.hardware.devicestate.DeviceStateRequest, @Nullable java.util.concurrent.Executor, @Nullable android.hardware.devicestate.DeviceStateRequest.Callback);
+  }
+
+  public static interface DeviceStateManager.DeviceStateListener {
+    method public void onDeviceStateChanged(int);
+  }
+
+  public final class DeviceStateRequest {
+    method public int getFlags();
+    method public int getState();
+    method @NonNull public static android.hardware.devicestate.DeviceStateRequest.Builder newBuilder(int);
+    field public static final int FLAG_CANCEL_WHEN_BASE_CHANGES = 1; // 0x1
+  }
+
+  public static final class DeviceStateRequest.Builder {
+    method @NonNull public android.hardware.devicestate.DeviceStateRequest build();
+    method @NonNull public android.hardware.devicestate.DeviceStateRequest.Builder setFlags(int);
+  }
+
+  public static interface DeviceStateRequest.Callback {
+    method public default void onRequestActivated(@NonNull android.hardware.devicestate.DeviceStateRequest);
+    method public default void onRequestCanceled(@NonNull android.hardware.devicestate.DeviceStateRequest);
+    method public default void onRequestSuspended(@NonNull android.hardware.devicestate.DeviceStateRequest);
   }
 
 }
