@@ -127,11 +127,9 @@ public class LockscreenLockIconController extends ViewController<LockIcon> {
         mResources = resources;
         mHeadsUpManagerPhone = headsUpManagerPhone;
 
-        if (view == null) {
-            return;
+        if (view != null) {
+            mKeyguardIndicationController.setLockIconController(this);
         }
-
-        mKeyguardIndicationController.setLockIconController(this);
     }
 
     @Override
