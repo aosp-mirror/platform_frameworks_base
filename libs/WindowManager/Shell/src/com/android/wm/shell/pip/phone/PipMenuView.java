@@ -367,15 +367,17 @@ public class PipMenuView extends FrameLayout {
     }
 
     /**
-     * @return estimated {@link Size} for which the width is based on number of actions and
-     *         height based on the height of expand button + top and bottom action bar.
+     * @return Estimated minimum {@link Size} to hold the actions.
+     *         See also {@link #updateActionViews(Rect)}
      */
-    Size getEstimatedMenuSize() {
-        final int pipActionSize = mContext.getResources().getDimensionPixelSize(
-                R.dimen.pip_action_size);
-        final int width = mActions.size() * pipActionSize;
-        final int height = pipActionSize * 2 + mContext.getResources().getDimensionPixelSize(
-                R.dimen.pip_expand_action_size);
+    Size getEstimatedMinMenuSize() {
+        final int pipActionSize = getResources().getDimensionPixelSize(R.dimen.pip_action_size);
+        // the minimum width would be (2 * pipActionSize) since we have settings and dismiss button
+        // on the top action container.
+        final int width = Math.max(2, mActions.size()) * pipActionSize;
+        final int height = getResources().getDimensionPixelSize(R.dimen.pip_expand_action_size)
+                + getResources().getDimensionPixelSize(R.dimen.pip_action_padding)
+                + getResources().getDimensionPixelSize(R.dimen.pip_expand_container_edge_margin);
         return new Size(width, height);
     }
 

@@ -146,7 +146,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
                 mAssistantFeedbackController);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically demoted to Silent by the system. "
-                        + "Was this correct?", prompt.getText().toString());
+                        + "Let the developer know your feedback. Was this correct?",
+                        prompt.getText().toString());
     }
 
     @Test
@@ -157,7 +158,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
                 mAssistantFeedbackController);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically ranked higher in your shade. "
-                        + "Was this correct?", prompt.getText().toString());
+                        + "Let the developer know your feedback. Was this correct?",
+                        prompt.getText().toString());
     }
 
     @Test
@@ -168,7 +170,7 @@ public class FeedbackInfoTest extends SysuiTestCase {
                 mAssistantFeedbackController);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically promoted to Default by the system. "
-                        + "Was this correct?",
+                        + "Let the developer know your feedback. Was this correct?",
                 prompt.getText().toString());
     }
 
@@ -180,7 +182,8 @@ public class FeedbackInfoTest extends SysuiTestCase {
                 mAssistantFeedbackController);
         TextView prompt = mFeedbackInfo.findViewById(R.id.prompt);
         assertEquals("This notification was automatically ranked lower in your shade. "
-                        + "Was this correct?", prompt.getText().toString());
+                        + "Let the developer know your feedback. Was this correct?",
+                        prompt.getText().toString());
     }
 
     @Test

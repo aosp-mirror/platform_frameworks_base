@@ -368,7 +368,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationShadeWindowController mNotificationShadeWindowController;
     protected StatusBarWindowController mStatusBarWindowController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
-    private final LockscreenLockIconController mLockscreenLockIconController;
     @VisibleForTesting
     DozeServiceHost mDozeServiceHost;
     private boolean mWakeUpComingFromTouch;
@@ -415,6 +414,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     // expanded notifications
     // the sliding/resizing panel within the notification window
     protected NotificationPanelViewController mNotificationPanelViewController;
+    protected LockscreenLockIconController mLockscreenLockIconController;
 
     // settings
     private QSPanelController mQSPanelController;
@@ -725,7 +725,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             Lazy<AssistManager> assistManagerLazy,
             ConfigurationController configurationController,
             NotificationShadeWindowController notificationShadeWindowController,
-            LockscreenLockIconController lockscreenLockIconController,
             DozeParameters dozeParameters,
             ScrimController scrimController,
             @Nullable KeyguardLiftController keyguardLiftController,
@@ -807,7 +806,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mAssistManagerLazy = assistManagerLazy;
         mConfigurationController = configurationController;
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mLockscreenLockIconController = lockscreenLockIconController;
         mDozeServiceHost = dozeServiceHost;
         mPowerManager = powerManager;
         mDozeParameters = dozeParameters;
@@ -1173,9 +1171,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mScrimController.setScrimVisibleListener(scrimsVisible -> {
             mNotificationShadeWindowController.setScrimsVisibility(scrimsVisible);
-            if (mNotificationShadeWindowView != null) {
-                mLockscreenLockIconController.onScrimVisibilityChanged(scrimsVisible);
-            }
+            mLockscreenLockIconController.onScrimVisibilityChanged(scrimsVisible);
         });
         mScrimController.attachViews(scrimBehind, scrimInFront, scrimForBubble);
 
@@ -1207,9 +1203,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
             createUserSwitcher();
         }
-
-        mNotificationPanelViewController.setLaunchAffordanceListener(
-                mLockscreenLockIconController::onShowingLaunchAffordanceChanged);
 
         // Set up the quick settings tile panel
         final View container = mNotificationShadeWindowView.findViewById(R.id.qs_frame);
@@ -1490,6 +1483,11 @@ public class StatusBar extends SystemUI implements DemoMode,
         mStatusBarWindowController = statusBarComponent.getStatusBarWindowController();
         mPhoneStatusBarWindow = mSuperStatusBarViewFactory.getStatusBarWindowView();
         mNotificationPanelViewController = statusBarComponent.getNotificationPanelViewController();
+        mLockscreenLockIconController = statusBarComponent.getLockscreenLockIconController();
+        mLockscreenLockIconController.init();
+
+        mNotificationPanelViewController.setLaunchAffordanceListener(
+                mLockscreenLockIconController::onShowingLaunchAffordanceChanged);
     }
 
     protected void startKeyguard() {

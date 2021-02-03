@@ -462,6 +462,23 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    void resolveOverrideConfiguration(Configuration newParentConfiguration) {
+        super.resolveOverrideConfiguration(newParentConfiguration);
+        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
+        final Rect overrideBounds = resolvedConfig.windowConfiguration.getBounds();
+        final Rect overrideAppBounds = resolvedConfig.windowConfiguration.getAppBounds();
+        final Rect parentAppBounds = newParentConfiguration.windowConfiguration.getAppBounds();
+
+        // If there is no override of appBounds, restrict appBounds to the override bounds.
+        if (!overrideBounds.isEmpty() && (overrideAppBounds == null || overrideAppBounds.isEmpty())
+                && parentAppBounds != null && !parentAppBounds.isEmpty()) {
+            final Rect appBounds = new Rect(overrideBounds);
+            appBounds.intersect(parentAppBounds);
+            resolvedConfig.windowConfiguration.setAppBounds(appBounds);
+        }
+    }
+
+    @Override
     boolean isOrganized() {
         return mOrganizer != null;
     }

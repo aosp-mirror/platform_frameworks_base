@@ -28,6 +28,7 @@ import android.content.pm.UserInfo;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.IInvalidationCallback;
 import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
@@ -777,6 +778,17 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         }
         proto.flush();
         tracker.clear();
+    }
+
+    @Override
+    public void scheduleInvalidateAuthenticatorId(int sensorId, int userId,
+            @NonNull IInvalidationCallback callback) {
+        // TODO (b/179101888): Remove this temporary workaround.
+        try {
+            callback.onCompleted();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to complete InvalidateAuthenticatorId");
+        }
     }
 
     @Override

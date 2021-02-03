@@ -169,8 +169,9 @@ public class FontManagerShellCommand extends ShellCommand {
             sb.append(c++);
             sb.append("]: lang=\"");
             sb.append(family.getLocaleList().toLanguageTags());
+            sb.append("\"");
             if (family.getVariant() != FontConfig.FontFamily.VARIANT_DEFAULT) {
-                sb.append("\", variant=");
+                sb.append(", variant=");
                 switch (family.getVariant()) {
                     case FontConfig.FontFamily.VARIANT_COMPACT:
                         sb.append("Compact");

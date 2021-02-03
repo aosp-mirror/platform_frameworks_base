@@ -57,6 +57,7 @@ java_library {
     static_libs: [
         "net-utils-device-common",
         "net-utils-framework-common",
+        "netd-client",
     ],
     apex_available: [
         "//apex_available:platform",

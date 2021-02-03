@@ -21,10 +21,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.junit.Assume.assumeTrue;
 
 import android.platform.test.annotations.RootPermissionTest;
 
+import com.android.fsverity.AddFsVerityCertRule;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
@@ -35,6 +35,7 @@ import com.android.tradefed.util.CommandStatus;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -85,29 +86,18 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     private static final String DAMAGING_EXECUTABLE = "/data/local/tmp/block_device_writer";
     private static final String CERT_PATH = "/data/local/tmp/ApkVerityTestCert.der";
 
-    private static final String APK_VERITY_STANDARD_MODE = "2";
-
     /** Only 4K page is supported by fs-verity currently. */
     private static final int FSVERITY_PAGE_SIZE = 4096;
 
+    @Rule
+    public final AddFsVerityCertRule mAddFsVerityCertRule =
+            new AddFsVerityCertRule(this, CERT_PATH);
+
     private ITestDevice mDevice;
-    private String mKeyId;
 
     @Before
     public void setUp() throws DeviceNotAvailableException {
         mDevice = getDevice();
-
-        String apkVerityMode = mDevice.getProperty("ro.apk_verity.mode");
-        assumeTrue(mDevice.getLaunchApiLevel() >= 30
-                || APK_VERITY_STANDARD_MODE.equals(apkVerityMode));
-
-        mKeyId = expectRemoteCommandToSucceed(
-                "mini-keyctl padd asymmetric fsv_test .fs-verity < " + CERT_PATH).trim();
-        if (!mKeyId.matches("^\\d+$")) {
-            String keyId = mKeyId;
-            mKeyId = null;
-            fail("Key ID is not decimal: " + keyId);
-        }
 
         uninstallPackage(TARGET_PACKAGE);
     }
@@ -115,10 +105,6 @@ public class ApkVerityTest extends BaseHostJUnit4Test {
     @After
     public void tearDown() throws DeviceNotAvailableException {
         uninstallPackage(TARGET_PACKAGE);
-
-        if (mKeyId != null) {
-            expectRemoteCommandToSucceed("mini-keyctl unlink " + mKeyId + " .fs-verity");
-        }
     }
 
     @Test

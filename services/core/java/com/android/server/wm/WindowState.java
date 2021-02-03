@@ -212,6 +212,7 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -440,6 +441,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float mGlobalScale=1;
     float mLastGlobalScale=1;
     float mInvGlobalScale=1;
+    float mOverrideScale = 1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
     final Matrix mTmpMatrix = new Matrix();
@@ -647,9 +649,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     /**
-     * Indicates if this window is behind IME. Only windows behind IME can get insets from IME.
+     * The insets state of sources provided by windows above the current window.
      */
-    boolean mBehindIme = false;
+    InsetsState mAboveInsetsState = new InsetsState();
+
+    /**
+     * The insets sources provided by this window.
+     */
+    ArrayMap<Integer, InsetsSource> mProvidedInsetsSources = new ArrayMap<>();
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -1008,6 +1015,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedWidth = 0;
         mLastRequestedHeight = 0;
         mLayer = 0;
+        mOverrideScale = mWmService.mAtmService.mCompatModePackages.getCompatScale(
+                mAttrs.packageName, s.mUid);
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
         // during onDisplayChanged.
@@ -1040,8 +1049,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSession.windowAddedLocked(mAttrs.packageName);
     }
 
+    /**
+     * @return {@code true} if the application runs in size compatibility mode or has an app level
+     * scaling override set.
+     * @see CompatModePackages#getCompatScale
+     * @see android.content.res.CompatibilityInfo#supportsScreen
+     * @see ActivityRecord#inSizeCompatMode()
+     */
     boolean inSizeCompatMode() {
-        return inSizeCompatMode(mAttrs, mActivityRecord);
+        return mOverrideScale != 1f || inSizeCompatMode(mAttrs, mActivityRecord);
     }
 
     /**
@@ -1676,7 +1692,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void prelayout() {
         if (inSizeCompatMode()) {
-            mGlobalScale = mToken.getSizeCompatScale();
+            if (mOverrideScale != 1f) {
+                mGlobalScale = mToken.hasSizeCompatBounds()
+                        ? mToken.getSizeCompatScale() * mOverrideScale
+                        : mOverrideScale;
+            } else {
+                mGlobalScale = mToken.getSizeCompatScale();
+            }
             mInvGlobalScale = 1 / mGlobalScale;
         } else {
             mGlobalScale = mInvGlobalScale = 1;
@@ -2634,8 +2656,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // scaling but the existing logic doesn't expect that. The result is that the already-
         // scaled region ends up getting sent to surfaceflinger which then applies the scale
         // (again). Until this is resolved, apply an inverse-scale here.
-        if (mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
-                && mGlobalScale != 1.f) {
+        if (mInvGlobalScale != 1.f) {
             region.scale(mInvGlobalScale);
         }
 

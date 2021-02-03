@@ -31,6 +31,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -1775,6 +1776,7 @@ public final class GnssMeasurement implements Parcelable {
      */
     @Nullable
     @SystemApi
+    @SuppressLint("NullableCollection")
     public Collection<CorrelationVector> getCorrelationVectors() {
         return mReadOnlyCorrelationVectors;
     }
@@ -1785,7 +1787,9 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setCorrelationVectors(@Nullable Collection<CorrelationVector> correlationVectors) {
+    public void setCorrelationVectors(
+            @SuppressLint("NullableCollection")
+            @Nullable Collection<CorrelationVector> correlationVectors) {
         if (correlationVectors == null || correlationVectors.isEmpty()) {
             resetCorrelationVectors();
         } else {

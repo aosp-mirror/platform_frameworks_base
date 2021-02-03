@@ -4131,48 +4131,52 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @BinderThread
     @Override
     @GuardedBy("mMethodMap")
-    public void startProtoDump(byte[] protoDump, int source, String where) {
-        if (protoDump == null && source != IME_TRACING_FROM_IMMS) {
-            // Dump not triggered from IMMS, but no proto information provided.
-            return;
-        }
-        ImeTracing tracingInstance = ImeTracing.getInstance();
-        if (!tracingInstance.isAvailable() || !tracingInstance.isEnabled()) {
-            return;
-        }
-
-        ProtoOutputStream proto = new ProtoOutputStream();
-        switch (source) {
-            case ImeTracing.IME_TRACING_FROM_CLIENT:
-                final long client_token = proto.start(InputMethodClientsTraceFileProto.ENTRY);
-                proto.write(InputMethodClientsTraceProto.ELAPSED_REALTIME_NANOS,
-                        SystemClock.elapsedRealtimeNanos());
-                proto.write(InputMethodClientsTraceProto.WHERE, where);
-                proto.write(InputMethodClientsTraceProto.CLIENT, protoDump);
-                proto.end(client_token);
-                break;
-            case ImeTracing.IME_TRACING_FROM_IMS:
-                final long service_token = proto.start(InputMethodServiceTraceFileProto.ENTRY);
-                proto.write(InputMethodServiceTraceProto.ELAPSED_REALTIME_NANOS,
-                        SystemClock.elapsedRealtimeNanos());
-                proto.write(InputMethodServiceTraceProto.WHERE, where);
-                proto.write(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE, protoDump);
-                proto.end(service_token);
-                break;
-            case IME_TRACING_FROM_IMMS:
-                final long managerservice_token =
-                        proto.start(InputMethodManagerServiceTraceFileProto.ENTRY);
-                proto.write(InputMethodManagerServiceTraceProto.ELAPSED_REALTIME_NANOS,
-                        SystemClock.elapsedRealtimeNanos());
-                proto.write(InputMethodManagerServiceTraceProto.WHERE, where);
-                dumpDebug(proto, InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
-                proto.end(managerservice_token);
-                break;
-            default:
-                // Dump triggered by a source not recognised.
+    public void startProtoDump(byte[] protoDump, int source, String where,
+            IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            if (protoDump == null && source != IME_TRACING_FROM_IMMS) {
+                // Dump not triggered from IMMS, but no proto information provided.
                 return;
-        }
-        tracingInstance.addToBuffer(proto, source);
+            }
+            ImeTracing tracingInstance = ImeTracing.getInstance();
+            if (!tracingInstance.isAvailable() || !tracingInstance.isEnabled()) {
+                return;
+            }
+
+            ProtoOutputStream proto = new ProtoOutputStream();
+            switch (source) {
+                case ImeTracing.IME_TRACING_FROM_CLIENT:
+                    final long client_token = proto.start(InputMethodClientsTraceFileProto.ENTRY);
+                    proto.write(InputMethodClientsTraceProto.ELAPSED_REALTIME_NANOS,
+                            SystemClock.elapsedRealtimeNanos());
+                    proto.write(InputMethodClientsTraceProto.WHERE, where);
+                    proto.write(InputMethodClientsTraceProto.CLIENT, protoDump);
+                    proto.end(client_token);
+                    break;
+                case ImeTracing.IME_TRACING_FROM_IMS:
+                    final long service_token = proto.start(InputMethodServiceTraceFileProto.ENTRY);
+                    proto.write(InputMethodServiceTraceProto.ELAPSED_REALTIME_NANOS,
+                            SystemClock.elapsedRealtimeNanos());
+                    proto.write(InputMethodServiceTraceProto.WHERE, where);
+                    proto.write(InputMethodServiceTraceProto.INPUT_METHOD_SERVICE, protoDump);
+                    proto.end(service_token);
+                    break;
+                case IME_TRACING_FROM_IMMS:
+                    final long managerservice_token =
+                            proto.start(InputMethodManagerServiceTraceFileProto.ENTRY);
+                    proto.write(InputMethodManagerServiceTraceProto.ELAPSED_REALTIME_NANOS,
+                            SystemClock.elapsedRealtimeNanos());
+                    proto.write(InputMethodManagerServiceTraceProto.WHERE, where);
+                    dumpDebug(proto,
+                            InputMethodManagerServiceTraceProto.INPUT_METHOD_MANAGER_SERVICE);
+                    proto.end(managerservice_token);
+                    break;
+                default:
+                    // Dump triggered by a source not recognised.
+                    return;
+            }
+            tracingInstance.addToBuffer(proto, source);
+        });
     }
 
     @BinderThread
@@ -4183,40 +4187,44 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @BinderThread
     @Override
-    public void startImeTrace() {
-        ImeTracing.getInstance().startTrace(null /* printwriter */);
-        ArrayMap<IBinder, ClientState> clients;
-        synchronized (mMethodMap) {
-            clients = new ArrayMap<>(mClients);
-        }
-        for (ClientState state : clients.values()) {
-            if (state != null) {
-                try {
-                    state.client.setImeTraceEnabled(true /* enabled */);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error while trying to enable ime trace on client window", e);
+    public void startImeTrace(IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            ImeTracing.getInstance().startTrace(null /* printwriter */);
+            ArrayMap<IBinder, ClientState> clients;
+            synchronized (mMethodMap) {
+                clients = new ArrayMap<>(mClients);
+            }
+            for (ClientState state : clients.values()) {
+                if (state != null) {
+                    try {
+                        state.client.setImeTraceEnabled(true /* enabled */);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error while trying to enable ime trace on client window", e);
+                    }
                 }
             }
-        }
+        });
     }
 
     @BinderThread
     @Override
-    public void stopImeTrace() {
-        ImeTracing.getInstance().stopTrace(null /* printwriter */);
-        ArrayMap<IBinder, ClientState> clients;
-        synchronized (mMethodMap) {
-            clients = new ArrayMap<>(mClients);
-        }
-        for (ClientState state : clients.values()) {
-            if (state != null) {
-                try {
-                    state.client.setImeTraceEnabled(false /* enabled */);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error while trying to disable ime trace on client window", e);
+    public void stopImeTrace(IVoidResultCallback resultCallback) {
+        CallbackUtils.onResult(resultCallback, () -> {
+            ImeTracing.getInstance().stopTrace(null /* printwriter */);
+            ArrayMap<IBinder, ClientState> clients;
+            synchronized (mMethodMap) {
+                clients = new ArrayMap<>(mClients);
+            }
+            for (ClientState state : clients.values()) {
+                if (state != null) {
+                    try {
+                        state.client.setImeTraceEnabled(false /* enabled */);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Error while trying to disable ime trace on client window", e);
+                    }
                 }
             }
-        }
+        });
     }
 
     @GuardedBy("mMethodMap")

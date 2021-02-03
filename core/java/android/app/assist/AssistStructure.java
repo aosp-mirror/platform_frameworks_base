@@ -2,6 +2,7 @@ package android.app.assist;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Activity;
 import android.content.ComponentName;
@@ -1542,6 +1543,7 @@ public class AssistStructure implements Parcelable {
          * {@link View#getOnReceiveContentMimeTypes()} for details.
          */
         @Nullable
+        @SuppressLint("NullableCollection")
         public String[] getOnReceiveContentMimeTypes() {
             return mOnReceiveContentMimeTypes;
         }

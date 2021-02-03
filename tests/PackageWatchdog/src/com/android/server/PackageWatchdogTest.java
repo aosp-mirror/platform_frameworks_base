@@ -98,6 +98,8 @@ public class PackageWatchdogTest {
     private final TestClock mTestClock = new TestClock();
     private TestLooper mTestLooper;
     private Context mSpyContext;
+    // Keep track of all created watchdogs to apply device config changes
+    private List<PackageWatchdog> mAllocatedWatchdogs;
     @Mock
     private ConnectivityModuleConnector mConnectivityModuleConnector;
     @Mock
@@ -112,7 +114,8 @@ public class PackageWatchdogTest {
         MockitoAnnotations.initMocks(this);
         new File(InstrumentationRegistry.getContext().getFilesDir(),
                 "package-watchdog.xml").delete();
-        adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG);
+        adoptShellPermissions(Manifest.permission.READ_DEVICE_CONFIG,
+                Manifest.permission.WRITE_DEVICE_CONFIG);
         mTestLooper = new TestLooper();
         mSpyContext = spy(InstrumentationRegistry.getContext());
         when(mSpyContext.getPackageManager()).thenReturn(mMockPackageManager);
@@ -157,12 +160,23 @@ public class PackageWatchdogTest {
                     return storedValue == null ? defaultValue : Long.parseLong(storedValue);
                 }
         ).when(() -> SystemProperties.getLong(anyString(), anyLong()));
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
+                Boolean.toString(true), false);
+
+        DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
+                PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
+                Integer.toString(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_COUNT), false);
+
+        mAllocatedWatchdogs = new ArrayList<>();
     }
 
     @After
     public void tearDown() throws Exception {
         dropShellPermissions();
         mSession.finishMocking();
+        mAllocatedWatchdogs.clear();
     }
 
     @Test
@@ -611,10 +625,6 @@ public class PackageWatchdogTest {
      */
     @Test
     public void testExplicitHealthCheckStateChanges() throws Exception {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
-
         TestController controller = new TestController();
         PackageWatchdog watchdog = createWatchdog(controller, true /* withPackagesReady */);
         TestObserver observer = new TestObserver(OBSERVER_NAME_1,
@@ -807,9 +817,6 @@ public class PackageWatchdogTest {
     /** Test default values are used when device property is invalid. */
     @Test
     public void testInvalidConfig_watchdogTriggerFailureCount() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(-1), /*makeDefault*/false);
@@ -835,9 +842,6 @@ public class PackageWatchdogTest {
     /** Test default values are used when device property is invalid. */
     @Test
     public void testInvalidConfig_watchdogTriggerDurationMillis() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(2), /*makeDefault*/false);
@@ -850,7 +854,6 @@ public class PackageWatchdogTest {
         watchdog.startObservingHealth(observer, Arrays.asList(APP_A, APP_B), Long.MAX_VALUE);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS + 1);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -862,7 +865,6 @@ public class PackageWatchdogTest {
 
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(PackageWatchdog.DEFAULT_TRIGGER_FAILURE_DURATION_MS - 1);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_B, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
@@ -917,9 +919,6 @@ public class PackageWatchdogTest {
     /** Test we are notified when enough failures are triggered within any window. */
     @Test
     public void testFailureTriggerWindow() {
-        adoptShellPermissions(
-                Manifest.permission.WRITE_DEVICE_CONFIG,
-                Manifest.permission.READ_DEVICE_CONFIG);
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_TRIGGER_FAILURE_COUNT,
                 Integer.toString(3), /*makeDefault*/false);
@@ -933,11 +932,9 @@ public class PackageWatchdogTest {
         // Raise 2 failures at t=0 and t=900 respectively
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
         moveTimeForwardAndDispatch(900);
         watchdog.onPackageFailure(Arrays.asList(new VersionedPackage(APP_A, VERSION_CODE)),
                 PackageWatchdog.FAILURE_REASON_UNKNOWN);
-        mTestLooper.dispatchAll();
 
         // Raise 2 failures at t=1100
         moveTimeForwardAndDispatch(200);
@@ -1303,15 +1300,15 @@ public class PackageWatchdogTest {
         DeviceConfig.setProperty(DeviceConfig.NAMESPACE_ROLLBACK,
                 PackageWatchdog.PROPERTY_WATCHDOG_EXPLICIT_HEALTH_CHECK_ENABLED,
                 Boolean.toString(enabled), /*makeDefault*/false);
-        //give time for DeviceConfig to broadcast the property value change
-        try {
-            Thread.sleep(SHORT_DURATION);
-        } catch (InterruptedException e) {
-            fail("Thread.sleep unexpectedly failed!");
+        // Call updateConfigs() so device config changes take effect immediately
+        for (PackageWatchdog watchdog : mAllocatedWatchdogs) {
+            watchdog.updateConfigs();
         }
     }
 
     private void moveTimeForwardAndDispatch(long milliSeconds) {
+        // Exhaust all due runnables now which shouldn't be executed after time-leap
+        mTestLooper.dispatchAll();
         mTestClock.moveTimeForward(milliSeconds);
         mTestLooper.moveTimeForward(milliSeconds);
         mTestLooper.dispatchAll();
@@ -1354,6 +1351,7 @@ public class PackageWatchdogTest {
             verify(mConnectivityModuleConnector).registerHealthListener(
                     mConnectivityModuleCallbackCaptor.capture());
         }
+        mAllocatedWatchdogs.add(watchdog);
         return watchdog;
     }
 

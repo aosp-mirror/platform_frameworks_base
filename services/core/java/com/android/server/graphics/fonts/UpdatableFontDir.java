@@ -142,11 +142,9 @@ final class UpdatableFontDir {
         mFsverityUtil = fsverityUtil;
         mConfigFile = configFile;
         mTmpConfigFile = new File(configFile.getAbsoluteFile() + ".tmp");
-        loadFontFileMap();
     }
 
-    private void loadFontFileMap() {
-        // TODO: SIGBUS crash protection
+    /* package */ void loadFontFileMap() {
         synchronized (UpdatableFontDir.this) {
             boolean success = false;
 

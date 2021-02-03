@@ -26,14 +26,14 @@
 // Log debug messages about InputDispatcherPolicy
 #define DEBUG_INPUT_DISPATCHER_POLICY 0
 
-
-#include <atomic>
-#include <cinttypes>
-#include <limits.h>
 #include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
+#include <android/os/IInputConstants.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
+#include <limits.h>
+#include <atomic>
+#include <cinttypes>
 
 #include <utils/Log.h>
 #include <utils/Looper.h>
@@ -46,6 +46,7 @@
 #include <input/SpriteController.h>
 #include <ui/Region.h>
 
+#include <batteryservice/include/batteryservice/BatteryServiceConstants.h>
 #include <inputflinger/InputManager.h>
 
 #include <android_os_MessageQueue.h>
@@ -1908,6 +1909,20 @@ static jintArray nativeGetVibratorIds(JNIEnv* env, jclass clazz, jlong ptr, jint
     return vibIdArray;
 }
 
+static jint nativeGetBatteryCapacity(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    std::optional<int32_t> ret = im->getInputManager()->getReader()->getBatteryCapacity(deviceId);
+    return static_cast<jint>(ret.value_or(android::os::IInputConstants::INVALID_BATTERY_CAPACITY));
+}
+
+static jint nativeGetBatteryStatus(JNIEnv* env, jclass /* clazz */, jlong ptr, jint deviceId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    std::optional<int32_t> ret = im->getInputManager()->getReader()->getBatteryStatus(deviceId);
+    return static_cast<jint>(ret.value_or(BATTERY_STATUS_UNKNOWN));
+}
+
 static void nativeReloadKeyboardLayouts(JNIEnv* /* env */,
         jclass /* clazz */, jlong ptr) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
@@ -2163,6 +2178,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
         {"nativeCancelVibrate", "(JII)V", (void*)nativeCancelVibrate},
         {"nativeIsVibrating", "(JI)Z", (void*)nativeIsVibrating},
         {"nativeGetVibratorIds", "(JI)[I", (void*)nativeGetVibratorIds},
+        {"nativeGetBatteryCapacity", "(JI)I", (void*)nativeGetBatteryCapacity},
+        {"nativeGetBatteryStatus", "(JI)I", (void*)nativeGetBatteryStatus},
         {"nativeReloadKeyboardLayouts", "(J)V", (void*)nativeReloadKeyboardLayouts},
         {"nativeReloadDeviceAliases", "(J)V", (void*)nativeReloadDeviceAliases},
         {"nativeDump", "(J)Ljava/lang/String;", (void*)nativeDump},

@@ -27,7 +27,6 @@ import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Debug;
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.Choreographer;
@@ -62,6 +61,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private static final int SHRINK_STACK_FROM_MENU_DURATION = 250;
     private static final int EXPAND_STACK_TO_MENU_DURATION = 250;
+    private static final int UNSTASH_DURATION = 250;
     private static final int LEAVE_PIP_DURATION = 300;
     private static final int SHIFT_DURATION = 300;
 
@@ -479,6 +479,13 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         } else {
             resizeAndAnimatePipUnchecked(normalBounds, SHRINK_STACK_FROM_MENU_DURATION);
         }
+    }
+
+    /**
+     * Animates the PiP from stashed state into un-stashed, popping it out from the edge.
+     */
+    void animateToUnStashedBounds(Rect unstashedBounds) {
+        resizeAndAnimatePipUnchecked(unstashedBounds, UNSTASH_DURATION);
     }
 
     /**

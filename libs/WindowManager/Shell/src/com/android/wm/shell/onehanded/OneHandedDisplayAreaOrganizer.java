@@ -89,6 +89,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
                     mAnimationController.removeAnimator(animator.getToken());
                     if (mAnimationController.isAnimatorsConsumed()) {
+                        resetWindowsOffsetInternal(animator.getTransitionDirection());
                         finishOffset(animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
                     }
@@ -99,6 +100,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
                     mAnimationController.removeAnimator(animator.getToken());
                     if (mAnimationController.isAnimatorsConsumed()) {
+                        resetWindowsOffsetInternal(animator.getTransitionDirection());
                         finishOffset(animator.getDestinationOffset(),
                                 animator.getTransitionDirection());
                     }
@@ -202,6 +204,16 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                             mEnterExitAnimationDurationMs);
                     wct.setBounds(token, toBounds);
                 });
+        applyTransaction(wct);
+    }
+
+    private void resetWindowsOffsetInternal(
+            @OneHandedAnimationController.TransitionDirection int td) {
+        if (td == TRANSITION_DIRECTION_TRIGGER) {
+            return;
+        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        resetWindowsOffset(wct);
         applyTransaction(wct);
     }
 

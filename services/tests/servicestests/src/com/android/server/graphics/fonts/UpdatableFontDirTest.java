@@ -147,6 +147,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dirForPreparation.loadFontFileMap();
         assertThat(dirForPreparation.getSystemFontConfig().getLastModifiedTimeMillis())
                 .isEqualTo(expectedModifiedDate);
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
@@ -162,6 +163,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).containsKey("foo.ttf");
         assertThat(parser.getRevision(dir.getFontFileMap().get("foo.ttf"))).isEqualTo(3);
         assertThat(dir.getFontFileMap()).containsKey("bar.ttf");
@@ -177,6 +179,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
     }
 
@@ -187,6 +190,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dirForPreparation.loadFontFileMap();
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
@@ -199,6 +203,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
@@ -211,6 +216,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dirForPreparation.loadFontFileMap();
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
@@ -224,6 +230,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
         // All font dirs (including dir for "bar.ttf") should be deleted.
         assertThat(mUpdatableFontFilesDir.list()).hasLength(0);
@@ -236,6 +243,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dirForPreparation = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dirForPreparation.loadFontFileMap();
         installFontFile(dirForPreparation, "foo,1", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "bar,2", GOOD_SIGNATURE);
         installFontFile(dirForPreparation, "foo,3", GOOD_SIGNATURE);
@@ -250,6 +258,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
         // For foo.ttf, preinstalled font (revision 5) should be used.
         assertThat(dir.getFontFileMap()).doesNotContainKey("foo.ttf");
         // For bar.ttf, updated font (revision 4) should be used.
@@ -268,6 +277,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 new File("/dev/null"));
+        dir.loadFontFileMap();
         assertThat(dir.getFontFileMap()).isEmpty();
     }
 
@@ -278,6 +288,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         installFontFile(dir, "test,1", GOOD_SIGNATURE);
         assertThat(dir.getFontFileMap()).containsKey("test.ttf");
@@ -295,6 +306,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         installFontFile(dir, "test,1", GOOD_SIGNATURE);
         Map<String, File> mapBeforeUpgrade = dir.getFontFileMap();
@@ -313,6 +325,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         installFontFile(dir, "test,2", GOOD_SIGNATURE);
         try {
@@ -333,6 +346,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         installFontFile(dir, "foo,1", GOOD_SIGNATURE);
         installFontFile(dir, "bar,2", GOOD_SIGNATURE);
@@ -349,6 +363,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         try {
             installFontFile(dir, "test,1", "Invalid signature");
@@ -368,6 +383,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         try {
             installFontFile(dir, "test,1", GOOD_SIGNATURE);
@@ -398,6 +414,7 @@ public final class UpdatableFontDirTest {
             UpdatableFontDir dir = new UpdatableFontDir(
                     mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                     readonlyFile);
+            dir.loadFontFileMap();
 
             try {
                 installFontFile(dir, "test,2", GOOD_SIGNATURE);
@@ -429,6 +446,7 @@ public final class UpdatableFontDirTest {
                         return 0;
                     }
                 }, fakeFsverityUtil, mConfigFile);
+        dir.loadFontFileMap();
 
         try {
             installFontFile(dir, "foo,1", GOOD_SIGNATURE);
@@ -456,6 +474,7 @@ public final class UpdatableFontDirTest {
                         return 0;
                     }
                 }, fakeFsverityUtil, mConfigFile);
+        dir.loadFontFileMap();
 
         try {
             installFontFile(dir, "foo,1", GOOD_SIGNATURE);
@@ -491,6 +510,7 @@ public final class UpdatableFontDirTest {
         UpdatableFontDir dir = new UpdatableFontDir(
                 mUpdatableFontFilesDir, mPreinstalledFontDirs, parser, fakeFsverityUtil,
                 mConfigFile);
+        dir.loadFontFileMap();
 
         try {
             installFontFile(dir, "foo,1", GOOD_SIGNATURE);

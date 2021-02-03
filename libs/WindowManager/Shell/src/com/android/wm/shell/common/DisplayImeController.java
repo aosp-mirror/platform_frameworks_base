@@ -159,6 +159,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         }
     }
 
+    private void dispatchVisibilityChanged(int displayId, boolean isShowing) {
+        synchronized (mPositionProcessors) {
+            for (ImePositionProcessor pp : mPositionProcessors) {
+                pp.onImeVisibilityChanged(displayId, isShowing);
+            }
+        }
+    }
+
     /**
      * Adds an {@link ImePositionProcessor} to be called during ime position updates.
      */
@@ -212,7 +220,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 return;
             }
 
-            mImeShowing = insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME);
+            updateImeVisibility(insetsState.getSourceOrDefaultVisibility(InsetsState.ITYPE_IME));
 
             final InsetsSource newSource = insetsState.getSource(InsetsState.ITYPE_IME);
             final Rect newFrame = newSource.getFrame();
@@ -371,7 +379,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 seek = true;
             }
             mAnimationDirection = show ? DIRECTION_SHOW : DIRECTION_HIDE;
-            mImeShowing = show;
+            updateImeVisibility(show);
             mAnimation = ValueAnimator.ofFloat(startY, endY);
             mAnimation.setDuration(
                     show ? ANIMATION_DURATION_SHOW_MS : ANIMATION_DURATION_HIDE_MS);
@@ -452,6 +460,13 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 // When showing away, queue up insets change last, otherwise any bounds changes
                 // can have a "flicker" of ime-provided insets.
                 setVisibleDirectly(true /* visible */);
+            }
+        }
+
+        private void updateImeVisibility(boolean isShowing) {
+            if (mImeShowing != isShowing) {
+                mImeShowing = isShowing;
+                dispatchVisibilityChanged(mDisplayId, isShowing);
             }
         }
 
@@ -562,6 +577,15 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         default void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {
+        }
+
+        /**
+         * Called when the IME visibility changed.
+         *
+         * @param isShowing {@code true} if the IME is shown.
+         */
+        default void onImeVisibilityChanged(int displayId, boolean isShowing) {
+
         }
     }
 

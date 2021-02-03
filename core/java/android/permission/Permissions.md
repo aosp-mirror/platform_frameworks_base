@@ -809,6 +809,9 @@ Please note that OEMs sign their platform themselves. I.e. OEMs can implement ne
 permissions. It is unlikely that 3rd party apps will be able to use APIs protected by signature
 permissions as they are usually not signed with the platform certificate.
 
+If possible, [role protected permissions](#role-protected-permissions) should also be considered as
+an alternative to better restrict which apps may get the permission.
+
 Such permissions are defined and checked like an install time permission.
 
 ### Preinstalled permissions
@@ -818,6 +821,9 @@ on a particular device install there. Hence it can be really any app including 3
 
 Hence this permission level is discouraged unless there are
 [further restrictions](#restricted-by-tests).
+
+If possible, [role protected permissions](#role-protected-permissions) should also be considered as
+an alternative to better restrict which apps may get the permission.
 
 Such permissions are defined and checked like an install time permission.
 
@@ -832,6 +838,9 @@ privileged permissions added in updates will never be granted.
 
 Hence this permission level is discouraged unless there are
 [further restrictions](#restricted-by-tests).
+
+If possible, [role protected permissions](#role-protected-permissions) should also be considered as
+an alternative to better restrict which apps may get the permission.
 
 Such permissions are defined and checked like an install time permission.
 
@@ -890,7 +899,15 @@ well defined app or set of apps. It is possible to add new types in `PackageMana
 Which apps qualify for such a permission level is flexible and custom for each such level. Usually
 they refer to a single or small set of apps, usually - but not always - apps defined in AOSP.
 
+This type of permission is deprecated in favor of
+[role protected permissions](#role-protected-permissions).
+
 These permissions are defined and checked like an install time permission.
+
+### Role protected permissions
+
+See
+[Using role for permission protection](../../../../../../packages/modules/Permission/PermissionController/src/com/android/permissioncontroller/role/RolePermissionProtection.md).
 
 ### Development permissions
 

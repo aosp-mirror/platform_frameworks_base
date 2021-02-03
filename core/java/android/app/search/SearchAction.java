@@ -18,6 +18,7 @@ package android.app.search;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -167,6 +168,7 @@ public final class SearchAction implements Parcelable {
     /**
      * Returns the extra bundle for this object.
      */
+    @SuppressLint("NullableCollection")
     public @Nullable Bundle getExtras() {
         return mExtras;
     }
@@ -325,7 +327,8 @@ public final class SearchAction implements Parcelable {
          * Sets the extra.
          */
         @NonNull
-        public SearchAction.Builder setExtras(@Nullable Bundle extras) {
+        public SearchAction.Builder setExtras(
+                @SuppressLint("NullableCollection") @Nullable Bundle extras) {
             mExtras = extras;
             return this;
         }

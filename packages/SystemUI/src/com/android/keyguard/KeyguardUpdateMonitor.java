@@ -1909,12 +1909,14 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     }
 
     /**
-     * Whether to show the lock icon on lock screen and bouncer. This depends on the enrolled
-     * biometrics to the device.
+     * Whether to show the lock icon on lock screen and bouncer.
      */
-    public boolean shouldShowLockIcon() {
-        return isFaceAuthEnabledForUser(KeyguardUpdateMonitor.getCurrentUser())
-                && !isUdfpsEnrolled();
+    public boolean canShowLockIcon() {
+        if (mLockScreenMode == LOCK_SCREEN_MODE_LAYOUT_1) {
+            return isFaceAuthEnabledForUser(KeyguardUpdateMonitor.getCurrentUser())
+                    && !isUdfpsEnrolled();
+        }
+        return true;
     }
 
     /**
