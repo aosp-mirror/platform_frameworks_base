@@ -231,7 +231,6 @@ public class PipMenuView extends FrameLayout {
                     && (mMenuState == MENU_STATE_FULL || menuState == MENU_STATE_FULL);
             mAllowTouches = !disallowTouchesUntilAnimationEnd;
             cancelDelayedHide();
-            updateActionViews(stackBounds);
             if (mMenuContainerAnimator != null) {
                 mMenuContainerAnimator.cancel();
             }
@@ -280,6 +279,7 @@ public class PipMenuView extends FrameLayout {
                 setVisibility(VISIBLE);
                 mMenuContainerAnimator.start();
             }
+            updateActionViews(stackBounds);
         } else {
             // If we are already visible, then just start the delayed dismiss and unregister any
             // existing input consumers from the previous drag
@@ -395,7 +395,7 @@ public class PipMenuView extends FrameLayout {
             return true;
         });
 
-        if (mActions.isEmpty() || mMenuState == MENU_STATE_CLOSE) {
+        if (mActions.isEmpty() || mMenuState == MENU_STATE_CLOSE || mMenuState == MENU_STATE_NONE) {
             actionsContainer.setVisibility(View.INVISIBLE);
         } else {
             actionsContainer.setVisibility(View.VISIBLE);
