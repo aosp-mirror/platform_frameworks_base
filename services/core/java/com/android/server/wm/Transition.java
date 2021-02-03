@@ -235,16 +235,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         for (int i = mTargets.size() - 1; i >= 0; --i) {
             final WindowContainer target = mTargets.valueAt(i);
             if (target.getParent() != null) {
+                final SurfaceControl targetLeash = getLeashSurface(target);
+                final SurfaceControl origParent = getOrigParentSurface(target);
                 // Ensure surfaceControls are re-parented back into the hierarchy.
-                t.reparent(target.getSurfaceControl(), target.getParent().getSurfaceControl());
-                t.setLayer(target.getSurfaceControl(), target.getLastLayer());
+                t.reparent(targetLeash, origParent);
+                t.setLayer(targetLeash, target.getLastLayer());
                 // TODO(shell-transitions): Once all remotables have been moved, see if there is
                 //                          a more appropriate place to do the following. This may
                 //                          involve passing an SF transaction from shell on finish.
                 target.getRelativePosition(tmpPos);
-                t.setPosition(target.getSurfaceControl(), tmpPos.x, tmpPos.y);
-                t.setCornerRadius(target.getSurfaceControl(), 0);
-                t.setShadowRadius(target.getSurfaceControl(), 0);
+                t.setPosition(targetLeash, tmpPos.x, tmpPos.y);
+                t.setCornerRadius(targetLeash, 0);
+                t.setShadowRadius(targetLeash, 0);
                 displays.add(target.getDisplayContent());
             }
         }
@@ -455,8 +457,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 final int depth = getChildDepth(topTargets.valueAt(j), sibling);
                 if (depth < 0) continue;
                 if (depth == 0) {
-                    final int siblingMode = sibling.isVisibleRequested()
-                            ? TRANSIT_OPEN : TRANSIT_CLOSE;
+                    final int siblingMode = changes.get(sibling).getTransitMode(sibling);
                     ProtoLog.v(ProtoLogGroup.WM_DEBUG_WINDOW_TRANSITIONS,
                             "        sibling is a top target with mode %s",
                             TransitionInfo.modeToString(siblingMode));
@@ -638,6 +639,15 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
         }
     }
 
+    /** Gets the leash surface for a window container */
+    private static SurfaceControl getLeashSurface(WindowContainer wc) {
+        return wc.getSurfaceControl();
+    }
+
+    private static SurfaceControl getOrigParentSurface(WindowContainer wc) {
+        return wc.getParent().getSurfaceControl();
+    }
+
     /**
      * Construct a TransitionInfo object from a set of targets and changes. Also populates the
      * root surface.
@@ -713,7 +723,7 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
             final ChangeInfo info = changes.get(target);
             final TransitionInfo.Change change = new TransitionInfo.Change(
                     target.mRemoteToken != null ? target.mRemoteToken.toWindowContainerToken()
-                            : null, target.getSurfaceControl());
+                            : null, getLeashSurface(target));
             // TODO(shell-transitions): Use leash for non-organized windows.
             if (info.mParent != null) {
                 change.setParent(info.mParent.mRemoteToken.toWindowContainerToken());

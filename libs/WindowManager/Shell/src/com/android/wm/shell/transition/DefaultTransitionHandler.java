@@ -97,8 +97,8 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
 
-            // Don't animate anything with an animating parent
-            if (change.getParent() != null) continue;
+            // Don't animate anything that isn't independent.
+            if (!TransitionInfo.isIndependent(change, info)) continue;
 
             Animation a = loadAnimation(info.getType(), change);
             if (a != null) {
