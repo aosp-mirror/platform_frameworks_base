@@ -10429,6 +10429,7 @@ package android.telephony.data {
     method public long getRetryDurationMillis();
     method @Nullable public android.telephony.data.SliceInfo getSliceInfo();
     method @Deprecated public int getSuggestedRetryTime();
+    method @NonNull public java.util.List<android.telephony.data.TrafficDescriptor> getTrafficDescriptors();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.DataCallResponse> CREATOR;
     field public static final int HANDOVER_FAILURE_MODE_DO_FALLBACK = 1; // 0x1
@@ -10464,6 +10465,7 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.DataCallResponse.Builder setRetryDurationMillis(long);
     method @NonNull public android.telephony.data.DataCallResponse.Builder setSliceInfo(@Nullable android.telephony.data.SliceInfo);
     method @Deprecated @NonNull public android.telephony.data.DataCallResponse.Builder setSuggestedRetryTime(int);
+    method @NonNull public android.telephony.data.DataCallResponse.Builder setTrafficDescriptors(@NonNull java.util.List<android.telephony.data.TrafficDescriptor>);
   }
 
   public final class DataProfile implements android.os.Parcelable {
@@ -10535,7 +10537,7 @@ package android.telephony.data {
     method public void setDataProfile(@NonNull java.util.List<android.telephony.data.DataProfile>, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setInitialAttachApn(@NonNull android.telephony.data.DataProfile, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @NonNull android.telephony.data.DataServiceCallback);
-    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @NonNull android.telephony.data.DataServiceCallback);
+    method public void setupDataCall(int, @NonNull android.telephony.data.DataProfile, boolean, boolean, int, @Nullable android.net.LinkProperties, @IntRange(from=0, to=15) int, @Nullable android.telephony.data.SliceInfo, @Nullable android.telephony.data.TrafficDescriptor, boolean, @NonNull android.telephony.data.DataServiceCallback);
     method public void startHandover(int, @NonNull android.telephony.data.DataServiceCallback);
   }
 
@@ -10635,6 +10637,15 @@ package android.telephony.data {
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setSlotIndex(int);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setThrottleExpiryTimeMillis(long);
     method @NonNull public android.telephony.data.ThrottleStatus.Builder setTransportType(int);
+  }
+
+  public final class TrafficDescriptor implements android.os.Parcelable {
+    ctor public TrafficDescriptor(@Nullable String, @Nullable String);
+    method public int describeContents();
+    method @Nullable public String getDnn();
+    method @Nullable public String getOsAppId();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.data.TrafficDescriptor> CREATOR;
   }
 
 }
