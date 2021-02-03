@@ -202,7 +202,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.service.attestation.ImpressionToken;
+import android.service.screenshot.ScreenshotHash;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.sysprop.SurfaceFlingerProperties;
@@ -768,7 +768,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final EmbeddedWindowController mEmbeddedWindowController;
     final AnrController mAnrController;
 
-    private final ImpressionAttestationController mImpressionAttestationController;
+    private final ScreenshotHashController mScreenshotHashController;
     private final WindowContextListenerController mWindowContextListenerController =
             new WindowContextListenerController();
 
@@ -1418,7 +1418,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
                 mContext.getResources());
 
-        mImpressionAttestationController = new ImpressionAttestationController(mContext);
+        mScreenshotHashController = new ScreenshotHashController(mContext);
         setGlobalShadowSettings();
         mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
@@ -8660,38 +8660,38 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public String[] getSupportedImpressionAlgorithms() {
-        return mImpressionAttestationController.getSupportedImpressionAlgorithms();
+    public String[] getSupportedScreenshotHashingAlgorithms() {
+        return mScreenshotHashController.getSupportedHashingAlgorithms();
     }
 
     @Override
-    public boolean verifyImpressionToken(ImpressionToken impressionToken) {
-        return mImpressionAttestationController.verifyImpressionToken(impressionToken);
+    public boolean verifyScreenshotHash(ScreenshotHash screenshotHash) {
+        return mScreenshotHashController.verifyScreenshotHash(screenshotHash);
     }
 
-    ImpressionToken generateImpressionToken(Session session, IWindow window,
+    ScreenshotHash generateScreenshotHash(Session session, IWindow window,
             Rect boundsInWindow, String hashAlgorithm) {
         final SurfaceControl displaySurfaceControl;
         final Rect boundsInDisplay = new Rect(boundsInWindow);
         synchronized (mGlobalLock) {
             final WindowState win = windowForClientLocked(session, window, false);
             if (win == null) {
-                Slog.w(TAG, "Failed to generate impression token. Invalid window");
+                Slog.w(TAG, "Failed to generate ScreenshotHash. Invalid window");
                 return null;
             }
 
             DisplayContent displayContent = win.getDisplayContent();
             if (displayContent == null) {
-                Slog.w(TAG, "Failed to generate impression token. Window is not on a display");
+                Slog.w(TAG, "Failed to generate ScreenshotHash. Window is not on a display");
                 return null;
             }
 
             displaySurfaceControl = displayContent.getSurfaceControl();
-            mImpressionAttestationController.calculateImpressionTokenBoundsLocked(win,
+            mScreenshotHashController.calculateScreenshotHashBoundsLocked(win,
                     boundsInWindow, boundsInDisplay);
 
             if (boundsInDisplay.isEmpty()) {
-                Slog.w(TAG, "Failed to generate impression token. Bounds are not on screen");
+                Slog.w(TAG, "Failed to generate ScreenshotHash. Bounds are not on screen");
                 return null;
             }
         }
@@ -8711,11 +8711,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 SurfaceControl.captureLayers(args);
         if (screenshotHardwareBuffer == null
                 || screenshotHardwareBuffer.getHardwareBuffer() == null) {
-            Slog.w(TAG, "Failed to generate impression token. Failed to take screenshot");
+            Slog.w(TAG, "Failed to generate ScreenshotHash. Failed to take screenshot");
             return null;
         }
 
-        return mImpressionAttestationController.generateImpressionToken(
+        return mScreenshotHashController.generateScreenshotHash(
                 screenshotHardwareBuffer.getHardwareBuffer(), boundsInWindow, hashAlgorithm);
     }
 }

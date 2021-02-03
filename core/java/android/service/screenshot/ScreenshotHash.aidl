@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package android.service.attestation;
+package android.service.screenshot;
 
-parcelable ImpressionToken;
+parcelable ScreenshotHash;
