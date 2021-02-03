@@ -39,14 +39,14 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * A view containing 1) A SurfaceView for HBM, and 2) A normal drawable view for all other
  * animations.
  */
 public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIlluminator,
-        StatusBarStateController.StateListener, ScrimController.ScrimChangedListener {
+        StatusBarStateController.StateListener, StatusBar.ExpansionChangedListener {
     private static final String TAG = "UdfpsView";
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
@@ -133,8 +133,8 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     }
 
     @Override
-    public void onAlphaChanged(float alpha) {
-        mAnimationView.onAlphaChanged(alpha);
+    public void onExpansionChanged(float expansion, boolean expanded) {
+        mAnimationView.onExpansionChanged(expansion, expanded);
     }
 
     @Override

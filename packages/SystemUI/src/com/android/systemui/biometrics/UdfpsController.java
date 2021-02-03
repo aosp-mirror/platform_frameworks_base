@@ -45,6 +45,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
@@ -155,7 +156,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
             WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
-            @NonNull ScrimController scrimController) {
+            @Nullable StatusBar statusBar) {
         mContext = context;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
@@ -186,7 +187,7 @@ public class UdfpsController implements DozeReceiver, HbmCallback {
         mView.setSensorProperties(mSensorProps);
         mView.setHbmCallback(this);
 
-        scrimController.addScrimChangedListener(mView);
+        statusBar.addExpansionChangedListener(mView);
         statusBarStateController.addCallback(mView);
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
