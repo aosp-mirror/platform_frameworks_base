@@ -54,6 +54,9 @@ import com.android.systemui.statusbar.policy.NetworkController.IconState;
 import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
 import com.android.systemui.statusbar.policy.WifiIcons;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+
 import javax.inject.Inject;
 
 /** Quick settings tile: Internet **/
@@ -65,7 +68,7 @@ public class InternetTile extends QSTileImpl<SignalState> {
     protected final NetworkController mController;
     private final DataUsageController mDataController;
     private final QSTile.SignalState mStateBeforeClick = newTileState();
-    // The last updated tile state, 0: mobile, 1: wifi
+    // The last updated tile state, 0: mobile, 1: wifi, 2: ethernet.
     private int mLastTileState = -1;
 
     protected final InternetSignalCallback mSignalCallback = new InternetSignalCallback();
@@ -140,6 +143,21 @@ public class InternetTile extends QSTileImpl<SignalState> {
         return string;
     }
 
+    private static final class EthernetCallbackInfo {
+        boolean mConnected;
+        int mEthernetSignalIconId;
+        String mEthernetContentDescription;
+
+        @Override
+        public String toString() {
+            return new StringBuilder("EthernetCallbackInfo[")
+                    .append("mConnected=").append(mConnected)
+                    .append(",mEthernetSignalIconId=").append(mEthernetSignalIconId)
+                    .append(",mEthernetContentDescription=").append(mEthernetContentDescription)
+                    .append(']').toString();
+        }
+    }
+
     private static final class WifiCallbackInfo {
         boolean mAirplaneModeEnabled;
         boolean mEnabled;
@@ -212,6 +230,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
     protected final class InternetSignalCallback implements SignalCallback {
         final WifiCallbackInfo mWifiInfo = new WifiCallbackInfo();
         final CellularCallbackInfo mCellularInfo = new CellularCallbackInfo();
+        final EthernetCallbackInfo mEthernetInfo = new EthernetCallbackInfo();
+
 
         @Override
         public void setWifiIndicators(boolean enabled, IconState statusIcon, IconState qsIcon,
@@ -230,14 +250,12 @@ public class InternetTile extends QSTileImpl<SignalState> {
             }
             // When airplane mode is enabled, we need to refresh the Internet Tile even if the WiFi
             // is not the default network.
-            if (qsIcon == null && !mWifiInfo.mAirplaneModeEnabled) {
+            if (qsIcon == null) {
                 return;
             }
-            if (qsIcon != null) {
-                mWifiInfo.mConnected = qsIcon.visible;
-                mWifiInfo.mWifiSignalIconId = qsIcon.icon;
-                mWifiInfo.mWifiSignalContentDescription = qsIcon.contentDescription;
-            }
+            mWifiInfo.mConnected = qsIcon.visible;
+            mWifiInfo.mWifiSignalIconId = qsIcon.icon;
+            mWifiInfo.mWifiSignalContentDescription = qsIcon.contentDescription;
             mWifiInfo.mEnabled = enabled;
             mWifiInfo.mSsid = description;
             mWifiInfo.mActivityIn = activityIn;
@@ -287,6 +305,20 @@ public class InternetTile extends QSTileImpl<SignalState> {
         }
 
         @Override
+        public void setEthernetIndicators(IconState icon) {
+            if (DEBUG) {
+                Log.d(TAG, "setEthernetIndicators: "
+                        + "icon = " + (icon == null ? "" :  icon.toString()));
+            }
+            mEthernetInfo.mConnected = icon.visible;
+            mEthernetInfo.mEthernetSignalIconId = icon.icon;
+            mEthernetInfo.mEthernetContentDescription = icon.contentDescription;
+            if (icon.visible) {
+                refreshState(mEthernetInfo);
+            }
+        }
+
+        @Override
         public void setNoSims(boolean show, boolean simDetected) {
             if (DEBUG) {
                 Log.d(TAG, "setNoSims: "
@@ -299,7 +331,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 mCellularInfo.mMobileSignalIconId = 0;
                 mCellularInfo.mQsTypeIcon = 0;
             }
-            refreshState(mCellularInfo);
         }
 
         @Override
@@ -310,7 +341,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
             }
             mCellularInfo.mAirplaneModeEnabled = icon.visible;
             mWifiInfo.mAirplaneModeEnabled = icon.visible;
-            refreshState(mCellularInfo);
+            if (!mSignalCallback.mEthernetInfo.mConnected) {
+                refreshState(mCellularInfo);
+            }
         }
 
         @Override
@@ -330,6 +363,15 @@ public class InternetTile extends QSTileImpl<SignalState> {
             mWifiInfo.mNoNetworksAvailable = noNetworksAvailable;
             refreshState(mWifiInfo);
         }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("InternetSignalCallback[")
+                .append("mWifiInfo=").append(mWifiInfo)
+                .append(",mCellularInfo=").append(mCellularInfo)
+                .append(",mEthernetInfo=").append(mEthernetInfo)
+                .append(']').toString();
+        }
     }
 
     @Override
@@ -340,6 +382,9 @@ public class InternetTile extends QSTileImpl<SignalState> {
         } else if (arg instanceof WifiCallbackInfo) {
             mLastTileState = 1;
             handleUpdateWifiState(state, arg);
+        } else if (arg instanceof EthernetCallbackInfo) {
+            mLastTileState = 2;
+            handleUpdateEthernetState(state, arg);
         } else {
             // handleUpdateState will be triggered when user expands the QuickSetting panel with
             // arg = null, in this case the last updated CellularCallbackInfo or WifiCallbackInfo
@@ -348,6 +393,8 @@ public class InternetTile extends QSTileImpl<SignalState> {
                 handleUpdateCellularState(state, mSignalCallback.mCellularInfo);
             } else if (mLastTileState == 1) {
                 handleUpdateWifiState(state, mSignalCallback.mWifiInfo);
+            } else if (mLastTileState == 2) {
+                handleUpdateEthernetState(state, mSignalCallback.mEthernetInfo);
             }
         }
     }
@@ -440,7 +487,6 @@ public class InternetTile extends QSTileImpl<SignalState> {
             Log.d(TAG, "handleUpdateCellularState: " + "CellularCallbackInfo = " + cb.toString());
         }
         final Resources r = mContext.getResources();
-        // TODO(b/174753536): Use the new "Internet" string as state.label once available.
         state.label = r.getString(R.string.quick_settings_internet_label);
         state.state = Tile.STATE_ACTIVE;
         boolean mobileDataEnabled = mDataController.isMobileDataSupported()
@@ -476,6 +522,18 @@ public class InternetTile extends QSTileImpl<SignalState> {
         } else {
             state.stateDescription = state.secondaryLabel;
         }
+    }
+
+    private void handleUpdateEthernetState(SignalState state, Object arg) {
+        EthernetCallbackInfo cb = (EthernetCallbackInfo) arg;
+        if (DEBUG) {
+            Log.d(TAG, "handleUpdateEthernetState: " + "EthernetCallbackInfo = " + cb.toString());
+        }
+        final Resources r = mContext.getResources();
+        state.label = r.getString(R.string.quick_settings_internet_label);
+        state.state = Tile.STATE_ACTIVE;
+        state.icon = ResourceIcon.get(cb.mEthernetSignalIconId);
+        state.secondaryLabel = cb.mEthernetContentDescription;
     }
 
     private CharSequence appendMobileDataType(CharSequence current, CharSequence dataType) {
@@ -518,5 +576,16 @@ public class InternetTile extends QSTileImpl<SignalState> {
             d.setLevel(getState());
             return d;
         }
+    }
+
+    /**
+     * Dumps the state of this tile along with its name.
+     */
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        pw.println(this.getClass().getSimpleName() + ":");
+        pw.print("    "); pw.println(getState().toString());
+        pw.print("    "); pw.println("mLastTileState=" + mLastTileState);
+        pw.print("    "); pw.println("mSignalCallback=" + mSignalCallback.toString());
     }
 }
