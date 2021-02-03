@@ -162,9 +162,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
      * @hide
      */
     public void initStartingSurface(StartingSurface startingSurface) {
-        synchronized (mLock) {
-            mStartingSurface = startingSurface;
-        }
+        mStartingSurface = startingSurface;
     }
 
     /**

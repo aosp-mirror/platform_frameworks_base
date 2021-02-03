@@ -52,7 +52,7 @@ public class TaskOrganizer extends WindowOrganizer {
     /** @hide */
     @VisibleForTesting
     public TaskOrganizer(ITaskOrganizerController taskOrganizerController, Executor executor) {
-        mExecutor = executor != null ? executor : command -> command.run();
+        mExecutor = executor != null ? executor : Runnable::run;
         mTaskOrganizerController = taskOrganizerController != null
                 ? taskOrganizerController : getController();
     }

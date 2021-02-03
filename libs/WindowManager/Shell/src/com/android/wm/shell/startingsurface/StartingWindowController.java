@@ -47,6 +47,12 @@ import java.util.function.BiConsumer;
  * starting window and attached to the Task, then when the Task want to remove the starting window,
  * the TaskOrganizer will receive {@link TaskOrganizer#removeStartingWindow} callback then use this
  * class to remove the starting window of the Task.
+ * Besides add/remove starting window, There is an API #setStartingWindowListener to register
+ * a callback when starting window is about to create which let the registerer knows the next
+ * starting window's type.
+ * So far all classes in this package is an enclose system so there is no interact with other shell
+ * component, all the methods must be executed in splash screen thread or the thread used in
+ * constructor to keep everything synchronized.
  * @hide
  */
 public class StartingWindowController {
@@ -59,9 +65,11 @@ public class StartingWindowController {
 
     private BiConsumer<Integer, Integer> mTaskLaunchingCallback;
     private final StartingSurfaceImpl mImpl = new StartingSurfaceImpl();
+    private final ShellExecutor mSplashScreenExecutor;
 
-    public StartingWindowController(Context context, ShellExecutor mainExecutor) {
-        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, mainExecutor);
+    public StartingWindowController(Context context, ShellExecutor splashScreenExecutor) {
+        mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, splashScreenExecutor);
+        mSplashScreenExecutor = splashScreenExecutor;
     }
 
     /**
@@ -198,22 +206,26 @@ public class StartingWindowController {
 
         @Override
         public void addStartingWindow(StartingWindowInfo windowInfo, IBinder appToken) {
-            StartingWindowController.this.addStartingWindow(windowInfo, appToken);
+            mSplashScreenExecutor.execute(() ->
+                    StartingWindowController.this.addStartingWindow(windowInfo, appToken));
         }
 
         @Override
         public void removeStartingWindow(int taskId) {
-            StartingWindowController.this.removeStartingWindow(taskId);
+            mSplashScreenExecutor.execute(() ->
+                    StartingWindowController.this.removeStartingWindow(taskId));
         }
 
         @Override
         public void copySplashScreenView(int taskId) {
-            StartingWindowController.this.copySplashScreenView(taskId);
+            mSplashScreenExecutor.execute(() ->
+                    StartingWindowController.this.copySplashScreenView(taskId));
         }
 
         @Override
         public void setStartingWindowListener(BiConsumer<Integer, Integer> listener) {
-            StartingWindowController.this.setStartingWindowListener(listener);
+            mSplashScreenExecutor.execute(() ->
+                    StartingWindowController.this.setStartingWindowListener(listener));
         }
     }
 }
