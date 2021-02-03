@@ -87,7 +87,9 @@ public abstract class ResumeOnRebootService extends Service {
      * Implementation for wrapping the opaque blob used for resume-on-reboot prior to
      * reboot. The service should not assume any structure of the blob to be wrapped. The
      * implementation should wrap the opaque blob in a reasonable time or throw {@link IOException}
-     * if it's unable to complete the action.
+     * if it's unable to complete the action due to retry-able errors (e.g network errors)
+     * and {@link IllegalArgumentException} if {@code wrapBlob} fails due to fatal errors
+     * (e.g corrupted blob).
      *
      * @param blob             The opaque blob with size on the order of 100 bytes.
      * @param lifeTimeInMillis The life time of the blob. This must be strictly enforced by the
@@ -95,7 +97,8 @@ public abstract class ResumeOnRebootService extends Service {
      *                         this function after expiration should
      *                         fail.
      * @return Wrapped blob to be persisted across reboot with size on the order of 100 bytes.
-     * @throws IOException if the implementation is unable to wrap the blob successfully.
+     * @throws IOException if the implementation is unable to wrap the blob successfully due to
+     * retry-able errors.
      */
     @NonNull
     public abstract byte[] onWrap(@NonNull byte[] blob, @DurationMillisLong long lifeTimeInMillis)
@@ -106,12 +109,13 @@ public abstract class ResumeOnRebootService extends Service {
      * operation would happen after reboot during direct boot mode (i.e before device is unlocked
      * for the first time). The implementation should unwrap the wrapped blob in a reasonable time
      * and returns the result or throw {@link IOException} if it's unable to complete the action
-     * and {@link IllegalArgumentException} if {@code unwrapBlob} fails because the wrappedBlob is
-     * stale.
+     * due to retry-able errors (e.g network error) and {@link IllegalArgumentException}
+     * if {@code unwrapBlob} fails due to fatal errors (e.g stale or corrupted blob).
      *
      * @param wrappedBlob The wrapped blob with size on the order of 100 bytes.
      * @return Unwrapped blob used for resume-on-reboot with the size on the order of 100 bytes.
-     * @throws IOException if the implementation is unable to unwrap the wrapped blob successfully.
+     * @throws IOException if the implementation is unable to unwrap the wrapped blob successfully
+     * due to retry-able errors.
      */
     @NonNull
     public abstract byte[] onUnwrap(@NonNull byte[] wrappedBlob) throws IOException;
