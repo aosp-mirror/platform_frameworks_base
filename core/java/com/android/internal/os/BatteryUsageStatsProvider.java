@@ -114,14 +114,9 @@ public class BatteryUsageStatsProvider {
                         .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
                         .setConsumedPower(batteryStatsHelper.getTotalPower());
 
-        final List<BatterySipper> usageList = batteryStatsHelper.getUsageList();
-        for (int i = 0; i < usageList.size(); i++) {
-            final BatterySipper sipper = usageList.get(i);
-            if (sipper.drainType == BatterySipper.DrainType.APP) {
-                batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(sipper.uidObj)
-                        .setPackageWithHighestDrain(sipper.packageWithHighestDrain)
-                        .setConsumedPower(sipper.sumPower());
-            }
+        SparseArray<? extends BatteryStats.Uid> uidStats = mStats.getUidStats();
+        for (int i = uidStats.size() - 1; i >= 0; i--) {
+            batteryUsageStatsBuilder.getOrCreateUidBatteryConsumerBuilder(uidStats.valueAt(i));
         }
 
         final long realtimeUs = SystemClock.elapsedRealtime() * 1000;
