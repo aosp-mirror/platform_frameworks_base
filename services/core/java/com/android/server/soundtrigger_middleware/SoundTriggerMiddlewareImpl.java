@@ -17,9 +17,7 @@
 package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
-import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
-import android.media.soundtrigger_middleware.ISoundTriggerMiddlewareService;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.IBinder;
@@ -84,15 +82,15 @@ public class SoundTriggerMiddlewareImpl implements ISoundTriggerMiddlewareIntern
             @NonNull AudioSessionProvider audioSessionProvider) {
         List<SoundTriggerModule> modules = new ArrayList<>(halFactories.length);
 
-        for (int i = 0; i < halFactories.length; ++i) {
+        for (HalFactory halFactory : halFactories) {
             try {
-                modules.add(new SoundTriggerModule(halFactories[i], audioSessionProvider));
+                modules.add(new SoundTriggerModule(halFactory, audioSessionProvider));
             } catch (Exception e) {
                 Log.e(TAG, "Failed to add a SoundTriggerModule instance", e);
             }
         }
 
-        mModules = modules.toArray(new SoundTriggerModule[modules.size()]);
+        mModules = modules.toArray(new SoundTriggerModule[0]);
     }
 
     /**

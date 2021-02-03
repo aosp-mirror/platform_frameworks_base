@@ -320,8 +320,13 @@ public class SoundTriggerMiddlewarePermission implements ISoundTriggerMiddleware
             }
 
             @Override
-            public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
-                mDelegate.onRecognitionAvailabilityChange(available);
+            public void onResourceConditionChange() throws RemoteException {
+                mDelegate.onResourceConditionChange();
+            }
+
+            @Override
+            public void onModelUnloaded(int modelHandle) throws RemoteException {
+                mDelegate.onModelUnloaded(modelHandle);
             }
 
             @Override

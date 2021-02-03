@@ -21,16 +21,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.hardware.soundtrigger.V2_0.ISoundTriggerHwCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.ModelParameter;
@@ -143,10 +141,6 @@ public class SoundTriggerMiddlewareImplTest {
         verify(mHalDriver).stopRecognition(hwHandle);
     }
 
-    private void verifyNotStartRecognition() {
-        verify(mHalDriver, never()).startRecognition(anyInt(), any());
-    }
-
     @Before
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
@@ -177,31 +171,6 @@ public class SoundTriggerMiddlewareImplTest {
         initService(true);
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(true);
-        assertNotNull(module);
-        module.detach();
-    }
-
-    @Test
-    public void testAttachDetachNotAvailable() throws Exception {
-        // Attachment / detachment during external capture, with a module not supporting concurrent
-        // capture.
-        initService(false);
-        ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(false);
-        assertNotNull(module);
-        module.detach();
-    }
-
-    @Test
-    public void testAttachDetachAvailable() throws Exception {
-        // Attachment / detachment during external capture, with a module supporting concurrent
-        // capture.
-        initService(true);
-        ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(true);
         assertNotNull(module);
         module.detach();
     }
@@ -215,6 +184,26 @@ public class SoundTriggerMiddlewareImplTest {
         final int hwHandle = 7;
         int handle = loadGenericModel(module, hwHandle).first;
         unloadModel(module, handle, hwHandle);
+        module.detach();
+    }
+
+    @Test
+    public void testLoadPreemptModel() throws Exception {
+        initService(true);
+        ISoundTriggerCallback callback = createCallbackMock();
+        ISoundTriggerModule module = mService.attach(0, callback);
+
+        final int hwHandle = 7;
+        Pair<Integer, SoundTriggerHwCallback> loadResult = loadGenericModel(module, hwHandle);
+
+        int handle = loadResult.first;
+        SoundTriggerHwCallback hwCallback = loadResult.second;
+
+        // Signal preemption.
+        hwCallback.sendUnloadEvent(hwHandle);
+
+        verify(callback).onModelUnloaded(handle);
+
         module.detach();
     }
 
@@ -511,17 +500,19 @@ public class SoundTriggerMiddlewareImplTest {
 
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(true);
 
         // Load the model.
         final int hwHandle = 11;
-        int handle = loadGenericModel(module, hwHandle).first;
+        Pair<Integer, SoundTriggerHwCallback> loadResult = loadGenericModel(module, hwHandle);
+        int handle = loadResult.first;
+        SoundTriggerHwCallback hwCallback = loadResult.second;
 
         // Initiate a recognition.
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        mService.setCaptureState(true);
+        hwCallback.sendRecognitionEvent(hwHandle, ISoundTriggerHwCallback.RecognitionStatus.ABORT,
+                99);
 
         ArgumentCaptor<RecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 RecognitionEvent.class);
@@ -529,22 +520,6 @@ public class SoundTriggerMiddlewareImplTest {
 
         // Validate the event.
         assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
-
-        // Make sure we are notified of the lost availability.
-        verify(callback).onRecognitionAvailabilityChange(false);
-
-        // Attempt to start a new recognition - should get an abort event immediately, without
-        // involving the HAL.
-        clearInvocations(callback);
-        clearInvocations(mHalDriver);
-        module.startRecognition(handle, TestUtil.createRecognitionConfig());
-        verify(callback).onRecognition(eq(handle), eventCaptor.capture());
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().status);
-        verifyNotStartRecognition();
-
-        // Now enable it and make sure we are notified.
-        mService.setCaptureState(false);
-        verify(callback).onRecognitionAvailabilityChange(true);
 
         // Unload the model.
         unloadModel(module, handle, hwHandle);
@@ -559,17 +534,19 @@ public class SoundTriggerMiddlewareImplTest {
 
         ISoundTriggerCallback callback = createCallbackMock();
         ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(true);
 
         // Load the model.
         final int hwHandle = 11;
-        int handle = loadPhraseModel(module, hwHandle).first;
+        Pair<Integer, SoundTriggerHwCallback> loadResult = loadPhraseModel(module, hwHandle);
+        int handle = loadResult.first;
+        SoundTriggerHwCallback hwCallback = loadResult.second;
 
         // Initiate a recognition.
         startRecognition(module, handle, hwHandle);
 
         // Abort.
-        mService.setCaptureState(true);
+        hwCallback.sendPhraseRecognitionEvent(hwHandle,
+                ISoundTriggerHwCallback.RecognitionStatus.ABORT, 333);
 
         ArgumentCaptor<PhraseRecognitionEvent> eventCaptor = ArgumentCaptor.forClass(
                 PhraseRecognitionEvent.class);
@@ -578,96 +555,8 @@ public class SoundTriggerMiddlewareImplTest {
         // Validate the event.
         assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
 
-        // Make sure we are notified of the lost availability.
-        verify(callback).onRecognitionAvailabilityChange(false);
-
-        // Attempt to start a new recognition - should get an abort event immediately, without
-        // involving the HAL.
-        clearInvocations(callback);
-        clearInvocations(mHalDriver);
-        module.startRecognition(handle, TestUtil.createRecognitionConfig());
-        verify(callback).onPhraseRecognition(eq(handle), eventCaptor.capture());
-        assertEquals(RecognitionStatus.ABORTED, eventCaptor.getValue().common.status);
-        verifyNotStartRecognition();
-
-        // Now enable it and make sure we are notified.
-        mService.setCaptureState(false);
-        verify(callback).onRecognitionAvailabilityChange(true);
-
         // Unload the model.
         unloadModel(module, handle, hwHandle);
-        module.detach();
-    }
-
-    @Test
-    public void testNotAbortRecognitionConcurrent() throws Exception {
-        // Make sure the HAL supports concurrent capture.
-        initService(true);
-
-        ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(true);
-        clearInvocations(callback);
-
-        // Load the model.
-        final int hwHandle = 13;
-        int handle = loadGenericModel(module, hwHandle).first;
-
-        // Initiate a recognition.
-        startRecognition(module, handle, hwHandle);
-
-        // Signal concurrent capture. Shouldn't abort.
-        mService.setCaptureState(true);
-        verify(callback, never()).onRecognition(anyInt(), any());
-        verify(callback, never()).onRecognitionAvailabilityChange(anyBoolean());
-
-        // Stop the recognition.
-        stopRecognition(module, handle, hwHandle);
-
-        // Initiating a new one should work fine.
-        clearInvocations(mHalDriver);
-        startRecognition(module, handle, hwHandle);
-        verify(callback, never()).onRecognition(anyInt(), any());
-        stopRecognition(module, handle, hwHandle);
-
-        // Unload the model.
-        module.unloadModel(handle);
-        module.detach();
-    }
-
-    @Test
-    public void testNotAbortPhraseRecognitionConcurrent() throws Exception {
-        // Make sure the HAL supports concurrent capture.
-        initService(true);
-
-        ISoundTriggerCallback callback = createCallbackMock();
-        ISoundTriggerModule module = mService.attach(0, callback);
-        verify(callback).onRecognitionAvailabilityChange(true);
-        clearInvocations(callback);
-
-        // Load the model.
-        final int hwHandle = 13;
-        int handle = loadPhraseModel(module, hwHandle).first;
-
-        // Initiate a recognition.
-        startRecognition(module, handle, hwHandle);
-
-        // Signal concurrent capture. Shouldn't abort.
-        mService.setCaptureState(true);
-        verify(callback, never()).onPhraseRecognition(anyInt(), any());
-        verify(callback, never()).onRecognitionAvailabilityChange(anyBoolean());
-
-        // Stop the recognition.
-        stopRecognition(module, handle, hwHandle);
-
-        // Initiating a new one should work fine.
-        clearInvocations(mHalDriver);
-        startRecognition(module, handle, hwHandle);
-        verify(callback, never()).onRecognition(anyInt(), any());
-        stopRecognition(module, handle, hwHandle);
-
-        // Unload the model.
-        module.unloadModel(handle);
         module.detach();
     }
 
@@ -768,6 +657,10 @@ public class SoundTriggerMiddlewareImplTest {
         private void sendPhraseRecognitionEvent(int hwHandle, int status, int captureSession) {
             mCallback.phraseRecognitionCallback(
                     TestUtil.createPhraseRecognitionEvent_2_1(hwHandle, status, captureSession));
+        }
+
+        private void sendUnloadEvent(int hwHandle) {
+            mCallback.modelUnloaded(hwHandle);
         }
     }
 }

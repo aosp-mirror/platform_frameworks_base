@@ -176,9 +176,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         for (Runnable callback : callbacks) {
             callback.run();
         }
-        for (Session session : mActiveSessions) {
-            session.notifyRecognitionAvailability();
-        }
     }
 
     @Override
@@ -234,8 +231,21 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
     @Override
     public void tryAgain() {
-        // TODO: Implement
-        throw new RuntimeException("Implement me");
+        List<ISoundTriggerCallback> callbacks;
+        synchronized (this) {
+            callbacks = new ArrayList<>(mActiveSessions.size());
+            for (Session session : mActiveSessions) {
+                callbacks.add(session.mCallback);
+            }
+        }
+        // Trigger the callbacks outside of the lock to avoid deadlocks.
+        for (ISoundTriggerCallback callback : callbacks) {
+            try {
+                callback.onResourceConditionChange();
+            } catch (RemoteException e) {
+                throw e.rethrowAsRuntimeException();
+            }
+        }
     }
 
     /** State of a single sound model. */
@@ -264,7 +274,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
          */
         private Session(@NonNull ISoundTriggerCallback callback) {
             mCallback = callback;
-            notifyRecognitionAvailability();
         }
 
         @Override
@@ -420,16 +429,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         private void abortActiveRecognitions(@NonNull List<Runnable> callbacks) {
             for (Model model : mLoadedModels.values()) {
                 model.abortActiveRecognition(callbacks);
-            }
-        }
-
-        private void notifyRecognitionAvailability() {
-            try {
-                mCallback.onRecognitionAvailabilityChange(mRecognitionAvailable);
-            } catch (RemoteException e) {
-                // Dead client will be handled by binderDied() - no need to handle here.
-                // In any case, client callbacks are considered best effort.
-                Log.e(TAG, "Client callback execption.", e);
             }
         }
 
@@ -660,8 +659,13 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
 
             @Override
             public void modelUnloaded(int modelHandle) {
-                // TODO: Implement
-                throw new RuntimeException("Implement me");
+                // There is no change in state, just propagate upward.
+                try {
+                    mCallback.onModelUnloaded(modelHandle);
+                } catch (RemoteException e) {
+                    // We're not expecting any exceptions here.
+                    throw e.rethrowAsRuntimeException();
+                }
             }
         }
     }

@@ -364,11 +364,19 @@ public class SoundTriggerModule {
         }
 
         @Override
-        public synchronized void onRecognitionAvailabilityChange(boolean available)
-                throws RemoteException {
+        public void onModelUnloaded(int modelHandle) throws RemoteException {
+            // TODO: Implement
+            throw new RuntimeException("Implement me");
+        }
+
+        @Override
+        public synchronized void onResourceConditionChange() throws RemoteException {
+            // TODO: Temporary hack.
             Message m = mHandler.obtainMessage(EVENT_SERVICE_STATE_CHANGE,
-                    available ? SoundTrigger.SERVICE_STATE_ENABLED
-                            : SoundTrigger.SERVICE_STATE_DISABLED);
+                    SoundTrigger.SERVICE_STATE_DISABLED);
+            mHandler.sendMessage(m);
+            m = mHandler.obtainMessage(EVENT_SERVICE_STATE_CHANGE,
+                    SoundTrigger.SERVICE_STATE_ENABLED);
             mHandler.sendMessage(m);
         }
 

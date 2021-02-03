@@ -57,9 +57,10 @@ import java.util.Objects;
  *     }
  * }
  * </code></pre>
- * The actual handling of these events is then done inside of {@link #logReturnWithObject(Object,
- * String, Object, Object[])}, {@link #logVoidReturnWithObject(Object, String, Object[])} and {@link
- * #logExceptionWithObject(Object, String, Exception, Object[])}.
+ * The actual handling of these events is then done inside of
+ * {@link #logReturnWithObject(Object, Identity, String, Object, Object[])},
+ * {@link #logVoidReturnWithObject(Object, Identity, String, Object[])} and {@link
+ * #logExceptionWithObject(Object, Identity, String, Exception, Object[])}.
  */
 public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInternal, Dumpable {
     private static final String TAG = "SoundTriggerMiddlewareLogging";
@@ -322,12 +323,23 @@ public class SoundTriggerMiddlewareLogging implements ISoundTriggerMiddlewareInt
             }
 
             @Override
-            public void onRecognitionAvailabilityChange(boolean available) throws RemoteException {
+            public void onModelUnloaded(int modelHandle) throws RemoteException {
                 try {
-                    mCallbackDelegate.onRecognitionAvailabilityChange(available);
-                    logVoidReturn("onRecognitionAvailabilityChange", available);
+                    mCallbackDelegate.onModelUnloaded(modelHandle);
+                    logVoidReturn("onModelUnloaded", modelHandle);
                 } catch (Exception e) {
-                    logException("onRecognitionAvailabilityChange", e, available);
+                    logException("onModelUnloaded", e, modelHandle);
+                    throw e;
+                }
+            }
+
+            @Override
+            public void onResourceConditionChange() throws RemoteException {
+                try {
+                    mCallbackDelegate.onResourceConditionChange();
+                    logVoidReturn("onResourceConditionChange");
+                } catch (Exception e) {
+                    logException("onResourceConditionChange", e);
                     throw e;
                 }
             }
