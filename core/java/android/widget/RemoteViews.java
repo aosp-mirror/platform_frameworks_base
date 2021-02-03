@@ -17,6 +17,7 @@
 package android.widget;
 
 import android.annotation.ColorInt;
+import android.annotation.ColorRes;
 import android.annotation.DimenRes;
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
@@ -25,6 +26,7 @@ import android.annotation.LayoutRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Px;
+import android.annotation.StringRes;
 import android.annotation.StyleRes;
 import android.app.Activity;
 import android.app.ActivityOptions;
@@ -180,6 +182,7 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_RIPPLE_DRAWABLE_COLOR_TAG = 21;
     private static final int SET_INT_TAG_TAG = 22;
     private static final int REMOVE_FROM_PARENT_ACTION_TAG = 23;
+    private static final int RESOURCE_REFLECTION_ACTION_TAG = 24;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -980,6 +983,45 @@ public class RemoteViews implements Parcelable, Filter {
         return rect;
     }
 
+    private static Class<?> getParameterType(int type) {
+        switch (type) {
+            case ReflectionAction.BOOLEAN:
+                return boolean.class;
+            case ReflectionAction.BYTE:
+                return byte.class;
+            case ReflectionAction.SHORT:
+                return short.class;
+            case ReflectionAction.INT:
+                return int.class;
+            case ReflectionAction.LONG:
+                return long.class;
+            case ReflectionAction.FLOAT:
+                return float.class;
+            case ReflectionAction.DOUBLE:
+                return double.class;
+            case ReflectionAction.CHAR:
+                return char.class;
+            case ReflectionAction.STRING:
+                return String.class;
+            case ReflectionAction.CHAR_SEQUENCE:
+                return CharSequence.class;
+            case ReflectionAction.URI:
+                return Uri.class;
+            case ReflectionAction.BITMAP:
+                return Bitmap.class;
+            case ReflectionAction.BUNDLE:
+                return Bundle.class;
+            case ReflectionAction.INTENT:
+                return Intent.class;
+            case ReflectionAction.COLOR_STATE_LIST:
+                return ColorStateList.class;
+            case ReflectionAction.ICON:
+                return Icon.class;
+            default:
+                return null;
+        }
+    }
+
     private MethodHandle getMethod(View view, String methodName, Class<?> paramType,
             boolean async) {
         MethodArgs result;
@@ -1457,51 +1499,12 @@ public class RemoteViews implements Parcelable, Filter {
             }
         }
 
-        private Class<?> getParameterType() {
-            switch (this.type) {
-                case BOOLEAN:
-                    return boolean.class;
-                case BYTE:
-                    return byte.class;
-                case SHORT:
-                    return short.class;
-                case INT:
-                    return int.class;
-                case LONG:
-                    return long.class;
-                case FLOAT:
-                    return float.class;
-                case DOUBLE:
-                    return double.class;
-                case CHAR:
-                    return char.class;
-                case STRING:
-                    return String.class;
-                case CHAR_SEQUENCE:
-                    return CharSequence.class;
-                case URI:
-                    return Uri.class;
-                case BITMAP:
-                    return Bitmap.class;
-                case BUNDLE:
-                    return Bundle.class;
-                case INTENT:
-                    return Intent.class;
-                case COLOR_STATE_LIST:
-                    return ColorStateList.class;
-                case ICON:
-                    return Icon.class;
-                default:
-                    return null;
-            }
-        }
-
         @Override
         public void apply(View root, ViewGroup rootParent, OnClickHandler handler) {
             final View view = root.findViewById(viewId);
             if (view == null) return;
 
-            Class<?> param = getParameterType();
+            Class<?> param = getParameterType(this.type);
             if (param == null) {
                 throw new ActionException("bad type: " + this.type);
             }
@@ -1517,7 +1520,7 @@ public class RemoteViews implements Parcelable, Filter {
             final View view = root.findViewById(viewId);
             if (view == null) return ACTION_NOOP;
 
-            Class<?> param = getParameterType();
+            Class<?> param = getParameterType(this.type);
             if (param == null) {
                 throw new ActionException("bad type: " + this.type);
             }
@@ -1585,6 +1588,133 @@ public class RemoteViews implements Parcelable, Filter {
                     visitIconUri(icon, visitor);
                     break;
             }
+        }
+    }
+
+    private final class ResourceReflectionAction extends Action {
+
+        static final int DIMEN_RESOURCE = 1;
+        static final int COLOR_RESOURCE = 2;
+        static final int STRING_RESOURCE = 3;
+
+        private final String mMethodName;
+        private final int mParameterType;
+        private final int mResourceType;
+        private final int mResId;
+
+        ResourceReflectionAction(@IdRes int viewId, String methodName, int parameterType,
+                int resourceType, int resId) {
+            this.viewId = viewId;
+            this.mMethodName = methodName;
+            this.mParameterType = parameterType;
+            this.mResourceType = resourceType;
+            this.mResId = resId;
+        }
+
+        ResourceReflectionAction(Parcel in) {
+            this.viewId = in.readInt();
+            this.mMethodName = in.readString8();
+            this.mParameterType = in.readInt();
+            this.mResourceType = in.readInt();
+            this.mResId = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(this.viewId);
+            dest.writeString8(this.mMethodName);
+            dest.writeInt(this.mParameterType);
+            dest.writeInt(this.mResourceType);
+            dest.writeInt(this.mResId);
+        }
+
+        private @NonNull Object getResourceValue(View view) throws ActionException {
+            Resources resources = view.getContext().getResources();
+            try {
+                switch (this.mResourceType) {
+                    case DIMEN_RESOURCE:
+                        if (this.mParameterType == ReflectionAction.INT) {
+                            return resources.getDimensionPixelSize(this.mResId);
+                        }
+                        return resources.getDimension(this.mResId);
+                    case COLOR_RESOURCE:
+                        switch(this.mParameterType) {
+                            case ReflectionAction.INT:
+                                return view.getContext().getColor(this.mResId);
+                            case ReflectionAction.COLOR_STATE_LIST:
+                                return view.getContext().getColorStateList(this.mResId);
+                            default:
+                                throw new ActionException(
+                                        "color resources must be used as int or ColorStateList, "
+                                                + "not " + this.mParameterType);
+                        }
+                    case STRING_RESOURCE:
+                        return resources.getText(this.mResId);
+                    default:
+                        throw new ActionException("unknown resource type: " + this.mResourceType);
+                }
+            } catch (Throwable t) {
+                throw new ActionException(t);
+            }
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
+                throws ActionException {
+            final View view = root.findViewById(viewId);
+            if (view == null) return;
+            Object value = getResourceValue(view);
+            Class<?> param = getParameterType(this.mParameterType);
+            if (param == null) {
+                throw new ActionException("bad type: " + this.mParameterType);
+            }
+            try {
+                getMethod(view, this.mMethodName, param, false /* async */).invoke(view, value);
+            } catch (Throwable ex) {
+                throw new ActionException(ex);
+            }
+        }
+
+        @Override
+        public Action initActionAsync(ViewTree root, ViewGroup rootParent, OnClickHandler handler) {
+            final View view = root.findViewById(viewId);
+            if (view == null) return ACTION_NOOP;
+
+            Class<?> param = getParameterType(this.mParameterType);
+            if (param == null) {
+                throw new ActionException("bad type: " + this.mParameterType);
+            }
+
+            Object value = getResourceValue(view);
+
+            try {
+                MethodHandle method = getMethod(view, this.mMethodName, param, true /* async */);
+
+                if (method != null) {
+                    Runnable endAction = (Runnable) method.invoke(view, value);
+                    if (endAction == null) {
+                        return ACTION_NOOP;
+                    } else {
+                        // Special case view stub
+                        if (endAction instanceof ViewStub.ViewReplaceRunnable) {
+                            root.createTree();
+                            // Replace child tree
+                            root.findViewTreeById(viewId).replaceView(
+                                    ((ViewStub.ViewReplaceRunnable) endAction).view);
+                        }
+                        return new RunnableAction(endAction);
+                    }
+                }
+            } catch (Throwable ex) {
+                throw new ActionException(ex);
+            }
+
+            return this;
+        }
+
+        @Override
+        public int getActionTag() {
+            return RESOURCE_REFLECTION_ACTION_TAG;
         }
     }
 
@@ -2611,6 +2741,8 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetIntTagAction(parcel);
             case REMOVE_FROM_PARENT_ACTION_TAG:
                 return new RemoveFromParentAction(parcel);
+            case RESOURCE_REFLECTION_ACTION_TAG:
+                return new ResourceReflectionAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -3390,6 +3522,38 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
+     * Call a method taking one int, a size in pixels, on a view in the layout for this
+     * RemoteViews.
+     *
+     * The dimension will be resolved from the resources at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param dimenResource The resource to resolve and pass as argument to the method.
+     */
+    public void setIntDimen(@IdRes int viewId, @NonNull String methodName,
+            @DimenRes int dimenResource) {
+        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.INT,
+                ResourceReflectionAction.DIMEN_RESOURCE, dimenResource));
+    }
+
+    /**
+     * Call a method taking one int, a color, on a view in the layout for this RemoteViews.
+     *
+     * The ColorStateList will be resolved from the resources at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param colorResource The resource to resolve and pass as argument to the method.
+     */
+    public void setColor(@IdRes int viewId, @NonNull String methodName,
+            @ColorRes int colorResource) {
+        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.INT,
+                ResourceReflectionAction.COLOR_RESOURCE, colorResource));
+    }
+
+
+    /**
      * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
      *
      * @param viewId The id of the view on which to call the method.
@@ -3403,6 +3567,21 @@ public class RemoteViews implements Parcelable, Filter {
                 value));
     }
 
+    /**
+     * Call a method taking one ColorStateList on a view in the layout for this RemoteViews.
+     *
+     * The ColorStateList will be resolved from the resources at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param colorResource The resource to resolve and pass as argument to the method.
+     */
+    public void setColorStateList(@IdRes int viewId, @NonNull String methodName,
+            @ColorRes int colorResource) {
+        addAction(
+                new ResourceReflectionAction(viewId, methodName, ReflectionAction.COLOR_STATE_LIST,
+                        ResourceReflectionAction.COLOR_RESOURCE, colorResource));
+    }
 
     /**
      * Call a method taking one long on a view in the layout for this RemoteViews.
@@ -3424,6 +3603,22 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setFloat(@IdRes int viewId, String methodName, float value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.FLOAT, value));
+    }
+
+    /**
+     * Call a method taking one float, a size in pixels, on a view in the layout for this
+     * RemoteViews.
+     *
+     * The dimension will be resolved from the resources at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param dimenResource The resource to resolve and pass as argument to the method.
+     */
+    public void setFloatDimen(@IdRes int viewId, @NonNull String methodName,
+            @DimenRes int dimenResource) {
+        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.FLOAT,
+                ResourceReflectionAction.DIMEN_RESOURCE, dimenResource));
     }
 
     /**
@@ -3468,6 +3663,21 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setCharSequence(@IdRes int viewId, String methodName, CharSequence value) {
         addAction(new ReflectionAction(viewId, methodName, ReflectionAction.CHAR_SEQUENCE, value));
+    }
+
+    /**
+     * Call a method taking one CharSequence on a view in the layout for this RemoteViews.
+     *
+     * The CharSequence will be resolved from the resources at the time of inflation.
+     *
+     * @param viewId The id of the view on which to call the method.
+     * @param methodName The name of the method to call.
+     * @param stringResource The resource to resolve and pass as argument to the method.
+     */
+    public void setCharSequence(@IdRes int viewId, @NonNull String methodName,
+            @StringRes int stringResource) {
+        addAction(new ResourceReflectionAction(viewId, methodName, ReflectionAction.CHAR_SEQUENCE,
+                ResourceReflectionAction.STRING_RESOURCE, stringResource));
     }
 
     /**
