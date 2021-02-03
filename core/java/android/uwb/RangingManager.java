@@ -33,6 +33,7 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
 
     private final IUwbAdapter mAdapter;
     private final Hashtable<SessionHandle, RangingSession> mRangingSessionTable = new Hashtable<>();
+    private int mNextSessionId = 1;
 
     public RangingManager(IUwbAdapter adapter) {
         mAdapter = adapter;
@@ -51,24 +52,17 @@ public class RangingManager extends android.uwb.IUwbRangingCallbacks.Stub {
     public CancellationSignal openSession(@NonNull PersistableBundle params,
             @NonNull Executor executor,
             @NonNull RangingSession.Callback callbacks) {
-        SessionHandle sessionHandle;
-        try {
-            sessionHandle = mAdapter.openRanging(this, params);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
         synchronized (this) {
-            if (hasSession(sessionHandle)) {
-                Log.w(TAG, "Newly created session unexpectedly reuses an active SessionHandle");
-                executor.execute(() -> callbacks.onClosed(
-                        RangingSession.Callback.REASON_GENERIC_ERROR,
-                        new PersistableBundle()));
-            }
-
+            SessionHandle sessionHandle = new SessionHandle(mNextSessionId++);
             RangingSession session =
                     new RangingSession(executor, callbacks, mAdapter, sessionHandle);
             mRangingSessionTable.put(sessionHandle, session);
+            try {
+                mAdapter.openRanging(sessionHandle, this, params);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+
             CancellationSignal cancellationSignal = new CancellationSignal();
             cancellationSignal.setOnCancelListener(() -> session.close());
             return cancellationSignal;

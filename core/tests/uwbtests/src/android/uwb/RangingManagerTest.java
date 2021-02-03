@@ -22,7 +22,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import android.os.PersistableBundle;
 import android.os.RemoteException;
@@ -32,6 +31,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 
 import java.util.concurrent.Executor;
 
@@ -42,51 +42,23 @@ import java.util.concurrent.Executor;
 @RunWith(AndroidJUnit4.class)
 public class RangingManagerTest {
 
-    private static final IUwbAdapter ADAPTER = mock(IUwbAdapter.class);
     private static final Executor EXECUTOR = UwbTestUtils.getExecutor();
     private static final PersistableBundle PARAMS = new PersistableBundle();
     private static final @RangingChangeReason int REASON = RangingChangeReason.UNKNOWN;
 
     @Test
     public void testOpenSession_OpenRangingInvoked() throws RemoteException {
-        RangingManager rangingManager = new RangingManager(ADAPTER);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingManager rangingManager = new RangingManager(adapter);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
         rangingManager.openSession(PARAMS, EXECUTOR, callback);
-        verify(ADAPTER, times(1)).openRanging(eq(rangingManager), eq(PARAMS));
-    }
-
-    @Test
-    public void testOpenSession_ErrorIfSameSessionHandleReturned() throws RemoteException {
-        RangingManager rangingManager = new RangingManager(ADAPTER);
-        RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        SessionHandle handle = new SessionHandle(1);
-        when(ADAPTER.openRanging(any(), any())).thenReturn(handle);
-
-        rangingManager.openSession(PARAMS, EXECUTOR, callback);
-
-        // Calling openSession will cause the same session handle to be returned. The onClosed
-        // callback should be invoked
-        RangingSession.Callback callback2 = mock(RangingSession.Callback.class);
-        rangingManager.openSession(PARAMS, EXECUTOR, callback2);
-        verify(callback, times(0)).onClosed(anyInt(), any());
-        verify(callback2, times(1)).onClosed(anyInt(), any());
-    }
-
-    @Test
-    public void testOnRangingOpened_ValidSessionHandle() throws RemoteException {
-        RangingManager rangingManager = new RangingManager(ADAPTER);
-        RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        SessionHandle handle = new SessionHandle(1);
-        when(ADAPTER.openRanging(any(), any())).thenReturn(handle);
-
-        rangingManager.openSession(PARAMS, EXECUTOR, callback);
-        rangingManager.onRangingOpened(handle);
-        verify(callback, times(1)).onOpened(any());
+        verify(adapter, times(1)).openRanging(any(), eq(rangingManager), eq(PARAMS));
     }
 
     @Test
     public void testOnRangingOpened_InvalidSessionHandle() throws RemoteException {
-        RangingManager rangingManager = new RangingManager(ADAPTER);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingManager rangingManager = new RangingManager(adapter);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
 
         rangingManager.onRangingOpened(new SessionHandle(2));
@@ -95,18 +67,20 @@ public class RangingManagerTest {
 
     @Test
     public void testOnRangingOpened_MultipleSessionsRegistered() throws RemoteException {
-        SessionHandle sessionHandle1 = new SessionHandle(1);
-        SessionHandle sessionHandle2 = new SessionHandle(2);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
         RangingSession.Callback callback1 = mock(RangingSession.Callback.class);
         RangingSession.Callback callback2 = mock(RangingSession.Callback.class);
+        ArgumentCaptor<SessionHandle> sessionHandleCaptor =
+                ArgumentCaptor.forClass(SessionHandle.class);
 
-        when(ADAPTER.openRanging(any(), any()))
-                .thenReturn(sessionHandle1)
-                .thenReturn(sessionHandle2);
-
-        RangingManager rangingManager = new RangingManager(ADAPTER);
+        RangingManager rangingManager = new RangingManager(adapter);
         rangingManager.openSession(PARAMS, EXECUTOR, callback1);
+        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle sessionHandle1 = sessionHandleCaptor.getValue();
+
         rangingManager.openSession(PARAMS, EXECUTOR, callback2);
+        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle sessionHandle2 = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingOpened(sessionHandle1);
         verify(callback1, times(1)).onOpened(any());
@@ -119,12 +93,17 @@ public class RangingManagerTest {
 
     @Test
     public void testCorrectCallbackInvoked() throws RemoteException {
-        RangingManager rangingManager = new RangingManager(ADAPTER);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingManager rangingManager = new RangingManager(adapter);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        SessionHandle handle = new SessionHandle(1);
-        when(ADAPTER.openRanging(any(), any())).thenReturn(handle);
+
+        ArgumentCaptor<SessionHandle> sessionHandleCaptor =
+                ArgumentCaptor.forClass(SessionHandle.class);
 
         rangingManager.openSession(PARAMS, EXECUTOR, callback);
+        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle handle = sessionHandleCaptor.getValue();
+
         rangingManager.onRangingOpened(handle);
         verify(callback, times(1)).onOpened(any());
 
@@ -156,20 +135,23 @@ public class RangingManagerTest {
 
     @Test
     public void testOnRangingClosed_MultipleSessionsRegistered() throws RemoteException {
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
         // Verify that if multiple sessions are registered, only the session that is
         // requested to close receives the associated callbacks
-        SessionHandle sessionHandle1 = new SessionHandle(1);
-        SessionHandle sessionHandle2 = new SessionHandle(2);
         RangingSession.Callback callback1 = mock(RangingSession.Callback.class);
         RangingSession.Callback callback2 = mock(RangingSession.Callback.class);
 
-        when(ADAPTER.openRanging(any(), any()))
-                .thenReturn(sessionHandle1)
-                .thenReturn(sessionHandle2);
+        RangingManager rangingManager = new RangingManager(adapter);
+        ArgumentCaptor<SessionHandle> sessionHandleCaptor =
+                ArgumentCaptor.forClass(SessionHandle.class);
 
-        RangingManager rangingManager = new RangingManager(ADAPTER);
         rangingManager.openSession(PARAMS, EXECUTOR, callback1);
+        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle sessionHandle1 = sessionHandleCaptor.getValue();
+
         rangingManager.openSession(PARAMS, EXECUTOR, callback2);
+        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle sessionHandle2 = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingClosed(sessionHandle1, REASON, PARAMS);
         verify(callback1, times(1)).onClosed(anyInt(), any());
@@ -182,19 +164,22 @@ public class RangingManagerTest {
 
     @Test
     public void testOnRangingReport_MultipleSessionsRegistered() throws RemoteException {
-        SessionHandle sessionHandle1 = new SessionHandle(1);
-        SessionHandle sessionHandle2 = new SessionHandle(2);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
         RangingSession.Callback callback1 = mock(RangingSession.Callback.class);
         RangingSession.Callback callback2 = mock(RangingSession.Callback.class);
 
-        when(ADAPTER.openRanging(any(), any()))
-                .thenReturn(sessionHandle1)
-                .thenReturn(sessionHandle2);
+        ArgumentCaptor<SessionHandle> sessionHandleCaptor =
+                ArgumentCaptor.forClass(SessionHandle.class);
 
-        RangingManager rangingManager = new RangingManager(ADAPTER);
+        RangingManager rangingManager = new RangingManager(adapter);
         rangingManager.openSession(PARAMS, EXECUTOR, callback1);
+        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle sessionHandle1 = sessionHandleCaptor.getValue();
+
         rangingManager.onRangingStarted(sessionHandle1, PARAMS);
         rangingManager.openSession(PARAMS, EXECUTOR, callback2);
+        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle sessionHandle2 = sessionHandleCaptor.getValue();
         rangingManager.onRangingStarted(sessionHandle2, PARAMS);
 
         rangingManager.onRangingResult(sessionHandle1, UwbTestUtils.getRangingReports(1));
@@ -232,17 +217,24 @@ public class RangingManagerTest {
 
     private void runReason(@RangingChangeReason int reasonIn,
             @RangingSession.Callback.Reason int reasonOut) throws RemoteException {
-        RangingManager rangingManager = new RangingManager(ADAPTER);
+        IUwbAdapter adapter = mock(IUwbAdapter.class);
+        RangingManager rangingManager = new RangingManager(adapter);
         RangingSession.Callback callback = mock(RangingSession.Callback.class);
-        SessionHandle handle = new SessionHandle(1);
-        when(ADAPTER.openRanging(any(), any())).thenReturn(handle);
+
+        ArgumentCaptor<SessionHandle> sessionHandleCaptor =
+                ArgumentCaptor.forClass(SessionHandle.class);
+
         rangingManager.openSession(PARAMS, EXECUTOR, callback);
+        verify(adapter, times(1)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        SessionHandle handle = sessionHandleCaptor.getValue();
 
         rangingManager.onRangingOpenFailed(handle, reasonIn, PARAMS);
         verify(callback, times(1)).onOpenFailed(eq(reasonOut), eq(PARAMS));
 
         // Open a new session
         rangingManager.openSession(PARAMS, EXECUTOR, callback);
+        verify(adapter, times(2)).openRanging(sessionHandleCaptor.capture(), any(), any());
+        handle = sessionHandleCaptor.getValue();
         rangingManager.onRangingOpened(handle);
 
         rangingManager.onRangingStartFailed(handle, reasonIn, PARAMS);
