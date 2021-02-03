@@ -57,6 +57,7 @@ import android.hardware.display.Curve;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayGroupListener;
 import android.hardware.display.DisplayManagerInternal.DisplayTransactionListener;
 import android.hardware.display.DisplayViewport;
 import android.hardware.display.DisplayedContentSample;
@@ -190,6 +191,7 @@ public final class DisplayManagerService extends SystemService {
     private static final int MSG_UPDATE_VIEWPORT = 5;
     private static final int MSG_LOAD_BRIGHTNESS_CONFIGURATION = 6;
     private static final int MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE = 7;
+    private static final int MSG_DELIVER_DISPLAY_GROUP_EVENT = 8;
 
     private final Context mContext;
     private final DisplayManagerHandler mHandler;
@@ -236,6 +238,10 @@ public final class DisplayManagerService extends SystemService {
     // List of all display transaction listeners.
     private final CopyOnWriteArrayList<DisplayTransactionListener> mDisplayTransactionListeners =
             new CopyOnWriteArrayList<DisplayTransactionListener>();
+
+    /** List of all display group listeners. */
+    private final CopyOnWriteArrayList<DisplayGroupListener> mDisplayGroupListeners =
+            new CopyOnWriteArrayList<>();
 
     /** All {@link DisplayPowerController}s indexed by {@link LogicalDisplay} ID. */
     private final SparseArray<DisplayPowerController> mDisplayPowerControllers =
@@ -1677,6 +1683,11 @@ public final class DisplayManagerService extends SystemService {
         mHandler.sendMessage(msg);
     }
 
+    private void sendDisplayGroupEvent(int groupId, int event) {
+        Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_GROUP_EVENT, groupId, event);
+        mHandler.sendMessage(msg);
+    }
+
     private void sendDisplayEventFrameRateOverrideLocked(int displayId) {
         Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE,
                 displayId, DisplayManagerGlobal.EVENT_DISPLAY_CHANGED);
@@ -1719,6 +1730,35 @@ public final class DisplayManagerService extends SystemService {
             mTempCallbacks.get(i).notifyDisplayEventAsync(displayId, event);
         }
         mTempCallbacks.clear();
+    }
+
+    // Runs on Handler thread.
+    // Delivers display group event notifications to callbacks.
+    private void deliverDisplayGroupEvent(int groupId, int event) {
+        if (DEBUG) {
+            Slog.d(TAG, "Delivering display group event: groupId=" + groupId + ", event="
+                    + event);
+        }
+
+        switch (event) {
+            case LogicalDisplayMapper.DISPLAY_GROUP_EVENT_ADDED:
+                for (DisplayGroupListener listener : mDisplayGroupListeners) {
+                    listener.onDisplayGroupAdded(groupId);
+                }
+                break;
+
+            case LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED:
+                for (DisplayGroupListener listener : mDisplayGroupListeners) {
+                    listener.onDisplayGroupChanged(groupId);
+                }
+                break;
+
+            case LogicalDisplayMapper.DISPLAY_GROUP_EVENT_REMOVED:
+                for (DisplayGroupListener listener : mDisplayGroupListeners) {
+                    listener.onDisplayGroupRemoved(groupId);
+                }
+                break;
+        }
     }
 
     private IMediaProjectionManager getProjectionService() {
@@ -1943,6 +1983,11 @@ public final class DisplayManagerService extends SystemService {
                     }
                     deliverDisplayEvent(msg.arg1, uids, msg.arg2);
                     break;
+
+                case MSG_DELIVER_DISPLAY_GROUP_EVENT:
+                    deliverDisplayGroupEvent(msg.arg1, msg.arg2);
+                    break;
+
             }
         }
     }
@@ -1971,6 +2016,11 @@ public final class DisplayManagerService extends SystemService {
                     handleLogicalDisplayFrameRateOverridesChangedLocked(display);
                     break;
             }
+        }
+
+        @Override
+        public void onDisplayGroupEventLocked(int groupId, int event) {
+            sendDisplayGroupEvent(groupId, event);
         }
 
         @Override
@@ -2708,11 +2758,25 @@ public final class DisplayManagerService extends SystemService {
         }
 
         @Override
-        public boolean requestPowerState(DisplayPowerRequest request,
+        public boolean requestPowerState(int groupId, DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
             synchronized (mSyncRoot) {
-                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
-                        .requestPowerState(request, waitForNegativeProximity);
+                final DisplayGroup displayGroup = mLogicalDisplayMapper.getDisplayGroupLocked(
+                        groupId);
+                if (displayGroup == null) {
+                    return true;
+                }
+
+                final int size = displayGroup.getSizeLocked();
+                boolean ready = true;
+                for (int i = 0; i < size; i++) {
+                    final DisplayPowerController displayPowerController =
+                            mDisplayPowerControllers.get(displayGroup.getIdLocked(i));
+                    ready &= displayPowerController.requestPowerState(request,
+                            waitForNegativeProximity);
+                }
+
+                return ready;
             }
         }
 
@@ -2729,6 +2793,16 @@ public final class DisplayManagerService extends SystemService {
             synchronized (mSyncRoot) {
                 return mLogicalDisplayMapper.getDisplayGroupIdLocked(displayId);
             }
+        }
+
+        @Override
+        public void registerDisplayGroupListener(DisplayGroupListener listener) {
+            mDisplayGroupListeners.add(listener);
+        }
+
+        @Override
+        public void unregisterDisplayGroupListener(DisplayGroupListener listener) {
+            mDisplayGroupListeners.remove(listener);
         }
 
         @Override
