@@ -52,4 +52,18 @@ public abstract class UdfpsAnimation extends Drawable {
     public void setAlpha(int alpha) {
         mFingerprintDrawable.setAlpha(alpha);
     }
+
+    /**
+     * @return The amount of padding that's needed on each side of the sensor, in pixels.
+     */
+    public int getPaddingX() {
+        return 0;
+    }
+
+    /**
+     * @return The amount of padding that's needed on each side of the sensor, in pixels.
+     */
+    public int getPaddingY() {
+        return 0;
+    }
 }

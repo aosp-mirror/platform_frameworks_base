@@ -56,7 +56,6 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @NonNull private final RectF mSensorRect;
     @NonNull private final Paint mDebugTextPaint;
 
-
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
 
