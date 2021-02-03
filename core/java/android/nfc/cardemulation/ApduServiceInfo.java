@@ -97,6 +97,11 @@ public final class ApduServiceInfo implements Parcelable {
     final boolean mRequiresDeviceUnlock;
 
     /**
+     * Whether this service should only be started when the device is screen on.
+     */
+    final boolean mRequiresDeviceScreenOn;
+
+    /**
      * The id of the service banner specified in XML.
      */
     final int mBannerResourceId;
@@ -119,6 +124,18 @@ public final class ApduServiceInfo implements Parcelable {
             ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
             boolean requiresUnlock, int bannerResource, int uid,
             String settingsActivityName, String offHost, String staticOffHost) {
+        this(info, onHost, description, staticAidGroups, dynamicAidGroups,
+                requiresUnlock, onHost ? true : false, bannerResource, uid,
+                settingsActivityName, offHost, staticOffHost);
+    }
+
+    /**
+     * @hide
+     */
+    public ApduServiceInfo(ResolveInfo info, boolean onHost, String description,
+            ArrayList<AidGroup> staticAidGroups, ArrayList<AidGroup> dynamicAidGroups,
+            boolean requiresUnlock, boolean requiresScreenOn, int bannerResource, int uid,
+            String settingsActivityName, String offHost, String staticOffHost) {
         this.mService = info;
         this.mDescription = description;
         this.mStaticAidGroups = new HashMap<String, AidGroup>();
@@ -127,6 +144,7 @@ public final class ApduServiceInfo implements Parcelable {
         this.mStaticOffHostName = staticOffHost;
         this.mOnHost = onHost;
         this.mRequiresDeviceUnlock = requiresUnlock;
+        this.mRequiresDeviceScreenOn = requiresScreenOn;
         for (AidGroup aidGroup : staticAidGroups) {
             this.mStaticAidGroups.put(aidGroup.category, aidGroup);
         }
@@ -183,6 +201,9 @@ public final class ApduServiceInfo implements Parcelable {
                 mRequiresDeviceUnlock = sa.getBoolean(
                         com.android.internal.R.styleable.HostApduService_requireDeviceUnlock,
                         false);
+                mRequiresDeviceScreenOn = sa.getBoolean(
+                        com.android.internal.R.styleable.HostApduService_requireDeviceScreenOn,
+                        true);
                 mBannerResourceId = sa.getResourceId(
                         com.android.internal.R.styleable.HostApduService_apduServiceBanner, -1);
                 mSettingsActivityName = sa.getString(
@@ -196,7 +217,12 @@ public final class ApduServiceInfo implements Parcelable {
                 mService = info;
                 mDescription = sa.getString(
                         com.android.internal.R.styleable.OffHostApduService_description);
-                mRequiresDeviceUnlock = false;
+                mRequiresDeviceUnlock = sa.getBoolean(
+                        com.android.internal.R.styleable.OffHostApduService_requireDeviceUnlock,
+                        false);
+                mRequiresDeviceScreenOn = sa.getBoolean(
+                        com.android.internal.R.styleable.OffHostApduService_requireDeviceScreenOn,
+                        false);
                 mBannerResourceId = sa.getResourceId(
                         com.android.internal.R.styleable.OffHostApduService_apduServiceBanner, -1);
                 mSettingsActivityName = sa.getString(
@@ -419,6 +445,13 @@ public final class ApduServiceInfo implements Parcelable {
         return mRequiresDeviceUnlock;
     }
 
+    /**
+     * Returns whether this service should only be started when the device is screen on.
+     */
+    public boolean requiresScreenOn() {
+        return mRequiresDeviceScreenOn;
+    }
+
     @UnsupportedAppUsage
     public String getDescription() {
         return mDescription;
@@ -542,6 +575,7 @@ public final class ApduServiceInfo implements Parcelable {
             dest.writeTypedList(new ArrayList<AidGroup>(mDynamicAidGroups.values()));
         }
         dest.writeInt(mRequiresDeviceUnlock ? 1 : 0);
+        dest.writeInt(mRequiresDeviceScreenOn ? 1 : 0);
         dest.writeInt(mBannerResourceId);
         dest.writeInt(mUid);
         dest.writeString(mSettingsActivityName);
@@ -568,11 +602,12 @@ public final class ApduServiceInfo implements Parcelable {
                 source.readTypedList(dynamicAidGroups, AidGroup.CREATOR);
             }
             boolean requiresUnlock = source.readInt() != 0;
+            boolean requiresScreenOn = source.readInt() != 0;
             int bannerResource = source.readInt();
             int uid = source.readInt();
             String settingsActivityName = source.readString();
             return new ApduServiceInfo(info, onHost, description, staticAidGroups,
-                    dynamicAidGroups, requiresUnlock, bannerResource, uid,
+                    dynamicAidGroups, requiresUnlock, requiresScreenOn, bannerResource, uid,
                     settingsActivityName, offHostName, staticOffHostName);
         }
 
@@ -607,6 +642,8 @@ public final class ApduServiceInfo implements Parcelable {
             }
         }
         pw.println("    Settings Activity: " + mSettingsActivityName);
+        pw.println("    Requires Device Unlock: " + mRequiresDeviceUnlock);
+        pw.println("    Requires Device ScreenOn: " + mRequiresDeviceScreenOn);
     }
 
     /**
