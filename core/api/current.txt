@@ -12134,6 +12134,8 @@ package android.content.pm {
     field public static final String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
     field public static final String FEATURE_IRIS = "android.hardware.biometrics.iris";
+    field public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY = "android.hardware.keystore.limited_use_key";
+    field public static final String FEATURE_KEYSTORE_SINGLE_USE_KEY = "android.hardware.keystore.single_use_key";
     field public static final String FEATURE_LEANBACK = "android.software.leanback";
     field public static final String FEATURE_LEANBACK_ONLY = "android.software.leanback_only";
     field public static final String FEATURE_LIVE_TV = "android.software.live_tv";
