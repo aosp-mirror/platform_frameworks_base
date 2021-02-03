@@ -491,7 +491,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
             NotificationSectionsManager notificationSectionsManager,
             GroupMembershipManager groupMembershipManager,
             GroupExpansionManager groupExpansionManager,
-            SysuiStatusBarStateController statusbarStateController
+            SysuiStatusBarStateController statusbarStateController,
+            AmbientState ambientState
     ) {
         super(context, attrs, 0, 0);
         Resources res = getResources();
@@ -500,7 +501,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
         mSectionsManager.initialize(this, LayoutInflater.from(context));
         mSections = mSectionsManager.createSectionsForBuckets();
 
-        mAmbientState = new AmbientState(context, mSectionsManager);
+        mAmbientState = ambientState;
         mBgColor = Utils.getColorAttr(mContext, android.R.attr.colorBackgroundFloating)
                 .getDefaultColor();
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
@@ -547,10 +548,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements Dumpable
                 ((ExpandableNotificationRow) child).setDismissRtl(dismissRtl);
             }
         }
-    }
-
-    void setIsShadeOpening(boolean isOpening) {
-        mAmbientState.setIsShadeOpening(isOpening);
     }
 
     void setSectionPadding(float margin) {
