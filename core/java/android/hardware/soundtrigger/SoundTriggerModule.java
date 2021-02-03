@@ -48,7 +48,8 @@ public class SoundTriggerModule {
 
     private static final int EVENT_RECOGNITION = 1;
     private static final int EVENT_SERVICE_DIED = 2;
-    private static final int EVENT_SERVICE_STATE_CHANGE = 3;
+    private static final int EVENT_RESOURCE_CONDITION_CHANGE = 3;
+    private static final int EVENT_MODEL_UNLOADED = 4;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     private int mId;
     private EventHandlerDelegate mEventHandlerDelegate;
@@ -120,6 +121,7 @@ public class SoundTriggerModule {
      * @param soundModelHandle an array of int where the sound model handle will be returned.
      * @return - {@link SoundTrigger#STATUS_OK} in case of success
      *         - {@link SoundTrigger#STATUS_ERROR} in case of unspecified error
+     *         - {@link SoundTrigger#STATUS_BUSY} in case of transient resource constraints
      *         - {@link SoundTrigger#STATUS_PERMISSION_DENIED} if the caller does not have
      *         system permission
      *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
@@ -181,6 +183,7 @@ public class SoundTriggerModule {
      *  recognition mode, keyphrases, users, minimum confidence levels...
      * @return - {@link SoundTrigger#STATUS_OK} in case of success
      *         - {@link SoundTrigger#STATUS_ERROR} in case of unspecified error
+     *         - {@link SoundTrigger#STATUS_BUSY} in case of transient resource constraints
      *         - {@link SoundTrigger#STATUS_PERMISSION_DENIED} if the caller does not have
      *         system permission
      *         - {@link SoundTrigger#STATUS_NO_INIT} if the native service cannot be reached
@@ -333,8 +336,11 @@ public class SoundTriggerModule {
                             listener.onRecognition(
                                     (SoundTrigger.RecognitionEvent) msg.obj);
                             break;
-                        case EVENT_SERVICE_STATE_CHANGE:
-                            listener.onServiceStateChange((int) msg.obj);
+                        case EVENT_RESOURCE_CONDITION_CHANGE:
+                            listener.onResourceConditionChange();
+                            break;
+                        case EVENT_MODEL_UNLOADED:
+                            listener.onModelUnloaded((Integer) msg.obj);
                             break;
                         case EVENT_SERVICE_DIED:
                             listener.onServiceDied();
@@ -365,18 +371,13 @@ public class SoundTriggerModule {
 
         @Override
         public void onModelUnloaded(int modelHandle) throws RemoteException {
-            // TODO: Implement
-            throw new RuntimeException("Implement me");
+            Message m = mHandler.obtainMessage(EVENT_MODEL_UNLOADED, modelHandle);
+            mHandler.sendMessage(m);
         }
 
         @Override
         public synchronized void onResourceConditionChange() throws RemoteException {
-            // TODO: Temporary hack.
-            Message m = mHandler.obtainMessage(EVENT_SERVICE_STATE_CHANGE,
-                    SoundTrigger.SERVICE_STATE_DISABLED);
-            mHandler.sendMessage(m);
-            m = mHandler.obtainMessage(EVENT_SERVICE_STATE_CHANGE,
-                    SoundTrigger.SERVICE_STATE_ENABLED);
+            Message m = mHandler.obtainMessage(EVENT_RESOURCE_CONDITION_CHANGE);
             mHandler.sendMessage(m);
         }
 
