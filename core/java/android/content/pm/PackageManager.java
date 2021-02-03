@@ -48,12 +48,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.dex.ArtManager;
-import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.pm.parsing.ParsingPackage;
-import android.content.pm.parsing.ParsingPackageUtils;
-import android.content.pm.parsing.result.ParseInput;
-import android.content.pm.parsing.result.ParseResult;
-import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
@@ -83,7 +77,6 @@ import com.android.internal.util.ArrayUtils;
 
 import dalvik.system.VMRuntime;
 
-import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.security.cert.Certificate;
@@ -6791,25 +6784,8 @@ public abstract class PackageManager {
     @Nullable
     public PackageInfo getPackageArchiveInfo(@NonNull String archiveFilePath,
             @PackageInfoFlags int flags) {
-        if ((flags & (PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                | PackageManager.MATCH_DIRECT_BOOT_AWARE)) == 0) {
-            // Caller expressed no opinion about what encryption
-            // aware/unaware components they want to see, so match both
-            flags |= PackageManager.MATCH_DIRECT_BOOT_AWARE
-                    | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
-        }
-
-        boolean collectCertificates = (flags & PackageManager.GET_SIGNATURES) != 0
-                || (flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
-
-        ParseInput input = ParseTypeImpl.forParsingWithoutPlatformCompat().reset();
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefault(input,
-                new File(archiveFilePath), 0, collectCertificates);
-        if (result.isError()) {
-            return null;
-        }
-        return PackageInfoWithoutStateUtils.generate(result.getResult(), null, flags, 0, 0, null,
-                new PackageUserState(), UserHandle.getCallingUserId());
+        throw new UnsupportedOperationException(
+                "getPackageArchiveInfo() not implemented in subclass");
     }
 
     /**
