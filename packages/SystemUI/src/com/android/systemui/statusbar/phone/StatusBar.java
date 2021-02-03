@@ -1136,8 +1136,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mLockscreenWallpaper = mLockscreenWallpaperLazy.get();
         }
 
-        mKeyguardIndicationController.setIndicationArea(
-                mNotificationShadeWindowView.findViewById(R.id.keyguard_indication_area));
         mNotificationPanelViewController.setKeyguardIndicationController(
                 mKeyguardIndicationController);
 
@@ -3613,26 +3611,19 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNavigationBarController.touchAutoDim(mDisplayId);
         Trace.beginSection("StatusBar#updateKeyguardState");
         if (mState == StatusBarState.KEYGUARD) {
-            mKeyguardIndicationController.setVisible(true);
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(true,
                         mStatusBarStateController.fromShadeLocked());
             }
             if (mStatusBarView != null) mStatusBarView.removePendingHideExpandedRunnables();
-            if (mAmbientIndicationContainer != null) {
-                mAmbientIndicationContainer.setVisibility(View.VISIBLE);
-            }
         } else {
-            mKeyguardIndicationController.setVisible(false);
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(false,
                         mStatusBarStateController.goingToFullShade() ||
                                 mState == StatusBarState.SHADE_LOCKED ||
                                 mStatusBarStateController.fromShadeLocked());
             }
-            if (mAmbientIndicationContainer != null) {
-                mAmbientIndicationContainer.setVisibility(View.INVISIBLE);
-            }
+
         }
         updateDozingState();
         checkBarModes();

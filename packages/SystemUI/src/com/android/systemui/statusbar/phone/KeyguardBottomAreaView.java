@@ -123,8 +123,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
     private KeyguardAffordanceView mRightAffordanceView;
     private KeyguardAffordanceView mLeftAffordanceView;
     private ViewGroup mIndicationArea;
-    private TextView mEnterpriseDisclosure;
     private TextView mIndicationText;
+    private TextView mIndicationTextBottom;
     private ViewGroup mPreviewContainer;
     private ViewGroup mOverlayContainer;
 
@@ -237,9 +237,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mRightAffordanceView = findViewById(R.id.camera_button);
         mLeftAffordanceView = findViewById(R.id.left_button);
         mIndicationArea = findViewById(R.id.keyguard_indication_area);
-        mEnterpriseDisclosure = findViewById(
-                R.id.keyguard_indication_enterprise_disclosure);
         mIndicationText = findViewById(R.id.keyguard_indication_text);
+        mIndicationTextBottom = findViewById(R.id.keyguard_indication_text_bottom);
         mIndicationBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.keyguard_indication_margin_bottom);
         mBurnInYOffset = getResources().getDimensionPixelSize(
@@ -316,7 +315,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
 
         // Respect font size setting.
-        mEnterpriseDisclosure.setTextSize(TypedValue.COMPLEX_UNIT_PX,
+        mIndicationTextBottom.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                 getResources().getDimensionPixelSize(
                         com.android.internal.R.dimen.text_size_small_material));
         mIndicationText.setTextSize(TypedValue.COMPLEX_UNIT_PX,
