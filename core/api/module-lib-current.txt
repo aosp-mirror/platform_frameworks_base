@@ -61,6 +61,16 @@ package android.net {
     method public void teardownTestNetwork(@NonNull android.net.Network);
   }
 
+  public final class UnderlyingNetworkInfo implements android.os.Parcelable {
+    ctor public UnderlyingNetworkInfo(int, @NonNull String, @NonNull java.util.List<java.lang.String>);
+    method public int describeContents();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.UnderlyingNetworkInfo> CREATOR;
+    field @NonNull public final String iface;
+    field public final int ownerUid;
+    field @NonNull public final java.util.List<java.lang.String> underlyingIfaces;
+  }
+
 }
 
 package android.os {
