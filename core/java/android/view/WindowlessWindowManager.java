@@ -149,8 +149,15 @@ public class WindowlessWindowManager implements IWindowSession {
         if (((attrs.inputFeatures &
                 WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL) == 0)) {
             try {
-                mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
+                if(mRealWm instanceof IWindowSession.Stub) {
+                    mRealWm.grantInputChannel(displayId,
+                        new SurfaceControl(sc, "WindowlessWindowManager.addToDisplay"),
+                        window, mHostInputToken, attrs.flags, attrs.privateFlags, attrs.type,
+                        outInputChannel);
+                } else {
+                    mRealWm.grantInputChannel(displayId, sc, window, mHostInputToken, attrs.flags,
                         attrs.privateFlags, attrs.type, outInputChannel);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to grant input to surface: ", e);
             }
@@ -293,8 +300,14 @@ public class WindowlessWindowManager implements IWindowSession {
         if ((attrChanges & WindowManager.LayoutParams.FLAGS_CHANGED) != 0
                 && state.mInputChannelToken != null) {
             try {
-                mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId, sc,
-                        attrs.flags, attrs.privateFlags, state.mInputRegion);
+                if(mRealWm instanceof IWindowSession.Stub) {
+                    mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId,
+                            new SurfaceControl(sc, "WindowlessWindowManager.relayout"),
+                            attrs.flags, attrs.privateFlags, state.mInputRegion);
+                } else {
+                    mRealWm.updateInputChannel(state.mInputChannelToken, state.mDisplayId, sc,
+                            attrs.flags, attrs.privateFlags, state.mInputRegion);
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to update surface input channel: ", e);
             }
