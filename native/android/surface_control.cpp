@@ -17,6 +17,7 @@
 #include <android/hardware/configstore/1.0/ISurfaceFlingerConfigs.h>
 #include <android/native_window.h>
 #include <android/surface_control.h>
+#include <surface_control_private.h>
 
 #include <configstore/Utils.h>
 
@@ -197,6 +198,48 @@ void ASurfaceControl_release(ASurfaceControl* aSurfaceControl) {
     SurfaceControl_release(surfaceControl);
 }
 
+struct ASurfaceControlStats {
+    int64_t acquireTime;
+    sp<Fence> previousReleaseFence;
+    uint64_t frameNumber;
+};
+
+void ASurfaceControl_registerSurfaceStatsListener(ASurfaceControl* control, void* context,
+        ASurfaceControl_SurfaceStatsListener func) {
+    SurfaceStatsCallback callback = [func](void* callback_context,
+                                                               nsecs_t,
+                                                               const sp<Fence>&,
+                                                               const SurfaceStats& surfaceStats) {
+
+        ASurfaceControlStats aSurfaceControlStats;
+
+        ASurfaceControl* aSurfaceControl =
+                reinterpret_cast<ASurfaceControl*>(surfaceStats.surfaceControl.get());
+        aSurfaceControlStats.acquireTime = surfaceStats.acquireTime;
+        aSurfaceControlStats.previousReleaseFence = surfaceStats.previousReleaseFence;
+        aSurfaceControlStats.frameNumber = surfaceStats.eventStats.frameNumber;
+
+        (*func)(callback_context, aSurfaceControl, &aSurfaceControlStats);
+    };
+    TransactionCompletedListener::getInstance()->addSurfaceStatsListener(context,
+            reinterpret_cast<void*>(func), ASurfaceControl_to_SurfaceControl(control), callback);
+}
+
+
+void ASurfaceControl_unregisterSurfaceStatsListener(void* context,
+        ASurfaceControl_SurfaceStatsListener func) {
+    TransactionCompletedListener::getInstance()->removeSurfaceStatsListener(context,
+            reinterpret_cast<void*>(func));
+}
+
+int64_t ASurfaceControlStats_getAcquireTime(ASurfaceControlStats* stats) {
+    return stats->acquireTime;
+}
+
+uint64_t ASurfaceControlStats_getFrameNumber(ASurfaceControlStats* stats) {
+    return stats->frameNumber;
+}
+
 ASurfaceTransaction* ASurfaceTransaction_create() {
     Transaction* transaction = new Transaction;
     return reinterpret_cast<ASurfaceTransaction*>(transaction);
@@ -214,11 +257,6 @@ void ASurfaceTransaction_apply(ASurfaceTransaction* aSurfaceTransaction) {
 
     transaction->apply();
 }
-
-typedef struct ASurfaceControlStats {
-    int64_t acquireTime;
-    sp<Fence> previousReleaseFence;
-} ASurfaceControlStats;
 
 struct ASurfaceTransactionStats {
     std::unordered_map<ASurfaceControl*, ASurfaceControlStats> aSurfaceControlStats;

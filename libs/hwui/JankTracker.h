@@ -84,12 +84,15 @@ private:
     // This is only used if we are in pipelined mode and are using HWC2,
     // otherwise it's 0.
     nsecs_t mDequeueTimeForgiveness = 0;
-    ProfileDataContainer mData;
-    ProfileDataContainer* mGlobalData;
+    ProfileDataContainer mData GUARDED_BY(mDataMutex);
+    ProfileDataContainer* mGlobalData GUARDED_BY(mDataMutex);
     ProfileDataDescription mDescription;
 
     // Ring buffer large enough for 2 seconds worth of frames
     RingBuffer<FrameInfo, 120> mFrames;
+
+    // Mutex to protect acccess to mData and mGlobalData obtained from mGlobalData->getDataMutex
+    std::mutex& mDataMutex;
 };
 
 } /* namespace uirenderer */
