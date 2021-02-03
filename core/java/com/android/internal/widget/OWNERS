@@ -5,3 +5,16 @@ per-file *LockPattern* = file:/services/core/java/com/android/server/locksetting
 per-file *LockScreen* = file:/services/core/java/com/android/server/locksettings/OWNERS
 per-file *Lockscreen* = file:/services/core/java/com/android/server/locksettings/OWNERS
 per-file *LockSettings* = file:/services/core/java/com/android/server/locksettings/OWNERS
+
+# Notification related
+per-file *Notification* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *Messaging* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *Message* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *Conversation* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file *ImageResolver* = file:/services/core/java/com/android/server/notification/OWNERS
+per-file CallLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
+per-file CachingIconView.java = file:/services/core/java/com/android/server/notification/OWNERS
+per-file ImageFloatingTextView.java = file:/services/core/java/com/android/server/notification/OWNERS
+per-file ObservableTextView.java = file:/services/core/java/com/android/server/notification/OWNERS
+per-file RemeasuringLinearLayout.java = file:/services/core/java/com/android/server/notification/OWNERS
+per-file ViewClippingUtil.java = file:/services/core/java/com/android/server/notification/OWNERS
