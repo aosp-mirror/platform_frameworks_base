@@ -167,15 +167,15 @@ public class TimeZoneDetectorStrategyImplTest {
             createConfig(null, false /* geoDetection */);
 
     private TimeZoneDetectorStrategyImpl mTimeZoneDetectorStrategy;
-    private FakeCallback mFakeCallback;
+    private FakeEnvironment mFakeEnvironment;
     private MockConfigChangeListener mMockConfigChangeListener;
 
 
     @Before
     public void setUp() {
-        mFakeCallback = new FakeCallback();
+        mFakeEnvironment = new FakeEnvironment();
         mMockConfigChangeListener = new MockConfigChangeListener();
-        mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(mFakeCallback);
+        mTimeZoneDetectorStrategy = new TimeZoneDetectorStrategyImpl(mFakeEnvironment);
         mTimeZoneDetectorStrategy.addConfigChangeListener(mMockConfigChangeListener);
     }
 
@@ -183,7 +183,7 @@ public class TimeZoneDetectorStrategyImplTest {
     public void testGetCurrentUserConfiguration() {
         new Script().initializeConfig(CONFIG_INT_AUTO_ENABLED_GEO_DISABLED);
         ConfigurationInternal expectedConfiguration =
-                mFakeCallback.getConfigurationInternal(USER_ID);
+                mFakeEnvironment.getConfigurationInternal(USER_ID);
         assertEquals(expectedConfiguration,
                 mTimeZoneDetectorStrategy.getCurrentUserConfigurationInternal());
     }
@@ -490,7 +490,7 @@ public class TimeZoneDetectorStrategyImplTest {
 
     private void makeSlotIndex1SuggestionAndCheckState(Script script, TelephonyTestCase testCase) {
         // Give the next suggestion a different zone from the currently set device time zone;
-        String currentZoneId = mFakeCallback.getDeviceTimeZone();
+        String currentZoneId = mFakeEnvironment.getDeviceTimeZone();
         String suggestionZoneId =
                 "Europe/London".equals(currentZoneId) ? "Europe/Paris" : "Europe/London";
         TelephonyTimeZoneSuggestion zoneSlotIndex1Suggestion =
@@ -610,9 +610,9 @@ public class TimeZoneDetectorStrategyImplTest {
     }
 
     /**
-     * The {@link TimeZoneDetectorStrategyImpl.Callback} is left to detect whether changing the time
-     * zone is actually necessary. This test proves that the strategy doesn't assume it knows the
-     * current settings.
+     * The {@link TimeZoneDetectorStrategyImpl.Environment} is left to detect whether changing the
+     * time zone is actually necessary. This test proves that the strategy doesn't assume it knows
+     * the current settings.
      */
     @Test
     public void testTelephonySuggestionStrategyDoesNotAssumeCurrentSetting_autoTelephony() {
@@ -958,7 +958,7 @@ public class TimeZoneDetectorStrategyImplTest {
         return builder.build();
     }
 
-    static class FakeCallback implements TimeZoneDetectorStrategyImpl.Callback {
+    static class FakeEnvironment implements TimeZoneDetectorStrategyImpl.Environment {
 
         private final TestState<ConfigurationInternal> mConfigurationInternal = new TestState<>();
         private final TestState<String> mTimeZoneId = new TestState<>();
@@ -1051,12 +1051,12 @@ public class TimeZoneDetectorStrategyImplTest {
     private class Script {
 
         Script initializeConfig(ConfigurationInternal configuration) {
-            mFakeCallback.initializeConfig(configuration);
+            mFakeEnvironment.initializeConfig(configuration);
             return this;
         }
 
         Script initializeTimeZoneSetting(String zoneId) {
-            mFakeCallback.initializeTimeZoneSetting(zoneId);
+            mFakeEnvironment.initializeTimeZoneSetting(zoneId);
             return this;
         }
 
@@ -1084,7 +1084,7 @@ public class TimeZoneDetectorStrategyImplTest {
         Script simulateManualTimeZoneSuggestion(
                 @UserIdInt int userId, ManualTimeZoneSuggestion manualTimeZoneSuggestion,
                 boolean expectedResult) {
-            mFakeCallback.assertKnownUser(userId);
+            mFakeEnvironment.assertKnownUser(userId);
             boolean actualResult = mTimeZoneDetectorStrategy.suggestManualTimeZone(
                     userId, manualTimeZoneSuggestion);
             assertEquals(expectedResult, actualResult);
@@ -1104,26 +1104,26 @@ public class TimeZoneDetectorStrategyImplTest {
          * state was last reset.
          */
         Script verifyTimeZoneNotChanged() {
-            mFakeCallback.assertTimeZoneNotChanged();
+            mFakeEnvironment.assertTimeZoneNotChanged();
             return this;
         }
 
         /** Verifies the device's time zone has been set and clears change tracking history. */
         Script verifyTimeZoneChangedAndReset(String zoneId) {
-            mFakeCallback.assertTimeZoneChangedTo(zoneId);
-            mFakeCallback.commitAllChanges();
+            mFakeEnvironment.assertTimeZoneChangedTo(zoneId);
+            mFakeEnvironment.commitAllChanges();
             return this;
         }
 
         Script verifyTimeZoneChangedAndReset(ManualTimeZoneSuggestion suggestion) {
-            mFakeCallback.assertTimeZoneChangedTo(suggestion.getZoneId());
-            mFakeCallback.commitAllChanges();
+            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
+            mFakeEnvironment.commitAllChanges();
             return this;
         }
 
         Script verifyTimeZoneChangedAndReset(TelephonyTimeZoneSuggestion suggestion) {
-            mFakeCallback.assertTimeZoneChangedTo(suggestion.getZoneId());
-            mFakeCallback.commitAllChanges();
+            mFakeEnvironment.assertTimeZoneChangedTo(suggestion.getZoneId());
+            mFakeEnvironment.commitAllChanges();
             return this;
         }
 
@@ -1131,9 +1131,9 @@ public class TimeZoneDetectorStrategyImplTest {
          * Verifies that the configuration has been changed to the expected value.
          */
         Script verifyConfigurationChangedAndReset(ConfigurationInternal expected) {
-            mFakeCallback.mConfigurationInternal.assertHasBeenSet();
-            assertEquals(expected, mFakeCallback.mConfigurationInternal.getLatest());
-            mFakeCallback.commitAllChanges();
+            mFakeEnvironment.mConfigurationInternal.assertHasBeenSet();
+            assertEquals(expected, mFakeEnvironment.mConfigurationInternal.getLatest());
+            mFakeEnvironment.commitAllChanges();
 
             // Also confirm the listener triggered.
             mMockConfigChangeListener.verifyOnChangeCalled();
@@ -1146,7 +1146,7 @@ public class TimeZoneDetectorStrategyImplTest {
          * {@link TimeZoneConfiguration} have been changed.
          */
         Script verifyConfigurationNotChanged() {
-            mFakeCallback.mConfigurationInternal.assertHasNotBeenSet();
+            mFakeEnvironment.mConfigurationInternal.assertHasNotBeenSet();
 
             // Also confirm the listener did not trigger.
             mMockConfigChangeListener.verifyOnChangeNotCalled();
@@ -1154,7 +1154,7 @@ public class TimeZoneDetectorStrategyImplTest {
         }
 
         Script resetConfigurationTracking() {
-            mFakeCallback.commitAllChanges();
+            mFakeEnvironment.commitAllChanges();
             return this;
         }
     }
