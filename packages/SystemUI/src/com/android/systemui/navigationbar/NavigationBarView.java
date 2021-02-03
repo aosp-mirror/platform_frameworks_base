@@ -57,6 +57,7 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
 import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
@@ -624,6 +625,10 @@ public class NavigationBarView extends FrameLayout implements
     public void setWindowVisible(boolean visible) {
         mRegionSamplingHelper.setWindowVisible(visible);
         mRotationButtonController.onNavigationBarWindowVisibilityChange(visible);
+    }
+
+    public void setBehavior(@Behavior int behavior) {
+        mRotationButtonController.onBehaviorChanged(behavior);
     }
 
     @Override
