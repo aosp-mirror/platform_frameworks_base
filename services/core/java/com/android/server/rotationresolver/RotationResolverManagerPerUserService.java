@@ -159,7 +159,7 @@ final class RotationResolverManagerPerUserService extends
         final Intent intent = new Intent(
                 RotationResolverService.SERVICE_INTERFACE).setPackage(resolvedPackage);
 
-        final ResolveInfo resolveInfo = context.getPackageManager().resolveActivityAsUser(intent,
+        final ResolveInfo resolveInfo = context.getPackageManager().resolveServiceAsUser(intent,
                 flags, context.getUserId());
         if (resolveInfo == null || resolveInfo.serviceInfo == null) {
             Slog.wtf(TAG, String.format("Service %s not found in package %s",
