@@ -671,34 +671,29 @@ public final class ActiveServices {
         }
 
         if (fgRequired) {
-            if (isFgsBgStart(r.mAllowStartForeground)) {
-                if (!r.mLoggedInfoAllowStartForeground) {
-                    Slog.wtf(TAG, "Background started FGS " + r.mInfoAllowStartForeground);
-                    r.mLoggedInfoAllowStartForeground = true;
+            logFgsBackgroundStart(r);
+            if (r.mAllowStartForeground == FGS_FEATURE_DENIED && isBgFgsRestrictionEnabled(r)) {
+                String msg = "startForegroundService() not allowed due to "
+                        + "mAllowStartForeground false: service "
+                        + r.shortInstanceName;
+                Slog.w(TAG, msg);
+                showFgsBgRestrictedNotificationLocked(r);
+                ApplicationInfo aInfo = null;
+                try {
+                    aInfo = AppGlobals.getPackageManager().getApplicationInfo(
+                            callingPackage, ActivityManagerService.STOCK_PM_FLAGS,
+                            userId);
+                } catch (android.os.RemoteException e) {
+                    // pm is in same process, this will never happen.
                 }
-                if (r.mAllowStartForeground == FGS_FEATURE_DENIED && isBgFgsRestrictionEnabled(r)) {
-                    String msg = "startForegroundService() not allowed due to "
-                            + "mAllowStartForeground false: service "
-                            + r.shortInstanceName;
-                    Slog.w(TAG, msg);
-                    showFgsBgRestrictedNotificationLocked(r);
-                    ApplicationInfo aInfo = null;
-                    try {
-                        aInfo = AppGlobals.getPackageManager().getApplicationInfo(
-                                callingPackage, ActivityManagerService.STOCK_PM_FLAGS,
-                                userId);
-                    } catch (android.os.RemoteException e) {
-                        // pm is in same process, this will never happen.
-                    }
-                    if (aInfo == null) {
-                        throw new SecurityException("startServiceLocked failed, "
-                                + "could not resolve client package " + callingPackage);
-                    }
-                    if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, aInfo.uid)) {
-                        throw new IllegalStateException(msg);
-                    }
-                    return null;
+                if (aInfo == null) {
+                    throw new SecurityException("startServiceLocked failed, "
+                            + "could not resolve client package " + callingPackage);
                 }
+                if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID, aInfo.uid)) {
+                    throw new IllegalStateException(msg);
+                }
+                return null;
             }
         }
 
@@ -1768,25 +1763,19 @@ public final class ActiveServices {
                 }
 
                 if (!ignoreForeground) {
-                    if (isFgsBgStart(r.mAllowStartForeground)) {
-                        if (!r.mLoggedInfoAllowStartForeground) {
-                            Slog.wtf(TAG, "Background started FGS "
-                                    + r.mInfoAllowStartForeground);
-                            r.mLoggedInfoAllowStartForeground = true;
-                        }
-                        if (r.mAllowStartForeground == FGS_FEATURE_DENIED
-                                && isBgFgsRestrictionEnabled(r)) {
-                            final String msg = "Service.startForeground() not allowed due to "
-                                    + "mAllowStartForeground false: service "
-                                    + r.shortInstanceName;
-                            Slog.w(TAG, msg);
-                            showFgsBgRestrictedNotificationLocked(r);
-                            updateServiceForegroundLocked(r.app, true);
-                            ignoreForeground = true;
-                            if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
-                                    r.appInfo.uid)) {
-                                throw new IllegalStateException(msg);
-                            }
+                    logFgsBackgroundStart(r);
+                    if (r.mAllowStartForeground == FGS_FEATURE_DENIED
+                            && isBgFgsRestrictionEnabled(r)) {
+                        final String msg = "Service.startForeground() not allowed due to "
+                                + "mAllowStartForeground false: service "
+                                + r.shortInstanceName;
+                        Slog.w(TAG, msg);
+                        showFgsBgRestrictedNotificationLocked(r);
+                        updateServiceForegroundLocked(r.app, true);
+                        ignoreForeground = true;
+                        if (CompatChanges.isChangeEnabled(FGS_START_EXCEPTION_CHANGE_ID,
+                                r.appInfo.uid)) {
+                            throw new IllegalStateException(msg);
                         }
                     }
                 }
@@ -5719,5 +5708,24 @@ public final class ActiveServices {
     private boolean isBgFgsRestrictionEnabled(ServiceRecord r) {
         return mAm.mConstants.mFlagFgsStartRestrictionEnabled
                 && CompatChanges.isChangeEnabled(FGS_BG_START_RESTRICTION_CHANGE_ID, r.appInfo.uid);
+    }
+
+    private void logFgsBackgroundStart(ServiceRecord r) {
+        // Only log if FGS is started from background.
+        if (!isFgsBgStart(r.mAllowStartForeground)) {
+            return;
+        }
+        if (!r.mLoggedInfoAllowStartForeground) {
+            final String msg = "Background started FGS: "
+                    + ((r.mAllowStartForeground != FGS_FEATURE_DENIED) ? "Allowed " : "Disallowed ")
+                    + r.mInfoAllowStartForeground;
+            Slog.wtfQuiet(TAG, msg);
+            if (r.mAllowStartForeground != FGS_FEATURE_DENIED) {
+                Slog.i(TAG, msg);
+            } else {
+                Slog.w(TAG, msg);
+            }
+            r.mLoggedInfoAllowStartForeground = true;
+        }
     }
 }
