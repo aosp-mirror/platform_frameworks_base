@@ -25,22 +25,21 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.android.systemui.doze.DozeReceiver;
-import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * Class that coordinates non-HBM animations (such as enroll, keyguard, BiometricPrompt,
  * FingerprintManager).
  */
 public class UdfpsAnimationView extends View implements DozeReceiver,
-        ScrimController.ScrimChangedListener {
+        StatusBar.ExpansionChangedListener {
 
     private static final String TAG = "UdfpsAnimationView";
 
     @NonNull private UdfpsView mParent;
     @Nullable private UdfpsAnimation mUdfpsAnimation;
     @NonNull private RectF mSensorRect;
-    private int mNotificationPanelAlpha;
-
+    private int mAlpha;
 
     public UdfpsAnimationView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -52,10 +51,22 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
         super.onDraw(canvas);
 
         if (mUdfpsAnimation != null) {
-            final int alpha = mParent.shouldPauseAuth() ? 255 - mNotificationPanelAlpha : 255;
+            final int alpha = mParent.shouldPauseAuth() ? mAlpha : 255;
             mUdfpsAnimation.setAlpha(alpha);
             mUdfpsAnimation.draw(canvas);
         }
+    }
+
+    private int expansionToAlpha(float expansion) {
+        // Fade to 0 opacity when reaching this expansion amount
+        final float maxExpansion = 0.4f;
+
+        if (expansion >= maxExpansion) {
+            return 0; // transparent
+        }
+
+        final float percent = expansion / maxExpansion;
+        return (int) ((1 - percent) * 255);
     }
 
     void setParent(@NonNull UdfpsView parent) {
@@ -87,8 +98,8 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
     }
 
     @Override
-    public void onAlphaChanged(float alpha) {
-        mNotificationPanelAlpha = (int) (alpha * 255);
+    public void onExpansionChanged(float expansion, boolean expanded) {
+        mAlpha = expansionToAlpha(expansion);
         postInvalidate();
     }
 
