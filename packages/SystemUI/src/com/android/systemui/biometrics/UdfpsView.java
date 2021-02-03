@@ -27,16 +27,14 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
-import android.graphics.PorterDuff;
 import android.graphics.RectF;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
@@ -44,56 +42,20 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.ScrimController;
 
 /**
- * A full screen view with a configurable illumination dot and scrim.
+ * A view containing 1) A SurfaceView for HBM, and 2) A normal drawable view for all other
+ * animations.
  */
-public class UdfpsView extends SurfaceView implements DozeReceiver,
+public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIlluminator,
         StatusBarStateController.StateListener, ScrimController.ScrimChangedListener {
     private static final String TAG = "UdfpsView";
 
-    /**
-     * Interface for controlling the high-brightness mode (HBM). UdfpsView can use this callback to
-     * enable the HBM while showing the fingerprint illumination, and to disable the HBM after the
-     * illumination is no longer necessary.
-     */
-    interface HbmCallback {
-        /**
-         * UdfpsView will call this to enable the HBM before drawing the illumination dot.
-         *
-         * @param surface A valid surface for which the HBM should be enabled.
-         */
-        void enableHbm(@NonNull Surface surface);
-
-        /**
-         * UdfpsView will call this to disable the HBM when the illumination is not longer needed.
-         *
-         * @param surface A valid surface for which the HBM should be disabled.
-         */
-        void disableHbm(@NonNull Surface surface);
-    }
-
-    /**
-     * This is used instead of {@link android.graphics.drawable.Drawable}, because the latter has
-     * several abstract methods that are not used here but require implementation.
-     */
-    private interface SimpleDrawable {
-        void draw(Canvas canvas);
-    }
-
-    // Radius in pixels.
-    private static final float SENSOR_SHADOW_RADIUS = 2.0f;
-
     private static final int DEBUG_TEXT_SIZE_PX = 32;
 
-    @NonNull private final SurfaceHolder mHolder;
+    @NonNull private final UdfpsSurfaceView mHbmSurfaceView;
+    @NonNull private final UdfpsAnimationView mAnimationView;
     @NonNull private final RectF mSensorRect;
-    @NonNull private final Paint mSensorPaint;
     @NonNull private final Paint mDebugTextPaint;
-    @NonNull private final SimpleDrawable mIlluminationDotDrawable;
-    @NonNull private final SimpleDrawable mClearSurfaceDrawable;
 
-    @Nullable private UdfpsAnimation mUdfpsAnimation;
-    @Nullable private HbmCallback mHbmCallback;
-    @Nullable private Runnable mOnIlluminatedRunnable;
 
     // Used to obtain the sensor location.
     @NonNull private FingerprintSensorPropertiesInternal mSensorProps;
@@ -103,7 +65,6 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
     private boolean mIlluminationRequested;
     private int mStatusBarState;
     private boolean mNotificationShadeExpanded;
-    private int mNotificationPanelAlpha;
 
     public UdfpsView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -121,27 +82,27 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
             a.recycle();
         }
 
-        mHolder = getHolder();
-        mHolder.setFormat(PixelFormat.RGBA_8888);
+        // Inflate UdfpsSurfaceView
+        final LayoutInflater inflater = LayoutInflater.from(context);
+        mHbmSurfaceView = (UdfpsSurfaceView) inflater.inflate(R.layout.udfps_surface_view,
+                null, false);
+        addView(mHbmSurfaceView);
+        mHbmSurfaceView.setVisibility(View.INVISIBLE);
+
+        // Inflate UdfpsAnimationView
+        mAnimationView = (UdfpsAnimationView) inflater.inflate(R.layout.udfps_animation_view,
+                null, false);
+        mAnimationView.setParent(this);
+        addView(mAnimationView);
 
         mSensorRect = new RectF();
-        mSensorPaint = new Paint(0 /* flags */);
-        mSensorPaint.setAntiAlias(true);
-        mSensorPaint.setARGB(255, 255, 255, 255);
-        mSensorPaint.setStyle(Paint.Style.FILL);
 
         mDebugTextPaint = new Paint();
         mDebugTextPaint.setAntiAlias(true);
         mDebugTextPaint.setColor(Color.BLUE);
         mDebugTextPaint.setTextSize(DEBUG_TEXT_SIZE_PX);
 
-        mIlluminationDotDrawable = canvas -> canvas.drawOval(mSensorRect, mSensorPaint);
-        mClearSurfaceDrawable = canvas -> canvas.drawColor(0, PorterDuff.Mode.CLEAR);
-
         mIlluminationRequested = false;
-        // SurfaceView sets this to true by default. We must set it to false to allow
-        // onDraw to be called.
-        setWillNotDraw(false);
     }
 
     void setSensorProperties(@NonNull FingerprintSensorPropertiesInternal properties) {
@@ -149,29 +110,17 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
     }
 
     void setUdfpsAnimation(@Nullable UdfpsAnimation animation) {
-        mUdfpsAnimation = animation;
+        mAnimationView.setAnimation(animation);
     }
 
-    /**
-     * Sets a callback that can be used to enable and disable the high-brightness mode (HBM).
-     */
-    void setHbmCallback(@Nullable HbmCallback callback) {
-        mHbmCallback = callback;
-    }
-
-    /**
-     * Sets a runnable that will be run when the first illumination frame reaches the panel.
-     * The runnable is reset to null after it is executed once.
-     */
-    void setOnIlluminatedRunnable(Runnable runnable) {
-        mOnIlluminatedRunnable = runnable;
+    @Override
+    public void setHbmCallback(@Nullable HbmCallback callback) {
+        mHbmSurfaceView.setHbmCallback(callback);
     }
 
     @Override
     public void dozeTimeTick() {
-        if (mUdfpsAnimation instanceof DozeReceiver) {
-            ((DozeReceiver) mUdfpsAnimation).dozeTimeTick();
-        }
+        mAnimationView.dozeTimeTick();
     }
 
     @Override
@@ -186,17 +135,15 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
 
     @Override
     public void onAlphaChanged(float alpha) {
-        mNotificationPanelAlpha = (int) (alpha * 255);
-        postInvalidate();
+        mAnimationView.onAlphaChanged(alpha);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
         mSensorRect.set(0, 0, 2 * mSensorProps.sensorRadius, 2 * mSensorProps.sensorRadius);
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.onSensorRectUpdated(new RectF(mSensorRect));
-        }
+        mHbmSurfaceView.onSensorRectUpdated(new RectF(mSensorRect));
+        mAnimationView.onSensorRectUpdated(new RectF(mSensorRect));
     }
 
     @Override
@@ -205,13 +152,7 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         Log.v(TAG, "onAttachedToWindow");
 
         // Retrieve the colors each time, since it depends on day/night mode
-        updateColor();
-    }
-
-    private void updateColor() {
-        if (mUdfpsAnimation != null) {
-            mUdfpsAnimation.updateColor();
-        }
+        mAnimationView.updateColor();
     }
 
     @Override
@@ -220,36 +161,12 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         Log.v(TAG, "onDetachedFromWindow");
     }
 
-    /**
-     * Immediately draws the provided drawable on this SurfaceView's surface.
-     */
-    private void drawImmediately(@NonNull SimpleDrawable drawable) {
-        Canvas canvas = null;
-        try {
-            canvas = mHolder.lockCanvas();
-            drawable.draw(canvas);
-        } finally {
-            // Make sure the surface is never left in a bad state.
-            if (canvas != null) {
-                mHolder.unlockCanvasAndPost(canvas);
-            }
-        }
-    }
-
-    /**
-     * This onDraw will not execute if setWillNotDraw(true) is called.
-     */
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if (!mIlluminationRequested) {
             if (!TextUtils.isEmpty(mDebugMessage)) {
                 canvas.drawText(mDebugMessage, 0, 160, mDebugTextPaint);
-            }
-            if (mUdfpsAnimation != null) {
-                final int alpha = shouldPauseAuth() ? 255 - mNotificationPanelAlpha : 255;
-                mUdfpsAnimation.setAlpha(alpha);
-                mUdfpsAnimation.draw(canvas);
             }
         }
     }
@@ -283,7 +200,7 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
      * authentication which would cause the UDFPS icons to abruptly disappear, do it here by not
      * sending onFingerDown and smoothly animating away.
      */
-    private boolean shouldPauseAuth() {
+    boolean shouldPauseAuth() {
         return (mNotificationShadeExpanded && mStatusBarState != KEYGUARD)
                 || mStatusBarState == SHADE_LOCKED
                 || mStatusBarState == FULLSCREEN_USER_SWITCHER;
@@ -293,49 +210,30 @@ public class UdfpsView extends SurfaceView implements DozeReceiver,
         return mIlluminationRequested;
     }
 
-    void startIllumination() {
+    /**
+     * @param onIlluminatedRunnable Runs when the first illumination frame reaches the panel.
+     */
+    @Override
+    public void startIllumination(@Nullable Runnable onIlluminatedRunnable) {
         mIlluminationRequested = true;
-
-        // Disable onDraw to prevent overriding the illumination dot with the regular UI.
-        setWillNotDraw(true);
-
-        if (mHbmCallback != null && mHolder.getSurface().isValid()) {
-            mHbmCallback.enableHbm(mHolder.getSurface());
-        }
-        drawImmediately(mIlluminationDotDrawable);
-
-        if (mOnIlluminatedRunnable != null) {
-            // No framework API can reliably tell when a frame reaches the panel. A timeout is the
-            // safest solution. The frame should be displayed within 3 refresh cycles, which on a
-            // 60 Hz panel equates to 50 milliseconds.
-            postDelayed(mOnIlluminatedRunnable, 50 /* delayMillis */);
-            mOnIlluminatedRunnable = null;
-        }
+        mAnimationView.setVisibility(View.INVISIBLE);
+        mHbmSurfaceView.setVisibility(View.VISIBLE);
+        mHbmSurfaceView.startIllumination(onIlluminatedRunnable);
     }
 
-    void stopIllumination() {
+    @Override
+    public void stopIllumination() {
         mIlluminationRequested = false;
-
-        if (mHbmCallback != null && mHolder.getSurface().isValid()) {
-            mHbmCallback.disableHbm(mHolder.getSurface());
-        }
-        // It may be necessary to clear the surface for the HBM changes to apply.
-        drawImmediately(mClearSurfaceDrawable);
-
-        // Enable onDraw to allow the regular UI to be drawn.
-        setWillNotDraw(false);
-        invalidate();
+        mAnimationView.setVisibility(View.VISIBLE);
+        mHbmSurfaceView.setVisibility(View.INVISIBLE);
+        mHbmSurfaceView.stopIllumination();
     }
 
     void onEnrollmentProgress(int remaining) {
-        if (mUdfpsAnimation instanceof UdfpsAnimationEnroll) {
-            ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentProgress(remaining);
-        }
+        mAnimationView.onEnrollmentProgress(remaining);
     }
 
     void onEnrollmentHelp() {
-        if (mUdfpsAnimation instanceof UdfpsAnimationEnroll) {
-            ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentHelp();
-        }
+        mAnimationView.onEnrollmentHelp();
     }
 }
