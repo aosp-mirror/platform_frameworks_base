@@ -16,8 +16,8 @@
 
 package com.android.server.wm;
 
-import static android.content.ActivityInfoProto.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
@@ -50,6 +50,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.platform.test.annotations.Presubmit;
@@ -408,6 +409,32 @@ public class DisplayAreaTest extends WindowTestsBase {
     }
 
     @Test
+    public void testRestrictAppBoundsToOverrideBounds() {
+        final RootDisplayArea root =
+                new DisplayAreaPolicyBuilderTest.SurfacelessDisplayAreaRoot(mWm);
+        final DisplayArea<DisplayArea> da = new DisplayArea<>(mWm, ANY, "Test_DA");
+        root.addChild(da, POSITION_TOP);
+        final Rect displayBounds = new Rect(0, 0, 1800, 2800);
+        final Rect displayAppBounds = new Rect(0, 100, 1800, 2800);
+        final Rect daBounds = new Rect(0, 1400, 1800, 2800);
+        root.setBounds(displayBounds);
+
+        // DA inherit parent app bounds.
+        final Configuration displayConfig = new Configuration();
+        displayConfig.windowConfiguration.setAppBounds(displayAppBounds);
+        root.onRequestedOverrideConfigurationChanged(displayConfig);
+
+        assertEquals(displayAppBounds, da.getConfiguration().windowConfiguration.getAppBounds());
+
+        // Restrict DA appBounds to override Bounds
+        da.setBounds(daBounds);
+
+        final Rect expectedDaAppBounds = new Rect(daBounds);
+        expectedDaAppBounds.intersect(displayAppBounds);
+        assertEquals(expectedDaAppBounds, da.getConfiguration().windowConfiguration.getAppBounds());
+    }
+
+    @Test
     public void testGetOrientation() {
         final DisplayArea.Tokens area = new DisplayArea.Tokens(mWm, ABOVE_TASKS, "test");
         final WindowToken token = createWindowToken(TYPE_APPLICATION_OVERLAY);
@@ -514,7 +541,7 @@ public class DisplayAreaTest extends WindowTestsBase {
         return new WindowState(mWm, mock(Session.class), new TestIWindow(), token,
                 null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
                 View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
-                false /* ownerCanAddInternalSystemWindow */, false /* ownerCanUseBackgroundBlur */);
+                false /* ownerCanAddInternalSystemWindow */);
     }
 
     private WindowToken createWindowToken(int type) {

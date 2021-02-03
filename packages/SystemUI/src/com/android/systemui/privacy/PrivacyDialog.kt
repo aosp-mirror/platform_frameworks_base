@@ -24,7 +24,6 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowInsets
 import android.widget.ImageView
@@ -66,9 +65,8 @@ class PrivacyDialog(
         super.onCreate(savedInstanceState)
         window?.apply {
             attributes.fitInsetsTypes = attributes.fitInsetsTypes or WindowInsets.Type.statusBars()
-            setLayout(MATCH_PARENT, WRAP_CONTENT)
+            setLayout(context.resources.getDimensionPixelSize(R.dimen.qs_panel_width), WRAP_CONTENT)
             setGravity(Gravity.TOP or Gravity.CENTER_HORIZONTAL)
-            setBackgroundDrawable(null)
         }
 
         setContentView(R.layout.privacy_dialog)
@@ -125,12 +123,12 @@ class PrivacyDialog(
         val finalText = element.attribution?.let {
             TextUtils.concat(
                     firstLine,
-                    "\n",
+                    " ",
                     context.getString(R.string.ongoing_privacy_dialog_attribution_text, it)
             )
         } ?: firstLine
         newView.requireViewById<TextView>(R.id.text).text = finalText
-        newView.requireViewById<View>(R.id.link).apply {
+        newView.apply {
             tag = element.type.permGroupName
             setOnClickListener(clickListener)
         }
@@ -154,9 +152,7 @@ class PrivacyDialog(
     }
 
     private val clickListener = View.OnClickListener { v ->
-        if (v.id == R.id.link) {
-            v.tag?.let { activityStarter(it as String) }
-        }
+        v.tag?.let { activityStarter(it as String) }
     }
 
     /** */

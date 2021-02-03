@@ -623,6 +623,8 @@ final class ProcessProfileRecord {
             DebugUtils.printSizeValue(pw, mLastCachedSwapPss * 1024);
             pw.print(" lastRss=");
             DebugUtils.printSizeValue(pw, mLastRss * 1024);
+            pw.println();
+            pw.print(prefix);
             pw.print(" trimMemoryLevel=");
             pw.println(mTrimMemoryLevel);
             pw.println();

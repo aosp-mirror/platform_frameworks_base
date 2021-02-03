@@ -395,7 +395,9 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     private void beginJankInstrument(int cuj) {
-        InteractionJankMonitor.getInstance().begin(mSecurityViewFlipper.getSecurityView(), cuj);
+        KeyguardInputView securityView = mSecurityViewFlipper.getSecurityView();
+        if (securityView == null) return;
+        InteractionJankMonitor.getInstance().begin(securityView, cuj);
     }
 
     private void endJankInstrument(int cuj) {

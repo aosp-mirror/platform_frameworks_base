@@ -222,6 +222,7 @@ import com.android.server.wm.DisplayPolicy;
 import com.android.server.wm.DisplayRotation;
 import com.android.server.wm.WindowManagerInternal;
 import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
+import com.android.server.wm.WindowManagerService;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -241,7 +242,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     static final String TAG = "WindowManager";
     static final boolean localLOGV = false;
     static final boolean DEBUG_INPUT = false;
-    static final boolean DEBUG_KEYGUARD = false;
+    static final boolean DEBUG_KEYGUARD = true;
     static final boolean DEBUG_SPLASH_SCREEN = false;
     static final boolean DEBUG_WAKEUP = false;
     static final boolean SHOW_SPLASH_SCREENS = true;
@@ -1913,6 +1914,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 handleStartTransitionForKeyguardLw(keyguardGoingAway, 0 /* duration */);
             }
         });
+
         mKeyguardDelegate = new KeyguardServiceDelegate(mContext,
                 new StateCallback() {
                     @Override
@@ -3136,7 +3138,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private int handleStartTransitionForKeyguardLw(boolean keyguardGoingAway, long duration) {
         final int res = applyKeyguardOcclusionChange();
         if (res != 0) return res;
-        if (keyguardGoingAway) {
+        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && keyguardGoingAway) {
             if (DEBUG_KEYGUARD) Slog.d(TAG, "Starting keyguard exit animation");
             startKeyguardExitAnimation(SystemClock.uptimeMillis(), duration);
         }

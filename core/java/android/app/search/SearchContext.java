@@ -17,6 +17,7 @@ package android.app.search;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -52,7 +53,7 @@ public final class SearchContext implements Parcelable {
 
     public SearchContext(int resultTypes,
             int queryTimeoutMillis,
-            @Nullable Bundle extras) {
+            @SuppressLint("NullableCollection") @Nullable Bundle extras) {
         mResultTypes = resultTypes;
         mTimeoutMillis = queryTimeoutMillis;
         mExtras = extras;
@@ -83,6 +84,7 @@ public final class SearchContext implements Parcelable {
     }
 
     @Nullable
+    @SuppressLint("NullableCollection")
     public Bundle getExtras() {
         return mExtras;
     }

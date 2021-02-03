@@ -53,6 +53,7 @@ android_test {
     jarjar_rules: "jarjar-rules.txt",
     static_libs: [
         "androidx.test.rules",
+        "bouncycastle-repackaged-unbundled",
         "FrameworksNetCommonTests",
         "frameworks-base-testutils",
         "frameworks-net-integration-testutils",

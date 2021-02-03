@@ -129,14 +129,14 @@ public final class Dataset implements Parcelable {
 
     /** @hide */
     @TestApi
-    @SuppressLint("ConcreteCollection")
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
     public @Nullable ArrayList<AutofillId> getFieldIds() {
         return mFieldIds;
     }
 
     /** @hide */
     @TestApi
-    @SuppressLint("ConcreteCollection")
+    @SuppressLint({"ConcreteCollection", "NullableCollection"})
     public @Nullable ArrayList<AutofillValue> getFieldValues() {
         return mFieldValues;
     }

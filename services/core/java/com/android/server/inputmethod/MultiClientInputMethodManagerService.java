@@ -1868,7 +1868,9 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void startProtoDump(byte[] clientProtoDump, int source, String where) {
+        public void startProtoDump(byte[] clientProtoDump, int source, String where,
+                IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
@@ -1879,12 +1881,14 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
-        public void startImeTrace() {
+        public void startImeTrace(IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
 
         @BinderThread
         @Override
-        public void stopImeTrace() {
+        public void stopImeTrace(IVoidResultCallback resultCallback) {
+            CallbackUtils.onResult(resultCallback, () -> { });
         }
     }
 }

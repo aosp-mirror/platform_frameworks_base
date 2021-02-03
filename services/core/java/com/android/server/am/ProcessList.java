@@ -1767,8 +1767,7 @@ public final class ProcessList {
      */
     @GuardedBy("mService")
     boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
-            int zygotePolicyFlags, boolean disableHiddenApiChecks, boolean disableTestApiChecks,
-            String abiOverride) {
+            int zygotePolicyFlags, boolean disableHiddenApiChecks, String abiOverride) {
         if (app.pendingStart) {
             return true;
         }
@@ -1914,10 +1913,6 @@ public final class ProcessList {
                     throw new IllegalStateException("Invalid API policy: " + policy);
                 }
                 runtimeFlags |= policyBits;
-
-                if (disableTestApiChecks) {
-                    runtimeFlags |= Zygote.DISABLE_TEST_API_ENFORCEMENT_POLICY;
-                }
             }
 
             String useAppImageCache = SystemProperties.get(
@@ -2367,8 +2362,7 @@ public final class ProcessList {
     final boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
             int zygotePolicyFlags, String abiOverride) {
         return startProcessLocked(app, hostingRecord, zygotePolicyFlags,
-                false /* disableHiddenApiChecks */, false /* disableTestApiChecks */,
-                abiOverride);
+                false /* disableHiddenApiChecks */, abiOverride);
     }
 
     @GuardedBy("mService")
@@ -4447,7 +4441,7 @@ public final class ProcessList {
             }
 
             app.getPkgList().forEachPackage(packageName -> {
-                if (updateFrameworkRes && packagesToUpdate.contains(packageName)) {
+                if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
                                 .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);

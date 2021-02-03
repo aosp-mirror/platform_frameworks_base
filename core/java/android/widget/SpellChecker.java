@@ -220,29 +220,26 @@ public class SpellChecker implements SpellCheckerSessionListener {
     }
 
     void onPerformSpellCheck() {
-        final int selectionStart = mTextView.getSelectionStart();
-        final int selectionEnd = mTextView.getSelectionEnd();
-        final int selectionRangeStart;
-        final int selectionRangeEnd;
-        if (selectionStart < selectionEnd) {
-            selectionRangeStart = selectionStart;
-            selectionRangeEnd = selectionEnd;
-        } else {
-            selectionRangeStart = selectionEnd;
-            selectionRangeEnd = selectionStart;
-        }
-        // Expand the range so that it (hopefully) includes the current sentence.
-        final int start = Math.max(0, selectionRangeStart - MIN_SENTENCE_LENGTH);
-        final int end = Math.min(mTextView.length(), selectionRangeEnd + MIN_SENTENCE_LENGTH);
+        // Triggers full content spell check.
+        final int start = 0;
+        final int end = mTextView.length();
         if (DBG) {
             Log.d(TAG, "performSpellCheckAroundSelection: " + start + ", " + end);
         }
-        spellCheck(start, end);
+        spellCheck(start, end, /* forceCheckWhenEditingWord= */ true);
     }
 
     public void spellCheck(int start, int end) {
+        spellCheck(start, end, /* forceCheckWhenEditingWord= */ false);
+    }
+
+    /**
+     * Requests to do spell check for text in the range (start, end).
+     */
+    public void spellCheck(int start, int end, boolean forceCheckWhenEditingWord) {
         if (DBG) {
-            Log.d(TAG, "Start spell-checking: " + start + ", " + end);
+            Log.d(TAG, "Start spell-checking: " + start + ", " + end + ", "
+                    + forceCheckWhenEditingWord);
         }
         final Locale locale = mTextView.getSpellCheckerLocale();
         final boolean isSessionActive = isSessionActive();
@@ -267,7 +264,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
         for (int i = 0; i < length; i++) {
             final SpellParser spellParser = mSpellParsers[i];
             if (spellParser.isFinished()) {
-                spellParser.parse(start, end);
+                spellParser.parse(start, end, forceCheckWhenEditingWord);
                 return;
             }
         }
@@ -282,10 +279,14 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         SpellParser spellParser = new SpellParser();
         mSpellParsers[length] = spellParser;
-        spellParser.parse(start, end);
+        spellParser.parse(start, end, forceCheckWhenEditingWord);
     }
 
     private void spellCheck() {
+        spellCheck(/* forceCheckWhenEditingWord= */ false);
+    }
+
+    private void spellCheck(boolean forceCheckWhenEditingWord) {
         if (mSpellCheckerSession == null) return;
 
         Editable editable = (Editable) mTextView.getText();
@@ -294,6 +295,12 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         TextInfo[] textInfos = new TextInfo[mLength];
         int textInfosCount = 0;
+
+        if (DBG) {
+            Log.d(TAG, "forceCheckWhenEditingWord=" + forceCheckWhenEditingWord
+                    + ", mLength=" + mLength + ", cookie = " + mCookie
+                    + ", sel start = " + selectionStart + ", sel end = " + selectionEnd);
+        }
 
         for (int i = 0; i < mLength; i++) {
             final SpellCheckSpan spellCheckSpan = mSpellCheckSpans[i];
@@ -319,7 +326,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
             } else {
                 isEditing = selectionEnd < start || selectionStart > end;
             }
-            if (start >= 0 && end > start && isEditing) {
+            if (start >= 0 && end > start && (forceCheckWhenEditingWord || isEditing)) {
                 spellCheckSpan.setSpellCheckInProgress(true);
                 final TextInfo textInfo = new TextInfo(editable, start, end, mCookie, mIds[i]);
                 textInfos[textInfosCount++] = textInfo;
@@ -546,7 +553,11 @@ public class SpellChecker implements SpellCheckerSessionListener {
     private class SpellParser {
         private Object mRange = new Object();
 
-        public void parse(int start, int end) {
+        // Forces to do spell checker even user is editing the word.
+        private boolean mForceCheckWhenEditingWord;
+
+        public void parse(int start, int end, boolean forceCheckWhenEditingWord) {
+            mForceCheckWhenEditingWord = forceCheckWhenEditingWord;
             final int max = mTextView.length();
             final int parseEnd;
             if (end > max) {
@@ -567,6 +578,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
 
         public void stop() {
             removeRangeSpan((Editable) mTextView.getText());
+            mForceCheckWhenEditingWord = false;
         }
 
         private void setRangeSpan(Editable editable, int start, int end) {
@@ -617,7 +629,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 if (DBG) {
                     Log.i(TAG, "No more spell check.");
                 }
-                removeRangeSpan(editable);
+                stop();
                 return;
             }
 
@@ -649,7 +661,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                     if (DBG) {
                         Log.i(TAG, "Incorrect range span.");
                     }
-                    removeRangeSpan(editable);
+                    stop();
                     return;
                 }
                 do {
@@ -778,7 +790,7 @@ public class SpellChecker implements SpellCheckerSessionListener {
                 removeRangeSpan(editable);
             }
 
-            spellCheck();
+            spellCheck(mForceCheckWhenEditingWord);
         }
 
         private <T> void removeSpansAt(Editable editable, int offset, T[] spans) {

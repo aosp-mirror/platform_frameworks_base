@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.content.ClipData;
 import android.content.ClipDescription;
@@ -204,6 +205,7 @@ public final class ContentInfo {
      * the IME.
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public Bundle getExtras() {
         return mExtras;
     }
@@ -347,7 +349,7 @@ public final class ContentInfo {
          * @return this builder
          */
         @NonNull
-        public Builder setExtras(@Nullable Bundle extras) {
+        public Builder setExtras(@SuppressLint("NullableCollection") @Nullable Bundle extras) {
             mExtras = extras;
             return this;
         }

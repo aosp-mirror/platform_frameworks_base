@@ -45,7 +45,6 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
-import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -212,6 +211,7 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -296,8 +296,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     final int mShowUserId;
     /** The owner has {@link android.Manifest.permission#INTERNAL_SYSTEM_WINDOW} */
     final boolean mOwnerCanAddInternalSystemWindow;
-    /** The owner has {@link android.Manifest.permission#USE_BACKGROUND_BLUR} */
-    final boolean mOwnerCanUseBackgroundBlur;
     final WindowId mWindowId;
     WindowToken mToken;
     // The same object as mToken if this is an app window and null for non-app windows.
@@ -440,6 +438,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     float mGlobalScale=1;
     float mLastGlobalScale=1;
     float mInvGlobalScale=1;
+    float mOverrideScale = 1;
     float mHScale=1, mVScale=1;
     float mLastHScale=1, mLastVScale=1;
     final Matrix mTmpMatrix = new Matrix();
@@ -647,9 +646,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mSeamlesslyRotated = false;
 
     /**
-     * Indicates if this window is behind IME. Only windows behind IME can get insets from IME.
+     * The insets state of sources provided by windows above the current window.
      */
-    boolean mBehindIme = false;
+    InsetsState mAboveInsetsState = new InsetsState();
+
+    /**
+     * The insets sources provided by this window.
+     */
+    ArrayMap<Integer, InsetsSource> mProvidedInsetsSources = new ArrayMap<>();
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -890,11 +894,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
             WindowState parentWindow, int appOp, WindowManager.LayoutParams a, int viewVisibility,
-            int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow,
-            boolean ownerCanUseBackgroundBlur) {
+            int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow) {
         this(service, s, c, token, parentWindow, appOp, a, viewVisibility, ownerId, showUserId,
-                ownerCanAddInternalSystemWindow, ownerCanUseBackgroundBlur,
-                new PowerManagerWrapper() {
+                ownerCanAddInternalSystemWindow, new PowerManagerWrapper() {
                     @Override
                     public void wakeUp(long time, @WakeReason int reason, String details) {
                         service.mPowerManager.wakeUp(time, reason, details);
@@ -910,7 +912,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     WindowState(WindowManagerService service, Session s, IWindow c, WindowToken token,
             WindowState parentWindow, int appOp, WindowManager.LayoutParams a, int viewVisibility,
             int ownerId, int showUserId, boolean ownerCanAddInternalSystemWindow,
-            boolean ownerCanUseBackgroundBlur, PowerManagerWrapper powerManagerWrapper) {
+            PowerManagerWrapper powerManagerWrapper) {
         super(service);
         mTmpTransaction = service.mTransactionFactory.get();
         mSession = s;
@@ -921,7 +923,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mOwnerUid = ownerId;
         mShowUserId = showUserId;
         mOwnerCanAddInternalSystemWindow = ownerCanAddInternalSystemWindow;
-        mOwnerCanUseBackgroundBlur = ownerCanUseBackgroundBlur;
         mWindowId = new WindowId(this);
         mAttrs.copyFrom(a);
         mLastSurfaceInsets.set(mAttrs.surfaceInsets);
@@ -1008,6 +1009,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mLastRequestedWidth = 0;
         mLastRequestedHeight = 0;
         mLayer = 0;
+        mOverrideScale = mWmService.mAtmService.mCompatModePackages.getCompatScale(
+                mAttrs.packageName, s.mUid);
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
         // during onDisplayChanged.
@@ -1040,8 +1043,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mSession.windowAddedLocked(mAttrs.packageName);
     }
 
+    /**
+     * @return {@code true} if the application runs in size compatibility mode or has an app level
+     * scaling override set.
+     * @see CompatModePackages#getCompatScale
+     * @see android.content.res.CompatibilityInfo#supportsScreen
+     * @see ActivityRecord#inSizeCompatMode()
+     */
     boolean inSizeCompatMode() {
-        return inSizeCompatMode(mAttrs, mActivityRecord);
+        return mOverrideScale != 1f || inSizeCompatMode(mAttrs, mActivityRecord);
     }
 
     /**
@@ -1676,7 +1686,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void prelayout() {
         if (inSizeCompatMode()) {
-            mGlobalScale = mToken.getSizeCompatScale();
+            if (mOverrideScale != 1f) {
+                mGlobalScale = mToken.hasSizeCompatBounds()
+                        ? mToken.getSizeCompatScale() * mOverrideScale
+                        : mOverrideScale;
+            } else {
+                mGlobalScale = mToken.getSizeCompatScale();
+            }
             mInvGlobalScale = 1 / mGlobalScale;
         } else {
             mGlobalScale = mInvGlobalScale = 1;
@@ -2634,8 +2650,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // scaling but the existing logic doesn't expect that. The result is that the already-
         // scaled region ends up getting sent to surfaceflinger which then applies the scale
         // (again). Until this is resolved, apply an inverse-scale here.
-        if (mActivityRecord != null && mActivityRecord.hasSizeCompatBounds()
-                && mGlobalScale != 1.f) {
+        if (mInvGlobalScale != 1.f) {
             region.scale(mInvGlobalScale);
         }
 
@@ -5254,7 +5269,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
             getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
-        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || isBlurEnabled())
+        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || mAttrs.backgroundBlurRadius != 0)
                    && isVisibleNow() && !mHidden) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or background blur is requested
@@ -5263,13 +5278,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 4. The WS is not hidden.
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
-            final int blurRadius = isBlurEnabled() ? mAttrs.backgroundBlurRadius : 0;
-            getDimmer().dimBelow(getSyncTransaction(), this, dimAmount, blurRadius);
+            getDimmer().dimBelow(
+                    getSyncTransaction(), this, mAttrs.dimAmount, mAttrs.backgroundBlurRadius);
         }
-    }
-
-    private boolean isBlurEnabled() {
-        return (mAttrs.flags & FLAG_BLUR_BEHIND) != 0 && mOwnerCanUseBackgroundBlur;
     }
 
     /**

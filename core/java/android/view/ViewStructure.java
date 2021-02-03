@@ -18,6 +18,7 @@ package android.view;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -377,7 +378,8 @@ public abstract class ViewStructure {
      * <p>Should only be set when the node is used for Autofill or Content Capture purposes - it
      * will be ignored when used for Assist.
      */
-    public void setOnReceiveContentMimeTypes(@Nullable String[] mimeTypes) {}
+    public void setOnReceiveContentMimeTypes(
+            @SuppressLint("NullableCollection") @Nullable String[] mimeTypes) {}
 
     /**
      * Sets the {@link android.text.InputType} bits of this node.

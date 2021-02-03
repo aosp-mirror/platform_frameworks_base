@@ -194,7 +194,7 @@ void GLFunctorDrawable::onDraw(SkCanvas* canvas) {
         canvas->concat(invertedMatrix);
 
         const SkIRect deviceBounds = canvas->getDeviceClipBounds();
-        tmpSurface->draw(canvas, deviceBounds.fLeft, deviceBounds.fTop, nullptr);
+        tmpSurface->draw(canvas, deviceBounds.fLeft, deviceBounds.fTop);
     }
 }
 

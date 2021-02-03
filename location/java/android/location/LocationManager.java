@@ -2233,6 +2233,7 @@ public class LocationManager {
      * @see #getGnssCapabilities()
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public List<GnssAntennaInfo> getGnssAntennaInfos() {
         try {
             return mService.getGnssAntennaInfos();

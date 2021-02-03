@@ -18,13 +18,13 @@
 <resources>
 
     <!-- Size of layout margin left -->
-    <dimen name="switchbar_margin_start">26dp</dimen>
+    <dimen name="switchbar_margin_start">22dp</dimen>
 
     <!-- Size of layout margin right -->
-    <dimen name="switchbar_margin_end">24dp</dimen>
+    <dimen name="switchbar_margin_end">16dp</dimen>
 
     <!-- Minimum width of switch -->
-    <dimen name="min_switch_width">48dp</dimen>
+    <dimen name="min_switch_width">52dp</dimen>
 
     <!-- Minimum width of switch bar -->
     <dimen name="min_switch_bar_height">72dp</dimen>

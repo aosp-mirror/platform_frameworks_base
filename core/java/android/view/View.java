@@ -41,6 +41,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.StyleRes;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
@@ -9030,7 +9031,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                  not be null or empty if a non-null listener is passed in.
      * @param listener The listener to use. This can be null to reset to the default behavior.
      */
-    public void setOnReceiveContentListener(@Nullable String[] mimeTypes,
+    public void setOnReceiveContentListener(
+            @SuppressLint("NullableCollection") @Nullable String[] mimeTypes,
             @Nullable OnReceiveContentListener listener) {
         if (listener != null) {
             Preconditions.checkArgument(mimeTypes != null && mimeTypes.length > 0,
@@ -9106,6 +9108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The MIME types accepted by {@link #performReceiveContent} for this view (may
      * include patterns such as "image/*").
      */
+    @SuppressLint("NullableCollection")
     @Nullable
     public String[] getOnReceiveContentMimeTypes() {
         return mOnReceiveContentMimeTypes;
@@ -9803,20 +9806,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void notifyAttachForDrawables() {
-        if (mBackground != null) mBackground.onAttached(this);
-        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
-            mForegroundInfo.mDrawable.onAttached(this);
-        }
-    }
-
-    private void notifyDetachForDrawables() {
-        if (mBackground != null) mBackground.onDetached(this);
-        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
-            mForegroundInfo.mDrawable.onDetached(this);
-        }
-    }
-
     private void setNotifiedContentCaptureAppeared() {
         mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
         mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
@@ -10364,6 +10353,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                         for (int i = 0; i < childDrawIndex; i++) {
                             drawingOrderInParent += numViewsForAccessibility(preorderedList.get(i));
                         }
+                        preorderedList.clear();
                     } else {
                         final int childIndex = parentGroup.indexOfChild(viewAtDrawingLevel);
                         final boolean customOrder = parentGroup.isChildrenDrawingOrderEnabled();
@@ -20668,7 +20658,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         notifyEnterOrExitForAutoFillIfNeeded(true);
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(true);
-        notifyAttachForDrawables();
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -20718,7 +20707,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         notifyEnterOrExitForAutoFillIfNeeded(false);
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(false);
-        notifyDetachForDrawables();
     }
 
     /**
@@ -21366,6 +21354,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int width = mRight - mLeft;
             int height = mBottom - mTop;
             int layerType = getLayerType();
+
+            // Hacky hack: Reset any stretch effects as those are applied during the draw pass
+            // instead of being "stateful" like other RenderNode properties
+            renderNode.clearStretch();
 
             final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
@@ -22793,6 +22785,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
+
+        // Hacky hack: Reset any stretch effects as those are applied during the draw pass
+        // instead of being "stateful" like other RenderNode properties
+        renderNode.clearStretch();
+
         final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
         // Reverse left/top translation done by drawable canvas, which will
@@ -23847,7 +23844,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackground != null) {
             if (isAttachedToWindow()) {
                 mBackground.setVisible(false, false);
-                mBackground.onDetached(this);
             }
             mBackground.setCallback(null);
             unscheduleDrawable(mBackground);
@@ -23897,7 +23893,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 background.setState(getDrawableState());
             }
             if (isAttachedToWindow()) {
-                background.onAttached(this);
                 background.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             }
 
@@ -24130,7 +24125,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mForegroundInfo.mDrawable != null) {
             if (isAttachedToWindow()) {
                 mForegroundInfo.mDrawable.setVisible(false, false);
-                mForegroundInfo.mDrawable.onDetached(this);
             }
             mForegroundInfo.mDrawable.setCallback(null);
             unscheduleDrawable(mForegroundInfo.mDrawable);
@@ -24148,7 +24142,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             applyForegroundTint();
             if (isAttachedToWindow()) {
-                foreground.onAttached(this);
                 foreground.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             }
             // Set callback last, since the view may still be initializing.

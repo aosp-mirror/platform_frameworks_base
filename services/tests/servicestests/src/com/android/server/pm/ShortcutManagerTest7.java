@@ -18,6 +18,7 @@ package com.android.server.pm;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.array;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertContains;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertExpectException;
+import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertHaveIds;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertSuccess;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.assertWith;
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.list;
@@ -25,6 +26,8 @@ import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils
 import static com.android.server.pm.shortcutmanagertest.ShortcutManagerTestUtils.resultContains;
 
 import android.content.ComponentName;
+import android.content.pm.LauncherApps;
+import android.content.pm.ShortcutManager;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
@@ -47,6 +50,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @SmallTest
 public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
+
+    private static final int CACHE_OWNER = LauncherApps.FLAG_CACHE_NOTIFICATION_SHORTCUTS;
+
     private List<String> callShellCommand(String... args) throws IOException, RemoteException {
 
         // For reset to work, the current time needs to be incrementing.
@@ -321,6 +327,72 @@ public class ShortcutManagerTest7 extends BaseShortcutManagerTest {
                     .areAllEnabled()
                     .areAllNotPinned();
         });
+    }
+
+    public void testGetShortcuts() throws Exception {
+
+        mRunningUsers.put(USER_10, true);
+
+        // Add two manifests and two dynamics.
+        addManifestShortcutResource(
+                new ComponentName(CALLING_PACKAGE_1, ShortcutActivity.class.getName()),
+                R.xml.shortcut_2);
+        updatePackageVersion(CALLING_PACKAGE_1, 1);
+        mService.mPackageMonitor.onReceive(getTestContext(),
+                genPackageAddIntent(CALLING_PACKAGE_1, USER_10));
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertTrue(mManager.addDynamicShortcuts(list(
+                    makeLongLivedShortcut("s1"), makeShortcut("s2"))));
+        });
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mInjectCheckAccessShortcutsPermission = true;
+            mLauncherApps.cacheShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_10,
+                    CACHE_OWNER);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("ms2", "s2"), HANDLE_USER_10);
+        });
+
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+            assertWith(getCallerShortcuts())
+                    .haveIds("ms1", "ms2", "s1", "s2")
+                    .areAllEnabled()
+
+                    .selectPinned()
+                    .haveIds("ms2", "s2");
+        });
+
+
+        mRunningUsers.put(USER_10, true);
+        mUnlockedUsers.put(USER_10, true);
+
+        mInjectedCallingUid = Process.SHELL_UID;
+
+        assertHaveIds(callShellCommand("get-shortcuts", "--user", "10", "--flags",
+                Integer.toString(ShortcutManager.FLAG_MATCH_CACHED), CALLING_PACKAGE_1),
+                "s1");
+
+        assertHaveIds(callShellCommand("get-shortcuts", "--user", "10", "--flags",
+                Integer.toString(ShortcutManager.FLAG_MATCH_DYNAMIC), CALLING_PACKAGE_1),
+                "s1", "s2");
+
+        assertHaveIds(callShellCommand("get-shortcuts", "--user", "10", "--flags",
+                Integer.toString(ShortcutManager.FLAG_MATCH_MANIFEST), CALLING_PACKAGE_1),
+                "ms1", "ms2");
+
+        assertHaveIds(callShellCommand("get-shortcuts", "--user", "10", "--flags",
+                Integer.toString(ShortcutManager.FLAG_MATCH_PINNED), CALLING_PACKAGE_1),
+                "ms2", "s2");
+
+        assertHaveIds(callShellCommand("get-shortcuts", "--user", "10", "--flags",
+                Integer.toString(ShortcutManager.FLAG_MATCH_DYNAMIC
+                        | ShortcutManager.FLAG_MATCH_PINNED), CALLING_PACKAGE_1),
+                "ms2", "s1", "s2");
+
+        assertHaveIds(callShellCommand("get-shortcuts", "--user", "10", "--flags",
+                Integer.toString(ShortcutManager.FLAG_MATCH_MANIFEST
+                        | ShortcutManager.FLAG_MATCH_CACHED), CALLING_PACKAGE_1),
+                "ms1", "ms2", "s1");
+
     }
 
     public void testDumpsysArgs() {

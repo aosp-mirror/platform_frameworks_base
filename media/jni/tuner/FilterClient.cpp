@@ -23,15 +23,19 @@
 #include "FilterClient.h"
 
 using ::aidl::android::media::tv::tuner::TunerFilterAvSettings;
+using ::aidl::android::media::tv::tuner::TunerFilterMonitorEvent;
+using ::aidl::android::media::tv::tuner::TunerFilterScIndexMask;
 using ::aidl::android::media::tv::tuner::TunerFilterSharedHandleInfo;
 using ::aidl::android::media::tv::tuner::TunerFilterTsConfiguration;
 
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxTpid;
 using ::android::hardware::tv::tuner::V1_0::DemuxStreamId;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterType;
+using ::android::hardware::tv::tuner::V1_1::ScramblingStatus;
 
 namespace android {
 
@@ -294,6 +298,10 @@ Status TunerFilterCallback::onFilterEvent(const vector<TunerFilterEvent>& filter
         return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_STATE));
     }
 
+    if (filterEvents.size() == 0) {
+        return Status::fromServiceSpecificError(static_cast<int32_t>(Result::INVALID_ARGUMENT));
+    }
+
     DemuxFilterEvent event;
     DemuxFilterEventExt eventExt;
     getHidlFilterEvent(filterEvents, event, eventExt);
@@ -348,42 +356,256 @@ TunerFilterConfiguration FilterClient::getAidlFilterSettings(DemuxFilterSettings
 
 
 void TunerFilterCallback::getHidlFilterEvent(const vector<TunerFilterEvent>& filterEvents,
-        DemuxFilterEvent& event, DemuxFilterEventExt& /*eventExt*/) {
-    // TODO: finish handling extended evets and other filter event types
+        DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
     switch (filterEvents[0].getTag()) {
         case  TunerFilterEvent::media: {
-            for (int i = 0; i < filterEvents.size(); i++) {
-                hidl_handle handle = hidl_handle(
-                        makeFromAidl(filterEvents[i].get<TunerFilterEvent::media>().avMemory));
-                int size = event.events.size();
-                event.events.resize(size + 1);
-                event.events[size].media({
-                    .avMemory = handle,
-                    .streamId = static_cast<DemuxStreamId>(
-                            filterEvents[i].get<TunerFilterEvent::media>().streamId),
-                    .isPtsPresent =
-                            filterEvents[i].get<TunerFilterEvent::media>().isPtsPresent,
-                    .pts = static_cast<uint64_t>(
-                            filterEvents[i].get<TunerFilterEvent::media>().pts),
-                    .dataLength = static_cast<uint32_t>(
-                            filterEvents[i].get<TunerFilterEvent::media>().dataLength),
-                    .offset = static_cast<uint32_t>(
-                            filterEvents[i].get<TunerFilterEvent::media>().offset),
-                    .isSecureMemory =
-                            filterEvents[i].get<TunerFilterEvent::media>().isSecureMemory,
-                    .avDataId = static_cast<uint64_t>(
-                            filterEvents[i].get<TunerFilterEvent::media>().avDataId),
-                    .mpuSequenceNumber = static_cast<uint32_t>(
-                            filterEvents[i].get<TunerFilterEvent::media>().offset),
-                    .isPesPrivateData =
-                            filterEvents[i].get<TunerFilterEvent::media>().isPesPrivateData,
-                });
-            }
+            getHidlMediaEvent(filterEvents, event);
+            break;
+        }
+        case  TunerFilterEvent::section: {
+            getHidlSectionEvent(filterEvents, event);
+            break;
+        }
+        case  TunerFilterEvent::pes: {
+            getHidlPesEvent(filterEvents, event);
+            break;
+        }
+        case  TunerFilterEvent::tsRecord: {
+            getHidlTsRecordEvent(filterEvents, event, eventExt);
+            break;
+        }
+        case  TunerFilterEvent::mmtpRecord: {
+            getHidlMmtpRecordEvent(filterEvents, event, eventExt);
+            break;
+        }
+        case  TunerFilterEvent::download: {
+            getHidlDownloadEvent(filterEvents, event);
+            break;
+        }
+        case  TunerFilterEvent::ipPayload: {
+            getHidlIpPayloadEvent(filterEvents, event);
+            break;
+        }
+        case  TunerFilterEvent::temi: {
+            getHidlTemiEvent(filterEvents, event);
+            break;
+        }
+        case  TunerFilterEvent::monitor: {
+            getHidlMonitorEvent(filterEvents, eventExt);
+            break;
+        }
+        case  TunerFilterEvent::startId: {
+            getHidlRestartEvent(filterEvents, eventExt);
             break;
         }
         default:
             break;
     }
+}
+
+void TunerFilterCallback::getHidlMediaEvent(
+        const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        hidl_handle handle = hidl_handle(makeFromAidl(filterEvents[i]
+                .get<TunerFilterEvent::media>().avMemory));
+        event.events.resize(i + 1);
+        event.events[i].media({
+            .avMemory = handle,
+            .streamId = static_cast<DemuxStreamId>(filterEvents[i]
+                    .get<TunerFilterEvent::media>().streamId),
+            .isPtsPresent = filterEvents[i]
+                    .get<TunerFilterEvent::media>().isPtsPresent,
+            .pts = static_cast<uint64_t>(filterEvents[i]
+                    .get<TunerFilterEvent::media>().pts),
+            .dataLength = static_cast<uint32_t>(filterEvents[i]
+                    .get<TunerFilterEvent::media>().dataLength),
+            .offset = static_cast<uint32_t>(filterEvents[i]
+                    .get<TunerFilterEvent::media>().offset),
+            .isSecureMemory = filterEvents[i]
+                    .get<TunerFilterEvent::media>().isSecureMemory,
+            .avDataId = static_cast<uint64_t>(filterEvents[i]
+                    .get<TunerFilterEvent::media>().avDataId),
+            .mpuSequenceNumber = static_cast<uint32_t>(filterEvents[i]
+                    .get<TunerFilterEvent::media>().offset),
+            .isPesPrivateData = filterEvents[i]
+                    .get<TunerFilterEvent::media>().isPesPrivateData,
+        });
+
+        if (filterEvents[i].get<TunerFilterEvent::media>().isAudioExtraMetaData) {
+            event.events[i].media().extraMetaData.audio({
+                .adFade = static_cast<uint8_t>(filterEvents[i]
+                        .get<TunerFilterEvent::media>().audio.adFade),
+                .adPan = static_cast<uint8_t>(filterEvents[i]
+                        .get<TunerFilterEvent::media>().audio.adPan),
+                .versionTextTag = static_cast<uint8_t>(filterEvents[i]
+                        .get<TunerFilterEvent::media>().audio.versionTextTag),
+                .adGainCenter = static_cast<uint8_t>(filterEvents[i]
+                        .get<TunerFilterEvent::media>().audio.adGainCenter),
+                .adGainFront = static_cast<uint8_t>(filterEvents[i]
+                        .get<TunerFilterEvent::media>().audio.adGainFront),
+                .adGainSurround = static_cast<uint8_t>(filterEvents[i]
+                        .get<TunerFilterEvent::media>().audio.adGainSurround),
+            });
+        } else {
+            event.events[i].media().extraMetaData.noinit();
+        }
+    }
+}
+
+void TunerFilterCallback::getHidlSectionEvent(
+        const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto section = filterEvents[i].get<TunerFilterEvent::section>();
+        event.events.resize(i + 1);
+        event.events[i].section({
+            .tableId = static_cast<uint16_t>(section.tableId),
+            .version = static_cast<uint16_t>(section.version),
+            .sectionNum = static_cast<uint16_t>(section.sectionNum),
+            .dataLength = static_cast<uint16_t>(section.dataLength),
+        });
+    }
+}
+
+void TunerFilterCallback::getHidlPesEvent(
+        const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto pes = filterEvents[i].get<TunerFilterEvent::pes>();
+        event.events.resize(i + 1);
+        event.events[i].pes({
+            .streamId = static_cast<DemuxStreamId>(pes.streamId),
+            .dataLength = static_cast<uint16_t>(pes.dataLength),
+            .mpuSequenceNumber = static_cast<uint32_t>(pes.mpuSequenceNumber),
+        });
+    }
+}
+
+void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto ts = filterEvents[i].get<TunerFilterEvent::tsRecord>();
+        event.events.resize(i + 1);
+        event.events[i].tsRecord({
+            .tsIndexMask = static_cast<uint32_t>(ts.tsIndexMask),
+            .byteNumber = static_cast<uint64_t>(ts.byteNumber),
+        });
+        event.events[i].tsRecord().pid.tPid(static_cast<DemuxTpid>(ts.pid));
+
+        switch (ts.scIndexMask.getTag()) {
+            case TunerFilterScIndexMask::sc: {
+                event.events[i].tsRecord().scIndexMask.sc(
+                        ts.scIndexMask.get<TunerFilterScIndexMask::sc>());
+                break;
+            }
+            case TunerFilterScIndexMask::scHevc: {
+                event.events[i].tsRecord().scIndexMask.scHevc(
+                        ts.scIndexMask.get<TunerFilterScIndexMask::scHevc>());
+                break;
+            }
+            default:
+                break;
+        }
+
+        eventExt.events.resize(i + 1);
+        if (ts.isExtended) {
+            eventExt.events[i].tsRecord({
+                .pts = static_cast<uint64_t>(ts.pts),
+                .firstMbInSlice = static_cast<uint32_t>(ts.firstMbInSlice),
+            });
+        } else {
+            eventExt.events[i].noinit();
+        }
+    }
+}
+
+void TunerFilterCallback::getHidlMmtpRecordEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto mmtp = filterEvents[i].get<TunerFilterEvent::mmtpRecord>();
+        event.events.resize(i + 1);
+        event.events[i].mmtpRecord({
+            .scHevcIndexMask = static_cast<uint32_t>(mmtp.scHevcIndexMask),
+            .byteNumber = static_cast<uint64_t>(mmtp.byteNumber),
+        });
+
+        eventExt.events.resize(i + 1);
+        if (mmtp.isExtended) {
+            eventExt.events[i].mmtpRecord({
+                .pts = static_cast<uint64_t>(mmtp.pts),
+                .mpuSequenceNumber = static_cast<uint32_t>(mmtp.mpuSequenceNumber),
+                .firstMbInSlice = static_cast<uint32_t>(mmtp.firstMbInSlice),
+                .tsIndexMask = static_cast<uint32_t>(mmtp.tsIndexMask),
+            });
+        } else {
+            eventExt.events[i].noinit();
+        }
+    }
+}
+
+void TunerFilterCallback::getHidlDownloadEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEvent& event) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto download = filterEvents[i].get<TunerFilterEvent::download>();
+        event.events.resize(i + 1);
+        event.events[i].download({
+            .itemId = static_cast<uint32_t>(download.itemId),
+            .mpuSequenceNumber = static_cast<uint32_t>(download.mpuSequenceNumber),
+            .itemFragmentIndex = static_cast<uint32_t>(download.itemFragmentIndex),
+            .lastItemFragmentIndex = static_cast<uint32_t>(download.lastItemFragmentIndex),
+            .dataLength = static_cast<uint16_t>(download.dataLength),
+        });
+    }
+}
+
+void TunerFilterCallback::getHidlIpPayloadEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEvent& event) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto ip = filterEvents[i].get<TunerFilterEvent::ipPayload>();
+        event.events.resize(i + 1);
+        event.events[i].ipPayload({
+            .dataLength = static_cast<uint16_t>(ip.dataLength),
+        });
+    }
+}
+
+void TunerFilterCallback::getHidlTemiEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEvent& event) {
+    for (int i = 0; i < filterEvents.size(); i++) {
+        auto temi = filterEvents[i].get<TunerFilterEvent::temi>();
+        event.events.resize(i + 1);
+        event.events[i].temi({
+            .pts = static_cast<uint64_t>(temi.pts),
+            .descrTag = static_cast<uint8_t>(temi.descrTag),
+        });
+        vector<uint8_t> descrData(temi.descrData.size());
+        copy(temi.descrData.begin(), temi.descrData.end(), descrData.begin());
+    }
+}
+
+void TunerFilterCallback::getHidlMonitorEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEventExt& eventExt) {
+    auto monitor = filterEvents[0].get<TunerFilterEvent::monitor>();
+    eventExt.events.resize(1);
+    switch (monitor.getTag()) {
+        case TunerFilterMonitorEvent::scramblingStatus: {
+            eventExt.events[0].monitorEvent().scramblingStatus(
+                    static_cast<ScramblingStatus>(monitor.scramblingStatus));
+            break;
+        }
+        case TunerFilterMonitorEvent::cid: {
+            eventExt.events[0].monitorEvent().cid(static_cast<uint32_t>(monitor.cid));
+            break;
+        }
+        default:
+            eventExt.events[0].noinit();
+            break;
+    }
+}
+
+void TunerFilterCallback::getHidlRestartEvent(const vector<TunerFilterEvent>& filterEvents,
+        DemuxFilterEventExt& eventExt) {
+    uint32_t startId = filterEvents[0].get<TunerFilterEvent::startId>();
+    eventExt.events.resize(1);
+    eventExt.events[0].startId(static_cast<uint32_t>(startId));
 }
 
 Result FilterClient::getFilterMq() {
