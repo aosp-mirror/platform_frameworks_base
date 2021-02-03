@@ -3252,7 +3252,10 @@ public final class SurfaceControl implements Parcelable {
          *                         interruptions, such as a black screen for a second or two. True
          *                         indicates that any frame rate changes caused by this request
          *                         should be seamless. False indicates that non-seamless refresh
-         *                         rates are also acceptable.
+         *                         rates are also acceptable. Non-seamless switches might be
+         *                         used when the benefit of matching the content's frame rate
+         *                         outweighs the cost of the transition, for example when
+         *                         displaying long-running video content.
          * @return This transaction object.
          */
         @NonNull
