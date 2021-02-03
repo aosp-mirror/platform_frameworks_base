@@ -18,14 +18,14 @@ package com.android.wm.shell.flicker
 
 import android.graphics.Region
 import android.view.Surface
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilderLegacy
 import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.server.wm.flicker.DOCKED_STACK_DIVIDER
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
 
 @JvmOverloads
-fun LayersAssertionBuilder.appPairsDividerIsVisible(
+fun LayersAssertionBuilderLegacy.appPairsDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -35,7 +35,7 @@ fun LayersAssertionBuilder.appPairsDividerIsVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.appPairsDividerIsInvisible(
+fun LayersAssertionBuilderLegacy.appPairsDividerIsInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -45,7 +45,7 @@ fun LayersAssertionBuilder.appPairsDividerIsInvisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.appPairsDividerBecomesVisible(
+fun LayersAssertionBuilderLegacy.appPairsDividerBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -57,7 +57,7 @@ fun LayersAssertionBuilder.appPairsDividerBecomesVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerIsVisible(
+fun LayersAssertionBuilderLegacy.dockedStackDividerIsVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -67,7 +67,7 @@ fun LayersAssertionBuilder.dockedStackDividerIsVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerBecomesVisible(
+fun LayersAssertionBuilderLegacy.dockedStackDividerBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -79,7 +79,7 @@ fun LayersAssertionBuilder.dockedStackDividerBecomesVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerBecomesInvisible(
+fun LayersAssertionBuilderLegacy.dockedStackDividerBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -91,7 +91,7 @@ fun LayersAssertionBuilder.dockedStackDividerBecomesInvisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.dockedStackDividerIsInvisible(
+fun LayersAssertionBuilderLegacy.dockedStackDividerIsInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -101,7 +101,7 @@ fun LayersAssertionBuilder.dockedStackDividerIsInvisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.appPairsPrimaryBoundsIsVisible(
+fun LayersAssertionBuilderLegacy.appPairsPrimaryBoundsIsVisible(
     rotation: Int,
     primaryLayerName: String,
     bugId: Int = 0,
@@ -114,7 +114,7 @@ fun LayersAssertionBuilder.appPairsPrimaryBoundsIsVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.appPairsSecondaryBoundsIsVisible(
+fun LayersAssertionBuilderLegacy.appPairsSecondaryBoundsIsVisible(
     rotation: Int,
     secondaryLayerName: String,
     bugId: Int = 0,
@@ -127,7 +127,7 @@ fun LayersAssertionBuilder.appPairsSecondaryBoundsIsVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.dockedStackPrimaryBoundsIsVisible(
+fun LayersAssertionBuilderLegacy.dockedStackPrimaryBoundsIsVisible(
     rotation: Int,
     primaryLayerName: String,
     bugId: Int = 0,
@@ -140,7 +140,7 @@ fun LayersAssertionBuilder.dockedStackPrimaryBoundsIsVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.dockedStackSecondaryBoundsIsVisible(
+fun LayersAssertionBuilderLegacy.dockedStackSecondaryBoundsIsVisible(
     rotation: Int,
     secondaryLayerName: String,
     bugId: Int = 0,

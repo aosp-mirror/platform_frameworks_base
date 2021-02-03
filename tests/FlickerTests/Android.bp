@@ -18,28 +18,7 @@ android_test {
     name: "FlickerTests",
     srcs: ["src/**/*.java", "src/**/*.kt"],
     manifest: "AndroidManifest.xml",
-    test_config: "AndroidTestPhysicalDevices.xml",
-    platform_apis: true,
-    certificate: "platform",
-    test_suites: ["device-tests"],
-    libs: ["android.test.runner"],
-    static_libs: [
-        "androidx.test.ext.junit",
-        "flickertestapplib",
-        "flickerlib",
-        "truth-prebuilt",
-        "launcher-helper-lib",
-        "launcher-aosp-tapl",
-        "platform-test-annotations",
-    ],
-}
-
-
-android_test {
-    name: "FlickerTestsVirtual",
-    srcs: ["src/**/*.java", "src/**/*.kt"],
-    manifest: "AndroidManifest.xml",
-    test_config: "AndroidTestVirtualDevices.xml",
+    test_config: "AndroidTest.xml",
     platform_apis: true,
     certificate: "platform",
     test_suites: ["device-tests"],
