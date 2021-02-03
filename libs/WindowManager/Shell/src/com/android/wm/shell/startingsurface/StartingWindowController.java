@@ -123,7 +123,8 @@ public class StartingWindowController {
                         + " allowTaskSnapshot " + allowTaskSnapshot
                         + " activityCreated " + activityCreated);
             }
-            if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+            if ((newTask || !processRunning || (taskSwitch && !activityCreated))
+                    && windowInfo.taskInfo.topActivityType != ACTIVITY_TYPE_HOME) {
                 return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
             }
             if (taskSwitch && allowTaskSnapshot) {

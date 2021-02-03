@@ -36,6 +36,7 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -50,6 +51,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+import static com.android.server.wm.StartingSurfaceController.DEBUG_ENABLE_SHELL_DRAWER;
 import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
 
@@ -75,6 +77,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IDisplayWindowInsetsController;
@@ -101,6 +104,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.HashMap;
 
 /** Common base class for window manager unit test classes. */
 class WindowTestsBase extends SystemServiceTestsBase {
@@ -1121,6 +1125,88 @@ class WindowTestsBase extends SystemServiceTestsBase {
             }
 
             return task;
+        }
+    }
+
+    static class TestStartingWindowOrganizer extends ITaskOrganizer.Stub {
+        private final ActivityTaskManagerService mAtm;
+        private final WindowManagerService mWMService;
+        private final WindowState.PowerManagerWrapper mPowerManagerWrapper;
+
+        private Runnable mRunnableWhenAddingSplashScreen;
+        private final SparseArray<IBinder> mTaskAppMap = new SparseArray<>();
+        private final HashMap<IBinder, WindowState> mAppWindowMap = new HashMap<>();
+
+        TestStartingWindowOrganizer(ActivityTaskManagerService service,
+                WindowState.PowerManagerWrapper powerManagerWrapper) {
+            mAtm = service;
+            mWMService = mAtm.mWindowManager;
+            mPowerManagerWrapper = powerManagerWrapper;
+            if (DEBUG_ENABLE_SHELL_DRAWER) {
+                mAtm.mTaskOrganizerController.setDeferTaskOrgCallbacksConsumer(Runnable::run);
+                mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
+            }
+        }
+
+        void setRunnableWhenAddingSplashScreen(Runnable r) {
+            if (DEBUG_ENABLE_SHELL_DRAWER) {
+                mRunnableWhenAddingSplashScreen = r;
+            } else {
+                ((TestWindowManagerPolicy) mWMService.mPolicy).setRunnableWhenAddingSplashScreen(r);
+            }
+        }
+
+        @Override
+        public void addStartingWindow(StartingWindowInfo info, IBinder appToken) {
+            synchronized (mWMService.mGlobalLock) {
+                final ActivityRecord activity = mWMService.mRoot.getActivityRecord(
+                        appToken);
+                IWindow iWindow = mock(IWindow.class);
+                doReturn(mock(IBinder.class)).when(iWindow).asBinder();
+                final WindowState window = WindowTestsBase.createWindow(null,
+                        TYPE_APPLICATION_STARTING, activity,
+                        "Starting window", 0 /* ownerId */, 0 /* userId*/,
+                        false /* internalWindows */, mWMService, mock(Session.class),
+                        iWindow,
+                        mPowerManagerWrapper);
+                activity.mStartingWindow = window;
+                mAppWindowMap.put(appToken, window);
+                mTaskAppMap.put(info.taskInfo.taskId, appToken);
+            }
+            if (mRunnableWhenAddingSplashScreen != null) {
+                mRunnableWhenAddingSplashScreen.run();
+                mRunnableWhenAddingSplashScreen = null;
+            }
+        }
+        @Override
+        public void removeStartingWindow(int taskId, SurfaceControl leash, Rect frame,
+                boolean playRevealAnimation) {
+            synchronized (mWMService.mGlobalLock) {
+                final IBinder appToken = mTaskAppMap.get(taskId);
+                if (appToken != null) {
+                    mTaskAppMap.remove(taskId);
+                    final ActivityRecord activity = mWMService.mRoot.getActivityRecord(
+                            appToken);
+                    WindowState win = mAppWindowMap.remove(appToken);
+                    activity.removeChild(win);
+                    activity.mStartingWindow = null;
+                }
+            }
+        }
+        @Override
+        public void copySplashScreenView(int taskId) {
+        }
+        @Override
+        public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
+        }
+        @Override
+        public void onTaskVanished(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
+        public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
+        }
+        @Override
+        public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         }
     }
 

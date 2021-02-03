@@ -2128,7 +2128,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated,
             TaskSnapshot snapshot) {
-        if (newTask || !processRunning || (taskSwitch && !activityCreated)) {
+        if ((newTask || !processRunning || (taskSwitch && !activityCreated))
+                && !isActivityTypeHome()) {
             return STARTING_WINDOW_TYPE_SPLASH_SCREEN;
         } else if (taskSwitch && allowTaskSnapshot) {
             if (isSnapshotCompatible(snapshot)) {

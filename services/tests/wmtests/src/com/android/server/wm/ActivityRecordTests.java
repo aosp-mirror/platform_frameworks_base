@@ -159,6 +159,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         setBooted(mAtm);
     }
 
+    private TestStartingWindowOrganizer registerTestStartingWindowOrganizer() {
+        return new TestStartingWindowOrganizer(mAtm,
+                mSystemServicesTestRule.getPowerManagerWrapper());
+    }
+
     @Test
     public void testStackCleanupOnClearingTask() {
         final ActivityRecord activity = createActivityWith2LevelTask();
@@ -2294,6 +2299,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testCreateRemoveStartingWindow() {
+        registerTestStartingWindowOrganizer();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
@@ -2307,6 +2313,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testAddRemoveRace() {
+        registerTestStartingWindowOrganizer();
         // There was once a race condition between adding and removing starting windows
         final ActivityRecord appToken = new ActivityBuilder(mAtm).setCreateTask(true).build();
         for (int i = 0; i < 1000; i++) {
@@ -2321,6 +2328,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindow() {
+        registerTestStartingWindowOrganizer();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity1.addStartingWindow(mPackageName,
@@ -2337,9 +2345,10 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindowWhileCreating() {
+        final TestStartingWindowOrganizer organizer = registerTestStartingWindowOrganizer();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
-        ((TestWindowManagerPolicy) activity1.mWmService.mPolicy).setRunnableWhenAddingSplashScreen(
+        organizer.setRunnableWhenAddingSplashScreen(
                 () -> {
                     // Surprise, ...! Transfer window in the middle of the creation flow.
                     activity2.addStartingWindow(mPackageName,
@@ -2357,6 +2366,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindowCanAnimate() {
+        registerTestStartingWindowOrganizer();
         final ActivityRecord activity1 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord activity2 = new ActivityBuilder(mAtm).setCreateTask(true).build();
         activity1.addStartingWindow(mPackageName,
@@ -2380,6 +2390,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindowFromFinishingActivity() {
+        registerTestStartingWindowOrganizer();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Task task = activity.getTask();
         activity.addStartingWindow(mPackageName, android.R.style.Theme, null /* compatInfo */,
@@ -2423,6 +2434,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testTransferStartingWindowSetFixedRotation() {
+        registerTestStartingWindowOrganizer();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Task task = activity.getTask();
         final ActivityRecord topActivity = new ActivityBuilder(mAtm).setTask(task).build();
@@ -2454,6 +2466,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testTryTransferStartingWindowFromHiddenAboveToken() {
+        registerTestStartingWindowOrganizer();
         // Add two tasks on top of each other.
         final ActivityRecord activityTop = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final ActivityRecord activityBottom = new ActivityBuilder(mAtm).build();

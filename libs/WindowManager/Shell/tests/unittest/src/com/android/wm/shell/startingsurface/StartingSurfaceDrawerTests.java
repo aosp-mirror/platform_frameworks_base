@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package unittest.src.com.android.wm.shell.startingsurface;
+package com.android.wm.shell.startingsurface;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
@@ -51,7 +51,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import com.android.wm.shell.common.HandlerExecutor;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.TransactionPool;
-import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import org.junit.Before;
 import org.junit.Test;

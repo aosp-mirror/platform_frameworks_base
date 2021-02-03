@@ -217,7 +217,7 @@ public class StartingSurfaceDrawer {
         // the keyguard is being hidden. This is okay because starting windows never show
         // secret information.
         // TODO(b/113840485): Occluded may not only happen on default display
-        if (displayId == DEFAULT_DISPLAY) {
+        if (displayId == DEFAULT_DISPLAY && windowInfo.isKeyguardOccluded) {
             windowFlags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
         }
 
@@ -342,12 +342,6 @@ public class StartingSurfaceDrawer {
             // ignore
             Slog.w(TAG, appToken + " already running, starting window not displayed. "
                     + e.getMessage());
-            shouldSaveView = false;
-        } catch (RuntimeException e) {
-            // don't crash if something else bad happens, for example a
-            // failure loading resources because we are loading from an app
-            // on external storage that has been unmounted.
-            Slog.w(TAG, appToken + " failed creating starting window", e);
             shouldSaveView = false;
         } finally {
             if (view != null && view.getParent() == null) {

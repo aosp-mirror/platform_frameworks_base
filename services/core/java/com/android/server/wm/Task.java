@@ -4135,6 +4135,8 @@ class Task extends WindowContainer<WindowContainer> {
         final StartingWindowInfo info = new StartingWindowInfo();
         info.taskInfo = getTaskInfo();
 
+        info.isKeyguardOccluded =
+            mAtmService.mKeyguardController.isDisplayOccluded(DEFAULT_DISPLAY);
         final ActivityRecord topActivity = getTopMostActivity();
         if (topActivity != null) {
             info.startingWindowTypeParameter =
