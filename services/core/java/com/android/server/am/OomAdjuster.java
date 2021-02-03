@@ -51,6 +51,7 @@ import static android.os.Process.setProcessGroup;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
 
+import static com.android.server.am.ActiveServices.FGS_FEATURE_DENIED;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
@@ -1786,8 +1787,9 @@ public final class OomAdjuster {
                     int clientProcState = client.getCurRawProcState();
 
                     // pass client's mAllowStartFgs to the app if client is not persistent process.
-                    if (client.mAllowStartFgs && client.maxAdj >= ProcessList.FOREGROUND_APP_ADJ) {
-                        app.mAllowStartFgs = true;
+                    if (client.mAllowStartFgs != FGS_FEATURE_DENIED
+                            && client.maxAdj >= ProcessList.FOREGROUND_APP_ADJ) {
+                        app.mAllowStartFgs = client.mAllowStartFgs;
                     }
 
                     if ((cr.flags & Context.BIND_WAIVE_PRIORITY) == 0) {
