@@ -17,14 +17,19 @@
 package com.android.systemui.sensorprivacy
 
 import android.app.AppOpsManager
+import android.app.KeyguardManager
+import android.app.KeyguardManager.KeyguardDismissCallback
 import android.content.DialogInterface
 import android.content.Intent.EXTRA_PACKAGE_NAME
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.hardware.SensorPrivacyManager
-import android.hardware.SensorPrivacyManager.*
+import android.hardware.SensorPrivacyManager.EXTRA_SENSOR
+import android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_CAMERA
+import android.hardware.SensorPrivacyManager.INDIVIDUAL_SENSOR_MICROPHONE
 import android.os.Bundle
 import android.text.Html
+import android.util.Log
 import com.android.internal.app.AlertActivity
 import com.android.systemui.R
 
@@ -35,18 +40,29 @@ import com.android.systemui.R
  * <p>The dialog is started for the user the app is running for which might be a secondary users.
  */
 class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListener {
+
+    companion object {
+        private val LOG_TAG = SensorUseStartedActivity::class.java.simpleName
+    }
+
     private var sensor = -1
     private lateinit var sensorUsePackageName: String
 
     private lateinit var sensorPrivacyManager: SensorPrivacyManager
     private lateinit var appOpsManager: AppOpsManager
+    private lateinit var keyguardManager: KeyguardManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setShowWhenLocked(true)
+
+        setFinishOnTouchOutside(false)
+
         setResult(RESULT_CANCELED)
         sensorPrivacyManager = getSystemService(SensorPrivacyManager::class.java)!!
         appOpsManager = getSystemService(AppOpsManager::class.java)!!
+        keyguardManager = getSystemService(KeyguardManager::class.java)!!
 
         sensorUsePackageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: return
         sensor = intent.getIntExtra(EXTRA_SENSOR, -1).also {
@@ -107,8 +123,23 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
     override fun onClick(dialog: DialogInterface?, which: Int) {
         when (which) {
             BUTTON_POSITIVE -> {
-                sensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(sensor, false)
-                setResult(RESULT_OK)
+                if (keyguardManager.isDeviceLocked) {
+                    keyguardManager
+                            .requestDismissKeyguard(this, object : KeyguardDismissCallback() {
+                        override fun onDismissError() {
+                            Log.e(LOG_TAG, "Cannot dismiss keyguard")
+                        }
+
+                        override fun onDismissSucceeded() {
+                            sensorPrivacyManager
+                                    .setIndividualSensorPrivacyForProfileGroup(sensor, false)
+                            setResult(RESULT_OK)
+                        }
+                    })
+                } else {
+                    sensorPrivacyManager.setIndividualSensorPrivacyForProfileGroup(sensor, false)
+                    setResult(RESULT_OK)
+                }
             }
         }
 
@@ -119,5 +150,9 @@ class SensorUseStartedActivity : AlertActivity(), DialogInterface.OnClickListene
         super.onDestroy()
 
         sensorPrivacyManager.suppressIndividualSensorPrivacyReminders(sensorUsePackageName, false)
+    }
+
+    override fun onBackPressed() {
+        // do not allow backing out
     }
 }
