@@ -25,6 +25,7 @@ import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.CHOOSER_PACKAGE_NAME;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_INPUT_MONITOR;
+import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SHELL_PIP;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SUPPORTS_WINDOW_CORNERS;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_SYSUI_PROXY;
 import static com.android.systemui.shared.system.QuickStepContract.KEY_EXTRA_WINDOW_CORNER_RADIUS;
@@ -83,7 +84,6 @@ import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
 import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.recents.IOverviewProxy;
-import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.recents.ISplitScreenListener;
 import com.android.systemui.shared.recents.IStartingWindowListener;
 import com.android.systemui.shared.recents.ISystemUiProxy;
@@ -156,7 +156,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
 
     private Region mActiveNavBarRegion;
 
-    private IPinnedStackAnimationListener mIPinnedStackAnimationListener;
     private IOverviewProxy mOverviewProxy;
     private int mConnectionBackoffAttempts;
     private boolean mBound;
@@ -383,20 +382,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
 
         @Override
-        public void setShelfHeight(boolean visible, int shelfHeight) {
-            if (!verifyCaller("setShelfHeight")) {
-                return;
-            }
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mPipOptional.ifPresent(
-                        pip -> pip.setShelfHeight(visible, shelfHeight));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
         public void handleImageAsScreenshot(Bitmap screenImage, Rect locationInScreen,
                 Insets visibleInsets, int taskId) {
             // Deprecated
@@ -418,21 +403,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mPipOptional.ifPresent(
                         pip -> pip.setPinnedStackAnimationType(
                                 PipAnimationController.ANIM_TYPE_ALPHA));
-            } finally {
-                Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public void setPinnedStackAnimationListener(IPinnedStackAnimationListener listener) {
-            if (!verifyCaller("setPinnedStackAnimationListener")) {
-                return;
-            }
-            mIPinnedStackAnimationListener = listener;
-            final long token = Binder.clearCallingIdentity();
-            try {
-                mPipOptional.ifPresent(
-                        pip -> pip.setPinnedStackAnimationListener(mPinnedStackAnimationCallback));
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -517,38 +487,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
                 mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
             } finally {
                 Binder.restoreCallingIdentity(token);
-            }
-        }
-
-        @Override
-        public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
-                PictureInPictureParams pictureInPictureParams,
-                int launcherRotation, int shelfHeight) {
-            if (!verifyCaller("startSwipePipToHome")) {
-                return null;
-            }
-            final long binderToken = Binder.clearCallingIdentity();
-            try {
-                return mPipOptional.map(pip ->
-                        pip.startSwipePipToHome(componentName, activityInfo,
-                                pictureInPictureParams, launcherRotation, shelfHeight))
-                        .orElse(null);
-            } finally {
-                Binder.restoreCallingIdentity(binderToken);
-            }
-        }
-
-        @Override
-        public void stopSwipePipToHome(ComponentName componentName, Rect destinationBounds) {
-            if (!verifyCaller("stopSwipePipToHome")) {
-                return;
-            }
-            final long binderToken = Binder.clearCallingIdentity();
-            try {
-                mPipOptional.ifPresent(pip -> pip.stopSwipePipToHome(
-                        componentName, destinationBounds));
-            } finally {
-                Binder.restoreCallingIdentity(binderToken);
             }
         }
 
@@ -757,6 +695,10 @@ public class OverviewProxyService extends CurrentUserTracker implements
             params.putBinder(KEY_EXTRA_SYSUI_PROXY, mSysUiProxy.asBinder());
             params.putFloat(KEY_EXTRA_WINDOW_CORNER_RADIUS, mWindowCornerRadius);
             params.putBoolean(KEY_EXTRA_SUPPORTS_WINDOW_CORNERS, mSupportsRoundedCornersOnWindows);
+
+            mPipOptional.ifPresent((pip) -> params.putBinder(KEY_EXTRA_SHELL_PIP,
+                    pip.createExternalInterface().asBinder()));
+
             try {
                 mOverviewProxy.onInitialize(params);
             } catch (RemoteException e) {
@@ -796,8 +738,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final StatusBarWindowCallback mStatusBarWindowCallback = this::onStatusBarStateChanged;
     private final BiConsumer<Rect, Rect> mSplitScreenBoundsChangeListener =
             this::notifySplitScreenBoundsChanged;
-    private final Consumer<Boolean> mPinnedStackAnimationCallback =
-            this::notifyPinnedStackAnimationStarted;
 
     private final BiConsumer<Integer, Integer> mStartingWindowListener =
             this::notifyTaskLaunching;
@@ -958,17 +898,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
             }
         } catch (RemoteException e) {
             Log.e(TAG_OPS, "Failed to notify sysui state change", e);
-        }
-    }
-
-    private void notifyPinnedStackAnimationStarted(Boolean isAnimationStarted) {
-        if (mIPinnedStackAnimationListener == null) {
-            return;
-        }
-        try {
-            mIPinnedStackAnimationListener.onPinnedStackAnimationStarted();
-        } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to call onPinnedStackAnimationStarted()", e);
         }
     }
 
