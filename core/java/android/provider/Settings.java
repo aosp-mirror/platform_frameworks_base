@@ -5931,6 +5931,13 @@ public final class Settings {
         public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
 
         /**
+         * Setting key to indicate whether camera-based autorotate is enabled.
+         *
+         * @hide
+         */
+        public static final String CAMERA_AUTOROTATE = "camera_autorotate";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}
          * instead
          */
