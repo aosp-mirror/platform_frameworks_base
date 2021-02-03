@@ -1511,9 +1511,7 @@ public interface WindowManager extends ViewManager {
          *  Use {@link #dimAmount} to control the amount of dim. */
         public static final int FLAG_DIM_BEHIND        = 0x00000002;
 
-        /** Window flag: blur everything behind this window.
-         * @deprecated Blurring is no longer supported. */
-        @Deprecated
+        /** Window flag: enable blur behind for this window. */
         public static final int FLAG_BLUR_BEHIND        = 0x00000004;
 
         /** Window flag: this window won't ever get key input focus, so the
@@ -3233,11 +3231,16 @@ public interface WindowManager extends ViewManager {
         public boolean preferMinimalPostProcessing = false;
 
         /**
-         * Indicates that this window wants to have blurred content behind it.
+         * Specifies the amount of blur to be used to blur everything behind the window.
+         * The effect is similar to the dimAmount, but instead of dimming, the content behind
+         * will be blurred.
          *
-         * @hide
+         * The blur behind radius range starts at 0, which means no blur, and increases until 150
+         * for the densest blur.
+         *
+         * @see #FLAG_BLUR_BEHIND
          */
-        public int backgroundBlurRadius = 0;
+        public int blurBehindRadius = 0;
 
         /**
          * The color mode requested by this window. The target display may
@@ -3626,7 +3629,7 @@ public interface WindowManager extends ViewManager {
             out.writeInt(mFitInsetsSides);
             out.writeBoolean(mFitInsetsIgnoringVisibility);
             out.writeBoolean(preferMinimalPostProcessing);
-            out.writeInt(backgroundBlurRadius);
+            out.writeInt(blurBehindRadius);
             if (providesInsetsTypes != null) {
                 out.writeInt(providesInsetsTypes.length);
                 out.writeIntArray(providesInsetsTypes);
@@ -3695,7 +3698,7 @@ public interface WindowManager extends ViewManager {
             mFitInsetsSides = in.readInt();
             mFitInsetsIgnoringVisibility = in.readBoolean();
             preferMinimalPostProcessing = in.readBoolean();
-            backgroundBlurRadius = in.readInt();
+            blurBehindRadius = in.readInt();
             int insetsTypesLength = in.readInt();
             if (insetsTypesLength > 0) {
                 providesInsetsTypes = new int[insetsTypesLength];
@@ -3940,8 +3943,8 @@ public interface WindowManager extends ViewManager {
                 changes |= MINIMAL_POST_PROCESSING_PREFERENCE_CHANGED;
             }
 
-            if (backgroundBlurRadius != o.backgroundBlurRadius) {
-                backgroundBlurRadius = o.backgroundBlurRadius;
+            if (blurBehindRadius != o.blurBehindRadius) {
+                blurBehindRadius = o.blurBehindRadius;
                 changes |= BACKGROUND_BLUR_RADIUS_CHANGED;
             }
 
@@ -4108,9 +4111,9 @@ public interface WindowManager extends ViewManager {
                 sb.append(" preferMinimalPostProcessing=");
                 sb.append(preferMinimalPostProcessing);
             }
-            if (backgroundBlurRadius != 0) {
-                sb.append(" backgroundBlurRadius=");
-                sb.append(backgroundBlurRadius);
+            if (blurBehindRadius != 0) {
+                sb.append(" blurBehindRadius=");
+                sb.append(blurBehindRadius);
             }
             sb.append(System.lineSeparator());
             sb.append(prefix).append("  fl=").append(
