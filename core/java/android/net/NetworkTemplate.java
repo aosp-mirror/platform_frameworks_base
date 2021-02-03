@@ -48,6 +48,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.net.module.util.NetworkIdentityUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -296,11 +297,11 @@ public class NetworkTemplate implements Parcelable {
         builder.append("matchRule=").append(getMatchRuleName(mMatchRule));
         if (mSubscriberId != null) {
             builder.append(", subscriberId=").append(
-                    NetworkIdentity.scrubSubscriberId(mSubscriberId));
+                    NetworkIdentityUtils.scrubSubscriberId(mSubscriberId));
         }
         if (mMatchSubscriberIds != null) {
             builder.append(", matchSubscriberIds=").append(
-                    Arrays.toString(NetworkIdentity.scrubSubscriberId(mMatchSubscriberIds)));
+                    Arrays.toString(NetworkIdentityUtils.scrubSubscriberIds(mMatchSubscriberIds)));
         }
         if (mNetworkId != null) {
             builder.append(", networkId=").append(mNetworkId);
