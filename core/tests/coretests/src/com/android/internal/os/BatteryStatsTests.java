@@ -45,6 +45,7 @@ import org.junit.runners.Suite;
         BluetoothPowerCalculatorTest.class,
         BstatsCpuTimesValidationTest.class,
         CameraPowerCalculatorTest.class,
+        CpuPowerCalculatorTest.class,
         FlashlightPowerCalculatorTest.class,
         GnssPowerCalculatorTest.class,
         IdlePowerCalculatorTest.class,
