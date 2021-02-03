@@ -10099,27 +10099,6 @@ package android.service.timezone {
 
 package android.service.translation {
 
-  public final class TranslationRequest implements android.os.Parcelable {
-    ctor public TranslationRequest(int, @NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.translation.TranslationRequest>);
-    method public int describeContents();
-    method @NonNull public android.view.translation.TranslationSpec getDestSpec();
-    method public int getRequestId();
-    method @NonNull public android.view.translation.TranslationSpec getSourceSpec();
-    method @NonNull public java.util.List<android.view.translation.TranslationRequest> getTranslationRequests();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.translation.TranslationRequest> CREATOR;
-  }
-
-  public static final class TranslationRequest.Builder {
-    ctor public TranslationRequest.Builder(int, @NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, @NonNull java.util.List<android.view.translation.TranslationRequest>);
-    method @NonNull public android.service.translation.TranslationRequest.Builder addTranslationRequests(@NonNull android.view.translation.TranslationRequest);
-    method @NonNull public android.service.translation.TranslationRequest build();
-    method @NonNull public android.service.translation.TranslationRequest.Builder setDestSpec(@NonNull android.view.translation.TranslationSpec);
-    method @NonNull public android.service.translation.TranslationRequest.Builder setRequestId(int);
-    method @NonNull public android.service.translation.TranslationRequest.Builder setSourceSpec(@NonNull android.view.translation.TranslationSpec);
-    method @NonNull public android.service.translation.TranslationRequest.Builder setTranslationRequests(@NonNull java.util.List<android.view.translation.TranslationRequest>);
-  }
-
   public abstract class TranslationService extends android.app.Service {
     ctor public TranslationService();
     method @Nullable public final android.os.IBinder onBind(@NonNull android.content.Intent);
@@ -10127,7 +10106,7 @@ package android.service.translation {
     method public abstract void onCreateTranslationSession(@NonNull android.view.translation.TranslationSpec, @NonNull android.view.translation.TranslationSpec, int);
     method public void onDisconnected();
     method public abstract void onFinishTranslationSession(int);
-    method public abstract void onTranslationRequest(@NonNull android.service.translation.TranslationRequest, int, @NonNull android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
+    method public abstract void onTranslationRequest(@NonNull android.view.translation.TranslationRequest, int, @NonNull android.os.CancellationSignal, @NonNull android.service.translation.TranslationService.OnTranslationResultCallback);
     field public static final String SERVICE_INTERFACE = "android.service.translation.TranslationService";
     field public static final String SERVICE_META_DATA = "android.translation_service";
   }

@@ -150,7 +150,8 @@ import android.view.inputmethod.InputConnection;
 import android.view.inspector.InspectableProperty;
 import android.view.inspector.InspectableProperty.EnumEntry;
 import android.view.inspector.InspectableProperty.FlagEntry;
-import android.view.translation.TranslationRequest;
+import android.view.translation.ViewTranslationRequest;
+import android.view.translation.ViewTranslationResponse;
 import android.widget.Checkable;
 import android.widget.FrameLayout;
 import android.widget.ScrollBarDrawable;
@@ -30686,18 +30687,18 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * Returns a {@link TranslationRequest} to the {@link onStartUiTranslation} which represents
+     * Returns a {@link ViewTranslationRequest} to the {@link onStartUiTranslation} which represents
      * the content to be translated.
      *
      * <p>The default implementation does nothing and return null.</p>
      *
      * @hide
      *
-     * @return the {@link TranslationRequest} which contains the information to be translated.
+     * @return the {@link ViewTranslationRequest} which contains the information to be translated.
      */
     @Nullable
     //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public TranslationRequest onCreateTranslationRequest() {
+    public ViewTranslationRequest onCreateTranslationRequest() {
         return null;
     }
 
@@ -30746,10 +30747,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *
      * <p> The default implementation does nothing.</p>
      *
-     * @param request the translated information which can be shown in the view.
+     * @param response the translated information which can be shown in the view.
      */
     //TODO(b/178046780): initial version for demo. Will mark public when the design is reviewed.
-    public void onTranslationComplete(@NonNull TranslationRequest request) {
+    public void onTranslationComplete(@NonNull ViewTranslationResponse response) {
         // no-op
     }
 

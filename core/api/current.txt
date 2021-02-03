@@ -52165,38 +52165,77 @@ package android.view.translation {
   }
 
   public final class TranslationRequest implements android.os.Parcelable {
-    ctor public TranslationRequest(@Nullable CharSequence);
     method public int describeContents();
-    method @Nullable public android.view.autofill.AutofillId getAutofillId();
-    method @Nullable public CharSequence getTranslationText();
+    method public int getFlags();
+    method @NonNull public java.util.List<android.view.translation.TranslationRequestValue> getTranslationRequestValues();
+    method @NonNull public java.util.List<android.view.translation.ViewTranslationRequest> getViewTranslationRequests();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationRequest> CREATOR;
+    field public static final int FLAG_DICTIONARY_RESULT = 2; // 0x2
+    field public static final int FLAG_PARTIAL_RESPONSES = 8; // 0x8
+    field public static final int FLAG_TRANSLATION_RESULT = 1; // 0x1
+    field public static final int FLAG_TRANSLITERATION_RESULT = 4; // 0x4
   }
 
   public static final class TranslationRequest.Builder {
     ctor public TranslationRequest.Builder();
+    method @NonNull public android.view.translation.TranslationRequest.Builder addTranslationRequestValue(@NonNull android.view.translation.TranslationRequestValue);
+    method @NonNull public android.view.translation.TranslationRequest.Builder addViewTranslationRequest(@NonNull android.view.translation.ViewTranslationRequest);
     method @NonNull public android.view.translation.TranslationRequest build();
-    method @NonNull public android.view.translation.TranslationRequest.Builder setAutofillId(@NonNull android.view.autofill.AutofillId);
-    method @NonNull public android.view.translation.TranslationRequest.Builder setTranslationText(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationRequest.Builder setFlags(int);
+    method @NonNull public android.view.translation.TranslationRequest.Builder setTranslationRequestValues(@NonNull java.util.List<android.view.translation.TranslationRequestValue>);
+    method @NonNull public android.view.translation.TranslationRequest.Builder setViewTranslationRequests(@NonNull java.util.List<android.view.translation.ViewTranslationRequest>);
+  }
+
+  public final class TranslationRequestValue implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.view.translation.TranslationRequestValue forText(@NonNull CharSequence);
+    method @NonNull public CharSequence getText();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationRequestValue> CREATOR;
   }
 
   public final class TranslationResponse implements android.os.Parcelable {
     method public int describeContents();
+    method @NonNull public android.util.SparseArray<android.view.translation.TranslationResponseValue> getTranslationResponseValues();
     method public int getTranslationStatus();
-    method @NonNull public java.util.List<android.view.translation.TranslationRequest> getTranslations();
+    method @NonNull public android.util.SparseArray<android.view.translation.ViewTranslationResponse> getViewTranslationResponses();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponse> CREATOR;
-    field public static final int TRANSLATION_STATUS_LANGUAGE_UNAVAILABLE = 2; // 0x2
+    field public static final int TRANSLATION_STATUS_CONTEXT_UNSUPPORTED = 2; // 0x2
     field public static final int TRANSLATION_STATUS_SUCCESS = 0; // 0x0
     field public static final int TRANSLATION_STATUS_UNKNOWN_ERROR = 1; // 0x1
   }
 
   public static final class TranslationResponse.Builder {
     ctor public TranslationResponse.Builder(int);
-    method @NonNull public android.view.translation.TranslationResponse.Builder addTranslations(@NonNull android.view.translation.TranslationRequest);
     method @NonNull public android.view.translation.TranslationResponse build();
+    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValue(int, @NonNull android.view.translation.TranslationResponseValue);
+    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationResponseValues(@NonNull android.util.SparseArray<android.view.translation.TranslationResponseValue>);
     method @NonNull public android.view.translation.TranslationResponse.Builder setTranslationStatus(int);
-    method @NonNull public android.view.translation.TranslationResponse.Builder setTranslations(@NonNull java.util.List<android.view.translation.TranslationRequest>);
+    method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponse(int, @NonNull android.view.translation.ViewTranslationResponse);
+    method @NonNull public android.view.translation.TranslationResponse.Builder setViewTranslationResponses(@NonNull android.util.SparseArray<android.view.translation.ViewTranslationResponse>);
+  }
+
+  public final class TranslationResponseValue implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public static android.view.translation.TranslationResponseValue forError();
+    method @Nullable public CharSequence getDictionaryDescription();
+    method public int getStatusCode();
+    method @Nullable public CharSequence getText();
+    method @Nullable public CharSequence getTransliteration();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.TranslationResponseValue> CREATOR;
+    field public static final int STATUS_ERROR = 1; // 0x1
+    field public static final int STATUS_SUCCESS = 0; // 0x0
+  }
+
+  public static final class TranslationResponseValue.Builder {
+    ctor public TranslationResponseValue.Builder(int);
+    method @NonNull public android.view.translation.TranslationResponseValue build();
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setDictionaryDescription(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setText(@NonNull CharSequence);
+    method @NonNull public android.view.translation.TranslationResponseValue.Builder setTransliteration(@NonNull CharSequence);
   }
 
   public final class TranslationSpec implements android.os.Parcelable {
@@ -52213,6 +52252,37 @@ package android.view.translation {
     method public void destroy();
     method public boolean isDestroyed();
     method @Nullable @WorkerThread public android.view.translation.TranslationResponse translate(@NonNull android.view.translation.TranslationRequest);
+  }
+
+  public final class ViewTranslationRequest implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.view.autofill.AutofillId getAutofillId();
+    method @NonNull public java.util.Set<java.lang.String> getKeys();
+    method @NonNull public android.view.translation.TranslationRequestValue getValue(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationRequest> CREATOR;
+    field public static final String ID_TEXT = "text";
+  }
+
+  public static final class ViewTranslationRequest.Builder {
+    ctor public ViewTranslationRequest.Builder(@NonNull android.view.autofill.AutofillId);
+    method @NonNull public android.view.translation.ViewTranslationRequest build();
+    method public android.view.translation.ViewTranslationRequest.Builder setValue(String, android.view.translation.TranslationRequestValue);
+  }
+
+  public final class ViewTranslationResponse implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public android.view.autofill.AutofillId getAutofillId();
+    method @NonNull public java.util.Set<java.lang.String> getKeys();
+    method @NonNull public android.view.translation.TranslationResponseValue getValue(@NonNull String);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.translation.ViewTranslationResponse> CREATOR;
+  }
+
+  public static final class ViewTranslationResponse.Builder {
+    ctor public ViewTranslationResponse.Builder(@NonNull android.view.autofill.AutofillId);
+    method @NonNull public android.view.translation.ViewTranslationResponse build();
+    method public android.view.translation.ViewTranslationResponse.Builder setValue(String, android.view.translation.TranslationResponseValue);
   }
 
 }
