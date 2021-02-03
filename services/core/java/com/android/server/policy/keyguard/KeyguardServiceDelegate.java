@@ -29,7 +29,6 @@ import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.server.UiThread;
 import com.android.server.policy.WindowManagerPolicy.OnKeyguardExitResult;
-import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
 
@@ -399,7 +398,7 @@ public class KeyguardServiceDelegate {
     }
 
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
-        if (!WindowManagerService.sEnableRemoteKeyguardAnimation && mKeyguardService != null) {
+        if (mKeyguardService != null) {
             mKeyguardService.startKeyguardExitAnimation(startTime, fadeoutDuration);
         }
     }

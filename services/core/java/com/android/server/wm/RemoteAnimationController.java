@@ -36,7 +36,6 @@ import android.view.RemoteAnimationAdapter;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-import android.view.WindowManager;
 
 import com.android.internal.protolog.ProtoLogImpl;
 import com.android.internal.protolog.common.ProtoLog;
@@ -99,7 +98,7 @@ class RemoteAnimationController implements DeathRecipient {
     /**
      * Called when the transition is ready to be started, and all leashes have been set up.
      */
-    void goodToGo(@WindowManager.TransitionOldType int transit) {
+    void goodToGo() {
         ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS, "goodToGo()");
         if (mPendingAnimations.isEmpty() || mCanceled) {
             ProtoLog.d(WM_DEBUG_REMOTE_ANIMATIONS,
@@ -124,15 +123,11 @@ class RemoteAnimationController implements DeathRecipient {
 
         // Create the remote wallpaper animation targets (if any)
         final RemoteAnimationTarget[] wallpaperTargets = createWallpaperAnimations();
-
-        // TODO(bc-unlock): Create the remote non app animation targets (if any)
-        final RemoteAnimationTarget[] nonAppTargets = null;
-
         mService.mAnimator.addAfterPrepareSurfacesRunnable(() -> {
             try {
                 linkToDeathOfRunner();
-                mRemoteAnimationAdapter.getRunner().onAnimationStart(transit, appTargets,
-                        wallpaperTargets, nonAppTargets, mFinishedCallback);
+                mRemoteAnimationAdapter.getRunner().onAnimationStart(appTargets, wallpaperTargets,
+                        mFinishedCallback);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to start remote animation", e);
                 onAnimationFinished();
@@ -279,7 +274,6 @@ class RemoteAnimationController implements DeathRecipient {
     private void setRunningRemoteAnimation(boolean running) {
         final int pid = mRemoteAnimationAdapter.getCallingPid();
         final int uid = mRemoteAnimationAdapter.getCallingUid();
-
         if (pid == 0) {
             throw new RuntimeException("Calling pid of remote animation was null");
         }

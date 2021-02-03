@@ -33,7 +33,6 @@ import android.view.RemoteAnimationTarget;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
 import android.view.View;
-import android.view.WindowManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.policy.ScreenDecorationsUtils;
@@ -160,10 +159,8 @@ public class ActivityLaunchAnimator {
         }
 
         @Override
-        public void onAnimationStart(@WindowManager.TransitionOldType int transit,
-                RemoteAnimationTarget[] remoteAnimationTargets,
+        public void onAnimationStart(RemoteAnimationTarget[] remoteAnimationTargets,
                 RemoteAnimationTarget[] remoteAnimationWallpaperTargets,
-                RemoteAnimationTarget[] remoteAnimationNonAppTargets,
                 IRemoteAnimationFinishedCallback iRemoteAnimationFinishedCallback)
                     throws RemoteException {
             mMainExecutor.execute(() -> {
