@@ -36,6 +36,7 @@
 #include <utils/List.h>
 #include <utils/KeyedVector.h>
 #include <binder/Parcel.h>
+#include <binder/ParcelRef.h>
 #include <binder/ProcessState.h>
 #include <binder/IServiceManager.h>
 #include <utils/threads.h>
@@ -529,8 +530,9 @@ static jobject android_os_Parcel_readFileDescriptor(JNIEnv* env, jclass clazz, j
 
 static jlong android_os_Parcel_create(JNIEnv* env, jclass clazz)
 {
-    Parcel* parcel = new Parcel();
-    return reinterpret_cast<jlong>(parcel);
+    sp<ParcelRef> parcelRef = ParcelRef::create();
+    parcelRef->incStrong(reinterpret_cast<const void*>(android_os_Parcel_create));
+    return reinterpret_cast<jlong>(static_cast<Parcel *>(parcelRef.get()));
 }
 
 static jlong android_os_Parcel_freeBuffer(JNIEnv* env, jclass clazz, jlong nativePtr)
@@ -545,8 +547,8 @@ static jlong android_os_Parcel_freeBuffer(JNIEnv* env, jclass clazz, jlong nativ
 
 static void android_os_Parcel_destroy(JNIEnv* env, jclass clazz, jlong nativePtr)
 {
-    Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    delete parcel;
+    ParcelRef* derivative = static_cast<ParcelRef*>(reinterpret_cast<Parcel*>(nativePtr));
+    derivative->decStrong(reinterpret_cast<const void*>(android_os_Parcel_create));
 }
 
 static jbyteArray android_os_Parcel_marshall(JNIEnv* env, jclass clazz, jlong nativePtr)
