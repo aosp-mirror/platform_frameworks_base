@@ -66,6 +66,7 @@ import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
 import android.view.InsetsState;
+import android.view.RoundedCorners;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
@@ -99,6 +100,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private int mRotation = ROTATION_0;
     private boolean mHasDisplayCutout;
     private boolean mIsLongEdgeDisplayCutout;
+    private boolean mHasRoundedCorners;
 
     private final Rect mDisplayBounds = new Rect();
 
@@ -153,6 +155,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         updateDisplayFrames();
     }
 
+    public void addRoundedCorners() {
+        mHasRoundedCorners = true;
+        updateDisplayFrames();
+    }
+
     private void updateDisplayFrames() {
         mFrames = createDisplayFrames(
                 mDisplayContent.getInsetsStateController().getRawInsetsState());
@@ -166,9 +173,11 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private DisplayFrames createDisplayFrames(InsetsState insetsState) {
         final Pair<DisplayInfo, WmDisplayCutout> info = displayInfoAndCutoutForRotation(mRotation,
                 mHasDisplayCutout, mIsLongEdgeDisplayCutout);
+        final RoundedCorners roundedCorners = mHasRoundedCorners
+                ? mDisplayContent.calculateRoundedCornersForRotation(mRotation)
+                : RoundedCorners.NO_ROUNDED_CORNERS;
         return new DisplayFrames(mDisplayContent.getDisplayId(),
-                insetsState,
-                info.first, info.second);
+                insetsState, info.first, info.second, roundedCorners);
     }
 
     @Test
@@ -752,6 +761,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         setRotation(ROTATION_90, false /* includingWindows */);
         assertSimulateLayoutSameDisplayFrames();
         addDisplayCutout();
+        assertSimulateLayoutSameDisplayFrames();
+        addRoundedCorners();
         assertSimulateLayoutSameDisplayFrames();
     }
 

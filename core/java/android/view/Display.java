@@ -896,6 +896,32 @@ public final class Display {
     }
 
     /**
+     * Returns the {@link RoundedCorner} of the given position if there is one.
+     *
+     * @param position the position of the rounded corner on the display.
+     *
+     * @return the rounded corner of the given position. Returns {@code null} if there is none.
+     */
+    @SuppressLint("VisiblySynchronized")
+    @Nullable
+    public RoundedCorner getRoundedCorner(@RoundedCorner.Position int position) {
+        synchronized (this) {
+            updateDisplayInfoLocked();
+            RoundedCorners roundedCorners;
+            if (mMayAdjustByFixedRotation) {
+                roundedCorners = getDisplayAdjustments().adjustRoundedCorner(
+                        mDisplayInfo.roundedCorners,
+                        mDisplayInfo.rotation,
+                        mDisplayInfo.logicalWidth,
+                        mDisplayInfo.logicalHeight);
+            } else {
+                roundedCorners = mDisplayInfo.roundedCorners;
+            }
+            return roundedCorners == null ? null : roundedCorners.getRoundedCorner(position);
+        }
+    }
+
+    /**
      * Gets the pixel format of the display.
      * @return One of the constants defined in {@link android.graphics.PixelFormat}.
      *

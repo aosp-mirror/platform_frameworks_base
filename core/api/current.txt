@@ -46148,6 +46148,7 @@ package android.view {
     method @Deprecated public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();
+    method @Nullable public android.view.RoundedCorner getRoundedCorner(int);
     method @Deprecated public void getSize(android.graphics.Point);
     method public int getState();
     method public android.view.Display.Mode[] getSupportedModes();
@@ -47400,6 +47401,20 @@ package android.view {
     field public static final int TYPE_WAIT = 1004; // 0x3ec
     field public static final int TYPE_ZOOM_IN = 1018; // 0x3fa
     field public static final int TYPE_ZOOM_OUT = 1019; // 0x3fb
+  }
+
+  public final class RoundedCorner implements android.os.Parcelable {
+    ctor public RoundedCorner(int, int, int, int);
+    method public int describeContents();
+    method @NonNull public android.graphics.Point getCenter();
+    method public int getPosition();
+    method public int getRadius();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.RoundedCorner> CREATOR;
+    field public static final int POSITION_BOTTOM_LEFT = 3; // 0x3
+    field public static final int POSITION_BOTTOM_RIGHT = 2; // 0x2
+    field public static final int POSITION_TOP_LEFT = 0; // 0x0
+    field public static final int POSITION_TOP_RIGHT = 1; // 0x1
   }
 
   public class ScaleGestureDetector {
@@ -49411,6 +49426,7 @@ package android.view {
     method @NonNull public android.graphics.Insets getInsets(int);
     method @NonNull public android.graphics.Insets getInsetsIgnoringVisibility(int);
     method @Deprecated @NonNull public android.graphics.Insets getMandatorySystemGestureInsets();
+    method @Nullable public android.view.RoundedCorner getRoundedCorner(int);
     method @Deprecated public int getStableInsetBottom();
     method @Deprecated public int getStableInsetLeft();
     method @Deprecated public int getStableInsetRight();
@@ -49444,6 +49460,7 @@ package android.view {
     method @NonNull public android.view.WindowInsets.Builder setInsets(int, @NonNull android.graphics.Insets);
     method @NonNull public android.view.WindowInsets.Builder setInsetsIgnoringVisibility(int, @NonNull android.graphics.Insets) throws java.lang.IllegalArgumentException;
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setMandatorySystemGestureInsets(@NonNull android.graphics.Insets);
+    method @NonNull public android.view.WindowInsets.Builder setRoundedCorner(int, @Nullable android.view.RoundedCorner);
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setStableInsets(@NonNull android.graphics.Insets);
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setSystemGestureInsets(@NonNull android.graphics.Insets);
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setSystemWindowInsets(@NonNull android.graphics.Insets);
