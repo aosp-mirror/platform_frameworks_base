@@ -222,6 +222,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -987,6 +988,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
          */
         public boolean queryUserAccess(int uid, int netId) {
             return NetworkUtils.queryUserAccess(uid, netId);
+        }
+
+        /**
+         * Gets the UID that owns a socket connection. Needed because opening SOCK_DIAG sockets
+         * requires CAP_NET_ADMIN, which the unit tests do not have.
+         */
+        public int getConnectionOwnerUid(int protocol, InetSocketAddress local,
+                InetSocketAddress remote) {
+            return InetDiagMessage.getConnectionOwnerUid(protocol, local, remote);
         }
 
         /**
@@ -8350,7 +8360,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             throw new IllegalArgumentException("Unsupported protocol " + connectionInfo.protocol);
         }
 
-        final int uid = InetDiagMessage.getConnectionOwnerUid(connectionInfo.protocol,
+        final int uid = mDeps.getConnectionOwnerUid(connectionInfo.protocol,
                 connectionInfo.local, connectionInfo.remote);
 
         /* Filter out Uids not associated with the VPN. */
