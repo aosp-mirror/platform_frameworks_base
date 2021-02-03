@@ -9140,7 +9140,7 @@ package android.bluetooth.le {
     method public boolean getIncludeTxPowerLevel();
     method public android.util.SparseArray<byte[]> getManufacturerSpecificData();
     method public java.util.Map<android.os.ParcelUuid,byte[]> getServiceData();
-    method @Nullable public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
+    method @NonNull public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
