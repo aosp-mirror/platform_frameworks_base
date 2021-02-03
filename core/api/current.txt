@@ -19869,6 +19869,10 @@ package android.media {
     field public static final int ENCODING_IEC61937 = 13; // 0xd
     field public static final int ENCODING_INVALID = 0; // 0x0
     field public static final int ENCODING_MP3 = 9; // 0x9
+    field public static final int ENCODING_MPEGH_BL_L3 = 23; // 0x17
+    field public static final int ENCODING_MPEGH_BL_L4 = 24; // 0x18
+    field public static final int ENCODING_MPEGH_LC_L3 = 25; // 0x19
+    field public static final int ENCODING_MPEGH_LC_L4 = 26; // 0x1a
     field public static final int ENCODING_OPUS = 20; // 0x14
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
     field public static final int ENCODING_PCM_24BIT_PACKED = 21; // 0x15
