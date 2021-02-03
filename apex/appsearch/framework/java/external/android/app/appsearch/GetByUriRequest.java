@@ -122,14 +122,14 @@ public final class GetByUriRequest {
 
         /** Adds one or more URIs to the request. */
         @NonNull
-        public Builder addUri(@NonNull String... uris) {
+        public Builder addUris(@NonNull String... uris) {
             Preconditions.checkNotNull(uris);
-            return addUri(Arrays.asList(uris));
+            return addUris(Arrays.asList(uris));
         }
 
         /** Adds one or more URIs to the request. */
         @NonNull
-        public Builder addUri(@NonNull Collection<String> uris) {
+        public Builder addUris(@NonNull Collection<String> uris) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkNotNull(uris);
             mUris.addAll(uris);

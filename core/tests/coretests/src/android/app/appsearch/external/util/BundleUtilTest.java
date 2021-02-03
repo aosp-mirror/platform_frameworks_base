@@ -201,6 +201,18 @@ public class BundleUtilTest {
         assertThat(BundleUtil.deepHashCode(b1)).isNotEqualTo(BundleUtil.deepHashCode(b2));
     }
 
+    @Test
+    public void testDeepHashCode_differentKeys() {
+        Bundle[] inputs = new Bundle[2];
+        for (int i = 0; i < 2; i++) {
+            Bundle b = new Bundle();
+            b.putString("key" + i, "value");
+            inputs[i] = b;
+        }
+        assertThat(BundleUtil.deepHashCode(inputs[0]))
+                .isNotEqualTo(BundleUtil.deepHashCode(inputs[1]));
+    }
+
     private static Bundle createThoroughBundle() {
         Bundle toy1 = new Bundle();
         toy1.putString("a", "a");

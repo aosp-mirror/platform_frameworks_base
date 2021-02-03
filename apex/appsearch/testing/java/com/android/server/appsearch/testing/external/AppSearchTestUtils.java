@@ -59,7 +59,7 @@ public class AppSearchTestUtils {
                         session.getByUri(
                                 new GetByUriRequest.Builder()
                                         .setNamespace(namespace)
-                                        .addUri(uris)
+                                        .addUris(uris)
                                         .build()));
         assertThat(result.getSuccesses()).hasSize(uris.length);
         assertThat(result.getFailures()).isEmpty();
