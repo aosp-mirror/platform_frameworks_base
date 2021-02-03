@@ -25,8 +25,8 @@ import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.KeyguardManager;
+import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -59,12 +59,8 @@ import java.util.List;
  * an application window, excluding the system decorations.  The application display area may
  * be smaller than the real display area because the system subtracts the space needed
  * for decor elements such as the status bar.  Use {@link WindowMetrics#getBounds()} to query the
- * application window bounds.</li>
- * <li>The real display area specifies the part of the display that contains content
- * including the system decorations.  Even so, the real display area may be smaller than the
- * physical size of the display if the window manager is emulating a smaller display
- * using (adb shell wm size).  Use the following methods to query the
- * real display area: {@link #getRealSize}, {@link #getRealMetrics}.</li>
+ * application window bounds. Generally, use {@link WindowManager#getCurrentWindowMetrics()} to
+ * query the metrics and perform UI-related actions.</li>
  * </ul>
  * </p><p>
  * A logical display does not necessarily represent a particular physical display device
@@ -677,9 +673,9 @@ public final class Display {
     @UnsupportedAppUsage
     public DisplayAdjustments getDisplayAdjustments() {
         if (mResources != null) {
-            final DisplayAdjustments currentAdjustements = mResources.getDisplayAdjustments();
-            if (!mDisplayAdjustments.equals(currentAdjustements)) {
-                mDisplayAdjustments = new DisplayAdjustments(currentAdjustements);
+            final DisplayAdjustments currentAdjustments = mResources.getDisplayAdjustments();
+            if (!mDisplayAdjustments.equals(currentAdjustments)) {
+                mDisplayAdjustments = new DisplayAdjustments(currentAdjustments);
             }
         }
 
@@ -1191,30 +1187,34 @@ public final class Display {
     }
 
     /**
-     * Gets the real size of the display without subtracting any window decor or
-     * applying any compatibility scale factors.
+     * Provides the largest {@link Point outSize} an app may expect in the current system state,
+     * without subtracting any window decor.
      * <p>
-     * The size is adjusted based on the current rotation of the display.
+     * The size describes the largest potential area the window might occupy. The size is adjusted
+     * based on the current rotation of the display.
      * </p><p>
      * The real size may be smaller than the physical size of the screen when the
      * window manager is emulating a smaller display (using adb shell wm size).
-     * </p><p>
-     * In general, {@link #getRealSize(Point)} and {@link WindowManager#getMaximumWindowMetrics()}
-     * report the same bounds except that certain areas of the display may not be available to
-     * windows created in the {@link WindowManager}'s {@link Context}.
-     *
-     * For example, imagine a device which has a multi-task mode that limits windows to half of the
-     * screen. In this case, {@link WindowManager#getMaximumWindowMetrics()} reports the
-     * bounds of the screen half where the window is located, while {@link #getRealSize(Point)}
-     * still reports the bounds of the whole display.
+     * </p>
      *
      * @param outSize Set to the real size of the display.
-     *
-     * @see WindowManager#getMaximumWindowMetrics()
      */
     public void getRealSize(Point outSize) {
         synchronized (this) {
             updateDisplayInfoLocked();
+            if (shouldReportMaxBounds()) {
+                final Rect bounds = mResources.getConfiguration()
+                        .windowConfiguration.getMaxBounds();
+                outSize.x = bounds.width();
+                outSize.y = bounds.height();
+                if (DEBUG) {
+                    Log.d(TAG, "getRealSize determined from max bounds: " + outSize
+                            + " for uid " + Process.myUid());
+                }
+                // Skip adjusting by fixed rotation, since if it is necessary, the configuration
+                // should already reflect the expected rotation.
+                return;
+            }
             outSize.x = mDisplayInfo.logicalWidth;
             outSize.y = mDisplayInfo.logicalHeight;
             if (mMayAdjustByFixedRotation) {
@@ -1224,9 +1224,11 @@ public final class Display {
     }
 
     /**
-     * Gets display metrics based on the real size of this display.
+     * Provides the largest {@link DisplayMetrics outMetrics} an app may expect in the current
+     * system state, without subtracting any window decor.
      * <p>
-     * The size is adjusted based on the current rotation of the display.
+     * The size describes the largest potential area the window might occupy. The size is adjusted
+     * based on the current rotation of the display.
      * </p><p>
      * The real size may be smaller than the physical size of the screen when the
      * window manager is emulating a smaller display (using adb shell wm size).
@@ -1237,12 +1239,38 @@ public final class Display {
     public void getRealMetrics(DisplayMetrics outMetrics) {
         synchronized (this) {
             updateDisplayInfoLocked();
+            if (shouldReportMaxBounds()) {
+                mDisplayInfo.getMaxBoundsMetrics(outMetrics,
+                        CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO,
+                        mResources.getConfiguration());
+                if (DEBUG) {
+                    Log.d(TAG, "getRealMetrics determined from max bounds: " + outMetrics
+                            + " for uid " + Process.myUid());
+                }
+                // Skip adjusting by fixed rotation, since if it is necessary, the configuration
+                // should already reflect the expected rotation.
+                return;
+            }
             mDisplayInfo.getLogicalMetrics(outMetrics,
                     CompatibilityInfo.DEFAULT_COMPATIBILITY_INFO, null);
             if (mMayAdjustByFixedRotation) {
                 getDisplayAdjustments().adjustMetrics(outMetrics, mDisplayInfo.rotation);
             }
         }
+    }
+
+    /**
+     * Determines if {@link WindowConfiguration#getMaxBounds()} should be reported as the
+     * display dimensions. The max bounds field may be smaller than the logical dimensions
+     * when apps need to be sandboxed.
+     * @return {@code true} when max bounds should be applied.
+     */
+    private boolean shouldReportMaxBounds() {
+        if (mResources == null) {
+            return false;
+        }
+        final Configuration config = mResources.getConfiguration();
+        return config != null && !config.windowConfiguration.getMaxBounds().isEmpty();
     }
 
     /**
