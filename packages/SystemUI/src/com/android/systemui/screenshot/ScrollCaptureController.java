@@ -51,6 +51,12 @@ import java.util.function.Consumer;
 public class ScrollCaptureController implements OnComputeInternalInsetsListener {
     private static final String TAG = "ScrollCaptureController";
 
+    // TODO: Support saving without additional action.
+    private enum PendingAction {
+        SHARE,
+        EDIT
+    }
+
     public static final int MAX_PAGES = 5;
     public static final int MAX_HEIGHT = 12000;
 
@@ -71,9 +77,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private View mClose;
     private View mEdit;
     private View mShare;
-
-    private ListenableFuture<ImageExporter.Result> mExportFuture;
-    private Runnable mPendingAction;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter, UiEventLogger uiEventLogger) {
@@ -139,25 +142,17 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         if (id == R.id.close) {
             v.setPressed(true);
             disableButtons();
-            finish();
+            doFinish();
         } else if (id == R.id.edit) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
             v.setPressed(true);
             disableButtons();
-            edit();
+            startExport(PendingAction.EDIT);
         } else if (id == R.id.share) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
             v.setPressed(true);
             disableButtons();
-            share();
-        }
-    }
-
-    private void finish() {
-        if (mExportFuture == null) {
-            doFinish();
-        } else {
-            mExportFuture.addListener(this::doFinish, mUiExecutor);
+            startExport(PendingAction.SHARE);
         }
     }
 
@@ -169,31 +164,53 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
                 .removeOnComputeInternalInsetsListener(this);
     }
 
-    private void edit() {
-        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
-        sendIntentWhenReady(Intent.ACTION_EDIT, editorPackage);
-    }
-
-    private void share() {
-        sendIntentWhenReady(Intent.ACTION_SEND, null);
-    }
-
-    void sendIntentWhenReady(String action, String component) {
-        if (mExportFuture != null) {
-            mExportFuture.addListener(() -> {
-                try {
-                    ImageExporter.Result result = mExportFuture.get();
-                    sendIntent(action, component, result.uri);
-                    mCallback.onFinish();
-                } catch (InterruptedException | ExecutionException e) {
-                    Log.e(TAG, "failed to export", e);
-                    mCallback.onFinish();
+    private void startExport(PendingAction action) {
+        ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
+                mBgExecutor, mRequestId, mImageTileSet.toBitmap(), mCaptureTime);
+        exportFuture.addListener(() -> {
+            try {
+                ImageExporter.Result result = exportFuture.get();
+                if (action == PendingAction.EDIT) {
+                    doEdit(result.uri);
+                } else if (action == PendingAction.SHARE) {
+                    doShare(result.uri);
                 }
+                doFinish();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "failed to export", e);
+                mCallback.onFinish();
+            }
+        }, mUiExecutor);
+    }
 
-            }, mUiExecutor);
-        } else {
-            mPendingAction = this::edit;
+    private void doEdit(Uri uri) {
+        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
+        Intent intent = new Intent(Intent.ACTION_EDIT);
+        if (!TextUtils.isEmpty(editorPackage)) {
+            intent.setComponent(ComponentName.unflattenFromString(editorPackage));
         }
+        intent.setType("image/png");
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent sharingChooserIntent = Intent.createChooser(intent, null)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        mContext.startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
+    }
+
+    private void doShare(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/png");
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        Intent sharingChooserIntent = Intent.createChooser(intent, null)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
+                .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        mContext.startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
     }
 
     private void setContentView(@IdRes int id) {
@@ -248,25 +265,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
             session.end(mCallback::onFinish);
         } else {
             mPreview.setImageDrawable(mImageTileSet.getDrawable());
-            mExportFuture = mImageExporter.export(
-                    mBgExecutor, mRequestId, mImageTileSet.toBitmap(), mCaptureTime);
-            // The user chose an action already, link it to the result
-            if (mPendingAction != null) {
-                mExportFuture.addListener(mPendingAction, mUiExecutor);
-            }
         }
-    }
-
-    void sendIntent(String action, String component, Uri uri) {
-        Intent intent = new Intent(action);
-        if (!TextUtils.isEmpty(component)) {
-            intent.setComponent(ComponentName.unflattenFromString(component));
-        }
-        intent.setType("image/png");
-        intent.setData(uri);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
     }
 }
