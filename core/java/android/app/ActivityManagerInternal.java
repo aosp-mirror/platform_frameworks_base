@@ -538,4 +538,10 @@ public abstract class ActivityManagerInternal {
      * @return mBootTimeTempAllowlistDuration of ActivityManagerConstants.
      */
     public abstract long getBootTimeTempAllowListDuration();
+
+    /** Register an {@link AnrController} to control the ANR dialog behavior */
+    public abstract void registerAnrController(AnrController controller);
+
+    /** Unregister an {@link AnrController} */
+    public abstract void unregisterAnrController(AnrController controller);
 }

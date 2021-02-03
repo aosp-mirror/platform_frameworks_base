@@ -145,6 +145,7 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
+import android.app.AnrController;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
@@ -15860,6 +15861,16 @@ public class ActivityManagerService extends IActivityManager.Stub
             // Do not lock ActivityManagerService.this here, this API is called by
             // PackageManagerService.
             return mConstants.mBootTimeTempAllowlistDuration;
+        }
+
+        @Override
+        public void registerAnrController(AnrController controller) {
+            mActivityTaskManager.registerAnrController(controller);
+        }
+
+        @Override
+        public void unregisterAnrController(AnrController controller) {
+            mActivityTaskManager.unregisterAnrController(controller);
         }
     }
 

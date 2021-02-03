@@ -130,6 +130,7 @@ import android.app.ActivityTaskManager;
 import android.app.ActivityTaskManager.RootTaskInfo;
 import android.app.ActivityThread;
 import android.app.AlertDialog;
+import android.app.AnrController;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.Dialog;
@@ -494,6 +495,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     private volatile long mLastStopAppSwitchesTime;
 
+    private final List<AnrController> mAnrController = new ArrayList<>();
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
 
@@ -2056,6 +2058,40 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      */
     boolean getBalAppSwitchesAllowed() {
         return mAppSwitchesAllowed;
+    }
+
+    /** Register an {@link AnrController} to control the ANR dialog behavior */
+    public void registerAnrController(AnrController controller) {
+        synchronized (mGlobalLock) {
+            mAnrController.add(controller);
+        }
+    }
+
+    /** Unregister an {@link AnrController} */
+    public void unregisterAnrController(AnrController controller) {
+        synchronized (mGlobalLock) {
+            mAnrController.remove(controller);
+        }
+    }
+
+    /** @return the max ANR delay from all registered {@link AnrController} instances */
+    public long getMaxAnrDelayMillis(ApplicationInfo info) {
+        if (info == null || info.packageName == null) {
+            return 0;
+        }
+
+        final ArrayList<AnrController> controllers;
+        synchronized (mGlobalLock) {
+            controllers = new ArrayList<>(mAnrController);
+        }
+
+        final String packageName = info.packageName;
+        long maxDelayMs = 0;
+        for (AnrController controller : controllers) {
+            maxDelayMs = Math.max(maxDelayMs, controller.getAnrDelayMillis(packageName, info.uid));
+        }
+        maxDelayMs = Math.max(maxDelayMs, 0);
+        return maxDelayMs;
     }
 
     @Override
