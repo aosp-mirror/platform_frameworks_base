@@ -18,6 +18,7 @@ package com.android.server.graphics.fonts;
 
 import android.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Slog;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
@@ -29,24 +30,19 @@ import org.xmlpull.v1.XmlPullParserException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Set;
 
 /* package */ class PersistentSystemFontConfig {
     private static final String TAG = "PersistentSystemFontConfig";
 
     private static final String TAG_ROOT = "fontConfig";
     private static final String TAG_LAST_MODIFIED_DATE = "lastModifiedDate";
-    private static final String TAG_VALUE = "value";
+    private static final String TAG_UPDATED_FONT_DIR = "updatedFontDir";
+    private static final String ATTR_VALUE = "value";
 
     /* package */ static class Config {
         public long lastModifiedDate;
-
-        public void reset() {
-            lastModifiedDate = 0;
-        }
-
-        public void copyTo(@NonNull Config out) {
-            out.lastModifiedDate = lastModifiedDate;
-        }
+        public final Set<String> updatedFontDirs = new ArraySet<>();
     }
 
     /**
@@ -54,7 +50,6 @@ import java.io.OutputStream;
      */
     public static void loadFromXml(@NonNull InputStream is, @NonNull Config out)
             throws XmlPullParserException, IOException {
-        out.reset();
         TypedXmlPullParser parser = Xml.resolvePullParser(is);
 
         int type;
@@ -72,7 +67,10 @@ import java.io.OutputStream;
             } else if (depth == 2) {
                 switch (tag) {
                     case TAG_LAST_MODIFIED_DATE:
-                        out.lastModifiedDate = parseLongAttribute(parser, TAG_VALUE, 0);
+                        out.lastModifiedDate = parseLongAttribute(parser, ATTR_VALUE, 0);
+                        break;
+                    case TAG_UPDATED_FONT_DIR:
+                        out.updatedFontDirs.add(getAttribute(parser, ATTR_VALUE));
                         break;
                     default:
                         Slog.w(TAG, "Skipping unknown tag: " + tag);
@@ -92,8 +90,13 @@ import java.io.OutputStream;
 
         out.startTag(null, TAG_ROOT);
         out.startTag(null, TAG_LAST_MODIFIED_DATE);
-        out.attribute(null, TAG_VALUE, Long.toString(config.lastModifiedDate));
+        out.attribute(null, ATTR_VALUE, Long.toString(config.lastModifiedDate));
         out.endTag(null, TAG_LAST_MODIFIED_DATE);
+        for (String dir : config.updatedFontDirs) {
+            out.startTag(null, TAG_UPDATED_FONT_DIR);
+            out.attribute(null, ATTR_VALUE, dir);
+            out.endTag(null, TAG_UPDATED_FONT_DIR);
+        }
         out.endTag(null, TAG_ROOT);
 
         out.endDocument();
@@ -111,4 +114,9 @@ import java.io.OutputStream;
         }
     }
 
+    @NonNull
+    private static String getAttribute(TypedXmlPullParser parser, String attr) {
+        final String value = parser.getAttributeValue(null /* namespace */, attr);
+        return value == null ? "" : value;
+    }
 }
