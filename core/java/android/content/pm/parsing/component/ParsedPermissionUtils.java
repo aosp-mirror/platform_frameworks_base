@@ -108,17 +108,14 @@ public class ParsedPermissionUtils {
 
         permission.protectionLevel = PermissionInfo.fixProtectionLevel(permission.protectionLevel);
 
-        if (permission.getProtectionFlags() != 0) {
-            if ((permission.protectionLevel & PermissionInfo.PROTECTION_FLAG_INSTANT) == 0
-                    && (permission.protectionLevel & PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY)
-                    == 0
-                    && (permission.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
-                    != PermissionInfo.PROTECTION_SIGNATURE
-                    && (permission.protectionLevel & PermissionInfo.PROTECTION_MASK_BASE)
-                    != PermissionInfo.PROTECTION_INTERNAL) {
-                return input.error("<permission>  protectionLevel specifies a non-instant flag "
-                        + "but is not based on signature or internal type");
-            }
+        final int otherProtectionFlags = permission.getProtectionFlags()
+                & ~(PermissionInfo.PROTECTION_FLAG_APPOP | PermissionInfo.PROTECTION_FLAG_INSTANT
+                | PermissionInfo.PROTECTION_FLAG_RUNTIME_ONLY);
+        if (otherProtectionFlags != 0
+                && permission.getProtection() != PermissionInfo.PROTECTION_SIGNATURE
+                && permission.getProtection() != PermissionInfo.PROTECTION_INTERNAL) {
+            return input.error("<permission> protectionLevel specifies a non-instant, non-appop,"
+                    + " non-runtimeOnly flag but is not based on signature or internal type");
         }
 
         return ComponentParseUtils.parseAllMetaData(pkg, res, parser, tag, permission, input);
