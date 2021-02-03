@@ -249,6 +249,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
@@ -14918,7 +14919,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void updateDeviceIdleTempWhitelist(int[] appids, int changingUid, boolean adding,
-                long durationMs, @BroadcastOptions.TempAllowListType int type) {
+                long durationMs, @TempAllowListType int type) {
             synchronized (ActivityManagerService.this) {
                 mDeviceIdleTempAllowlist = appids;
                 if (adding) {
