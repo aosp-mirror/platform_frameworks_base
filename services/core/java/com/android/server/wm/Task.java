@@ -2092,7 +2092,9 @@ class Task extends WindowContainer<WindowContainer> {
                 td.setEnsureNavigationBarContrastWhenTransparent(
                         atd.getEnsureNavigationBarContrastWhenTransparent());
             }
-
+            if (td.getBackgroundColorFloating() == 0) {
+                td.setBackgroundColorFloating(atd.getBackgroundColorFloating());
+            }
         }
 
         // End search once we get to root.
