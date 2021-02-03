@@ -145,11 +145,11 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
 
     private final LockoutFrameworkImpl.LockoutResetCallback mLockoutResetCallback =
             new LockoutFrameworkImpl.LockoutResetCallback() {
-        @Override
-        public void onLockoutReset(int userId) {
-            mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorProperties.sensorId);
-        }
-    };
+                @Override
+                public void onLockoutReset(int userId) {
+                    mLockoutResetDispatcher.notifyLockoutResetCallbacks(mSensorProperties.sensorId);
+                }
+            };
 
     private final UserSwitchObserver mUserSwitchObserver = new SynchronousUserSwitchObserver() {
         @Override
@@ -356,7 +356,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
         final int maxEnrollmentsPerUser = mContext.getResources()
                 .getInteger(R.integer.config_fingerprintMaxTemplatesPerUser);
 
-        mSensorProperties = new FingerprintSensorPropertiesInternal(sensorId,
+        mSensorProperties = new FingerprintSensorPropertiesInternal(context, sensorId,
                 Utils.authenticatorStrengthToPropertyStrength(strength), maxEnrollmentsPerUser,
                 sensorType, resetLockoutRequiresHardwareAuthToken);
     }
@@ -631,13 +631,13 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
             @NonNull IFingerprintServiceReceiver receiver, int fingerId, int userId,
             @NonNull String opPackageName) {
         mHandler.post(() -> {
-           scheduleUpdateActiveUserWithoutHandler(userId);
+            scheduleUpdateActiveUserWithoutHandler(userId);
 
-           final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
-                   mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), fingerId,
-                   userId, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
-                   mSensorProperties.sensorId, mAuthenticatorIds);
-           mScheduler.scheduleClientMonitor(client);
+            final FingerprintRemovalClient client = new FingerprintRemovalClient(mContext,
+                    mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), fingerId,
+                    userId, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
+                    mSensorProperties.sensorId, mAuthenticatorIds);
+            mScheduler.scheduleClientMonitor(client);
         });
     }
 
