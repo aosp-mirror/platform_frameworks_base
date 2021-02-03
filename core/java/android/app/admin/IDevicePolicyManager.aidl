@@ -500,4 +500,5 @@ interface IDevicePolicyManager {
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
 
     void resetDefaultCrossProfileIntentFilters(int userId);
+    boolean canAdminGrantSensorsPermissionsForUser(int userId);
 }
