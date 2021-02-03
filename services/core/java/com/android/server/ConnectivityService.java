@@ -2703,9 +2703,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 pw.println(nai.requestAt(i).toString());
             }
             pw.decreaseIndent();
-            pw.println("Lingered:");
+            pw.println("Inactivity Timers:");
             pw.increaseIndent();
-            nai.dumpLingerTimers(pw);
+            nai.dumpInactivityTimers(pw);
             pw.decreaseIndent();
             pw.decreaseIndent();
         }
@@ -3300,27 +3300,27 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     /**
-     * Updates the linger state from the network requests inside the NAI.
+     * Updates the inactivity state from the network requests inside the NAI.
      * @param nai the agent info to update
      * @param now the timestamp of the event causing this update
-     * @return whether the network was lingered as a result of this update
+     * @return whether the network was inactive as a result of this update
      */
-    private boolean updateLingerState(@NonNull final NetworkAgentInfo nai, final long now) {
-        // 1. Update the linger timer. If it's changed, reschedule or cancel the alarm.
-        // 2. If the network was lingering and there are now requests, unlinger it.
+    private boolean updateInactivityState(@NonNull final NetworkAgentInfo nai, final long now) {
+        // 1. Update the inactivity timer. If it's changed, reschedule or cancel the alarm.
+        // 2. If the network was inactive and there are now requests, unset inactive.
         // 3. If this network is unneeded (which implies it is not lingering), and there is at least
-        //    one lingered request, start lingering.
-        nai.updateLingerTimer();
+        //    one lingered request, set inactive.
+        nai.updateInactivityTimer();
         if (nai.isLingering() && nai.numForegroundNetworkRequests() > 0) {
-            if (DBG) log("Unlingering " + nai.toShortString());
-            nai.unlinger();
+            if (DBG) log("Unsetting inactive " + nai.toShortString());
+            nai.unsetInactive();
             logNetworkEvent(nai, NetworkEvent.NETWORK_UNLINGER);
-        } else if (unneeded(nai, UnneededFor.LINGER) && nai.getLingerExpiry() > 0) {
+        } else if (unneeded(nai, UnneededFor.LINGER) && nai.getInactivityExpiry() > 0) {
             if (DBG) {
-                final int lingerTime = (int) (nai.getLingerExpiry() - now);
-                log("Lingering " + nai.toShortString() + " for " + lingerTime + "ms");
+                final int lingerTime = (int) (nai.getInactivityExpiry() - now);
+                log("Setting inactive " + nai.toShortString() + " for " + lingerTime + "ms");
             }
-            nai.linger();
+            nai.setInactive();
             logNetworkEvent(nai, NetworkEvent.NETWORK_LINGER);
             return true;
         }
@@ -3456,7 +3456,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
         }
-        nai.clearLingerState();
+        nai.clearInactivityState();
         // TODO: mLegacyTypeTracker.remove seems redundant given there's a full rematch right after.
         //  Currently, deleting it breaks tests that check for the fallback network disconnecting.
         //  Find out why, fix the rematch code, and delete this.
@@ -3799,7 +3799,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // If there are still lingered requests on this network, don't tear it down,
             // but resume lingering instead.
             final long now = SystemClock.elapsedRealtime();
-            if (updateLingerState(nai, now)) {
+            if (updateInactivityState(nai, now)) {
                 notifyNetworkLosing(nai, now);
             }
             if (unneeded(nai, UnneededFor.TEARDOWN)) {
@@ -7186,7 +7186,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         // If we get here it means that the last linger timeout for this network expired. So there
         // must be no other active linger timers, and we must stop lingering.
-        oldNetwork.clearLingerState();
+        oldNetwork.clearInactivityState();
 
         if (unneeded(oldNetwork, UnneededFor.TEARDOWN)) {
             // Tear the network down.
@@ -7557,7 +7557,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // if the state has not changed : the source of truth is controlled with
             // NetworkAgentInfo#lingerRequest and NetworkAgentInfo#unlingerRequest, which have been
             // called while rematching the individual networks above.
-            if (updateLingerState(nai, now)) {
+            if (updateInactivityState(nai, now)) {
                 lingeredNetworks.add(nai);
             }
         }
@@ -7584,7 +7584,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // Tear down all unneeded networks.
         for (NetworkAgentInfo nai : mNetworkAgentInfos) {
             if (unneeded(nai, UnneededFor.TEARDOWN)) {
-                if (nai.getLingerExpiry() > 0) {
+                if (nai.getInactivityExpiry() > 0) {
                     // This network has active linger timers and no requests, but is not
                     // lingering. Linger it.
                     //
@@ -7592,7 +7592,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     // and became unneeded due to another network improving its score to the
                     // point where this network will no longer be able to satisfy any requests
                     // even if it validates.
-                    if (updateLingerState(nai, now)) {
+                    if (updateInactivityState(nai, now)) {
                         notifyNetworkLosing(nai, now);
                     }
                 } else {
@@ -7869,7 +7869,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Notify the requests on this NAI that the network is now lingered.
     private void notifyNetworkLosing(@NonNull final NetworkAgentInfo nai, final long now) {
-        final int lingerTime = (int) (nai.getLingerExpiry() - now);
+        final int lingerTime = (int) (nai.getInactivityExpiry() - now);
         notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_LOSING, lingerTime);
     }
 
