@@ -21,8 +21,8 @@
 
 #include "FrontendClient.h"
 
-using ::aidl::android::media::tv::tuner::TunerFrontendDvbtSettings;
 using ::aidl::android::media::tv::tuner::TunerFrontendScanAtsc3PlpInfo;
+using ::aidl::android::media::tv::tuner::TunerFrontendUnionSettings;
 
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogSifStandard;
 using ::android::hardware::tv::tuner::V1_0::FrontendAnalogType;
@@ -43,6 +43,7 @@ using ::android::hardware::tv::tuner::V1_1::Constant;
 using ::android::hardware::tv::tuner::V1_1::FrontendDtmbModulation;
 using ::android::hardware::tv::tuner::V1_1::FrontendDvbtConstellation;
 using ::android::hardware::tv::tuner::V1_1::FrontendModulation;
+using ::android::hardware::tv::tuner::V1_1::FrontendSpectralInversion;
 
 namespace android {
 
@@ -86,14 +87,13 @@ void FrontendClient::setHidlFrontend(sp<IFrontend> frontend) {
 Result FrontendClient::tune(const FrontendSettings& settings,
         const FrontendSettingsExt1_1& settingsExt1_1) {
     if (mTunerFrontend != NULL) {
-        // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
         TunerFrontendSettings tunerFeSettings = getAidlFrontendSettings(settings, settingsExt1_1);
         Status s = mTunerFrontend->tune(tunerFeSettings);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     Result result;
-    if (mFrontend_1_1 != NULL) {
+    if (mFrontend_1_1 != NULL && validateExtendedSettings(settingsExt1_1)) {
         result = mFrontend_1_1->tune_1_1(settings, settingsExt1_1);
         return result;
     }
@@ -123,14 +123,13 @@ Result FrontendClient::stopTune() {
 Result FrontendClient::scan(const FrontendSettings& settings, FrontendScanType type,
         const FrontendSettingsExt1_1& settingsExt1_1) {
     if (mTunerFrontend != NULL) {
-        // TODO: aidl frontend settings to include Tuner HAL 1.1 settings
         TunerFrontendSettings tunerFeSettings = getAidlFrontendSettings(settings, settingsExt1_1);
         Status s = mTunerFrontend->scan(tunerFeSettings, (int)type);
         return ClientHelper::getServiceSpecificErrorCode(s);
     }
 
     Result result;
-    if (mFrontend_1_1 != NULL) {
+    if (mFrontend_1_1 != NULL && validateExtendedSettings(settingsExt1_1)) {
         result = mFrontend_1_1->scan_1_1(settings, type, settingsExt1_1);
         return result;
     }
@@ -293,6 +292,8 @@ Result FrontendClient::close() {
     return Result::INVALID_STATE;
 }
 
+/////////////// TunerFrontend Helper Methods ///////////////////////
+
 shared_ptr<ITunerFrontend> FrontendClient::getAidlFrontend() {
     return mTunerFrontend;
 }
@@ -302,58 +303,251 @@ int FrontendClient::getId() {
 }
 
 TunerFrontendSettings FrontendClient::getAidlFrontendSettings(const FrontendSettings& settings,
-        const FrontendSettingsExt1_1& /*settingsExt1_1*/) {
-    // TODO: complete hidl to aidl frontend settings conversion
-    TunerFrontendSettings s;
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    bool isExtended = validateExtendedSettings(settingsExt1_1);
+    TunerFrontendSettings s{
+        .isExtended = isExtended,
+        .endFrequency = (int) settingsExt1_1.endFrequency,
+        .inversion = (int) settingsExt1_1.inversion,
+    };
+
+    if (settingsExt1_1.settingExt.getDiscriminator()
+            == FrontendSettingsExt1_1::SettingsExt::hidl_discriminator::dtmb) {
+        s.settings.set<TunerFrontendUnionSettings::dtmb>(getAidlDtmbSettings(settingsExt1_1));
+        return s;
+    }
+
     switch (settings.getDiscriminator()) {
         case FrontendSettings::hidl_discriminator::analog: {
+            s.settings.set<TunerFrontendUnionSettings::analog>(
+                    getAidlAnalogSettings(settings, settingsExt1_1));
             break;
         }
         case FrontendSettings::hidl_discriminator::atsc: {
+            s.settings.set<TunerFrontendUnionSettings::atsc>(getAidlAtscSettings(settings));
             break;
         }
         case FrontendSettings::hidl_discriminator::atsc3: {
+            s.settings.set<TunerFrontendUnionSettings::atsc3>(getAidlAtsc3Settings(settings));
             break;
         }
         case FrontendSettings::hidl_discriminator::dvbs: {
+            s.settings.set<TunerFrontendUnionSettings::dvbs>(
+                    getAidlDvbsSettings(settings, settingsExt1_1));
             break;
         }
         case FrontendSettings::hidl_discriminator::dvbc: {
+            s.settings.set<TunerFrontendUnionSettings::cable>(
+                    getAidlCableSettings(settings, settingsExt1_1));
             break;
         }
         case FrontendSettings::hidl_discriminator::dvbt: {
-            TunerFrontendDvbtSettings dvbtSettings{
-                .frequency = (int)settings.dvbt().frequency,
-                .transmissionMode = (int)settings.dvbt().transmissionMode,
-                .bandwidth = (int)settings.dvbt().bandwidth,
-                .constellation = (int)settings.dvbt().constellation,
-                .hierarchy = (int)settings.dvbt().hierarchy,
-                .hpCodeRate = (int)settings.dvbt().hpCoderate,
-                .lpCodeRate = (int)settings.dvbt().lpCoderate,
-                .guardInterval = (int)settings.dvbt().guardInterval,
-                .isHighPriority = settings.dvbt().isHighPriority,
-                .standard = (int)settings.dvbt().standard,
-                .isMiso = settings.dvbt().isMiso,
-                .plpMode = (int)settings.dvbt().plpMode,
-                .plpId = (int)settings.dvbt().plpId,
-                .plpGroupId = (int)settings.dvbt().plpGroupId,
-            };
-            s.set<TunerFrontendSettings::dvbt>(dvbtSettings);
+            s.settings.set<TunerFrontendUnionSettings::dvbt>(
+                    getAidlDvbtSettings(settings, settingsExt1_1));
             break;
         }
         case FrontendSettings::hidl_discriminator::isdbs: {
+            s.settings.set<TunerFrontendUnionSettings::isdbs>(getAidlIsdbsSettings(settings));
             break;
         }
         case FrontendSettings::hidl_discriminator::isdbs3: {
+            s.settings.set<TunerFrontendUnionSettings::isdbs3>(getAidlIsdbs3Settings(settings));
             break;
         }
         case FrontendSettings::hidl_discriminator::isdbt: {
+            s.settings.set<TunerFrontendUnionSettings::isdbt>(getAidlIsdbtSettings(settings));
             break;
         }
         default:
             break;
     }
     return s;
+}
+
+TunerFrontendAnalogSettings FrontendClient::getAidlAnalogSettings(const FrontendSettings& settings,
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    TunerFrontendAnalogSettings analogSettings{
+        .frequency = (int)settings.analog().frequency,
+        .signalType = (int)settings.analog().type,
+        .sifStandard = (int)settings.analog().sifStandard,
+    };
+    if (settingsExt1_1.settingExt.getDiscriminator()
+            == FrontendSettingsExt1_1::SettingsExt::hidl_discriminator::analog) {
+        analogSettings.isExtended = true;
+        analogSettings.aftFlag = (int)settingsExt1_1.settingExt.analog().aftFlag;
+    } else {
+        analogSettings.isExtended = false;
+    }
+    return analogSettings;
+}
+
+TunerFrontendDvbsSettings FrontendClient::getAidlDvbsSettings(const FrontendSettings& settings,
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    TunerFrontendDvbsSettings dvbsSettings{
+        .frequency = (int)settings.dvbs().frequency,
+        .modulation = (int)settings.dvbs().modulation,
+        .codeRate = {
+            .fec = (long)settings.dvbs().coderate.fec,
+            .isLinear = settings.dvbs().coderate.isLinear,
+            .isShortFrames = settings.dvbs().coderate.isShortFrames,
+            .bitsPer1000Symbol = (int)settings.dvbs().coderate.bitsPer1000Symbol,
+        },
+        .symbolRate = (int)settings.dvbs().symbolRate,
+        .rolloff = (int)settings.dvbs().rolloff,
+        .pilot = (int)settings.dvbs().pilot,
+        .inputStreamId = (int)settings.dvbs().inputStreamId,
+        .standard = (int)settings.dvbs().standard,
+        .vcm = (int)settings.dvbs().vcmMode,
+    };
+    if (settingsExt1_1.settingExt.getDiscriminator()
+            == FrontendSettingsExt1_1::SettingsExt::hidl_discriminator::dvbs) {
+        dvbsSettings.isExtended = true;
+        dvbsSettings.scanType = (int)settingsExt1_1.settingExt.dvbs().scanType;
+        dvbsSettings.isDiseqcRxMessage = settingsExt1_1.settingExt.dvbs().isDiseqcRxMessage;
+    } else {
+        dvbsSettings.isExtended = false;
+    }
+    return dvbsSettings;
+}
+
+TunerFrontendCableSettings FrontendClient::getAidlCableSettings(const FrontendSettings& settings,
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    TunerFrontendCableSettings cableSettings{
+        .frequency = (int)settings.dvbc().frequency,
+        .modulation = (int)settings.dvbc().modulation,
+        .innerFec = (long)settings.dvbc().fec,
+        .symbolRate = (int)settings.dvbc().symbolRate,
+        .outerFec = (int)settings.dvbc().outerFec,
+        .annex = (int)settings.dvbc().annex,
+        .spectralInversion = (int)settings.dvbc().spectralInversion,
+    };
+    if (settingsExt1_1.settingExt.getDiscriminator()
+            == FrontendSettingsExt1_1::SettingsExt::hidl_discriminator::dvbc) {
+        cableSettings.isExtended = true;
+        cableSettings.interleaveMode = (int)settingsExt1_1.settingExt.dvbc().interleaveMode;
+        cableSettings.bandwidth = (int)settingsExt1_1.settingExt.dvbc().bandwidth;
+    } else {
+        cableSettings.isExtended = false;
+    }
+    return cableSettings;
+}
+
+TunerFrontendDvbtSettings FrontendClient::getAidlDvbtSettings(const FrontendSettings& settings,
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    TunerFrontendDvbtSettings dvbtSettings{
+        .frequency = (int)settings.dvbt().frequency,
+        .transmissionMode = (int)settings.dvbt().transmissionMode,
+        .bandwidth = (int)settings.dvbt().bandwidth,
+        .constellation = (int)settings.dvbt().constellation,
+        .hierarchy = (int)settings.dvbt().hierarchy,
+        .hpCodeRate = (int)settings.dvbt().hpCoderate,
+        .lpCodeRate = (int)settings.dvbt().lpCoderate,
+        .guardInterval = (int)settings.dvbt().guardInterval,
+        .isHighPriority = settings.dvbt().isHighPriority,
+        .standard = (int)settings.dvbt().standard,
+        .isMiso = settings.dvbt().isMiso,
+        .plpMode = (int)settings.dvbt().plpMode,
+        .plpId = (int)settings.dvbt().plpId,
+        .plpGroupId = (int)settings.dvbt().plpGroupId,
+    };
+    if (settingsExt1_1.settingExt.getDiscriminator()
+            == FrontendSettingsExt1_1::SettingsExt::hidl_discriminator::dvbt) {
+        dvbtSettings.isExtended = true;
+        dvbtSettings.constellation = (int)settingsExt1_1.settingExt.dvbt().constellation;
+        dvbtSettings.transmissionMode =
+                (int)settingsExt1_1.settingExt.dvbt().transmissionMode;
+    } else {
+        dvbtSettings.isExtended = false;
+    }
+    return dvbtSettings;
+}
+
+TunerFrontendDtmbSettings FrontendClient::getAidlDtmbSettings(
+        const FrontendSettingsExt1_1& settingsExt1_1) {
+    TunerFrontendDtmbSettings dtmbSettings{
+        .frequency = (int)settingsExt1_1.settingExt.dtmb().frequency,
+        .transmissionMode = (int)settingsExt1_1.settingExt.dtmb().transmissionMode,
+        .bandwidth = (int)settingsExt1_1.settingExt.dtmb().bandwidth,
+        .modulation = (int)settingsExt1_1.settingExt.dtmb().modulation,
+        .codeRate = (int)settingsExt1_1.settingExt.dtmb().codeRate,
+        .guardInterval = (int)settingsExt1_1.settingExt.dtmb().guardInterval,
+        .interleaveMode = (int)settingsExt1_1.settingExt.dtmb().interleaveMode,
+    };
+    return dtmbSettings;
+}
+
+TunerFrontendAtscSettings FrontendClient::getAidlAtscSettings(const FrontendSettings& settings) {
+    TunerFrontendAtscSettings atscSettings{
+        .frequency = (int)settings.atsc().frequency,
+        .modulation = (int)settings.atsc().modulation,
+    };
+    return atscSettings;
+}
+
+TunerFrontendAtsc3Settings FrontendClient::getAidlAtsc3Settings(const FrontendSettings& settings) {
+    TunerFrontendAtsc3Settings atsc3Settings{
+        .frequency = (int)settings.atsc3().frequency,
+        .bandwidth = (int)settings.atsc3().bandwidth,
+        .demodOutputFormat = (int)settings.atsc3().demodOutputFormat,
+    };
+    atsc3Settings.plpSettings.resize(settings.atsc3().plpSettings.size());
+    for (auto plpSetting : settings.atsc3().plpSettings) {
+        atsc3Settings.plpSettings.push_back({
+            .plpId = (int)plpSetting.plpId,
+            .modulation = (int)plpSetting.modulation,
+            .interleaveMode = (int)plpSetting.interleaveMode,
+            .codeRate = (int)plpSetting.codeRate,
+            .fec = (int)plpSetting.fec,
+        });
+    }
+    return atsc3Settings;
+}
+
+TunerFrontendIsdbsSettings FrontendClient::getAidlIsdbsSettings(const FrontendSettings& settings) {
+    TunerFrontendIsdbsSettings isdbsSettings{
+        .frequency = (int)settings.isdbs().frequency,
+        .streamId = (int)settings.isdbs().streamId,
+        .streamIdType = (int)settings.isdbs().streamIdType,
+        .modulation = (int)settings.isdbs().modulation,
+        .codeRate = (int)settings.isdbs().coderate,
+        .symbolRate = (int)settings.isdbs().symbolRate,
+        .rolloff = (int)settings.isdbs().rolloff,
+    };
+    return isdbsSettings;
+}
+
+TunerFrontendIsdbs3Settings FrontendClient::getAidlIsdbs3Settings(
+        const FrontendSettings& settings) {
+    TunerFrontendIsdbs3Settings isdbs3Settings{
+        .frequency = (int)settings.isdbs3().frequency,
+        .streamId = (int)settings.isdbs3().streamId,
+        .streamIdType = (int)settings.isdbs3().streamIdType,
+        .modulation = (int)settings.isdbs3().modulation,
+        .codeRate = (int)settings.isdbs3().coderate,
+        .symbolRate = (int)settings.isdbs3().symbolRate,
+        .rolloff = (int)settings.isdbs3().rolloff,
+    };
+    return isdbs3Settings;
+}
+
+TunerFrontendIsdbtSettings FrontendClient::getAidlIsdbtSettings(const FrontendSettings& settings) {
+    TunerFrontendIsdbtSettings isdbtSettings{
+        .frequency = (int)settings.isdbt().frequency,
+        .modulation = (int)settings.isdbt().modulation,
+        .bandwidth = (int)settings.isdbt().bandwidth,
+        .mode = (int)settings.isdbt().mode,
+        .codeRate = (int)settings.isdbt().coderate,
+        .guardInterval = (int)settings.isdbt().guardInterval,
+        .serviceAreaId = (int)settings.isdbt().serviceAreaId,
+    };
+    return isdbtSettings;
+}
+
+bool FrontendClient::validateExtendedSettings(const FrontendSettingsExt1_1& settingsExt1_1) {
+    return settingsExt1_1.endFrequency != (uint32_t)Constant::INVALID_FRONTEND_SETTING_FREQUENCY
+            || settingsExt1_1.inversion != FrontendSpectralInversion::UNDEFINED
+            || settingsExt1_1.settingExt.getDiscriminator()
+                    != FrontendSettingsExt1_1::SettingsExt::hidl_discriminator::noinit;
 }
 
 /////////////// TunerFrontendCallback ///////////////////////
