@@ -18,7 +18,6 @@ package com.android.settingslib.widget;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.text.TextUtils;
 import android.util.AttributeSet;
 
 import androidx.core.content.res.TypedArrayUtils;
@@ -40,7 +39,7 @@ public class MainSwitchPreference extends TwoStatePreference {
     private final List<OnMainSwitchChangeListener> mSwitchChangeListeners = new ArrayList<>();
 
     private MainSwitchBar mMainSwitchBar;
-    private String mTitle;
+    private CharSequence mTitle;
 
     private RestrictedLockUtils.EnforcedAdmin mEnforcedAdmin;
 
@@ -81,24 +80,28 @@ public class MainSwitchPreference extends TwoStatePreference {
         setLayoutResource(R.layout.main_switch_layout);
 
         if (attrs != null) {
-            TypedArray a = context.obtainStyledAttributes(attrs,
+            final TypedArray a = context.obtainStyledAttributes(attrs,
                     androidx.preference.R.styleable.Preference, 0 /*defStyleAttr*/,
                     0 /*defStyleRes*/);
             final CharSequence title = TypedArrayUtils.getText(a,
                     androidx.preference.R.styleable.Preference_title,
                     androidx.preference.R.styleable.Preference_android_title);
-            if (!TextUtils.isEmpty(title)) {
-                setTitle(title.toString());
-            }
+            setTitle(title);
             a.recycle();
         }
     }
 
-    /**
-     * Set the preference title text
-     */
-    public void setTitle(String text) {
-        mTitle = text;
+    @Override
+    public void setChecked(boolean checked) {
+        super.setChecked(checked);
+        if (mMainSwitchBar != null) {
+            mMainSwitchBar.setChecked(checked);
+        }
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle = title;
         if (mMainSwitchBar != null) {
             mMainSwitchBar.setTitle(mTitle);
         }
