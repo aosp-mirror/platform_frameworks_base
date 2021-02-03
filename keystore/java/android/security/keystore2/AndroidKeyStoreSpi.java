@@ -535,6 +535,12 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                         spec.getKeyValidityForConsumptionEnd()
                 ));
             }
+            if (spec.getMaxUsageCount() != KeyProperties.UNRESTRICTED_USAGE_COUNT) {
+                importArgs.add(KeyStore2ParameterUtils.makeInt(
+                        KeymasterDefs.KM_TAG_USAGE_COUNT_LIMIT,
+                        spec.getMaxUsageCount()
+                ));
+            }
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new KeyStoreException(e);
         }
@@ -770,6 +776,12 @@ public class AndroidKeyStoreSpi extends KeyStoreSpi {
                 importArgs.add(KeyStore2ParameterUtils.makeDate(
                         KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
                         params.getKeyValidityForConsumptionEnd()
+                ));
+            }
+            if (params.getMaxUsageCount() != KeyProperties.UNRESTRICTED_USAGE_COUNT) {
+                importArgs.add(KeyStore2ParameterUtils.makeInt(
+                        KeymasterDefs.KM_TAG_USAGE_COUNT_LIMIT,
+                        params.getMaxUsageCount()
                 ));
             }
         } catch (IllegalArgumentException | IllegalStateException e) {

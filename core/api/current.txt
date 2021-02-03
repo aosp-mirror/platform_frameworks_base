@@ -12134,6 +12134,8 @@ package android.content.pm {
     field public static final String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
     field public static final String FEATURE_IRIS = "android.hardware.biometrics.iris";
+    field public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY = "android.hardware.keystore.limited_use_key";
+    field public static final String FEATURE_KEYSTORE_SINGLE_USE_KEY = "android.hardware.keystore.single_use_key";
     field public static final String FEATURE_LEANBACK = "android.software.leanback";
     field public static final String FEATURE_LEANBACK_ONLY = "android.software.leanback_only";
     field public static final String FEATURE_LIVE_TV = "android.software.live_tv";
@@ -36205,6 +36207,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
     method @NonNull public String getKeystoreAlias();
+    method public int getMaxUsageCount();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36241,6 +36244,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityStart(java.util.Date);
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setMaxUsageCount(int);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUnlockedDeviceRequired(boolean);
@@ -36263,6 +36267,7 @@ package android.security.keystore {
     method public String getKeystoreAlias();
     method public int getOrigin();
     method public int getPurposes();
+    method public int getRemainingUsageCount();
     method public int getSecurityLevel();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36332,6 +36337,7 @@ package android.security.keystore {
     field public static final int SECURITY_LEVEL_UNKNOWN_SECURE = -1; // 0xffffffff
     field public static final String SIGNATURE_PADDING_RSA_PKCS1 = "PKCS1";
     field public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
+    field public static final int UNRESTRICTED_USAGE_COUNT = -1; // 0xffffffff
   }
 
   public final class KeyProtection implements java.security.KeyStore.ProtectionParameter {
@@ -36341,6 +36347,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForConsumptionEnd();
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
+    method public int getMaxUsageCount();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36366,6 +36373,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityStart(java.util.Date);
+    method @NonNull public android.security.keystore.KeyProtection.Builder setMaxUsageCount(int);
     method @NonNull public android.security.keystore.KeyProtection.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyProtection.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyProtection.Builder setUnlockedDeviceRequired(boolean);

@@ -907,4 +907,9 @@ public abstract class KeyProperties {
                         + uid);
         }
     }
+
+    /**
+     * This value indicates that there is no restriction on the number of times the key can be used.
+     */
+    public static final int UNRESTRICTED_USAGE_COUNT = -1;
 }

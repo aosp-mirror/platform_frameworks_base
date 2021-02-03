@@ -108,6 +108,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeBoolean(mSpec.isUserConfirmationRequired());
         out.writeBoolean(mSpec.isUnlockedDeviceRequired());
         out.writeBoolean(mSpec.isCriticalToDeviceEncryption());
+        out.writeInt(mSpec.getMaxUsageCount());
     }
 
     private static Date readDateOrNull(Parcel in) {
@@ -166,6 +167,7 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         final boolean userConfirmationRequired = in.readBoolean();
         final boolean unlockedDeviceRequired = in.readBoolean();
         final boolean criticalToDeviceEncryption = in.readBoolean();
+        final int maxUsageCount = in.readInt();
         // The KeyGenParameterSpec is intentionally not constructed using a Builder here:
         // The intention is for this class to break if new parameters are added to the
         // KeyGenParameterSpec constructor (whereas using a builder would silently drop them).
@@ -199,7 +201,8 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
                 isStrongBoxBacked,
                 userConfirmationRequired,
                 unlockedDeviceRequired,
-                criticalToDeviceEncryption);
+                criticalToDeviceEncryption,
+                maxUsageCount);
     }
 
     public static final @android.annotation.NonNull Creator<ParcelableKeyGenParameterSpec> CREATOR = new Creator<ParcelableKeyGenParameterSpec>() {
