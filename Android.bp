@@ -1295,6 +1295,18 @@ python_binary_host {
     ],
 }
 
+python_binary_host {
+    name: "update_font_metadata",
+    defaults: ["base_default"],
+    main: "tools/fonts/update_font_metadata.py",
+    srcs: [
+        "tools/fonts/update_font_metadata.py",
+    ],
+    libs: [
+        "fontTools",
+    ],
+}
+
 filegroup {
     name: "framework-media-annotation-srcs",
     srcs: [
