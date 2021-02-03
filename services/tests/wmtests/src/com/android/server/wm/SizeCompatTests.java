@@ -52,14 +52,12 @@ import static org.mockito.Mockito.doCallRealMethod;
 
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
-import android.app.TaskStackListener;
 import android.app.WindowConfiguration;
 import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
-import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
 
@@ -71,8 +69,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
-
-import java.util.ArrayList;
 
 /**
  * Tests for Size Compatibility mode.
@@ -476,52 +472,6 @@ public class SizeCompatTests extends WindowTestsBase {
         waitHandlerIdle(mAtm.mH);
         verify(mAtm.mAmInternal).killProcess(
                 eq(mActivity.app.mName), eq(mActivity.app.mUid), anyString());
-    }
-
-    /**
-     * Ensures that {@link TaskStackListener} can receive callback about the activity in size
-     * compatibility mode.
-     *
-     * TODO(b/178327644) Remove after update DC#handleActivitySizeCompatModeIfNeeded
-     */
-    @Test
-    public void testHandleActivitySizeCompatMode() {
-        setUpDisplaySizeWithApp(1000, 2000);
-        doReturn(true).when(mTask).isOrganized();
-        ActivityRecord activity = mActivity;
-        activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
-        prepareUnresizable(mActivity, -1.f /* maxAspect */, SCREEN_ORIENTATION_PORTRAIT);
-        assertFitted();
-
-        final ArrayList<IBinder> compatTokens = new ArrayList<>();
-        mAtm.getTaskChangeNotificationController().registerTaskStackListener(
-                new TaskStackListener() {
-                    @Override
-                    public void onSizeCompatModeActivityChanged(int displayId,
-                            IBinder activityToken) {
-                        compatTokens.add(activityToken);
-                    }
-                });
-
-        // Resize the display so that the activity exercises size-compat mode.
-        resizeDisplay(mTask.mDisplayContent, 1000, 2500);
-
-        // Expect the exact token when the activity is in size compatibility mode.
-        assertEquals(1, compatTokens.size());
-        assertEquals(activity.appToken, compatTokens.get(0));
-
-        compatTokens.clear();
-        // Make the activity resizable again by restarting it
-        activity.info.resizeMode = RESIZE_MODE_RESIZEABLE;
-        activity.mVisibleRequested = true;
-        activity.restartProcessIfVisible();
-        // The full lifecycle isn't hooked up so manually set state to resumed
-        activity.setState(Task.ActivityState.RESUMED, "testHandleActivitySizeCompatMode");
-        mTask.mDisplayContent.handleActivitySizeCompatModeIfNeeded(activity);
-
-        // Expect null token when switching to non-size-compat mode activity.
-        assertEquals(1, compatTokens.size());
-        assertEquals(null, compatTokens.get(0));
     }
 
     /**
