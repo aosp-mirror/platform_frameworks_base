@@ -95,9 +95,21 @@ public class FullscreenTaskListener implements ShellTaskOrganizer.TaskListener {
     }
 
     @Override
+    public boolean supportSizeCompatUI() {
+        return true;
+    }
+
+    @Override
+    public void attachChildSurfaceToTask(int taskId, SurfaceControl.Builder b) {
+        if (!mLeashByTaskId.contains(taskId)) {
+            throw new IllegalArgumentException("There is no surface for taskId=" + taskId);
+        }
+        b.setParent(mLeashByTaskId.get(taskId));
+    }
+
+    @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
-        final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + this);
         pw.println(innerPrefix + mLeashByTaskId.size() + " Tasks");
     }

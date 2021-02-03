@@ -31,6 +31,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -104,6 +105,11 @@ public class ShellTaskOrganizerTests {
         @Override
         public void onTaskVanished(RunningTaskInfo taskInfo) {
             vanished.add(taskInfo);
+        }
+
+        @Override
+        public boolean supportSizeCompatUI() {
+            return true;
         }
     }
 
@@ -282,10 +288,10 @@ public class ShellTaskOrganizerTests {
 
         // sizeCompatActivity is null if top activity is not in size compat.
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration.windowConfiguration.getBounds(),
-                null /* sizeCompatActivity*/ , taskListener);
+                null /* taskConfig */, null /* sizeCompatActivity*/, null /* taskListener */);
 
         // sizeCompatActivity is non-null if top activity is in size compat.
+        clearInvocations(mSizeCompatUI);
         final RunningTaskInfo taskInfo2 =
                 createTaskInfo(taskInfo1.taskId, taskInfo1.getWindowingMode());
         taskInfo2.displayId = taskInfo1.displayId;
@@ -293,14 +299,12 @@ public class ShellTaskOrganizerTests {
         taskInfo2.topActivityInSizeCompat = true;
         mOrganizer.onTaskInfoChanged(taskInfo2);
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                taskInfo1.configuration.windowConfiguration.getBounds(),
-                taskInfo1.topActivityToken,
-                taskListener);
+                taskInfo1.configuration, taskInfo1.topActivityToken, taskListener);
 
+        clearInvocations(mSizeCompatUI);
         mOrganizer.onTaskVanished(taskInfo1);
         verify(mSizeCompatUI).onSizeCompatInfoChanged(taskInfo1.displayId, taskInfo1.taskId,
-                null /* taskConfig */, null /* sizeCompatActivity*/,
-                null /* taskListener */);
+                null /* taskConfig */, null /* sizeCompatActivity*/, null /* taskListener */);
     }
 
     private static RunningTaskInfo createTaskInfo(int taskId, int windowingMode) {
