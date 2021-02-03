@@ -300,17 +300,14 @@ class LoadedArsc {
  public:
   // Load a resource table from memory pointed to by `data` of size `len`.
   // The lifetime of `data` must out-live the LoadedArsc returned from this method.
-  // If `system` is set to true, the LoadedArsc is considered as a system provided resource.
-  // If `load_as_shared_library` is set to true, the application package (0x7f) is treated
-  // as a shared library (0x00). When loaded into an AssetManager, the package will be assigned an
-  // ID.
-  static std::unique_ptr<const LoadedArsc> Load(incfs::map_ptr<void> data,
-                                                size_t length,
-                                                const LoadedIdmap* loaded_idmap = nullptr,
-                                                package_property_t property_flags = 0U);
+
+  static std::unique_ptr<LoadedArsc> Load(incfs::map_ptr<void> data,
+                                          size_t length,
+                                          const LoadedIdmap* loaded_idmap = nullptr,
+                                          package_property_t property_flags = 0U);
 
   // Create an empty LoadedArsc. This is used when an APK has no resources.arsc.
-  static std::unique_ptr<const LoadedArsc> CreateEmpty();
+  static std::unique_ptr<LoadedArsc> CreateEmpty();
 
   // Returns the string pool where all string resource values
   // (Res_value::dataType == Res_value::TYPE_STRING) are indexed.
