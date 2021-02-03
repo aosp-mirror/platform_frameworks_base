@@ -123,7 +123,7 @@ static int getAnonPageAdvice(const Vma& vma) {
     }
     return -1;
 }
-static bool getAnyPageAdvice(const Vma& vma) {
+static int getAnyPageAdvice(const Vma& vma) {
     if (vma.inode == 0 && !vma.is_shared) {
         return MADV_PAGEOUT;
     }
