@@ -9806,20 +9806,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
     }
 
-    private void notifyAttachForDrawables() {
-        if (mBackground != null) mBackground.onAttached(this);
-        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
-            mForegroundInfo.mDrawable.onAttached(this);
-        }
-    }
-
-    private void notifyDetachForDrawables() {
-        if (mBackground != null) mBackground.onDetached(this);
-        if (mForegroundInfo != null && mForegroundInfo.mDrawable != null) {
-            mForegroundInfo.mDrawable.onDetached(this);
-        }
-    }
-
     private void setNotifiedContentCaptureAppeared() {
         mPrivateFlags4 |= PFLAG4_NOTIFIED_CONTENT_CAPTURE_APPEARED;
         mPrivateFlags4 &= ~PFLAG4_NOTIFIED_CONTENT_CAPTURE_DISAPPEARED;
@@ -20672,7 +20658,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         notifyEnterOrExitForAutoFillIfNeeded(true);
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(true);
-        notifyAttachForDrawables();
     }
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
@@ -20722,7 +20707,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         notifyEnterOrExitForAutoFillIfNeeded(false);
         notifyAppearedOrDisappearedForContentCaptureIfNeeded(false);
-        notifyDetachForDrawables();
     }
 
     /**
@@ -23860,7 +23844,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mBackground != null) {
             if (isAttachedToWindow()) {
                 mBackground.setVisible(false, false);
-                mBackground.onDetached(this);
             }
             mBackground.setCallback(null);
             unscheduleDrawable(mBackground);
@@ -23910,7 +23893,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 background.setState(getDrawableState());
             }
             if (isAttachedToWindow()) {
-                background.onAttached(this);
                 background.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             }
 
@@ -24143,7 +24125,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (mForegroundInfo.mDrawable != null) {
             if (isAttachedToWindow()) {
                 mForegroundInfo.mDrawable.setVisible(false, false);
-                mForegroundInfo.mDrawable.onDetached(this);
             }
             mForegroundInfo.mDrawable.setCallback(null);
             unscheduleDrawable(mForegroundInfo.mDrawable);
@@ -24161,7 +24142,6 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             applyForegroundTint();
             if (isAttachedToWindow()) {
-                foreground.onAttached(this);
                 foreground.setVisible(getWindowVisibility() == VISIBLE && isShown(), false);
             }
             // Set callback last, since the view may still be initializing.
