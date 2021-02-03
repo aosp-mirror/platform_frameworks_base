@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.os.IInputConstants.DEFAULT_DISPATCHING_TIMEOUT_MILLIS;
 import static android.view.SurfaceControl.HIDDEN;
 
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.IBinder;
@@ -45,6 +46,8 @@ public class Letterbox {
     private final Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
     private final Supplier<SurfaceControl.Transaction> mTransactionFactory;
     private final Supplier<Boolean> mAreCornersRounded;
+    private final Supplier<Color> mColorSupplier;
+
     private final Rect mOuter = new Rect();
     private final Rect mInner = new Rect();
     private final LetterboxSurface mTop = new LetterboxSurface("top");
@@ -64,10 +67,12 @@ public class Letterbox {
      */
     public Letterbox(Supplier<SurfaceControl.Builder> surfaceControlFactory,
             Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<Boolean> areCornersRounded) {
+            Supplier<Boolean> areCornersRounded,
+            Supplier<Color> colorSupplier) {
         mSurfaceControlFactory = surfaceControlFactory;
         mTransactionFactory = transactionFactory;
         mAreCornersRounded = areCornersRounded;
+        mColorSupplier = colorSupplier;
     }
 
     /**
@@ -268,6 +273,7 @@ public class Letterbox {
 
         private final String mType;
         private SurfaceControl mSurface;
+        private Color mColor;
 
         private final Rect mSurfaceFrameRelative = new Rect();
         private final Rect mLayoutFrameGlobal = new Rect();
@@ -292,9 +298,8 @@ public class Letterbox {
                     .setColorLayer()
                     .setCallsite("LetterboxSurface.createSurface")
                     .build();
-            t.setLayer(mSurface, -1)
-                    .setColor(mSurface, new float[]{0, 0, 0})
-                    .setColorSpaceAgnostic(mSurface, true);
+
+            t.setLayer(mSurface, -1).setColorSpaceAgnostic(mSurface, true);
         }
 
         void attachInput(WindowState win) {
@@ -344,6 +349,14 @@ public class Letterbox {
                 if (mSurface == null) {
                     createSurface(t);
                 }
+
+                mColor = mColorSupplier.get();
+                final float[] rgbTmpFloat = new float[3];
+                rgbTmpFloat[0] = mColor.red();
+                rgbTmpFloat[1] = mColor.green();
+                rgbTmpFloat[2] = mColor.blue();
+                t.setColor(mSurface, rgbTmpFloat);
+
                 t.setPosition(mSurface, mSurfaceFrameRelative.left, mSurfaceFrameRelative.top);
                 t.setWindowCrop(mSurface, mSurfaceFrameRelative.width(),
                         mSurfaceFrameRelative.height());
@@ -358,7 +371,8 @@ public class Letterbox {
         }
 
         public boolean needsApplySurfaceChanges() {
-            return !mSurfaceFrameRelative.equals(mLayoutFrameRelative);
+            return !mSurfaceFrameRelative.equals(mLayoutFrameRelative)
+                    || mColorSupplier.get() != mColor;
         }
     }
 }
