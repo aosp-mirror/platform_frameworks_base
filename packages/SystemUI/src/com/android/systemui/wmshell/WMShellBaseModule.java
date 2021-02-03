@@ -71,6 +71,8 @@ import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
+import com.android.wm.shell.sizecompatui.SizeCompatUI;
+import com.android.wm.shell.sizecompatui.SizeCompatUIController;
 import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
@@ -293,8 +295,8 @@ public abstract class WMShellBaseModule {
     @WMSingleton
     @Provides
     static ShellTaskOrganizer provideShellTaskOrganizer(@ShellMainThread ShellExecutor mainExecutor,
-            Context context) {
-        return new ShellTaskOrganizer(mainExecutor, context);
+            Context context, SizeCompatUI sizeCompatUI) {
+        return new ShellTaskOrganizer(mainExecutor, context, sizeCompatUI);
     }
 
     @WMSingleton
@@ -380,8 +382,7 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static FullscreenTaskListener provideFullscreenTaskListener(
-            SyncTransactionQueue syncQueue) {
+    static FullscreenTaskListener provideFullscreenTaskListener(SyncTransactionQueue syncQueue) {
         return new FullscreenTaskListener(syncQueue);
     }
 
@@ -391,5 +392,13 @@ public abstract class WMShellBaseModule {
             @ShellMainThread ShellExecutor mainExecutor,
             @ShellAnimationThread ShellExecutor animExecutor) {
         return new Transitions(organizer, pool, mainExecutor, animExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static SizeCompatUI provideSizeCompatUI(Context context, DisplayController displayController,
+            DisplayImeController imeController, @ShellMainThread ShellExecutor mainExecutor) {
+        return SizeCompatUIController.create(context, displayController, imeController,
+                mainExecutor);
     }
 }
