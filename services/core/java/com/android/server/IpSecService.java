@@ -62,6 +62,7 @@ import android.util.SparseBooleanArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.NetdUtils;
 
 import libcore.io.IoUtils;
 
@@ -1317,7 +1318,7 @@ public class IpSecService extends IIpSecService.Stub {
             netd.ipSecAddTunnelInterface(intfName, localAddr, remoteAddr, ikey, okey, resourceId);
 
             Binder.withCleanCallingIdentity(() -> {
-                mNetworkManager.setInterfaceUp(intfName);
+                NetdUtils.setInterfaceUp(netd, intfName);
             });
 
             for (int selAddrFamily : ADDRESS_FAMILIES) {
