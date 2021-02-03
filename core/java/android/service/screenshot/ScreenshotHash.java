@@ -84,7 +84,8 @@ public final class ScreenshotHash implements Parcelable {
     // CHECKSTYLE:OFF Generated code
     //
     // To regenerate run:
-    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/service/screenshothash/ScreenshotHash.java
+    // $ codegen $ANDROID_BUILD_TOP/frameworks/base/core/java/android/service/screenshot
+    // /ScreenshotHash.java
     //
     // To exclude the generated code from IntelliJ auto-formatting enable (one-time):
     //   Settings > Editor > Code Style > Formatter Control
@@ -241,9 +242,9 @@ public final class ScreenshotHash implements Parcelable {
     };
 
     @DataClass.Generated(
-            time = 1611861333501L,
+            time = 1612383172822L,
             codegenVersion = "1.0.22",
-            sourceFile = "frameworks/base/core/java/android/service/screenshothash/ScreenshotHash.java",
+            sourceFile = "frameworks/base/core/java/android/service/screenshot/ScreenshotHash.java",
             inputSignatures = "private final  long mScreenshotTimeMillis\nprivate final @android.annotation.NonNull android.graphics.Rect mBoundsInWindow\nprivate final @android.annotation.NonNull java.lang.String mHashingAlgorithm\nprivate final @android.annotation.NonNull byte[] mImageHash\nprivate final @android.annotation.NonNull byte[] mHmac\npublic @android.annotation.SystemApi @android.annotation.NonNull byte[] getHmac()\nclass ScreenshotHash extends java.lang.Object implements [android.os.Parcelable]\n@com.android.internal.util.DataClass(genToString=true, genAidl=true)")
     @Deprecated
     private void __metadata() {}
