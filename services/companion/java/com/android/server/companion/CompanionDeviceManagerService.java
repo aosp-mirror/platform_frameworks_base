@@ -132,12 +132,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -174,6 +177,11 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     private static final String XML_ATTR_NOTIFY_DEVICE_NEARBY = "notify_device_nearby";
     private static final String XML_ATTR_TIME_APPROVED = "time_approved";
     private static final String XML_FILE_NAME = "companion_device_manager_associations.xml";
+
+    private static DateFormat sDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    static {
+        sDateFormat.setTimeZone(TimeZone.getDefault());
+    }
 
     private final CompanionDeviceManagerImpl mImpl;
     private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
@@ -672,12 +680,40 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             synchronized (mLock) {
                 for (UserInfo user : getAllUsers()) {
                     forEach(mCachedAssociations.get(user.id), a -> {
-                        fout.append("  ")
-                                .append("u").append("" + a.getUserId()).append(": ")
-                                .append(a.getPackageName()).append(" - ")
-                                .append(a.getDeviceMacAddress()).append('\n');
+                        fout.append("  ").append(a.toString()).append('\n');
                     });
                 }
+
+            }
+            fout.append("Currently Connected Devices:").append('\n');
+            for (int i = 0, size = mCurrentlyConnectedDevices.size(); i < size; i++) {
+                fout.append("  ").append(mCurrentlyConnectedDevices.get(i)).append('\n');
+            }
+
+            fout.append("Devices Last Nearby:").append('\n');
+            for (int i = 0, size = mDevicesLastNearby.size(); i < size; i++) {
+                String device = mDevicesLastNearby.keyAt(i);
+                Date time = mDevicesLastNearby.valueAt(i);
+                fout.append("  ").append(device).append(" -> ")
+                        .append(sDateFormat.format(time)).append('\n');
+            }
+
+            fout.append("Discovery Service State:").append('\n');
+            for (int i = 0, size = mServiceConnectors.size(); i < size; i++) {
+                int userId = mServiceConnectors.keyAt(i);
+                fout.append("  ")
+                        .append("u").append(Integer.toString(userId)).append(": ")
+                        .append(Objects.toString(mServiceConnectors.valueAt(i)))
+                        .append('\n');
+            }
+
+            fout.append("Device Listener Services State:").append('\n');
+            for (int i = 0, size = mDeviceListenerServiceConnectors.size(); i < size; i++) {
+                int userId = mDeviceListenerServiceConnectors.keyAt(i);
+                fout.append("  ")
+                        .append("u").append(Integer.toString(userId)).append(": ")
+                        .append(Objects.toString(mDeviceListenerServiceConnectors.valueAt(i)))
+                        .append('\n');
             }
         }
     }
@@ -1224,7 +1260,8 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
                 if (DEBUG) {
                     Log.i(LOG_TAG, "Device " + address
                             + " managed by " + association.getPackageName()
-                            + " disappeared; last seen on " + mDevicesLastNearby.get(address));
+                            + " disappeared; last seen on "
+                            + sDateFormat.format(mDevicesLastNearby.get(address)));
                 }
 
                 getDeviceListenerServiceConnector(association).run(
