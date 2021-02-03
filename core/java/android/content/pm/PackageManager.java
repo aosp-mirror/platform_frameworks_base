@@ -3588,6 +3588,24 @@ public abstract class PackageManager {
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_CROSS_LAYER_BLUR = "android.software.cross_layer_blur";
 
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * a Keystore implementation that can only enforce limited use key in hardware with max usage
+     * count equals to 1.
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_KEYSTORE_SINGLE_USE_KEY =
+            "android.hardware.keystore.single_use_key";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device has
+     * a Keystore implementation that can enforce limited use key in hardware with any max usage
+     * count (including count equals to 1).
+     */
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY =
+            "android.hardware.keystore.limited_use_key";
+
     /** @hide */
     public static final boolean APP_ENUMERATION_ENABLED_BY_DEFAULT = true;
 
