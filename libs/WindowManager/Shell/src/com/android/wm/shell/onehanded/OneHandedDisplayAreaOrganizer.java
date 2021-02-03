@@ -203,6 +203,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                     animateWindows(token, leash, fromBounds, toBounds, direction,
                             mEnterExitAnimationDurationMs);
                     wct.setBounds(token, toBounds);
+                    wct.setAppBounds(token, toBounds);
                 });
         applyTransaction(wct);
     }
@@ -232,6 +233,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer {
                     // DisplayRotationController will applyTransaction() after finish rotating
                     if (wct != null) {
                         wct.setBounds(token, null/* reset */);
+                        wct.setAppBounds(token, null/* reset */);
                     }
                 });
         tx.apply();
