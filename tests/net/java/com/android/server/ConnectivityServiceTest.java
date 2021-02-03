@@ -132,6 +132,7 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -252,6 +253,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.WakeupMessage;
 import com.android.internal.util.test.BroadcastInterceptingContext;
 import com.android.internal.util.test.FakeSettingsProvider;
+import com.android.net.module.util.ArrayTrackRecord;
 import com.android.server.ConnectivityService.ConnectivityDiagnosticsCallbackInfo;
 import com.android.server.connectivity.ConnectivityConstants;
 import com.android.server.connectivity.MockableSystemProperties;
@@ -906,28 +908,69 @@ public class ConnectivityServiceTest {
     }
 
     /**
-     * A NetworkFactory that allows tests to wait until any in-flight NetworkRequest add or remove
-     * operations have been processed. Before ConnectivityService can add or remove any requests,
-     * the factory must be told to expect those operations by calling expectAddRequestsWithScores or
-     * expectRemoveRequests.
+     * A NetworkFactory that allows to wait until any in-flight NetworkRequest add or remove
+     * operations have been processed and test for them.
      */
     private static class MockNetworkFactory extends NetworkFactory {
         private final ConditionVariable mNetworkStartedCV = new ConditionVariable();
         private final ConditionVariable mNetworkStoppedCV = new ConditionVariable();
         private final AtomicBoolean mNetworkStarted = new AtomicBoolean(false);
 
-        // Used to expect that requests be removed or added on a separate thread, without sleeping.
-        // Callers can call either expectAddRequestsWithScores() or expectRemoveRequests() exactly
-        // once, then cause some other thread to add or remove requests, then call
-        // waitForRequests().
-        // It is not possible to wait for both add and remove requests. When adding, the queue
-        // contains the expected score. When removing, the value is unused, all matters is the
-        // number of objects in the queue.
-        private final LinkedBlockingQueue<Integer> mExpectations;
+        static class RequestEntry {
+            @NonNull
+            public final NetworkRequest request;
 
-        // Whether we are currently expecting requests to be added or removed. Valid only if
-        // mExpectations is non-empty.
-        private boolean mExpectingAdditions;
+            RequestEntry(@NonNull final NetworkRequest request) {
+                this.request = request;
+            }
+
+            static final class Add extends RequestEntry {
+                public final int factorySerialNumber;
+
+                Add(@NonNull final NetworkRequest request, final int factorySerialNumber) {
+                    super(request);
+                    this.factorySerialNumber = factorySerialNumber;
+                }
+            }
+
+            static final class Remove extends RequestEntry {
+                Remove(@NonNull final NetworkRequest request) {
+                    super(request);
+                }
+            }
+        }
+
+        // History of received requests adds and removes.
+        private final ArrayTrackRecord<RequestEntry>.ReadHead mRequestHistory =
+                new ArrayTrackRecord<RequestEntry>().newReadHead();
+
+        private static <T> T failIfNull(@Nullable final T obj, @Nullable final String message) {
+            if (null == obj) fail(null != message ? message : "Must not be null");
+            return obj;
+        }
+
+
+        public RequestEntry.Add expectRequestAdd() {
+            return failIfNull((RequestEntry.Add) mRequestHistory.poll(TIMEOUT_MS,
+                    it -> it instanceof RequestEntry.Add), "Expected request add");
+        }
+
+        public void expectRequestAdds(final int count) {
+            for (int i = count; i > 0; --i) {
+                expectRequestAdd();
+            }
+        }
+
+        public RequestEntry.Remove expectRequestRemove() {
+            return failIfNull((RequestEntry.Remove) mRequestHistory.poll(TIMEOUT_MS,
+                    it -> it instanceof RequestEntry.Remove), "Expected request remove");
+        }
+
+        public void expectRequestRemoves(final int count) {
+            for (int i = count; i > 0; --i) {
+                expectRequestRemove();
+            }
+        }
 
         // Used to collect the networks requests managed by this factory. This is a duplicate of
         // the internal information stored in the NetworkFactory (which is private).
@@ -936,7 +979,6 @@ public class ConnectivityServiceTest {
         public MockNetworkFactory(Looper looper, Context context, String logTag,
                 NetworkCapabilities filter) {
             super(looper, context, logTag, filter);
-            mExpectations = new LinkedBlockingQueue<>();
         }
 
         public int getMyRequestCount() {
@@ -970,94 +1012,32 @@ public class ConnectivityServiceTest {
         @Override
         protected void handleAddRequest(NetworkRequest request, int score,
                 int factorySerialNumber) {
-            synchronized (mExpectations) {
-                final Integer expectedScore = mExpectations.poll(); // null if the queue is empty
-
-                assertNotNull("Added more requests than expected (" + request + " score : "
-                        + score + ")", expectedScore);
-                // If we're expecting anything, we must be expecting additions.
-                if (!mExpectingAdditions) {
-                    fail("Can't add requests while expecting requests to be removed");
-                }
-                if (expectedScore != score) {
-                    fail("Expected score was " + expectedScore + " but actual was " + score
-                            + " in added request");
-                }
-
-                // Add the request.
-                mNetworkRequests.put(request.requestId, request);
-                super.handleAddRequest(request, score, factorySerialNumber);
-                mExpectations.notify();
-            }
+            mNetworkRequests.put(request.requestId, request);
+            super.handleAddRequest(request, score, factorySerialNumber);
+            mRequestHistory.add(new RequestEntry.Add(request, factorySerialNumber));
         }
 
         @Override
         protected void handleRemoveRequest(NetworkRequest request) {
-            synchronized (mExpectations) {
-                final Integer expectedScore = mExpectations.poll(); // null if the queue is empty
+            mNetworkRequests.remove(request.requestId);
+            super.handleRemoveRequest(request);
+            mRequestHistory.add(new RequestEntry.Remove(request));
+        }
 
-                assertTrue("Removed more requests than expected", expectedScore != null);
-                // If we're expecting anything, we must be expecting removals.
-                if (mExpectingAdditions) {
-                    fail("Can't remove requests while expecting requests to be added");
-                }
+        public void assertRequestCountEquals(final int count) {
+            assertEquals(count, getMyRequestCount());
+        }
 
-                // Remove the request.
-                mNetworkRequests.remove(request.requestId);
-                super.handleRemoveRequest(request);
-                mExpectations.notify();
-            }
+        @Override
+        public void terminate() {
+            super.terminate();
+            // Make sure there are no remaining requests unaccounted for.
+            assertNull(mRequestHistory.poll(TIMEOUT_MS, r -> true));
         }
 
         // Trigger releasing the request as unfulfillable
         public void triggerUnfulfillable(NetworkRequest r) {
             super.releaseRequestAsUnfulfillableByAnyFactory(r);
-        }
-
-        private void assertNoExpectations() {
-            if (mExpectations.size() != 0) {
-                fail("Can't add expectation, " + mExpectations.size() + " already pending");
-            }
-        }
-
-        // Expects that requests with the specified scores will be added.
-        public void expectAddRequestsWithScores(final int... scores) {
-            assertNoExpectations();
-            mExpectingAdditions = true;
-            for (int score : scores) {
-                mExpectations.add(score);
-            }
-        }
-
-        // Expects that count requests will be removed.
-        public void expectRemoveRequests(final int count) {
-            assertNoExpectations();
-            mExpectingAdditions = false;
-            for (int i = 0; i < count; ++i) {
-                mExpectations.add(0); // For removals the score is ignored so any value will do.
-            }
-        }
-
-        // Waits for the expected request additions or removals to happen within a timeout.
-        public void waitForRequests() throws InterruptedException {
-            final long deadline = SystemClock.elapsedRealtime() + TIMEOUT_MS;
-            synchronized (mExpectations) {
-                while (mExpectations.size() > 0 && SystemClock.elapsedRealtime() < deadline) {
-                    mExpectations.wait(deadline - SystemClock.elapsedRealtime());
-                }
-            }
-            final long count = mExpectations.size();
-            final String msg = count + " requests still not " +
-                    (mExpectingAdditions ? "added" : "removed") +
-                    " after " + TIMEOUT_MS + " ms";
-            assertEquals(msg, 0, count);
-        }
-
-        public SparseArray<NetworkRequest> waitForNetworkRequests(final int count)
-                throws InterruptedException {
-            waitForRequests();
-            assertEquals(count, getMyRequestCount());
-            return mNetworkRequests;
         }
     }
 
@@ -2595,12 +2575,6 @@ public class ConnectivityServiceTest {
         callback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
     }
 
-    private int[] makeIntArray(final int size, final int value) {
-        final int[] array = new int[size];
-        Arrays.fill(array, value);
-        return array;
-    }
-
     private void tryNetworkFactoryRequests(int capability) throws Exception {
         // Verify NOT_RESTRICTED is set appropriately
         final NetworkCapabilities nc = new NetworkRequest.Builder().addCapability(capability)
@@ -2622,9 +2596,9 @@ public class ConnectivityServiceTest {
                 mServiceContext, "testFactory", filter);
         testFactory.setScoreFilter(40);
         ConditionVariable cv = testFactory.getNetworkStartedCV();
-        testFactory.expectAddRequestsWithScores(0);
         testFactory.register();
-        testFactory.waitForNetworkRequests(1);
+        testFactory.expectRequestAdd();
+        testFactory.assertRequestCountEquals(1);
         int expectedRequestCount = 1;
         NetworkCallback networkCallback = null;
         // For non-INTERNET capabilities we cannot rely on the default request being present, so
@@ -2633,13 +2607,12 @@ public class ConnectivityServiceTest {
             assertFalse(testFactory.getMyStartRequested());
             NetworkRequest request = new NetworkRequest.Builder().addCapability(capability).build();
             networkCallback = new NetworkCallback();
-            testFactory.expectAddRequestsWithScores(0);  // New request
             mCm.requestNetwork(request, networkCallback);
             expectedRequestCount++;
-            testFactory.waitForNetworkRequests(expectedRequestCount);
+            testFactory.expectRequestAdd();
         }
         waitFor(cv);
-        assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
+        testFactory.assertRequestCountEquals(expectedRequestCount);
         assertTrue(testFactory.getMyStartRequested());
 
         // Now bring in a higher scored network.
@@ -2653,15 +2626,14 @@ public class ConnectivityServiceTest {
         // When testAgent connects, ConnectivityService will re-send us all current requests with
         // the new score. There are expectedRequestCount such requests, and we must wait for all of
         // them.
-        testFactory.expectAddRequestsWithScores(makeIntArray(expectedRequestCount, 50));
         testAgent.connect(false);
         testAgent.addCapability(capability);
         waitFor(cv);
-        testFactory.waitForNetworkRequests(expectedRequestCount);
+        testFactory.expectRequestAdds(expectedRequestCount);
+        testFactory.assertRequestCountEquals(expectedRequestCount);
         assertFalse(testFactory.getMyStartRequested());
 
         // Bring in a bunch of requests.
-        testFactory.expectAddRequestsWithScores(makeIntArray(10, 50));
         assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
         ConnectivityManager.NetworkCallback[] networkCallbacks =
                 new ConnectivityManager.NetworkCallback[10];
@@ -2671,24 +2643,24 @@ public class ConnectivityServiceTest {
             builder.addCapability(capability);
             mCm.requestNetwork(builder.build(), networkCallbacks[i]);
         }
-        testFactory.waitForNetworkRequests(10 + expectedRequestCount);
+        testFactory.expectRequestAdds(10);
+        testFactory.assertRequestCountEquals(10 + expectedRequestCount);
         assertFalse(testFactory.getMyStartRequested());
 
         // Remove the requests.
-        testFactory.expectRemoveRequests(10);
         for (int i = 0; i < networkCallbacks.length; i++) {
             mCm.unregisterNetworkCallback(networkCallbacks[i]);
         }
-        testFactory.waitForNetworkRequests(expectedRequestCount);
+        testFactory.expectRequestRemoves(10);
+        testFactory.assertRequestCountEquals(expectedRequestCount);
         assertFalse(testFactory.getMyStartRequested());
 
         // Drop the higher scored network.
         cv = testFactory.getNetworkStartedCV();
-        // With the default network disconnecting, the requests are sent with score 0 to factories.
-        testFactory.expectAddRequestsWithScores(makeIntArray(expectedRequestCount, 0));
         testAgent.disconnect();
         waitFor(cv);
-        testFactory.waitForNetworkRequests(expectedRequestCount);
+        testFactory.expectRequestAdds(expectedRequestCount);
+        testFactory.assertRequestCountEquals(expectedRequestCount);
         assertEquals(expectedRequestCount, testFactory.getMyRequestCount());
         assertTrue(testFactory.getMyStartRequested());
 
@@ -2731,9 +2703,8 @@ public class ConnectivityServiceTest {
             final MockNetworkFactory testFactory = new MockNetworkFactory(handlerThread.getLooper(),
                     mServiceContext, "testFactory", filter);
             // Register the factory and don't be surprised when the default request arrives.
-            testFactory.expectAddRequestsWithScores(0);
             testFactory.register();
-            testFactory.waitForNetworkRequests(1);
+            testFactory.expectRequestAdd();
 
             testFactory.setScoreFilter(42);
             testFactory.terminate();
@@ -3876,38 +3847,37 @@ public class ConnectivityServiceTest {
         testFactory.setScoreFilter(40);
 
         // Register the factory and expect it to start looking for a network.
-        testFactory.expectAddRequestsWithScores(0);  // Score 0 as the request is not served yet.
         testFactory.register();
 
         try {
-            testFactory.waitForNetworkRequests(1);
+            testFactory.expectRequestAdd();
+            testFactory.assertRequestCountEquals(1);
             assertTrue(testFactory.getMyStartRequested());
 
             // Bring up wifi. The factory stops looking for a network.
             mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
             // Score 60 - 40 penalty for not validated yet, then 60 when it validates
-            testFactory.expectAddRequestsWithScores(20, 60);
             mWiFiNetworkAgent.connect(true);
-            testFactory.waitForRequests();
+            // Default request and mobile always on request
+            testFactory.expectRequestAdds(2);
             assertFalse(testFactory.getMyStartRequested());
 
-            ContentResolver cr = mServiceContext.getContentResolver();
-
             // Turn on mobile data always on. The factory starts looking again.
-            testFactory.expectAddRequestsWithScores(0);  // Always on requests comes up with score 0
             setAlwaysOnNetworks(true);
-            testFactory.waitForNetworkRequests(2);
+            testFactory.expectRequestAdd();
+            testFactory.assertRequestCountEquals(2);
+
             assertTrue(testFactory.getMyStartRequested());
 
             // Bring up cell data and check that the factory stops looking.
             assertLength(1, mCm.getAllNetworks());
             mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
-            testFactory.expectAddRequestsWithScores(10, 50);  // Unvalidated, then validated
             mCellNetworkAgent.connect(true);
             cellNetworkCallback.expectAvailableThenValidatedCallbacks(mCellNetworkAgent);
-            testFactory.waitForNetworkRequests(2);
-            assertFalse(
-                    testFactory.getMyStartRequested());  // Because the cell network outscores us.
+            testFactory.expectRequestAdds(2); // Unvalidated and validated
+            testFactory.assertRequestCountEquals(2);
+            // The cell network outscores the factory filter, so start is not requested.
+            assertFalse(testFactory.getMyStartRequested());
 
             // Check that cell data stays up.
             waitForIdle();
@@ -3915,9 +3885,8 @@ public class ConnectivityServiceTest {
             assertLength(2, mCm.getAllNetworks());
 
             // Turn off mobile data always on and expect the request to disappear...
-            testFactory.expectRemoveRequests(1);
             setAlwaysOnNetworks(false);
-            testFactory.waitForNetworkRequests(1);
+            testFactory.expectRequestRemove();
 
             // ...  and cell data to be torn down.
             cellNetworkCallback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
@@ -4224,45 +4193,32 @@ public class ConnectivityServiceTest {
         testFactory.setScoreFilter(40);
 
         // Register the factory and expect it to receive the default request.
-        testFactory.expectAddRequestsWithScores(0);
         testFactory.register();
-        SparseArray<NetworkRequest> requests = testFactory.waitForNetworkRequests(1);
-
-        assertEquals(1, requests.size()); // have 1 request at this point
-        int origRequestId = requests.valueAt(0).requestId;
+        testFactory.expectRequestAdd();
 
         // Now file the test request and expect it.
-        testFactory.expectAddRequestsWithScores(0);
         mCm.requestNetwork(nr, networkCallback);
-        requests = testFactory.waitForNetworkRequests(2); // have 2 requests at this point
+        final NetworkRequest newRequest = testFactory.expectRequestAdd().request;
 
-        int newRequestId = 0;
-        for (int i = 0; i < requests.size(); ++i) {
-            if (requests.valueAt(i).requestId != origRequestId) {
-                newRequestId = requests.valueAt(i).requestId;
-                break;
-            }
-        }
-
-        testFactory.expectRemoveRequests(1);
         if (preUnregister) {
             mCm.unregisterNetworkCallback(networkCallback);
 
             // Simulate the factory releasing the request as unfulfillable: no-op since
             // the callback has already been unregistered (but a test that no exceptions are
             // thrown).
-            testFactory.triggerUnfulfillable(requests.get(newRequestId));
+            testFactory.triggerUnfulfillable(newRequest);
         } else {
             // Simulate the factory releasing the request as unfulfillable and expect onUnavailable!
-            testFactory.triggerUnfulfillable(requests.get(newRequestId));
+            testFactory.triggerUnfulfillable(newRequest);
 
             networkCallback.expectCallback(CallbackEntry.UNAVAILABLE, (Network) null);
-            testFactory.waitForRequests();
 
             // unregister network callback - a no-op (since already freed by the
             // on-unavailable), but should not fail or throw exceptions.
             mCm.unregisterNetworkCallback(networkCallback);
         }
+
+        testFactory.expectRequestRemove();
 
         testFactory.terminate();
         handlerThread.quit();
