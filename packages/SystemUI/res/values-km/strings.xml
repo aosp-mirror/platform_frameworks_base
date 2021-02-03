@@ -181,6 +181,7 @@
     <string name="accessibility_battery_two_bars" msgid="7895789999668425551">"ថ្ម​ពីរ​កាំ។"</string>
     <string name="accessibility_battery_three_bars" msgid="118341923832368291">"ថ្ម​ទាំង​បី​​កាំ​។"</string>
     <string name="accessibility_battery_full" msgid="1480463938961288494">"ថ្ម​ពេញ​ហើយ។"</string>
+    <string name="accessibility_battery_unknown" msgid="1807789554617976440">"មិនដឹងអំពី​ភាគរយថ្មទេ។"</string>
     <string name="accessibility_no_phone" msgid="8828412144430247025">"គ្មាន​ទូរស័ព្ទ។"</string>
     <string name="accessibility_phone_one_bar" msgid="8786055123727785588">"សេវា​ទូរស័ព្ទ​មួយ​កាំ។"</string>
     <string name="accessibility_phone_two_bars" msgid="3316909612598670674">"សេវា​ទូរស័ព្ទ​ពីរ​កាំ។"</string>
@@ -1097,4 +1098,6 @@
     <string name="media_output_dialog_disconnected" msgid="1834473104836986046">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> (បាន​ផ្ដាច់)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3225190634236259010">"មិន​អាច​ភ្ជាប់​បាន​ទេ។ សូមព្យាយាមម្ដងទៀត។"</string>
     <string name="media_output_dialog_pairing_new" msgid="9099497976087485862">"ផ្គូផ្គង​ឧបករណ៍ថ្មី"</string>
+    <string name="battery_state_unknown_notification_title" msgid="8464703640483773454">"មានបញ្ហាក្នុង​ការអាន​ឧបករណ៍រង្វាស់កម្រិតថ្មរបស់អ្នក"</string>
+    <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"ចុចដើម្បីទទួលបាន​ព័ត៌មានបន្ថែម"</string>
 </resources>
