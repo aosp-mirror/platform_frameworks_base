@@ -53106,10 +53106,12 @@ package android.widget {
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
+    method @Deprecated @Nullable public String getTimeZone();
     method @Deprecated public void setDial(@NonNull android.graphics.drawable.Icon);
     method @Deprecated public void setHourHand(@NonNull android.graphics.drawable.Icon);
     method @Deprecated public void setMinuteHand(@NonNull android.graphics.drawable.Icon);
     method @Deprecated public void setSecondHand(@Nullable android.graphics.drawable.Icon);
+    method @Deprecated public void setTimeZone(@Nullable String);
   }
 
   public class ArrayAdapter<T> extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.ThemedSpinnerAdapter {

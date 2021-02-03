@@ -30,14 +30,19 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.RemotableViewMethod;
 import android.view.View;
+import android.view.inspector.InspectableProperty;
 import android.widget.RemoteViews.RemoteView;
 
 import java.time.Clock;
+import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Formatter;
+import java.util.Locale;
 
 /**
  * This widget display an analogic clock with two hands for hours and
@@ -47,15 +52,19 @@ import java.time.ZoneId;
  * @attr ref android.R.styleable#AnalogClock_hand_hour
  * @attr ref android.R.styleable#AnalogClock_hand_minute
  * @attr ref android.R.styleable#AnalogClock_hand_second
+ * @attr ref android.R.styleable#AnalogClock_timeZone
  * @deprecated This widget is no longer supported.
  */
 @RemoteView
 @Deprecated
 public class AnalogClock extends View {
+    private static final String LOG_TAG = "AnalogClock";
     /** How often the clock should refresh to make the seconds hand advance at ~15 FPS. */
     private static final long SECONDS_TICK_FREQUENCY_MS = 1000 / 15;
 
     private Clock mClock;
+    @Nullable
+    private ZoneId mTimeZone;
 
     @UnsupportedAppUsage
     private Drawable mHourHand;
@@ -114,7 +123,8 @@ public class AnalogClock extends View {
 
         mSecondHand = a.getDrawable(com.android.internal.R.styleable.AnalogClock_hand_second);
 
-        mClock = Clock.systemDefaultZone();
+        mTimeZone = toZoneId(a.getString(com.android.internal.R.styleable.AnalogClock_timeZone));
+        createClock();
 
         mDialWidth = mDial.getIntrinsicWidth();
         mDialHeight = mDial.getIntrinsicHeight();
@@ -162,6 +172,46 @@ public class AnalogClock extends View {
         invalidate();
     }
 
+    /**
+     * Indicates which time zone is currently used by this view.
+     *
+     * @return The ID of the current time zone or null if the default time zone,
+     *         as set by the user, must be used
+     *
+     * @see java.util.TimeZone
+     * @see java.util.TimeZone#getAvailableIDs()
+     * @see #setTimeZone(String)
+     */
+    @InspectableProperty
+    @Nullable
+    public String getTimeZone() {
+        ZoneId zoneId = mTimeZone;
+        return zoneId == null ? null : zoneId.getId();
+    }
+
+    /**
+     * Sets the specified time zone to use in this clock. When the time zone
+     * is set through this method, system time zone changes (when the user
+     * sets the time zone in settings for instance) will be ignored.
+     *
+     * @param timeZone The desired time zone's ID as specified in {@link java.util.TimeZone}
+     *                 or null to user the time zone specified by the user
+     *                 (system time zone)
+     *
+     * @see #getTimeZone()
+     * @see java.util.TimeZone#getAvailableIDs()
+     * @see java.util.TimeZone#getTimeZone(String)
+     *
+     * @attr ref android.R.styleable#AnalogClock_timeZone
+     */
+    @RemotableViewMethod
+    public void setTimeZone(@Nullable String timeZone) {
+        mTimeZone = toZoneId(timeZone);
+
+        createClock();
+        onTimeChanged();
+    }
+
     @Override
     public void onVisibilityAggregated(boolean isVisible) {
         super.onVisibilityAggregated(isVisible);
@@ -198,8 +248,8 @@ public class AnalogClock extends View {
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
         // in the main thread, therefore the receiver can't run before this method returns.
 
-        // The time zone may have changed while the receiver wasn't registered, so update the Time
-        mClock = Clock.systemDefaultZone();
+        // The time zone may have changed while the receiver wasn't registered, so update the clock.
+        createClock();
 
         // Make sure we update to the current time
         onTimeChanged();
@@ -340,8 +390,7 @@ public class AnalogClock extends View {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_TIMEZONE_CHANGED)) {
-                String tz = intent.getStringExtra(Intent.EXTRA_TIMEZONE);
-                mClock = Clock.system(ZoneId.of(tz));
+                createClock();
             }
 
             onTimeChanged();
@@ -365,9 +414,26 @@ public class AnalogClock extends View {
         }
     };
 
+    private void createClock() {
+        ZoneId zoneId = mTimeZone;
+        if (zoneId == null) {
+            mClock = Clock.systemDefaultZone();
+        } else {
+            mClock = Clock.system(zoneId);
+        }
+    }
+
     private void updateContentDescription(long timeMillis) {
         final int flags = DateUtils.FORMAT_SHOW_TIME | DateUtils.FORMAT_24HOUR;
-        String contentDescription = DateUtils.formatDateTime(mContext, timeMillis, flags);
+        String contentDescription =
+                DateUtils.formatDateRange(
+                        mContext,
+                        new Formatter(new StringBuilder(50), Locale.getDefault()),
+                        timeMillis /* startMillis */,
+                        timeMillis /* endMillis */,
+                        flags,
+                        getTimeZone())
+                        .toString();
         setContentDescription(contentDescription);
     }
 
@@ -377,5 +443,23 @@ public class AnalogClock extends View {
         // resulting exceptions while the input to this class is a long.
         Instant instant = Instant.ofEpochMilli(timeMillis);
         return LocalDateTime.ofInstant(instant, zoneId);
+    }
+
+    /**
+     * Tries to parse a {@link ZoneId} from {@code timeZone}, returning null if it is null or there
+     * is an error parsing.
+     */
+    @Nullable
+    private static ZoneId toZoneId(@Nullable String timeZone) {
+        if (timeZone == null) {
+            return null;
+        }
+
+        try {
+            return ZoneId.of(timeZone);
+        } catch (DateTimeException e) {
+            Log.w(LOG_TAG, "Failed to parse time zone from " + timeZone, e);
+            return null;
+        }
     }
 }
