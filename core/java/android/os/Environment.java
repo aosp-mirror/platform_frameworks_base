@@ -1339,8 +1339,17 @@ public class Environment {
         }
 
         final AppOpsManager appOps = context.getSystemService(AppOpsManager.class);
-        return appOps.checkOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE,
-                uid, context.getOpPackageName()) == AppOpsManager.MODE_ALLOWED;
+        final String opPackageName = context.getOpPackageName();
+
+        if (appOps.noteOpNoThrow(AppOpsManager.OP_LEGACY_STORAGE, uid,
+                opPackageName) == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
+
+        // Legacy external storage access is granted to instrumentations invoked with
+        // "--no-isolated-storage" flag.
+        return appOps.noteOpNoThrow(AppOpsManager.OP_NO_ISOLATED_STORAGE, uid,
+                opPackageName) == AppOpsManager.MODE_ALLOWED;
     }
 
     private static boolean isScopedStorageEnforced(boolean defaultScopedStorage,
