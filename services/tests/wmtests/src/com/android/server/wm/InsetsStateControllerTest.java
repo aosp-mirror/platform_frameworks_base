@@ -86,6 +86,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_STATUS_BAR));
         assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_NAVIGATION_BAR));
+        assertNull(getController().getInsetsForWindow(app).peekSource(ITYPE_IME));
     }
 
     @Test

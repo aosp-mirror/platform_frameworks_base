@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.view.InsetsState.ITYPE_CAPTION_BAR;
@@ -218,6 +219,9 @@ class InsetsStateController {
             state.removeSource(ITYPE_STATUS_BAR);
             state.removeSource(ITYPE_NAVIGATION_BAR);
             state.removeSource(ITYPE_EXTRA_NAVIGATION_BAR);
+            if (windowingMode == WINDOWING_MODE_PINNED) {
+                state.removeSource(ITYPE_IME);
+            }
         }
 
         return state;
