@@ -3536,6 +3536,28 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertFalse(conversationWrapperContainsChannel(convos, channel2));
     }
 
+    @Test
+    public void testGetConversations_parentDeleted() {
+        String convoId = "convo";
+        NotificationChannel messages =
+                new NotificationChannel("messages", "Messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, messages, true, false);
+
+        NotificationChannel channel =
+                new NotificationChannel("A person msgs", "messages from A", IMPORTANCE_DEFAULT);
+        channel.setConversationId(messages.getId(), convoId);
+        channel.setImportantConversation(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+
+        mHelper.permanentlyDeleteNotificationChannel(PKG_O, UID_O, "messages");
+
+        List<ConversationChannelWrapper> convos =
+                mHelper.getConversations(IntArray.wrap(new int[] {0}), true);
+
+        assertEquals(1, convos.size());
+        assertTrue(conversationWrapperContainsChannel(convos, channel));
+    }
+
     private boolean conversationWrapperContainsChannel(List<ConversationChannelWrapper> list,
             NotificationChannel expected) {
         for (ConversationChannelWrapper ccw : list) {
