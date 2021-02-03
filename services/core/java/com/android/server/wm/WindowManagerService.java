@@ -1652,7 +1652,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
             final WindowState win = new WindowState(this, session, client, token, parentWindow,
                     appOp[0], attrs, viewVisibility, session.mUid, userId,
-                    session.mCanAddInternalSystemWindow, session.mCanUseBackgroundBlur);
+                    session.mCanAddInternalSystemWindow);
             if (win.mDeathRecipient == null) {
                 // Client has apparently died, so there is no reason to
                 // continue.
