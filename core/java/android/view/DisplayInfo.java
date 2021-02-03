@@ -302,6 +302,12 @@ public final class DisplayInfo implements Parcelable {
      */
     public float brightnessDefault;
 
+    /**
+     * The {@link RoundedCorners} if present, otherwise {@code null}.
+     */
+    @Nullable
+    public RoundedCorners roundedCorners;
+
     public static final @android.annotation.NonNull Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {
         @Override
         public DisplayInfo createFromParcel(Parcel source) {
@@ -370,7 +376,8 @@ public final class DisplayInfo implements Parcelable {
                 && refreshRateOverride == other.refreshRateOverride
                 && brightnessMinimum == other.brightnessMinimum
                 && brightnessMaximum == other.brightnessMaximum
-                && brightnessDefault == other.brightnessDefault;
+                && brightnessDefault == other.brightnessDefault
+                && Objects.equals(roundedCorners, other.roundedCorners);
     }
 
     @Override
@@ -419,6 +426,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        roundedCorners = other.roundedCorners;
     }
 
     public void readFromParcel(Parcel source) {
@@ -469,6 +477,7 @@ public final class DisplayInfo implements Parcelable {
         brightnessMinimum = source.readFloat();
         brightnessMaximum = source.readFloat();
         brightnessDefault = source.readFloat();
+        roundedCorners = source.readTypedObject(RoundedCorners.CREATOR);
     }
 
     @Override
@@ -518,6 +527,7 @@ public final class DisplayInfo implements Parcelable {
         dest.writeFloat(brightnessMinimum);
         dest.writeFloat(brightnessMaximum);
         dest.writeFloat(brightnessDefault);
+        dest.writeTypedObject(roundedCorners, flags);
     }
 
     @Override
