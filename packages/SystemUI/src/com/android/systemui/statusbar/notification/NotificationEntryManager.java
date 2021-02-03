@@ -21,6 +21,7 @@ import static android.service.notification.NotificationListenerService.REASON_ER
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.content.Context;
+import android.os.SystemClock;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.ArrayMap;
@@ -385,7 +386,10 @@ public class NotificationEntryManager implements
         NotificationListenerService.Ranking ranking = new NotificationListenerService.Ranking();
         rankingMap.getRanking(key, ranking);
 
-        NotificationEntry entry = new NotificationEntry(notification, ranking);
+        NotificationEntry entry = new NotificationEntry(
+                notification,
+                ranking,
+                SystemClock.uptimeMillis());
 
         Dependency.get(LeakDetector.class).trackInstance(entry);
         // Construct the expanded view.

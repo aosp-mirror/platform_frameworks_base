@@ -44,7 +44,8 @@ public class ForegroundServiceNotificationListener {
     @Inject
     public ForegroundServiceNotificationListener(Context context,
             ForegroundServiceController foregroundServiceController,
-            NotificationEntryManager notificationEntryManager) {
+            NotificationEntryManager notificationEntryManager,
+            ForegroundServiceLifetimeExtender fgsLifetimeExtender) {
         mContext = context;
         mForegroundServiceController = foregroundServiceController;
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
@@ -66,9 +67,7 @@ public class ForegroundServiceNotificationListener {
                 removeNotification(entry.notification);
             }
         });
-
-        notificationEntryManager.addNotificationLifetimeExtender(
-                new ForegroundServiceLifetimeExtender());
+        notificationEntryManager.addNotificationLifetimeExtender(fgsLifetimeExtender);
     }
 
     /**

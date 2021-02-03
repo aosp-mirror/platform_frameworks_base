@@ -54,6 +54,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private SmartReplyController mSmartReplyController;
     @Mock private NotificationListenerService.RankingMap mRanking;
     @Mock private ExpandableNotificationRow mRow;
+    @Mock private NotificationClickNotifier mClickNotifier;
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
@@ -73,7 +74,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext,
                 mLockscreenUserManager, mSmartReplyController, mEntryManager,
                 () -> mock(ShadeController.class),
-                Handler.createAsync(Looper.myLooper()));
+                Handler.createAsync(Looper.myLooper()),
+                mClickNotifier);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
                 0, new Notification(), UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntry(mSbn);
@@ -202,9 +204,10 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
                 Lazy<ShadeController> shadeController,
-                Handler mainHandler) {
+                Handler mainHandler,
+                NotificationClickNotifier clickNotifier) {
             super(context, lockscreenUserManager, smartReplyController, notificationEntryManager,
-                    shadeController, mainHandler);
+                    shadeController, mainHandler, clickNotifier);
         }
 
         public void setUpWithPresenterForTest(Callback callback,

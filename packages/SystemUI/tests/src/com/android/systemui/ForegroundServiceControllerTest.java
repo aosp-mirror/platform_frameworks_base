@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +62,8 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         mFsc = new ForegroundServiceController();
         NotificationEntryManager notificationEntryManager = mock(NotificationEntryManager.class);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, notificationEntryManager);
+                mContext, mFsc, notificationEntryManager,
+                mock(ForegroundServiceLifetimeExtender.class));
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
                 ArgumentCaptor.forClass(NotificationEntryListener.class);
         verify(notificationEntryManager).addNotificationEntryListener(

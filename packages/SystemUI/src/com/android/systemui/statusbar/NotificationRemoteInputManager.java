@@ -121,6 +121,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     protected final Context mContext;
     private final UserManager mUserManager;
     private final KeyguardManager mKeyguardManager;
+    private final NotificationClickNotifier mClickNotifier;
 
     protected RemoteInputController mRemoteInputController;
     protected NotificationLifetimeExtender.NotificationSafeToRemoveCallback
@@ -203,11 +204,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                             mEntryManager.getNotificationData().get(key));
             final NotificationVisibility nv =
                     NotificationVisibility.obtain(key, rank, count, true, location);
-            try {
-                mBarService.onNotificationActionClick(key, buttonIndex, action, nv, false);
-            } catch (RemoteException e) {
-                // Ignore
-            }
+            mClickNotifier.onNotificationActionClick(key, buttonIndex, action, nv, false);
         }
 
         private StatusBarNotification getNotificationForParent(ViewParent parent) {
@@ -259,7 +256,8 @@ public class NotificationRemoteInputManager implements Dumpable {
             SmartReplyController smartReplyController,
             NotificationEntryManager notificationEntryManager,
             Lazy<ShadeController> shadeController,
-            @Named(MAIN_HANDLER_NAME) Handler mainHandler) {
+            @Named(MAIN_HANDLER_NAME) Handler mainHandler,
+            NotificationClickNotifier clickNotifier) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
         mSmartReplyController = smartReplyController;
@@ -271,6 +269,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         addLifetimeExtenders();
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mClickNotifier = clickNotifier;
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override

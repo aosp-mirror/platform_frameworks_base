@@ -96,6 +96,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
     NotificationUsageStats mUsageStats;
     @Mock
     IAccessibilityManager mAccessibilityService;
+    private InjectableSystemClock mSystemClock = new FakeSystemClock();
 
     private NotificationManagerService mService;
     private String mPkg = "com.android.server.notification";
@@ -145,7 +146,7 @@ public class BuzzBeepBlinkTest extends UiServiceTestCase {
         verify(mAccessibilityService).addClient(any(IAccessibilityManagerClient.class), anyInt());
         assertTrue(accessibilityManager.isEnabled());
 
-        mService = spy(new NotificationManagerService(getContext()));
+        mService = spy(new NotificationManagerService(getContext(), mSystemClock));
         mService.setAudioManager(mAudioManager);
         mService.setVibrator(mVibrator);
         mService.setSystemReady(true);

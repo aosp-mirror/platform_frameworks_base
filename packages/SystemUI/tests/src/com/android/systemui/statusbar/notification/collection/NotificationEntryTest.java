@@ -30,6 +30,7 @@ import android.testing.TestableLooper;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -48,6 +49,7 @@ public class NotificationEntryTest extends SysuiTestCase {
 
     private NotificationEntry mEntry;
     private Bundle mExtras;
+    private final FakeSystemClock mClock = new FakeSystemClock();
 
     @Before
     public void setUp() {

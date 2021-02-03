@@ -905,6 +905,10 @@ public final class NotificationRecord {
         return (int) (now - mInterruptionTimeMs);
     }
 
+    public long getUpdateTimeMs() {
+        return mUpdateTimeMs;
+    }
+
     /**
      * Set the visibility of the notification.
      */

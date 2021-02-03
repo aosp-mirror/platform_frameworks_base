@@ -38,14 +38,17 @@ import javax.inject.Singleton;
 public class SmartReplyController {
     private final IStatusBarService mBarService;
     private final NotificationEntryManager mEntryManager;
+    private final NotificationClickNotifier mClickNotifier;
     private Set<String> mSendingKeys = new ArraySet<>();
     private Callback mCallback;
 
     @Inject
     public SmartReplyController(NotificationEntryManager entryManager,
-            IStatusBarService statusBarService) {
+            IStatusBarService statusBarService,
+            NotificationClickNotifier clickNotifier) {
         mBarService = statusBarService;
         mEntryManager = entryManager;
+        mClickNotifier = clickNotifier;
     }
 
     public void setCallback(Callback callback) {
@@ -79,12 +82,8 @@ public class SmartReplyController {
                 NotificationLogger.getNotificationLocation(entry);
         final NotificationVisibility nv = NotificationVisibility.obtain(
                 entry.key, rank, count, true, location);
-        try {
-            mBarService.onNotificationActionClick(
-                    entry.key, actionIndex, action, nv, generatedByAssistant);
-        } catch (RemoteException e) {
-            // Nothing to do, system going down
-        }
+        mClickNotifier.onNotificationActionClick(
+                entry.key, actionIndex, action, nv, generatedByAssistant);
     }
 
     /**

@@ -181,6 +181,7 @@ import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
 import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.NavigationBarController;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -595,6 +596,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             };
     private ActivityIntentHelper mActivityIntentHelper;
     private ShadeController mShadeController;
+    private NotificationClickNotifier mClickNotifier;
 
     @Override
     public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
@@ -612,6 +614,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     @Override
     public void start() {
+        mClickNotifier = Dependency.get(NotificationClickNotifier.class);
         mGroupManager = Dependency.get(NotificationGroupManager.class);
         mGroupAlertTransferHelper = Dependency.get(NotificationGroupAlertTransferHelper.class);
         mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
@@ -1073,7 +1076,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationActivityStarter = new StatusBarNotificationActivityStarter(mContext,
                 mCommandQueue, mAssistManager, mNotificationPanel, mPresenter, mEntryManager,
                 mHeadsUpManager, activityStarter, mActivityLaunchAnimator,
-                mBarService, mStatusBarStateController, mKeyguardManager, mDreamManager,
+                mClickNotifier, mStatusBarStateController, mKeyguardManager, mDreamManager,
                 mRemoteInputManager, mStatusBarRemoteInputCallback, mGroupManager,
                 mLockscreenUserManager, mShadeController, mKeyguardMonitor,
                 mNotificationInterruptionStateProvider, mMetricsLogger,

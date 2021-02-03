@@ -28,8 +28,6 @@ import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -37,7 +35,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -80,8 +77,8 @@ public class NotificationLockscreenUserManagerImpl implements
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
     private final UserManager mUserManager;
-    private final IStatusBarService mBarService;
     private final List<UserChangedListener> mListeners = new ArrayList<>();
+    private final NotificationClickNotifier mClickNotifier;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -146,11 +143,7 @@ public class NotificationLockscreenUserManagerImpl implements
                                     getEntryManager().getNotificationData().get(notificationKey));
                     final NotificationVisibility nv = NotificationVisibility.obtain(notificationKey,
                             rank, count, true, location);
-                    try {
-                        mBarService.onNotificationClick(notificationKey, nv);
-                    } catch (RemoteException e) {
-                        /* ignore */
-                    }
+                    mClickNotifier.onNotificationClick(notificationKey, nv);
                 }
             }
         }
@@ -171,15 +164,16 @@ public class NotificationLockscreenUserManagerImpl implements
         return mEntryManager;
     }
 
-    public NotificationLockscreenUserManagerImpl(Context context) {
+    public NotificationLockscreenUserManagerImpl(
+            Context context,
+            NotificationClickNotifier clickNotifier) {
         mContext = context;
         mDevicePolicyManager = (DevicePolicyManager) mContext.getSystemService(
                 Context.DEVICE_POLICY_SERVICE);
         mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
         mCurrentUserId = ActivityManager.getCurrentUser();
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
         Dependency.get(StatusBarStateController.class).addCallback(this);
+        mClickNotifier = clickNotifier;
         mLockPatternUtils = new LockPatternUtils(context);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
     }

@@ -41,6 +41,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
@@ -167,8 +168,9 @@ public class SystemUIFactory {
     @Singleton
     @Provides
     public NotificationLockscreenUserManager provideNotificationLockscreenUserManager(
-            Context context) {
-        return new NotificationLockscreenUserManagerImpl(context);
+            Context context,
+            NotificationClickNotifier clickNotifier) {
+        return new NotificationLockscreenUserManagerImpl(context, clickNotifier);
     }
 
     @Singleton
