@@ -509,7 +509,13 @@ public abstract class WMShellBaseModule {
 
     @WMSingleton
     @Provides
-    static ShellInit provideShellInit(DisplayImeController displayImeController,
+    static ShellInit provideShellInit(ShellInitImpl impl) {
+        return impl.asShellInit();
+    }
+
+    @WMSingleton
+    @Provides
+    static ShellInitImpl provideShellInitImpl(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
@@ -520,7 +526,7 @@ public abstract class WMShellBaseModule {
             FullscreenTaskListener fullscreenTaskListener,
             Transitions transitions,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return ShellInitImpl.create(displayImeController,
+        return new ShellInitImpl(displayImeController,
                 dragAndDropController,
                 shellTaskOrganizer,
                 legacySplitScreenOptional,
@@ -539,7 +545,13 @@ public abstract class WMShellBaseModule {
      */
     @WMSingleton
     @Provides
-    static Optional<ShellCommandHandler> provideShellCommandHandler(
+    static Optional<ShellCommandHandler> provideShellCommandHandler(ShellCommandHandlerImpl impl) {
+        return Optional.of(impl.asShellCommandHandler());
+    }
+
+    @WMSingleton
+    @Provides
+    static ShellCommandHandlerImpl provideShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
@@ -548,8 +560,8 @@ public abstract class WMShellBaseModule {
             Optional<HideDisplayCutoutController> hideDisplayCutout,
             Optional<AppPairsController> appPairsOptional,
             @ShellMainThread ShellExecutor mainExecutor) {
-        return Optional.of(ShellCommandHandlerImpl.create(shellTaskOrganizer,
+        return new ShellCommandHandlerImpl(shellTaskOrganizer,
                 legacySplitScreenOptional, splitScreenOptional, pipOptional, oneHandedOptional,
-                hideDisplayCutout, appPairsOptional, mainExecutor));
+                hideDisplayCutout, appPairsOptional, mainExecutor);
     }
 }

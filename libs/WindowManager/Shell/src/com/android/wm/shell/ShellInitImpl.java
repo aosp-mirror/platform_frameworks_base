@@ -51,31 +51,7 @@ public class ShellInitImpl {
 
     private final InitImpl mImpl = new InitImpl();
 
-    public static ShellInit create(DisplayImeController displayImeController,
-            DragAndDropController dragAndDropController,
-            ShellTaskOrganizer shellTaskOrganizer,
-            Optional<LegacySplitScreenController> legacySplitScreenOptional,
-            Optional<SplitScreenController> splitScreenOptional,
-            Optional<AppPairsController> appPairsOptional,
-            Optional<StartingSurface> startingSurfaceOptional,
-            Optional<PipTouchHandler> pipTouchHandlerOptional,
-            FullscreenTaskListener fullscreenTaskListener,
-            Transitions transitions,
-            ShellExecutor mainExecutor) {
-        return new ShellInitImpl(displayImeController,
-                dragAndDropController,
-                shellTaskOrganizer,
-                legacySplitScreenOptional,
-                splitScreenOptional,
-                appPairsOptional,
-                startingSurfaceOptional,
-                pipTouchHandlerOptional,
-                fullscreenTaskListener,
-                transitions,
-                mainExecutor).mImpl;
-    }
-
-    private ShellInitImpl(DisplayImeController displayImeController,
+    public ShellInitImpl(DisplayImeController displayImeController,
             DragAndDropController dragAndDropController,
             ShellTaskOrganizer shellTaskOrganizer,
             Optional<LegacySplitScreenController> legacySplitScreenOptional,
@@ -97,6 +73,10 @@ public class ShellInitImpl {
         mTransitions = transitions;
         mMainExecutor = mainExecutor;
         mStartingSurfaceOptional = startingSurfaceOptional;
+    }
+
+    public ShellInit asShellInit() {
+        return mImpl;
     }
 
     private void init() {
