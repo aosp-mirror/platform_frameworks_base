@@ -21,9 +21,11 @@ import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnTestUtils.setupIpSecManager;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.annotation.NonNull;
 import android.content.Context;
@@ -42,12 +44,14 @@ import android.net.ipsec.ike.IkeSessionCallback;
 import android.net.vcn.VcnGatewayConnectionConfig;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
 import android.os.ParcelUuid;
+import android.os.PowerManager;
 import android.os.test.TestLooper;
 
 import com.android.server.IpSecService;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 import com.android.server.vcn.VcnGatewayConnection.VcnChildSessionCallback;
+import com.android.server.vcn.VcnGatewayConnection.VcnWakeLock;
 
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -94,6 +98,7 @@ public class VcnGatewayConnectionTestBase {
     @NonNull protected final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull protected final VcnGatewayConnection.Dependencies mDeps;
     @NonNull protected final UnderlyingNetworkTracker mUnderlyingNetworkTracker;
+    @NonNull protected final VcnWakeLock mWakeLock;
 
     @NonNull protected final IpSecService mIpSecSvc;
     @NonNull protected final ConnectivityManager mConnMgr;
@@ -110,6 +115,7 @@ public class VcnGatewayConnectionTestBase {
         mGatewayStatusCallback = mock(VcnGatewayStatusCallback.class);
         mDeps = mock(VcnGatewayConnection.Dependencies.class);
         mUnderlyingNetworkTracker = mock(UnderlyingNetworkTracker.class);
+        mWakeLock = mock(VcnWakeLock.class);
 
         mIpSecSvc = mock(IpSecService.class);
         setupIpSecManager(mContext, mIpSecSvc);
@@ -125,6 +131,9 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mUnderlyingNetworkTracker)
                 .when(mDeps)
                 .newUnderlyingNetworkTracker(any(), any(), any(), any(), any());
+        doReturn(mWakeLock)
+                .when(mDeps)
+                .newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());
     }
 
     @Before
@@ -165,5 +174,20 @@ public class VcnGatewayConnectionTestBase {
                 ArgumentCaptor.forClass(ChildSessionCallback.class);
         verify(mDeps).newIkeSession(any(), any(), any(), any(), captor.capture());
         return (VcnChildSessionCallback) captor.getValue();
+    }
+
+    protected void verifyWakeLockSetUp() {
+        verify(mDeps).newWakeLock(eq(mContext), eq(PowerManager.PARTIAL_WAKE_LOCK), any());
+        verifyNoMoreInteractions(mWakeLock);
+    }
+
+    protected void verifyWakeLockAcquired() {
+        verify(mWakeLock).acquire();
+        verifyNoMoreInteractions(mWakeLock);
+    }
+
+    protected void verifyWakeLockReleased() {
+        verify(mWakeLock).release();
+        verifyNoMoreInteractions(mWakeLock);
     }
 }
