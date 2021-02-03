@@ -21108,7 +21108,9 @@ package android.media {
 
   public static final class MediaCodecInfo.AudioCapabilities {
     method public android.util.Range<java.lang.Integer> getBitrateRange();
+    method @NonNull public android.util.Range<java.lang.Integer>[] getInputChannelCountRanges();
     method public int getMaxInputChannelCount();
+    method public int getMinInputChannelCount();
     method public android.util.Range<java.lang.Integer>[] getSupportedSampleRateRanges();
     method public int[] getSupportedSampleRates();
     method public boolean isSampleRateSupported(int);
