@@ -21,6 +21,7 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -77,6 +78,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private View mClose;
     private View mEdit;
     private View mShare;
+    private CropView mCropView;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter, UiEventLogger uiEventLogger) {
@@ -114,6 +116,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         mClose = findViewById(R.id.close);
         mEdit = findViewById(R.id.edit);
         mShare = findViewById(R.id.share);
+        mCropView = findViewById(R.id.crop_view);
 
         mClose.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
@@ -165,8 +168,13 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     }
 
     private void startExport(PendingAction action) {
+        Rect croppedPortion = new Rect(
+                0,
+                (int) (mImageTileSet.getHeight() * mCropView.getTopBoundary()),
+                mImageTileSet.getWidth(),
+                (int) (mImageTileSet.getHeight() * mCropView.getBottomBoundary()));
         ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
-                mBgExecutor, mRequestId, mImageTileSet.toBitmap(), mCaptureTime);
+                mBgExecutor, mRequestId, mImageTileSet.toBitmap(croppedPortion), mCaptureTime);
         exportFuture.addListener(() -> {
             try {
                 ImageExporter.Result result = exportFuture.get();
