@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package android.graphics.drawable;
+package com.android.internal.graphics.drawable;
 
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
@@ -31,30 +30,29 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
+import android.graphics.drawable.Drawable;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.SurfaceControl;
-import android.view.View;
 import android.view.ViewRootImpl;
+
+import com.android.internal.R;
 
 /**
  * A drawable that keeps track of a blur region, pokes a hole under it, and propagates its state
  * to SurfaceFlinger.
- *
- * @hide
  */
-@SystemApi
 public final class BackgroundBlurDrawable extends Drawable {
+
     private static final String TAG = BackgroundBlurDrawable.class.getSimpleName();
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
+    private final Aggregator mAggregator;
     private final RenderNode mRenderNode;
     private final Paint mPaint = new Paint();
     private final Path mRectPath = new Path();
     private final float[] mTmpRadii = new float[8];
     private final SurfaceControl.BlurRegion mBlurRegion = new SurfaceControl.BlurRegion();
-
-    private Aggregator mAggregator;
 
     // This will be called from a thread pool.
     private final RenderNode.PositionUpdateListener mPositionUpdateListener =
@@ -62,40 +60,29 @@ public final class BackgroundBlurDrawable extends Drawable {
             @Override
             public void positionChanged(long frameNumber, int left, int top, int right,
                     int bottom) {
-                if (mAggregator == null) {
+                synchronized (mAggregator) {
                     mBlurRegion.rect.set(left, top, right, bottom);
-                } else {
-                    synchronized (mAggregator) {
-                        mBlurRegion.rect.set(left, top, right, bottom);
-                        mAggregator.onBlurRegionUpdated(BackgroundBlurDrawable.this, mBlurRegion);
-                    }
+                    mAggregator.onBlurRegionUpdated(BackgroundBlurDrawable.this, mBlurRegion);
                 }
             }
 
             @Override
             public void positionLost(long frameNumber) {
-                if (mAggregator == null) {
+                synchronized (mAggregator) {
                     mBlurRegion.rect.setEmpty();
-                } else {
-                    synchronized (mAggregator) {
-                        mBlurRegion.rect.setEmpty();
-                        mAggregator.onBlurRegionUpdated(BackgroundBlurDrawable.this, mBlurRegion);
-                    }
+                    mAggregator.onBlurRegionUpdated(BackgroundBlurDrawable.this, mBlurRegion);
                 }
             }
         };
 
-    @RequiresPermission(android.Manifest.permission.USE_BACKGROUND_BLUR)
-    public BackgroundBlurDrawable() {
+    private BackgroundBlurDrawable(Aggregator aggregator) {
+        mAggregator = aggregator;
         mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mPaint.setColor(Color.TRANSPARENT);
         mRenderNode = new RenderNode("BackgroundBlurDrawable");
         mRenderNode.addPositionUpdateListener(mPositionUpdateListener);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void draw(@NonNull Canvas canvas) {
         if (mRectPath.isEmpty() || !isVisible() || getAlpha() == 0) {
@@ -113,9 +100,6 @@ public final class BackgroundBlurDrawable extends Drawable {
         mPaint.setColor(color);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         boolean changed = super.setVisible(visible, restart);
@@ -125,9 +109,6 @@ public final class BackgroundBlurDrawable extends Drawable {
         return changed;
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void setAlpha(int alpha) {
         mBlurRegion.alpha = alpha / 255f;
@@ -158,12 +139,12 @@ public final class BackgroundBlurDrawable extends Drawable {
      */
     public void setCornerRadius(float cornerRadiusTL, float cornerRadiusTR, float cornerRadiusBL,
             float cornerRadiusBR) {
-        maybeRunSynchronized(() -> {
+        synchronized (mAggregator) {
             mBlurRegion.cornerRadiusTL = cornerRadiusTL;
             mBlurRegion.cornerRadiusTR = cornerRadiusTR;
             mBlurRegion.cornerRadiusBL = cornerRadiusBL;
             mBlurRegion.cornerRadiusBR = cornerRadiusBR;
-        });
+        }
         updatePath();
         invalidateSelf();
     }
@@ -176,13 +157,12 @@ public final class BackgroundBlurDrawable extends Drawable {
     }
 
     private void updatePath() {
-        maybeRunSynchronized(() -> {
+        synchronized (mAggregator) {
             mTmpRadii[0] = mTmpRadii[1] = mBlurRegion.cornerRadiusTL;
             mTmpRadii[2] = mTmpRadii[3] = mBlurRegion.cornerRadiusTR;
             mTmpRadii[4] = mTmpRadii[5] = mBlurRegion.cornerRadiusBL;
             mTmpRadii[6] = mTmpRadii[7] = mBlurRegion.cornerRadiusBR;
-        });
-
+        }
         mRectPath.reset();
         if (getAlpha() == 0 || !isVisible()) {
             return;
@@ -192,62 +172,19 @@ public final class BackgroundBlurDrawable extends Drawable {
                 Path.Direction.CW);
     }
 
-    /**
-     * @hide
-     */
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
         throw new IllegalArgumentException("not implemented");
     }
 
-    /**
-     * @hide
-     */
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;
     }
 
     /**
-     *  @hide
-     */
-    @Override
-    public void onAttached(@NonNull View v) {
-        super.onAttached(v);
-        mAggregator = v.getViewRootImpl().getBlurRegionAggregator();
-    }
-
-    /**
-     *  @hide
-     */
-    @Override
-    public void onDetached(@NonNull View v) {
-        super.onDetached(v);
-        mAggregator = null;
-    }
-
-    /**
-     * The Aggregator is called from the RenderThread to aggregate all blur regions and send them
-     * to SurfaceFlinger. Since the BackgroundBlurDrawable could be updated at any time from the
-     * main thread, we need to synchronize the two threads. The BackgroundBlurDrawable may be
-     * instantiated before the ViewRootImpl is created, i.e. before the Aggregator is created.
-     * In that case, updates are not synchronized.
-     */
-    private void maybeRunSynchronized(Runnable r) {
-        if (mAggregator == null) {
-            r.run();
-        } else {
-            synchronized (mAggregator) {
-                r.run();
-            }
-        }
-    }
-
-    /**
      * Responsible for keeping track of all blur regions of a {@link ViewRootImpl} and posting a
      * message when it's time to propagate them.
-     *
-     * @hide
      */
     public static final class Aggregator {
 
@@ -259,6 +196,16 @@ public final class BackgroundBlurDrawable extends Drawable {
 
         public Aggregator(ViewRootImpl viewRoot) {
             mViewRoot = viewRoot;
+        }
+
+        /**
+         * Creates a blur region with default radius.
+         */
+        public BackgroundBlurDrawable createBackgroundBlurDrawable(Context context) {
+            BackgroundBlurDrawable drawable = new BackgroundBlurDrawable(this);
+            drawable.setBlurRadius(context.getResources().getDimensionPixelSize(
+                    R.dimen.default_background_blur_radius));
+            return drawable;
         }
 
         /**
