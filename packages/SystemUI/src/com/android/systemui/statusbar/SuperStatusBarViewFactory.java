@@ -23,8 +23,6 @@ import android.view.ViewGroup;
 import com.android.systemui.R;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationShelfComponent;
-import com.android.systemui.statusbar.phone.LockIcon;
-import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.StatusBarWindowView;
@@ -41,7 +39,6 @@ public class SuperStatusBarViewFactory {
 
     private final Context mContext;
     private final InjectionInflationController mInjectionInflationController;
-    private final LockscreenLockIconController mLockIconController;
     private final NotificationShelfComponent.Builder mNotificationShelfComponentBuilder;
 
     private NotificationShadeWindowView mNotificationShadeWindowView;
@@ -51,11 +48,9 @@ public class SuperStatusBarViewFactory {
     @Inject
     public SuperStatusBarViewFactory(Context context,
             InjectionInflationController injectionInflationController,
-            NotificationShelfComponent.Builder notificationShelfComponentBuilder,
-            LockscreenLockIconController lockIconController) {
+            NotificationShelfComponent.Builder notificationShelfComponentBuilder) {
         mContext = context;
         mInjectionInflationController = injectionInflationController;
-        mLockIconController = lockIconController;
         mNotificationShelfComponentBuilder = notificationShelfComponentBuilder;
     }
 
@@ -76,10 +71,6 @@ public class SuperStatusBarViewFactory {
         if (mNotificationShadeWindowView == null) {
             throw new IllegalStateException(
                     "R.layout.super_notification_shade could not be properly inflated");
-        }
-        LockIcon lockIcon = mNotificationShadeWindowView.findViewById(R.id.lock_icon);
-        if (lockIcon != null) {
-            mLockIconController.attach(lockIcon);
         }
 
         return mNotificationShadeWindowView;

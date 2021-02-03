@@ -1181,6 +1181,12 @@
 
     <dimen name="ongoing_appops_dialog_side_margins">@dimen/notification_shade_content_margin_horizontal</dimen>
 
+    <dimen name="ongoing_appops_dialog_circle_size">32dp</dimen>
+
+    <dimen name="ongoing_appops_dialog_icon_size">20dp</dimen>
+
+    <dimen name="ongoing_appops_dialog_side_padding">16dp</dimen>
+
     <!-- Size of the RAT type for CellularTile -->
     <dimen name="celltile_rat_type_size">10sp</dimen>
 

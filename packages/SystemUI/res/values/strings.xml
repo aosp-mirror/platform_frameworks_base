@@ -1888,7 +1888,7 @@
     <!-- Notification Inline controls: describes how the notification was adjusted [CHAR_LIMIT=NONE] -->
     <string name="feedback_demoted">This notification was automatically &lt;b>ranked lower&lt;/b> in your shade.</string>
     <!-- Notification Inline controls: prompts the user for feedback [CHAR_LIMIT=NONE] -->
-    <string name="feedback_prompt">Was this correct?</string>
+    <string name="feedback_prompt">Let the developer know your feedback. Was this correct?</string>
     <!-- Notification Inline controls: responds to user provided feedback [CHAR_LIMIT=NONE] -->
     <string name="feedback_response">Thanks for your feedback!</string>
     <string name="feedback_ok">OK</string>
@@ -2580,9 +2580,6 @@
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
 
-    <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
-    <string name="restart_button_description">Tap to restart this app and go full screen.</string>
-
     <!-- Action in accessibility menu to move the stack of bubbles [CHAR LIMIT=20] -->
     <string name="bubble_accessibility_action_move">Move</string>
 
@@ -2770,13 +2767,6 @@
     <string name="controls_menu_add">Add controls</string>
     <!-- Controls menu, edit [CHAR_LIMIT=30] -->
     <string name="controls_menu_edit">Edit controls</string>
-
-    <!-- Device-specific path to the node for enabling/disabling the high-brightness mode -->
-    <string name="udfps_hbm_sysfs_path" translatable="false"></string>
-    <!-- Device-specific payload for enabling the high-brightness mode -->
-    <string name="udfps_hbm_enable_command" translatable="false"></string>
-    <!-- Device-specific payload for disabling the high-brightness mode -->
-    <string name="udfps_hbm_disable_command" translatable="false"></string>
 
     <!-- Title for the media output group dialog with media related devices [CHAR LIMIT=50] -->
     <string name="media_output_dialog_add_output">Add outputs</string>

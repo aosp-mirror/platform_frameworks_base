@@ -20,7 +20,7 @@
   <item
       android:width="13.33dp"
       android:height="1.67dp"
-      android:left="19dp"
+      android:left="21dp"
       android:gravity="center"
       android:drawable="@drawable/track_off_indicator" />
 </layer-list>

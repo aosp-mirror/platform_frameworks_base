@@ -31,6 +31,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.os.Parcel;
@@ -1379,10 +1380,9 @@ public final class GnssMeasurement implements Parcelable {
      * Gets the Automatic Gain Control level in dB.
      *
      * <p> AGC acts as a variable gain amplifier adjusting the power of the incoming signal. The AGC
-     * level may be used to indicate potential interference. When AGC is at a nominal level, this
-     * value must be set as 0. Higher gain (and/or lower input power) shall be output as a positive
-     * number. Hence in cases of strong jamming, in the band of this signal, this value will go more
-     * negative.
+     * level may be used to indicate potential interference. Higher gain (and/or lower input power)
+     * shall be output as a positive number. Hence in cases of strong jamming, in the band of this
+     * signal, this value will go more negative.
      *
      * <p> Note: Different hardware designs (e.g. antenna, pre-amplification, or other RF HW
      * components) may also affect the typical output of of this value on any given hardware design
@@ -1775,6 +1775,7 @@ public final class GnssMeasurement implements Parcelable {
      */
     @Nullable
     @SystemApi
+    @SuppressLint("NullableCollection")
     public Collection<CorrelationVector> getCorrelationVectors() {
         return mReadOnlyCorrelationVectors;
     }
@@ -1785,7 +1786,9 @@ public final class GnssMeasurement implements Parcelable {
      * @hide
      */
     @TestApi
-    public void setCorrelationVectors(@Nullable Collection<CorrelationVector> correlationVectors) {
+    public void setCorrelationVectors(
+            @SuppressLint("NullableCollection")
+            @Nullable Collection<CorrelationVector> correlationVectors) {
         if (correlationVectors == null || correlationVectors.isEmpty()) {
             resetCorrelationVectors();
         } else {

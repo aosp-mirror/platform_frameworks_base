@@ -772,18 +772,7 @@ public class VibratorService extends IVibratorService.Stub {
             proto.write(VibratorServiceDumpProto.IS_VIBRATING, mVibratorController.isVibrating());
             proto.write(VibratorServiceDumpProto.VIBRATOR_UNDER_EXTERNAL_CONTROL,
                     mVibratorController.isUnderExternalControl());
-            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
-                    mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_TOUCH));
-            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_DEFAULT_INTENSITY,
-                    mVibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_TOUCH));
-            proto.write(VibratorServiceDumpProto.NOTIFICATION_INTENSITY,
-                    mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_NOTIFICATION));
-            proto.write(VibratorServiceDumpProto.NOTIFICATION_DEFAULT_INTENSITY,
-                    mVibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_NOTIFICATION));
-            proto.write(VibratorServiceDumpProto.RING_INTENSITY,
-                    mVibrationSettings.getCurrentIntensity(VibrationAttributes.USAGE_RINGTONE));
-            proto.write(VibratorServiceDumpProto.RING_DEFAULT_INTENSITY,
-                    mVibrationSettings.getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE));
+            mVibrationSettings.dumpProto(proto);
 
             for (Vibration.DebugInfo info : mPreviousRingVibrations) {
                 info.dumpProto(proto, VibratorServiceDumpProto.PREVIOUS_RING_VIBRATIONS);

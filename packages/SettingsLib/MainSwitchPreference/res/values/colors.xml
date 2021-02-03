@@ -17,7 +17,6 @@
 
 <resources>
 
-    <color name="title_text_color">@*android:color/primary_text_light</color>
     <color name="thumb_off">#BFFFFFFF</color>
     <color name="track_off">@*android:color/material_grey_600</color>
 

@@ -4447,7 +4447,7 @@ public final class ProcessList {
             }
 
             app.getPkgList().forEachPackage(packageName -> {
-                if (updateFrameworkRes && packagesToUpdate.contains(packageName)) {
+                if (updateFrameworkRes || packagesToUpdate.contains(packageName)) {
                     try {
                         final ApplicationInfo ai = AppGlobals.getPackageManager()
                                 .getApplicationInfo(packageName, STOCK_PM_FLAGS, app.userId);

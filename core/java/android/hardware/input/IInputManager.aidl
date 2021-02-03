@@ -93,6 +93,10 @@ interface IInputManager {
     int[] getVibratorIds(int deviceId);
     boolean isVibrating(int deviceId);
 
+    // Input device battery query.
+    int getBatteryStatus(int deviceId);
+    int getBatteryCapacity(int deviceId);
+
     void setPointerIconType(int typeId);
     void setCustomPointerIcon(in PointerIcon icon);
 

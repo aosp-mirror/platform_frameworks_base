@@ -1,0 +1,13 @@
+filegroup {
+    name: "services.smartspace-sources",
+    srcs: ["java/**/*.java"],
+    path: "java",
+    visibility: ["//frameworks/base/services"],
+}
+
+java_library_static {
+    name: "services.smartspace",
+    defaults: ["platform_service_defaults"],
+    srcs: [":services.smartspace-sources"],
+    libs: ["services.core"],
+}

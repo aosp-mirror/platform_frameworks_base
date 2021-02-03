@@ -22,7 +22,6 @@ import static android.Manifest.permission.HIDE_OVERLAY_WINDOWS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.SYSTEM_APPLICATION_OVERLAY;
-import static android.Manifest.permission.USE_BACKGROUND_BLUR;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_ACTIVITY;
 import static android.content.ClipDescription.MIMETYPE_APPLICATION_SHORTCUT;
@@ -111,7 +110,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     final boolean mCanCreateSystemApplicationOverlay;
     final boolean mCanHideNonSystemOverlayWindows;
     final boolean mCanAcquireSleepToken;
-    final boolean mCanUseBackgroundBlur;
     private AlertWindowNotification mAlertWindowNotification;
     private boolean mShowingAlertWindowNotificationAllowed;
     private boolean mClientDead = false;
@@ -141,8 +139,6 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         mOverlaysCanBeHidden = !mCanAddInternalSystemWindow
                 && !mService.mAtmInternal.isCallerRecents(mUid);
         mCanAcquireSleepToken = service.mContext.checkCallingOrSelfPermission(DEVICE_POWER)
-                == PERMISSION_GRANTED;
-        mCanUseBackgroundBlur = service.mContext.checkCallingOrSelfPermission(USE_BACKGROUND_BLUR)
                 == PERMISSION_GRANTED;
         mShowingAlertWindowNotificationAllowed = mService.mShowAlertWindowNotifications;
         mDragDropController = mService.mDragDropController;

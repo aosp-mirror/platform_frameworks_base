@@ -34,6 +34,7 @@ import android.app.prediction.AppPredictionManager;
 import android.app.role.RoleFrameworkInitializer;
 import android.app.search.SearchUiManager;
 import android.app.slice.SliceManager;
+import android.app.smartspace.SmartspaceManager;
 import android.app.time.TimeManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timedetector.TimeDetectorImpl;
@@ -72,7 +73,6 @@ import android.content.res.Resources;
 import android.content.rollback.RollbackManagerFrameworkInitializer;
 import android.debug.AdbManager;
 import android.debug.IAdbManager;
-import android.graphics.GameManager;
 import android.graphics.fonts.FontManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
@@ -120,21 +120,16 @@ import android.media.tv.ITvInputManager;
 import android.media.tv.TvInputManager;
 import android.media.tv.tunerresourcemanager.ITunerResourceManager;
 import android.media.tv.tunerresourcemanager.TunerResourceManager;
-import android.net.ConnectivityDiagnosticsManager;
-import android.net.ConnectivityManager;
+import android.net.ConnectivityFrameworkInitializer;
 import android.net.EthernetManager;
-import android.net.IConnectivityManager;
 import android.net.IEthernetManager;
 import android.net.IIpSecService;
 import android.net.INetworkPolicyManager;
-import android.net.ITestNetworkManager;
 import android.net.IpSecManager;
 import android.net.NetworkPolicyManager;
 import android.net.NetworkScoreManager;
 import android.net.NetworkWatchlistManager;
-import android.net.TestNetworkManager;
 import android.net.TetheringManager;
-import android.net.VpnManager;
 import android.net.lowpan.ILowpanManager;
 import android.net.lowpan.LowpanManager;
 import android.net.nsd.INsdManager;
@@ -163,7 +158,6 @@ import android.os.IUserManager;
 import android.os.IncidentManager;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceManager.ServiceNotFoundException;
 import android.os.StatsFrameworkInitializer;
@@ -370,15 +364,6 @@ public final class SystemServiceRegistry {
         // (which extends it).
         SYSTEM_SERVICE_NAMES.put(android.text.ClipboardManager.class, Context.CLIPBOARD_SERVICE);
 
-        registerService(Context.CONNECTIVITY_SERVICE, ConnectivityManager.class,
-                new StaticApplicationContextServiceFetcher<ConnectivityManager>() {
-            @Override
-            public ConnectivityManager createService(Context context) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getServiceOrThrow(Context.CONNECTIVITY_SERVICE);
-                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
-                return new ConnectivityManager(context, service);
-            }});
-
         registerService(Context.NETD_SERVICE, IBinder.class, new StaticServiceFetcher<IBinder>() {
             @Override
             public IBinder createService() throws ServiceNotFoundException {
@@ -411,50 +396,6 @@ public final class SystemServiceRegistry {
                 IIpSecService service = IIpSecService.Stub.asInterface(b);
                 return new IpSecManager(ctx, service);
             }});
-
-        registerService(Context.VPN_MANAGEMENT_SERVICE, VpnManager.class,
-                new CachedServiceFetcher<VpnManager>() {
-            @Override
-            public VpnManager createService(ContextImpl ctx) throws ServiceNotFoundException {
-                IBinder b = ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
-                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
-                return new VpnManager(ctx, service);
-            }});
-
-        registerService(Context.CONNECTIVITY_DIAGNOSTICS_SERVICE,
-                ConnectivityDiagnosticsManager.class,
-                new CachedServiceFetcher<ConnectivityDiagnosticsManager>() {
-            @Override
-            public ConnectivityDiagnosticsManager createService(ContextImpl ctx)
-                    throws ServiceNotFoundException {
-                // ConnectivityDiagnosticsManager is backed by ConnectivityService
-                IBinder b = ServiceManager.getServiceOrThrow(Context.CONNECTIVITY_SERVICE);
-                IConnectivityManager service = IConnectivityManager.Stub.asInterface(b);
-                return new ConnectivityDiagnosticsManager(ctx, service);
-            }});
-
-        registerService(
-                Context.TEST_NETWORK_SERVICE,
-                TestNetworkManager.class,
-                new StaticApplicationContextServiceFetcher<TestNetworkManager>() {
-                    @Override
-                    public TestNetworkManager createService(Context context)
-                            throws ServiceNotFoundException {
-                        IBinder csBinder =
-                                ServiceManager.getServiceOrThrow(Context.CONNECTIVITY_SERVICE);
-                        IConnectivityManager csMgr =
-                                IConnectivityManager.Stub.asInterface(csBinder);
-
-                        final IBinder tnBinder;
-                        try {
-                            tnBinder = csMgr.startOrGetTestNetworkService();
-                        } catch (RemoteException e) {
-                            throw new ServiceNotFoundException(Context.TEST_NETWORK_SERVICE);
-                        }
-                        ITestNetworkManager tnMgr = ITestNetworkManager.Stub.asInterface(tnBinder);
-                        return new TestNetworkManager(tnMgr);
-                    }
-                });
 
         registerService(Context.COUNTRY_DETECTOR, CountryDetector.class,
                 new StaticServiceFetcher<CountryDetector>() {
@@ -1224,6 +1165,16 @@ public final class SystemServiceRegistry {
                 }
             });
 
+        registerService(Context.SMARTSPACE_SERVICE, SmartspaceManager.class,
+            new CachedServiceFetcher<SmartspaceManager>() {
+                @Override
+                public SmartspaceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                    IBinder b = ServiceManager.getService(Context.SMARTSPACE_SERVICE);
+                    return b == null ? null : new SmartspaceManager(ctx);
+                }
+            });
+
         registerService(Context.APP_PREDICTION_SERVICE, AppPredictionManager.class,
                 new CachedServiceFetcher<AppPredictionManager>() {
             @Override
@@ -1441,6 +1392,7 @@ public final class SystemServiceRegistry {
         try {
             // Note: the following functions need to be @SystemApis, once they become mainline
             // modules.
+            ConnectivityFrameworkInitializer.registerServiceWrappers();
             JobSchedulerFrameworkInitializer.registerServiceWrappers();
             BlobStoreManagerFrameworkInitializer.initialize();
             TelephonyFrameworkInitializer.registerServiceWrappers();

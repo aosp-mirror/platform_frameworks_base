@@ -858,7 +858,7 @@ public interface InputConnection {
     boolean reportFullscreenMode(boolean enabled);
 
     /**
-     * Have the editor perform spell checking around the current selection.
+     * Have the editor perform spell checking for the full content.
      *
      * <p>The editor can ignore this method call if it does not support spell checking.
      *

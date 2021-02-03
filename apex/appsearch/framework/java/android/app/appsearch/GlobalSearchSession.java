@@ -134,7 +134,7 @@ public class GlobalSearchSession implements Closeable {
      * @return The search result of performing this operation.
      */
     @NonNull
-    public SearchResults query(
+    public SearchResults search(
             @NonNull String queryExpression,
             @NonNull SearchSpec searchSpec,
             @NonNull @CallbackExecutor Executor executor) {

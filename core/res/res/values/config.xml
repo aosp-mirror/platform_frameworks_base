@@ -517,6 +517,9 @@
     <!-- Flag indicating whether we should enable smart battery. -->
     <bool name="config_smart_battery_available">false</bool>
 
+    <!-- Flag indicating whether we should enable camera-based autorotate -->
+    <bool name="config_camera_autorotate">false</bool>
+
     <!-- Fast brightness animation ramp rate in brightness units per second-->
     <integer translatable="false" name="config_brightness_ramp_rate_fast">180</integer>
 
@@ -3799,6 +3802,15 @@
      Example: "com.android.intelliegence/.SearchUiService"
 -->
     <string name="config_defaultSearchUiService" translatable="false"></string>
+
+    <!-- The package name for the system's smartspace service.
+     This service returns smartspace results.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, smartspace will be disabled.
+     Example: "com.android.intelligence/.SmartspaceService"
+-->
+    <string name="config_defaultSmartspaceService" translatable="false"></string>
 
     <!-- The package name for the system's speech recognition service.
          This service must be trusted, as it can be activated without explicit consent of the user.

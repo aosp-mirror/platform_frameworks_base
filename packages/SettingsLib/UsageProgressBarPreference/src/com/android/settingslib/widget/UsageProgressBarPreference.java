@@ -22,6 +22,9 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.RelativeSizeSpan;
 import android.util.AttributeSet;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -41,6 +44,7 @@ public class UsageProgressBarPreference extends Preference {
 
     private CharSequence mUsageSummary;
     private CharSequence mTotalSummary;
+    private ImageView mCustomImageView;
     private int mPercent = -1;
 
     /**
@@ -110,6 +114,15 @@ public class UsageProgressBarPreference extends Preference {
         notifyChanged();
     }
 
+    /** Set custom ImageView to the right side of total summary. */
+    public <T extends ImageView> void setCustomContent(T imageView) {
+        if (imageView == mCustomImageView) {
+            return;
+        }
+        mCustomImageView = imageView;
+        notifyChanged();
+    }
+
     /**
      * Binds the created View to the data for this preference.
      *
@@ -140,6 +153,15 @@ public class UsageProgressBarPreference extends Preference {
         } else {
             progressBar.setIndeterminate(false);
             progressBar.setProgress(mPercent);
+        }
+
+        final FrameLayout customLayout = (FrameLayout) holder.findViewById(R.id.custom_content);
+        if (mCustomImageView == null) {
+            customLayout.removeAllViews();
+            customLayout.setVisibility(View.GONE);
+        } else {
+            customLayout.addView(mCustomImageView);
+            customLayout.setVisibility(View.VISIBLE);
         }
     }
 

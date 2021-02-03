@@ -55,6 +55,7 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.function.Function;
 
 /**
@@ -523,7 +524,7 @@ public class PackageParserLegacyCoreTest {
         int flags = PackageManager.GET_META_DATA | PackageManager.GET_SIGNING_CERTIFICATES;
 
         ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(apexFile,
-                flags, false /*collectCertificates*/);
+                flags, Collections.emptyList(), false /*collectCertificates*/);
         if (result.isError()) {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }

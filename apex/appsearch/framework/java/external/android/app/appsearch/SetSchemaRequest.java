@@ -126,9 +126,9 @@ public final class SetSchemaRequest {
          * <p>Any documents of these types will be visible on system UI surfaces by default.
          */
         @NonNull
-        public Builder addSchema(@NonNull AppSearchSchema... schemas) {
+        public Builder addSchemas(@NonNull AppSearchSchema... schemas) {
             Preconditions.checkNotNull(schemas);
-            return addSchema(Arrays.asList(schemas));
+            return addSchemas(Arrays.asList(schemas));
         }
 
         /**
@@ -137,7 +137,7 @@ public final class SetSchemaRequest {
          * <p>Any documents of these types will be visible on system UI surfaces by default.
          */
         @NonNull
-        public Builder addSchema(@NonNull Collection<AppSearchSchema> schemas) {
+        public Builder addSchemas(@NonNull Collection<AppSearchSchema> schemas) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkNotNull(schemas);
             mSchemas.addAll(schemas);

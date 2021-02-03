@@ -25,7 +25,7 @@
     android:layout_marginBottom="@dimen/screenshot_offset_y"
     android:scaleType="fitStart"
     android:elevation="@dimen/screenshot_preview_elevation"
-    android:visibility="gone"
+    android:visibility="invisible"
     android:background="@drawable/screenshot_rounded_corners"
     android:adjustViewBounds="true"
     android:contentDescription="@string/screenshot_edit_label"

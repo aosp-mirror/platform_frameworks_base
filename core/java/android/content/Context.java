@@ -37,6 +37,7 @@ import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
+import android.app.GameManager;
 import android.app.IApplicationThread;
 import android.app.IServiceConnection;
 import android.app.VrManager;
@@ -4625,6 +4626,18 @@ public abstract class Context {
     public static final String SEARCH_UI_SERVICE = "search_ui";
 
     /**
+     * Used for getting the smartspace service.
+     *
+     * <p><b>NOTE: </b> this service is optional; callers of
+     * {@code Context.getSystemServiceName(SMARTSPACE_SERVICE)} should check for {@code null}.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    @SystemApi
+    public static final String SMARTSPACE_SERVICE = "smartspace";
+
+    /**
      * Use with {@link #getSystemService(String)} to access the
      * {@link com.android.server.voiceinteraction.SoundTriggerService}.
      *
@@ -5429,7 +5442,7 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
-     * {@link android.graphics.GameManager}.
+     * {@link GameManager}.
      *
      * @see #getSystemService(String)
      *
@@ -6154,6 +6167,7 @@ public abstract class Context {
     @UiContext
     @NonNull
     public Context createWindowContext(@NonNull Display display, @WindowType int type,
+            @SuppressLint("NullableCollection")
             @Nullable Bundle options) {
         throw new RuntimeException("Not implemented. Must override in a subclass.");
     }

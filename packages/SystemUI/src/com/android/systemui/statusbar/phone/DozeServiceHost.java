@@ -71,7 +71,7 @@ public final class DozeServiceHost implements DozeHost {
             "persist.sysui.wake_performs_auth", true);
     private boolean mDozingRequested;
     private boolean mPulsing;
-    private WakefulnessLifecycle mWakefulnessLifecycle;
+    private final WakefulnessLifecycle mWakefulnessLifecycle;
     private final SysuiStatusBarStateController mStatusBarStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
     private final HeadsUpManagerPhone mHeadsUpManagerPhone;
@@ -86,9 +86,8 @@ public final class DozeServiceHost implements DozeHost {
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private final NotificationWakeUpCoordinator mNotificationWakeUpCoordinator;
     private NotificationShadeWindowViewController mNotificationShadeWindowViewController;
-    private final LockscreenLockIconController mLockscreenLockIconController;
     private final AuthController mAuthController;
-    private NotificationIconAreaController mNotificationIconAreaController;
+    private final NotificationIconAreaController mNotificationIconAreaController;
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private NotificationPanelViewController mNotificationPanel;
     private View mAmbientIndicationContainer;
@@ -109,7 +108,6 @@ public final class DozeServiceHost implements DozeHost {
             PulseExpansionHandler pulseExpansionHandler,
             NotificationShadeWindowController notificationShadeWindowController,
             NotificationWakeUpCoordinator notificationWakeUpCoordinator,
-            LockscreenLockIconController lockscreenLockIconController,
             AuthController authController,
             NotificationIconAreaController notificationIconAreaController) {
         super();
@@ -129,7 +127,6 @@ public final class DozeServiceHost implements DozeHost {
         mPulseExpansionHandler = pulseExpansionHandler;
         mNotificationShadeWindowController = notificationShadeWindowController;
         mNotificationWakeUpCoordinator = notificationWakeUpCoordinator;
-        mLockscreenLockIconController = lockscreenLockIconController;
         mAuthController = authController;
         mNotificationIconAreaController = notificationIconAreaController;
     }

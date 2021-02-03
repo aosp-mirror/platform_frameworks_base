@@ -188,9 +188,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         mTouchListenerCaptor.getValue().onTouch(mUdfpsView, event);
         event.recycle();
         // THEN illumination begins
-        verify(mUdfpsView).startIllumination();
         // AND onIlluminatedRunnable that notifies FingerprintManager is set
-        verify(mUdfpsView).setOnIlluminatedRunnable(mOnIlluminatedRunnableCaptor.capture());
+        verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
         mOnIlluminatedRunnableCaptor.getValue().run();
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
                 eq(0), eq(0f), eq(0f));
@@ -205,9 +204,8 @@ public class UdfpsControllerTest extends SysuiTestCase {
         // WHEN fingerprint is requested because of AOD interrupt
         mUdfpsController.onAodInterrupt(0, 0, 2f, 3f);
         // THEN illumination begins
-        verify(mUdfpsView).startIllumination();
         // AND onIlluminatedRunnable that notifies FingerprintManager is set
-        verify(mUdfpsView).setOnIlluminatedRunnable(mOnIlluminatedRunnableCaptor.capture());
+        verify(mUdfpsView).startIllumination(mOnIlluminatedRunnableCaptor.capture());
         mOnIlluminatedRunnableCaptor.getValue().run();
         verify(mFingerprintManager).onPointerDown(eq(mUdfpsController.mSensorProps.sensorId), eq(0),
                 eq(0), eq(3f) /* minor */, eq(2f) /* major */);

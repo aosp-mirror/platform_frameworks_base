@@ -27,10 +27,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.LinkProperties;
 import android.net.NetworkCapabilities;
+import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.IVcnManagementService;
 import android.net.vcn.IVcnUnderlyingNetworkPolicyListener;
 import android.net.vcn.VcnConfig;
 import android.net.vcn.VcnUnderlyingNetworkPolicy;
+import android.net.wifi.WifiInfo;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -290,6 +292,12 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 @NonNull ParcelUuid subscriptionGroup,
                 @NonNull VcnConfig config) {
             return new Vcn(vcnContext, subscriptionGroup, config);
+        }
+
+        /** Gets the subId indicated by the given {@link WifiInfo}. */
+        public int getSubIdForWifiInfo(@NonNull WifiInfo wifiInfo) {
+            // TODO(b/178501049): use the subId indicated by WifiInfo#getSubscriptionId
+            return SubscriptionManager.INVALID_SUBSCRIPTION_ID;
         }
     }
 
@@ -582,8 +590,36 @@ public class VcnManagementService extends IVcnManagementService.Stub {
                 "Must have permission NETWORK_FACTORY or be the SystemServer to get underlying"
                         + " Network policies");
 
-        // TODO(b/175914059): implement policy generation once VcnManagementService is able to
-        // determine policies
+        // Defensive copy in case this call is in-process and the given NetworkCapabilities mutates
+        networkCapabilities = new NetworkCapabilities(networkCapabilities);
+
+        int subId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+        if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                && networkCapabilities.getNetworkSpecifier() instanceof TelephonyNetworkSpecifier) {
+            TelephonyNetworkSpecifier telephonyNetworkSpecifier =
+                    (TelephonyNetworkSpecifier) networkCapabilities.getNetworkSpecifier();
+            subId = telephonyNetworkSpecifier.getSubscriptionId();
+        } else if (networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+                && networkCapabilities.getTransportInfo() instanceof WifiInfo) {
+            WifiInfo wifiInfo = (WifiInfo) networkCapabilities.getTransportInfo();
+            subId = mDeps.getSubIdForWifiInfo(wifiInfo);
+        }
+
+        boolean isVcnManagedNetwork = false;
+        if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
+            synchronized (mLock) {
+                ParcelUuid subGroup = mLastSnapshot.getGroupForSubId(subId);
+
+                // TODO(b/178140910): only mark the Network as VCN-managed if not in safe mode
+                if (mVcns.containsKey(subGroup)) {
+                    isVcnManagedNetwork = true;
+                }
+            }
+        }
+        if (isVcnManagedNetwork) {
+            networkCapabilities.removeCapability(
+                    NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED);
+        }
 
         return new VcnUnderlyingNetworkPolicy(false /* isTearDownRequested */, networkCapabilities);
     }

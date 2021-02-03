@@ -187,7 +187,8 @@ public final class TextServicesManager {
      * @return The spell checker session of the spell checker.
      */
     @Nullable
-    public SpellCheckerSession newSpellCheckerSession(@Nullable Bundle bundle,
+    public SpellCheckerSession newSpellCheckerSession(
+            @SuppressLint("NullableCollection") @Nullable Bundle bundle,
             @SuppressLint("UseIcu") @Nullable Locale locale,
             @NonNull SpellCheckerSessionListener listener,
             @SuppressLint("ListenerLast") boolean referToSpellCheckerLanguageSettings,
@@ -277,6 +278,7 @@ public final class TextServicesManager {
      * @return The list of currently enabled spell checkers.
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public List<SpellCheckerInfo> getEnabledSpellCheckersList() {
         final SpellCheckerInfo[] enabledSpellCheckers = getEnabledSpellCheckers();
         return enabledSpellCheckers != null ? Arrays.asList(enabledSpellCheckers) : null;

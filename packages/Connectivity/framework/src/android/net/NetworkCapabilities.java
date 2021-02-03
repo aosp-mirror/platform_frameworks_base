@@ -34,9 +34,9 @@ import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.CollectionUtils;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -401,11 +401,18 @@ public final class NetworkCapabilities implements Parcelable {
     public static final int NET_CAPABILITY_VEHICLE_INTERNAL = 27;
 
     /**
-     * Indicates that this network is not managed by a Virtual Carrier Network (VCN).
-     *
-     * TODO(b/177299683): Add additional clarifying javadoc.
+     * Indicates that this network is not subsumed by a Virtual Carrier Network (VCN).
+     * <p>
+     * To provide an experience on a VCN similar to a single traditional carrier network, in
+     * some cases the system sets this bit is set by default in application's network requests,
+     * and may choose to remove it at its own discretion when matching the request to a network.
+     * <p>
+     * Applications that want to know about a Virtual Carrier Network's underlying networks,
+     * for example to use them for multipath purposes, should remove this bit from their network
+     * requests ; the system will not add it back once removed.
      * @hide
      */
+    @SystemApi
     public static final int NET_CAPABILITY_NOT_VCN_MANAGED = 28;
 
     private static final int MIN_NET_CAPABILITY = NET_CAPABILITY_MMS;
@@ -767,7 +774,7 @@ public final class NetworkCapabilities implements Parcelable {
         if (originalOwnerUid == creatorUid) {
             setOwnerUid(creatorUid);
         }
-        if (ArrayUtils.contains(originalAdministratorUids, creatorUid)) {
+        if (CollectionUtils.contains(originalAdministratorUids, creatorUid)) {
             setAdministratorUids(new int[] {creatorUid});
         }
         // There is no need to clear the UIDs, they have already been cleared by clearAll() above.
@@ -1873,7 +1880,7 @@ public final class NetworkCapabilities implements Parcelable {
             sb.append(" OwnerUid: ").append(mOwnerUid);
         }
 
-        if (!ArrayUtils.isEmpty(mAdministratorUids)) {
+        if (mAdministratorUids != null && mAdministratorUids.length != 0) {
             sb.append(" AdminUids: ").append(Arrays.toString(mAdministratorUids));
         }
 
@@ -2506,7 +2513,7 @@ public final class NetworkCapabilities implements Parcelable {
         @NonNull
         public NetworkCapabilities build() {
             if (mCaps.getOwnerUid() != Process.INVALID_UID) {
-                if (!ArrayUtils.contains(mCaps.getAdministratorUids(), mCaps.getOwnerUid())) {
+                if (!CollectionUtils.contains(mCaps.getAdministratorUids(), mCaps.getOwnerUid())) {
                     throw new IllegalStateException("The owner UID must be included in "
                             + " administrator UIDs.");
                 }

@@ -1782,7 +1782,7 @@ public class VoiceInteractionManagerService extends SystemService {
             }
 
             @Override
-            public void onPackageModified(String pkgName) {
+            public void onPackageModified(@NonNull String pkgName) {
                 // If the package modified is not in the current user, then don't bother making
                 // any changes as we are going to do any initialization needed when we switch users.
                 if (mCurUser != getChangingUserId()) {

@@ -275,7 +275,7 @@ public class WindowFrameTests extends WindowTestsBase {
         imeSource.setFrame(imeFrame);
         imeSource.setVisible(true);
         w.updateRequestedVisibility(state);
-        w.mBehindIme = true;
+        w.mAboveInsetsState.addSource(imeSource);
 
         // With no insets or system decor all the frames incoming from PhoneWindowManager
         // are identical.

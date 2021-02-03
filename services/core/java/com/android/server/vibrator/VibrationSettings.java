@@ -34,10 +34,12 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.SparseArray;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.VibratorServiceDumpProto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -338,6 +340,24 @@ public final class VibrationSettings {
                 + ", mRingDefaultIntensity="
                 + intensityToString(getDefaultIntensity(VibrationAttributes.USAGE_RINGTONE))
                 + '}';
+    }
+
+    /** Write current settings into given {@link ProtoOutputStream}. */
+    public void dumpProto(ProtoOutputStream proto) {
+        synchronized (mLock) {
+            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_INTENSITY,
+                    mHapticFeedbackIntensity);
+            proto.write(VibratorServiceDumpProto.HAPTIC_FEEDBACK_DEFAULT_INTENSITY,
+                    mVibrator.getDefaultHapticFeedbackIntensity());
+            proto.write(VibratorServiceDumpProto.NOTIFICATION_INTENSITY,
+                    mNotificationIntensity);
+            proto.write(VibratorServiceDumpProto.NOTIFICATION_DEFAULT_INTENSITY,
+                    mVibrator.getDefaultNotificationVibrationIntensity());
+            proto.write(VibratorServiceDumpProto.RING_INTENSITY,
+                    mRingIntensity);
+            proto.write(VibratorServiceDumpProto.RING_DEFAULT_INTENSITY,
+                    mVibrator.getDefaultRingVibrationIntensity());
+        }
     }
 
     private void notifyListeners() {
