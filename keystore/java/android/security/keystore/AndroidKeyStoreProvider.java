@@ -23,7 +23,6 @@ import android.security.KeyStore;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterDefs;
-import android.sysprop.Keystore2Properties;
 
 import java.io.IOException;
 import java.security.KeyFactory;
@@ -117,8 +116,6 @@ public class AndroidKeyStoreProvider extends Provider {
         putSecretKeyFactoryImpl("HmacSHA512");
     }
 
-    private static boolean sKeystore2Enabled;
-
     /**
      * This function indicates whether or not Keystore 2.0 is enabled. Some parts of the
      * Keystore SPI must behave subtly differently when Keystore 2.0 is enabled. However,
@@ -133,9 +130,8 @@ public class AndroidKeyStoreProvider extends Provider {
      * @hide
      */
     public static boolean isKeystore2Enabled() {
-        return sKeystore2Enabled;
+        return android.security.keystore2.AndroidKeyStoreProvider.isInstalled();
     }
-
 
     /**
      * Installs a new instance of this provider (and the
@@ -164,11 +160,6 @@ public class AndroidKeyStoreProvider extends Provider {
             // priority.
             Security.addProvider(workaroundProvider);
         }
-
-        // {@code install()} is run by zygote when this property is still accessible. We store its
-        // value so that the Keystore SPI can act accordingly without having to access an internal
-        // property.
-        sKeystore2Enabled = Keystore2Properties.keystore2_enabled().orElse(false);
     }
 
     private void putSecretKeyFactoryImpl(String algorithm) {
