@@ -4842,13 +4842,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         try {
             return super.onTransact(code, data, reply, flags);
         } catch (RuntimeException e) {
-            if (!(e instanceof SecurityException)) {
-                Slog.w(TAG, "Activity Task Manager onTransact aborts "
-                        + " UID:" + Binder.getCallingUid()
-                        + " PID:" + Binder.getCallingPid(), e);
-            }
-            throw e;
+            throw logAndRethrowRuntimeExceptionOnTransact(TAG, e);
         }
+    }
+
+    /** Provides the full stack traces of non-security exception that occurs in onTransact. */
+    static RuntimeException logAndRethrowRuntimeExceptionOnTransact(String name,
+            RuntimeException e) {
+        if (!(e instanceof SecurityException)) {
+            Slog.w(TAG, name + " onTransact aborts"
+                    + " UID:" + Binder.getCallingUid()
+                    + " PID:" + Binder.getCallingPid(), e);
+        }
+        throw e;
     }
 
     /**
