@@ -128,6 +128,8 @@ public class KeyguardSecurityViewFlipper extends ViewFlipper {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
+            if (child.getVisibility() != View.VISIBLE) continue;
+
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
 
             if (lp.maxWidth > 0 && lp.maxWidth < maxWidth) {
