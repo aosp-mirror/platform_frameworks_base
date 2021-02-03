@@ -3863,7 +3863,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 int i = 0;
                 for (int index = 0; index < N; index++) {
                     final PackageSetting ps = sus.packages.valueAt(index);
-                    if (ps.getInstalled(userId)) {
+                    if (ps.getInstalled(userId)
+                            && !shouldFilterApplicationLocked(ps, callingUid, userId)) {
                         res[i++] = ps.name;
                     }
                 }
