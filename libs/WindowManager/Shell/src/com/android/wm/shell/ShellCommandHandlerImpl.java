@@ -16,7 +16,7 @@
 
 package com.android.wm.shell;
 
-import static com.android.wm.shell.splitscreen.SplitScreen.SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
 
 import com.android.wm.shell.apppairs.AppPairs;
 import com.android.wm.shell.common.ShellExecutor;
@@ -155,7 +155,7 @@ public final class ShellCommandHandlerImpl {
         }
         final int taskId = new Integer(args[2]);
         final int sideStagePosition = args.length > 3
-                ? new Integer(args[3]) : SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+                ? new Integer(args[3]) : STAGE_POSITION_BOTTOM_OR_RIGHT;
         mSplitScreenOptional.ifPresent(split -> split.moveToSideStage(taskId, sideStagePosition));
         return true;
     }

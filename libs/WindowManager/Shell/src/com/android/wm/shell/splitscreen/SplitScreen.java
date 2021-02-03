@@ -18,12 +18,16 @@ package com.android.wm.shell.splitscreen;
 
 import android.annotation.IntDef;
 import android.app.ActivityManager;
+import android.app.PendingIntent;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.UserHandle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.android.wm.shell.common.annotations.ExternalThread;
+import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 
 import java.io.PrintWriter;
 
@@ -31,46 +35,93 @@ import java.io.PrintWriter;
  * Interface to engage split-screen feature.
  */
 @ExternalThread
-public interface SplitScreen {
+public interface SplitScreen extends DragAndDropPolicy.Starter {
     /**
-     * Specifies that the side-stage is positioned at the top half of the screen if
+     * Stage position isn't specified normally meaning to use what ever it is currently set to.
+     */
+    int STAGE_POSITION_UNDEFINED = -1;
+    /**
+     * Specifies that a stage is positioned at the top half of the screen if
      * in portrait mode or at the left half of the screen if in landscape mode.
      */
-    int SIDE_STAGE_POSITION_TOP_OR_LEFT = 0;
+    int STAGE_POSITION_TOP_OR_LEFT = 0;
 
     /**
-     * Specifies that the side-stage is positioned at the bottom half of the screen if
+     * Specifies that a stage is positioned at the bottom half of the screen if
      * in portrait mode or at the right half of the screen if in landscape mode.
      */
-    int SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
+    int STAGE_POSITION_BOTTOM_OR_RIGHT = 1;
 
-    @IntDef(prefix = { "SIDE_STAGE_POSITION_" }, value = {
-            SIDE_STAGE_POSITION_TOP_OR_LEFT,
-            SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT
+    @IntDef(prefix = { "STAGE_POSITION_" }, value = {
+            STAGE_POSITION_UNDEFINED,
+            STAGE_POSITION_TOP_OR_LEFT,
+            STAGE_POSITION_BOTTOM_OR_RIGHT
     })
-    @interface SideStagePosition {}
+    @interface StagePosition {}
+
+    /**
+     * Stage type isn't specified normally meaning to use what ever the default is.
+     * E.g. exit split-screen and launch the app in fullscreen.
+     */
+    int STAGE_TYPE_UNDEFINED = -1;
+    /**
+     * The main stage type.
+     * @see MainStage
+     */
+    int STAGE_TYPE_MAIN = 0;
+
+    /**
+     * The side stage type.
+     * @see SideStage
+     */
+    int STAGE_TYPE_SIDE = 1;
+
+    @IntDef(prefix = { "STAGE_TYPE_" }, value = {
+            STAGE_TYPE_UNDEFINED,
+            STAGE_TYPE_MAIN,
+            STAGE_TYPE_SIDE
+    })
+    @interface StageType {}
+
+    /** Callback interface for listening to changes in a split-screen stage. */
+    interface SplitScreenListener {
+        void onStagePositionChanged(@StageType int stage, @StagePosition int position);
+        void onTaskStageChanged(int taskId, @StageType int stage);
+    }
 
     /** @return {@code true} if split-screen is currently visible. */
     boolean isSplitScreenVisible();
     /** Moves a task in the side-stage of split-screen. */
-    boolean moveToSideStage(int taskId, @SideStagePosition int sideStagePosition);
+    boolean moveToSideStage(int taskId, @StagePosition int sideStagePosition);
     /** Moves a task in the side-stage of split-screen. */
     boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @SideStagePosition int sideStagePosition);
+            @StagePosition int sideStagePosition);
     /** Removes a task from the side-stage of split-screen. */
     boolean removeFromSideStage(int taskId);
     /** Sets the position of the side-stage. */
-    void setSideStagePosition(@SideStagePosition int sideStagePosition);
+    void setSideStagePosition(@StagePosition int sideStagePosition);
     /** Hides the side-stage if it is currently visible. */
     void setSideStageVisibility(boolean visible);
+    default void enterSplitScreen(int taskId, boolean leftOrTop) {
+        moveToSideStage(taskId,
+                leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT);
+    }
     /** Removes the split-screen stages. */
     void exitSplitScreen();
     /** Gets the stage bounds. */
     void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds);
-    /** Updates the launch activity options for the split position we want to launch it in. */
-    void updateActivityOptions(Bundle opts, @SideStagePosition int position);
     /** Dumps current status of split-screen. */
     void dump(@NonNull PrintWriter pw, String prefix);
     /** Called when the shell organizer has been registered. */
     void onOrganizerRegistered();
+
+    void registerSplitScreenListener(SplitScreenListener listener);
+    void unregisterSplitScreenListener(SplitScreenListener listener);
+
+    void startTask(int taskId,
+            @StageType int stage, @StagePosition int position, @Nullable Bundle options);
+    void startShortcut(String packageName, String shortcutId, @StageType int stage,
+            @StagePosition int position, @Nullable Bundle options, UserHandle user);
+    void startIntent(PendingIntent intent,
+            @StageType int stage, @StagePosition int position, @Nullable Bundle options);
 }
