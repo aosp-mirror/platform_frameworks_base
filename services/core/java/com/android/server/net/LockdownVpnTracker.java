@@ -155,7 +155,7 @@ public class LockdownVpnTracker {
                 try {
                     // Use the privileged method because Lockdown VPN is initiated by the system, so
                     // no additional permission checks are necessary.
-                    mVpn.startLegacyVpnPrivileged(mProfile, mKeyStore, egressProp);
+                    mVpn.startLegacyVpnPrivileged(mProfile, mKeyStore, null, egressProp);
                 } catch (IllegalStateException e) {
                     mAcceptedEgressIface = null;
                     Log.e(TAG, "Failed to start VPN", e);

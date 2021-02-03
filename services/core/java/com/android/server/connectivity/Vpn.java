@@ -1982,27 +1982,28 @@ public class Vpn {
      * secondary thread to perform connection work, returning quickly.
      *
      * Should only be called to respond to Binder requests as this enforces caller permission. Use
-     * {@link #startLegacyVpnPrivileged(VpnProfile, KeyStore, LinkProperties)} to skip the
+     * {@link #startLegacyVpnPrivileged(VpnProfile, KeyStore, Network, LinkProperties)} to skip the
      * permission check only when the caller is trusted (or the call is initiated by the system).
      */
-    public void startLegacyVpn(VpnProfile profile, KeyStore keyStore, LinkProperties egress) {
+    public void startLegacyVpn(VpnProfile profile, KeyStore keyStore, @Nullable Network underlying,
+            LinkProperties egress) {
         enforceControlPermission();
         final long token = Binder.clearCallingIdentity();
         try {
-            startLegacyVpnPrivileged(profile, keyStore, egress);
+            startLegacyVpnPrivileged(profile, keyStore, underlying, egress);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
     }
 
     /**
-     * Like {@link #startLegacyVpn(VpnProfile, KeyStore, LinkProperties)}, but does not check
-     * permissions under the assumption that the caller is the system.
+     * Like {@link #startLegacyVpn(VpnProfile, KeyStore, Network, LinkProperties)}, but does not
+     * check permissions under the assumption that the caller is the system.
      *
      * Callers are responsible for checking permissions if needed.
      */
     public void startLegacyVpnPrivileged(VpnProfile profile, KeyStore keyStore,
-            LinkProperties egress) {
+            @Nullable Network underlying, @NonNull LinkProperties egress) {
         UserManager mgr = UserManager.get(mContext);
         UserInfo user = mgr.getUserInfo(mUserId);
         if (user.isRestricted() || mgr.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
@@ -2128,6 +2129,9 @@ public class Vpn {
         config.session = profile.name;
         config.isMetered = false;
         config.proxyInfo = profile.proxy;
+        if (underlying != null) {
+            config.underlyingNetworks = new Network[] { underlying };
+        }
 
         config.addLegacyRoutes(profile.routes);
         if (!profile.dnsServers.isEmpty()) {
