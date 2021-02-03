@@ -45,7 +45,6 @@ import com.android.server.biometrics.SensorServiceStateProto;
 import com.android.server.biometrics.SensorStateProto;
 import com.android.server.biometrics.UserStateProto;
 import com.android.server.biometrics.Utils;
-import com.android.server.biometrics.sensors.AcquisitionClient;
 import com.android.server.biometrics.sensors.AuthenticationConsumer;
 import com.android.server.biometrics.sensors.BaseClientMonitor;
 import com.android.server.biometrics.sensors.BiometricScheduler;
@@ -170,33 +169,39 @@ public class Sensor implements IBinder.DeathRecipient {
 
         @Override
         public void onAuthenticationFrame(AuthenticationFrame frame) {
-            // TODO(b/174619156): propagate the frame to an AuthenticationClient
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AcquisitionClient)) {
-                    Slog.e(mTag, "onAcquired for non-acquisition client: "
+                if (!(client instanceof FaceAuthenticationClient)) {
+                    Slog.e(mTag, "onAuthenticationFrame for incompatible client: "
+                            + Utils.getClientName(client));
+                    return;
+
+                }
+                if (frame == null) {
+                    Slog.e(mTag, "Received null authentication frame for client: "
                             + Utils.getClientName(client));
                     return;
                 }
-
-                final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(frame.data.acquiredInfo, frame.data.vendorCode);
+                ((FaceAuthenticationClient) client).onAuthenticationFrame(
+                        AidlConversionUtils.convert(frame));
             });
         }
 
         @Override
         public void onEnrollmentFrame(EnrollmentFrame frame) {
-            // TODO(b/174619156): propagate the frame to an EnrollmentClient
             mHandler.post(() -> {
                 final BaseClientMonitor client = mScheduler.getCurrentClient();
-                if (!(client instanceof AcquisitionClient)) {
-                    Slog.e(mTag, "onAcquired for non-acquisition client: "
+                if (!(client instanceof FaceEnrollClient)) {
+                    Slog.e(mTag, "onEnrollmentFrame for incompatible client: "
                             + Utils.getClientName(client));
                     return;
                 }
-
-                final AcquisitionClient<?> acquisitionClient = (AcquisitionClient<?>) client;
-                acquisitionClient.onAcquired(frame.data.acquiredInfo, frame.data.vendorCode);
+                if (frame == null) {
+                    Slog.e(mTag, "Received null enrollment frame for client: "
+                            + Utils.getClientName(client));
+                    return;
+                }
+                ((FaceEnrollClient) client).onEnrollmentFrame(AidlConversionUtils.convert(frame));
             });
         }
 
