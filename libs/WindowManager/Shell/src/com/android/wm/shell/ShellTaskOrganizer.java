@@ -44,6 +44,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.wm.shell.common.ShellExecutor;
+import com.android.wm.shell.sizecompatui.SizeCompatUI;
 import com.android.wm.shell.startingsurface.StartingSurfaceDrawer;
 
 import java.io.PrintWriter;
@@ -102,18 +103,31 @@ public class ShellTaskOrganizer extends TaskOrganizer {
     private final Object mLock = new Object();
     private final StartingSurfaceDrawer mStartingSurfaceDrawer;
 
+    /**
+     * In charge of showing size compat UI. Can be {@code null} if device doesn't support size
+     * compat.
+     */
+    @Nullable
+    private final SizeCompatUI mSizeCompatUI;
+
     public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context) {
-        this(null, mainExecutor, context);
+        this(null /* taskOrganizerController */, mainExecutor, context, null /* sizeCompatUI */);
+    }
+
+    public ShellTaskOrganizer(ShellExecutor mainExecutor, Context context, @Nullable
+            SizeCompatUI sizeCompatUI) {
+        this(null /* taskOrganizerController */, mainExecutor, context, sizeCompatUI);
     }
 
     @VisibleForTesting
     ShellTaskOrganizer(ITaskOrganizerController taskOrganizerController, ShellExecutor mainExecutor,
-            Context context) {
+            Context context, @Nullable SizeCompatUI sizeCompatUI) {
         super(taskOrganizerController, mainExecutor);
         // TODO(b/131727939) temporarily live here, the starting surface drawer should be controlled
         //  by a controller, that class should be create while porting
         //  ActivityRecord#addStartingWindow to WMShell.
         mStartingSurfaceDrawer = new StartingSurfaceDrawer(context, mainExecutor);
+        mSizeCompatUI = sizeCompatUI;
     }
 
     @Override
@@ -255,6 +269,7 @@ public class ShellTaskOrganizer extends TaskOrganizer {
         if (listener != null) {
             listener.onTaskAppeared(info.getTaskInfo(), info.getLeash());
         }
+        notifySizeCompatUI(info.getTaskInfo(), listener);
     }
 
     @Override
@@ -269,6 +284,10 @@ public class ShellTaskOrganizer extends TaskOrganizer {
                     taskInfo, data.getLeash(), oldListener, newListener);
             if (!updated && newListener != null) {
                 newListener.onTaskInfoChanged(taskInfo);
+            }
+            if (updated || !taskInfo.equalsForSizeCompat(data.getTaskInfo())) {
+                // Notify the size compat UI if the listener or task info changed.
+                notifySizeCompatUI(taskInfo, newListener);
             }
         }
     }
@@ -294,6 +313,8 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             if (listener != null) {
                 listener.onTaskVanished(taskInfo);
             }
+            // Pass null for listener to remove the size compat UI on this task if there is any.
+            notifySizeCompatUI(taskInfo, null /* taskListener */);
         }
     }
 
@@ -318,6 +339,34 @@ public class ShellTaskOrganizer extends TaskOrganizer {
             newListener.onTaskAppeared(taskInfo, leash);
         }
         return true;
+    }
+
+    /**
+     * Notifies {@link SizeCompatUI} about the size compat info changed on the give Task to update
+     * the UI accordingly.
+     *
+     * @param taskInfo the new Task info
+     * @param taskListener listener to handle the Task Surface placement. {@code null} if task is
+     *                     vanished.
+     */
+    private void notifySizeCompatUI(RunningTaskInfo taskInfo, @Nullable TaskListener taskListener) {
+        if (mSizeCompatUI == null) {
+            return;
+        }
+
+        // The task is vanished, notify to remove size compat UI on this Task if there is any.
+        if (taskListener == null) {
+            mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
+                    null /* taskConfig */, null /* sizeCompatActivity*/,
+                    null /* taskListener */);
+            return;
+        }
+
+        mSizeCompatUI.onSizeCompatInfoChanged(taskInfo.displayId, taskInfo.taskId,
+                taskInfo.configuration.windowConfiguration.getBounds(),
+                // null if the top activity not in size compat.
+                taskInfo.topActivityInSizeCompat ? taskInfo.topActivityToken : null,
+                taskListener);
     }
 
     private TaskListener getTaskListener(RunningTaskInfo runningTaskInfo) {
