@@ -122,6 +122,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URISyntaxException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
@@ -154,6 +155,8 @@ class PackageManagerShellCommand extends ShellCommand {
     boolean mBrief;
     boolean mComponents;
     int mQueryFlags;
+
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     PackageManagerShellCommand(PackageManagerService service, Context context) {
         mInterface = service;
@@ -3146,7 +3149,7 @@ class PackageManagerShellCommand extends ShellCommand {
 
             // 1. Single file from stdin.
             if (args.isEmpty() || STDIN_PATH.equals(args.get(0))) {
-                final String name = "base." + (isApex ? "apex" : "apk");
+                final String name = "base" + RANDOM.nextInt() + "." + (isApex ? "apex" : "apk");
                 final Metadata metadata = Metadata.forStdIn(name);
                 session.addFile(LOCATION_DATA_APP, name, sessionSizeBytes,
                         metadata.toByteArray(), null);

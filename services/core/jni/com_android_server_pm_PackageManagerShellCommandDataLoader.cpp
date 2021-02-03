@@ -22,6 +22,7 @@
 #include <android-base/stringprintf.h>
 #include <android-base/unique_fd.h>
 #include <core_jni_helpers.h>
+#include <cutils/multiuser.h>
 #include <cutils/trace.h>
 #include <endian.h>
 #include <nativehelper/JNIHelp.h>
@@ -375,6 +376,9 @@ public:
     }
 
 private:
+    // Bitmask of supported features.
+    DataLoaderFeatures getFeatures() const final { return DATA_LOADER_FEATURE_UID; }
+
     // Lifecycle.
     bool onCreate(const android::dataloader::DataLoaderParams& params,
                   android::dataloader::FilesystemConnectorPtr ifs,
@@ -554,51 +558,6 @@ private:
         return true;
     }
 
-    // Read tracing.
-    struct TracedRead {
-        uint64_t timestampUs;
-        android::dataloader::FileId fileId;
-        uint32_t firstBlockIdx;
-        uint32_t count;
-    };
-
-    void onPageReads(android::dataloader::PageReads pageReads) final {
-        auto trace = atrace_is_tag_enabled(ATRACE_TAG);
-        if (CC_LIKELY(!trace)) {
-            return;
-        }
-
-        TracedRead last = {};
-        for (auto&& read : pageReads) {
-            if (read.id != last.fileId || read.block != last.firstBlockIdx + last.count) {
-                traceRead(last);
-                last = TracedRead{
-                        .timestampUs = read.bootClockTsUs,
-                        .fileId = read.id,
-                        .firstBlockIdx = (uint32_t)read.block,
-                        .count = 1,
-                };
-            } else {
-                ++last.count;
-            }
-        }
-        traceRead(last);
-    }
-
-    void traceRead(const TracedRead& read) {
-        if (!read.count) {
-            return;
-        }
-
-        FileIdx fileIdx = convertFileIdToFileIndex(read.fileId);
-        auto str = android::base::StringPrintf("page_read: index=%lld count=%lld file=%d",
-                                               static_cast<long long>(read.firstBlockIdx),
-                                               static_cast<long long>(read.count),
-                                               static_cast<int>(fileIdx));
-        ATRACE_BEGIN(str.c_str());
-        ATRACE_END();
-    }
-
     // Streaming.
     bool initStreaming(unique_fd inout, MetadataMode mode) {
         mEventFd.reset(eventfd(0, EFD_CLOEXEC));
@@ -634,7 +593,10 @@ private:
     }
 
     // IFS callbacks.
-    void onPendingReads(dataloader::PendingReads pendingReads) final {
+    void onPendingReads(dataloader::PendingReads pendingReads) final {}
+    void onPageReads(dataloader::PageReads pageReads) final {}
+
+    void onPendingReadsWithUid(dataloader::PendingReadsWithUid pendingReads) final {
         std::lock_guard lock{mOutFdLock};
         if (mOutFd < 0) {
             return;
@@ -658,6 +620,67 @@ private:
             }
             sendRequest(mOutFd, BLOCK_MISSING, fileIdx, blockIdx);
         }
+    }
+
+    // Read tracing.
+    struct TracedRead {
+        uint64_t timestampUs;
+        android::dataloader::FileId fileId;
+        android::dataloader::Uid uid;
+        uint32_t firstBlockIdx;
+        uint32_t count;
+    };
+
+    void onPageReadsWithUid(dataloader::PageReadsWithUid pageReads) final {
+        auto trace = atrace_is_tag_enabled(ATRACE_TAG);
+        if (CC_LIKELY(!trace)) {
+            return;
+        }
+
+        TracedRead last = {};
+        for (auto&& read : pageReads) {
+            if (read.id != last.fileId || read.uid != last.uid ||
+                read.block != last.firstBlockIdx + last.count) {
+                traceRead(last);
+                last = TracedRead{
+                        .timestampUs = read.bootClockTsUs,
+                        .fileId = read.id,
+                        .uid = read.uid,
+                        .firstBlockIdx = (uint32_t)read.block,
+                        .count = 1,
+                };
+            } else {
+                ++last.count;
+            }
+        }
+        traceRead(last);
+    }
+
+    void traceRead(const TracedRead& read) {
+        if (!read.count) {
+            return;
+        }
+
+        FileIdx fileIdx = convertFileIdToFileIndex(read.fileId);
+
+        std::string trace;
+        if (read.uid != kIncFsNoUid) {
+            auto appId = multiuser_get_app_id(read.uid);
+            auto userId = multiuser_get_user_id(read.uid);
+            trace = android::base::
+                    StringPrintf("page_read: index=%lld count=%lld file=%d appid=%d userid=%d",
+                                 static_cast<long long>(read.firstBlockIdx),
+                                 static_cast<long long>(read.count), static_cast<int>(fileIdx),
+                                 static_cast<int>(appId), static_cast<int>(userId));
+        } else {
+            trace = android::base::StringPrintf("page_read: index=%lld count=%lld file=%d",
+                                                static_cast<long long>(read.firstBlockIdx),
+                                                static_cast<long long>(read.count),
+                                                static_cast<int>(fileIdx));
+        }
+
+        ATRACE_BEGIN(trace.c_str());
+        ATRACE_END();
     }
 
     void receiver(unique_fd inout, MetadataMode mode) {
