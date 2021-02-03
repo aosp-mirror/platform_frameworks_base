@@ -44,7 +44,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 
@@ -88,7 +88,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Mock
     private StatusBarStateController mStatusBarStateController;
     @Mock
-    private ScrimController mScrimController;
+    private StatusBar mStatusBar;
 
     private FakeExecutor mFgExecutor;
 
@@ -126,7 +126,7 @@ public class UdfpsControllerTest extends SysuiTestCase {
                 mWindowManager,
                 mStatusBarStateController,
                 mFgExecutor,
-                mScrimController);
+                mStatusBar);
         verify(mFingerprintManager).setUdfpsOverlayController(mOverlayCaptor.capture());
         mOverlayController = mOverlayCaptor.getValue();
 
@@ -241,6 +241,6 @@ public class UdfpsControllerTest extends SysuiTestCase {
     @Test
     public void registersViewForCallbacks() throws RemoteException {
         verify(mStatusBarStateController).addCallback(mUdfpsView);
-        verify(mScrimController).addScrimChangedListener(mUdfpsView);
+        verify(mStatusBar).addExpansionChangedListener(mUdfpsView);
     }
 }
