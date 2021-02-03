@@ -3612,11 +3612,11 @@ message AppStartOccurred {
     // Empty if not set.
     optional string launch_token = 13;
 
-    // The compiler filter used when when the package was optimized.
-    optional int32 package_optimization_compilation_filter = 14;
-
     // The reason why the package was optimized.
-    optional int32 package_optimization_compilation_reason = 15;
+    optional int32 package_optimization_compilation_reason = 14;
+
+    // The compiler filter used when when the package was optimized.
+    optional int32 package_optimization_compilation_filter = 15;
 }
 
 message AppStartCanceled {
@@ -3662,11 +3662,11 @@ message AppStartFullyDrawn {
     // App startup time (until call to Activity#reportFullyDrawn()).
     optional int64 app_startup_time_millis = 6;
 
-    // The compiler filter used when when the package was optimized.
-    optional int32 package_optimization_compilation_filter = 7;
-
     // The reason why the package was optimized.
-    optional int32 package_optimization_compilation_reason = 8;
+    optional int32 package_optimization_compilation_reason = 7;
+
+    // The compiler filter used when when the package was optimized.
+    optional int32 package_optimization_compilation_filter = 8;
 }
 
 /**
