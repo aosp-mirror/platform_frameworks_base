@@ -62,9 +62,6 @@ interface IUwbAdapter {
   /**
    * Request to open a new ranging session
    *
-   * This function must return before calling any functions in
-   * IUwbAdapterCallbacks.
-   *
    * This function does not start the ranging session, but all necessary
    * components must be initialized and ready to start a new ranging
    * session prior to calling IUwbAdapterCallback#onRangingOpened.
@@ -77,12 +74,16 @@ interface IUwbAdapter {
    * RANGING_SESSION_OPEN_THRESHOLD_MS milliseconds of #openRanging being called
    * if the ranging session fails to be opened.
    *
+   * If the provided sessionHandle is already open for the calling client, then
+   * #onRangingOpenFailed must be called and the new session must not be opened.
+   *
+   * @param sessionHandle the session handle to open ranging for
    * @param rangingCallbacks the callbacks used to deliver ranging information
    * @param parameters the configuration to use for ranging
-   * @return a SessionHandle used to identify this ranging request
    */
-  SessionHandle openRanging(in IUwbRangingCallbacks rangingCallbacks,
-                            in PersistableBundle parameters);
+  void openRanging(in SessionHandle sessionHandle,
+                   in IUwbRangingCallbacks rangingCallbacks,
+                   in PersistableBundle parameters);
 
   /**
    * Request to start ranging
