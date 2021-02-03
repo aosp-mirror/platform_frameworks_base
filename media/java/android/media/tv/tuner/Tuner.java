@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.hardware.tv.tuner.V1_0.Constants;
@@ -1017,6 +1018,7 @@ public class Tuner implements AutoCloseable  {
      * failed.
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public List<FrontendInfo> getAvailableFrontendInfos() {
         FrontendInfo[] feInfoList = getFrontendInfoListInternal();
         if (feInfoList == null) {

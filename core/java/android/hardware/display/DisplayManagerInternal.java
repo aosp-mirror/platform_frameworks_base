@@ -47,20 +47,22 @@ public abstract class DisplayManagerInternal {
      * begins adjusting the power state to match what was requested.
      * </p>
      *
+     * @param groupId The identifier for the display group being requested to change power state
      * @param request The requested power state.
-     * @param waitForNegativeProximity If true, issues a request to wait for
+     * @param waitForNegativeProximity If {@code true}, issues a request to wait for
      * negative proximity before turning the screen back on, assuming the screen
      * was turned off by the proximity sensor.
-     * @return True if display is ready, false if there are important changes that must
-     * be made asynchronously (such as turning the screen on), in which case the caller
-     * should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged()}
-     * then try the request again later until the state converges.
+     * @return {@code true} if display group is ready, {@code false} if there are important
+     * changes that must be made asynchronously (such as turning the screen on), in which case
+     * the caller should grab a wake lock, watch for {@link DisplayPowerCallbacks#onStateChanged}
+     * then try the request again later until the state converges. If the provided {@code groupId}
+     * cannot be found then {@code true} will be returned.
      */
-    public abstract boolean requestPowerState(DisplayPowerRequest request,
+    public abstract boolean requestPowerState(int groupId, DisplayPowerRequest request,
             boolean waitForNegativeProximity);
 
     /**
-     * Returns true if the proximity sensor screen-off function is available.
+     * Returns {@code true} if the proximity sensor screen-off function is available.
      */
     public abstract boolean isProximitySensorAvailable();
 
@@ -69,6 +71,22 @@ public abstract class DisplayManagerInternal {
      * display belongs.
      */
     public abstract int getDisplayGroupId(int displayId);
+
+    /**
+     * Registers a display group listener which will be informed of the addition, removal, or change
+     * of display groups.
+     *
+     * @param listener The listener to register.
+     */
+    public abstract void registerDisplayGroupListener(DisplayGroupListener listener);
+
+    /**
+     * Unregisters a display group listener which will be informed of the addition, removal, or
+     * change of display groups.
+     *
+     * @param listener The listener to unregister.
+     */
+    public abstract void unregisterDisplayGroupListener(DisplayGroupListener listener);
 
     /**
      * Screenshot for internal system-only use such as rotation, etc.  This method includes

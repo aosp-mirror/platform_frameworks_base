@@ -212,8 +212,8 @@ public class PhonePipMenuController implements PipMenuController {
     }
 
     @Nullable
-    Size getEstimatedMenuSize() {
-        return mPipMenuView == null ? null : mPipMenuView.getEstimatedMenuSize();
+    Size getEstimatedMinMenuSize() {
+        return mPipMenuView == null ? null : mPipMenuView.getEstimatedMinMenuSize();
     }
 
     /**

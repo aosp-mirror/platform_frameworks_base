@@ -1089,7 +1089,7 @@ public final class MediaCodecInfo {
 
         private int[] mSampleRates;
         private Range<Integer>[] mSampleRateRanges;
-        private int mMaxInputChannelCount;
+        private Range<Integer>[] mInputChannelRanges;
 
         private static final int MAX_INPUT_CHANNEL_COUNT = 30;
 
@@ -1119,11 +1119,61 @@ public final class MediaCodecInfo {
         }
 
         /**
-         * Returns the maximum number of input channels supported.  The codec
-         * supports any number of channels between 1 and this maximum value.
+         * Returns the maximum number of input channels supported.
+         *
+         * Through {@link android.os.Build.VERSION_CODES#R}, this method indicated support
+         * for any number of input channels between 1 and this maximum value.
+         *
+         * As of {@link android.os.Build.VERSION_CODES#S},
+         * the implied lower limit of 1 channel is no longer valid.
+         * As of {@link android.os.Build.VERSION_CODES#S}, {@link #getMaxInputChannelCount} is
+         * superseded by {@link #getInputChannelCountRanges},
+         * which returns an array of ranges of channels.
+         * The {@link #getMaxInputChannelCount} method will return the highest value
+         * in the ranges returned by {@link #getInputChannelCountRanges}
+         *
          */
         public int getMaxInputChannelCount() {
-            return mMaxInputChannelCount;
+            int overall_max = 0;
+            for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
+                int lmax = mInputChannelRanges[i].getUpper();
+                if (lmax > overall_max) {
+                    overall_max = lmax;
+                }
+            }
+            return overall_max;
+        }
+
+        /**
+         * Returns the minimum number of input channels supported.
+         * This is often 1, but does vary for certain mime types.
+         *
+         * This returns the lowest channel count in the ranges returned by
+         * {@link #getInputChannelCountRanges}.
+         */
+        public int getMinInputChannelCount() {
+            int overall_min = MAX_INPUT_CHANNEL_COUNT;
+            for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
+                int lmin = mInputChannelRanges[i].getLower();
+                if (lmin < overall_min) {
+                    overall_min = lmin;
+                }
+            }
+            return overall_min;
+        }
+
+        /*
+         * Returns an array of ranges representing the number of input channels supported.
+         * The codec supports any number of input channels within this range.
+         *
+         * This supersedes the {@link #getMaxInputChannelCount} method.
+         *
+         * For many codecs, this will be a single range [1..N], for some N.
+         */
+        @SuppressLint("ArrayReturn")
+        @NonNull
+        public Range<Integer>[] getInputChannelCountRanges() {
+            return Arrays.copyOf(mInputChannelRanges, mInputChannelRanges.length);
         }
 
         /* no public constructor */
@@ -1146,7 +1196,7 @@ public final class MediaCodecInfo {
 
         private void initWithPlatformLimits() {
             mBitrateRange = Range.create(0, Integer.MAX_VALUE);
-            mMaxInputChannelCount = MAX_INPUT_CHANNEL_COUNT;
+            mInputChannelRanges = new Range[] {Range.create(1, MAX_INPUT_CHANNEL_COUNT)};
             // mBitrateRange = Range.create(1, 320000);
             final int minSampleRate = SystemProperties.
                 getInt("ro.mediacodec.min_sample_rate", 7350);
@@ -1158,9 +1208,12 @@ public final class MediaCodecInfo {
 
         private boolean supports(Integer sampleRate, Integer inputChannels) {
             // channels and sample rates are checked orthogonally
-            if (inputChannels != null &&
-                    (inputChannels < 1 || inputChannels > mMaxInputChannelCount)) {
-                return false;
+            if (inputChannels != null) {
+                int ix = Utils.binarySearchDistinctRanges(
+                        mInputChannelRanges, inputChannels);
+                if (ix < 0) {
+                    return false;
+                }
             }
             if (sampleRate != null) {
                 int ix = Utils.binarySearchDistinctRanges(
@@ -1292,12 +1345,28 @@ public final class MediaCodecInfo {
             } else if (sampleRateRange != null) {
                 limitSampleRates(new Range[] { sampleRateRange });
             }
-            applyLimits(maxChannels, bitRates);
+
+            Range<Integer> channelRange = Range.create(1, maxChannels);
+
+            applyLimits(new Range[] { channelRange }, bitRates);
         }
 
-        private void applyLimits(int maxInputChannels, Range<Integer> bitRates) {
-            mMaxInputChannelCount = Range.create(1, mMaxInputChannelCount)
-                    .clamp(maxInputChannels);
+        private void applyLimits(Range<Integer>[] inputChannels, Range<Integer> bitRates) {
+
+            // clamp & make a local copy
+            Range<Integer>[] myInputChannels = new Range[inputChannels.length];
+            for (int i = 0; i < inputChannels.length; i++) {
+                int lower = inputChannels[i].clamp(1);
+                int upper = inputChannels[i].clamp(MAX_INPUT_CHANNEL_COUNT);
+                myInputChannels[i] = Range.create(lower, upper);
+            }
+
+            // sort, intersect with existing, & save channel list
+            sortDistinctRanges(myInputChannels);
+            Range<Integer>[] joinedChannelList =
+                            intersectSortedDistinctRanges(myInputChannels, mInputChannelRanges);
+            mInputChannelRanges = joinedChannelList;
+
             if (bitRates != null) {
                 mBitrateRange = mBitrateRange.intersect(bitRates);
             }
@@ -1305,6 +1374,7 @@ public final class MediaCodecInfo {
 
         private void parseFromInfo(MediaFormat info) {
             int maxInputChannels = MAX_INPUT_CHANNEL_COUNT;
+            Range<Integer>[] channels = new Range[] { Range.create(1, maxInputChannels)};
             Range<Integer> bitRates = POSITIVE_INTEGERS;
 
             if (info.containsKey("sample-rate-ranges")) {
@@ -1315,17 +1385,38 @@ public final class MediaCodecInfo {
                 }
                 limitSampleRates(rateRanges);
             }
-            if (info.containsKey("max-channel-count")) {
+
+            // we will prefer channel-ranges over max-channel-count
+            if (info.containsKey("channel-ranges")) {
+                String[] channelStrings = info.getString("channel-ranges").split(",");
+                Range<Integer>[] channelRanges = new Range[channelStrings.length];
+                for (int i = 0; i < channelStrings.length; i++) {
+                    channelRanges[i] = Utils.parseIntRange(channelStrings[i], null);
+                }
+                channels = channelRanges;
+            } else if (info.containsKey("channel-range")) {
+                Range<Integer> oneRange = Utils.parseIntRange(info.getString("channel-range"),
+                                                              null);
+                channels = new Range[] { oneRange };
+            } else if (info.containsKey("max-channel-count")) {
                 maxInputChannels = Utils.parseIntSafely(
                         info.getString("max-channel-count"), maxInputChannels);
+                if (maxInputChannels == 0) {
+                    channels = new Range[] {Range.create(0, 0)};
+                } else {
+                    channels = new Range[] {Range.create(1, maxInputChannels)};
+                }
             } else if ((mParent.mError & ERROR_UNSUPPORTED) != 0) {
                 maxInputChannels = 0;
+                channels = new Range[] {Range.create(0, 0)};
             }
+
             if (info.containsKey("bitrate-range")) {
                 bitRates = bitRates.intersect(
                         Utils.parseIntRange(info.getString("bitrate-range"), bitRates));
             }
-            applyLimits(maxInputChannels, bitRates);
+
+            applyLimits(channels, bitRates);
         }
 
         /** @hide */
@@ -1334,7 +1425,7 @@ public final class MediaCodecInfo {
             if (mBitrateRange.getLower().equals(mBitrateRange.getUpper())) {
                 format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrateRange.getLower());
             }
-            if (mMaxInputChannelCount == 1) {
+            if (getMaxInputChannelCount() == 1) {
                 // mono-only format
                 format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
             }

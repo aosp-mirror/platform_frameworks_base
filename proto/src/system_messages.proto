@@ -260,6 +260,10 @@ message SystemMessage {
     // Package: android
     NOTE_ADB_WIFI_ACTIVE = 62;
 
+    // Notify the user a carrier suggestion is available to get IMSI exemption.
+    // Package: android
+    NOTE_CARRIER_SUGGESTION_AVAILABLE = 63;
+
     // ADD_NEW_IDS_ABOVE_THIS_LINE
     // Legacy IDs with arbitrary values appear below
     // Legacy IDs existed as stable non-conflicting constants prior to the O release

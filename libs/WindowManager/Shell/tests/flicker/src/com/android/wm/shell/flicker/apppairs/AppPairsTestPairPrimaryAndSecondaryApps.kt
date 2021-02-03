@@ -21,12 +21,12 @@ import android.os.SystemClock
 import android.platform.test.annotations.Presubmit
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
+import com.android.server.wm.flicker.APP_PAIR_SPLIT_DIVIDER
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.dsl.FlickerBuilder
 import com.android.server.wm.flicker.helpers.buildTestTag
 import com.android.server.wm.flicker.traces.layers.getVisibleBounds
-import com.android.wm.shell.flicker.FlickerTestBase.Companion.APP_PAIR_SPLIT_DIVIDER
 import com.android.wm.shell.flicker.appPairsDividerIsVisible
 import com.android.wm.shell.flicker.helpers.AppPairsHelper
 import org.junit.FixMethodOrder

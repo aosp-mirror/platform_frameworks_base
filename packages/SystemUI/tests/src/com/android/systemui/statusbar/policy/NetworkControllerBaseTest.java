@@ -37,6 +37,7 @@ import static org.mockito.Mockito.when;
 import android.app.Instrumentation;
 import android.content.Intent;
 import android.net.ConnectivityManager;
+import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
@@ -343,6 +344,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_WIFI) {
             if (isConnected) {
+                mNetworkCallback.onAvailable(mock(Network.class),
+                        new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
                         mock(Network.class), new NetworkCapabilities(mNetCapabilities));
             } else {
@@ -357,6 +360,8 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         setConnectivityCommon(networkType, validated, isConnected);
         if (networkType == NetworkCapabilities.TRANSPORT_CELLULAR) {
             if (isConnected) {
+                mNetworkCallback.onAvailable(mock(Network.class),
+                        new NetworkCapabilities(mNetCapabilities), new LinkProperties(), false);
                 mNetworkCallback.onCapabilitiesChanged(
                         mock(Network.class), new NetworkCapabilities(mNetCapabilities));
             } else {

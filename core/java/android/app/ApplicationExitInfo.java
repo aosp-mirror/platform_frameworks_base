@@ -50,7 +50,7 @@ import java.util.zip.GZIPInputStream;
  *
  * <p>
  * Application process could die for many reasons, for example {@link #REASON_LOW_MEMORY}
- * when it was killed by the ystem because it was running low on memory. Reason
+ * when it was killed by the system because it was running low on memory. Reason
  * of the death can be retrieved via {@link #getReason}. Besides the reason, there are a few other
  * auxiliary APIs like {@link #getStatus} and {@link #getImportance} to help the caller with
  * additional diagnostic information.

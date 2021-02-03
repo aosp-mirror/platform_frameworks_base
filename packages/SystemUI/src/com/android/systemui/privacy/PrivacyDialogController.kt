@@ -227,21 +227,20 @@ class PrivacyDialogController(
     /**
      * Filters the list of elements to show.
      *
-     * * Return at most one element per [PrivacyType], sorted by the natural order of the
-     * [PrivacyType].
-     * * If there are no active usages for a type, return the most recent
-     * * If there are multiple active usages for a type, return the most active recent.
+     * For each privacy type, it'll return all active elements. If there are no active elements,
+     * it'll return the most recent access
      */
     private fun filterAndSelect(
         list: List<PrivacyDialog.PrivacyElement>
     ): List<PrivacyDialog.PrivacyElement> {
-        return list.groupBy { it.type }.toSortedMap().mapNotNull { entry ->
-            if (entry.value.isEmpty()) {
-                null
+        return list.groupBy { it.type }.toSortedMap().flatMap { (_, elements) ->
+            val actives = elements.filter { it.active }
+            if (actives.isNotEmpty()) {
+                actives.sortedByDescending { it.lastActiveTimestamp }
             } else {
-                val actives = entry.value.filter { it.active }
-                val out = if (actives.isNotEmpty()) actives else entry.value
-                out.maxByOrNull { it.lastActiveTimestamp }
+                elements.maxByOrNull { it.lastActiveTimestamp }?.let {
+                    listOf(it)
+                } ?: emptyList()
             }
         }
     }

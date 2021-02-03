@@ -91,11 +91,12 @@ interface IInputMethodManager {
     /** Remove the IME surface. Requires passing the currently focused window. */
     oneway void removeImeSurfaceFromWindow(in IBinder windowToken,
             in IVoidResultCallback resultCallback);
-    void startProtoDump(in byte[] protoDump, int source, String where);
+    oneway void startProtoDump(in byte[] protoDump, int source, String where,
+            in IVoidResultCallback resultCallback);
     oneway void isImeTraceEnabled(in IBooleanResultCallback resultCallback);
 
     // Starts an ime trace.
-    void startImeTrace();
+    oneway void startImeTrace(in IVoidResultCallback resultCallback);
     // Stops an ime trace.
-    void stopImeTrace();
+    oneway void stopImeTrace(in IVoidResultCallback resultCallback);
 }

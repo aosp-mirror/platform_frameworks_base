@@ -78,6 +78,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -334,7 +335,8 @@ public class PackageManagerTests extends AndroidTestCase {
     private ParsingPackage parsePackage(Uri packageURI) {
         final String archiveFilePath = packageURI.getPath();
         ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(
-                new File(archiveFilePath), 0 /*flags*/, false /*collectCertificates*/);
+                new File(archiveFilePath), 0 /*flags*/, Collections.emptyList(),
+                false /*collectCertificates*/);
         if (result.isError()) {
             throw new IllegalStateException(result.getErrorMessage(), result.getException());
         }

@@ -20,6 +20,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
@@ -53,7 +54,9 @@ public abstract class MusicRecognitionService extends Service {
          * @param extras extra data to be supplied back to the caller. Note that all executable
          *               parameters and file descriptors would be removed from the supplied bundle
          */
-        void onRecognitionSucceeded(@NonNull MediaMetadata result, @Nullable Bundle extras);
+        void onRecognitionSucceeded(@NonNull MediaMetadata result,
+                @SuppressLint("NullableCollection")
+                @Nullable Bundle extras);
 
         /**
          * Call this method if the search does not find a result on an error occurred.

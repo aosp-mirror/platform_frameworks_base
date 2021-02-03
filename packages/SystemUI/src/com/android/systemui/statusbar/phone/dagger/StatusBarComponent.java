@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone.dagger;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
@@ -73,4 +74,9 @@ public interface StatusBarComponent {
     @StatusBarScope
     NotificationPanelViewController getNotificationPanelViewController();
 
+    /**
+     * Creates a LockscreenLockIconController.
+     */
+    @StatusBarScope
+    LockscreenLockIconController getLockscreenLockIconController();
 }

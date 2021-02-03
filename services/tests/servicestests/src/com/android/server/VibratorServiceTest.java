@@ -582,16 +582,19 @@ public class VibratorServiceTest {
         VibratorService service = createService();
 
         service.registerVibratorStateListener(mVibratorStateListenerMock);
-        verify(mVibratorStateListenerMock).onVibrating(false);
 
-        vibrate(service, VibrationEffect.createOneShot(100, 100), ALARM_ATTRS);
+        vibrate(service, VibrationEffect.createOneShot(30, 100), ALARM_ATTRS);
 
         // VibrationThread will start this vibration async, so wait before triggering callbacks.
         Thread.sleep(10);
+        assertTrue(service.isVibrating());
+
         service.unregisterVibratorStateListener(mVibratorStateListenerMock);
         // Trigger callbacks from controller.
-        mTestLooper.moveTimeForward(150);
+        mTestLooper.moveTimeForward(50);
         mTestLooper.dispatchAll();
+        Thread.sleep(20);
+        assertFalse(service.isVibrating());
 
         InOrder inOrderVerifier = inOrder(mVibratorStateListenerMock);
         // First notification done when listener is registered.
@@ -745,7 +748,8 @@ public class VibratorServiceTest {
 
     private InputDevice createInputDeviceWithVibrator(int id) {
         return new InputDevice(id, 0, 0, "name", 0, 0, "description", false, 0, 0,
-                null, /* hasVibrator= */ true, false, false, false /* hasSensor */);
+                null, /* hasVibrator= */ true, false, false, false /* hasSensor */,
+                false /* hasBattery */);
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {

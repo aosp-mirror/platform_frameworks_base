@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -25,8 +27,10 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
+import android.view.RemotableViewMethod;
 import android.view.View;
 import android.widget.RemoteViews.RemoteView;
 
@@ -42,25 +46,32 @@ import java.time.ZoneId;
  * @attr ref android.R.styleable#AnalogClock_dial
  * @attr ref android.R.styleable#AnalogClock_hand_hour
  * @attr ref android.R.styleable#AnalogClock_hand_minute
+ * @attr ref android.R.styleable#AnalogClock_hand_second
  * @deprecated This widget is no longer supported.
  */
 @RemoteView
 @Deprecated
 public class AnalogClock extends View {
+    /** How often the clock should refresh to make the seconds hand advance at ~15 FPS. */
+    private static final long SECONDS_TICK_FREQUENCY_MS = 1000 / 15;
+
     private Clock mClock;
 
     @UnsupportedAppUsage
     private Drawable mHourHand;
     @UnsupportedAppUsage
     private Drawable mMinuteHand;
+    @Nullable
+    private Drawable mSecondHand;
     @UnsupportedAppUsage
     private Drawable mDial;
 
     private int mDialWidth;
     private int mDialHeight;
 
-    private boolean mAttached;
+    private boolean mVisible;
 
+    private float mSeconds;
     private float mMinutes;
     private float mHour;
     private boolean mChanged;
@@ -101,18 +112,70 @@ public class AnalogClock extends View {
             mMinuteHand = context.getDrawable(com.android.internal.R.drawable.clock_hand_minute);
         }
 
+        mSecondHand = a.getDrawable(com.android.internal.R.styleable.AnalogClock_hand_second);
+
         mClock = Clock.systemDefaultZone();
 
         mDialWidth = mDial.getIntrinsicWidth();
         mDialHeight = mDial.getIntrinsicHeight();
     }
 
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
+    /** Sets the dial of the clock to the specified Icon. */
+    @RemotableViewMethod
+    public void setDial(@NonNull Icon icon) {
+        mDial = icon.loadDrawable(getContext());
+        mDialWidth = mDial.getIntrinsicWidth();
+        mDialHeight = mDial.getIntrinsicHeight();
 
-        if (!mAttached) {
-            mAttached = true;
+        mChanged = true;
+        invalidate();
+    }
+
+    /** Sets the hour hand of the clock to the specified Icon. */
+    @RemotableViewMethod
+    public void setHourHand(@NonNull Icon icon) {
+        mHourHand = icon.loadDrawable(getContext());
+
+        mChanged = true;
+        invalidate();
+    }
+
+    /** Sets the minute hand of the clock to the specified Icon. */
+    @RemotableViewMethod
+    public void setMinuteHand(@NonNull Icon icon) {
+        mMinuteHand = icon.loadDrawable(getContext());
+
+        mChanged = true;
+        invalidate();
+    }
+
+    /**
+     * Sets the second hand of the clock to the specified Icon, or hides the second hand if it is
+     * null.
+     */
+    @RemotableViewMethod
+    public void setSecondHand(@Nullable Icon icon) {
+        mSecondHand = icon == null ? null : icon.loadDrawable(getContext());
+        mSecondsTick.run();
+
+        mChanged = true;
+        invalidate();
+    }
+
+    @Override
+    public void onVisibilityAggregated(boolean isVisible) {
+        super.onVisibilityAggregated(isVisible);
+
+        if (isVisible) {
+            onVisible();
+        } else {
+            onInvisible();
+        }
+    }
+
+    private void onVisible() {
+        if (!mVisible) {
+            mVisible = true;
             IntentFilter filter = new IntentFilter();
 
             filter.addAction(Intent.ACTION_TIME_TICK);
@@ -128,6 +191,8 @@ public class AnalogClock extends View {
             // user not the one the context is for.
             getContext().registerReceiverAsUser(mIntentReceiver,
                     android.os.Process.myUserHandle(), filter, null, getHandler());
+
+            mSecondsTick.run();
         }
 
         // NOTE: It's safe to do these after registering the receiver since the receiver always runs
@@ -140,12 +205,11 @@ public class AnalogClock extends View {
         onTimeChanged();
     }
 
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mAttached) {
+    private void onInvisible() {
+        if (mVisible) {
             getContext().unregisterReceiver(mIntentReceiver);
-            mAttached = false;
+            removeCallbacks(mSecondsTick);
+            mVisible = false;
         }
     }
 
@@ -237,6 +301,20 @@ public class AnalogClock extends View {
         minuteHand.draw(canvas);
         canvas.restore();
 
+        final Drawable secondHand = mSecondHand;
+        if (secondHand != null) {
+            canvas.save();
+            canvas.rotate(mSeconds / 60.0f * 360.0f, x, y);
+
+            if (changed) {
+                w = secondHand.getIntrinsicWidth();
+                h = secondHand.getIntrinsicHeight();
+                secondHand.setBounds(x - (w / 2), y - (h / 2), x + (w / 2), y + (h / 2));
+            }
+            secondHand.draw(canvas);
+            canvas.restore();
+        }
+
         if (scaled) {
             canvas.restore();
         }
@@ -250,6 +328,7 @@ public class AnalogClock extends View {
         int minute = localDateTime.getMinute();
         int second = localDateTime.getSecond();
 
+        mSeconds = second + localDateTime.getNano() / 1_000_000_000f;
         mMinutes = minute + second / 60.0f;
         mHour = hour + mMinutes / 60.0f;
         mChanged = true;
@@ -268,6 +347,21 @@ public class AnalogClock extends View {
             onTimeChanged();
 
             invalidate();
+        }
+    };
+
+    private final Runnable mSecondsTick = new Runnable() {
+        @Override
+        public void run() {
+            if (!mVisible || mSecondHand == null) {
+                return;
+            }
+
+            onTimeChanged();
+
+            invalidate();
+
+            postDelayed(this, SECONDS_TICK_FREQUENCY_MS);
         }
     };
 
