@@ -24,6 +24,8 @@
         <option name="run-command" value="am broadcast -a 'com.google.android.gms.phenotype.FLAG_OVERRIDE' --es package &quot;com.google.android.gms.platformconfigurator&quot; --es user '\\*' --esa flags &quot;ModuleConfig__versioned_immediate_commit_packages&quot; --esa types &quot;bytes&quot; --esa values &quot;Cm5vdGFwYWNrYWdlOgA=&quot; com.google.android.gms" />
         <option name="teardown-command" value="am broadcast -a 'com.google.android.gms.phenotype.FLAG_OVERRIDE' --es action delete --es package &quot;com.google.android.gms.platformconfigurator&quot; --es user '\*' --esa flag &quot;ModuleConfig__immediate_commit_packages&quot; com.google.android.gms" />
         <option name="teardown-command" value="am broadcast -a 'com.google.android.gms.phenotype.FLAG_OVERRIDE' --es action delete --es package &quot;com.google.android.gms.platformconfigurator&quot; --es user '\*' --esa flag &quot;ModuleConfig__versioned_immediate_commit_packages&quot; com.google.android.gms" />
+        <option name="run-command" value="setprop persist.rollback.is_test 1" />
+        <option name="teardown-command" value="setprop persist.rollback.is_test 0" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.HostTest" >
         <option name="class" value="com.android.tests.rollback.host.NetworkStagedRollbackTest" />

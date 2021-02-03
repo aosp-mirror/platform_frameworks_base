@@ -24,6 +24,7 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -227,6 +228,15 @@ class RollbackStore {
                 packageSessionIds, extensionVersions);
     }
 
+    private static boolean isLinkPossible(File oldFile, File newFile) {
+        try {
+            return Os.stat(oldFile.getAbsolutePath()).st_dev
+                    == Os.stat(newFile.getAbsolutePath()).st_dev;
+        } catch (ErrnoException ignore) {
+            return false;
+        }
+    }
+
     /**
      * Creates a backup copy of an apk or apex for a package.
      * For packages containing splits, this method should be called for each
@@ -239,16 +249,29 @@ class RollbackStore {
         targetDir.mkdirs();
         File targetFile = new File(targetDir, sourceFile.getName());
 
-        try {
-            // Create a hard link to avoid copy
-            // TODO(b/168562373)
-            // Linking between non-encrypted and encrypted is not supported and we have
-            // encrypted /data/rollback and non-encrypted /data/apex/active. For now this works
-            // because we happen to store encrypted files under /data/apex/active which is no
-            // longer the case when compressed apex rolls out. We have to handle this case in
-            // order not to fall back to copy.
-            Os.link(sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
-        } catch (ErrnoException ignore) {
+        boolean fallbackToCopy = !isLinkPossible(sourceFile, targetFile);
+        if (!fallbackToCopy) {
+            try {
+                // Create a hard link to avoid copy
+                // TODO(b/168562373)
+                // Linking between non-encrypted and encrypted is not supported and we have
+                // encrypted /data/rollback and non-encrypted /data/apex/active. For now this works
+                // because we happen to store encrypted files under /data/apex/active which is no
+                // longer the case when compressed apex rolls out. We have to handle this case in
+                // order not to fall back to copy.
+                Os.link(sourceFile.getAbsolutePath(), targetFile.getAbsolutePath());
+            } catch (ErrnoException e) {
+                boolean isRollbackTest =
+                        SystemProperties.getBoolean("persist.rollback.is_test", false);
+                if (isRollbackTest) {
+                    throw new IOException(e);
+                } else {
+                    fallbackToCopy = true;
+                }
+            }
+        }
+
+        if (fallbackToCopy) {
             // Fall back to copy if hardlink can't be created
             Files.copy(sourceFile.toPath(), targetFile.toPath());
         }
