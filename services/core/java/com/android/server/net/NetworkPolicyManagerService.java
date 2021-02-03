@@ -5380,6 +5380,17 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
     }
 
     @Override
+    public boolean checkUidNetworkingBlocked(int uid, int uidRules,
+            boolean isNetworkMetered, boolean isBackgroundRestricted) {
+        mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
+        // Log of invoking this function is disabled because it will be called very frequently. And
+        // metrics are unlikely needed on this method because the callers are external and this
+        // method doesn't take any locks or perform expensive operations.
+        return isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
+                isBackgroundRestricted, null);
+    }
+
+    @Override
     public boolean isUidRestrictedOnMeteredNetworks(int uid) {
         mContext.enforceCallingOrSelfPermission(OBSERVE_NETWORK_POLICY, TAG);
         final int uidRules;
@@ -5388,9 +5399,9 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
             uidRules = mUidRules.get(uid, RULE_ALLOW_ALL);
             isBackgroundRestricted = mRestrictBackground;
         }
-        //TODO(b/177490332): The logic here might not be correct because it doesn't consider
-        // RULE_REJECT_METERED condition. And it could be replaced by
-        // isUidNetworkingBlockedInternal().
+        // TODO(b/177490332): The logic here might not be correct because it doesn't consider
+        //  RULE_REJECT_METERED condition. And it could be replaced by
+        //  isUidNetworkingBlockedInternal().
         return isBackgroundRestricted
                 && !hasRule(uidRules, RULE_ALLOW_METERED)
                 && !hasRule(uidRules, RULE_TEMPORARY_ALLOW_METERED);
