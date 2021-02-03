@@ -14242,7 +14242,7 @@ public class TelephonyManager {
      * If this policy is enabled, data will be temporarily enabled on the non-default data SIM
      * during any voice calls.
      *
-     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabledStatus}.
+     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabled}.
      * @hide
      */
     @SystemApi
@@ -14256,7 +14256,7 @@ public class TelephonyManager {
      * will also return true for {@link ApnSetting#TYPE_MMS}.
      * When disabled, the MMS APN will be governed by the same rules as all other APNs.
      *
-     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabledStatus}.
+     * This policy can be enabled and disabled via {@link #setMobileDataPolicyEnabled}.
      * @hide
      */
     @SystemApi
@@ -14284,11 +14284,11 @@ public class TelephonyManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setMobileDataPolicyEnabledStatus(@MobileDataPolicy int policy, boolean enabled) {
+    public void setMobileDataPolicyEnabled(@MobileDataPolicy int policy, boolean enabled) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.setMobileDataPolicyEnabledStatus(getSubId(), policy, enabled);
+                service.setMobileDataPolicyEnabled(getSubId(), policy, enabled);
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
