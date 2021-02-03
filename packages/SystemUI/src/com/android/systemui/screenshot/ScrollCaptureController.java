@@ -18,10 +18,12 @@ package com.android.systemui.screenshot;
 
 import android.annotation.IdRes;
 import android.annotation.UiThread;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver.InternalInsetsInfo;
@@ -168,19 +170,20 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     }
 
     private void edit() {
-        sendIntentWhenReady(Intent.ACTION_EDIT);
+        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
+        sendIntentWhenReady(Intent.ACTION_EDIT, editorPackage);
     }
 
     private void share() {
-        sendIntentWhenReady(Intent.ACTION_SEND);
+        sendIntentWhenReady(Intent.ACTION_SEND, null);
     }
 
-    void sendIntentWhenReady(String action) {
+    void sendIntentWhenReady(String action, String component) {
         if (mExportFuture != null) {
             mExportFuture.addListener(() -> {
                 try {
                     ImageExporter.Result result = mExportFuture.get();
-                    sendIntent(action, result.uri);
+                    sendIntent(action, component, result.uri);
                     mCallback.onFinish();
                 } catch (InterruptedException | ExecutionException e) {
                     Log.e(TAG, "failed to export", e);
@@ -254,12 +257,16 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         }
     }
 
-    void sendIntent(String action, Uri uri) {
-        Intent editIntent = new Intent(action);
-        editIntent.setType("image/png");
-        editIntent.setData(uri);
-        editIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        mContext.startActivityAsUser(editIntent, UserHandle.CURRENT);
+    void sendIntent(String action, String component, Uri uri) {
+        Intent intent = new Intent(action);
+        if (!TextUtils.isEmpty(component)) {
+            intent.setComponent(ComponentName.unflattenFromString(component));
+        }
+        intent.setType("image/png");
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
     }
 }

@@ -39,6 +39,25 @@
         tools:minHeight="100dp"
         tools:minWidth="100dp" />
 
+    <com.android.systemui.screenshot.CropView
+        android:id="@+id/crop_view"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="8dp"
+        app:layout_constrainedHeight="true"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintBottom_toBottomOf="@id/guideline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:handleThickness="3dp"
+        app:handleColor="@*android:color/accent_device_default"
+        app:scrimColor="#9444"
+        tools:background="?android:colorBackground"
+        tools:minHeight="100dp"
+        tools:minWidth="100dp" />
+
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
         android:layout_width="wrap_content"
