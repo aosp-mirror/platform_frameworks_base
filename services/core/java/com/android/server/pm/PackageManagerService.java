@@ -27188,6 +27188,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                 final boolean instantApp =
                         isInstantAppInternal(visiblePackage.getPackageName(), userId, visibleUid);
+                final boolean accessGranted;
                 if (instantApp) {
                     if (!direct) {
                         // if the interaction that lead to this granting access to an instant app
@@ -27195,10 +27196,13 @@ public class PackageManagerService extends IPackageManager.Stub
                         // grant.
                         return;
                     }
-                    mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
+                    accessGranted = mInstantAppRegistry.grantInstantAccessLPw(userId, intent,
                             recipientAppId, UserHandle.getAppId(visibleUid) /*instantAppId*/);
                 } else {
-                    mAppsFilter.grantImplicitAccess(recipientUid, visibleUid);
+                    accessGranted = mAppsFilter.grantImplicitAccess(recipientUid, visibleUid);
+                }
+                if (accessGranted) {
+                    ApplicationPackageManager.invalidateGetPackagesForUidCache();
                 }
             }
         }
