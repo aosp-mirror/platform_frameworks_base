@@ -465,6 +465,8 @@ applications that come with the platform
         <permission name="android.permission.WIFI_UPDATE_COEX_UNSAFE_CHANNELS" />
         <!-- Permission required for CTS test CarrierMessagingServiceWrapperTest -->
         <permission name="android.permission.BIND_CARRIER_SERVICES"/>
+        <!-- Permission required for CTS test - MusicRecognitionManagerTest -->
+        <permission name="android.permission.MANAGE_MUSIC_RECOGNITION" />
         <!-- Permission required for CTS test - CallLogTest -->
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
