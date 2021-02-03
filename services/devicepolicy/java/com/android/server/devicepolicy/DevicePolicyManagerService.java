@@ -2935,6 +2935,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         // reading the value during user switch, due to onStartUser() being asynchronous.
         updatePasswordQualityCacheForUserGroup(
                 userId == UserHandle.USER_SYSTEM ? UserHandle.USER_ALL : userId);
+        updatePermissionPolicyCache(userId);
 
         startOwnerService(userId, "start-user");
     }
@@ -12461,11 +12462,13 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 || (caller.hasPackage() && isCallerDelegate(caller, DELEGATION_PERMISSION_GRANT)));
         checkCanExecuteOrThrowUnsafe(DevicePolicyManager.OPERATION_SET_PERMISSION_POLICY);
 
+        final int forUser = caller.getUserId();
         synchronized (getLockObject()) {
-            DevicePolicyData userPolicy = getUserData(caller.getUserId());
+            DevicePolicyData userPolicy = getUserData(forUser);
             if (userPolicy.mPermissionPolicy != policy) {
                 userPolicy.mPermissionPolicy = policy;
-                saveSettingsLocked(caller.getUserId());
+                mPolicyCache.setPermissionPolicy(forUser, policy);
+                saveSettingsLocked(forUser);
             }
         }
         DevicePolicyEventLogger
@@ -12476,13 +12479,17 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
     }
 
+    private void updatePermissionPolicyCache(int userId) {
+        synchronized (getLockObject()) {
+            DevicePolicyData userPolicy = getUserData(userId);
+            mPolicyCache.setPermissionPolicy(userId, userPolicy.mPermissionPolicy);
+        }
+    }
+
     @Override
     public int getPermissionPolicy(ComponentName admin) throws RemoteException {
         int userId = UserHandle.getCallingUserId();
-        synchronized (getLockObject()) {
-            DevicePolicyData userPolicy = getUserData(userId);
-            return userPolicy.mPermissionPolicy;
-        }
+        return mPolicyCache.getPermissionPolicy(userId);
     }
 
     @Override
