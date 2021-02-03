@@ -9604,29 +9604,6 @@ package android.service.attention {
 
 }
 
-package android.service.attestation {
-
-  public abstract class ImpressionAttestationService extends android.app.Service {
-    ctor public ImpressionAttestationService();
-    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
-    method public abstract boolean onVerifyImpressionToken(@NonNull byte[], @NonNull android.service.attestation.ImpressionToken);
-  }
-
-  public final class ImpressionToken implements android.os.Parcelable {
-    ctor public ImpressionToken(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
-    method public int describeContents();
-    method @NonNull public android.graphics.Rect getBoundsInWindow();
-    method @NonNull public String getHashingAlgorithm();
-    method @NonNull public byte[] getHmac();
-    method @NonNull public byte[] getImageHash();
-    method public long getScreenshotTimeMillis();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.attestation.ImpressionToken> CREATOR;
-  }
-
-}
-
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
@@ -10188,6 +10165,30 @@ package android.service.rotationresolver {
   public static interface RotationResolverService.RotationResolverCallback {
     method public void onFailure(int);
     method public void onSuccess(int);
+  }
+
+}
+
+package android.service.screenshot {
+
+  public final class ScreenshotHash implements android.os.Parcelable {
+    ctor public ScreenshotHash(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public android.graphics.Rect getBoundsInWindow();
+    method @NonNull public String getHashingAlgorithm();
+    method @NonNull public byte[] getHmac();
+    method @NonNull public byte[] getImageHash();
+    method public long getScreenshotTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.screenshot.ScreenshotHash> CREATOR;
+  }
+
+  public abstract class ScreenshotHasherService extends android.app.Service {
+    ctor public ScreenshotHasherService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public abstract android.service.screenshot.ScreenshotHash onGenerateScreenshotHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
+    method public abstract boolean onVerifyScreenshotHash(@NonNull byte[], @NonNull android.service.screenshot.ScreenshotHash);
+    field public static final String SERVICE_INTERFACE = "android.service.screenshot.ScreenshotHasherService";
   }
 
 }
