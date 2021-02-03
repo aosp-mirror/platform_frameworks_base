@@ -146,4 +146,10 @@
 
     <!-- Content description to tell the user a bubble has been dismissed. -->
     <string name="accessibility_bubble_dismissed">Bubble dismissed.</string>
+
+    <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
+    <string name="restart_button_description">Tap to restart this app and go full screen.</string>
+
+    <!-- Generic "got it" acceptance of dialog or cling [CHAR LIMIT=NONE] -->
+    <string name="got_it">Got it</string>
 </resources>

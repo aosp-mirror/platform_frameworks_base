@@ -2580,9 +2580,6 @@
     <!-- What to show on the ambient display player when song doesn't have a title. [CHAR LIMIT=20] -->
     <string name="music_controls_no_title">No title</string>
 
-    <!-- Description of the restart button in the hint of size compatibility mode. [CHAR LIMIT=NONE] -->
-    <string name="restart_button_description">Tap to restart this app and go full screen.</string>
-
     <!-- Action in accessibility menu to move the stack of bubbles [CHAR LIMIT=20] -->
     <string name="bubble_accessibility_action_move">Move</string>
 

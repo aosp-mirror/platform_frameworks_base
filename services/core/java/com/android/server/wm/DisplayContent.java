@@ -5500,12 +5500,9 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // The callback is only interested in the foreground changes of fullscreen activity.
             return;
         }
+        // TODO(b/178327644) Update for per Task size compat
         if (!r.inSizeCompatMode()) {
             if (mLastCompatModeActivity != null) {
-                // TODO(b/178327644) Remove notifySizeCompatModeActivityChanged
-                mAtmService.getTaskChangeNotificationController()
-                        .notifySizeCompatModeActivityChanged(mDisplayId, null /* activityToken */);
-                // This will do nothing until SizeCompatModeActivityController is moved to shell
                 organizedTask.onSizeCompatActivityChanged();
             }
             mLastCompatModeActivity = null;
@@ -5515,10 +5512,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return;
         }
         mLastCompatModeActivity = r;
-        // TODO(b/178327644) Remove notifySizeCompatModeActivityChanged
-        mAtmService.getTaskChangeNotificationController()
-                .notifySizeCompatModeActivityChanged(mDisplayId, r.appToken);
-        // This will do nothing until SizeCompatModeActivityController is moved to shell
         organizedTask.onSizeCompatActivityChanged();
     }
 
