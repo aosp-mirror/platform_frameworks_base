@@ -33,6 +33,7 @@ import android.os.Binder;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Singleton;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -104,6 +105,9 @@ public class DomainVerificationService extends SystemService
     private final DomainVerificationEnforcer mEnforcer;
 
     @NonNull
+    private final DomainVerificationDebug mDebug;
+
+    @NonNull
     private final IDomainVerificationManager.Stub mStub = new DomainVerificationManagerStub(this);
 
     @NonNull
@@ -117,11 +121,18 @@ public class DomainVerificationService extends SystemService
         mSettings = new DomainVerificationSettings();
         mCollector = new DomainVerificationCollector(platformCompat, systemConfig);
         mEnforcer = new DomainVerificationEnforcer(context);
+        mDebug = new DomainVerificationDebug(mCollector);
     }
 
     @Override
     public void onStart() {
         publishBinderService(Context.DOMAIN_VERIFICATION_SERVICE, mStub);
+    }
+
+    @NonNull
+    @Override
+    public DomainVerificationProxy getProxy() {
+        return mProxy;
     }
 
     @Override
@@ -188,8 +199,8 @@ public class DomainVerificationService extends SystemService
         if (state < DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED) {
             if (state != DomainVerificationState.STATE_SUCCESS) {
                 throw new IllegalArgumentException(
-                        "External callers can only set STATE_SUCCESS or codes greater than or "
-                                + "equal to STATE_FIRST_CALLER_DEFINED");
+                        "Verifier can only set STATE_SUCCESS or codes greater than or equal to "
+                                + "STATE_FIRST_VERIFIER_DEFINED");
             }
         }
 
@@ -569,6 +580,14 @@ public class DomainVerificationService extends SystemService
     @Override
     public boolean runMessage(int messageCode, Object object) {
         return mProxy.runMessage(messageCode, object);
+    }
+
+    @Override
+    public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
+            @Nullable @UserIdInt Integer userId) throws NameNotFoundException {
+        synchronized (mLock) {
+            mDebug.printState(writer, packageName, userId, mConnection.get(), mAttachedPkgStates);
+        }
     }
 
     private void sendBroadcastForPackage(@NonNull String packageName) {
