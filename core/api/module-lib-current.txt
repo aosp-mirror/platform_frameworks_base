@@ -171,6 +171,14 @@ package android.media.session {
 
 package android.net {
 
+  public final class EthernetNetworkSpecifier extends android.net.NetworkSpecifier implements android.os.Parcelable {
+    ctor public EthernetNetworkSpecifier(@NonNull String);
+    method public int describeContents();
+    method @Nullable public String getInterfaceName();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.EthernetNetworkSpecifier> CREATOR;
+  }
+
   public static final class IpSecManager.UdpEncapsulationSocket implements java.lang.AutoCloseable {
     method public int getResourceId();
   }
