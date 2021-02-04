@@ -4928,7 +4928,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
     // The snapshot disable/enable switch.  An image with the flag set true uses snapshots
     // and an image with the flag set false does not use snapshots.
-    private static final boolean SNAPSHOT_ENABLED = true;
+    private static final boolean SNAPSHOT_ENABLED = false;
 
     /**
      * Return the live computer.
