@@ -220,9 +220,8 @@ public class TaskSnapshotWindow {
         final InputChannel tmpInputChannel = new InputChannel();
         mainExecutor.execute(() -> {
             try {
-                final int res = session.addToDisplay(window, layoutParams, View.GONE,
-                        displayId, mTmpInsetsState, tmpFrames.frame, tmpInputChannel,
-                        mTmpInsetsState, mTempControls);
+                final int res = session.addToDisplay(window, layoutParams, View.GONE, displayId,
+                        mTmpInsetsState, tmpInputChannel, mTmpInsetsState, mTempControls);
                 if (res < 0) {
                     Slog.w(TAG, "Failed to add snapshot starting window res=" + res);
                     return;

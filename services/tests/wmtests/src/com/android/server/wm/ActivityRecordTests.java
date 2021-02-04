@@ -1715,9 +1715,8 @@ public class ActivityRecordTests extends WindowTestsBase {
             doReturn(WindowManagerGlobal.ADD_STARTING_NOT_NEEDED).when(session).addToDisplay(
                     any() /* window */,  any() /* attrs */,
                     anyInt() /* viewVisibility */, anyInt() /* displayId */,
-                    any() /* requestedVisibility */, any() /* outFrame */,
-                    any() /* outInputChannel */, any() /* outInsetsState */,
-                    any() /* outActiveControls */);
+                    any() /* requestedVisibility */, any() /* outInputChannel */,
+                    any() /* outInsetsState */, any() /* outActiveControls */);
             mAtm.mWindowManager.mStartingSurfaceController
                     .createTaskSnapshotSurface(activity, snapshot);
         } catch (RemoteException ignored) {
