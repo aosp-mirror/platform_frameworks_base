@@ -69,9 +69,6 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
-        canvas.save();
-        canvas.translate(getPaddingX(), getPaddingY());
-
         final boolean isNightMode = (mContext.getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_YES) != 0;
         if (!isNightMode) {
@@ -80,8 +77,6 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
             }
         }
         mFingerprintDrawable.draw(canvas);
-
-        canvas.restore();
     }
 
     @Override
