@@ -1494,6 +1494,16 @@ public abstract class WallpaperService extends Service {
         private void doDetachEngine() {
             mActiveEngines.remove(mEngine);
             mEngine.detach();
+            // Some wallpapers will not trigger the rendering threads of the remaining engines even
+            // if they are visible, so we need to toggle the state to get their attention.
+            if (!mDetached.get()) {
+                for (Engine eng : mActiveEngines) {
+                    if (eng.mVisible) {
+                        eng.doVisibilityChanged(false);
+                        eng.doVisibilityChanged(true);
+                    }
+                }
+            }
         }
 
         @Override
