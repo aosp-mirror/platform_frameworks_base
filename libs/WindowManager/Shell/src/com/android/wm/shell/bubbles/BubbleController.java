@@ -771,7 +771,8 @@ public class BubbleController {
                     // if the bubble is already active, there's no need to push it to overflow
                     return;
                 }
-                bubble.inflate((b) -> mBubbleData.overflowBubble(DISMISS_AGED, bubble),
+                bubble.inflate(
+                        (b) -> mBubbleData.overflowBubble(Bubbles.DISMISS_RELOAD_FROM_DISK, bubble),
                         mContext, this, mStackView, mBubbleIconFactory, true /* skipInflation */);
             });
             return null;
