@@ -162,7 +162,7 @@ public final class Zygote {
      * GWP-ASan is activated unconditionally (but still, only a small subset of
      * allocations is protected).
      */
-    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
 
     /**
      * Enable automatic zero-initialization of native heap memory allocations.
