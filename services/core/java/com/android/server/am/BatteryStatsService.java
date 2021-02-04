@@ -126,7 +126,7 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith("?");
-    private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
+    private static final int MAX_LOW_POWER_STATS_SIZE = 8192;
     private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
 
     private final HandlerThread mHandlerThread;
