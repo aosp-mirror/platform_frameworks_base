@@ -49,7 +49,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.INetworkActivityListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
