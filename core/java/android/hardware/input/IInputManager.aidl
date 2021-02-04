@@ -26,6 +26,7 @@ import android.os.CombinedVibrationEffect;
 import android.hardware.input.IInputSensorEventListener;
 import android.hardware.input.InputSensorInfo;
 import android.os.IBinder;
+import android.os.IVibratorStateListener;
 import android.os.VibrationEffect;
 import android.view.InputDevice;
 import android.view.InputEvent;
@@ -92,6 +93,8 @@ interface IInputManager {
     void cancelVibrate(int deviceId, IBinder token);
     int[] getVibratorIds(int deviceId);
     boolean isVibrating(int deviceId);
+    boolean registerVibratorStateListener(int deviceId, in IVibratorStateListener listener);
+    boolean unregisterVibratorStateListener(int deviceId, in IVibratorStateListener listener);
 
     // Input device battery query.
     int getBatteryStatus(int deviceId);
