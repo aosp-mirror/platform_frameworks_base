@@ -54,7 +54,7 @@ public interface Bubbles {
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
             DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED,
-            DISMISS_NO_BUBBLE_UP})
+            DISMISS_NO_BUBBLE_UP, DISMISS_RELOAD_FROM_DISK})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -72,6 +72,7 @@ public interface Bubbles {
     int DISMISS_SHORTCUT_REMOVED = 12;
     int DISMISS_PACKAGE_REMOVED = 13;
     int DISMISS_NO_BUBBLE_UP = 14;
+    int DISMISS_RELOAD_FROM_DISK = 15;
 
     /**
      * @return {@code true} if there is a bubble associated with the provided key and if its
