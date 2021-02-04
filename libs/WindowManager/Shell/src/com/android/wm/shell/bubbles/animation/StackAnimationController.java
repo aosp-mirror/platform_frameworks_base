@@ -62,8 +62,8 @@ public class StackAnimationController extends
 
     private static final String TAG = "Bubbs.StackCtrl";
 
-    /** Values to use for animating bubbles in. */
-    private static final float ANIMATE_IN_STIFFNESS = 1000f;
+    /** Value to use for animating bubbles in and springing stack after fling. */
+    private static final float STACK_SPRING_STIFFNESS = 700f;
 
     /** Values to use for animating updated bubble to top of stack. */
     private static final float NEW_BUBBLE_START_SCALE = 0.5f;
@@ -80,20 +80,15 @@ public class StackAnimationController extends
 
     private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
             new PhysicsAnimator.SpringConfig(
-                    ANIMATE_IN_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+                    STACK_SPRING_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
 
     /**
      * Friction applied to fling animations. Since the stack must land on one of the sides of the
      * screen, we want less friction horizontally so that the stack has a better chance of making it
      * to the side without needing a spring.
      */
-    private static final float FLING_FRICTION = 2.2f;
+    private static final float FLING_FRICTION = 1.9f;
 
-    /**
-     * Values to use for the stack spring animation used to spring the stack to its final position
-     * after a fling.
-     */
-    private static final int SPRING_AFTER_FLING_STIFFNESS = 750;
     private static final float SPRING_AFTER_FLING_DAMPING_RATIO = 0.85f;
 
     /** Sentinel value for unset position value. */
@@ -216,7 +211,7 @@ public class StackAnimationController extends
 
         @Override
         public void moveToBounds(@NonNull Rect bounds) {
-            springStack(bounds.left, bounds.top, SpringForce.STIFFNESS_LOW);
+            springStack(bounds.left, bounds.top, STACK_SPRING_STIFFNESS);
         }
 
         @NonNull
@@ -341,7 +336,7 @@ public class StackAnimationController extends
      * flings.
      */
     public void springStackAfterFling(float destinationX, float destinationY) {
-        springStack(destinationX, destinationY, SPRING_AFTER_FLING_STIFFNESS);
+        springStack(destinationX, destinationY, STACK_SPRING_STIFFNESS);
     }
 
     /**
@@ -371,7 +366,7 @@ public class StackAnimationController extends
 
         final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
         final float stiffness = Settings.Secure.getFloat(contentResolver, "bubble_stiffness",
-                SPRING_AFTER_FLING_STIFFNESS /* default */);
+                STACK_SPRING_STIFFNESS /* default */);
         final float dampingRatio = Settings.Secure.getFloat(contentResolver, "bubble_damping",
                 SPRING_AFTER_FLING_DAMPING_RATIO);
         final float friction = Settings.Secure.getFloat(contentResolver, "bubble_friction",
