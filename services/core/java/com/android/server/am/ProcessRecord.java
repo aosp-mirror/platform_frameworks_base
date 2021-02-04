@@ -28,6 +28,17 @@ import static android.os.Process.SHELL_UID;
 import static android.os.Process.SYSTEM_UID;
 
 import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_BACKGROUND_ACTIVITY_PERMISSION;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_BACKGROUND_FGS_PERMISSION;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_COMPANION_APP;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_PROC_STATE;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_PROFILE_OWNER;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_ALLOWED_BY_SYSTEM_UID;
+import static com.android.server.am.ActiveServices.FGS_FEATURE_DENIED;
+import static com.android.server.am.ActiveServices.fgsCodeToString;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_OOM_ADJ;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
@@ -319,16 +330,12 @@ class ProcessRecord implements WindowProcessListener {
 
     private final ArraySet<Binder> mBackgroundFgsStartTokens = new ArraySet<>();
 
-    // The list of permissions that can start FGS from background.
-    private static String[] ALLOW_BG_START_FGS_PERMISSIONS =
-            {START_ACTIVITIES_FROM_BACKGROUND, START_FOREGROUND_SERVICES_FROM_BACKGROUND,
-                    SYSTEM_ALERT_WINDOW};
     // Does the process has permission to start FGS from background.
-    boolean mAllowStartFgsByPermission;
+    @ActiveServices.FgsFeatureRetCode int mAllowStartFgsByPermission;
     // Can this process start FGS from background?
     // If this process has the ability to start FGS from background, this ability can be passed to
     // another process through service binding.
-    boolean mAllowStartFgs;
+    @ActiveServices.FgsFeatureRetCode int mAllowStartFgs;
 
     /**
      * Profiling info of the process, such as PSS, cpu, etc.
@@ -430,8 +437,9 @@ class ProcessRecord implements WindowProcessListener {
                 pw.println();
         pw.print(prefix); pw.print("allowStartFgsState=");
                 pw.println(mAllowStartFgsState);
-        if (mAllowStartFgs) {
-            pw.print(prefix); pw.print("allowStartFgs="); pw.println(mAllowStartFgs);
+        if (mAllowStartFgs != FGS_FEATURE_DENIED) {
+            pw.print(prefix); pw.print("allowStartFgs=");
+            pw.println(fgsCodeToString(mAllowStartFgs));
         }
         if (hasShownUi || mProfile.hasPendingUiClean() || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
@@ -1892,8 +1900,8 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     void setAllowStartFgsByPermission() {
-        boolean ret = false;
-        if (!ret) {
+        int ret = FGS_FEATURE_DENIED;
+        if (ret == FGS_FEATURE_DENIED) {
             boolean isSystem = false;
             final int uid = UserHandle.getAppId(info.uid);
             switch (uid) {
@@ -1909,18 +1917,21 @@ class ProcessRecord implements WindowProcessListener {
             }
 
             if (isSystem) {
-                ret = true;
+                ret = FGS_FEATURE_ALLOWED_BY_SYSTEM_UID;
             }
         }
 
-        if (!ret) {
-            for (int i = 0; i < ALLOW_BG_START_FGS_PERMISSIONS.length; ++i) {
-                if (ActivityManager.checkComponentPermission(ALLOW_BG_START_FGS_PERMISSIONS[i],
-                        info.uid, -1, true)
-                        == PERMISSION_GRANTED) {
-                    ret = true;
-                    break;
-                }
+        if (ret == FGS_FEATURE_DENIED) {
+            if (ActivityManager.checkComponentPermission(START_ACTIVITIES_FROM_BACKGROUND,
+                    info.uid, -1, true) == PERMISSION_GRANTED) {
+                ret = FGS_FEATURE_ALLOWED_BY_BACKGROUND_ACTIVITY_PERMISSION;
+            } else if (ActivityManager.checkComponentPermission(
+                    START_FOREGROUND_SERVICES_FROM_BACKGROUND,
+                    info.uid, -1, true) == PERMISSION_GRANTED) {
+                ret = FGS_FEATURE_ALLOWED_BY_BACKGROUND_FGS_PERMISSION;
+            } else if (ActivityManager.checkComponentPermission(SYSTEM_ALERT_WINDOW,
+                    info.uid, -1, true) == PERMISSION_GRANTED) {
+                ret = FGS_FEATURE_ALLOWED_BY_SYSTEM_ALERT_WINDOW_PERMISSION;
             }
         }
         mAllowStartFgs = mAllowStartFgsByPermission = ret;
@@ -1931,38 +1942,49 @@ class ProcessRecord implements WindowProcessListener {
     }
 
     void setAllowStartFgs() {
-        if (mAllowStartFgs) {
+        if (mAllowStartFgs != FGS_FEATURE_DENIED) {
             return;
         }
-        if (!mAllowStartFgs) {
-            mAllowStartFgs = isAllowedStartFgsState();
+        if (mAllowStartFgs == FGS_FEATURE_DENIED) {
+            if (isAllowedStartFgsState()) {
+                mAllowStartFgs = FGS_FEATURE_ALLOWED_BY_PROC_STATE;
+            }
         }
 
-        if (!mAllowStartFgs) {
+        if (mAllowStartFgs == FGS_FEATURE_DENIED) {
             // Is the calling UID a device owner app?
             if (mService.mInternal != null) {
-                mAllowStartFgs = mService.mInternal.isDeviceOwner(info.uid);
+                if (mService.mInternal.isDeviceOwner(info.uid)) {
+                    mAllowStartFgs = FGS_FEATURE_ALLOWED_BY_DEVICE_OWNER;
+                }
             }
         }
 
-        if (!mAllowStartFgs) {
+        if (mAllowStartFgs == FGS_FEATURE_DENIED) {
             if (mService.mInternal != null) {
-                mAllowStartFgs = mService.mInternal.isAssociatedCompanionApp(
+                final boolean isCompanionApp = mService.mInternal.isAssociatedCompanionApp(
                         UserHandle.getUserId(info.uid), info.uid);
+                if (isCompanionApp) {
+                    mAllowStartFgs = FGS_FEATURE_ALLOWED_BY_COMPANION_APP;
+                }
             }
         }
 
-        if (!mAllowStartFgs) {
+        if (mAllowStartFgs == FGS_FEATURE_DENIED) {
             // Is the calling UID a profile owner app?
             if (mService.mInternal != null) {
-                mAllowStartFgs = mService.mInternal.isProfileOwner(info.uid);
+                if (mService.mInternal.isProfileOwner(info.uid)) {
+                    mAllowStartFgs = FGS_FEATURE_ALLOWED_BY_PROFILE_OWNER;
+                }
             }
         }
 
-        if (!mAllowStartFgs) {
+        if (mAllowStartFgs == FGS_FEATURE_DENIED) {
             // uid is on DeviceIdleController's user/system allowlist
             // or AMS's FgsStartTempAllowList.
-            mAllowStartFgs = mService.isAllowlistedForFgsStartLocked(info.uid);
+            if (mService.isAllowlistedForFgsStartLocked(info.uid)) {
+                mAllowStartFgs = FGS_FEATURE_ALLOWED_BY_DEVICE_IDLE_ALLOW_LIST;
+            }
         }
     }
 

@@ -5514,8 +5514,8 @@ public final class ActiveServices {
             for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
                 final ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
                 if (pr.uid == callingUid) {
-                    if (pr.mAllowStartFgs) {
-                        ret = FGS_FEATURE_ALLOWED_BY_PROCESS_RECORD;
+                    if (pr.mAllowStartFgs != FGS_FEATURE_DENIED) {
+                        ret = pr.mAllowStartFgs;
                         break;
                     } else if (pr.isAllowedStartFgsState()) {
                         ret = FGS_FEATURE_ALLOWED_BY_PROC_STATE;
@@ -5635,7 +5635,7 @@ public final class ActiveServices {
         return CompatChanges.isChangeEnabled(FGS_BG_START_USE_EXEMPTION_LIST_CHANGE_ID, uid);
     }
 
-    private static String fgsCodeToString(@FgsFeatureRetCode int code) {
+    static String fgsCodeToString(@FgsFeatureRetCode int code) {
         switch (code) {
             case FGS_FEATURE_DENIED:
                 return "DENIED";
