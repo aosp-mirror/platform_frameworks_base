@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"পিডিএফ হিসাবে সেভ করুন"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"প্রিন্ট বিকল্প প্রসারিত হয়েছে"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"প্রিন্ট বিকল্প সংকুচিত হয়েছে"</string>
-    <string name="search" msgid="5421724265322228497">"খুঁজুন"</string>
+    <string name="search" msgid="5421724265322228497">"সার্চ"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"সমস্ত প্রিন্টার"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"পরিষেবা যোগ করুন"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"সার্চ বাক্স দেখানো হচ্ছে"</string>

@@ -923,7 +923,7 @@
     <string name="granularity_label_link" msgid="9007852307112046526">"link"</string>
     <string name="granularity_label_line" msgid="376204904280620221">"red"</string>
     <string name="factorytest_failed" msgid="3190979160945298006">"Fabričko testiranje nije uspelo"</string>
-    <string name="factorytest_not_system" msgid="5658160199925519869">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u direktorijumu /system/app."</string>
+    <string name="factorytest_not_system" msgid="5658160199925519869">"Radnja FACTORY_TEST je podržana samo za pakete instalirane u folderu /system/app."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"Nije pronađen nijedan paket koji obezbeđuje radnju FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"Restartuj"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"Na stranici na adresi „<xliff:g id="TITLE">%s</xliff:g>“ piše:"</string>
@@ -2038,7 +2038,7 @@
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Baterija telefona je dovoljno napunjena. Funkcije više nisu ograničene."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Baterija tableta je dovoljno napunjena. Funkcije više nisu ograničene."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Baterija uređaja je dovoljno napunjena. Funkcije više nisu ograničene."</string>
-    <string name="mime_type_folder" msgid="2203536499348787650">"Direktorijum"</string>
+    <string name="mime_type_folder" msgid="2203536499348787650">"Folder"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android aplikacija"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Datoteka"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> datoteka"</string>

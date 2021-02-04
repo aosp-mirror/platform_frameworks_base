@@ -2,7 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="8016145283189546017">"உள்ளீட்டுச் சாதனங்கள்"</string>
-    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android விசைப்பலகை"</string>
+    <string name="keyboard_layouts_label" msgid="6688773268302087545">"Android கீபோர்டு"</string>
     <string name="keyboard_layout_english_uk_label" msgid="6664258463319999632">"ஆங்கிலம் (யூகே)"</string>
     <string name="keyboard_layout_english_us_label" msgid="8994890249649106291">"ஆங்கிலம் (யூஎஸ்)"</string>
     <string name="keyboard_layout_english_us_intl" msgid="3705168594034233583">"ஆங்கிலம் (யூஎஸ்), சர்வதேச நடை"</string>

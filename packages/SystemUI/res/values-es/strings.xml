@@ -98,7 +98,7 @@
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sonido de tu dispositivo, como música, llamadas y tonos de llamada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micrófono"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Audio y micrófono del dispositivo"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Empezar"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Iniciar"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Grabando pantalla"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Grabando pantalla y audio"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Mostrar toques en la pantalla"</string>
@@ -397,7 +397,7 @@
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Conectado (<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería)"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Conectando..."</string>
     <string name="quick_settings_tethering_label" msgid="5257299852322475780">"Compartir conexión"</string>
-    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Zona Wi-Fi"</string>
+    <string name="quick_settings_hotspot_label" msgid="1199196300038363424">"Punto de acceso"</string>
     <string name="quick_settings_hotspot_secondary_label_transient" msgid="7585604088079160564">"Activando…"</string>
     <string name="quick_settings_hotspot_secondary_label_data_saver_enabled" msgid="1280433136266439372">"Ahorro de datos activado"</string>
     <plurals name="quick_settings_hotspot_secondary_label_num_devices" formatted="false" msgid="3142308865165871976">
@@ -502,10 +502,10 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"Ahorro de batería activado"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Reduce el rendimiento y los datos en segundo plano"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactivar Ahorro de batería"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
-    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
+    <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servicio que ofrece esta función tendrá acceso a toda la información que se muestre en la pantalla o se reproduzca en el dispositivo mientras grabas o envías contenido, incluyendo contraseñas, detalles de pagos, fotos, mensajes y audios que reproduzcas."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"¿Empezar a grabar o enviar contenido?"</string>
-    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Quieres iniciar la grabación o el envío de contenido con <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
+    <string name="media_projection_dialog_title" msgid="3316063622495360646">"¿Iniciar grabación o el envío de contenido en <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>?"</string>
     <string name="media_projection_remember_text" msgid="6896767327140422951">"No volver a mostrar"</string>
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Borrar todo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gestionar"</string>
@@ -662,7 +662,7 @@
     <string name="alarm_template" msgid="2234991538018805736">"a las <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="3561752195856839456">"el <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="accessibility_quick_settings_detail" msgid="544463655956179791">"Ajustes rápidos, <xliff:g id="TITLE">%s</xliff:g>."</string>
-    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Zona Wi-Fi"</string>
+    <string name="accessibility_status_bar_hotspot" msgid="2888479317489131669">"Punto de acceso"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Diversión solo para algunos"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
@@ -712,11 +712,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminado"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbuja"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración y se muestra más abajo en la sección de conversaciones"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración, y se muestra más abajo en la sección de conversaciones"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones en forma de burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra arriba en la sección de conversaciones, como burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
