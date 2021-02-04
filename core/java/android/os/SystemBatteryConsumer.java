@@ -123,8 +123,8 @@ public class SystemBatteryConsumer extends BatteryConsumer implements Parcelable
         private List<UidBatteryConsumer.Builder> mUidBatteryConsumers;
 
         Builder(int customPowerComponentCount, int customTimeComponentCount,
-                boolean includeModeledComponents, @DrainType int drainType) {
-            super(customPowerComponentCount, customTimeComponentCount, includeModeledComponents);
+                @DrainType int drainType) {
+            super(customPowerComponentCount, customTimeComponentCount);
             mDrainType = drainType;
         }
 

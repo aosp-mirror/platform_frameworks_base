@@ -68,7 +68,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
     private ActivityResultLauncher<Void> mStartAppPicker = registerForActivityResult(
             BatteryConsumerPickerActivity.CONTRACT, this::onApplicationSelected);
     private BatteryStatsHelper mBatteryStatsHelper;
-    private BatteryUsageStats mBatteryUsageStats;
+    private List<BatteryUsageStats> mBatteryUsageStats;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -188,7 +188,8 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         }
     }
 
-    private static class BatteryUsageStatsLoader extends AsyncLoaderCompat<BatteryUsageStats> {
+    private static class BatteryUsageStatsLoader extends
+            AsyncLoaderCompat<List<BatteryUsageStats>> {
         private final BatteryStatsManager mBatteryStatsManager;
 
         BatteryUsageStatsLoader(Context context) {
@@ -197,33 +198,38 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         }
 
         @Override
-        public BatteryUsageStats loadInBackground() {
-            final BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()
-                    .includeModeled()
-                    .build();
-            return mBatteryStatsManager.getBatteryUsageStats(query);
+        public List<BatteryUsageStats> loadInBackground() {
+            final BatteryUsageStatsQuery queryDefault =
+                    new BatteryUsageStatsQuery.Builder().build();
+            final BatteryUsageStatsQuery queryPowerProfileModeledOnly =
+                    new BatteryUsageStatsQuery.Builder()
+                            .powerProfileModeledOnly()
+                            .build();
+            return mBatteryStatsManager.getBatteryUsageStats(
+                    List.of(queryDefault, queryPowerProfileModeledOnly));
         }
 
         @Override
-        protected void onDiscardResult(BatteryUsageStats result) {
+        protected void onDiscardResult(List<BatteryUsageStats> result) {
         }
     }
 
-    private class BatteryUsageStatsLoaderCallbacks implements LoaderCallbacks<BatteryUsageStats> {
+    private class BatteryUsageStatsLoaderCallbacks
+            implements LoaderCallbacks<List<BatteryUsageStats>> {
         @NonNull
         @Override
-        public Loader<BatteryUsageStats> onCreateLoader(int id, Bundle args) {
+        public Loader<List<BatteryUsageStats>> onCreateLoader(int id, Bundle args) {
             return new BatteryUsageStatsLoader(BatteryStatsViewerActivity.this);
         }
 
         @Override
-        public void onLoadFinished(@NonNull Loader<BatteryUsageStats> loader,
-                BatteryUsageStats batteryUsageStats) {
+        public void onLoadFinished(@NonNull Loader<List<BatteryUsageStats>> loader,
+                List<BatteryUsageStats> batteryUsageStats) {
             onBatteryUsageStatsLoaded(batteryUsageStats);
         }
 
         @Override
-        public void onLoaderReset(@NonNull Loader<BatteryUsageStats> loader) {
+        public void onLoaderReset(@NonNull Loader<List<BatteryUsageStats>> loader) {
         }
     }
 
@@ -232,7 +238,7 @@ public class BatteryStatsViewerActivity extends ComponentActivity {
         onBatteryStatsDataLoaded();
     }
 
-    private void onBatteryUsageStatsLoaded(BatteryUsageStats batteryUsageStats) {
+    private void onBatteryUsageStatsLoaded(List<BatteryUsageStats> batteryUsageStats) {
         mBatteryUsageStats = batteryUsageStats;
         onBatteryStatsDataLoaded();
     }
