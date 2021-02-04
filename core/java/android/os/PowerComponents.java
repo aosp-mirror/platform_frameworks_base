@@ -33,11 +33,9 @@ class PowerComponents {
     private final double[] mPowerComponents;
     private final long[] mTimeComponents;
     private final int mCustomPowerComponentCount;
-    private final int mModeledPowerComponentOffset;
 
     PowerComponents(@NonNull Builder builder) {
         mCustomPowerComponentCount = builder.mCustomPowerComponentCount;
-        mModeledPowerComponentOffset = builder.mModeledPowerComponentOffset;
         mPowerComponents = builder.mPowerComponents;
         mTimeComponents = builder.mTimeComponents;
         double totalPower = 0;
@@ -50,9 +48,6 @@ class PowerComponents {
     PowerComponents(@NonNull Parcel source) {
         mTotalPowerConsumed = source.readDouble();
         mCustomPowerComponentCount = source.readInt();
-        mModeledPowerComponentOffset =
-                BatteryConsumer.POWER_COMPONENT_COUNT + mCustomPowerComponentCount
-                        - BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID;
         mPowerComponents = source.createDoubleArray();
         mTimeComponents = source.createLongArray();
     }
@@ -106,14 +101,6 @@ class PowerComponents {
                 throw new IllegalArgumentException(
                         "Unsupported custom power component ID: " + componentId);
             }
-        } else if (componentId >= BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                && componentId < BatteryConsumer.LAST_MODELED_POWER_COMPONENT_ID) {
-            try {
-                return mPowerComponents[mModeledPowerComponentOffset + componentId];
-            } catch (ArrayIndexOutOfBoundsException e) {
-                throw new IllegalArgumentException(
-                        "Unsupported modeled power component ID: " + componentId);
-            }
         } else {
             throw new IllegalArgumentException(
                     "Unsupported custom power component ID: " + componentId);
@@ -165,20 +152,12 @@ class PowerComponents {
         private final double[] mPowerComponents;
         private final int mCustomPowerComponentCount;
         private final long[] mTimeComponents;
-        private final int mModeledPowerComponentOffset;
 
-        Builder(int customPowerComponentCount, int customTimeComponentCount,
-                boolean includeModeledPowerComponents) {
+        Builder(int customPowerComponentCount, int customTimeComponentCount) {
             mCustomPowerComponentCount = customPowerComponentCount;
             int powerComponentCount =
                     BatteryConsumer.POWER_COMPONENT_COUNT + customPowerComponentCount;
-            if (includeModeledPowerComponents) {
-                powerComponentCount += BatteryConsumer.POWER_COMPONENT_COUNT;
-            }
             mPowerComponents = new double[powerComponentCount];
-            mModeledPowerComponentOffset =
-                    BatteryConsumer.POWER_COMPONENT_COUNT + mCustomPowerComponentCount
-                            - BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID;
             mTimeComponents =
                     new long[BatteryConsumer.TIME_COMPONENT_COUNT + customTimeComponentCount];
         }
@@ -221,14 +200,6 @@ class PowerComponents {
                 } catch (ArrayIndexOutOfBoundsException e) {
                     throw new IllegalArgumentException(
                             "Unsupported custom power component ID: " + componentId);
-                }
-            } else if (componentId >= BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                    && componentId < BatteryConsumer.LAST_MODELED_POWER_COMPONENT_ID) {
-                try {
-                    mPowerComponents[mModeledPowerComponentOffset + componentId] = componentPower;
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new IllegalArgumentException(
-                            "Unsupported modeled power component ID: " + componentId);
                 }
             } else {
                 throw new IllegalArgumentException(

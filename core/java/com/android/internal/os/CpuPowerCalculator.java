@@ -122,11 +122,5 @@ public class CpuPowerCalculator extends PowerCalculator {
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU, cpuTimeMs)
                 .setUsageDurationMillis(BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND, cpuFgTimeMs)
                 .setPackageWithHighestDrain(packageWithHighestDrain);
-
-        if ((query.getFlags()
-                & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED) != 0) {
-            app.setConsumedPowerForCustomComponent(BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                    + BatteryConsumer.POWER_COMPONENT_CPU, cpuPowerMah);
-        }
     }
 }

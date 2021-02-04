@@ -63,7 +63,9 @@ public class BatteryConsumerData {
     private final List<Entry> mEntries = new ArrayList<>();
 
     public BatteryConsumerData(Context context, BatteryStatsHelper batteryStatsHelper,
-            BatteryUsageStats batteryUsageStats, String batteryConsumerId) {
+            List<BatteryUsageStats> batteryUsageStatsList, String batteryConsumerId) {
+        BatteryUsageStats batteryUsageStats = batteryUsageStatsList.get(0);
+        BatteryUsageStats powerProfileModeledUsageStats = batteryUsageStatsList.get(1);
         List<BatterySipper> usageList = batteryStatsHelper.getUsageList();
         BatteryStats batteryStats = batteryStatsHelper.getStats();
 
@@ -142,16 +144,22 @@ public class BatteryConsumerData {
         }
 
         BatteryConsumer requestedBatteryConsumer = null;
-        double totalModeledCpuPowerMah = 0;
 
         for (BatteryConsumer consumer : batteryUsageStats.getUidBatteryConsumers()) {
             if (batteryConsumerId(consumer).equals(batteryConsumerId)) {
                 requestedBatteryConsumer = consumer;
             }
+        }
 
-            totalModeledCpuPowerMah += consumer.getConsumedPowerForCustomComponent(
-                    BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                            + BatteryConsumer.POWER_COMPONENT_CPU);
+        double totalModeledCpuPowerMah = 0;
+        BatteryConsumer requestedBatteryConsumerPowerProfileModeled = null;
+        for (BatteryConsumer consumer : powerProfileModeledUsageStats.getUidBatteryConsumers()) {
+            if (batteryConsumerId(consumer).equals(batteryConsumerId)) {
+                requestedBatteryConsumerPowerProfileModeled = consumer;
+            }
+
+            totalModeledCpuPowerMah += consumer.getConsumedPower(
+                    BatteryConsumer.POWER_COMPONENT_CPU);
         }
 
         if (requestedBatterySipper == null) {
@@ -196,11 +204,10 @@ public class BatteryConsumerData {
             addEntry("CPU", EntryType.POWER,
                     requestedBatteryConsumer.getConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU),
                     totalCpuPowerMah);
-            if (totalModeledCpuPowerMah != 0) {
+            if (requestedBatteryConsumerPowerProfileModeled != null) {
                 addEntry("CPU (modeled)", EntryType.POWER,
-                        requestedBatteryConsumer.getConsumedPowerForCustomComponent(
-                                BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID
-                                        + BatteryConsumer.POWER_COMPONENT_CPU),
+                        requestedBatteryConsumerPowerProfileModeled.getConsumedPower(
+                                BatteryConsumer.POWER_COMPONENT_CPU),
                         totalModeledCpuPowerMah);
             }
         } else {

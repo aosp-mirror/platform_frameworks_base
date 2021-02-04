@@ -32,6 +32,7 @@ import com.android.internal.app.IBatteryStats;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.List;
 
 /**
  * This class provides an API surface for internal system components to report events that are
@@ -183,8 +184,20 @@ public final class BatteryStatsManager {
     @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
     @NonNull
     public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
+        return getBatteryUsageStats(List.of(query)).get(0);
+    }
+
+    /**
+     * Returns BatteryUsageStats, which contains power attribution data on a per-subsystem
+     * and per-UID basis.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.BATTERY_STATS)
+    @NonNull
+    public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
         try {
-            return mBatteryStats.getBatteryUsageStats(query);
+            return mBatteryStats.getBatteryUsageStats(queries);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
