@@ -173,6 +173,7 @@ public final class ColorDisplayService extends SystemService {
     private ContentObserver mContentObserver;
 
     private DisplayWhiteBalanceListener mDisplayWhiteBalanceListener;
+    private ReduceBrightColorsListener mReduceBrightColorsListener;
 
     private NightDisplayAutoMode mNightDisplayAutoMode;
 
@@ -617,18 +618,24 @@ public final class ColorDisplayService extends SystemService {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
-        mReduceBrightColorsTintController.setActivated(
-                Secure.getIntForUser(getContext().getContentResolver(),
-                        Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 0, mCurrentUser) == 1);
+        final boolean activated = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 0, mCurrentUser) == 1;
+        mReduceBrightColorsTintController.setActivated(activated);
+        if (mReduceBrightColorsListener != null) {
+            mReduceBrightColorsListener.onReduceBrightColorsActivationChanged(activated);
+        }
     }
 
     private void onReduceBrightColorsStrengthLevelChanged() {
         if (mCurrentUser == UserHandle.USER_NULL) {
             return;
         }
-        mReduceBrightColorsTintController.setMatrix(
-                Secure.getIntForUser(getContext().getContentResolver(),
-                        Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0, mCurrentUser));
+        final int strength = Secure.getIntForUser(getContext().getContentResolver(),
+                Secure.REDUCE_BRIGHT_COLORS_LEVEL, 0, mCurrentUser);
+        mReduceBrightColorsTintController.setMatrix(strength);
+        if (mReduceBrightColorsListener != null) {
+            mReduceBrightColorsListener.onReduceBrightColorsStrengthChanged(strength);
+        }
     }
 
     /**
@@ -760,6 +767,22 @@ public final class ColorDisplayService extends SystemService {
                         .getBoolean(R.bool.config_displayWhiteBalanceEnabledDefault) ? 1
                         : 0,
                 mCurrentUser) == 1;
+    }
+
+    private boolean setReduceBrightColorsActivatedInternal(boolean activated) {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return false;
+        }
+        return Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, activated ? 1 : 0, mCurrentUser);
+    }
+
+    private boolean setReduceBrightColorsStrengthInternal(int strength) {
+        if (mCurrentUser == UserHandle.USER_NULL) {
+            return false;
+        }
+        return Secure.putIntForUser(getContext().getContentResolver(),
+                Secure.REDUCE_BRIGHT_COLORS_LEVEL, strength, mCurrentUser);
     }
 
     private boolean isDeviceColorManagedInternal() {
@@ -1469,6 +1492,31 @@ public final class ColorDisplayService extends SystemService {
         }
 
         /**
+         * Sets the listener and returns whether reduce bright colors is currently enabled.
+         */
+        public boolean setReduceBrightColorsListener(ReduceBrightColorsListener listener) {
+            mReduceBrightColorsListener = listener;
+            return mReduceBrightColorsTintController.isActivated();
+        }
+
+        /**
+         * Returns whether reduce bright colors is currently active.
+         */
+        public boolean isReduceBrightColorsActivated() {
+            return mReduceBrightColorsTintController.isActivated();
+        }
+
+        /**
+         * Gets the computed brightness, in nits, when the reduce bright colors feature is applied
+         * at the current strength.
+         *
+         * @hide
+         */
+        public float getReduceBrightColorsAdjustedBrightnessNits(float nits) {
+            return mReduceBrightColorsTintController.getAdjustedBrightness(nits);
+        }
+
+        /**
          * Adds a {@link WeakReference<ColorTransformController>} for a newly started activity, and
          * invokes {@link ColorTransformController#applyAppSaturation(float[], float[])} if needed.
          */
@@ -1489,6 +1537,22 @@ public final class ColorDisplayService extends SystemService {
          * another transform or the feature being turned off.
          */
         void onDisplayWhiteBalanceStatusChanged(boolean activated);
+    }
+
+    /**
+     * Listener for changes in reduce bright colors status.
+     */
+    public interface ReduceBrightColorsListener {
+
+        /**
+         * Notify that the reduce bright colors activation status has changed.
+         */
+        void onReduceBrightColorsActivationChanged(boolean activated);
+
+        /**
+         * Notify that the reduce bright colors strength has changed.
+         */
+        void onReduceBrightColorsStrengthChanged(int strength);
     }
 
     private final class TintHandler extends Handler {
@@ -1781,6 +1845,62 @@ public final class ColorDisplayService extends SystemService {
             final long token = Binder.clearCallingIdentity();
             try {
                 return isDisplayWhiteBalanceSettingEnabled();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean isReduceBrightColorsActivated() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mReduceBrightColorsTintController.isActivated();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean setReduceBrightColorsActivated(boolean activated) {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set reduce bright colors activation state");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return setReduceBrightColorsActivatedInternal(activated);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public int getReduceBrightColorsStrength() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mReduceBrightColorsTintController.getStrength();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public float getReduceBrightColorsOffsetFactor() {
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return mReduceBrightColorsTintController.getOffsetFactor();
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public boolean setReduceBrightColorsStrength(int strength) {
+            getContext().enforceCallingOrSelfPermission(
+                    Manifest.permission.CONTROL_DISPLAY_COLOR_TRANSFORMS,
+                    "Permission required to set reduce bright colors strength");
+            final long token = Binder.clearCallingIdentity();
+            try {
+                return setReduceBrightColorsStrengthInternal(strength);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }

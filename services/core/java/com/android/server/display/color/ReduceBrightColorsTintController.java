@@ -34,7 +34,7 @@ import java.util.Arrays;
 public class ReduceBrightColorsTintController extends TintController {
 
     private final float[] mMatrix = new float[16];
-    private final float[] mCoefficients = new float[9];
+    private final float[] mCoefficients = new float[3];
 
     private int mStrength;
 
@@ -42,8 +42,8 @@ public class ReduceBrightColorsTintController extends TintController {
     public void setUp(Context context, boolean needsLinear) {
         final String[] coefficients = context.getResources().getStringArray(
                 needsLinear ? R.array.config_reduceBrightColorsCoefficients
-                        : R.array.config_reduceBrightColorsCoefficientsNative);
-        for (int i = 0; i < 9 && i < coefficients.length; i++) {
+                        : R.array.config_reduceBrightColorsCoefficientsNonlinear);
+        for (int i = 0; i < 3 && i < coefficients.length; i++) {
             mCoefficients[i] = Float.parseFloat(coefficients[i]);
         }
     }
@@ -67,20 +67,11 @@ public class ReduceBrightColorsTintController extends TintController {
 
         Matrix.setIdentityM(mMatrix, 0);
 
-        final float percentageStrength = strengthLevel / 100f;
-        final float squaredPercentageStrength = percentageStrength * percentageStrength;
-        final float red =
-                squaredPercentageStrength * mCoefficients[0] + percentageStrength * mCoefficients[1]
-                        + mCoefficients[2];
-        final float green =
-                squaredPercentageStrength * mCoefficients[3] + percentageStrength * mCoefficients[4]
-                        + mCoefficients[5];
-        final float blue =
-                squaredPercentageStrength * mCoefficients[6] + percentageStrength * mCoefficients[7]
-                        + mCoefficients[8];
-        mMatrix[0] = clamp(red);
-        mMatrix[5] = clamp(green);
-        mMatrix[10] = clamp(blue);
+        // All three (r,g,b) components are equal and calculated with the same formula.
+        final float componentValue = computeComponentValue(strengthLevel);
+        mMatrix[0] = componentValue;
+        mMatrix[5] = componentValue;
+        mMatrix[10] = componentValue;
     }
 
     private float clamp(float value) {
@@ -109,5 +100,27 @@ public class ReduceBrightColorsTintController extends TintController {
 
     public int getStrength() {
         return mStrength;
+    }
+
+    /** Returns the offset factor at Ymax. */
+    public float getOffsetFactor() {
+        // Strength terms drop out as strength --> 1, leaving the coefficients.
+        return mCoefficients[0] + mCoefficients[1] + mCoefficients[2];
+    }
+
+    /**
+     * Returns the effective brightness (in nits), which has been adjusted to account for the effect
+     * of the bright color reduction.
+     */
+    public float getAdjustedBrightness(float nits) {
+        return computeComponentValue(mStrength) * nits;
+    }
+
+    private float computeComponentValue(int strengthLevel) {
+        final float percentageStrength = strengthLevel / 100f;
+        final float squaredPercentageStrength = percentageStrength * percentageStrength;
+        return clamp(
+                squaredPercentageStrength * mCoefficients[0] + percentageStrength * mCoefficients[1]
+                        + mCoefficients[2]);
     }
 }
