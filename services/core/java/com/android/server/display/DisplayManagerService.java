@@ -1188,6 +1188,7 @@ public final class DisplayManagerService extends SystemService {
             final LogicalDisplay display = mLogicalDisplayMapper.getLocked(device);
             final int state;
             final int displayId = display.getDisplayIdLocked();
+
             if (display.isEnabled()) {
                 state = mDisplayStates.get(displayId);
             } else {
@@ -1561,12 +1562,6 @@ public final class DisplayManagerService extends SystemService {
             if (displayPowerController != null) {
                 displayPowerController.setAmbientColorTemperatureOverride(cct);
             }
-        }
-    }
-
-    void setFoldOverride(Boolean isFolded) {
-        synchronized (mSyncRoot) {
-            mLogicalDisplayMapper.setFoldOverrideLocked(isFolded);
         }
     }
 

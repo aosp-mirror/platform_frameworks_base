@@ -27,10 +27,10 @@ import android.view.Display;
 import android.view.DisplayEventReceiver;
 import android.view.DisplayInfo;
 
+import com.android.server.display.layout.Layout;
 
 import java.io.PrintWriter;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -75,39 +75,24 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
     private final boolean mSingleDisplayDemoMode;
 
     /**
-     * Physical Display ID of the DisplayDevice to associate with the default LogicalDisplay
-     * when {@link mIsFolded} is set to {@code true}.
-     */
-    private String mDisplayIdToUseWhenFolded;
-
-    /**
-     * Physical Display ID of the DisplayDevice to associate with the default LogicalDisplay
-     * when {@link mIsFolded} is set to {@code false}.
-     */
-    private String mDisplayIdToUseWhenUnfolded;
-
-    /** Overrides the folded state of the device. For use with ADB commands. */
-    private Boolean mIsFoldedOverride;
-
-    /** Saves the last device fold state. */
-    private boolean mIsFolded;
-
-    /**
      * List of all logical displays indexed by logical display id.
      * Any modification to mLogicalDisplays must invalidate the DisplayManagerGlobal cache.
      * TODO: multi-display - Move the aforementioned comment?
      */
     private final SparseArray<LogicalDisplay> mLogicalDisplays =
             new SparseArray<LogicalDisplay>();
-    private int mNextNonDefaultDisplayId = Display.DEFAULT_DISPLAY + 1;
-    private int mNextNonDefaultGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
 
     /** A mapping from logical display id to display group. */
     private final SparseArray<DisplayGroup> mDisplayIdToGroupMap = new SparseArray<>();
 
     private final DisplayDeviceRepository mDisplayDeviceRepo;
+    private final DeviceStateToLayoutMap mDeviceStateToLayoutMap;
     private final Listener mListener;
     private final int[] mFoldedDeviceStates;
+
+    private int mNextNonDefaultGroupId = Display.DEFAULT_DISPLAY_GROUP + 1;
+    private Layout mCurrentLayout = null;
+    private boolean mIsFolded = false;
 
     LogicalDisplayMapper(Context context, DisplayDeviceRepository repo, Listener listener) {
         mDisplayDeviceRepo = repo;
@@ -118,7 +103,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         mFoldedDeviceStates = context.getResources().getIntArray(
                 com.android.internal.R.array.config_foldedDeviceStates);
 
-        loadFoldedDisplayConfig(context);
+        mDeviceStateToLayoutMap = new DeviceStateToLayoutMap(context);
     }
 
     @Override
@@ -213,13 +198,12 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         ipw.increaseIndent();
 
         ipw.println("mSingleDisplayDemoMode=" + mSingleDisplayDemoMode);
-        ipw.println("mNextNonDefaultDisplayId=" + mNextNonDefaultDisplayId);
+
+        ipw.println("mCurrentLayout=" + mCurrentLayout);
 
         final int logicalDisplayCount = mLogicalDisplays.size();
         ipw.println();
         ipw.println("Logical Displays: size=" + logicalDisplayCount);
-
-
         for (int i = 0; i < logicalDisplayCount; i++) {
             int displayId = mLogicalDisplays.keyAt(i);
             LogicalDisplay display = mLogicalDisplays.valueAt(i);
@@ -229,6 +213,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             ipw.decreaseIndent();
             ipw.println();
         }
+        mDeviceStateToLayoutMap.dumpLocked(ipw);
     }
 
     void setDeviceStateLocked(int state) {
@@ -244,79 +229,55 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
 
     void setDeviceFoldedLocked(boolean isFolded) {
         mIsFolded = isFolded;
-        if (mIsFoldedOverride != null) {
-            isFolded = mIsFoldedOverride.booleanValue();
+
+        // Until we have fully functioning state mapping, use hardcoded states based on isFolded
+        final int state = mIsFolded ? DeviceStateToLayoutMap.STATE_FOLDED
+                : DeviceStateToLayoutMap.STATE_UNFOLDED;
+
+        if (DEBUG) {
+            Slog.d(TAG, "New device state: " + state);
         }
 
-        if (mDisplayIdToUseWhenFolded == null || mDisplayIdToUseWhenUnfolded == null
-                || mLogicalDisplays.size() < 2) {
-            // Do nothing if this behavior is disabled or there are less than two displays.
+        final Layout layout = mDeviceStateToLayoutMap.get(state);
+        if (layout == null) {
+            return;
+        }
+        final Layout.Display displayLayout = layout.getById(Display.DEFAULT_DISPLAY);
+        if (displayLayout == null) {
+            return;
+        }
+        final DisplayDevice newDefaultDevice =
+                mDisplayDeviceRepo.getByAddressLocked(displayLayout.getAddress());
+        if (newDefaultDevice == null) {
             return;
         }
 
-        final DisplayDevice deviceFolded =
-                mDisplayDeviceRepo.getByIdLocked(mDisplayIdToUseWhenFolded);
-        final DisplayDevice deviceUnfolded =
-                mDisplayDeviceRepo.getByIdLocked(mDisplayIdToUseWhenUnfolded);
-        if (deviceFolded == null || deviceUnfolded == null) {
-            // If the expected devices for folding functionality are not present, return early.
-            return;
-        }
-
-        // Find the associated LogicalDisplays for the configured "folding" DeviceDisplays.
-        final LogicalDisplay displayFolded = getLocked(deviceFolded);
-        final LogicalDisplay displayUnfolded = getLocked(deviceUnfolded);
-        if (displayFolded == null || displayUnfolded == null) {
-            // If the expected displays are not present, return early.
-            return;
-        }
-
-        // Find out which display is currently default and which is disabled.
         final LogicalDisplay defaultDisplay = mLogicalDisplays.get(Display.DEFAULT_DISPLAY);
-        final LogicalDisplay disabledDisplay;
-        if (defaultDisplay == displayFolded) {
-            disabledDisplay = displayUnfolded;
-        } else if (defaultDisplay == displayUnfolded) {
-            disabledDisplay = displayFolded;
-        } else {
-            // If neither folded or unfolded displays are currently set to the default display, we
-            // are in an unknown state and it's best to log the error and bail.
-            Slog.e(TAG, "Unexpected: when attempting to swap displays, neither of the two"
-                    + " configured displays were set up as the default display. Default: "
-                    + defaultDisplay.getDisplayInfoLocked() + ",  ConfiguredDisplays: [ folded="
-                    + displayFolded.getDisplayInfoLocked() + ", unfolded="
-                    + displayUnfolded.getDisplayInfoLocked() + " ]");
+        mCurrentLayout = layout;
+
+        // If we're already set up accurately, return early
+        if (defaultDisplay.getPrimaryDisplayDeviceLocked() == newDefaultDevice) {
             return;
         }
 
-        if (isFolded == (defaultDisplay == displayFolded)) {
-            // Nothing to do, already in the right state.
+        // We need to swap the default display's display-device with the one that is supposed
+        // to be the default in the new layout.
+        final LogicalDisplay displayToSwap = getLocked(newDefaultDevice);
+        if (displayToSwap == null) {
+            Slog.w(TAG, "Canceling display swap - unexpected empty second display for: "
+                    + newDefaultDevice);
             return;
         }
-
-        // Everything was checked and we need to swap, lets swap.
-        displayFolded.swapDisplaysLocked(displayUnfolded);
+        defaultDisplay.swapDisplaysLocked(displayToSwap);
 
         // We ensure that the non-default Display is always forced to be off. This was likely
         // already done in a previous iteration, but we do it with each swap in case something in
         // the underlying LogicalDisplays changed: like LogicalDisplay recreation, for example.
         defaultDisplay.setEnabled(true);
-        disabledDisplay.setEnabled(false);
+        displayToSwap.setEnabled(false);
 
         // Update the world
         updateLogicalDisplaysLocked();
-
-        if (DEBUG) {
-            Slog.d(TAG, "Folded displays: isFolded: " + isFolded + ", defaultDisplay? "
-                    + defaultDisplay.getDisplayInfoLocked());
-        }
-    }
-
-    void setFoldOverrideLocked(Boolean isFolded) {
-        if (!Objects.equals(isFolded, mIsFoldedOverride)) {
-            mIsFoldedOverride = isFolded;
-            setDeviceFoldedLocked(mIsFolded);
-        }
     }
 
     private void handleDisplayDeviceAddedLocked(DisplayDevice device) {
@@ -333,7 +294,7 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             return;
         }
 
-        final int displayId = assignDisplayIdLocked(isDefault);
+        final int displayId = Layout.assignDisplayIdLocked(isDefault);
         final int layerStack = assignLayerStackLocked(displayId);
 
         final DisplayGroup displayGroup;
@@ -356,8 +317,15 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             return;
         }
 
-        mLogicalDisplays.put(displayId, display);
+        // For foldable devices, we start the internal non-default displays as disabled.
+        // TODO - b/168208162 - this will be removed when we recalculate the layout with each
+        // display-device addition.
+        if (mFoldedDeviceStates.length > 0 && deviceInfo.type == Display.TYPE_INTERNAL
+                && !isDefault) {
+            display.setEnabled(false);
+        }
 
+        mLogicalDisplays.put(displayId, display);
         displayGroup.addDisplayLocked(display);
         mDisplayIdToGroupMap.append(displayId, displayGroup);
 
@@ -374,6 +342,10 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
             // Group changed events happen after Logical Display added events.
             mListener.onDisplayGroupEventLocked(displayGroup.getGroupId(),
                     LogicalDisplayMapper.DISPLAY_GROUP_EVENT_CHANGED);
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "New Display added: " + display);
         }
     }
 
@@ -466,10 +438,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         }
     }
 
-    private int assignDisplayIdLocked(boolean isDefault) {
-        return isDefault ? Display.DEFAULT_DISPLAY : mNextNonDefaultDisplayId++;
-    }
-
     private int assignDisplayGroupIdLocked(boolean isDefault) {
         return isDefault ? Display.DEFAULT_DISPLAY_GROUP : mNextNonDefaultGroupId++;
     }
@@ -478,21 +446,6 @@ class LogicalDisplayMapper implements DisplayDeviceRepository.Listener {
         // Currently layer stacks and display ids are the same.
         // This need not be the case.
         return displayId;
-    }
-
-    private void loadFoldedDisplayConfig(Context context) {
-        final String[] displayIds = context.getResources().getStringArray(
-                com.android.internal.R.array.config_internalFoldedPhysicalDisplayIds);
-
-        if (displayIds.length != 2 || TextUtils.isEmpty(displayIds[0])
-                || TextUtils.isEmpty(displayIds[1])) {
-            Slog.w(TAG, "Folded display configuration invalid: [" + Arrays.toString(displayIds)
-                    + "]");
-            return;
-        }
-
-        mDisplayIdToUseWhenFolded = displayIds[0];
-        mDisplayIdToUseWhenUnfolded = displayIds[1];
     }
 
     public interface Listener {
