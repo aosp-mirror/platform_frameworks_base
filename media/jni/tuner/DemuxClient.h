@@ -31,13 +31,18 @@
 
 using Status = ::ndk::ScopedAStatus;
 using ::aidl::android::media::tv::tuner::ITunerDemux;
+using ::aidl::android::media::tv::tuner::ITunerTimeFilter;
 
+using ::android::hardware::tv::tuner::V1_0::IDemux;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
 using ::android::hardware::tv::tuner::V1_0::DvrType;
 using ::android::hardware::tv::tuner::V1_0::IDemux;
 using ::android::hardware::tv::tuner::V1_0::ITimeFilter;
 
 using namespace std;
+
+const int64_t INVALID_AV_SYNC_TIME = -1;
+const int INVALID_AV_SYNC_HW_ID = -1;
 
 namespace android {
 
