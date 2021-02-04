@@ -17,7 +17,6 @@
 package com.android.systemui.settings.brightness;
 
 import android.content.Context;
-import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.LayoutInflater;
@@ -33,6 +32,7 @@ import com.android.settingslib.RestrictedLockUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController;
+import com.android.systemui.util.RoundedCornerProgressDrawable;
 import com.android.systemui.util.ViewController;
 
 import javax.inject.Inject;
@@ -292,8 +292,8 @@ public class BrightnessSlider
             if (b.getProgressDrawable() instanceof LayerDrawable) {
                 Drawable progress = ((LayerDrawable) b.getProgressDrawable())
                         .findDrawableByLayerId(com.android.internal.R.id.progress);
-                if (progress instanceof ClipDrawable) {
-                    Drawable inner = ((ClipDrawable) progress).getDrawable();
+                if (progress instanceof RoundedCornerProgressDrawable) {
+                    Drawable inner = ((RoundedCornerProgressDrawable) progress).getDrawable();
                     if (inner instanceof LayerDrawable) {
                         return (LayerDrawable) inner;
                     }
