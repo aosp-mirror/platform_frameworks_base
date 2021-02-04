@@ -435,6 +435,7 @@ package android {
     field public static final int clickable = 16842981; // 0x10100e5
     field public static final int clipChildren = 16842986; // 0x10100ea
     field public static final int clipOrientation = 16843274; // 0x101020a
+    field public static final int clipToOutline = 16844328; // 0x1010628
     field public static final int clipToPadding = 16842987; // 0x10100eb
     field public static final int closeIcon = 16843905; // 0x1010481
     field @Deprecated public static final int codes = 16843330; // 0x1010242
