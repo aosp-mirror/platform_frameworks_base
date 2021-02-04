@@ -34325,6 +34325,55 @@ package android.provider {
     field public static final String PATH_SETTING_INTENT = "intent";
   }
 
+  public final class SimPhonebookContract {
+    field public static final String AUTHORITY = "com.android.simphonebook";
+    field @NonNull public static final android.net.Uri AUTHORITY_URI;
+  }
+
+  public static final class SimPhonebookContract.ElementaryFiles {
+    method @NonNull public static android.net.Uri getItemUri(int, int);
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-elementary-file";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-elementary-file";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final int EF_ADN = 1; // 0x1
+    field public static final int EF_FDN = 2; // 0x2
+    field public static final int EF_SDN = 3; // 0x3
+    field public static final String EF_TYPE = "ef_type";
+    field public static final int EF_UNKNOWN = 0; // 0x0
+    field public static final String MAX_RECORDS = "max_records";
+    field public static final String NAME_MAX_LENGTH = "name_max_length";
+    field public static final String PHONE_NUMBER_MAX_LENGTH = "phone_number_max_length";
+    field public static final String RECORD_COUNT = "record_count";
+    field public static final String SLOT_INDEX = "slot_index";
+    field public static final String SUBSCRIPTION_ID = "subscription_id";
+  }
+
+  public static final class SimPhonebookContract.SimRecords {
+    method @NonNull public static android.net.Uri getContentUri(int, int);
+    method @NonNull public static android.net.Uri getItemUri(int, int, int);
+    method @NonNull @WorkerThread public static android.provider.SimPhonebookContract.SimRecords.NameValidationResult validateName(@NonNull android.content.ContentResolver, int, int, @NonNull String);
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-contact_v2";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-contact_v2";
+    field public static final String ELEMENTARY_FILE_TYPE = "elementary_file_type";
+    field public static final String NAME = "name";
+    field public static final String PHONE_NUMBER = "phone_number";
+    field public static final String RECORD_NUMBER = "record_number";
+    field public static final String SUBSCRIPTION_ID = "subscription_id";
+  }
+
+  public static final class SimPhonebookContract.SimRecords.NameValidationResult implements android.os.Parcelable {
+    ctor public SimPhonebookContract.SimRecords.NameValidationResult(@NonNull String, @NonNull String, int, int);
+    method public int describeContents();
+    method public int getEncodedLength();
+    method public int getMaxEncodedLength();
+    method @NonNull public String getName();
+    method @NonNull public String getSanitizedName();
+    method public boolean isSupportedCharacter(int);
+    method public boolean isValid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.provider.SimPhonebookContract.SimRecords.NameValidationResult> CREATOR;
+  }
+
   public class SyncStateContract {
     ctor public SyncStateContract();
   }
