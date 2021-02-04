@@ -24,6 +24,9 @@ import static com.android.server.wm.ActivityTaskSupervisor.PRESERVE_WINDOWS;
 
 import android.app.ActivityManager;
 import android.app.AppGlobals;
+import android.app.compat.CompatChanges;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.res.CompatibilityInfo;
@@ -32,6 +35,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -62,6 +66,58 @@ public final class CompatModePackages {
     private static final int COMPAT_FLAG_DONT_ASK = 1<<0;
     // Compatibility state: compatibility mode is enabled.
     private static final int COMPAT_FLAG_ENABLED = 1<<1;
+
+    /**
+     * CompatModePackages#DOWNSCALED is the gatekeeper of all per-app buffer downscaling
+     * changes.  Disabling this change will prevent the following scaling factors from working:
+     * CompatModePackages#DOWNSCALE_87_5
+     * CompatModePackages#DOWNSCALE_75
+     * CompatModePackages#DOWNSCALE_62_5
+     * CompatModePackages#DOWNSCALE_50
+     *
+     * If CompatModePackages#DOWNSCALED is enabled for an app package, then the app will be forcibly
+     * resized to the highest enabled scaling factor e.g. 87.5% if both 87.5% and 75% were
+     * enabled.
+     */
+    @ChangeId
+    @Disabled
+    private static final long DOWNSCALED = 168419799L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_87_5 for a package will force the app to assume it's
+     * running on a display with 87.5% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    private static final long DOWNSCALE_87_5 = 176926753L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_75 for a package will force the app to assume it's
+     * running on a display with 75% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    private static final long DOWNSCALE_75 = 176926829L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_62_5 for a package will force the app to assume it's
+     * running on a display with 62.5% the vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    private static final long DOWNSCALE_62_5 = 176926771L;
+
+    /**
+     * With CompatModePackages#DOWNSCALED enabled, subsequently enabling change-id
+     * CompatModePackages#DOWNSCALE_50 for a package will force the app to assume it's
+     * running on a display with 50% vertical and horizontal resolution of the real display.
+     */
+    @ChangeId
+    @Disabled
+    private static final long DOWNSCALE_50 = 176926741L;
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
@@ -191,11 +247,39 @@ public final class CompatModePackages {
         mHandler.sendMessageDelayed(msg, 10000);
     }
 
+    float getCompatScale(String packageName, int uid) {
+        if (!CompatChanges.isChangeEnabled(
+                DOWNSCALED, packageName, UserHandle.getUserHandleForUid(uid))) {
+            return 1f;
+        }
+        if (CompatChanges.isChangeEnabled(
+                DOWNSCALE_87_5, packageName, UserHandle.getUserHandleForUid(uid))) {
+            // 8/7 == (1 / 0.875) ~= 1.14285714286
+            return 8f / 7f;
+        }
+        if (CompatChanges.isChangeEnabled(
+                DOWNSCALE_75, packageName, UserHandle.getUserHandleForUid(uid))) {
+            // 4/3 == (1 / 0.75) ~= 1.333333333
+            return 4f / 3f;
+        }
+        if (CompatChanges.isChangeEnabled(
+                DOWNSCALE_62_5, packageName, UserHandle.getUserHandleForUid(uid))) {
+            // (1 / 0.625) == 1.6
+            return 1.6f;
+        }
+        if (CompatChanges.isChangeEnabled(
+                DOWNSCALE_50, packageName, UserHandle.getUserHandleForUid(uid))) {
+            return 2f;
+        }
+        return 1f;
+    }
+
     public CompatibilityInfo compatibilityInfoForPackageLocked(ApplicationInfo ai) {
         final Configuration globalConfig = mService.getGlobalConfiguration();
+        final float requestedScale = getCompatScale(ai.packageName, ai.uid);
         CompatibilityInfo ci = new CompatibilityInfo(ai, globalConfig.screenLayout,
                 globalConfig.smallestScreenWidthDp,
-                (getPackageFlags(ai.packageName)&COMPAT_FLAG_ENABLED) != 0);
+                (getPackageFlags(ai.packageName) & COMPAT_FLAG_ENABLED) != 0, requestedScale);
         //Slog.i(TAG, "*********** COMPAT FOR PKG " + ai.packageName + ": " + ci);
         return ci;
     }

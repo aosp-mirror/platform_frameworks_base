@@ -27,14 +27,13 @@ cc_library_shared {
     ],
 
     shared_libs: [
-        "libandroid_runtime",
         "libhwui",
         "liblog",
     ],
 
     header_libs: [
-        "libhwui_internal_headers",
         "jni_headers",
+        "libhwui_internal_headers",
     ],
 
     static_libs: ["libarect"],

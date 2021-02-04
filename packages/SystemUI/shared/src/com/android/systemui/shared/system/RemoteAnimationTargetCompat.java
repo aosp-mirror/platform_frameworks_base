@@ -118,9 +118,9 @@ public class RemoteAnimationTargetCompat {
     }
 
     public static RemoteAnimationTargetCompat[] wrap(RemoteAnimationTarget[] apps) {
-        final RemoteAnimationTargetCompat[] appsCompat =
-                new RemoteAnimationTargetCompat[apps != null ? apps.length : 0];
-        for (int i = 0; i < apps.length; i++) {
+        final int length = apps != null ? apps.length : 0;
+        final RemoteAnimationTargetCompat[] appsCompat = new RemoteAnimationTargetCompat[length];
+        for (int i = 0; i < length; i++) {
             appsCompat[i] = new RemoteAnimationTargetCompat(apps[i]);
         }
         return appsCompat;

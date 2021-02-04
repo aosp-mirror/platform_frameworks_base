@@ -26,7 +26,7 @@
         android:minHeight="@dimen/min_switch_bar_height"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:background="?android:attr/colorBackground"
+        android:background="?android:attr/selectableItemBackground"
         android:paddingLeft="@dimen/switchbar_margin_start"
         android:paddingRight="@dimen/switchbar_margin_end">
 
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:paddingRight="54dp"
+            android:layout_marginRight="16dp"
             android:layout_gravity="center_vertical"
             android:maxLines="2"
             android:ellipsize="end"

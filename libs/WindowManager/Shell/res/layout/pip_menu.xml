@@ -97,4 +97,14 @@
         android:padding="@dimen/pip_resize_handle_padding"
         android:src="@drawable/pip_resize_handle"
         android:background="?android:selectableItemBackgroundBorderless" />
-</FrameLayout>
+
+    <!-- invisible layer to trap the focus, b/169372603 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@null"
+        android:defaultFocusHighlightEnabled="false"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:focusedByDefault="true" />
+t </FrameLayout>

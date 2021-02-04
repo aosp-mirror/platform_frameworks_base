@@ -17,6 +17,7 @@ package android.app.search;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -46,6 +47,7 @@ public final class Query implements Parcelable {
 
     public Query(@NonNull String input,
             long timestamp,
+            @SuppressLint("NullableCollection")
             @Nullable Bundle extras) {
         mInput = input;
         mTimestamp = timestamp;
@@ -69,6 +71,7 @@ public final class Query implements Parcelable {
     }
 
     @Nullable
+    @SuppressLint("NullableCollection")
     public Bundle getExtras() {
         return mExtras;
     }

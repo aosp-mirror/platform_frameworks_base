@@ -179,7 +179,8 @@ public class PowerManagerServiceTest {
                 .thenReturn(mPowerSaveState);
         when(mBatteryManagerInternalMock.isPowered(anyInt())).thenReturn(false);
         when(mInattentiveSleepWarningControllerMock.isShown()).thenReturn(false);
-        when(mDisplayManagerInternalMock.requestPowerState(any(), anyBoolean())).thenReturn(true);
+        when(mDisplayManagerInternalMock.requestPowerState(anyInt(), any(), anyBoolean()))
+                .thenReturn(true);
         when(mSystemPropertiesMock.get(eq(SYSTEM_PROPERTY_QUIESCENT), anyString())).thenReturn("");
         when(mAmbientDisplayConfigurationMock.ambientDisplayAvailable()).thenReturn(true);
 

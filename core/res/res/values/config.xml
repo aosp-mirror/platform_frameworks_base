@@ -3800,6 +3800,15 @@
 -->
     <string name="config_defaultSearchUiService" translatable="false"></string>
 
+    <!-- The package name for the system's smartspace service.
+     This service returns smartspace results.
+
+     This service must be trusted, as it can be activated without explicit consent of the user.
+     If no service with the specified name exists on the device, smartspace will be disabled.
+     Example: "com.android.intelligence/.SmartspaceService"
+-->
+    <string name="config_defaultSmartspaceService" translatable="false"></string>
+
     <!-- The package name for the system's speech recognition service.
          This service must be trusted, as it can be activated without explicit consent of the user.
          Example: "com.android.speech/.RecognitionService"

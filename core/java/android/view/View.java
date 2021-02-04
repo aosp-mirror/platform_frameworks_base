@@ -41,6 +41,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.Size;
 import android.annotation.StyleRes;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.annotation.UiContext;
 import android.annotation.UiThread;
@@ -9030,7 +9031,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                  not be null or empty if a non-null listener is passed in.
      * @param listener The listener to use. This can be null to reset to the default behavior.
      */
-    public void setOnReceiveContentListener(@Nullable String[] mimeTypes,
+    public void setOnReceiveContentListener(
+            @SuppressLint("NullableCollection") @Nullable String[] mimeTypes,
             @Nullable OnReceiveContentListener listener) {
         if (listener != null) {
             Preconditions.checkArgument(mimeTypes != null && mimeTypes.length > 0,
@@ -9106,6 +9108,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @return The MIME types accepted by {@link #performReceiveContent} for this view (may
      * include patterns such as "image/*").
      */
+    @SuppressLint("NullableCollection")
     @Nullable
     public String[] getOnReceiveContentMimeTypes() {
         return mOnReceiveContentMimeTypes;
@@ -21367,6 +21370,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
+            // Hacky hack: Reset any stretch effects as those are applied during the draw pass
+            // instead of being "stateful" like other RenderNode properties
+            renderNode.clearStretch();
+
             final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
             try {
@@ -22793,6 +22800,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
+
+        // Hacky hack: Reset any stretch effects as those are applied during the draw pass
+        // instead of being "stateful" like other RenderNode properties
+        renderNode.clearStretch();
+
         final RecordingCanvas canvas = renderNode.beginRecording(width, height);
 
         // Reverse left/top translation done by drawable canvas, which will

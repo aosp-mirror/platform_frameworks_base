@@ -2892,8 +2892,8 @@ public final class PowerManagerService extends SystemService
                         PowerManager.BRIGHTNESS_INVALID_FLOAT;
             }
 
-            mDisplayReady = mDisplayManagerInternal.requestPowerState(displayPowerRequest,
-                    mRequestWaitForNegativeProximity);
+            mDisplayReady = mDisplayManagerInternal.requestPowerState(Display.DEFAULT_DISPLAY_GROUP,
+                    displayPowerRequest, mRequestWaitForNegativeProximity);
             mRequestWaitForNegativeProximity = false;
 
             if (DEBUG_SPEW) {

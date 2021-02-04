@@ -18,7 +18,6 @@ package com.android.internal.os;
 
 import android.content.Context;
 import android.hardware.SensorManager;
-import android.net.ConnectivityManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
@@ -57,7 +56,7 @@ public class BatteryUsageStatsProvider {
                 mPowerCalculators.add(new CpuPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new MemoryPowerCalculator(mPowerProfile));
                 mPowerCalculators.add(new WakelockPowerCalculator(mPowerProfile));
-                if (!isWifiOnlyDevice(mContext)) {
+                if (!BatteryStatsHelper.checkWifiOnly(mContext)) {
                     mPowerCalculators.add(new MobileRadioPowerCalculator(mPowerProfile));
                 }
                 mPowerCalculators.add(new WifiPowerCalculator(mPowerProfile));
@@ -79,14 +78,6 @@ public class BatteryUsageStatsProvider {
             }
         }
         return mPowerCalculators;
-    }
-
-    private static boolean isWifiOnlyDevice(Context context) {
-        ConnectivityManager cm = context.getSystemService(ConnectivityManager.class);
-        if (cm == null) {
-            return false;
-        }
-        return !cm.isNetworkSupported(ConnectivityManager.TYPE_MOBILE);
     }
 
     /**

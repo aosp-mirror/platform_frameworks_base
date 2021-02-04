@@ -166,6 +166,31 @@ static jboolean android_view_RenderNode_setOutlineNone(CRITICAL_JNI_PARAMS_COMMA
     return true;
 }
 
+static jboolean android_view_RenderNode_clearStretch(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    auto& stretch = renderNode->mutateStagingProperties()
+            .mutateLayerProperties().mutableStretchEffect();
+    if (stretch.isEmpty()) {
+        return false;
+    }
+    stretch.setEmpty();
+    renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
+    return true;
+}
+
+static jboolean android_view_RenderNode_stretch(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr,
+        jfloat left, jfloat top, jfloat right, jfloat bottom, jfloat vX, jfloat vY, jfloat max) {
+    RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
+    renderNode->mutateStagingProperties().mutateLayerProperties().mutableStretchEffect().mergeWith(
+            StretchEffect{
+        .stretchArea = SkRect::MakeLTRB(left, top, right, bottom),
+        .stretchDirection = {.fX = vX, .fY = vY},
+        .maxStretchAmount = max
+    });
+    renderNode->setPropertyFieldsDirty(RenderNode::GENERIC);
+    return true;
+}
+
 static jboolean android_view_RenderNode_hasShadow(CRITICAL_JNI_PARAMS_COMMA jlong renderNodePtr) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
     return renderNode->stagingProperties().hasShadow();
@@ -678,6 +703,8 @@ static const JNINativeMethod gMethods[] = {
     { "nSetOutlinePath",       "(JJF)Z", (void*) android_view_RenderNode_setOutlinePath },
     { "nSetOutlineEmpty",      "(J)Z",   (void*) android_view_RenderNode_setOutlineEmpty },
     { "nSetOutlineNone",       "(J)Z",   (void*) android_view_RenderNode_setOutlineNone },
+    { "nClearStretch",         "(J)Z",   (void*) android_view_RenderNode_clearStretch },
+    { "nStretch",              "(JFFFFFFF)Z",   (void*) android_view_RenderNode_stretch },
     { "nHasShadow",            "(J)Z",   (void*) android_view_RenderNode_hasShadow },
     { "nSetSpotShadowColor",   "(JI)Z",  (void*) android_view_RenderNode_setSpotShadowColor },
     { "nGetSpotShadowColor",   "(J)I",   (void*) android_view_RenderNode_getSpotShadowColor },

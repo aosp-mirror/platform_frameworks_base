@@ -21,6 +21,6 @@
       android:width="13.19dp"
       android:height="10.06dp"
       android:gravity="center"
-      android:right="19dp"
+      android:right="21dp"
       android:drawable="@drawable/track_on_indicator" />
 </layer-list>

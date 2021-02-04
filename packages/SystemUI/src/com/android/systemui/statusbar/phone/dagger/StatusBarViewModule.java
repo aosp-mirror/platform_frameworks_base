@@ -16,6 +16,10 @@
 
 package com.android.systemui.statusbar.phone.dagger;
 
+import android.annotation.Nullable;
+
+import com.android.systemui.R;
+import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
 
@@ -32,4 +36,12 @@ public abstract class StatusBarViewModule {
         return notificationShadeWindowView.getNotificationPanelView();
     }
 
+    /** */
+    @Provides
+    @StatusBarComponent.StatusBarScope
+    @Nullable
+    public static LockIcon getLockIcon(
+            NotificationShadeWindowView notificationShadeWindowView) {
+        return notificationShadeWindowView.findViewById(R.id.lock_icon);
+    }
 }

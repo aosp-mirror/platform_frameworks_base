@@ -15,11 +15,17 @@
   limitations under the License.
   -->
 
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval" >
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+  <item
+      android:top="4dp"
+      android:left="4dp"
+      android:right="4dp"
+      android:bottom="4dp">
 
-  <size android:height="24dp" android:width="24dp" />
-  <solid android:color="?android:attr/colorAccent" />
-  <stroke android:width="4dp" android:color="@android:color/transparent" />
+    <shape android:shape="oval" >
+      <size android:height="20dp" android:width="20dp" />
+      <solid android:color="?android:attr/colorAccent" />
+    </shape>
 
-</shape>
+  </item>
+</layer-list>

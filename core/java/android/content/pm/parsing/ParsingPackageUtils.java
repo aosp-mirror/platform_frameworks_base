@@ -34,7 +34,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StyleableRes;
-import android.app.ActivityThread;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
@@ -222,13 +221,15 @@ public class ParsingPackageUtils {
     private static final int MAX_FILE_NAME_SIZE = 223;
 
     /**
-     * @see #parseDefault(ParseInput, File, int, boolean)
+     * @see #parseDefault(ParseInput, File, int, List, boolean)
      */
     @NonNull
     public static ParseResult<ParsingPackage> parseDefaultOneTime(File file,
-            @ParseFlags int parseFlags, boolean collectCertificates) {
+            @ParseFlags int parseFlags,
+            @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
+            boolean collectCertificates) {
         ParseInput input = ParseTypeImpl.forDefaultParsing().reset();
-        return parseDefault(input, file, parseFlags, collectCertificates);
+        return parseDefault(input, file, parseFlags, splitPermissions, collectCertificates);
     }
 
     /**
@@ -238,28 +239,32 @@ public class ParsingPackageUtils {
      */
     @NonNull
     public static ParseResult<ParsingPackage> parseDefault(ParseInput input, File file,
-            @ParseFlags int parseFlags, boolean collectCertificates) {
+            @ParseFlags int parseFlags,
+            @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
+            boolean collectCertificates) {
         ParseResult<ParsingPackage> result;
 
-        ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, new Callback() {
-            @Override
-            public boolean hasFeature(String feature) {
-                // Assume the device doesn't support anything. This will affect permission parsing
-                // and will force <uses-permission/> declarations to include all requiredNotFeature
-                // permissions and exclude all requiredFeature permissions. This mirrors the old
-                // behavior.
-                return false;
-            }
+        ParsingPackageUtils parser = new ParsingPackageUtils(false, null, null, splitPermissions,
+                new Callback() {
+                    @Override
+                    public boolean hasFeature(String feature) {
+                        // Assume the device doesn't support anything. This will affect permission
+                        // parsing and will force <uses-permission/> declarations to include all
+                        // requiredNotFeature permissions and exclude all requiredFeature
+                        // permissions. This mirrors the old behavior.
+                        return false;
+                    }
 
-            @Override
-            public ParsingPackage startParsingPackage(
-                    @NonNull String packageName,
-                    @NonNull String baseApkPath,
-                    @NonNull String path,
-                    @NonNull TypedArray manifestArray, boolean isCoreApp) {
-                return new ParsingPackageImpl(packageName, baseApkPath, path, manifestArray);
-            }
-        });
+                    @Override
+                    public ParsingPackage startParsingPackage(
+                            @NonNull String packageName,
+                            @NonNull String baseApkPath,
+                            @NonNull String path,
+                            @NonNull TypedArray manifestArray, boolean isCoreApp) {
+                        return new ParsingPackageImpl(packageName, baseApkPath, path,
+                                manifestArray);
+                    }
+                });
         try {
             result = parser.parsePackage(input, file, parseFlags);
             if (result.isError()) {
@@ -290,13 +295,18 @@ public class ParsingPackageUtils {
     private boolean mOnlyCoreApps;
     private String[] mSeparateProcesses;
     private DisplayMetrics mDisplayMetrics;
+    @NonNull
+    private List<PermissionManager.SplitPermissionInfo> mSplitPermissionInfos;
     private Callback mCallback;
 
     public ParsingPackageUtils(boolean onlyCoreApps, String[] separateProcesses,
-            DisplayMetrics displayMetrics, @NonNull Callback callback) {
+            DisplayMetrics displayMetrics,
+            @NonNull List<PermissionManager.SplitPermissionInfo> splitPermissions,
+            @NonNull Callback callback) {
         mOnlyCoreApps = onlyCoreApps;
         mSeparateProcesses = separateProcesses;
         mDisplayMetrics = displayMetrics;
+        mSplitPermissionInfos = splitPermissions;
         mCallback = callback;
     }
 
@@ -2743,14 +2753,10 @@ public class ParsingPackageUtils {
         }
     }
 
-    private static void convertSplitPermissions(ParsingPackage pkg) {
-        final List<PermissionManager.SplitPermissionInfo> splitPermissions =
-                ActivityThread.currentApplication().getSystemService(PermissionManager.class)
-                        .getSplitPermissions();
-
-        final int listSize = splitPermissions.size();
+    private void convertSplitPermissions(ParsingPackage pkg) {
+        final int listSize = mSplitPermissionInfos.size();
         for (int is = 0; is < listSize; is++) {
-            final PermissionManager.SplitPermissionInfo spi = splitPermissions.get(is);
+            final PermissionManager.SplitPermissionInfo spi = mSplitPermissionInfos.get(is);
             List<String> requestedPermissions = pkg.getRequestedPermissions();
             if (pkg.getTargetSdkVersion() >= spi.getTargetSdk()
                     || !requestedPermissions.contains(spi.getSplitPermission())) {

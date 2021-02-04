@@ -665,9 +665,18 @@ class JobConcurrencyManager {
         WorkTypeConfig(@NonNull String configIdentifier, int defaultMaxTotal,
                 List<Pair<Integer, Integer>> defaultMin, List<Pair<Integer, Integer>> defaultMax) {
             mConfigIdentifier = configIdentifier;
-            mDefaultMaxTotal = mMaxTotal = defaultMaxTotal;
+            mDefaultMaxTotal = mMaxTotal = Math.min(defaultMaxTotal, MAX_JOB_CONTEXTS_COUNT);
+            int numReserved = 0;
             for (int i = defaultMin.size() - 1; i >= 0; --i) {
                 mDefaultMinReservedSlots.put(defaultMin.get(i).first, defaultMin.get(i).second);
+                numReserved += defaultMin.get(i).second;
+            }
+            if (mDefaultMaxTotal < 0 || numReserved > mDefaultMaxTotal) {
+                // We only create new configs on boot, so this should trigger during development
+                // (before the code gets checked in), so this makes sure the hard-coded defaults
+                // make sense. DeviceConfig values will be handled gracefully in update().
+                throw new IllegalArgumentException("Invalid default config: t=" + defaultMaxTotal
+                        + " min=" + defaultMin + " max=" + defaultMax);
             }
             for (int i = defaultMax.size() - 1; i >= 0; --i) {
                 mDefaultMaxAllowedSlots.put(defaultMax.get(i).first, defaultMax.get(i).second);
@@ -782,15 +791,10 @@ class JobConcurrencyManager {
             mNumUnspecialized = mConfigMaxTotal;
             mNumUnspecialized -= mConfigNumReservedSlots.get(WORK_TYPE_TOP);
             mNumUnspecialized -= mConfigNumReservedSlots.get(WORK_TYPE_BG);
-            mNumUnspecialized -= mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP);
-            mNumUnspecialized -= mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG);
-            calculateUnspecializedRemaining();
-        }
-
-        private void calculateUnspecializedRemaining() {
-            mNumUnspecializedRemaining = mNumUnspecialized;
+            mNumUnspecializedRemaining = mConfigMaxTotal;
             for (int i = mNumRunningJobs.size() - 1; i >= 0; --i) {
-                mNumUnspecializedRemaining -= mNumRunningJobs.valueAt(i);
+                mNumUnspecializedRemaining -= Math.max(mNumRunningJobs.valueAt(i),
+                        mConfigNumReservedSlots.get(mNumRunningJobs.keyAt(i)));
             }
         }
 
@@ -873,24 +877,42 @@ class JobConcurrencyManager {
             mNumUnspecialized = mConfigMaxTotal;
             final int numTop = mNumRunningJobs.get(WORK_TYPE_TOP)
                     + mNumPendingJobs.get(WORK_TYPE_TOP);
-            final int resTop = Math.min(mConfigNumReservedSlots.get(WORK_TYPE_TOP), numTop);
+            int resTop = Math.min(mConfigNumReservedSlots.get(WORK_TYPE_TOP), numTop);
             mNumActuallyReservedSlots.put(WORK_TYPE_TOP, resTop);
             mNumUnspecialized -= resTop;
             final int numBg = mNumRunningJobs.get(WORK_TYPE_BG) + mNumPendingJobs.get(WORK_TYPE_BG);
-            final int resBg = Math.min(mConfigNumReservedSlots.get(WORK_TYPE_BG), numBg);
+            int resBg = Math.min(mConfigNumReservedSlots.get(WORK_TYPE_BG), numBg);
             mNumActuallyReservedSlots.put(WORK_TYPE_BG, resBg);
             mNumUnspecialized -= resBg;
-            calculateUnspecializedRemaining();
+
+            mNumUnspecializedRemaining = mNumUnspecialized;
+            // Account for already running jobs after we've assigned the minimum number of slots.
+            int unspecializedAssigned;
+            int extraRunning = (mNumRunningJobs.get(WORK_TYPE_TOP) - resTop);
+            if (extraRunning > 0) {
+                unspecializedAssigned = Math.max(0,
+                        Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP) - resTop,
+                                extraRunning));
+                resTop += unspecializedAssigned;
+                mNumUnspecializedRemaining -= extraRunning;
+            }
+            extraRunning = (mNumRunningJobs.get(WORK_TYPE_BG) - resBg);
+            if (extraRunning > 0) {
+                unspecializedAssigned = Math.max(0,
+                        Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG) - resBg, extraRunning));
+                resBg += unspecializedAssigned;
+                mNumUnspecializedRemaining -= extraRunning;
+            }
 
             // Assign remaining unspecialized based on ranking.
-            int unspecializedAssigned = Math.max(0,
-                    Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP),
-                            Math.min(mNumUnspecializedRemaining, numTop - resTop)));
+            unspecializedAssigned = Math.max(0,
+                    Math.min(mNumUnspecializedRemaining,
+                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_TOP), numTop) - resTop));
             mNumActuallyReservedSlots.put(WORK_TYPE_TOP, resTop + unspecializedAssigned);
             mNumUnspecializedRemaining -= unspecializedAssigned;
             unspecializedAssigned = Math.max(0,
-                    Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG),
-                            Math.min(mNumUnspecializedRemaining, numBg - resBg)));
+                    Math.min(mNumUnspecializedRemaining,
+                            Math.min(mConfigAbsoluteMaxSlots.get(WORK_TYPE_BG), numBg) - resBg));
             mNumActuallyReservedSlots.put(WORK_TYPE_BG, resBg + unspecializedAssigned);
             mNumUnspecializedRemaining -= unspecializedAssigned;
         }

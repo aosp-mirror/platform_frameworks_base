@@ -119,6 +119,7 @@ public abstract class DataLoaderService extends Service {
                     IoUtils.closeQuietly(control.incremental.cmd);
                     IoUtils.closeQuietly(control.incremental.pendingReads);
                     IoUtils.closeQuietly(control.incremental.log);
+                    IoUtils.closeQuietly(control.incremental.blocksWritten);
                 }
             }
         }

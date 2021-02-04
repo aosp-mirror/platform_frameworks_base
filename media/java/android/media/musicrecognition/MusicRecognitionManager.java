@@ -23,6 +23,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -90,7 +91,9 @@ public class MusicRecognitionManager {
          *               supplied bundle
          */
         void onRecognitionSucceeded(@NonNull RecognitionRequest recognitionRequest,
-                @NonNull MediaMetadata result, @Nullable Bundle extras);
+                @NonNull MediaMetadata result,
+                @SuppressLint("NullableCollection")
+                @Nullable Bundle extras);
 
         /**
          * Invoked when the search is not successful (possibly but not necessarily due to error).

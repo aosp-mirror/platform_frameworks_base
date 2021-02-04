@@ -295,8 +295,9 @@ class PrivacyDialogControllerTest : SysuiTestCase() {
         )
         controller.showDialog(context)
         exhaustExecutors()
-        assertThat(dialogProvider.list).hasSize(1)
+        assertThat(dialogProvider.list).hasSize(2)
         assertThat(dialogProvider.list?.get(0)?.lastActiveTimestamp).isEqualTo(1L)
+        assertThat(dialogProvider.list?.get(1)?.lastActiveTimestamp).isEqualTo(0L)
     }
 
     @Test
