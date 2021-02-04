@@ -372,8 +372,6 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                     dc.mWallpaperController.startWallpaperAnimation(anim);
                 }
             }
-        }
-        if (transit == TRANSIT_KEYGUARD_GOING_AWAY) {
             dc.startKeyguardExitOnNonAppWindows(
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER) != 0,
                     (flags & TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE) != 0,
