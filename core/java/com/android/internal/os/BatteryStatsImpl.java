@@ -8633,11 +8633,7 @@ public class BatteryStatsImpl extends BatteryStats {
 
         @Override
         public long getScreenOnEnergy() {
-            if (mUidMeasuredEnergyStats == null) {
-                return ENERGY_DATA_UNAVAILABLE;
-            }
-            return mUidMeasuredEnergyStats.getAccumulatedBucketEnergy(
-                    MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
+            return getMeasuredEnergyMicroJoules(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
         }
 
         void initNetworkActivityLocked() {
