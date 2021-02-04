@@ -76,11 +76,8 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
     @GuardedBy("mLock")
     private final ArrayMap<Integer, Pair<UUID, String>> mRequests = new ArrayMap<>();
 
-    // TODO(b/159952358): For now, IDs start at a really high number to avoid conflict with the
-    //  legacy manager, which is still active in code. Should be set to 0 once
-    //  IntentFilterVerificationManager is removed.
     @GuardedBy("mLock")
-    private int mVerificationToken = Integer.MAX_VALUE / 2;
+    private int mVerificationToken = 0;
 
     public DomainVerificationProxyV1(@NonNull Context context,
             @NonNull DomainVerificationManagerInternal manager,

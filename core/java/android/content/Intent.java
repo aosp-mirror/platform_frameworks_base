@@ -37,6 +37,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.SuspendDialogInfo;
+import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
@@ -2841,10 +2842,13 @@ public class Intent implements Parcelable, Cloneable {
      * </p>
      *
      * @hide
+     * @deprecated Superseded by domain verification APIs. See {@link DomainVerificationManager}.
      */
+    @Deprecated
     @SystemApi
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
+    public static final String ACTION_INTENT_FILTER_NEEDS_VERIFICATION =
+            "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
 
 
     /**
