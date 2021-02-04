@@ -54,6 +54,7 @@ import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,6 +70,12 @@ import android.os.incremental.IncrementalManager;
 import android.os.storage.StorageManager;
 import android.os.storage.VolumeInfo;
 import android.permission.PermissionManager;
+import android.telephony.TelephonyManager;
+import android.telephony.gba.GbaService;
+import android.telephony.ims.ImsService;
+import android.telephony.ims.ProvisioningManager;
+import android.telephony.ims.RcsUceAdapter;
+import android.telephony.ims.SipDelegateManager;
 import android.util.AndroidException;
 import android.util.Log;
 
@@ -2933,6 +2940,37 @@ public abstract class PackageManager {
      */
     @SdkConstant(SdkConstantType.FEATURE)
     public static final String FEATURE_TELEPHONY_IMS = "android.hardware.telephony.ims";
+
+    /**
+     * Feature for {@link #getSystemAvailableFeatures} and {@link #hasSystemFeature}: The device
+     * supports a single IMS registration as defined by carrier networks in the IMS service
+     * implementation using the {@link ImsService} API, {@link GbaService} API, and IRadio 1.6 HAL.
+     * <p>
+     * When set, the device must fully support the following APIs for an application to implement
+     * IMS single registration:
+     * <ul>
+     * <li> Updating RCS provisioning status using the {@link ProvisioningManager} API to supply an
+     * RCC.14 defined XML and notify IMS applications of Auto Configuration Server (ACS) or
+     * proprietary server provisioning updates.</li>
+     * <li>Opening a delegate in the device IMS service to forward SIP traffic to the carrier's
+     * network using the {@link SipDelegateManager} API</li>
+     * <li>Listening to EPS dedicated bearer establishment via the
+     * {@link ConnectivityManager#registerQosCallback}
+     * API to indicate to the application when to start/stop media traffic.</li>
+     * <li>Implementing Generic Bootstrapping Architecture (GBA) and providing the associated
+     * authentication keys to applications
+     * requesting this information via the {@link TelephonyManager#bootstrapAuthenticationRequest}
+     * API</li>
+     * <li>Implementing RCS User Capability Exchange using the {@link RcsUceAdapter} API</li>
+     * </ul>
+     * <p>
+     * This feature should only be defined if {@link #FEATURE_TELEPHONY_IMS} is also defined.
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.FEATURE)
+    public static final String FEATURE_TELEPHONY_IMS_SINGLE_REGISTRATION =
+            "android.hardware.telephony.ims.singlereg";
 
     /**
      * Feature for {@link #getSystemAvailableFeatures} and
