@@ -5090,6 +5090,13 @@ public class Activity extends ContextThemeWrapper
             mTaskDescription.setBackgroundColor(colorBackground);
         }
 
+        int colorBackgroundFloating = a.getColor(
+                com.android.internal.R.styleable.ActivityTaskDescription_colorBackgroundFloating,
+                0);
+        if (colorBackgroundFloating != 0 && Color.alpha(colorBackgroundFloating) == 0xFF) {
+            mTaskDescription.setBackgroundColorFloating(colorBackgroundFloating);
+        }
+
         final int statusBarColor = a.getColor(
                 com.android.internal.R.styleable.ActivityTaskDescription_statusBarColor, 0);
         if (statusBarColor != 0) {

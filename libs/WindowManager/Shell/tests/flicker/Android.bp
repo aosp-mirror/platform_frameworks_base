@@ -18,32 +18,10 @@ android_test {
     name: "WMShellFlickerTests",
     srcs: ["src/**/*.java", "src/**/*.kt"],
     manifest: "AndroidManifest.xml",
-    test_config: "AndroidTestPhysicalDevices.xml",
+    test_config: "AndroidTest.xml",
     platform_apis: true,
     certificate: "platform",
     test_suites: ["device-tests"],
-    libs: ["android.test.runner"],
-    static_libs: [
-        "androidx.test.ext.junit",
-        "flickerlib",
-        "truth-prebuilt",
-        "app-helpers-core",
-        "launcher-helper-lib",
-        "launcher-aosp-tapl",
-        "wm-flicker-common-assertions",
-        "wm-flicker-common-app-helpers",
-        "platform-test-annotations",
-        "wmshell-flicker-test-components",
-    ],
-}
-
-android_test {
-    name: "WMShellFlickerTestsVirtual",
-    srcs: ["src/**/*.java", "src/**/*.kt"],
-    manifest: "AndroidManifest.xml",
-    test_config: "AndroidTestVirtualDevices.xml",
-    platform_apis: true,
-    certificate: "platform",
     libs: ["android.test.runner"],
     static_libs: [
         "androidx.test.ext.junit",

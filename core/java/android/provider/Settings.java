@@ -5931,6 +5931,13 @@ public final class Settings {
         public static final String ADAPTIVE_SLEEP = "adaptive_sleep";
 
         /**
+         * Setting key to indicate whether camera-based autorotate is enabled.
+         *
+         * @hide
+         */
+        public static final String CAMERA_AUTOROTATE = "camera_autorotate";
+
+        /**
          * @deprecated Use {@link android.provider.Settings.Global#DEVELOPMENT_SETTINGS_ENABLED}
          * instead
          */
@@ -13581,6 +13588,28 @@ public final class Settings {
          */
         public static final String POWER_BUTTON_VERY_LONG_PRESS =
                 "power_button_very_long_press";
+
+
+        /**
+         * Keyguard should be on the left hand side of the screen, for wide screen layouts.
+         *
+         * @hide
+         */
+        public static final int ONE_HANDED_KEYGUARD_SIDE_LEFT = 0;
+
+        /**
+         * Keyguard should be on the right hand side of the screen, for wide screen layouts.
+         *
+         * @hide
+         */
+        public static final int ONE_HANDED_KEYGUARD_SIDE_RIGHT = 1;
+        /**
+         * In one handed mode, which side the keyguard should be on. Allowable values are one of
+         * the ONE_HANDED_KEYGUARD_SIDE_* constants.
+         *
+         * @hide
+         */
+        public static final String ONE_HANDED_KEYGUARD_SIDE = "one_handed_keyguard_side";
 
         /**
          * Keys we no longer back up under the current schema, but want to continue to

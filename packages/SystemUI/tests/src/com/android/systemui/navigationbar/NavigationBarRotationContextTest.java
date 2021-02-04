@@ -23,6 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.view.View;
+import android.view.WindowInsetsController;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -87,6 +88,8 @@ public class NavigationBarRotationContextTest extends SysuiTestCase {
     @Test
     public void testOnRotationProposalShowButtonShowNav() {
         // No navigation bar should not call to set visibility state
+        mRotationButtonController.onBehaviorChanged(
+                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         mRotationButtonController.onNavigationBarWindowVisibilityChange(false /* showing */);
         verify(mRotationButtonController, times(0)).setRotateSuggestionButtonState(
                 false /* visible */);

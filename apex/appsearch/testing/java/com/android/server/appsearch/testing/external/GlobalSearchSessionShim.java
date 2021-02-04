@@ -23,7 +23,7 @@ import java.io.Closeable;
 /**
  * This class provides global access to the centralized AppSearch index maintained by the system.
  *
- * <p>Apps can retrieve indexed documents through the query API.
+ * <p>Apps can retrieve indexed documents through the {@link #search} API.
  */
 public interface GlobalSearchSessionShim extends Closeable {
     /**
@@ -66,7 +66,7 @@ public interface GlobalSearchSessionShim extends Closeable {
      * @return The search result of performing this operation.
      */
     @NonNull
-    SearchResultsShim query(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+    SearchResultsShim search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /** Closes the {@link GlobalSearchSessionShim}. */
     @Override

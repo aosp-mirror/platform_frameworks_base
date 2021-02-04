@@ -75,12 +75,12 @@ public class SetSchemaRequestTest {
         AppSearchSchema schema = new AppSearchSchema.Builder("Schema").build();
 
         // By default, the schema is visible.
-        SetSchemaRequest request = new SetSchemaRequest.Builder().addSchema(schema).build();
+        SetSchemaRequest request = new SetSchemaRequest.Builder().addSchemas(schema).build();
         assertThat(request.getSchemasNotVisibleToSystemUi()).isEmpty();
 
         request =
                 new SetSchemaRequest.Builder()
-                        .addSchema(schema)
+                        .addSchemas(schema)
                         .setSchemaTypeVisibilityForSystemUi("Schema", true)
                         .build();
         assertThat(request.getSchemasNotVisibleToSystemUi()).isEmpty();
@@ -91,7 +91,7 @@ public class SetSchemaRequestTest {
         AppSearchSchema schema = new AppSearchSchema.Builder("Schema").build();
         SetSchemaRequest request =
                 new SetSchemaRequest.Builder()
-                        .addSchema(schema)
+                        .addSchemas(schema)
                         .setSchemaTypeVisibilityForSystemUi("Schema", false)
                         .build();
         assertThat(request.getSchemasNotVisibleToSystemUi()).containsExactly("Schema");
@@ -102,7 +102,7 @@ public class SetSchemaRequestTest {
         AppSearchSchema schema = new AppSearchSchema.Builder("Schema").build();
 
         // By default, the schema is not visible.
-        SetSchemaRequest request = new SetSchemaRequest.Builder().addSchema(schema).build();
+        SetSchemaRequest request = new SetSchemaRequest.Builder().addSchemas(schema).build();
         assertThat(request.getSchemasVisibleToPackages()).isEmpty();
 
         PackageIdentifier packageIdentifier =
@@ -112,7 +112,7 @@ public class SetSchemaRequestTest {
 
         request =
                 new SetSchemaRequest.Builder()
-                        .addSchema(schema)
+                        .addSchemas(schema)
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema", /*visible=*/ true, packageIdentifier)
                         .build();
@@ -126,7 +126,7 @@ public class SetSchemaRequestTest {
 
         SetSchemaRequest request =
                 new SetSchemaRequest.Builder()
-                        .addSchema(schema)
+                        .addSchemas(schema)
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema",
                                 /*visible=*/ false,
@@ -147,7 +147,7 @@ public class SetSchemaRequestTest {
 
         SetSchemaRequest request =
                 new SetSchemaRequest.Builder()
-                        .addSchema(schema)
+                        .addSchemas(schema)
                         // Set it visible for "Schema"
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema", /*visible=*/ true, packageIdentifier)
@@ -165,7 +165,7 @@ public class SetSchemaRequestTest {
 
         SetSchemaRequest request =
                 new SetSchemaRequest.Builder()
-                        .addSchema(schema)
+                        .addSchemas(schema)
                         // First set it as visible
                         .setSchemaTypeVisibilityForPackage(
                                 "Schema",

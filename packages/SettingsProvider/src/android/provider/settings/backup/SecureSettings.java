@@ -38,6 +38,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED,
         Settings.Secure.ADAPTIVE_SLEEP,
+        Settings.Secure.CAMERA_AUTOROTATE,
         Settings.Secure.AUTOFILL_SERVICE,
         Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,

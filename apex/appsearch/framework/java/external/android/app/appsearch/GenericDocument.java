@@ -22,6 +22,7 @@ import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.appsearch.util.BundleUtil;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.Log;
 
 import com.android.internal.util.Preconditions;
@@ -37,9 +38,9 @@ import java.util.Set;
  *
  * <p>Documents are constructed via {@link GenericDocument.Builder}.
  *
- * @see AppSearchSession#putDocuments
+ * @see AppSearchSession#put
  * @see AppSearchSession#getByUri
- * @see AppSearchSession#query
+ * @see AppSearchSession#search
  */
 public class GenericDocument {
     private static final String TAG = "AppSearchGenericDocumen";
@@ -210,7 +211,7 @@ public class GenericDocument {
         Object property = mProperties.get(key);
         if (property instanceof ArrayList) {
             return getPropertyBytesArray(key);
-        } else if (property instanceof Bundle[]) {
+        } else if (property instanceof Parcelable[]) {
             return getPropertyDocumentArray(key);
         }
         return property;
@@ -436,7 +437,7 @@ public class GenericDocument {
     @Nullable
     public GenericDocument[] getPropertyDocumentArray(@NonNull String key) {
         Preconditions.checkNotNull(key);
-        Bundle[] bundles = getAndCastPropertyArray(key, Bundle[].class);
+        Parcelable[] bundles = getAndCastPropertyArray(key, Parcelable[].class);
         if (bundles == null || bundles.length == 0) {
             return null;
         }
@@ -446,7 +447,18 @@ public class GenericDocument {
                 Log.e(TAG, "The inner bundle is null at " + i + ", for key: " + key);
                 continue;
             }
-            documents[i] = new GenericDocument(bundles[i]);
+            if (!(bundles[i] instanceof Bundle)) {
+                Log.e(
+                        TAG,
+                        "The inner element at "
+                                + i
+                                + " is a "
+                                + bundles[i].getClass()
+                                + ", not a Bundle for key: "
+                                + key);
+                continue;
+            }
+            documents[i] = new GenericDocument((Bundle) bundles[i]);
         }
         return documents;
     }
@@ -574,8 +586,8 @@ public class GenericDocument {
          * @param schemaType The schema type of the {@link GenericDocument}. The passed-in {@code
          *     schemaType} must be defined using {@link AppSearchSession#setSchema} prior to
          *     inserting a document of this {@code schemaType} into the AppSearch index using {@link
-         *     AppSearchSession#putDocuments}. Otherwise, the document will be rejected by {@link
-         *     AppSearchSession#putDocuments}.
+         *     AppSearchSession#put}. Otherwise, the document will be rejected by {@link
+         *     AppSearchSession#put}.
          */
         @SuppressWarnings("unchecked")
         public Builder(@NonNull String uri, @NonNull String schemaType) {
@@ -817,7 +829,7 @@ public class GenericDocument {
 
         private void putInPropertyBundle(@NonNull String key, @NonNull GenericDocument[] values) {
             validateRepeatedPropertyLength(key, values.length);
-            Bundle[] documentBundles = new Bundle[values.length];
+            Parcelable[] documentBundles = new Parcelable[values.length];
             for (int i = 0; i < values.length; i++) {
                 if (values[i] == null) {
                     throw new IllegalArgumentException("The document at " + i + " is null.");

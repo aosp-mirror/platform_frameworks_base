@@ -35,6 +35,7 @@
 #include <binder/IPCThreadState.h>
 #include <binder/IServiceManager.h>
 #include <binder/Parcel.h>
+#include <binder/ParcelRef.h>
 #include <binder/ProcessState.h>
 #include <binder/Stability.h>
 #include <binderthreadstate/CallerUtils.h>
@@ -1367,7 +1368,8 @@ static bool should_time_binder_calls() {
 }
 
 static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
-        jint code, jobject dataObj, jobject replyObj, jint flags) // throws RemoteException
+        jint code, jobject dataObj, jobject replyObj, jboolean replyObjOwnsNativeParcel,
+        jint flags) // throws RemoteException
 {
     if (dataObj == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -1408,6 +1410,21 @@ static jboolean android_os_BinderProxy_transact(JNIEnv* env, jobject obj,
     //printf("Transact from Java code to %p sending: ", target); data->print();
     status_t err = target->transact(code, *data, reply, flags);
     //if (reply) printf("Transact from Java code to %p received: ", target); reply->print();
+
+    if (reply) {
+        if (replyObjOwnsNativeParcel) {
+            // as per Parcel java class constructor, here, "reply" MUST be a "ParcelRef"
+            // only for Parcel that contained Binder objects
+            if (reply->objectsCount() > 0) {
+                IPCThreadState::self()->createTransactionReference(static_cast<ParcelRef*>(reply));
+            }
+        } else {
+            // as per Parcel.java, if Parcel java object NOT owning native Parcel object, it will
+            // NOT destroy the native Parcel object upon GC(finalize()), so, there will be no race
+            // condtion in this case. Please refer to the java class methods: Parcel.finalize(),
+            // Parcel.destroy().
+        }
+    }
 
     if (kEnableBinderSample) {
         if (time_binder_calls) {
@@ -1535,7 +1552,7 @@ static const JNINativeMethod gBinderProxyMethods[] = {
     {"pingBinder",          "()Z", (void*)android_os_BinderProxy_pingBinder},
     {"isBinderAlive",       "()Z", (void*)android_os_BinderProxy_isBinderAlive},
     {"getInterfaceDescriptor", "()Ljava/lang/String;", (void*)android_os_BinderProxy_getInterfaceDescriptor},
-    {"transactNative",      "(ILandroid/os/Parcel;Landroid/os/Parcel;I)Z", (void*)android_os_BinderProxy_transact},
+    {"transactNative",      "(ILandroid/os/Parcel;Landroid/os/Parcel;ZI)Z", (void*)android_os_BinderProxy_transact},
     {"linkToDeath",         "(Landroid/os/IBinder$DeathRecipient;I)V", (void*)android_os_BinderProxy_linkToDeath},
     {"unlinkToDeath",       "(Landroid/os/IBinder$DeathRecipient;I)Z", (void*)android_os_BinderProxy_unlinkToDeath},
     {"getNativeFinalizer",  "()J", (void*)android_os_BinderProxy_getNativeFinalizer},

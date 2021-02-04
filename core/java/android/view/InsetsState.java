@@ -173,6 +173,9 @@ public class InsetsState implements Parcelable {
     private final DisplayCutout.ParcelableWrapper mDisplayCutout =
             new DisplayCutout.ParcelableWrapper();
 
+    /** The rounded corners on the display */
+    private RoundedCorners mRoundedCorners = RoundedCorners.NO_ROUNDED_CORNERS;
+
     public InsetsState() {
     }
 
@@ -256,7 +259,8 @@ public class InsetsState implements Parcelable {
         }
 
         return new WindowInsets(typeInsetsMap, typeMaxInsetsMap, typeVisibilityMap, isScreenRound,
-                alwaysConsumeSystemBars, calculateRelativeCutout(frame), compatInsetsTypes,
+                alwaysConsumeSystemBars, calculateRelativeCutout(frame),
+                calculateRelativeRoundedCorners(frame), compatInsetsTypes,
                 (legacySystemUiFlags & SYSTEM_UI_FLAG_LAYOUT_STABLE) != 0);
     }
 
@@ -279,6 +283,20 @@ public class InsetsState implements Parcelable {
             return DisplayCutout.NO_CUTOUT;
         }
         return raw.inset(insetLeft, insetTop, insetRight, insetBottom);
+    }
+
+    private RoundedCorners calculateRelativeRoundedCorners(Rect frame) {
+        if (mDisplayFrame.equals(frame)) {
+            return mRoundedCorners;
+        }
+        if (frame == null) {
+            return RoundedCorners.NO_ROUNDED_CORNERS;
+        }
+        final int insetLeft = frame.left - mDisplayFrame.left;
+        final int insetTop = frame.top - mDisplayFrame.top;
+        final int insetRight = mDisplayFrame.right - frame.right;
+        final int insetBottom = mDisplayFrame.bottom - frame.bottom;
+        return mRoundedCorners.inset(insetLeft, insetTop, insetRight, insetBottom);
     }
 
     public Rect calculateInsets(Rect frame, @InsetsType int types, boolean ignoreVisibility) {
@@ -462,6 +480,14 @@ public class InsetsState implements Parcelable {
         return mDisplayCutout.get();
     }
 
+    public void setRoundedCorners(RoundedCorners roundedCorners) {
+        mRoundedCorners = roundedCorners;
+    }
+
+    public RoundedCorners getRoundedCorners() {
+        return mRoundedCorners;
+    }
+
     /**
      * Modifies the state of this class to exclude a certain type to make it ready for dispatching
      * to the client.
@@ -493,6 +519,7 @@ public class InsetsState implements Parcelable {
     public void scale(float scale) {
         mDisplayFrame.scale(scale);
         mDisplayCutout.scale(scale);
+        mRoundedCorners = mRoundedCorners.scale(scale);
         for (int i = 0; i < SIZE; i++) {
             final InsetsSource source = mSources[i];
             if (source != null) {
@@ -512,6 +539,7 @@ public class InsetsState implements Parcelable {
     public void set(InsetsState other, boolean copySources) {
         mDisplayFrame.set(other.mDisplayFrame);
         mDisplayCutout.set(other.mDisplayCutout);
+        mRoundedCorners = other.getRoundedCorners();
         if (copySources) {
             for (int i = 0; i < SIZE; i++) {
                 InsetsSource source = other.mSources[i];
@@ -619,11 +647,15 @@ public class InsetsState implements Parcelable {
     }
 
     public void dump(String prefix, PrintWriter pw) {
+        final String newPrefix = prefix + "  ";
         pw.println(prefix + "InsetsState");
+        pw.println(newPrefix + "mDisplayFrame=" + mDisplayFrame);
+        pw.println(newPrefix + "mDisplayCutout=" + mDisplayCutout.get());
+        pw.println(newPrefix + "mRoundedCorners=" + mRoundedCorners);
         for (int i = 0; i < SIZE; i++) {
             InsetsSource source = mSources[i];
             if (source == null) continue;
-            source.dump(prefix + "  ", pw);
+            source.dump(newPrefix + "  ", pw);
         }
     }
 
@@ -713,7 +745,8 @@ public class InsetsState implements Parcelable {
         InsetsState state = (InsetsState) o;
 
         if (!mDisplayFrame.equals(state.mDisplayFrame)
-                || !mDisplayCutout.equals(state.mDisplayCutout)) {
+                || !mDisplayCutout.equals(state.mDisplayCutout)
+                || !mRoundedCorners.equals(state.mRoundedCorners)) {
             return false;
         }
         for (int i = 0; i < SIZE; i++) {
@@ -737,7 +770,8 @@ public class InsetsState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources));
+        return Objects.hash(mDisplayFrame, mDisplayCutout, Arrays.hashCode(mSources),
+                mRoundedCorners);
     }
 
     public InsetsState(Parcel in) {
@@ -754,6 +788,7 @@ public class InsetsState implements Parcelable {
         mDisplayFrame.writeToParcel(dest, flags);
         mDisplayCutout.writeToParcel(dest, flags);
         dest.writeParcelableArray(mSources, 0);
+        dest.writeTypedObject(mRoundedCorners, flags);
     }
 
     public static final @android.annotation.NonNull Creator<InsetsState> CREATOR = new Creator<InsetsState>() {
@@ -771,6 +806,7 @@ public class InsetsState implements Parcelable {
         mDisplayFrame.set(Rect.CREATOR.createFromParcel(in));
         mDisplayCutout.set(DisplayCutout.ParcelableWrapper.CREATOR.createFromParcel(in));
         mSources = in.readParcelableArray(null, InsetsSource.class);
+        mRoundedCorners = in.readTypedObject(RoundedCorners.CREATOR);
     }
 
     @Override
@@ -785,6 +821,7 @@ public class InsetsState implements Parcelable {
         return "InsetsState: {"
                 + "mDisplayFrame=" + mDisplayFrame
                 + ", mDisplayCutout=" + mDisplayCutout
+                + ", mRoundedCorners=" + mRoundedCorners
                 + ", mSources= { " + joiner
                 + " }";
     }

@@ -43,10 +43,14 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     @GuardedBy("mLock")
     private final SparseIntArray mPasswordQuality = new SparseIntArray();
 
+    @GuardedBy("mLock")
+    private final SparseIntArray mPermissionPolicy = new SparseIntArray();
+
     public void onUserRemoved(int userHandle) {
         synchronized (mLock) {
             mScreenCaptureDisabled.delete(userHandle);
             mPasswordQuality.delete(userHandle);
+            mPermissionPolicy.delete(userHandle);
         }
     }
 
@@ -78,12 +82,28 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
         }
     }
 
+    @Override
+    public int getPermissionPolicy(@UserIdInt int userHandle) {
+        synchronized (mLock) {
+            return mPermissionPolicy.get(userHandle,
+                    DevicePolicyManager.PERMISSION_POLICY_PROMPT);
+        }
+    }
+
+    /** Update the permission policy for the given user. */
+    public void setPermissionPolicy(@UserIdInt int userHandle, int policy) {
+        synchronized (mLock) {
+            mPermissionPolicy.put(userHandle, policy);
+        }
+    }
+
     /** Dump content */
     public void dump(IndentingPrintWriter pw) {
         pw.println("Device policy cache:");
         pw.increaseIndent();
         pw.println("Screen capture disabled: " + mScreenCaptureDisabled.toString());
         pw.println("Password quality: " + mPasswordQuality.toString());
+        pw.println("Permission policy: " + mPermissionPolicy.toString());
         pw.decreaseIndent();
     }
 }

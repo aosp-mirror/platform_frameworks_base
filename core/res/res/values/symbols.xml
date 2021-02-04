@@ -1881,6 +1881,7 @@
   <java-symbol type="bool" name="config_enableServerNotificationEffectsForAutomotive" />
   <java-symbol type="bool" name="config_useAttentionLight" />
   <java-symbol type="bool" name="config_adaptive_sleep_available" />
+  <java-symbol type="bool" name="config_camera_autorotate"/>
   <java-symbol type="bool" name="config_animateScreenLights" />
   <java-symbol type="bool" name="config_automatic_brightness_available" />
   <java-symbol type="bool" name="config_smart_battery_available" />
@@ -2541,6 +2542,7 @@
   <java-symbol type="string" name="config_biometric_prompt_ui_package" />
   <java-symbol type="array" name="config_biometric_sensors" />
   <java-symbol type="bool" name="allow_test_udfps" />
+  <java-symbol type="array" name="config_udfps_sensor_props" />
 
   <java-symbol type="array" name="config_face_acquire_enroll_ignorelist" />
   <java-symbol type="array" name="config_face_acquire_vendor_enroll_ignorelist" />
@@ -4135,6 +4137,8 @@
 
   <java-symbol type="dimen" name="config_taskLetterboxAspectRatio" />
   <java-symbol type="integer" name="config_letterboxActivityCornersRadius" />
+  <java-symbol type="integer" name="config_letterboxBackgroundType" />
+  <java-symbol type="color" name="config_letterboxBackgroundColor" />
 
   <java-symbol type="bool" name="config_hideDisplayCutoutWithDisplayArea" />
 
@@ -4173,4 +4177,6 @@
   <java-symbol type="bool" name="config_telephony5gNonStandalone" />
 
   <java-symbol type="bool" name="config_voice_data_sms_auto_fallback" />
+
+  <java-symbol type="bool" name="config_enableOneHandedKeyguard" />
 </resources>

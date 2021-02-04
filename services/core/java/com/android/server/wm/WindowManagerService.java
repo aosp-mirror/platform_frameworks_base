@@ -160,6 +160,7 @@ import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -201,7 +202,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
-import android.service.attestation.ImpressionToken;
+import android.service.screenshot.ScreenshotHash;
 import android.service.vr.IVrManager;
 import android.service.vr.IVrStateCallbacks;
 import android.sysprop.SurfaceFlingerProperties;
@@ -404,8 +405,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
-    static final int LOGTAG_INPUT_FOCUS = 62001;
-
     /**
      * Restrict ability of activities overriding transition animation in a way such that
      * an activity can do it only when the transition happens within a same task.
@@ -414,25 +413,13 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
             "persist.wm.disable_custom_task_animation";
+    static final int LOGTAG_INPUT_FOCUS = 62001;
 
     /**
      * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
      */
     static boolean sDisableCustomTaskAnimationProperty =
             SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
-
-    /**
-     * Run Keyguard animation as remote animation in System UI instead of local animation in
-     * the server process.
-     */
-    private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
-            "persist.wm.enable_remote_keyguard_animation";
-
-    /**
-     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
-     */
-    public static boolean sEnableRemoteKeyguardAnimation =
-            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
@@ -781,7 +768,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final EmbeddedWindowController mEmbeddedWindowController;
     final AnrController mAnrController;
 
-    private final ImpressionAttestationController mImpressionAttestationController;
+    private final ScreenshotHashController mScreenshotHashController;
     private final WindowContextListenerController mWindowContextListenerController =
             new WindowContextListenerController();
 
@@ -1024,10 +1011,30 @@ public class WindowManagerService extends IWindowManager.Stub
 
     // Aspect ratio of task level letterboxing, values <= MIN_TASK_LETTERBOX_ASPECT_RATIO will be
     // ignored.
-    private float mTaskLetterboxAspectRatio;
+    private volatile float mTaskLetterboxAspectRatio;
+
+    /** Enum for Letterbox background type. */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({LETTERBOX_BACKGROUND_SOLID_COLOR, LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND,
+            LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING})
+    @interface LetterboxBackgroundType {};
+    /** Solid background using color specified in R.color.config_letterboxBackgroundColor. */
+    static final int LETTERBOX_BACKGROUND_SOLID_COLOR = 0;
+
+    /** Color specified in R.attr.colorBackground for the letterboxed application. */
+    static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND = 1;
+
+    /** Color specified in R.attr.colorBackgroundFloating for the letterboxed application. */
+    static final int LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING = 2;
 
     // Corners radius for activities presented in the letterbox mode, values < 0 will be ignored.
-    private int mLetterboxActivityCornersRadius;
+    private volatile int mLetterboxActivityCornersRadius;
+
+    // Color for {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} letterbox background type.
+    private volatile Color mLetterboxBackgroundColor;
+
+    @LetterboxBackgroundType
+    private volatile int mLetterboxBackgroundType;
 
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
@@ -1254,10 +1261,15 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
         mAssistantOnTopOfDream = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_assistantOnTopOfDream);
+
         mTaskLetterboxAspectRatio = context.getResources().getFloat(
                 com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
         mLetterboxActivityCornersRadius = context.getResources().getInteger(
                 com.android.internal.R.integer.config_letterboxActivityCornersRadius);
+        mLetterboxBackgroundColor = Color.valueOf(context.getResources().getColor(
+                com.android.internal.R.color.config_letterboxBackgroundColor));
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(context);
+
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
@@ -1406,7 +1418,7 @@ public class WindowManagerService extends IWindowManager.Stub
         mDisplayAreaPolicyProvider = DisplayAreaPolicy.Provider.fromResources(
                 mContext.getResources());
 
-        mImpressionAttestationController = new ImpressionAttestationController(mContext);
+        mScreenshotHashController = new ScreenshotHashController(mContext);
         setGlobalShadowSettings();
         mAnrController = new AnrController(this);
         mStartingSurfaceController = new StartingSurfaceController(this);
@@ -3915,14 +3927,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * the framework implementation will be used to determine the aspect ratio.
      */
     void setTaskLetterboxAspectRatio(float aspectRatio) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mTaskLetterboxAspectRatio = aspectRatio;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mTaskLetterboxAspectRatio = aspectRatio;
     }
 
     /**
@@ -3930,29 +3935,15 @@ public class WindowManagerService extends IWindowManager.Stub
      * com.android.internal.R.dimen.config_taskLetterboxAspectRatio}.
      */
     void resetTaskLetterboxAspectRatio() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
-                            com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mTaskLetterboxAspectRatio = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_taskLetterboxAspectRatio);
     }
 
     /**
      * Gets the aspect ratio of task level letterboxing.
      */
     float getTaskLetterboxAspectRatio() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                return mTaskLetterboxAspectRatio;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        return mTaskLetterboxAspectRatio;
     }
 
     /**
@@ -3962,14 +3953,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * and corners of the activity won't be rounded.
      */
     void setLetterboxActivityCornersRadius(int cornersRadius) {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mLetterboxActivityCornersRadius = cornersRadius;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mLetterboxActivityCornersRadius = cornersRadius;
     }
 
     /**
@@ -3977,15 +3961,8 @@ public class WindowManagerService extends IWindowManager.Stub
      * com.android.internal.R.integer.config_letterboxActivityCornersRadius}.
      */
     void resetLetterboxActivityCornersRadius() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
-                            com.android.internal.R.integer.config_letterboxActivityCornersRadius);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        mLetterboxActivityCornersRadius = mContext.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxActivityCornersRadius);
     }
 
     /**
@@ -3999,14 +3976,67 @@ public class WindowManagerService extends IWindowManager.Stub
      * Gets corners raidus for activities presented in the letterbox mode.
      */
     int getLetterboxActivityCornersRadius() {
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (mGlobalLock) {
-                return mLetterboxActivityCornersRadius;
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
+        return mLetterboxActivityCornersRadius;
+    }
+
+    /**
+     * Gets color of letterbox background which is  used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other backfround types.
+     */
+    Color getLetterboxBackgroundColor() {
+        return mLetterboxBackgroundColor;
+    }
+
+
+    /**
+     * Sets color of letterbox background which is used when {@link
+     * #getLetterboxBackgroundType()} is {@link #LETTERBOX_BACKGROUND_SOLID_COLOR} or as
+     * fallback for other backfround types.
+     */
+    void setLetterboxBackgroundColor(Color color) {
+        mLetterboxBackgroundColor = color;
+    }
+
+    /**
+     * Resets color of letterbox background to {@link
+     * com.android.internal.R.color.config_letterboxBackgroundColor}.
+     */
+    void resetLetterboxBackgroundColor() {
+        mLetterboxBackgroundColor = Color.valueOf(mContext.getResources().getColor(
+                com.android.internal.R.color.config_letterboxBackgroundColor));
+    }
+
+    /**
+     * Gets {@link LetterboxBackgroundType} specified in {@link
+     * com.android.internal.R.integer.config_letterboxBackgroundType} or over via ADB command.
+     */
+    @LetterboxBackgroundType
+    int getLetterboxBackgroundType() {
+        return mLetterboxBackgroundType;
+    }
+
+    /** Sets letterbox background type. */
+    void setLetterboxBackgroundType(@LetterboxBackgroundType int backgroundType) {
+        mLetterboxBackgroundType = backgroundType;
+    }
+
+    /**
+     * Resets cletterbox background type to {@link
+     * com.android.internal.R.integer.config_letterboxBackgroundType}.
+     */
+    void resetLetterboxBackgroundType() {
+        mLetterboxBackgroundType = readLetterboxBackgroundTypeFromConfig(mContext);
+    }
+
+    @LetterboxBackgroundType
+    private static int readLetterboxBackgroundTypeFromConfig(Context context) {
+        int backgroundType = context.getResources().getInteger(
+                com.android.internal.R.integer.config_letterboxBackgroundType);
+        return backgroundType == LETTERBOX_BACKGROUND_SOLID_COLOR
+                    || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND
+                    || backgroundType == LETTERBOX_BACKGROUND_APP_COLOR_BACKGROUND_FLOATING
+                    ? backgroundType : LETTERBOX_BACKGROUND_SOLID_COLOR;
     }
 
     @Override
@@ -7718,15 +7748,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public void registerKeyguardExitAnimationStartListener(
-                KeyguardExitAnimationStartListener listener) {
-            synchronized (mGlobalLock) {
-                getDefaultDisplayContentLocked().mAppTransition
-                        .registerKeygaurdExitAnimationStartListener(listener);
-            }
-        }
-
-        @Override
         public void reportPasswordChanged(int userId) {
             mKeyguardDisableHandler.updateKeyguardEnabled(userId);
         }
@@ -8639,38 +8660,38 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public String[] getSupportedImpressionAlgorithms() {
-        return mImpressionAttestationController.getSupportedImpressionAlgorithms();
+    public String[] getSupportedScreenshotHashingAlgorithms() {
+        return mScreenshotHashController.getSupportedHashingAlgorithms();
     }
 
     @Override
-    public boolean verifyImpressionToken(ImpressionToken impressionToken) {
-        return mImpressionAttestationController.verifyImpressionToken(impressionToken);
+    public boolean verifyScreenshotHash(ScreenshotHash screenshotHash) {
+        return mScreenshotHashController.verifyScreenshotHash(screenshotHash);
     }
 
-    ImpressionToken generateImpressionToken(Session session, IWindow window,
+    ScreenshotHash generateScreenshotHash(Session session, IWindow window,
             Rect boundsInWindow, String hashAlgorithm) {
         final SurfaceControl displaySurfaceControl;
         final Rect boundsInDisplay = new Rect(boundsInWindow);
         synchronized (mGlobalLock) {
             final WindowState win = windowForClientLocked(session, window, false);
             if (win == null) {
-                Slog.w(TAG, "Failed to generate impression token. Invalid window");
+                Slog.w(TAG, "Failed to generate ScreenshotHash. Invalid window");
                 return null;
             }
 
             DisplayContent displayContent = win.getDisplayContent();
             if (displayContent == null) {
-                Slog.w(TAG, "Failed to generate impression token. Window is not on a display");
+                Slog.w(TAG, "Failed to generate ScreenshotHash. Window is not on a display");
                 return null;
             }
 
             displaySurfaceControl = displayContent.getSurfaceControl();
-            mImpressionAttestationController.calculateImpressionTokenBoundsLocked(win,
+            mScreenshotHashController.calculateScreenshotHashBoundsLocked(win,
                     boundsInWindow, boundsInDisplay);
 
             if (boundsInDisplay.isEmpty()) {
-                Slog.w(TAG, "Failed to generate impression token. Bounds are not on screen");
+                Slog.w(TAG, "Failed to generate ScreenshotHash. Bounds are not on screen");
                 return null;
             }
         }
@@ -8690,11 +8711,11 @@ public class WindowManagerService extends IWindowManager.Stub
                 SurfaceControl.captureLayers(args);
         if (screenshotHardwareBuffer == null
                 || screenshotHardwareBuffer.getHardwareBuffer() == null) {
-            Slog.w(TAG, "Failed to generate impression token. Failed to take screenshot");
+            Slog.w(TAG, "Failed to generate ScreenshotHash. Failed to take screenshot");
             return null;
         }
 
-        return mImpressionAttestationController.generateImpressionToken(
+        return mScreenshotHashController.generateScreenshotHash(
                 screenshotHardwareBuffer.getHardwareBuffer(), boundsInWindow, hashAlgorithm);
     }
 }

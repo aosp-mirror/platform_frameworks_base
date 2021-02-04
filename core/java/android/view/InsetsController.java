@@ -653,6 +653,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private void updateState(InsetsState newState) {
         mState.setDisplayFrame(newState.getDisplayFrame());
         mState.setDisplayCutout(newState.getDisplayCutout());
+        mState.setRoundedCorners(newState.getRoundedCorners());
         @InsetsType int disabledUserAnimationTypes = 0;
         @InsetsType int[] cancelledUserAnimationTypes = {0};
         for (@InternalInsetsType int type = 0; type < InsetsState.SIZE; type++) {

@@ -9604,29 +9604,6 @@ package android.service.attention {
 
 }
 
-package android.service.attestation {
-
-  public abstract class ImpressionAttestationService extends android.app.Service {
-    ctor public ImpressionAttestationService();
-    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
-    method @Nullable public abstract android.service.attestation.ImpressionToken onGenerateImpressionToken(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
-    method public abstract boolean onVerifyImpressionToken(@NonNull byte[], @NonNull android.service.attestation.ImpressionToken);
-  }
-
-  public final class ImpressionToken implements android.os.Parcelable {
-    ctor public ImpressionToken(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
-    method public int describeContents();
-    method @NonNull public android.graphics.Rect getBoundsInWindow();
-    method @NonNull public String getHashingAlgorithm();
-    method @NonNull public byte[] getHmac();
-    method @NonNull public byte[] getImageHash();
-    method public long getScreenshotTimeMillis();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.service.attestation.ImpressionToken> CREATOR;
-  }
-
-}
-
 package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
@@ -10188,6 +10165,30 @@ package android.service.rotationresolver {
   public static interface RotationResolverService.RotationResolverCallback {
     method public void onFailure(int);
     method public void onSuccess(int);
+  }
+
+}
+
+package android.service.screenshot {
+
+  public final class ScreenshotHash implements android.os.Parcelable {
+    ctor public ScreenshotHash(long, @NonNull android.graphics.Rect, @NonNull String, @NonNull byte[], @NonNull byte[]);
+    method public int describeContents();
+    method @NonNull public android.graphics.Rect getBoundsInWindow();
+    method @NonNull public String getHashingAlgorithm();
+    method @NonNull public byte[] getHmac();
+    method @NonNull public byte[] getImageHash();
+    method public long getScreenshotTimeMillis();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.service.screenshot.ScreenshotHash> CREATOR;
+  }
+
+  public abstract class ScreenshotHasherService extends android.app.Service {
+    ctor public ScreenshotHasherService();
+    method @NonNull public final android.os.IBinder onBind(@NonNull android.content.Intent);
+    method @Nullable public abstract android.service.screenshot.ScreenshotHash onGenerateScreenshotHash(@NonNull byte[], @NonNull android.hardware.HardwareBuffer, @NonNull android.graphics.Rect, @NonNull String);
+    method public abstract boolean onVerifyScreenshotHash(@NonNull byte[], @NonNull android.service.screenshot.ScreenshotHash);
+    field public static final String SERVICE_INTERFACE = "android.service.screenshot.ScreenshotHasherService";
   }
 
 }
@@ -11806,7 +11807,7 @@ package android.telephony {
     method @Deprecated @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setDataRoamingEnabled(boolean);
     method @NonNull @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public android.telephony.PinResult setIccLockEnabled(boolean, @NonNull String);
-    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMobileDataPolicyEnabledStatus(int, boolean);
+    method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMobileDataPolicyEnabled(int, boolean);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setMultiSimCarrierRestriction(boolean);
     method public int setNrDualConnectivityState(int);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunisticNetworkState(boolean);
@@ -14358,6 +14359,7 @@ package android.webkit {
     method public String getDataDirectorySuffix();
     method public String getErrorString(android.content.Context, int);
     method public int getPackageId(android.content.res.Resources, String);
+    method @NonNull public long[] getTimestamps();
     method @Deprecated public void invokeDrawGlFunctor(android.view.View, long, boolean);
     method public boolean isMultiProcessEnabled();
     method public boolean isTraceTagEnabled();
@@ -14373,6 +14375,12 @@ package android.webkit {
     method public static android.content.pm.PackageInfo getLoadedPackageInfo();
     method public static int loadWebViewNativeLibraryFromPackage(String, ClassLoader);
     method public static void prepareWebViewInZygote();
+    field public static final int ADD_ASSETS_END = 4; // 0x4
+    field public static final int ADD_ASSETS_START = 3; // 0x3
+    field public static final int CREATE_CONTEXT_END = 2; // 0x2
+    field public static final int CREATE_CONTEXT_START = 1; // 0x1
+    field public static final int GET_CLASS_LOADER_END = 6; // 0x6
+    field public static final int GET_CLASS_LOADER_START = 5; // 0x5
     field public static final int LIBLOAD_ADDRESS_SPACE_NOT_RESERVED = 2; // 0x2
     field public static final int LIBLOAD_FAILED_JNI_CALL = 7; // 0x7
     field public static final int LIBLOAD_FAILED_LISTING_WEBVIEW_PACKAGES = 4; // 0x4
@@ -14383,6 +14391,11 @@ package android.webkit {
     field public static final int LIBLOAD_FAILED_WAITING_FOR_WEBVIEW_REASON_UNKNOWN = 8; // 0x8
     field public static final int LIBLOAD_SUCCESS = 0; // 0x0
     field public static final int LIBLOAD_WRONG_PACKAGE_NAME = 1; // 0x1
+    field public static final int NATIVE_LOAD_END = 8; // 0x8
+    field public static final int NATIVE_LOAD_START = 7; // 0x7
+    field public static final int PROVIDER_CLASS_FOR_NAME_END = 10; // 0xa
+    field public static final int PROVIDER_CLASS_FOR_NAME_START = 9; // 0x9
+    field public static final int WEBVIEW_LOAD_START = 0; // 0x0
   }
 
   public interface WebViewFactoryProvider {

@@ -767,10 +767,10 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
   return true;
 }
 
-std::unique_ptr<const LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
-                                                   const size_t length,
-                                                   const LoadedIdmap* loaded_idmap,
-                                                   const package_property_t property_flags) {
+std::unique_ptr<LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
+                                             const size_t length,
+                                             const LoadedIdmap* loaded_idmap,
+                                             const package_property_t property_flags) {
   ATRACE_NAME("LoadedArsc::Load");
 
   // Not using make_unique because the constructor is private.
@@ -799,11 +799,10 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(incfs::map_ptr<void> data,
     }
   }
 
-  // Need to force a move for mingw32.
-  return std::move(loaded_arsc);
+  return loaded_arsc;
 }
 
-std::unique_ptr<const LoadedArsc> LoadedArsc::CreateEmpty() {
+std::unique_ptr<LoadedArsc> LoadedArsc::CreateEmpty() {
   return std::unique_ptr<LoadedArsc>(new LoadedArsc());
 }
 

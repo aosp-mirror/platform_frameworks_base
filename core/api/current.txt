@@ -9281,7 +9281,7 @@ package android.bluetooth.le {
     method public boolean getIncludeTxPowerLevel();
     method public android.util.SparseArray<byte[]> getManufacturerSpecificData();
     method public java.util.Map<android.os.ParcelUuid,byte[]> getServiceData();
-    method @Nullable public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
+    method @NonNull public java.util.List<android.os.ParcelUuid> getServiceSolicitationUuids();
     method public java.util.List<android.os.ParcelUuid> getServiceUuids();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.bluetooth.le.AdvertiseData> CREATOR;
@@ -12356,6 +12356,8 @@ package android.content.pm {
     field public static final String FEATURE_INPUT_METHODS = "android.software.input_methods";
     field public static final String FEATURE_IPSEC_TUNNELS = "android.software.ipsec_tunnels";
     field public static final String FEATURE_IRIS = "android.hardware.biometrics.iris";
+    field public static final String FEATURE_KEYSTORE_LIMITED_USE_KEY = "android.hardware.keystore.limited_use_key";
+    field public static final String FEATURE_KEYSTORE_SINGLE_USE_KEY = "android.hardware.keystore.single_use_key";
     field public static final String FEATURE_LEANBACK = "android.software.leanback";
     field public static final String FEATURE_LEANBACK_ONLY = "android.software.leanback_only";
     field public static final String FEATURE_LIVE_TV = "android.software.live_tv";
@@ -19869,6 +19871,10 @@ package android.media {
     field public static final int ENCODING_IEC61937 = 13; // 0xd
     field public static final int ENCODING_INVALID = 0; // 0x0
     field public static final int ENCODING_MP3 = 9; // 0x9
+    field public static final int ENCODING_MPEGH_BL_L3 = 23; // 0x17
+    field public static final int ENCODING_MPEGH_BL_L4 = 24; // 0x18
+    field public static final int ENCODING_MPEGH_LC_L3 = 25; // 0x19
+    field public static final int ENCODING_MPEGH_LC_L4 = 26; // 0x1a
     field public static final int ENCODING_OPUS = 20; // 0x14
     field public static final int ENCODING_PCM_16BIT = 2; // 0x2
     field public static final int ENCODING_PCM_24BIT_PACKED = 21; // 0x15
@@ -36869,6 +36875,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
     method @NonNull public String getKeystoreAlias();
+    method public int getMaxUsageCount();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36905,6 +36912,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setKeyValidityStart(java.util.Date);
+    method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setMaxUsageCount(int);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyGenParameterSpec.Builder setUnlockedDeviceRequired(boolean);
@@ -36927,6 +36935,7 @@ package android.security.keystore {
     method public String getKeystoreAlias();
     method public int getOrigin();
     method public int getPurposes();
+    method public int getRemainingUsageCount();
     method public int getSecurityLevel();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -36996,6 +37005,7 @@ package android.security.keystore {
     field public static final int SECURITY_LEVEL_UNKNOWN_SECURE = -1; // 0xffffffff
     field public static final String SIGNATURE_PADDING_RSA_PKCS1 = "PKCS1";
     field public static final String SIGNATURE_PADDING_RSA_PSS = "PSS";
+    field public static final int UNRESTRICTED_USAGE_COUNT = -1; // 0xffffffff
   }
 
   public final class KeyProtection implements java.security.KeyStore.ProtectionParameter {
@@ -37005,6 +37015,7 @@ package android.security.keystore {
     method @Nullable public java.util.Date getKeyValidityForConsumptionEnd();
     method @Nullable public java.util.Date getKeyValidityForOriginationEnd();
     method @Nullable public java.util.Date getKeyValidityStart();
+    method public int getMaxUsageCount();
     method public int getPurposes();
     method @NonNull public String[] getSignaturePaddings();
     method public int getUserAuthenticationType();
@@ -37031,6 +37042,7 @@ package android.security.keystore {
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForConsumptionEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityForOriginationEnd(java.util.Date);
     method @NonNull public android.security.keystore.KeyProtection.Builder setKeyValidityStart(java.util.Date);
+    method @NonNull public android.security.keystore.KeyProtection.Builder setMaxUsageCount(int);
     method @NonNull public android.security.keystore.KeyProtection.Builder setRandomizedEncryptionRequired(boolean);
     method @NonNull public android.security.keystore.KeyProtection.Builder setSignaturePaddings(java.lang.String...);
     method @NonNull public android.security.keystore.KeyProtection.Builder setUnlockedDeviceRequired(boolean);
@@ -46144,6 +46156,7 @@ package android.view {
     method @Deprecated public void getRectSize(android.graphics.Rect);
     method public float getRefreshRate();
     method public int getRotation();
+    method @Nullable public android.view.RoundedCorner getRoundedCorner(int);
     method @Deprecated public void getSize(android.graphics.Point);
     method public int getState();
     method public android.view.Display.Mode[] getSupportedModes();
@@ -47396,6 +47409,20 @@ package android.view {
     field public static final int TYPE_WAIT = 1004; // 0x3ec
     field public static final int TYPE_ZOOM_IN = 1018; // 0x3fa
     field public static final int TYPE_ZOOM_OUT = 1019; // 0x3fb
+  }
+
+  public final class RoundedCorner implements android.os.Parcelable {
+    ctor public RoundedCorner(int, int, int, int);
+    method public int describeContents();
+    method @NonNull public android.graphics.Point getCenter();
+    method public int getPosition();
+    method public int getRadius();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.view.RoundedCorner> CREATOR;
+    field public static final int POSITION_BOTTOM_LEFT = 3; // 0x3
+    field public static final int POSITION_BOTTOM_RIGHT = 2; // 0x2
+    field public static final int POSITION_TOP_LEFT = 0; // 0x0
+    field public static final int POSITION_TOP_RIGHT = 1; // 0x1
   }
 
   public class ScaleGestureDetector {
@@ -49407,6 +49434,7 @@ package android.view {
     method @NonNull public android.graphics.Insets getInsets(int);
     method @NonNull public android.graphics.Insets getInsetsIgnoringVisibility(int);
     method @Deprecated @NonNull public android.graphics.Insets getMandatorySystemGestureInsets();
+    method @Nullable public android.view.RoundedCorner getRoundedCorner(int);
     method @Deprecated public int getStableInsetBottom();
     method @Deprecated public int getStableInsetLeft();
     method @Deprecated public int getStableInsetRight();
@@ -49440,6 +49468,7 @@ package android.view {
     method @NonNull public android.view.WindowInsets.Builder setInsets(int, @NonNull android.graphics.Insets);
     method @NonNull public android.view.WindowInsets.Builder setInsetsIgnoringVisibility(int, @NonNull android.graphics.Insets) throws java.lang.IllegalArgumentException;
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setMandatorySystemGestureInsets(@NonNull android.graphics.Insets);
+    method @NonNull public android.view.WindowInsets.Builder setRoundedCorner(int, @Nullable android.view.RoundedCorner);
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setStableInsets(@NonNull android.graphics.Insets);
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setSystemGestureInsets(@NonNull android.graphics.Insets);
     method @Deprecated @NonNull public android.view.WindowInsets.Builder setSystemWindowInsets(@NonNull android.graphics.Insets);
@@ -53085,10 +53114,12 @@ package android.widget {
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int);
     ctor @Deprecated public AnalogClock(android.content.Context, android.util.AttributeSet, int, int);
+    method @Deprecated @Nullable public String getTimeZone();
     method @Deprecated public void setDial(@NonNull android.graphics.drawable.Icon);
     method @Deprecated public void setHourHand(@NonNull android.graphics.drawable.Icon);
     method @Deprecated public void setMinuteHand(@NonNull android.graphics.drawable.Icon);
     method @Deprecated public void setSecondHand(@Nullable android.graphics.drawable.Icon);
+    method @Deprecated public void setTimeZone(@Nullable String);
   }
 
   public class ArrayAdapter<T> extends android.widget.BaseAdapter implements android.widget.Filterable android.widget.ThemedSpinnerAdapter {
@@ -54500,19 +54531,26 @@ package android.widget {
     method public void setByte(@IdRes int, String, byte);
     method public void setChar(@IdRes int, String, char);
     method public void setCharSequence(@IdRes int, String, CharSequence);
+    method public void setCharSequence(@IdRes int, @NonNull String, @StringRes int);
     method public void setChronometer(@IdRes int, long, String, boolean);
     method public void setChronometerCountDown(@IdRes int, boolean);
+    method public void setColor(@IdRes int, @NonNull String, @ColorRes int);
+    method public void setColorStateList(@IdRes int, @NonNull String, @ColorRes int);
     method public void setContentDescription(@IdRes int, CharSequence);
     method public void setDisplayedChild(@IdRes int, int);
     method public void setDouble(@IdRes int, String, double);
     method public void setEmptyView(@IdRes int, @IdRes int);
     method public void setFloat(@IdRes int, String, float);
+    method public void setFloatDimen(@IdRes int, @NonNull String, @DimenRes int);
+    method public void setFloatDimen(@IdRes int, @NonNull String, float, int);
     method public void setIcon(@IdRes int, String, android.graphics.drawable.Icon);
     method public void setImageViewBitmap(@IdRes int, android.graphics.Bitmap);
     method public void setImageViewIcon(@IdRes int, android.graphics.drawable.Icon);
     method public void setImageViewResource(@IdRes int, @DrawableRes int);
     method public void setImageViewUri(@IdRes int, android.net.Uri);
     method public void setInt(@IdRes int, String, int);
+    method public void setIntDimen(@IdRes int, @NonNull String, @DimenRes int);
+    method public void setIntDimen(@IdRes int, @NonNull String, float, int);
     method public void setIntent(@IdRes int, String, android.content.Intent);
     method public void setLabelFor(@IdRes int, @IdRes int);
     method public void setLightBackgroundLayoutId(@LayoutRes int);

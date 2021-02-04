@@ -221,10 +221,6 @@ public:
             timeout.maxPendingTimeUs = perUidTimeout.maxPendingTimeUs;
         }
 
-        LOG(ERROR) << "Set read timeouts: " << timeouts.size() << " ["
-                   << (timeouts.empty() ? -1 : timeouts.front().uid) << "@"
-                   << (timeouts.empty() ? -1 : timeouts.front().minTimeUs / 1000) << "ms]";
-
         return incfs::setUidReadTimeouts(control, timeouts);
     }
 };
