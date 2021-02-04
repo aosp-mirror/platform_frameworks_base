@@ -83,7 +83,7 @@ public class BatteryUsageStatsProvider {
     /**
      * Returns a snapshot of battery attribution data.
      */
-    public BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query) {
+    public List<BatteryUsageStats> getBatteryUsageStats(List<BatteryUsageStatsQuery> queries) {
 
         // TODO(b/174186345): instead of BatteryStatsHelper, use PowerCalculators directly.
         final BatteryStatsHelper batteryStatsHelper = new BatteryStatsHelper(mContext,
@@ -100,17 +100,21 @@ public class BatteryUsageStatsProvider {
 
         batteryStatsHelper.refreshStats(BatteryStats.STATS_SINCE_CHARGED, users);
 
+        ArrayList<BatteryUsageStats> results = new ArrayList<>(queries.size());
+        for (int i = 0; i < queries.size(); i++) {
+            results.add(getBatteryUsageStats(queries.get(i), batteryStatsHelper, users));
+        }
+        return results;
+    }
+
+    private BatteryUsageStats getBatteryUsageStats(BatteryUsageStatsQuery query,
+            BatteryStatsHelper batteryStatsHelper, SparseArray<UserHandle> users) {
         // TODO(b/174186358): read extra power component number from configuration
         final int customPowerComponentCount = 0;
         final int customTimeComponentCount = 0;
-        final boolean includeModeledComponents =
-                (query.getFlags() & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED)
-                        != 0;
-
 
         final BatteryUsageStats.Builder batteryUsageStatsBuilder =
-                new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount,
-                        includeModeledComponents)
+                new BatteryUsageStats.Builder(customPowerComponentCount, customTimeComponentCount)
                         .setDischargePercentage(batteryStatsHelper.getStats().getDischargeAmount(0))
                         .setConsumedPower(batteryStatsHelper.getTotalPower());
 
