@@ -1956,7 +1956,7 @@
     <string name="autofill_save_type_debit_card" msgid="3169397504133097468">"डेबिट कार्ड"</string>
     <string name="autofill_save_type_payment_card" msgid="6555012156728690856">"भुक्तानी कार्ड"</string>
     <string name="autofill_save_type_generic_card" msgid="1019367283921448608">"कार्ड"</string>
-    <string name="autofill_save_type_username" msgid="1018816929884640882">"प्रयोगकर्ताको नाम"</string>
+    <string name="autofill_save_type_username" msgid="1018816929884640882">"युजरनेम"</string>
     <string name="autofill_save_type_email_address" msgid="1303262336895591924">"इमेल ठेगाना"</string>
     <string name="etws_primary_default_message_earthquake" msgid="8401079517718280669">"शान्त रहनुहोस् र नजिकै आश्रयस्थल खोज्नुहोस्।"</string>
     <string name="etws_primary_default_message_tsunami" msgid="5828171463387976279">"तटीय क्षेत्र र नदीछेउका ठाउँहरू छाडी उच्च सतहमा अवस्थित कुनै अझ सुरक्षित ठाउँमा जानुहोस्।"</string>

@@ -2,10 +2,10 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="keyguard_description" msgid="8582605799129954556">"Geef je wachtwoord op en ga door naar \'Dynamische systeemupdates\'"</string>
-    <string name="notification_install_completed" msgid="6252047868415172643">"Dynamisch systeem is gereed. Start je apparaat opnieuw op om het te gebruiken."</string>
+    <string name="notification_install_completed" msgid="6252047868415172643">"Dynamisch systeem is klaar. Start je apparaat opnieuw op om het te gebruiken."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Installatie wordt uitgevoerd"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Installatie mislukt"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Valideren van afbeelding mislukt. Installatie afbreken."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Valideren van image mislukt. Installatie afbreken."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Er is momenteel een dynamisch systeem actief. Start je apparaat opnieuw op om de oorspronkelijke Android-versie te gebruiken."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Annuleren"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Niet opslaan"</string>
