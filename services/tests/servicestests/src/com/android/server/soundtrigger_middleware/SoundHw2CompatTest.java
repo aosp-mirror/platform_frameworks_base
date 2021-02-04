@@ -24,10 +24,12 @@ import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import android.media.soundtrigger_middleware.Status;
@@ -37,6 +39,7 @@ import android.os.IHwInterface;
 import android.os.RemoteException;
 import android.system.OsConstants;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -114,6 +117,13 @@ public class SoundHw2CompatTest {
         };
         when(mHalDriver.asBinder()).thenReturn(binder);
         mCanonical = new SoundTriggerHw2Compat(mHalDriver);
+        // This method can be called any number of times.
+        verify(mHalDriver, atLeast(0)).asBinder();
+    }
+
+    @After
+    public void tearDown() {
+        verifyNoMoreInteractions(mHalDriver);
     }
 
     @Test
@@ -148,8 +158,12 @@ public class SoundHw2CompatTest {
         android.hardware.soundtrigger.V2_3.Properties properties = mCanonical.getProperties();
 
         if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+            android.hardware.soundtrigger.V2_3.ISoundTriggerHw driver =
+                    (android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver;
+            verify(driver).getProperties_2_3(any());
             assertEquals(halProperties, properties);
         } else {
+            verify(mHalDriver).getProperties(any());
             assertEquals(halProperties.base, properties.base);
             assertEquals(0, properties.audioCapabilities);
             assertEquals("", properties.supportedModelArch);
@@ -292,6 +306,7 @@ public class SoundHw2CompatTest {
         } catch (RecoverableException e) {
             assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
+        verify(driver_2_4).loadSoundModel_2_4(any(), any(), any());
     }
 
     @Test
@@ -438,6 +453,7 @@ public class SoundHw2CompatTest {
         } catch (RecoverableException e) {
             assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
+        verify(driver_2_4).loadPhraseSoundModel_2_4(any(), any(), any());
     }
 
     @Test
@@ -470,6 +486,7 @@ public class SoundHw2CompatTest {
                 ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
                 canonicalCallback));
+        verify(mHalDriver).loadSoundModel(any(), any(), anyInt(), any());
 
         // Then start.
         ArgumentCaptor<android.hardware.soundtrigger.V2_0.ISoundTriggerHw.RecognitionConfig>
@@ -512,6 +529,7 @@ public class SoundHw2CompatTest {
                 ISoundTriggerHw2.ModelCallback.class);
         assertEquals(handle, mCanonical.loadSoundModel(TestUtil.createGenericSoundModel_2_1(),
                 canonicalCallback));
+        verify(driver_2_1).loadSoundModel_2_1(any(), any(), anyInt(), any());
 
         // Then start.
         ArgumentCaptor<android.hardware.soundtrigger.V2_1.ISoundTriggerHw.RecognitionConfig>
