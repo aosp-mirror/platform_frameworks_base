@@ -58,6 +58,8 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.server.LocalServices;
 import com.android.server.am.BatteryStatsService;
+import com.android.server.display.color.ColorDisplayService.ColorDisplayServiceInternal;
+import com.android.server.display.color.ColorDisplayService.ReduceBrightColorsListener;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceController;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceFactory;
 import com.android.server.display.whitebalance.DisplayWhiteBalanceSettings;
@@ -346,6 +348,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     @Nullable
     private final DisplayWhiteBalanceController mDisplayWhiteBalanceController;
 
+    private final ColorDisplayServiceInternal mCdsi;
+    private final float[] mNitsRange;
+
     // A record of state for skipping brightness ramps.
     private int mSkipRampState = RAMP_STATE_SKIP_NONE;
 
@@ -580,6 +585,37 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         }
         mDisplayWhiteBalanceSettings = displayWhiteBalanceSettings;
         mDisplayWhiteBalanceController = displayWhiteBalanceController;
+
+        if (displayDeviceConfig != null && displayDeviceConfig.getNits() != null) {
+            mNitsRange = displayDeviceConfig.getNits();
+        } else {
+            Slog.w(TAG, "Screen brightness nits configuration is unavailable; falling back");
+            mNitsRange = BrightnessMappingStrategy.getFloatArray(context.getResources()
+                    .obtainTypedArray(com.android.internal.R.array.config_screenBrightnessNits));
+        }
+        mCdsi = LocalServices.getService(ColorDisplayServiceInternal.class);
+        boolean active = mCdsi.setReduceBrightColorsListener(new ReduceBrightColorsListener() {
+            @Override
+            public void onReduceBrightColorsActivationChanged(boolean activated) {
+                applyReduceBrightColorsSplineAdjustment();
+            }
+
+            @Override
+            public void onReduceBrightColorsStrengthChanged(int strength) {
+                applyReduceBrightColorsSplineAdjustment();
+            }
+        });
+        if (active) {
+            applyReduceBrightColorsSplineAdjustment();
+        }
+    }
+
+    private void applyReduceBrightColorsSplineAdjustment() {
+        float[] adjustedNits = new float[mNitsRange.length];
+        for (int i = 0; i < mNitsRange.length; i++) {
+            adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
+        }
+        mBrightnessMapper.recalculateSplines(mCdsi.isReduceBrightColorsActivated(), adjustedNits);
     }
 
     private Sensor findDisplayLightSensor(String sensorType) {

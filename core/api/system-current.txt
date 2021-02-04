@@ -2859,6 +2859,9 @@ package android.hardware.display {
     field public final boolean nightMode;
     field public final String packageName;
     field public final float powerBrightnessFactor;
+    field public final boolean reduceBrightColors;
+    field public final float reduceBrightColorsOffset;
+    field public final int reduceBrightColorsStrength;
     field public final long timeStamp;
   }
 
