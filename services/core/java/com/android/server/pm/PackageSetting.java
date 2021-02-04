@@ -344,8 +344,8 @@ public class PackageSetting extends PackageSettingBase {
                     installSource.originatingPackageName);
             proto.end(sourceToken);
         }
-        proto.write(PackageProto.StatesProto.IS_STARTABLE, incrementalStates.isStartable());
-        proto.write(PackageProto.StatesProto.IS_LOADING, incrementalStates.isLoading());
+        proto.write(PackageProto.StatesProto.IS_STARTABLE, isPackageStartable());
+        proto.write(PackageProto.StatesProto.IS_LOADING, isPackageLoading());
         writeUsersInfoToProto(proto, PackageProto.USERS);
         writePackageUserPermissionsProto(proto, PackageProto.USER_PERMISSIONS, users, dataProvider);
         proto.end(packageToken);
