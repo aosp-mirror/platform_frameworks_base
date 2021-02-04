@@ -110,7 +110,6 @@ import android.os.ServiceManager;
 import android.os.ShellCallback;
 import android.os.ShellCommand;
 import android.os.SystemClock;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -299,45 +298,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     private static final String ACTION_SHOW_INPUT_METHOD_PICKER =
             "com.android.server.inputmethod.InputMethodManagerService.SHOW_INPUT_METHOD_PICKER";
-
-    /**
-     * Debug flag for overriding runtime {@link SystemProperties}.
-     */
-    @AnyThread
-    private static final class DebugFlag {
-        private static final Object LOCK = new Object();
-        private final String mKey;
-        private final boolean mDefaultValue;
-        @GuardedBy("LOCK")
-        private boolean mValue;
-
-        public DebugFlag(String key, boolean defaultValue) {
-            mKey = key;
-            mDefaultValue = defaultValue;
-            mValue = SystemProperties.getBoolean(key, defaultValue);
-        }
-
-        void refresh() {
-            synchronized (LOCK) {
-                mValue = SystemProperties.getBoolean(mKey, mDefaultValue);
-            }
-        }
-
-        boolean value() {
-            synchronized (LOCK) {
-                return mValue;
-            }
-        }
-    }
-
-    /**
-     * Debug flags that can be overridden using "adb shell setprop <key>"
-     * Note: These flags are cached. To refresh, run "adb shell ime refresh_debug_properties".
-     */
-    private static final class DebugFlags {
-        static final DebugFlag FLAG_OPTIMIZE_START_INPUT =
-                new DebugFlag("debug.optimize_startinput", false);
-    }
 
     @UserIdInt
     private int mLastSwitchUserId;
@@ -3687,12 +3647,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
                             startInputFlags, startInputReason);
-                } else if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
-                        || (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
+                } else {
                     res = startInputUncheckedLocked(cs, inputContext, missingMethods, attribute,
                             startInputFlags, startInputReason);
-                } else {
-                    res = InputBindResult.NO_EDITOR;
                 }
             } else {
                 res = InputBindResult.NULL_EDITOR_INFO;
@@ -5467,10 +5424,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @BinderThread
         @ShellCommandResult
         private int onCommandWithSystemIdentity(@Nullable String cmd) {
-            if ("refresh_debug_properties".equals(cmd)) {
-                return refreshDebugProperties();
-            }
-
             if ("get-last-switch-user-id".equals(cmd)) {
                 return mService.getLastSwitchUserId(this);
             }
@@ -5502,13 +5455,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
 
             return handleDefaultCommands(cmd);
-        }
-
-        @BinderThread
-        @ShellCommandResult
-        private int refreshDebugProperties() {
-            DebugFlags.FLAG_OPTIMIZE_START_INPUT.refresh();
-            return ShellCommandResult.SUCCESS;
         }
 
         @BinderThread
