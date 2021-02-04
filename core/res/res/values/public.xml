@@ -3048,8 +3048,8 @@
     <public name="allowClickWhenDisabled" />
     <public name="windowLayoutAffinity" />
     <public name="canPauseRecording" />
-    <!-- @hide -->
-    <public name="windowBackgroundBlurRadius"/>
+    <public name="windowBlurBehindRadius"/>
+    <public name="windowBlurBehindEnabled"/>
     <public name="requireDeviceScreenOn" />
     <public name="pathSuffix" />
     <public name="sspSuffix" />

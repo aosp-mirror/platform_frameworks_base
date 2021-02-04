@@ -657,7 +657,7 @@ package android {
     field @Deprecated public static final int fontProviderCerts = 16844125; // 0x101055d
     field @Deprecated public static final int fontProviderPackage = 16844119; // 0x1010557
     field @Deprecated public static final int fontProviderQuery = 16844113; // 0x1010551
-    field public static final int fontProviderSystemFontFamily = 16844321; // 0x1010621
+    field public static final int fontProviderSystemFontFamily = 16844322; // 0x1010622
     field public static final int fontStyle = 16844095; // 0x101053f
     field public static final int fontVariationSettings = 16844144; // 0x1010570
     field public static final int fontWeight = 16844083; // 0x1010533
@@ -722,7 +722,7 @@ package android {
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
     field public static final int hand_minute = 16843012; // 0x1010104
-    field public static final int hand_second = 16844322; // 0x1010622
+    field public static final int hand_second = 16844323; // 0x1010623
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -1057,11 +1057,11 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
-    field public static final int pathAdvancedPattern = 16844319; // 0x101061f
+    field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
-    field public static final int pathSuffix = 16844317; // 0x101061d
+    field public static final int pathSuffix = 16844318; // 0x101061e
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1154,7 +1154,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
-    field public static final int requireDeviceScreenOn = 16844316; // 0x101061c
+    field public static final int requireDeviceScreenOn = 16844317; // 0x101061d
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
@@ -1295,10 +1295,10 @@ package android {
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
-    field public static final int sspAdvancedPattern = 16844320; // 0x1010620
+    field public static final int sspAdvancedPattern = 16844321; // 0x1010621
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
-    field public static final int sspSuffix = 16844318; // 0x101061e
+    field public static final int sspSuffix = 16844319; // 0x101061f
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -1609,6 +1609,8 @@ package android {
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowBackgroundFallback = 16844035; // 0x1010503
+    field public static final int windowBlurBehindEnabled = 16844316; // 0x101061c
+    field public static final int windowBlurBehindRadius = 16844315; // 0x101061b
     field public static final int windowClipToOutline = 16843947; // 0x10104ab
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
@@ -49666,7 +49668,7 @@ package android.view {
     field public static final int FLAGS_CHANGED = 4; // 0x4
     field public static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON = 1; // 0x1
     field public static final int FLAG_ALT_FOCUSABLE_IM = 131072; // 0x20000
-    field @Deprecated public static final int FLAG_BLUR_BEHIND = 4; // 0x4
+    field public static final int FLAG_BLUR_BEHIND = 4; // 0x4
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field @Deprecated public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
     field @Deprecated public static final int FLAG_DITHER = 4096; // 0x1000
@@ -49757,6 +49759,7 @@ package android.view {
     field @Deprecated public static final int TYPE_TOAST = 2005; // 0x7d5
     field public static final int TYPE_WALLPAPER = 2013; // 0x7dd
     field public float alpha;
+    field public int blurBehindRadius;
     field public float buttonBrightness;
     field public float dimAmount;
     field public int flags;
