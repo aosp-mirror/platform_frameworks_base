@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.transition.Transitions;
 
 import org.junit.Before;
@@ -71,7 +72,8 @@ public class OverviewProxyServiceTest extends SysuiTestCase {
     @Mock private NavigationModeController mMockNavModeController;
     @Mock private NotificationShadeWindowController mMockStatusBarWinController;
     @Mock private Optional<Pip> mMockPipOptional;
-    @Mock private Optional<LegacySplitScreen> mMockSplitScreenOptional;
+    @Mock private Optional<LegacySplitScreen> mMockLegacySplitScreenOptional;
+    @Mock private Optional<SplitScreen> mMockSplitScreenOptional;
     @Mock private Optional<Lazy<StatusBar>> mMockStatusBarOptionalLazy;
     @Mock private Optional<com.android.wm.shell.onehanded.OneHanded> mMockOneHandedOptional;
     @Mock private PackageManager mPackageManager;
@@ -89,8 +91,8 @@ public class OverviewProxyServiceTest extends SysuiTestCase {
 
         mSpiedOverviewProxyService = spy(new OverviewProxyService(mSpiedContext, mMockCommandQueue,
                 mMockNavBarControllerLazy, mMockNavModeController, mMockStatusBarWinController,
-                mMockSysUiState, mMockPipOptional, mMockSplitScreenOptional,
-                mMockStatusBarOptionalLazy, mMockOneHandedOptional,
+                mMockSysUiState, mMockPipOptional, mMockLegacySplitScreenOptional,
+                mMockSplitScreenOptional, mMockStatusBarOptionalLazy, mMockOneHandedOptional,
                 mMockBroadcastDispatcher, mMockTransitions));
     }
 
