@@ -1834,6 +1834,17 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public int getCallingUid() {
+            return Binder.getCallingUid();
+        }
+
+        @UserIdInt
+        @Override
+        public int getCallingUserId() {
+            return UserHandle.getCallingUserId();
+        }
+
+        @Override
         public void schedule(int code, @Nullable Object object) {
             Message message = mHandler.obtainMessage(DOMAIN_VERIFICATION);
             message.arg1 = code;
@@ -1855,6 +1866,18 @@ public class PackageManagerService extends IPackageManager.Stub
         public boolean isCallerPackage(int callingUid, @NonNull String packageName) {
             final int callingUserId = UserHandle.getUserId(callingUid);
             return callingUid == getPackageUid(packageName, 0, callingUserId);
+        }
+
+        @Nullable
+        @Override
+        public PackageSetting getPackageSettingLocked(@NonNull String pkgName) {
+            return PackageManagerService.this.getPackageSetting(pkgName);
+        }
+
+        @Nullable
+        @Override
+        public AndroidPackage getPackageLocked(@NonNull String pkgName) {
+            return PackageManagerService.this.getPackage(pkgName);
         }
     }
 

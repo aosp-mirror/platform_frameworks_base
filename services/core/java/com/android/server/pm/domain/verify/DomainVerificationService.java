@@ -29,6 +29,8 @@ import android.content.pm.domain.verify.DomainVerificationSet;
 import android.content.pm.domain.verify.DomainVerificationState;
 import android.content.pm.domain.verify.DomainVerificationUserSelection;
 import android.content.pm.domain.verify.IDomainVerificationManager;
+import android.os.Binder;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Singleton;
@@ -41,6 +43,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemConfig;
 import com.android.server.SystemService;
 import com.android.server.compat.PlatformCompat;
+import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
 import com.android.server.pm.domain.verify.models.DomainVerificationStateMap;
@@ -90,6 +93,9 @@ public class DomainVerificationService extends SystemService
     private final DomainVerificationCollector mCollector;
 
     @NonNull
+    private final DomainVerificationEnforcer mEnforcer;
+
+    @NonNull
     private final IDomainVerificationManager.Stub mStub = new DomainVerificationManagerStub(this);
 
     @NonNull
@@ -102,6 +108,7 @@ public class DomainVerificationService extends SystemService
         mSystemConfig = systemConfig;
         mSettings = new DomainVerificationSettings();
         mCollector = new DomainVerificationCollector(platformCompat, systemConfig);
+        mEnforcer = new DomainVerificationEnforcer(context);
     }
 
     @Override
@@ -117,6 +124,7 @@ public class DomainVerificationService extends SystemService
     @NonNull
     @Override
     public List<String> getValidVerificationPackageNames() {
+        mEnforcer.assertApprovedVerifier(mConnection.get().getCallingUid(), mProxy);
         return null;
     }
 
@@ -124,12 +132,14 @@ public class DomainVerificationService extends SystemService
     @Override
     public DomainVerificationSet getDomainVerificationSet(@NonNull String packageName)
             throws NameNotFoundException {
+        mEnforcer.assertApprovedQuerent(mConnection.get().getCallingUid(), mProxy);
         return null;
     }
 
     @Override
     public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
             int state) throws InvalidDomainSetException, NameNotFoundException {
+        mEnforcer.assertApprovedVerifier(mConnection.get().getCallingUid(), mProxy);
         //TODO(b/163565712): Implement method
         mConnection.get().scheduleWriteSettings();
     }
@@ -137,12 +147,15 @@ public class DomainVerificationService extends SystemService
     @Override
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed) throws NameNotFoundException {
-        //TODO(b/163565712): Implement method
-        mConnection.get().scheduleWriteSettings();
+        setDomainVerificationLinkHandlingAllowed(packageName, allowed,
+                mConnection.get().getCallingUserId());
     }
 
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed, @UserIdInt int userId) throws NameNotFoundException {
+        Connection connection = mConnection.get();
+        mEnforcer.assertApprovedUserSelector(connection.getCallingUid(),
+                connection.getCallingUserId(), userId);
         //TODO(b/163565712): Implement method
         mConnection.get().scheduleWriteSettings();
     }
@@ -151,13 +164,16 @@ public class DomainVerificationService extends SystemService
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled)
             throws InvalidDomainSetException, NameNotFoundException {
-        //TODO(b/163565712): Implement method
-        mConnection.get().scheduleWriteSettings();
+        setDomainVerificationUserSelection(domainSetId, domains, enabled,
+                mConnection.get().getCallingUserId());
     }
 
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled, @UserIdInt int userId)
             throws InvalidDomainSetException, NameNotFoundException {
+        Connection connection = mConnection.get();
+        mEnforcer.assertApprovedUserSelector(connection.getCallingUid(),
+                connection.getCallingUserId(), userId);
         //TODO(b/163565712): Implement method
         mConnection.get().scheduleWriteSettings();
     }
@@ -166,12 +182,16 @@ public class DomainVerificationService extends SystemService
     @Override
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName) throws NameNotFoundException {
-        return null;
+        return getDomainVerificationUserSelection(packageName,
+                mConnection.get().getCallingUserId());
     }
 
     @Nullable
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName, @UserIdInt int userId) throws NameNotFoundException {
+        Connection connection = mConnection.get();
+        mEnforcer.assertApprovedUserSelector(connection.getCallingUid(),
+                connection.getCallingUserId(), userId);
         return null;
     }
 
@@ -449,7 +469,38 @@ public class DomainVerificationService extends SystemService
          */
         void scheduleWriteSettings();
 
-        /** @see DomainVerificationProxy.Connection#schedule(int, java.lang.Object) */
+        /**
+         * Delegate to {@link Binder#getCallingUid()} to allow mocking in tests.
+         */
+        int getCallingUid();
+
+        /**
+         * Delegate to {@link UserHandle#getCallingUserId()} to allow mocking in tests.
+         */
+        @UserIdInt
+        int getCallingUserId();
+
+        /**
+         * @see DomainVerificationProxy.Connection#schedule(int, java.lang.Object)
+         */
         void schedule(int code, @Nullable Object object);
+
+        boolean isCallerPackage(int callingUid, @NonNull String packageName);
+
+        /**
+         * This can only be called when the internal {@link #mLock} is held. Otherwise it's possible
+         * to deadlock with {@link PackageManagerService}.
+         */
+        @GuardedBy("mLock")
+        @Nullable
+        PackageSetting getPackageSettingLocked(@NonNull String pkgName);
+
+        /**
+         * This can only be called when the internal {@link #mLock} is held. Otherwise it's possible
+         * to deadlock with {@link PackageManagerService}.
+         */
+        @GuardedBy("mLock")
+        @Nullable
+        AndroidPackage getPackageLocked(@NonNull String pkgName);
     }
 }
