@@ -7593,6 +7593,7 @@ package android.os {
     method @NonNull public static String formatUid(int);
     method public static int getAppId(int);
     method public int getIdentifier();
+    method public static int getUid(@NonNull android.os.UserHandle, int);
     method @Deprecated public boolean isOwner();
     method public boolean isSystem();
     method public static int myUserId();
