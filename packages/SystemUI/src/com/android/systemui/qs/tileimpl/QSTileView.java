@@ -36,7 +36,7 @@ import java.util.Objects;
 
 /** View that represents a standard quick settings tile. **/
 public class QSTileView extends QSTileBaseView {
-    private static final int MAX_LABEL_LINES = 2;
+    protected int mMaxLabelLines = 2;
     private View mDivider;
     protected TextView mLabel;
     protected TextView mSecondLine;
@@ -109,10 +109,17 @@ public class QSTileView extends QSTileBaseView {
 
         // Remeasure view if the primary label requires more then 2 lines or the secondary label
         // text will be cut off.
-        if (mLabel.getLineCount() > MAX_LABEL_LINES || !TextUtils.isEmpty(mSecondLine.getText())
+        if (mLabel.getLineCount() > mMaxLabelLines || !TextUtils.isEmpty(mSecondLine.getText())
                         && mSecondLine.getLineHeight() > mSecondLine.getHeight()) {
-            mLabel.setSingleLine();
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            if (!mLabel.isSingleLine()) {
+                mLabel.setSingleLine();
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
+        } else {
+            if (mLabel.isSingleLine()) {
+                mLabel.setSingleLine(false);
+                super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            }
         }
     }
 
