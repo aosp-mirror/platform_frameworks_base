@@ -25,6 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,6 +46,7 @@ import android.media.soundtrigger_middleware.Status;
 import android.os.RemoteException;
 import android.util.Pair;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -145,6 +147,11 @@ public class SoundTriggerMiddlewareImplTest {
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
         clearInvocations(mAudioSessionProvider);
+    }
+
+    @After
+    public void tearDown() {
+        verify(mHalDriver, never()).reboot();
     }
 
     @Test

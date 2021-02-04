@@ -23,7 +23,6 @@ import android.hardware.soundtrigger.V2_3.Properties;
 import android.hardware.soundtrigger.V2_3.RecognitionConfig;
 import android.os.IHwBinder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.Objects;
@@ -139,9 +138,9 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
         return mUnderlying.interfaceDescriptor();
     }
 
-    private static void rebootHal() {
-        // This property needs to be defined in an init.rc script and trigger a HAL reboot.
-        SystemProperties.set("sys.audio.restart.hal", "1");
+    @Override
+    public void reboot() {
+        mUnderlying.reboot();
     }
 
     private class Watchdog implements AutoCloseable {
@@ -156,7 +155,7 @@ public class SoundTriggerHw2Watchdog implements ISoundTriggerHw2 {
                 @Override
                 public void run() {
                     Log.e(TAG, "HAL deadline expired. Rebooting.", mException);
-                    rebootHal();
+                    reboot();
                 }
             };
             mTimer.schedule(mTask, TIMEOUT_MS);

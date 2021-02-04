@@ -57,6 +57,12 @@ import android.os.IHwBinder;
  */
 interface ISoundTriggerHw2 {
     /**
+     * Kill and restart the HAL instance. This is typically a last resort for error recovery and may
+     * result in other related services being killed.
+     */
+    void reboot();
+
+    /**
      * @see ISoundTriggerHw#getProperties_2_3(ISoundTriggerHw.getProperties_2_3Callback)
      */
     Properties getProperties();

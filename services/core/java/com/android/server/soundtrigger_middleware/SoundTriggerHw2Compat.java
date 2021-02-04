@@ -18,6 +18,7 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
@@ -45,6 +46,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * </ul>
  */
 final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
+    private final @NonNull Runnable mRebootRunnable;
     private final @NonNull IHwBinder mBinder;
     private final @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw mUnderlying_2_0;
     private final @Nullable android.hardware.soundtrigger.V2_1.ISoundTriggerHw mUnderlying_2_1;
@@ -58,15 +60,14 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     private final @NonNull ConcurrentMap<Integer, ModelCallback> mModelCallbacks =
             new ConcurrentHashMap<>();
 
-    public SoundTriggerHw2Compat(
-            @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw underlying) {
-        this(underlying.asBinder());
+    SoundTriggerHw2Compat(
+            @NonNull ISoundTriggerHw underlying, Runnable rebootRunnable) {
+        this(rebootRunnable, underlying.asBinder());
     }
 
-    public SoundTriggerHw2Compat(IHwBinder binder) {
-        Objects.requireNonNull(binder);
-
-        mBinder = binder;
+    SoundTriggerHw2Compat(Runnable rebootRunnable, IHwBinder binder) {
+        mRebootRunnable = Objects.requireNonNull(rebootRunnable);
+        mBinder = Objects.requireNonNull(binder);
 
         // We want to share the proxy instances rather than create a separate proxy for every
         // version, so we go down the versions in descending order to find the latest one supported,
@@ -131,6 +132,11 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
             throw new RecoverableException(Status.RESOURCE_CONTENTION);
         }
         handleHalStatus(status, methodName);
+    }
+
+    @Override
+    public void reboot() {
+        mRebootRunnable.run();
     }
 
     @Override

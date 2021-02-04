@@ -50,6 +50,7 @@ import org.mockito.ArgumentCaptor;
 public class SoundHw2CompatTest {
     @Parameterized.Parameter
     public android.hardware.soundtrigger.V2_0.ISoundTriggerHw mHalDriver;
+    private Runnable mRebootRunnable = mock(Runnable.class);
     private ISoundTriggerHw2 mCanonical;
 
     // We run the test once for every version of the underlying driver.
@@ -67,6 +68,7 @@ public class SoundHw2CompatTest {
     @Before
     public void setUp() throws Exception {
         clearInvocations(mHalDriver);
+        clearInvocations(mRebootRunnable);
 
         // This binder is associated with the mock, so it can be cast to either version of the
         // HAL interface.
@@ -116,7 +118,7 @@ public class SoundHw2CompatTest {
             }
         };
         when(mHalDriver.asBinder()).thenReturn(binder);
-        mCanonical = new SoundTriggerHw2Compat(mHalDriver);
+        mCanonical = new SoundTriggerHw2Compat(mHalDriver, mRebootRunnable);
         // This method can be called any number of times.
         verify(mHalDriver, atLeast(0)).asBinder();
     }
@@ -124,10 +126,17 @@ public class SoundHw2CompatTest {
     @After
     public void tearDown() {
         verifyNoMoreInteractions(mHalDriver);
+        verifyNoMoreInteractions(mRebootRunnable);
     }
 
     @Test
     public void testSetUpAndTearDown() {
+    }
+
+    @Test
+    public void testReboot() {
+        mCanonical.reboot();
+        verify(mRebootRunnable).run();
     }
 
     @Test

@@ -34,6 +34,7 @@ import android.media.soundtrigger_middleware.RecognitionConfig;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundTriggerModuleDescriptor;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.Log;
 
 import com.android.server.SystemService;
@@ -68,8 +69,10 @@ import java.util.Objects;
 public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareService.Stub {
     static private final String TAG = "SoundTriggerMiddlewareService";
 
-    private final @NonNull ISoundTriggerMiddlewareInternal mDelegate;
-    private final @NonNull Context mContext;
+    private final @NonNull
+    ISoundTriggerMiddlewareInternal mDelegate;
+    private final @NonNull
+    Context mContext;
 
     /**
      * Constructor for internal use only. Could be exposed for testing purposes in the future.
@@ -235,7 +238,12 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             HalFactory[] factories = new HalFactory[]{() -> {
                 try {
                     Log.d(TAG, "Connecting to default ISoundTriggerHw");
-                    return new SoundTriggerHw2Compat(ISoundTriggerHw.getService(true));
+                    return new SoundTriggerHw2Compat(ISoundTriggerHw.getService(true),
+                            () -> {
+                                // This property needs to be defined in an init.rc script and
+                                // trigger a HAL reboot.
+                                SystemProperties.set("sys.audio.restart.hal", "1");
+                            });
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }

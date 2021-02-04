@@ -26,7 +26,6 @@ import android.media.soundtrigger_middleware.Status;
 import android.os.DeadObjectException;
 import android.os.IHwBinder;
 import android.os.RemoteException;
-import android.os.SystemProperties;
 import android.util.Log;
 
 import java.util.HashMap;
@@ -207,7 +206,7 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
         return mUnderlying.interfaceDescriptor();
     }
 
-    private static RuntimeException handleException(RuntimeException e) {
+    private RuntimeException handleException(RuntimeException e) {
         if (e instanceof RecoverableException) {
             throw e;
         }
@@ -217,13 +216,13 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
             throw new RecoverableException(Status.DEAD_OBJECT);
         }
         Log.e(TAG, "Exception caught from HAL, rebooting HAL");
-        rebootHal();
+        reboot();
         throw e;
     }
 
-    private static void rebootHal() {
-        // This property needs to be defined in an init.rc script and trigger a HAL reboot.
-        SystemProperties.set("sys.audio.restart.hal", "1");
+    @Override
+    public void reboot() {
+        mUnderlying.reboot();
     }
 
     private class ModelCallbackEnforcer implements ModelCallback {
@@ -243,7 +242,7 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
-                    rebootHal();
+                    reboot();
                     return;
                 }
                 if (status != RecognitionStatus.FORCED) {
@@ -263,7 +262,7 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
                 ModelState state = mModelStates.get(model);
                 if (state == null || state == ModelState.INACTIVE) {
                     Log.wtfStack(TAG, "Unexpected recognition event for model: " + model);
-                    rebootHal();
+                    reboot();
                     return;
                 }
                 if (status != RecognitionStatus.FORCED) {
@@ -280,13 +279,13 @@ public class SoundTriggerHw2Enforcer implements ISoundTriggerHw2 {
                 ModelState state = mModelStates.get(modelHandle);
                 if (state == null) {
                     Log.wtfStack(TAG, "Unexpected unload event for model: " + modelHandle);
-                    rebootHal();
+                    reboot();
                     return;
                 }
 
                 if (state == ModelState.ACTIVE) {
                     Log.wtfStack(TAG, "Trying to unload an active model: " + modelHandle);
-                    rebootHal();
+                    reboot();
                     return;
                 }
                 mModelStates.remove(modelHandle);
