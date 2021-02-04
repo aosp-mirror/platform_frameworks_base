@@ -120,7 +120,7 @@ public final class PowerStatsHALWrapper {
          * @return List of EnergyMeasurement objects containing energy measurements for all
          *         available energy meters.
          */
-        android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters(int[] channelIds);
+        android.hardware.power.stats.EnergyMeasurement[] readEnergyMeter(int[] channelIds);
 
         /**
          * Returns boolean indicating if connection to power stats HAL was established.
@@ -235,13 +235,13 @@ public final class PowerStatsHALWrapper {
         }
 
         @Override
-        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters(int[] channelIds) {
+        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeter(int[] channelIds) {
             android.hardware.power.stats.EnergyMeasurement[] energyMeasurementHAL = null;
 
             if (sVintfPowerStats != null) {
                 try {
                     energyMeasurementHAL =
-                        sVintfPowerStats.get().readEnergyMeters(channelIds);
+                        sVintfPowerStats.get().readEnergyMeter(channelIds);
                 } catch (RemoteException e) {
                     if (DEBUG) Slog.d(TAG, "Failed to get energy measurements from PowerStats HAL");
                 }
@@ -311,7 +311,7 @@ public final class PowerStatsHALWrapper {
         }
 
         @Override
-        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeters(int[] channelIds) {
+        public android.hardware.power.stats.EnergyMeasurement[] readEnergyMeter(int[] channelIds) {
             return nativeReadEnergyMeters(channelIds);
         }
 
