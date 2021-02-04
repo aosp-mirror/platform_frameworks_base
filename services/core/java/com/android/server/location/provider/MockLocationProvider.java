@@ -53,7 +53,7 @@ public class MockLocationProvider extends AbstractLocationProvider {
         Location location = new Location(l);
         location.setIsFromMockProvider(true);
         mLocation = location;
-        reportLocation(LocationResult.wrap(location));
+        reportLocation(LocationResult.wrap(location).validate());
     }
 
     @Override

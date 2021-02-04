@@ -4718,10 +4718,6 @@ package android.location {
     method @NonNull @RequiresPermission(android.Manifest.permission.UPDATE_DEVICE_STATS) public android.location.LocationRequest.Builder setWorkSource(@Nullable android.os.WorkSource);
   }
 
-  public final class LocationResult implements android.os.Parcelable {
-    method @NonNull public static android.location.LocationResult wrap(@NonNull android.location.Location);
-  }
-
   public final class SatellitePvt implements android.os.Parcelable {
     method public int describeContents();
     method @NonNull public android.location.SatellitePvt.ClockInfo getClockInfo();
@@ -4788,7 +4784,7 @@ package android.location.provider {
     method public abstract void onSendExtraCommand(@NonNull String, @Nullable android.os.Bundle);
     method public abstract void onSetRequest(@NonNull android.location.provider.ProviderRequest);
     method public void reportLocation(@NonNull android.location.Location);
-    method public void reportLocation(@NonNull android.location.LocationResult);
+    method public void reportLocations(@NonNull java.util.List<android.location.Location>);
     method public void setAllowed(boolean);
     method public void setProperties(@NonNull android.location.provider.ProviderProperties);
     field public static final String ACTION_FUSED_PROVIDER = "com.android.location.service.FusedLocationProvider";
