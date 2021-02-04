@@ -178,6 +178,21 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
+    public void onUserUnlocked(@NonNull TargetUser user) {
+        super.onUserUnlocked(user);
+
+        // Package verification is sent at both boot and user unlock. The latter will allow v1
+        // verification agents to respond to the request, since they will not be directBootAware.
+        // However, ideally v2 implementations are boot aware and can handle the initial boot
+        // broadcast, to start verifying packages as soon as possible. It's possible this causes
+        // unnecessary duplication at device start up, but the implementation is responsible for
+        // de-duplicating.
+        // TODO: This can be improved by checking if the broadcast was received by the
+        //  verification agent in the initial boot broadcast
+        verifyPackages(null, false);
+    }
+
+    @Override
     public void setProxy(@NonNull DomainVerificationProxy proxy) {
         mProxy = proxy;
     }
