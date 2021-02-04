@@ -2459,7 +2459,7 @@ public abstract class ConnectionService extends Service {
     }
 
     private void onCallFilteringCompleted(String callId, boolean isBlocked, boolean isInContacts) {
-        Log.i(this, "onCallFilteringCompleted(%s, %b, %b)", isBlocked, isInContacts);
+        Log.i(this, "onCallFilteringCompleted(%b, %b)", isBlocked, isInContacts);
         Connection connection = findConnectionForAction(callId, "onCallFilteringCompleted");
         if (connection != null) {
             connection.onCallFilteringCompleted(isBlocked, isInContacts);
