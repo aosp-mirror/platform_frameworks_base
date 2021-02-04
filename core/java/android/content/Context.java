@@ -5451,6 +5451,15 @@ public abstract class Context {
     public static final String GAME_SERVICE = "game";
 
     /**
+     * Use with {@link #getSystemService(String)} to access domain verification service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    @SystemApi
+    public static final String DOMAIN_VERIFICATION_SERVICE = "domain_verification";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *

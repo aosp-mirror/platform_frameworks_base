@@ -627,9 +627,13 @@ interface IPackageManager {
     void verifyPendingInstall(int id, int verificationCode);
     void extendVerificationTimeout(int id, int verificationCodeAtTimeout, long millisecondsToDelay);
 
+    /** @deprecated */
     void verifyIntentFilter(int id, int verificationCode, in List<String> failedDomains);
+    /** @deprecated */
     int getIntentVerificationStatus(String packageName, int userId);
+    /** @deprecated */
     boolean updateIntentVerificationStatus(String packageName, int status, int userId);
+    /** @deprecated */
     ParceledListSlice getIntentFilterVerifications(String packageName);
     ParceledListSlice getAllIntentFilters(String packageName);
 

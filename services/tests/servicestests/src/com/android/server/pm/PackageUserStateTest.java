@@ -53,15 +53,7 @@ public class PackageUserStateTest {
         assertThat(testUserState.equals(oldUserState), is(true));
 
         oldUserState = new PackageUserState();
-        oldUserState.appLinkGeneration = 6;
-        assertThat(testUserState.equals(oldUserState), is(false));
-
-        oldUserState = new PackageUserState();
         oldUserState.ceDataInode = 4000L;
-        assertThat(testUserState.equals(oldUserState), is(false));
-
-        oldUserState = new PackageUserState();
-        oldUserState.domainVerificationStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK;
         assertThat(testUserState.equals(oldUserState), is(false));
 
         oldUserState = new PackageUserState();

@@ -33,10 +33,10 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -59,6 +59,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;
@@ -80,6 +81,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -94,10 +96,14 @@ public class PackageManagerSettingsTests {
     RuntimePermissionsPersistence mRuntimePermissionsPersistence;
     @Mock
     LegacyPermissionDataProvider mPermissionDataProvider;
+    @Mock
+    DomainVerificationManagerInternal mDomainVerificationManager;
 
     @Before
     public void initializeMocks() {
         MockitoAnnotations.initMocks(this);
+        when(mDomainVerificationManager.generateNewId())
+                .thenAnswer(invocation -> UUID.randomUUID());
     }
 
     @Before
@@ -112,10 +118,7 @@ public class PackageManagerSettingsTests {
             throws ReflectiveOperationException, IllegalAccessException {
         /* write out files and read */
         writeOldFiles();
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        Settings settings = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         verifyKeySetMetaData(settings);
     }
@@ -126,10 +129,7 @@ public class PackageManagerSettingsTests {
             throws ReflectiveOperationException, IllegalAccessException {
         // write out files and read
         writeOldFiles();
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        Settings settings = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         // write out, read back in and verify the same
@@ -142,10 +142,7 @@ public class PackageManagerSettingsTests {
     public void testSettingsReadOld() {
         // Write delegateshellthe package files and make sure they're parsed properly the first time
         writeOldFiles();
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        Settings settings = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_3), is(notNullValue()));
         assertThat(settings.getPackageLPr(PACKAGE_NAME_1), is(notNullValue()));
@@ -164,16 +161,12 @@ public class PackageManagerSettingsTests {
     public void testNewPackageRestrictionsFile() throws ReflectiveOperationException {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        Settings settings = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
         settings.writeLPr();
 
         // Create Settings again to make it read from the new files
-        settings = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        settings = makeSettings();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
 
         PackageSetting ps = settings.getPackageLPr(PACKAGE_NAME_2);
@@ -200,10 +193,7 @@ public class PackageManagerSettingsTests {
     @Test
     public void testReadPackageRestrictions_noSuspendingPackage() {
         writePackageRestrictions_noSuspendingPackageXml(0);
-        final Object lock = new Object();
-        final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
-                lock);
+        Settings settingsUnderTest = makeSettings();
         final WatchableTester watcher =
                 new WatchableTester(settingsUnderTest, "noSuspendingPackage");
         watcher.register();
@@ -244,10 +234,7 @@ public class PackageManagerSettingsTests {
     @Test
     public void testReadPackageRestrictions_noSuspendParamsMap() {
         writePackageRestrictions_noSuspendParamsMapXml(0);
-        final Object lock = new Object();
-        final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
-                lock);
+        final Settings settingsUnderTest = makeSettings();
         final WatchableTester watcher =
                 new WatchableTester(settingsUnderTest, "noSuspendParamsMap");
         watcher.register();
@@ -281,9 +268,7 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testReadWritePackageRestrictions_suspendInfo() {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
-                new Object());
+        final Settings settingsUnderTest = makeSettings();
         final WatchableTester watcher = new WatchableTester(settingsUnderTest, "suspendInfo");
         watcher.register();
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
@@ -397,9 +382,7 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testReadWritePackageRestrictions_distractionFlags() {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(), null, null,
-                new Object());
+        final Settings settingsUnderTest = makeSettings();
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         final PackageSetting ps2 = createPackageSetting(PACKAGE_NAME_2);
         final PackageSetting ps3 = createPackageSetting(PACKAGE_NAME_3);
@@ -440,10 +423,7 @@ public class PackageManagerSettingsTests {
 
     @Test
     public void testWriteReadUsesStaticLibraries() {
-        final Context context = InstrumentationRegistry.getTargetContext();
-        final Object lock = new Object();
-        final Settings settingsUnderTest = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        final Settings settingsUnderTest = makeSettings();
         final PackageSetting ps1 = createPackageSetting(PACKAGE_NAME_1);
         ps1.appId = Process.FIRST_APPLICATION_UID;
         ps1.pkg = ((ParsedPackage) PackageImpl.forTesting(PACKAGE_NAME_1).hideAsParsed())
@@ -516,10 +496,7 @@ public class PackageManagerSettingsTests {
     public void testEnableDisable() {
         // Write the package files and make sure they're parsed properly the first time
         writeOldFiles();
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        Settings settings = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         final WatchableTester watcher = new WatchableTester(settings, "testEnableDisable");
         watcher.register();
         assertThat(settings.readLPw(createFakeUsers()), is(true));
@@ -585,7 +562,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         final PackageSetting testPkgSetting01 = new PackageSetting(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -606,7 +584,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
@@ -621,7 +600,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         testPkgSetting01.copyFrom(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -648,7 +628,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertThat(testPkgSetting01.pkgFlags, is(0));
@@ -681,7 +662,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
@@ -698,12 +680,9 @@ public class PackageManagerSettingsTests {
     /** Update package; changing shared user throws exception */
     @Test
     public void testUpdatePackageSetting03() {
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        final Settings testSettings01 = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
-                testSettings01, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
+                settings, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
         final PackageSetting testPkgSetting01 =
                 createPackageSetting(0 /*sharedUserId*/, 0 /*pkgFlags*/);
         try {
@@ -720,7 +699,8 @@ public class PackageManagerSettingsTests {
                     UserManagerService.getInstance(),
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/,
-                    null /*mimeGroups*/);
+                    null /*mimeGroups*/,
+                    UUID.randomUUID());
             fail("Expected a PackageManagerException");
         } catch (PackageManagerException expected) {
         }
@@ -752,7 +732,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
@@ -790,7 +771,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.appId, is(0));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -808,12 +790,9 @@ public class PackageManagerSettingsTests {
     /** Create PackageSetting for a shared user */
     @Test
     public void testCreateNewSetting03() {
-        final Context context = InstrumentationRegistry.getContext();
-        final Object lock = new Object();
-        final Settings testSettings01 = new Settings(context.getFilesDir(),
-                mRuntimePermissionsPersistence, mPermissionDataProvider, lock);
+        Settings settings = makeSettings();
         final SharedUserSetting testUserSetting01 = createSharedUserSetting(
-                testSettings01, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
+                settings, "TestUser", 10064, 0 /*pkgFlags*/, 0 /*pkgPrivateFlags*/);
         final PackageSetting testPkgSetting01 = Settings.createNewSetting(
                 PACKAGE_NAME,
                 null /*originalPkg*/,
@@ -834,7 +813,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.appId, is(10064));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -875,7 +855,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.appId, is(10064));
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -934,6 +915,7 @@ public class PackageManagerSettingsTests {
         assertThat(origPkgSetting.getPathString(), is(testPkgSetting.getPathString()));
         assertSame(origPkgSetting.cpuAbiOverrideString, testPkgSetting.cpuAbiOverrideString);
         assertThat(origPkgSetting.cpuAbiOverrideString, is(testPkgSetting.cpuAbiOverrideString));
+        assertThat(origPkgSetting.getDomainSetId(), is(testPkgSetting.getDomainSetId()));
         assertThat(origPkgSetting.firstInstallTime, is(testPkgSetting.firstInstallTime));
         assertSame(origPkgSetting.installSource, testPkgSetting.installSource);
         assertThat(origPkgSetting.installPermissionsFixed,
@@ -976,8 +958,6 @@ public class PackageManagerSettingsTests {
         assertNotSame(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
         // No equals() method for SparseArray object
         // assertThat(origPkgSetting.getUserState(), is(testPkgSetting.getUserState()));
-        assertSame(origPkgSetting.verificationInfo, testPkgSetting.verificationInfo);
-        assertThat(origPkgSetting.verificationInfo, is(testPkgSetting.verificationInfo));
         assertThat(origPkgSetting.versionCode, is(testPkgSetting.versionCode));
         assertSame(origPkgSetting.volumeUuid, testPkgSetting.volumeUuid);
         assertThat(origPkgSetting.volumeUuid, is(testPkgSetting.volumeUuid));
@@ -1006,7 +986,8 @@ public class PackageManagerSettingsTests {
                 sharedUserId,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
     }
 
     private PackageSetting createPackageSetting(String packageName) {
@@ -1024,7 +1005,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
     }
 
     private @NonNull List<UserInfo> createFakeUsers() {
@@ -1210,6 +1192,12 @@ public class PackageManagerSettingsTests {
     @After
     public void tearDown() throws Exception {
         deleteFolder(InstrumentationRegistry.getTargetContext().getFilesDir());
+    }
+
+    private Settings makeSettings() {
+        return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
+                mRuntimePermissionsPersistence, mPermissionDataProvider,
+                mDomainVerificationManager, new Object());
     }
 
     private void verifyKeySetMetaData(Settings settings)

@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.IntFunction;
 
 /**
@@ -596,6 +597,20 @@ public class ArrayUtils {
             cur = new ArraySet<>();
         }
         cur.add(val);
+        return cur;
+    }
+
+    /**
+     * Similar to {@link Set#addAll(Collection)}}, but with support for set values of {@code null}.
+     */
+    public static @NonNull <T> ArraySet<T> addAll(@Nullable ArraySet<T> cur,
+            @Nullable Collection<T> val) {
+        if (cur == null) {
+            cur = new ArraySet<>();
+        }
+        if (val != null) {
+            cur.addAll(val);
+        }
         return cur;
     }
 

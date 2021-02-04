@@ -178,8 +178,9 @@ public class SystemConfig {
     // be delivered anonymously even to apps which target O+.
     final ArraySet<String> mAllowImplicitBroadcasts = new ArraySet<>();
 
-    // These are the package names of apps which should be in the 'always'
-    // URL-handling state upon factory reset.
+    // These are the package names of apps which should be automatically granted domain verification
+    // for all of their domains. The only way these apps can be overridden by the user is by
+    // explicitly disabling overall link handling support in app info.
     final ArraySet<String> mLinkedApps = new ArraySet<>();
 
     // These are the components that are enabled by default as VR mode listener services.

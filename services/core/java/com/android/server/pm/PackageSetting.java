@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Settings data for a particular package we know about.
@@ -99,18 +100,23 @@ public class PackageSetting extends PackageSettingBase {
     @NonNull
     private PackageStateUnserialized pkgState = new PackageStateUnserialized();
 
+    @NonNull
+    private UUID mDomainSetId;
+
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public PackageSetting(String name, String realName, @NonNull File codePath,
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString,
             long pVersionCode, int pkgFlags, int privateFlags,
             int sharedUserId, String[] usesStaticLibraries,
-            long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups) {
+            long[] usesStaticLibrariesVersions, Map<String, ArraySet<String>> mimeGroups,
+            @NonNull UUID domainSetId) {
         super(name, realName, codePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString,
                 pVersionCode, pkgFlags, privateFlags,
                 usesStaticLibraries, usesStaticLibrariesVersions);
         this.sharedUserId = sharedUserId;
+        mDomainSetId = domainSetId;
         copyMimeGroups(mimeGroups);
     }
 
@@ -168,6 +174,7 @@ public class PackageSetting extends PackageSettingBase {
         sharedUser = orig.sharedUser;
         sharedUserId = orig.sharedUserId;
         copyMimeGroups(orig.mimeGroups);
+        mDomainSetId = orig.getDomainSetId();
     }
 
     private void copyMimeGroups(@Nullable Map<String, ArraySet<String>> newMimeGroups) {
@@ -374,6 +381,7 @@ public class PackageSetting extends PackageSettingBase {
         pkg = other.pkg;
         sharedUserId = other.sharedUserId;
         sharedUser = other.sharedUser;
+        mDomainSetId = other.mDomainSetId;
 
         Set<String> mimeGroupNames = other.mimeGroups != null ? other.mimeGroups.keySet() : null;
         updateMimeGroups(mimeGroupNames);
@@ -384,5 +392,15 @@ public class PackageSetting extends PackageSettingBase {
     @NonNull
     public PackageStateUnserialized getPkgState() {
         return pkgState;
+    }
+
+    @NonNull
+    public UUID getDomainSetId() {
+        return mDomainSetId;
+    }
+
+    public PackageSetting setDomainSetId(@NonNull UUID domainSetId) {
+        mDomainSetId = domainSetId;
+        return this;
     }
 }
