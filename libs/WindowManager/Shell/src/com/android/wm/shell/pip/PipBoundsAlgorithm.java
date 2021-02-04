@@ -19,7 +19,9 @@ package com.android.wm.shell.pip;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
 import android.annotation.NonNull;
+import android.app.PictureInPictureParams;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -27,7 +29,6 @@ import android.graphics.Rect;
 import android.util.DisplayMetrics;
 import android.util.Size;
 import android.util.TypedValue;
-import android.view.DisplayInfo;
 import android.view.Gravity;
 
 import com.android.wm.shell.common.DisplayLayout;
@@ -142,8 +143,50 @@ public class PipBoundsAlgorithm {
                 true /* useCurrentMinEdgeSize */, false /* useCurrentSize */);
     }
 
+    /**
+     *
+     * Get the smallest/most minimal size allowed.
+     */
+    public Size getMinimalSize(ActivityInfo activityInfo) {
+        if (activityInfo == null || activityInfo.windowLayout == null) {
+            return null;
+        }
+        final ActivityInfo.WindowLayout windowLayout = activityInfo.windowLayout;
+        // -1 will be populated if an activity specifies defaultWidth/defaultHeight in <layout>
+        // without minWidth/minHeight
+        if (windowLayout.minWidth > 0 && windowLayout.minHeight > 0) {
+            return new Size(windowLayout.minWidth, windowLayout.minHeight);
+        }
+        return null;
+    }
+
+    /**
+     * Returns the source hint rect if it is valid (if provided and is contained by the current
+     * task bounds).
+     */
+    public static Rect getValidSourceHintRect(PictureInPictureParams params, Rect sourceBounds) {
+        final Rect sourceHintRect = params != null && params.hasSourceBoundsHint()
+                ? params.getSourceRectHint()
+                : null;
+        if (sourceHintRect != null && sourceBounds.contains(sourceHintRect)) {
+            return sourceHintRect;
+        }
+        return null;
+    }
+
     public float getDefaultAspectRatio() {
         return mDefaultAspectRatio;
+    }
+
+    /**
+     *
+     * Give the aspect ratio if the supplied PiP params have one, or else return default.
+     */
+    public float getAspectRatioOrDefault(
+            @android.annotation.Nullable PictureInPictureParams params) {
+        return params != null && params.hasSetAspectRatio()
+                ? params.getAspectRatio()
+                : getDefaultAspectRatio();
     }
 
     /**
