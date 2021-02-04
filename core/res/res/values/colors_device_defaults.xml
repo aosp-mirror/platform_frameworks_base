@@ -42,6 +42,13 @@
     <color name="background_floating_device_default_dark">@color/system_main_800</color>
     <color name="background_floating_device_default_light">@color/system_main_100</color>
 
+    <color name="text_color_primary_device_default_light">@color/system_main_900</color>
+    <color name="text_color_primary_device_default_dark">@color/system_main_50</color>
+    <color name="text_color_secondary_device_default_light">@color/system_main_700</color>
+    <color name="text_color_secondary_device_default_dark">@color/system_main_200</color>
+    <color name="text_color_tertiary_device_default_light">@color/system_main_500</color>
+    <color name="text_color_tertiary_device_default_dark">@color/system_main_400</color>
+
     <!-- Error color -->
     <color name="error_color_device_default_dark">@color/error_color_material_dark</color>
     <color name="error_color_device_default_light">@color/error_color_material_light</color>
