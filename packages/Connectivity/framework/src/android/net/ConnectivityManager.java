@@ -824,6 +824,7 @@ public class ConnectivityManager {
 
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 130143562)
     private final IConnectivityManager mService;
+
     /**
      * A kludge to facilitate static access where a Context pointer isn't available, like in the
      * case of the static set/getProcessDefaultNetwork methods and from the Network class.
@@ -1069,106 +1070,55 @@ public class ConnectivityManager {
     }
 
     /**
-     * Checks if a VPN app supports always-on mode.
-     *
-     * In order to support the always-on feature, an app has to
-     * <ul>
-     *     <li>target {@link VERSION_CODES#N API 24} or above, and
-     *     <li>not opt out through the {@link VpnService#SERVICE_META_DATA_SUPPORTS_ALWAYS_ON}
-     *         meta-data field.
-     * </ul>
-     *
-     * @param userId The identifier of the user for whom the VPN app is installed.
-     * @param vpnPackage The canonical package name of the VPN app.
-     * @return {@code true} if and only if the VPN app exists and supports always-on mode.
+     * Calls VpnManager#isAlwaysOnVpnPackageSupportedForUser.
+     * @deprecated TODO: remove when callers have migrated to VpnManager.
      * @hide
      */
+    @Deprecated
     public boolean isAlwaysOnVpnPackageSupportedForUser(int userId, @Nullable String vpnPackage) {
-        try {
-            return mService.isAlwaysOnVpnPackageSupported(userId, vpnPackage);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getVpnManager().isAlwaysOnVpnPackageSupportedForUser(userId, vpnPackage);
     }
 
     /**
-     * Configures an always-on VPN connection through a specific application.
-     * This connection is automatically granted and persisted after a reboot.
-     *
-     * <p>The designated package should declare a {@link VpnService} in its
-     *    manifest guarded by {@link android.Manifest.permission.BIND_VPN_SERVICE},
-     *    otherwise the call will fail.
-     *
-     * @param userId The identifier of the user to set an always-on VPN for.
-     * @param vpnPackage The package name for an installed VPN app on the device, or {@code null}
-     *                   to remove an existing always-on VPN configuration.
-     * @param lockdownEnabled {@code true} to disallow networking when the VPN is not connected or
-     *        {@code false} otherwise.
-     * @param lockdownAllowlist The list of packages that are allowed to access network directly
-     *         when VPN is in lockdown mode but is not running. Non-existent packages are ignored so
-     *         this method must be called when a package that should be allowed is installed or
-     *         uninstalled.
-     * @return {@code true} if the package is set as always-on VPN controller;
-     *         {@code false} otherwise.
+    * Calls VpnManager#setAlwaysOnVpnPackageForUser.
+     * @deprecated TODO: remove when callers have migrated to VpnManager.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    @Deprecated
     public boolean setAlwaysOnVpnPackageForUser(int userId, @Nullable String vpnPackage,
             boolean lockdownEnabled, @Nullable List<String> lockdownAllowlist) {
-        try {
-            return mService.setAlwaysOnVpnPackage(
-                    userId, vpnPackage, lockdownEnabled, lockdownAllowlist);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getVpnManager().setAlwaysOnVpnPackageForUser(userId, vpnPackage, lockdownEnabled,
+                lockdownAllowlist);
     }
 
-   /**
-     * Returns the package name of the currently set always-on VPN application.
-     * If there is no always-on VPN set, or the VPN is provided by the system instead
-     * of by an app, {@code null} will be returned.
-     *
-     * @return Package name of VPN controller responsible for always-on VPN,
-     *         or {@code null} if none is set.
+    /**
+     * Calls VpnManager#getAlwaysOnVpnPackageForUser.
+     * @deprecated TODO: remove when callers have migrated to VpnManager.
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+    @Deprecated
     public String getAlwaysOnVpnPackageForUser(int userId) {
-        try {
-            return mService.getAlwaysOnVpnPackage(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getVpnManager().getAlwaysOnVpnPackageForUser(userId);
     }
 
     /**
-     * @return whether always-on VPN is in lockdown mode.
-     *
+     * Calls VpnManager#isVpnLockdownEnabled.
+     * @deprecated TODO: remove when callers have migrated to VpnManager.
      * @hide
-     **/
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+     */
+    @Deprecated
     public boolean isVpnLockdownEnabled(int userId) {
-        try {
-            return mService.isVpnLockdownEnabled(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
+        return getVpnManager().isVpnLockdownEnabled(userId);
     }
 
     /**
-     * @return the list of packages that are allowed to access network when always-on VPN is in
-     * lockdown mode but not connected. Returns {@code null} when VPN lockdown is not active.
-     *
+     * Calls VpnManager#getVpnLockdownAllowlist.
+     * @deprecated TODO: remove when callers have migrated to VpnManager.
      * @hide
-     **/
-    @RequiresPermission(android.Manifest.permission.CONTROL_ALWAYS_ON_VPN)
+     */
+    @Deprecated
     public List<String> getVpnLockdownWhitelist(int userId) {
-        try {
-            return mService.getVpnLockdownWhitelist(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getVpnManager().getVpnLockdownAllowlist(userId);
     }
 
     /**
@@ -3219,20 +3169,13 @@ public class ConnectivityManager {
     }
 
     /**
-     * If the LockdownVpn mechanism is enabled, updates the vpn
-     * with a reload of its profile.
-     *
-     * @return a boolean with {@code} indicating success
-     *
-     * <p>This method can only be called by the system UID
-     * {@hide}
+     * Calls VpnManager#updateLockdownVpn.
+     * @deprecated TODO: remove when callers have migrated to VpnManager.
+     * @hide
      */
+    @Deprecated
     public boolean updateLockdownVpn() {
-        try {
-            return mService.updateLockdownVpn();
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
+        return getVpnManager().updateLockdownVpn();
     }
 
     /**
@@ -4596,6 +4539,8 @@ public class ConnectivityManager {
         try {
             mService.factoryReset();
             mTetheringManager.stopAllTethering();
+            // TODO: Migrate callers to VpnManager#factoryReset.
+            getVpnManager().factoryReset();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -4889,9 +4834,13 @@ public class ConnectivityManager {
         return new TestNetworkManager(ITestNetworkManager.Stub.asInterface(tnBinder));
     }
 
-    /** @hide */
-    public VpnManager createVpnManager() {
-        return new VpnManager(mContext, mService);
+    /**
+     * Temporary hack to shim calls from ConnectivityManager to VpnManager. We cannot store a
+     * private final mVpnManager because ConnectivityManager is initialized before VpnManager.
+     * @hide TODO: remove.
+     */
+    public VpnManager getVpnManager() {
+        return mContext.getSystemService(VpnManager.class);
     }
 
     /** @hide */

@@ -531,6 +531,11 @@ public class Vpn {
         }
     }
 
+    /** Returns the package name that is currently prepared. */
+    public String getPackage() {
+        return mPackage;
+    }
+
     /**
      * Check whether to prevent all traffic outside of a VPN even when the VPN is not connected.
      *

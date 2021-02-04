@@ -16,9 +16,47 @@
 
 package android.net;
 
+import android.net.Network;
+
+import com.android.internal.net.LegacyVpnInfo;
+import com.android.internal.net.VpnConfig;
+import com.android.internal.net.VpnProfile;
+
 /**
  * Interface that manages VPNs.
  */
 /** {@hide} */
 interface IVpnManager {
+    /** VpnService APIs */
+    boolean prepareVpn(String oldPackage, String newPackage, int userId);
+    void setVpnPackageAuthorization(String packageName, int userId, int vpnType);
+    ParcelFileDescriptor establishVpn(in VpnConfig config);
+    boolean addVpnAddress(String address, int prefixLength);
+    boolean removeVpnAddress(String address, int prefixLength);
+    boolean setUnderlyingNetworksForVpn(in Network[] networks);
+
+    /** VpnManager APIs */
+    boolean provisionVpnProfile(in VpnProfile profile, String packageName);
+    void deleteVpnProfile(String packageName);
+    void startVpnProfile(String packageName);
+    void stopVpnProfile(String packageName);
+
+    /** Always-on VPN APIs */
+    boolean isAlwaysOnVpnPackageSupported(int userId, String packageName);
+    boolean setAlwaysOnVpnPackage(int userId, String packageName, boolean lockdown,
+            in List<String> lockdownAllowlist);
+    String getAlwaysOnVpnPackage(int userId);
+    boolean isVpnLockdownEnabled(int userId);
+    List<String> getVpnLockdownAllowlist(int userId);
+    boolean isCallerCurrentAlwaysOnVpnApp();
+    boolean isCallerCurrentAlwaysOnVpnLockdownApp();
+
+    /** Legacy VPN APIs */
+    void startLegacyVpn(in VpnProfile profile);
+    LegacyVpnInfo getLegacyVpnInfo(int userId);
+    boolean updateLockdownVpn();
+
+    /** General system APIs */
+    VpnConfig getVpnConfig(int userId);
+    void factoryReset();
 }
