@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import android.annotation.NonNull;
 import android.content.pm.VersionedPackage;
 import android.util.ArrayMap;
 
@@ -73,7 +74,7 @@ final class PackageList {
         }
     }
 
-    void forEachPackage(Consumer<String> callback) {
+    void forEachPackage(@NonNull Consumer<String> callback) {
         synchronized (this) {
             for (int i = 0, size = mPkgList.size(); i < size; i++) {
                 callback.accept(mPkgList.keyAt(i));
@@ -81,7 +82,7 @@ final class PackageList {
         }
     }
 
-    void forEachPackage(BiConsumer<String, ProcessStats.ProcessStateHolder> callback) {
+    void forEachPackage(@NonNull BiConsumer<String, ProcessStats.ProcessStateHolder> callback) {
         synchronized (this) {
             for (int i = 0, size = mPkgList.size(); i < size; i++) {
                 callback.accept(mPkgList.keyAt(i), mPkgList.valueAt(i));
@@ -89,7 +90,16 @@ final class PackageList {
         }
     }
 
-    <R> R forEachPackage(Function<String, R> callback) {
+    /**
+     * Search in the package list, invoke the given {@code callback} with each of the package names
+     * in that list; if the callback returns a non-null object, halt the search, return that
+     * object as the return value of this search function.
+     *
+     * @param callback The callback interface to accept the current package name; if it returns
+     *                 a non-null object, the search will be halted and this object will be used
+     *                 as the return value of this search function.
+     */
+    <R> R searchEachPackage(@NonNull Function<String, R> callback) {
         synchronized (this) {
             for (int i = 0, size = mPkgList.size(); i < size; i++) {
                 R r = callback.apply(mPkgList.keyAt(i));
@@ -101,7 +111,7 @@ final class PackageList {
         return null;
     }
 
-    void forEachPackageProcessStats(Consumer<ProcessStats.ProcessStateHolder> callback) {
+    void forEachPackageProcessStats(@NonNull Consumer<ProcessStats.ProcessStateHolder> callback) {
         synchronized (this) {
             for (int i = 0, size = mPkgList.size(); i < size; i++) {
                 callback.accept(mPkgList.valueAt(i));

@@ -170,7 +170,7 @@ public class CacheOomRankerTest {
                 /* lruWeight= */1.0f);
 
         ProcessList list = new ProcessList();
-        ArrayList<ProcessRecord> processList = list.mLruProcesses;
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
         ProcessRecord lastUsed40MinutesAgo = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 Duration.ofMinutes(40).toMillis(), 10 * 1024L, 1000);
         processList.add(lastUsed40MinutesAgo);
@@ -191,7 +191,7 @@ public class CacheOomRankerTest {
                 Duration.ofMinutes(30).toMillis(), 1024L, 20);
         processList.add(lastUsed30MinutesAgo);
 
-        mCacheOomRanker.reRankLruCachedApps(list);
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
         // First 5 ordered by least recently used first, then last processes position unchanged.
         assertThat(processList).containsExactly(lastUsed60MinutesAgo, lastUsed42MinutesAgo,
@@ -207,7 +207,7 @@ public class CacheOomRankerTest {
                 /* lruWeight= */ 0.0f);
 
         ProcessList list = new ProcessList();
-        ArrayList<ProcessRecord> processList = list.mLruProcesses;
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
         ProcessRecord rss10k = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 Duration.ofMinutes(40).toMillis(), 10 * 1024L, 1000);
         processList.add(rss10k);
@@ -231,7 +231,7 @@ public class CacheOomRankerTest {
                 Duration.ofMinutes(30).toMillis(), 16 * 1024L, 20);
         processList.add(rss16k);
 
-        mCacheOomRanker.reRankLruCachedApps(list);
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
         // First 6 ordered by largest pss, then last processes position unchanged.
         assertThat(processList).containsExactly(rss100k, rss20k, rss15k, rss10k, rss2k, rss1k,
@@ -246,8 +246,8 @@ public class CacheOomRankerTest {
                 /* lruWeight= */ 0.0f);
 
         ProcessList list = new ProcessList();
-        list.mLruProcessServiceStart = 1;
-        ArrayList<ProcessRecord> processList = list.mLruProcesses;
+        list.setLruProcessServiceStartLSP(1);
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
         ProcessRecord used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 Duration.ofMinutes(40).toMillis(), 10 * 1024L, 1000);
         processList.add(used1000);
@@ -268,7 +268,7 @@ public class CacheOomRankerTest {
                 Duration.ofMinutes(30).toMillis(), 16 * 1024L, 200);
         processList.add(used200);
 
-        mCacheOomRanker.reRankLruCachedApps(list);
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
         // First 4 ordered by uses, then last processes position unchanged.
         assertThat(processList).containsExactly(used10, used20, used1000, used2000, used500,
@@ -283,7 +283,7 @@ public class CacheOomRankerTest {
                 /* lruWeight= */ 0.3f);
 
         ProcessList list = new ProcessList();
-        ArrayList<ProcessRecord> processList = list.mLruProcesses;
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
         ProcessRecord unknownAdj1 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 Duration.ofMinutes(40).toMillis(), 10 * 1024L, 1000);
         processList.add(unknownAdj1);
@@ -304,7 +304,7 @@ public class CacheOomRankerTest {
         processList.add(systemAdj);
 
         // 6 Processes but only 3 in eligible for cache so no re-ranking.
-        mCacheOomRanker.reRankLruCachedApps(list);
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
         // All positions unchanged.
         assertThat(processList).containsExactly(unknownAdj1, unknownAdj2, unknownAdj3,
@@ -319,8 +319,8 @@ public class CacheOomRankerTest {
                 /* lruWeight= */ 0.0f);
 
         ProcessList list = new ProcessList();
-        list.mLruProcessServiceStart = 4;
-        ArrayList<ProcessRecord> processList = list.mLruProcesses;
+        list.setLruProcessServiceStartLSP(4);
+        ArrayList<ProcessRecord> processList = list.getLruProcessesLSP();
         ProcessRecord used1000 = nextProcessRecord(ProcessList.UNKNOWN_ADJ,
                 Duration.ofMinutes(40).toMillis(), 10 * 1024L, 1000);
         processList.add(used1000);
@@ -340,7 +340,7 @@ public class CacheOomRankerTest {
                 Duration.ofMinutes(30).toMillis(), 16 * 1024L, 200);
         processList.add(used200);
 
-        mCacheOomRanker.reRankLruCachedApps(list);
+        mCacheOomRanker.reRankLruCachedAppsLSP(processList, list.getLruProcessServiceStartLOSP());
 
         // All positions unchanged.
         assertThat(processList).containsExactly(used1000, used2000, used10, used20, used500,
@@ -378,17 +378,17 @@ public class CacheOomRankerTest {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = "a.package.name" + mNextPackageName++;
         ProcessRecord app = new ProcessRecord(mAms, ai, ai.packageName + ":process", mNextUid++);
-        app.pid = mNextPid++;
+        app.setPid(mNextPid++);
         app.info.uid = mNextPackageUid++;
         // Exact value does not mater, it can be any state for which compaction is allowed.
-        app.setProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
-        app.setAdj = setAdj;
-        app.lastActivityTime = lastActivityTime;
+        app.mState.setSetProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+        app.mState.setSetAdj(setAdj);
+        app.setLastActivityTime(lastActivityTime);
         app.mProfile.setLastRss(lastRss);
-        app.setCached(false);
+        app.mState.setCached(false);
         for (int i = 0; i < returnedToCacheCount; ++i) {
-            app.setCached(false);
-            app.setCached(true);
+            app.mState.setCached(false);
+            app.mState.setCached(true);
         }
         return app;
     }
