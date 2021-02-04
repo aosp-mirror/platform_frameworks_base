@@ -1526,6 +1526,13 @@ public class AppProfiler {
                 memInfoBuilder.append("\n");
                 kernelUsed += totalExportedDmabuf;
             }
+
+            final long totalDmabufHeapPool = Debug.getDmabufHeapPoolsSizeKb();
+            if (totalDmabufHeapPool >= 0) {
+                memInfoBuilder.append("DMA-BUF Heaps pool: ");
+                memInfoBuilder.append(stringifyKBSize(totalDmabufHeapPool));
+                memInfoBuilder.append("\n");
+            }
         }
 
         final long gpuUsage = Debug.getGpuTotalUsageKb();
@@ -1538,6 +1545,11 @@ public class AppProfiler {
         memInfoBuilder.append(stringifyKBSize(
                                   totalPss - cachedPss + kernelUsed));
         memInfoBuilder.append("\n");
+
+        /*
+         * Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
+         * memInfo.getCachedSizeKb().
+         */
         memInfoBuilder.append("  Lost RAM: ");
         memInfoBuilder.append(stringifyKBSize(memInfo.getTotalSizeKb()
                 - (totalPss - totalSwapPss) - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
