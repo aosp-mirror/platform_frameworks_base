@@ -5359,12 +5359,6 @@ public class SettingsProvider extends ContentProvider {
                             disabledProfileSetting.isNull()
                                     ? 0
                                     : Long.parseLong(disabledProfileSetting.getValue());
-                    final boolean isHfpClientProfileEnabled =
-                            (disabledProfileSettingValue & (1 << BluetoothProfile.HEADSET_CLIENT))
-                                    == 0;
-                    initGlobalSettingsDefaultValForWearLocked(
-                            Settings.Global.Wearable.HFP_CLIENT_PROFILE_ENABLED,
-                            isHfpClientProfileEnabled);
                     initGlobalSettingsDefaultValForWearLocked(
                             Settings.Global.Wearable.COMPANION_OS_VERSION,
                             Settings.Global.Wearable.COMPANION_OS_VERSION_UNDEFINED);

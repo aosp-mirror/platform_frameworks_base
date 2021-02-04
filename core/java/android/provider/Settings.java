@@ -16758,12 +16758,6 @@ public final class Settings {
             public static final int HFP_CLIENT_DISABLED = 2;
 
             /**
-             * The current HFP client profile setting.
-             * @hide
-             */
-            public static final String HFP_CLIENT_PROFILE_ENABLED = "hfp_client_profile_enabled";
-
-            /**
              * The companion phone's android version.
              * @hide
              */
