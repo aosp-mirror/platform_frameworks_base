@@ -16,6 +16,7 @@
 <resources>
     <style name="AlertDialog.Leanback" parent="AlertDialog.Material">
         <item name="buttonPanelSideLayout">@android:layout/alert_dialog_leanback_button_panel_side</item>
+        <item name="layout">@android:layout/alert_dialog_leanback</item>
     </style>
 
     <style name="AlertDialog.Leanback.Light">
@@ -33,6 +34,10 @@
 
     <style name="Widget.Leanback.Button.ButtonBar" parent="Widget.Leanback.Button">
         <item name="android:layout_marginStart">10dp</item>
+    </style>
+
+    <style name="Widget.Leanback.Button.ButtonBarGravityStart" parent="Widget.Leanback.Button">
+        <item name="android:layout_marginEnd">10dp</item>
     </style>
 
     <style name="Widget.Leanback.ButtonBar" parent="Widget.Material.ButtonBar">
