@@ -20,6 +20,7 @@ android_test {
         "androidx.test.runner",
         "junit",
         "services.core",
+        "servicestests-utils",
         "truth-prebuilt",
     ],
     platform_apis: true,
