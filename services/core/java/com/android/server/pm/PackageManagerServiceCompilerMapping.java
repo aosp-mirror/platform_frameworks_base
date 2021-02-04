@@ -29,7 +29,8 @@ public class PackageManagerServiceCompilerMapping {
     // Names for compilation reasons.
     public static final String REASON_STRINGS[] = {
         "first-boot",
-        "boot",
+        "boot-after-ota",
+        "post-boot",
         "install",
         "install-fast",
         "install-bulk",
