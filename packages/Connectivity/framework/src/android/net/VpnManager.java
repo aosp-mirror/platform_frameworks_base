@@ -21,6 +21,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
@@ -28,6 +29,8 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.os.RemoteException;
 
+import com.android.internal.net.LegacyVpnInfo;
+import com.android.internal.net.VpnConfig;
 import com.android.internal.net.VpnProfile;
 
 import java.io.IOException;
@@ -157,6 +160,106 @@ public class VpnManager {
     public void stopProvisionedVpnProfile() {
         try {
             mService.stopVpnProfile(mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the VPN configuration for the given user ID.
+     * @hide
+     */
+    @Nullable
+    public VpnConfig getVpnConfig(@UserIdInt int userId) {
+        try {
+            return mService.getVpnConfig(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Prepare for a VPN application.
+     * VPN permissions are checked in the {@link Vpn} class. If the caller is not {@code userId},
+     * {@link android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     *
+     * @param oldPackage Package name of the application which currently controls VPN, which will
+     *                   be replaced. If there is no such application, this should should either be
+     *                   {@code null} or {@link VpnConfig.LEGACY_VPN}.
+     * @param newPackage Package name of the application which should gain control of VPN, or
+     *                   {@code null} to disable.
+     * @param userId User for whom to prepare the new VPN.
+     *
+     * @hide
+     */
+    public boolean prepareVpn(@Nullable String oldPackage, @Nullable String newPackage,
+            int userId) {
+        try {
+            return mService.prepareVpn(oldPackage, newPackage, userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Set whether the VPN package has the ability to launch VPNs without user intervention. This
+     * method is used by system-privileged apps. VPN permissions are checked in the {@link Vpn}
+     * class. If the caller is not {@code userId}, {@link
+     * android.Manifest.permission.INTERACT_ACROSS_USERS_FULL} permission is required.
+     *
+     * @param packageName The package for which authorization state should change.
+     * @param userId User for whom {@code packageName} is installed.
+     * @param vpnType The {@link VpnManager.VpnType} constant representing what class of VPN
+     *     permissions should be granted. When unauthorizing an app, {@link
+     *     VpnManager.TYPE_VPN_NONE} should be used.
+     * @hide
+     */
+    public void setVpnPackageAuthorization(
+            String packageName, int userId, @VpnManager.VpnType int vpnType) {
+        try {
+            mService.setVpnPackageAuthorization(packageName, userId, vpnType);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Return the legacy VPN information for the specified user ID.
+     * @hide
+     */
+    public LegacyVpnInfo getLegacyVpnInfo(@UserIdInt int userId) {
+        try {
+            return mService.getLegacyVpnInfo(userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Starts a legacy VPN.
+     * @hide
+     */
+    public void startLegacyVpn(VpnProfile profile) {
+        try {
+            mService.startLegacyVpn(profile);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Informs the service that legacy lockdown VPN state should be updated (e.g., if its keystore
+     * entry has been updated). If the LockdownVpn mechanism is enabled, updates the vpn
+     * with a reload of its profile.
+     *
+     * <p>This method can only be called by the system UID
+     * @return a boolean indicating success
+     *
+     * @hide
+     */
+    public boolean updateLockdownVpn() {
+        try {
+            return mService.updateLockdownVpn();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
