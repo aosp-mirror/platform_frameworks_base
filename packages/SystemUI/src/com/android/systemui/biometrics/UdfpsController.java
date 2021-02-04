@@ -45,6 +45,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import javax.inject.Inject;
@@ -62,7 +63,7 @@ import javax.inject.Inject;
  */
 @SuppressWarnings("deprecation")
 @SysUISingleton
-public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
+public class UdfpsController implements DozeReceiver, HbmCallback {
     private static final String TAG = "UdfpsController";
     private static final long AOD_INTERRUPT_TIMEOUT_MILLIS = 1000;
 
@@ -155,7 +156,7 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
             WindowManager windowManager,
             @NonNull StatusBarStateController statusBarStateController,
             @Main DelayableExecutor fgExecutor,
-            @NonNull ScrimController scrimController) {
+            @Nullable StatusBar statusBar) {
         mContext = context;
         // The fingerprint manager is queried for UDFPS before this class is constructed, so the
         // fingerprint manager should never be null.
@@ -186,7 +187,7 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
         mView.setSensorProperties(mSensorProps);
         mView.setHbmCallback(this);
 
-        scrimController.addScrimChangedListener(mView);
+        statusBar.addExpansionChangedListener(mView);
         statusBarStateController.addCallback(mView);
 
         mFingerprintManager.setUdfpsOverlayController(new UdfpsOverlayController());
@@ -242,12 +243,15 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
         }
     }
 
-    private WindowManager.LayoutParams computeLayoutParams() {
+    private WindowManager.LayoutParams computeLayoutParams(@Nullable UdfpsAnimation animation) {
+        final int paddingX = animation != null ? animation.getPaddingX() : 0;
+        final int paddingY = animation != null ? animation.getPaddingY() : 0;
+
         // Default dimensions assume portrait mode.
-        mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius;
-        mCoreLayoutParams.y = mSensorProps.sensorLocationY - mSensorProps.sensorRadius;
-        mCoreLayoutParams.height = 2 * mSensorProps.sensorRadius;
-        mCoreLayoutParams.width = 2 * mSensorProps.sensorRadius;
+        mCoreLayoutParams.x = mSensorProps.sensorLocationX - mSensorProps.sensorRadius - paddingX;
+        mCoreLayoutParams.y = mSensorProps.sensorLocationY - mSensorProps.sensorRadius - paddingY;
+        mCoreLayoutParams.height = 2 * mSensorProps.sensorRadius + 2 * paddingX;
+        mCoreLayoutParams.width = 2 * mSensorProps.sensorRadius + 2 * paddingY;
 
         Point p = new Point();
         // Gets the size based on the current rotation of the display.
@@ -289,8 +293,9 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
             if (!mIsOverlayShowing) {
                 try {
                     Log.v(TAG, "showUdfpsOverlay | adding window");
-                    mView.setUdfpsAnimation(getUdfpsAnimationForReason(reason));
-                    mWindowManager.addView(mView, computeLayoutParams());
+                    final UdfpsAnimation animation = getUdfpsAnimationForReason(reason);
+                    mView.setUdfpsAnimation(animation);
+                    mWindowManager.addView(mView, computeLayoutParams(animation));
                     mView.setOnTouchListener(mOnTouchListener);
                     mIsOverlayShowing = true;
                 } catch (RuntimeException e) {
@@ -374,9 +379,8 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
 
     // This method can be called from the UI thread.
     private void onFingerDown(int x, int y, float minor, float major) {
-        mView.setOnIlluminatedRunnable(
-                () -> mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major));
-        mView.startIllumination();
+        mView.startIllumination(() ->
+                mFingerprintManager.onPointerDown(mSensorProps.sensorId, x, y, minor, major));
     }
 
     // This method can be called from the UI thread.
@@ -386,13 +390,13 @@ public class UdfpsController implements UdfpsView.HbmCallback, DozeReceiver {
     }
 
     @Override
-    public void enableHbm(Surface surface) {
+    public void enableHbm(@NonNull Surface surface) {
         // Do nothing. This method can be implemented for devices that require the high-brightness
         // mode for fingerprint illumination.
     }
 
     @Override
-    public void disableHbm(Surface surface) {
+    public void disableHbm(@NonNull Surface surface) {
         // Do nothing. This method can be implemented for devices that require the high-brightness
         // mode for fingerprint illumination.
     }

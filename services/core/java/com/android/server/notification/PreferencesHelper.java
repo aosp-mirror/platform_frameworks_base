@@ -1419,8 +1419,10 @@ public class PreferencesHelper implements RankingConfig {
                             conversation.setPkg(p.pkg);
                             conversation.setUid(p.uid);
                             conversation.setNotificationChannel(nc);
-                            conversation.setParentChannelLabel(
-                                    p.channels.get(nc.getParentChannelId()).getName());
+                            NotificationChannel parent = p.channels.get(nc.getParentChannelId());
+                            conversation.setParentChannelLabel(parent == null
+                                    ? null
+                                    : parent.getName());
                             boolean blockedByGroup = false;
                             if (nc.getGroup() != null) {
                                 NotificationChannelGroup group = p.groups.get(nc.getGroup());

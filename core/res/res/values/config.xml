@@ -517,6 +517,9 @@
     <!-- Flag indicating whether we should enable smart battery. -->
     <bool name="config_smart_battery_available">false</bool>
 
+    <!-- Flag indicating whether we should enable camera-based autorotate -->
+    <bool name="config_camera_autorotate">false</bool>
+
     <!-- Fast brightness animation ramp rate in brightness units per second-->
     <integer translatable="false" name="config_brightness_ramp_rate_fast">180</integer>
 
@@ -660,9 +663,15 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
-    <!-- The device state (supplied by DeviceStateManager) that should be treated as folded by the
-         display fold controller. Default is DeviceStateManager.INVALID_DEVICE_STATE. -->
-    <integer name="config_foldedDeviceState">-1</integer>
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as folded by the
+         display fold controller. Default is empty. -->
+    <integer-array name="config_foldedDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
 
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
@@ -4404,6 +4413,15 @@
     <!--If true, allows the device to load udfps components on older HIDL implementations -->
     <bool name="allow_test_udfps" translatable="false" >false</bool>
 
+    <!-- The properties of a UDFPS sensor in pixels, in the order listed below: -->
+    <integer-array name="config_udfps_sensor_props" translatable="false" >
+      <!--
+        <item>sensorLocationX</item>
+        <item>sensorLocationY</item>
+        <item>sensorRadius</item>
+      -->
+    </integer-array>
+
     <!-- Messages that should not be shown to the user during face auth enrollment. This should be
          used to hide messages that may be too chatty or messages that the user can't do much about.
          Entries are defined in android.hardware.biometrics.face@1.0 types.hal -->
@@ -4645,6 +4663,23 @@
          corners of the activity won't be rounded. -->
     <integer name="config_letterboxActivityCornersRadius">0</integer>
 
+    <!-- Corners appearance of the letterbox background.
+            0 - Solid background using color specified in R.color.config_letterboxBackgroundColor.
+            1 - Color specified in R.attr.colorBackground for the letterboxed application.
+            2 - Color specified in R.attr.colorBackgroundFloating for the letterboxed application.
+        If given value is outside of this range, the option 0 will be assummed. -->
+    <integer name="config_letterboxBackgroundType">0</integer>
+
+    <!-- Color of the letterbox background if one following conditions is true
+            - Option 0 is selected for R.integer.config_letterboxBackgroundType.
+            - Option 1 is selected for R.integer.config_letterboxBackgroundType and
+            R.attr.colorBackground isn't specified for the app.
+            - Option 2 is selected for R.integer.config_letterboxBackgroundType and
+            R.attr.colorBackgroundFloating isn't specified for the app.
+        Defaults to black if not specified.
+     -->
+    <color name="config_letterboxBackgroundColor">#000</color>
+
     <!-- If true, hide the display cutout with display area -->
     <bool name="config_hideDisplayCutoutWithDisplayArea">false</bool>
 
@@ -4679,4 +4714,7 @@
 
     <!-- Whether to select voice/data/sms preference without user confirmation -->
     <bool name="config_voice_data_sms_auto_fallback">false</bool>
+
+    <!-- Whether to enable the one-handed keyguard on the lock screen for wide-screen devices. -->
+    <bool name="config_enableOneHandedKeyguard">false</bool>
 </resources>

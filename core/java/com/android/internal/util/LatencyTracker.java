@@ -14,6 +14,7 @@
 
 package com.android.internal.util;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.Build;
 import android.os.SystemClock;
@@ -23,9 +24,12 @@ import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseLongArray;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.EventLogTags;
 import com.android.internal.os.BackgroundThread;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -91,6 +95,34 @@ public class LatencyTracker {
      */
     public static final int ACTION_START_RECENTS_ANIMATION = 8;
 
+    private static final int[] ACTIONS_ALL = {
+        ACTION_EXPAND_PANEL,
+        ACTION_TOGGLE_RECENTS,
+        ACTION_FINGERPRINT_WAKE_AND_UNLOCK,
+        ACTION_CHECK_CREDENTIAL,
+        ACTION_CHECK_CREDENTIAL_UNLOCKED,
+        ACTION_TURN_ON_SCREEN,
+        ACTION_ROTATE_SCREEN,
+        ACTION_FACE_WAKE_AND_UNLOCK,
+        ACTION_START_RECENTS_ANIMATION
+    };
+
+    /** @hide */
+    @IntDef({
+        ACTION_EXPAND_PANEL,
+        ACTION_TOGGLE_RECENTS,
+        ACTION_FINGERPRINT_WAKE_AND_UNLOCK,
+        ACTION_CHECK_CREDENTIAL,
+        ACTION_CHECK_CREDENTIAL_UNLOCKED,
+        ACTION_TURN_ON_SCREEN,
+        ACTION_ROTATE_SCREEN,
+        ACTION_FACE_WAKE_AND_UNLOCK,
+        ACTION_START_RECENTS_ANIMATION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Action {
+    }
+
     private static final int[] STATSD_ACTION = new int[]{
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_EXPAND_PANEL,
             FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_TOGGLE_RECENTS,
@@ -105,9 +137,14 @@ public class LatencyTracker {
 
     private static LatencyTracker sLatencyTracker;
 
+    private final Object mLock = new Object();
     private final SparseLongArray mStartRtc = new SparseLongArray();
-    private volatile int mSamplingInterval;
-    private volatile boolean mEnabled;
+    @GuardedBy("mLock")
+    private final int[] mTraceThresholdPerAction = new int[ACTIONS_ALL.length];
+    @GuardedBy("mLock")
+    private int mSamplingInterval;
+    @GuardedBy("mLock")
+    private boolean mEnabled;
 
     public static LatencyTracker getInstance(Context context) {
         if (sLatencyTracker == null) {
@@ -132,20 +169,26 @@ public class LatencyTracker {
     }
 
     private void updateProperties(DeviceConfig.Properties properties) {
-        mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
-                DEFAULT_SAMPLING_INTERVAL);
-        mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
+        synchronized (mLock) {
+            mSamplingInterval = properties.getInt(SETTINGS_SAMPLING_INTERVAL_KEY,
+                    DEFAULT_SAMPLING_INTERVAL);
+            mEnabled = properties.getBoolean(SETTINGS_ENABLED_KEY, DEFAULT_ENABLED);
+            for (int action : ACTIONS_ALL) {
+                mTraceThresholdPerAction[action] =
+                    properties.getInt(getTraceTriggerNameForAction(action), -1);
+            }
+        }
     }
 
     /**
      * A helper method to translate action type to name.
      *
-     * @param action the action type defined in AtomsProto.java
+     * @param atomsProtoAction the action type defined in AtomsProto.java
      * @return the name of the action
      */
-    public static String getNameOfAction(int action) {
+    public static String getNameOfAction(int atomsProtoAction) {
         // Defined in AtomsProto.java
-        switch (action) {
+        switch (atomsProtoAction) {
             case 0:
                 return "UNKNOWN";
             case 1:
@@ -171,8 +214,12 @@ public class LatencyTracker {
         }
     }
 
-    private static String getTraceNameOfAction(int action) {
+    private static String getTraceNameOfAction(@Action int action) {
         return "L<" + getNameOfAction(STATSD_ACTION[action]) + ">";
+    }
+
+    private static String getTraceTriggerNameForAction(@Action int action) {
+        return "latency-tracker-" + getNameOfAction(STATSD_ACTION[action]);
     }
 
     public static boolean isEnabled(Context ctx) {
@@ -180,7 +227,9 @@ public class LatencyTracker {
     }
 
     public boolean isEnabled() {
-        return mEnabled;
+        synchronized (mLock) {
+            return mEnabled;
+        }
     }
 
     /**
@@ -188,7 +237,7 @@ public class LatencyTracker {
      *
      * @param action The action to start. One of the ACTION_* values.
      */
-    public void onActionStart(int action) {
+    public void onActionStart(@Action int action) {
         if (!isEnabled()) {
             return;
         }
@@ -201,7 +250,7 @@ public class LatencyTracker {
      *
      * @param action The action to end. One of the ACTION_* values.
      */
-    public void onActionEnd(int action) {
+    public void onActionEnd(@Action int action) {
         if (!isEnabled()) {
             return;
         }
@@ -221,19 +270,30 @@ public class LatencyTracker {
      * @param action   The action to end. One of the ACTION_* values.
      * @param duration The duration of the action in ms.
      */
-    public void logAction(int action, int duration) {
-        boolean shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+    public void logAction(@Action int action, int duration) {
+        boolean shouldSample;
+        int traceThreshold;
+        synchronized (mLock) {
+            shouldSample = ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
+            traceThreshold = mTraceThresholdPerAction[action];
+        }
+
+        if (traceThreshold > 0 && duration >= traceThreshold) {
+            PerfettoTrigger.trigger(getTraceTriggerNameForAction(action));
+        }
+
         logActionDeprecated(action, duration, shouldSample);
     }
 
     /**
      * Logs an action that has started and ended. This needs to be called from the main thread.
      *
-     * @param action          The action to end. One of the ACTION_* values.
-     * @param duration        The duration of the action in ms.
+     * @param action The action to end. One of the ACTION_* values.
+     * @param duration The duration of the action in ms.
      * @param writeToStatsLog Whether to write the measured latency to FrameworkStatsLog.
      */
-    public static void logActionDeprecated(int action, int duration, boolean writeToStatsLog) {
+    public static void logActionDeprecated(
+            @Action int action, int duration, boolean writeToStatsLog) {
         Log.i(TAG, getNameOfAction(STATSD_ACTION[action]) + " latency=" + duration);
         EventLog.writeEvent(EventLogTags.SYSUI_LATENCY, action, duration);
 

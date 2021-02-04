@@ -34,8 +34,11 @@ import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPL
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
-import static com.android.wm.shell.splitscreen.SplitScreen.SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
-import static com.android.wm.shell.splitscreen.SplitScreen.SIDE_STAGE_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -84,8 +87,7 @@ public class DragAndDropPolicy {
     private DragSession mSession;
 
     public DragAndDropPolicy(Context context, SplitScreen splitScreen) {
-        this(context, ActivityTaskManager.getInstance(), splitScreen,
-                new DefaultStarter(context, splitScreen));
+        this(context, ActivityTaskManager.getInstance(), splitScreen, new DefaultStarter(context));
     }
 
     @VisibleForTesting
@@ -94,7 +96,7 @@ public class DragAndDropPolicy {
         mContext = context;
         mActivityTaskManager = activityTaskManager;
         mSplitScreen = splitScreen;
-        mStarter = starter;
+        mStarter = mSplitScreen != null ? mSplitScreen : starter;
     }
 
     /**
@@ -195,39 +197,23 @@ public class DragAndDropPolicy {
             return;
         }
 
-        final ClipDescription description = data.getDescription();
-        final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
-        final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
-        final Intent dragData = mSession.dragData;
         final boolean inSplitScreen = mSplitScreen != null && mSplitScreen.isSplitScreenVisible();
         final boolean leftOrTop = target.type == TYPE_SPLIT_TOP || target.type == TYPE_SPLIT_LEFT;
-        final Bundle opts = dragData.hasExtra(EXTRA_ACTIVITY_OPTIONS)
-                ? dragData.getBundleExtra(EXTRA_ACTIVITY_OPTIONS)
-                : new Bundle();
 
-        if (target.type == TYPE_FULLSCREEN) {
-            // Exit split stages if needed
-            mStarter.exitSplitScreen();
-        } else if (mSplitScreen != null) {
+        @SplitScreen.StageType int stage = STAGE_TYPE_UNDEFINED;
+        @SplitScreen.StagePosition int position = STAGE_POSITION_UNDEFINED;
+        if (target.type != TYPE_FULLSCREEN && mSplitScreen != null) {
             // Update launch options for the split side we are targeting.
-            final int position = leftOrTop
-                    ? SIDE_STAGE_POSITION_TOP_OR_LEFT : SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT;
+            position = leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT;
             if (!inSplitScreen) {
-                // Update the side stage position to match where we want to launch.
-                mSplitScreen.setSideStagePosition(position);
+                // Launch in the side stage if we are not in split-screen already.
+                stage = STAGE_TYPE_SIDE;
             }
-            mSplitScreen.updateActivityOptions(opts, position);
         }
 
-        if (isTask) {
-            mStarter.startTask(dragData.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID), opts);
-        } else if (isShortcut) {
-            mStarter.startShortcut(dragData.getStringExtra(EXTRA_PACKAGE_NAME),
-                    dragData.getStringExtra(EXTRA_SHORTCUT_ID),
-                    opts, dragData.getParcelableExtra(EXTRA_USER));
-        } else {
-            mStarter.startIntent(dragData.getParcelableExtra(EXTRA_PENDING_INTENT), opts);
-        }
+        final ClipDescription description = data.getDescription();
+        final Intent dragData = mSession.dragData;
+        mStarter.startClipDescription(description, dragData, stage, position);
     }
 
     /**
@@ -247,7 +233,6 @@ public class DragAndDropPolicy {
         int runningTaskActType = ACTIVITY_TYPE_STANDARD;
         boolean runningTaskIsResizeable;
         boolean dragItemSupportsSplitscreen;
-        boolean isPhone;
 
         DragSession(Context context, ActivityTaskManager activityTaskManager,
                 DisplayLayout dispLayout, ClipData data) {
@@ -275,7 +260,6 @@ public class DragAndDropPolicy {
             final ActivityInfo info = mInitialDragData.getItemAt(0).getActivityInfo();
             dragItemSupportsSplitscreen = info == null
                     || ActivityInfo.isResizeableMode(info.resizeMode);
-            isPhone = mContext.getResources().getConfiguration().smallestScreenWidthDp < 600;
             dragData = mInitialDragData.getItemAt(0).getIntent();
         }
     }
@@ -284,11 +268,33 @@ public class DragAndDropPolicy {
      * Interface for actually committing the task launches.
      */
     @VisibleForTesting
-    interface Starter {
-        void startTask(int taskId, Bundle activityOptions);
-        void startShortcut(String packageName, String shortcutId, Bundle activityOptions,
-                UserHandle user);
-        void startIntent(PendingIntent intent, Bundle activityOptions);
+    public interface Starter {
+        default void startClipDescription(ClipDescription description, Intent intent,
+                @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position) {
+            final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
+            final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
+            final Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
+                    ? intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS) : new Bundle();
+
+            if (isTask) {
+                final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
+                startTask(taskId, stage, position, opts);
+            } else if (isShortcut) {
+                final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
+                final String id = intent.getStringExtra(EXTRA_SHORTCUT_ID);
+                final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
+                startShortcut(packageName, id, stage, position, opts, user);
+            } else {
+                startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT), stage, position, opts);
+            }
+        }
+        void startTask(int taskId, @SplitScreen.StageType int stage,
+                @SplitScreen.StagePosition int position, @Nullable Bundle options);
+        void startShortcut(String packageName, String shortcutId,
+                @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position,
+                @Nullable Bundle options, UserHandle user);
+        void startIntent(PendingIntent intent, @SplitScreen.StageType int stage,
+                @SplitScreen.StagePosition int position, @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
         void exitSplitScreen();
     }
@@ -299,39 +305,39 @@ public class DragAndDropPolicy {
      */
     private static class DefaultStarter implements Starter {
         private final Context mContext;
-        private final SplitScreen mSplitScreen;
 
-        public DefaultStarter(Context context, SplitScreen splitScreen) {
+        public DefaultStarter(Context context) {
             mContext = context;
-            mSplitScreen = splitScreen;
         }
 
         @Override
-        public void startTask(int taskId, Bundle activityOptions) {
+        public void startTask(int taskId, int stage, int position,
+                @Nullable Bundle options) {
             try {
-                ActivityTaskManager.getService().startActivityFromRecents(taskId, activityOptions);
+                ActivityTaskManager.getService().startActivityFromRecents(taskId, options);
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to launch task", e);
             }
         }
 
         @Override
-        public void startShortcut(String packageName, String shortcutId, Bundle activityOptions,
-                UserHandle user) {
+        public void startShortcut(String packageName, String shortcutId, int stage, int position,
+                @Nullable Bundle options, UserHandle user) {
             try {
                 LauncherApps launcherApps =
                         mContext.getSystemService(LauncherApps.class);
                 launcherApps.startShortcut(packageName, shortcutId, null /* sourceBounds */,
-                        activityOptions, user);
+                        options, user);
             } catch (ActivityNotFoundException e) {
                 Slog.e(TAG, "Failed to launch shortcut", e);
             }
         }
 
         @Override
-        public void startIntent(PendingIntent intent, Bundle activityOptions) {
+        public void startIntent(PendingIntent intent, int stage, int position,
+                @Nullable Bundle options) {
             try {
-                intent.send(null, 0, null, null, null, null, activityOptions);
+                intent.send(null, 0, null, null, null, null, options);
             } catch (PendingIntent.CanceledException e) {
                 Slog.e(TAG, "Failed to launch activity", e);
             }
@@ -339,14 +345,12 @@ public class DragAndDropPolicy {
 
         @Override
         public void enterSplitScreen(int taskId, boolean leftOrTop) {
-            mSplitScreen.moveToSideStage(taskId,
-                    leftOrTop ? SIDE_STAGE_POSITION_TOP_OR_LEFT
-                            : SIDE_STAGE_POSITION_BOTTOM_OR_RIGHT);
+            throw new UnsupportedOperationException("enterSplitScreen not implemented by starter");
         }
 
         @Override
         public void exitSplitScreen() {
-            mSplitScreen.exitSplitScreen();
+            throw new UnsupportedOperationException("exitSplitScreen not implemented by starter");
         }
     }
 

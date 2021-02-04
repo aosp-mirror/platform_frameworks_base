@@ -35,6 +35,8 @@ import android.view.IRotationWatcher.Stub;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowInsetsController;
+import android.view.WindowInsetsController.Behavior;
 import android.view.WindowManagerGlobal;
 import android.view.accessibility.AccessibilityManager;
 
@@ -78,6 +80,7 @@ public class RotationButtonController {
     private Consumer<Integer> mRotWatcherListener;
     private boolean mListenersRegistered = false;
     private boolean mIsNavigationBarShowing;
+    private @Behavior int mBehavior = WindowInsetsController.BEHAVIOR_DEFAULT;
     private boolean mSkipOverrideUserLockPrefsOnce;
     private int mLightIconColor;
     private int mDarkIconColor;
@@ -297,8 +300,8 @@ public class RotationButtonController {
         }
         mRotationButton.updateIcon(mLightIconColor, mDarkIconColor);
 
-        if (mIsNavigationBarShowing) {
-            // The navbar is visible so show the icon right away
+        if (canShowRotationButton()) {
+            // The navbar is visible / it's in visual immersive mode, so show the icon right away
             showAndLogRotationSuggestion();
         } else {
             // If the navbar isn't shown, flag the rotate icon to be shown should the navbar become
@@ -318,12 +321,26 @@ public class RotationButtonController {
     void onNavigationBarWindowVisibilityChange(boolean showing) {
         if (mIsNavigationBarShowing != showing) {
             mIsNavigationBarShowing = showing;
-
-            // If the navbar is visible, show the rotate button if there's a pending suggestion
-            if (showing && mPendingRotationSuggestion) {
-                showAndLogRotationSuggestion();
-            }
+            showPendingRotationButtonIfNeeded();
         }
+    }
+
+    void onBehaviorChanged(@Behavior int behavior) {
+        if (mBehavior != behavior) {
+            mBehavior = behavior;
+            showPendingRotationButtonIfNeeded();
+        }
+    }
+
+    private void showPendingRotationButtonIfNeeded() {
+        if (canShowRotationButton() && mPendingRotationSuggestion) {
+            showAndLogRotationSuggestion();
+        }
+    }
+
+    /** Return true when either the nav bar is visible or it's in visual immersive mode. */
+    private boolean canShowRotationButton() {
+        return mIsNavigationBarShowing || mBehavior == WindowInsetsController.BEHAVIOR_DEFAULT;
     }
 
     public Context getContext() {

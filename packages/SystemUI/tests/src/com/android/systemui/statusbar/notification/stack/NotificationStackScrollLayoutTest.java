@@ -83,6 +83,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
 
     private NotificationStackScrollLayout mStackScroller;  // Normally test this
     private NotificationStackScrollLayout mStackScrollerInternal;  // See explanation below
+    private AmbientState mAmbientState;
 
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
     @Mock private StatusBar mBar;
@@ -123,6 +124,9 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 });
         when(mRemoteInputManager.getController()).thenReturn(mRemoteInputController);
 
+        // Interact with real instance of AmbientState.
+        mAmbientState = new AmbientState(mContext, mNotificationSectionsManager);
+
         // The actual class under test.  You may need to work with this class directly when
         // testing anonymous class members of mStackScroller, like mMenuEventListener,
         // which refer to members of NotificationStackScrollLayout. The spy
@@ -134,7 +138,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mNotificationSectionsManager,
                 mGroupMembershipManger,
                 mGroupExpansionManager,
-                mStatusBarStateController
+                mStatusBarStateController,
+                mAmbientState
         );
         mStackScrollerInternal.initView(getContext(), mKeyguardBypassEnabledProvider,
                 mNotificationSwipeHelper);

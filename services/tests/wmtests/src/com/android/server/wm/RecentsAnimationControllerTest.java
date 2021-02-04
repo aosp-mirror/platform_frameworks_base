@@ -493,7 +493,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         initializeRecentsAnimationController(mController, homeActivity);
 
         // Verify RecentsAnimationController will animate visible leaf task by default.
-        verify(mController).addAnimation(eq(leafTask), anyBoolean(), anyBoolean(), eq(null));
+        verify(mController).addAnimation(eq(leafTask), anyBoolean(), anyBoolean(), any());
         assertTrue(leafTask.isAnimatingByRecents());
 
         // Make sure isAnimatingByRecents will also return true when it called by the parent task.
@@ -541,6 +541,35 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
         verify(transaction).reparent(navToken.getSurfaceControl(), parent.getSurfaceControl());
         verify(navBarFadeAnimationController, never()).fadeWindowToken(anyBoolean());
+    }
+
+    @Test
+    public void testCleanupAnimation_expectExitAnimationDone() {
+        mWm.setRecentsAnimationController(mController);
+        final ActivityRecord homeActivity = createHomeActivity();
+        final ActivityRecord activity = createActivityRecord(mDefaultDisplay);
+        final WindowState win1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "win1");
+        activity.addWindow(win1);
+
+        initializeRecentsAnimationController(mController, homeActivity);
+        mController.startAnimation();
+
+        spyOn(win1);
+        spyOn(win1.mWinAnimator);
+        // Simulate when the window is exiting and cleanupAnimation invoked
+        // (e.g. screen off during RecentsAnimation animating), will expect the window receives
+        // onExitAnimationDone to destroy the surface when the removal is allowed.
+        win1.mWinAnimator.mSurfaceController = mock(WindowSurfaceController.class);
+        win1.mHasSurface = true;
+        win1.mAnimatingExit = true;
+        win1.mRemoveOnExit = true;
+        win1.mWindowRemovalAllowed = true;
+        mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
+        verify(win1).onAnimationFinished(eq(ANIMATION_TYPE_RECENTS), any());
+        verify(win1).onExitAnimationDone();
+        verify(win1).destroySurface(eq(false), eq(false));
+        assertFalse(win1.mAnimatingExit);
+        assertFalse(win1.mHasSurface);
     }
 
     private ActivityRecord createHomeActivity() {

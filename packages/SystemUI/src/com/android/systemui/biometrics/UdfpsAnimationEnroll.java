@@ -28,7 +28,6 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.android.internal.graphics.ColorUtils;
 import com.android.settingslib.Utils;
 import com.android.systemui.R;
 
@@ -81,15 +80,19 @@ public class UdfpsAnimationEnroll extends UdfpsAnimation {
     }
 
     @Override
+    public int getPaddingX() {
+        return (int) Math.ceil(SHADOW_RADIUS);
+    }
+
+    @Override
+    public int getPaddingY() {
+        return (int) Math.ceil(SHADOW_RADIUS);
+    }
+
+    @Override
     public void setAlpha(int alpha) {
         super.setAlpha(alpha);
-
-        // Gradually fade into the notification shade color. This needs to be done because the
-        // UDFPS view is drawn on a layer on top of the notification shade
-        final float percent = alpha / 255.f;
-        mSensorPaint.setColor(ColorUtils.blendARGB(mNotificationShadeColor, Color.WHITE, percent));
-        mSensorPaint.setShadowLayer(SHADOW_RADIUS, 0, 0,
-                ColorUtils.blendARGB(mNotificationShadeColor, Color.BLACK, percent));
+        mSensorPaint.setAlpha(alpha);
     }
 
     @Override

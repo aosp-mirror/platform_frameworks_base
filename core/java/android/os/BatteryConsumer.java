@@ -216,16 +216,6 @@ public abstract class BatteryConsumer {
         }
 
         /**
-         * Sets the total amount of power consumed since BatteryStats reset, mAh.
-         */
-        @SuppressWarnings("unchecked")
-        @NonNull
-        public T setConsumedPower(double consumedPower) {
-            mPowerComponentsBuilder.setTotalPowerConsumed(consumedPower);
-            return (T) this;
-        }
-
-        /**
          * Sets the amount of time used by the specified component, e.g. CPU, WiFi etc.
          *
          * @param componentId              The ID of the time component, e.g.

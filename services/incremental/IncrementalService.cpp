@@ -1091,7 +1091,7 @@ void IncrementalService::setUidReadTimeouts(
         maxPendingTimeUs = std::max(maxPendingTimeUs, microseconds(timeouts.maxPendingTimeUs));
     }
     if (maxPendingTimeUs < Constants::minPerUidTimeout) {
-        LOG(ERROR) << "Skip setting timeouts: maxPendingTime < Constants::minPerUidTimeout"
+        LOG(ERROR) << "Skip setting  read timeouts (maxPendingTime < Constants::minPerUidTimeout): "
                    << duration_cast<milliseconds>(maxPendingTimeUs).count() << "ms < "
                    << Constants::minPerUidTimeout.count() << "ms";
         return;

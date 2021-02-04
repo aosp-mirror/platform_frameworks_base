@@ -35,6 +35,8 @@ public class BatterySipper implements Comparable<BatterySipper> {
     /**
      * Smeared power from screen usage.
      * We split the screen usage power and smear them among apps, based on activity time.
+     * The actual screen usage power may be measured or estimated, affecting the granularity and
+     * accuracy of the smearing, but the smearing algorithm is essentially the same.
      */
     public double screenPowerMah;
 

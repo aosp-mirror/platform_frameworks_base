@@ -75,7 +75,8 @@ class NonResizableLaunchInLegacySplitScreen(
                                         LAUNCHER_PACKAGE_NAME,
                                         LETTERBOX_NAME,
                                         nonResizeableApp.defaultWindowName,
-                                        splitScreenApp.defaultWindowName)
+                                        splitScreenApp.defaultWindowName),
+                            bugId = 178447631
                         )
                     }
                     windowManagerTrace {
@@ -86,7 +87,8 @@ class NonResizableLaunchInLegacySplitScreen(
                                         LAUNCHER_PACKAGE_NAME,
                                         LETTERBOX_NAME,
                                         nonResizeableApp.defaultWindowName,
-                                        splitScreenApp.defaultWindowName)
+                                        splitScreenApp.defaultWindowName),
+                            bugId = 178447631
                         )
                     }
                 }

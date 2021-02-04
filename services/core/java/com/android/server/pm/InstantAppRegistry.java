@@ -470,23 +470,34 @@ class InstantAppRegistry implements Watchable, Snappable {
         return instantGrantList.get(instantAppId);
     }
 
+    /**
+     * Allows an app to see an instant app.
+     *
+     * @param userId the userId in which this access is being granted
+     * @param intent when provided, this serves as the intent that caused
+     *               this access to be granted
+     * @param recipientUid the uid of the app receiving visibility
+     * @param instantAppId the app ID of the instant app being made visible
+     *                      to the recipient
+     * @return {@code true} if access is granted.
+     */
     @GuardedBy("mService.mLock")
-    public void grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
+    public boolean grantInstantAccessLPw(@UserIdInt int userId, @Nullable Intent intent,
             int recipientUid, int instantAppId) {
         if (mInstalledInstantAppUids == null) {
-            return;     // no instant apps installed; no need to grant
+            return false;     // no instant apps installed; no need to grant
         }
         WatchedSparseBooleanArray instantAppList = mInstalledInstantAppUids.get(userId);
         if (instantAppList == null || !instantAppList.get(instantAppId)) {
-            return;     // instant app id isn't installed; no need to grant
+            return false;     // instant app id isn't installed; no need to grant
         }
         if (instantAppList.get(recipientUid)) {
-            return;     // target app id is an instant app; no need to grant
+            return false;     // target app id is an instant app; no need to grant
         }
         if (intent != null && Intent.ACTION_VIEW.equals(intent.getAction())) {
             final Set<String> categories = intent.getCategories();
             if (categories != null && categories.contains(Intent.CATEGORY_BROWSABLE)) {
-                return;  // launched via VIEW/BROWSABLE intent; no need to grant
+                return false;  // launched via VIEW/BROWSABLE intent; no need to grant
             }
         }
         WatchedSparseArray<WatchedSparseBooleanArray> targetAppList = mInstantGrants.get(userId);
@@ -500,6 +511,7 @@ class InstantAppRegistry implements Watchable, Snappable {
             targetAppList.put(recipientUid, instantGrantList);
         }
         instantGrantList.put(instantAppId, true /*granted*/);
+        return true;
     }
 
     @GuardedBy("mService.mLock")

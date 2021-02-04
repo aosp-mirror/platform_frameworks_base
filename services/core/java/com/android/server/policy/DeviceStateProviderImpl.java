@@ -34,10 +34,11 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
+import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
 import com.android.server.policy.devicestate.config.Conditions;
-import com.android.server.policy.devicestate.config.DeviceState;
 import com.android.server.policy.devicestate.config.DeviceStateConfig;
 import com.android.server.policy.devicestate.config.LidSwitchCondition;
 import com.android.server.policy.devicestate.config.NumericRange;
@@ -54,6 +55,7 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BooleanSupplier;
@@ -82,7 +84,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private static final BooleanSupplier TRUE_BOOLEAN_SUPPLIER = () -> true;
 
     @VisibleForTesting
-    static final int DEFAULT_DEVICE_STATE = 0;
+    static final DeviceState DEFAULT_DEVICE_STATE = new DeviceState(0, "DEFAULT");
 
     private static final String VENDOR_CONFIG_FILE_PATH = "etc/devicestate/";
     private static final String DATA_CONFIG_FILE_PATH = "system/devicestate/";
@@ -116,31 +118,38 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     @VisibleForTesting
     static DeviceStateProviderImpl createFromConfig(@NonNull Context context,
             @Nullable ReadableConfig readableConfig) {
-        SparseArray<Conditions> conditionsForState = new SparseArray<>();
+        List<DeviceState> deviceStateList = new ArrayList<>();
+        List<Conditions> conditionsList = new ArrayList<>();
+
         if (readableConfig != null) {
             DeviceStateConfig config = parseConfig(readableConfig);
             if (config != null) {
-                for (DeviceState stateConfig : config.getDeviceState()) {
-                    int state = stateConfig.getIdentifier().intValue();
-                    Conditions conditions = stateConfig.getConditions();
-                    conditionsForState.put(state, conditions);
+                for (com.android.server.policy.devicestate.config.DeviceState stateConfig :
+                        config.getDeviceState()) {
+                    final int state = stateConfig.getIdentifier().intValue();
+                    final String name = stateConfig.getName() == null ? "" : stateConfig.getName();
+                    deviceStateList.add(new DeviceState(state, name));
+
+                    final Conditions condition = stateConfig.getConditions();
+                    conditionsList.add(condition);
                 }
             }
         }
 
-        if (conditionsForState.size() == 0) {
-            conditionsForState.put(DEFAULT_DEVICE_STATE, null);
+        if (deviceStateList.size() == 0) {
+            deviceStateList.add(DEFAULT_DEVICE_STATE);
+            conditionsList.add(null);
         }
-        return new DeviceStateProviderImpl(context, conditionsForState);
+        return new DeviceStateProviderImpl(context, deviceStateList, conditionsList);
     }
 
     // Lock for internal state.
     private final Object mLock = new Object();
     private final Context mContext;
-    // List of supported states in ascending order.
-    private final int[] mOrderedStates;
-    // Map of state to a boolean supplier that returns true when all required conditions are met for
-    // the device to be in the state.
+    // List of supported states in ascending order based on their identifier.
+    private final DeviceState[] mOrderedStates;
+    // Map of state identifier to a boolean supplier that returns true when all required conditions
+    // are met for the device to be in the state.
     private final SparseArray<BooleanSupplier> mStateConditions;
 
     @Nullable
@@ -155,12 +164,16 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
     private final Map<Sensor, SensorEvent> mLatestSensorEvent = new ArrayMap<>();
 
     private DeviceStateProviderImpl(@NonNull Context context,
-            @NonNull SparseArray<Conditions> conditionsForState) {
+            @NonNull List<DeviceState> deviceStates,
+            @NonNull List<Conditions> stateConditions) {
+        Preconditions.checkArgument(deviceStates.size() == stateConditions.size(),
+                "Number of device states must be equal to the number of device state conditions.");
+
         mContext = context;
-        mOrderedStates = new int[conditionsForState.size()];
-        for (int i = 0; i < conditionsForState.size(); i++) {
-            mOrderedStates[i] = conditionsForState.keyAt(i);
-        }
+
+        DeviceState[] orderedStates = deviceStates.toArray(new DeviceState[deviceStates.size()]);
+        Arrays.sort(orderedStates, Comparator.comparingInt(DeviceState::getIdentifier));
+        mOrderedStates = orderedStates;
 
         // Whether or not this instance should register to receive lid switch notifications from
         // InputManagerInternal. If there are no device state conditions that are based on the lid
@@ -171,9 +184,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
         final ArraySet<Sensor> sensorsToListenTo = new ArraySet<>();
 
         mStateConditions = new SparseArray<>();
-        for (int i = 0; i < mOrderedStates.length; i++) {
-            int state = mOrderedStates[i];
-            Conditions conditions = conditionsForState.get(state);
+        for (int i = 0; i < stateConditions.size(); i++) {
+            final int state = deviceStates.get(i).getIdentifier();
+            final Conditions conditions = stateConditions.get(i);
             if (conditions == null) {
                 mStateConditions.put(state, TRUE_BOOLEAN_SUPPLIER);
                 continue;
@@ -261,7 +274,7 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
 
     /** Notifies the listener that the set of supported device states has changed. */
     private void notifySupportedStatesChanged() {
-        int[] supportedStates;
+        DeviceState[] supportedStates;
         synchronized (mLock) {
             if (mListener == null) {
                 return;
@@ -281,9 +294,9 @@ public final class DeviceStateProviderImpl implements DeviceStateProvider,
                 return;
             }
 
-            int newState = mOrderedStates[0];
+            int newState = mOrderedStates[0].getIdentifier();
             for (int i = 0; i < mOrderedStates.length; i++) {
-                int state = mOrderedStates[i];
+                int state = mOrderedStates[i].getIdentifier();
                 if (mStateConditions.get(state).getAsBoolean()) {
                     newState = state;
                     break;

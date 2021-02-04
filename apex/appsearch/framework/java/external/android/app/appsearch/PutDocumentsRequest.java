@@ -16,8 +16,8 @@
 
 package android.app.appsearch;
 
+
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 
 import com.android.internal.util.Preconditions;
 
@@ -41,7 +41,7 @@ public final class PutDocumentsRequest {
 
     /** Returns the documents that are part of this request. */
     @NonNull
-    public List<GenericDocument> getDocuments() {
+    public List<GenericDocument> getGenericDocuments() {
         return Collections.unmodifiableList(mDocuments);
     }
 
@@ -55,17 +55,15 @@ public final class PutDocumentsRequest {
         private boolean mBuilt = false;
 
         /** Adds one or more {@link GenericDocument} objects to the request. */
-        @SuppressLint("MissingGetterMatchingBuilder") // Merged list available from getDocuments()
         @NonNull
-        public Builder addGenericDocument(@NonNull GenericDocument... documents) {
+        public Builder addGenericDocuments(@NonNull GenericDocument... documents) {
             Preconditions.checkNotNull(documents);
-            return addGenericDocument(Arrays.asList(documents));
+            return addGenericDocuments(Arrays.asList(documents));
         }
 
         /** Adds a collection of {@link GenericDocument} objects to the request. */
-        @SuppressLint("MissingGetterMatchingBuilder") // Merged list available from getDocuments()
         @NonNull
-        public Builder addGenericDocument(
+        public Builder addGenericDocuments(
                 @NonNull Collection<? extends GenericDocument> documents) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             Preconditions.checkNotNull(documents);

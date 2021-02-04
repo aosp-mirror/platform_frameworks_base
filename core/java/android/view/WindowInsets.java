@@ -82,6 +82,7 @@ public final class WindowInsets {
     @Nullable private Rect mTempRect;
     private final boolean mIsRound;
     @Nullable private final DisplayCutout mDisplayCutout;
+    @Nullable private final RoundedCorners mRoundedCorners;
 
     /**
      * In multi-window we force show the navigation bar. Because we don't want that the surface size
@@ -125,11 +126,12 @@ public final class WindowInsets {
      * @hide
      * @deprecated Use {@link WindowInsets(SparseArray, SparseArray, boolean, boolean, DisplayCutout)}
      */
-    public WindowInsets(Rect systemWindowInsetsRect, Rect stableInsetsRect,
-            boolean isRound, boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
+    @Deprecated
+    public WindowInsets(Rect systemWindowInsetsRect, Rect stableInsetsRect, boolean isRound,
+            boolean alwaysConsumeSystemBars, DisplayCutout displayCutout) {
         this(createCompatTypeMap(systemWindowInsetsRect), createCompatTypeMap(stableInsetsRect),
                 createCompatVisibilityMap(createCompatTypeMap(systemWindowInsetsRect)),
-                isRound, alwaysConsumeSystemBars, displayCutout, systemBars(),
+                isRound, alwaysConsumeSystemBars, displayCutout, null, systemBars(),
                 false /* compatIgnoreVisibility */);
     }
 
@@ -150,7 +152,8 @@ public final class WindowInsets {
             boolean[] typeVisibilityMap,
             boolean isRound,
             boolean alwaysConsumeSystemBars, DisplayCutout displayCutout,
-            @InsetsType int compatInsetsTypes, boolean compatIgnoreVisibility) {
+            RoundedCorners roundedCorners, @InsetsType int compatInsetsTypes,
+            boolean compatIgnoreVisibility) {
         mSystemWindowInsetsConsumed = typeInsetsMap == null;
         mTypeInsetsMap = mSystemWindowInsetsConsumed
                 ? new Insets[SIZE]
@@ -170,6 +173,8 @@ public final class WindowInsets {
         mDisplayCutoutConsumed = displayCutout == null;
         mDisplayCutout = (mDisplayCutoutConsumed || displayCutout.isEmpty())
                 ? null : displayCutout;
+
+        mRoundedCorners = roundedCorners;
     }
 
     /**
@@ -182,6 +187,7 @@ public final class WindowInsets {
                 src.mStableInsetsConsumed ? null : src.mTypeMaxInsetsMap,
                 src.mTypeVisibilityMap, src.mIsRound,
                 src.mAlwaysConsumeSystemBars, displayCutoutCopyConstructorArgument(src),
+                src.mRoundedCorners,
                 src.mCompatInsetsTypes,
                 src.mCompatIgnoreVisibility);
     }
@@ -235,7 +241,7 @@ public final class WindowInsets {
     @UnsupportedAppUsage
     public WindowInsets(Rect systemWindowInsets) {
         this(createCompatTypeMap(systemWindowInsets), null, new boolean[SIZE], false, false, null,
-                systemBars(), false /* compatIgnoreVisibility */);
+                null, systemBars(), false /* compatIgnoreVisibility */);
     }
 
     /**
@@ -466,7 +472,7 @@ public final class WindowInsets {
     public boolean hasInsets() {
         return !getInsets(mTypeInsetsMap, all()).equals(Insets.NONE)
                 || !getInsets(mTypeMaxInsetsMap, all()).equals(Insets.NONE)
-                || mDisplayCutout != null;
+                || mDisplayCutout != null || mRoundedCorners != null;
     }
 
     /**
@@ -487,6 +493,23 @@ public final class WindowInsets {
     }
 
     /**
+     * Returns the {@link RoundedCorner} of the given position if there is one.
+     *
+     * @param position the position of the rounded corner on the display. The value should be one of
+     *                 the following:
+     *                 {@link RoundedCorner#POSITION_TOP_LEFT},
+     *                 {@link RoundedCorner#POSITION_TOP_RIGHT},
+     *                 {@link RoundedCorner#POSITION_BOTTOM_RIGHT},
+     *                 {@link RoundedCorner#POSITION_BOTTOM_LEFT}.
+     * @return the rounded corner of the given position. Returns {@code null} if there is none or
+     *         the rounded corner area is not inside the application's bounds.
+     */
+    @Nullable
+    public RoundedCorner getRoundedCorner(@RoundedCorner.Position int position) {
+        return mRoundedCorners == null ? null : mRoundedCorners.getRoundedCorner(position);
+    }
+
+    /**
      * Returns a copy of this WindowInsets with the cutout fully consumed.
      *
      * @return A modified copy of this WindowInsets
@@ -501,7 +524,7 @@ public final class WindowInsets {
                 mStableInsetsConsumed ? null : mTypeMaxInsetsMap,
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
-                null /* displayCutout */,
+                null /* displayCutout */, mRoundedCorners,
                 mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
@@ -553,7 +576,7 @@ public final class WindowInsets {
                 mTypeVisibilityMap,
                 mIsRound, mAlwaysConsumeSystemBars,
                 displayCutoutCopyConstructorArgument(this),
-                mCompatInsetsTypes, mCompatIgnoreVisibility);
+                mRoundedCorners, mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
     // TODO(b/119190588): replace @code with @link below
@@ -856,6 +879,8 @@ public final class WindowInsets {
 
         result.append(mDisplayCutout != null ? "cutout=" + mDisplayCutout : "");
         result.append("\n    ");
+        result.append(mRoundedCorners != null ? "roundedCorners=" + mRoundedCorners : "");
+        result.append("\n    ");
         result.append(isRound() ? "round" : "");
         result.append("}");
         return result.toString();
@@ -947,6 +972,9 @@ public final class WindowInsets {
                         : mDisplayCutout == null
                                 ? DisplayCutout.NO_CUTOUT
                                 : mDisplayCutout.inset(left, top, right, bottom),
+                mRoundedCorners == null
+                        ? RoundedCorners.NO_ROUNDED_CORNERS
+                        : mRoundedCorners.inset(left, top, right, bottom),
                 mCompatInsetsTypes, mCompatIgnoreVisibility);
     }
 
@@ -964,13 +992,14 @@ public final class WindowInsets {
                 && Arrays.equals(mTypeInsetsMap, that.mTypeInsetsMap)
                 && Arrays.equals(mTypeMaxInsetsMap, that.mTypeMaxInsetsMap)
                 && Arrays.equals(mTypeVisibilityMap, that.mTypeVisibilityMap)
-                && Objects.equals(mDisplayCutout, that.mDisplayCutout);
+                && Objects.equals(mDisplayCutout, that.mDisplayCutout)
+                && Objects.equals(mRoundedCorners, that.mRoundedCorners);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(Arrays.hashCode(mTypeInsetsMap), Arrays.hashCode(mTypeMaxInsetsMap),
-                Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout,
+                Arrays.hashCode(mTypeVisibilityMap), mIsRound, mDisplayCutout, mRoundedCorners,
                 mAlwaysConsumeSystemBars, mSystemWindowInsetsConsumed, mStableInsetsConsumed,
                 mDisplayCutoutConsumed);
     }
@@ -1032,6 +1061,7 @@ public final class WindowInsets {
         private boolean mStableInsetsConsumed = true;
 
         private DisplayCutout mDisplayCutout;
+        private RoundedCorners mRoundedCorners = RoundedCorners.NO_ROUNDED_CORNERS;
 
         private boolean mIsRound;
         private boolean mAlwaysConsumeSystemBars;
@@ -1057,6 +1087,7 @@ public final class WindowInsets {
             mSystemInsetsConsumed = insets.mSystemWindowInsetsConsumed;
             mStableInsetsConsumed = insets.mStableInsetsConsumed;
             mDisplayCutout = displayCutoutCopyConstructorArgument(insets);
+            mRoundedCorners = insets.mRoundedCorners;
             mIsRound = insets.mIsRound;
             mAlwaysConsumeSystemBars = insets.mAlwaysConsumeSystemBars;
         }
@@ -1262,6 +1293,29 @@ public final class WindowInsets {
 
         /** @hide */
         @NonNull
+        public Builder setRoundedCorners(RoundedCorners roundedCorners) {
+            mRoundedCorners = roundedCorners != null
+                    ? roundedCorners : RoundedCorners.NO_ROUNDED_CORNERS;
+            return this;
+        }
+
+        /**
+         * Sets the rounded corner of given position.
+         *
+         * @see #getRoundedCorner(int)
+         * @param position the position of this rounded corner
+         * @param roundedCorner the rounded corner or null if there is none
+         * @return itself
+         */
+        @NonNull
+        public Builder setRoundedCorner(@RoundedCorner.Position int position,
+                @Nullable RoundedCorner roundedCorner) {
+            mRoundedCorners.setRoundedCorner(position, roundedCorner);
+            return this;
+        }
+
+        /** @hide */
+        @NonNull
         public Builder setRound(boolean round) {
             mIsRound = round;
             return this;
@@ -1283,7 +1337,7 @@ public final class WindowInsets {
         public WindowInsets build() {
             return new WindowInsets(mSystemInsetsConsumed ? null : mTypeInsetsMap,
                     mStableInsetsConsumed ? null : mTypeMaxInsetsMap, mTypeVisibilityMap,
-                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout,
+                    mIsRound, mAlwaysConsumeSystemBars, mDisplayCutout, mRoundedCorners,
                     systemBars(), false /* compatIgnoreVisibility */);
         }
     }

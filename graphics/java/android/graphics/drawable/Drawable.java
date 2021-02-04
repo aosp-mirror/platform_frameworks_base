@@ -1465,24 +1465,6 @@ public abstract class Drawable {
     }
 
     /**
-     * Notifies the drawable that it has been attached.
-     *
-     * @param v The view that it is attached to
-     * @hide
-     */
-    public void onAttached(View v) {
-    }
-
-    /**
-     * Notifies the drawable that it has been detached.
-     *
-     * @param v The view that it is detached from
-     * @hide
-     */
-    public void onDetached(View v) {
-    }
-
-    /**
      * Sets the source override density for this Drawable. If non-zero, this density is to be used
      * for any calls to {@link Resources#getDrawableForDensity(int, int, Theme)} or
      * {@link Resources#getValueForDensity(int, int, TypedValue, boolean)}.

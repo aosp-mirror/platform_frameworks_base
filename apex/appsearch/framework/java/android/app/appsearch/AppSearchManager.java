@@ -270,12 +270,12 @@ public class AppSearchManager {
      *     they were successfully indexed, or a failed {@link AppSearchResult} otherwise.
      * @throws RuntimeException If an error occurred during the execution.
      * @hide
-     * @deprecated use {@link AppSearchSession#putDocuments} instead.
+     * @deprecated use {@link AppSearchSession#put} instead.
      */
     public AppSearchBatchResult<String, Void> putDocuments(@NonNull PutDocumentsRequest request) {
         // TODO(b/146386470): Transmit these documents as a RemoteStream instead of sending them in
         // one big list.
-        List<GenericDocument> documents = request.getDocuments();
+        List<GenericDocument> documents = request.getGenericDocuments();
         List<Bundle> documentBundles = new ArrayList<>(documents.size());
         for (int i = 0; i < documents.size(); i++) {
             documentBundles.add(documents.get(i).getBundle());
@@ -330,7 +330,7 @@ public class AppSearchManager {
                     DEFAULT_DATABASE_NAME,
                     request.getNamespace(),
                     uris,
-                    request.getProjectionsVisibleToPackagesInternal(),
+                    request.getProjectionsInternal(),
                     mContext.getUserId(),
                     new IAppSearchBatchResultCallback.Stub() {
                         public void onResult(AppSearchBatchResult result) {
@@ -465,7 +465,7 @@ public class AppSearchManager {
      *     {@link AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
      * @throws RuntimeException If an error occurred during the execution.
      * @hide
-     * @deprecated use {@link AppSearchSession#removeByUri} instead.
+     * @deprecated use {@link AppSearchSession#remove} instead.
      */
     public AppSearchBatchResult<String, Void> removeByUri(@NonNull RemoveByUriRequest request) {
         List<String> uris = new ArrayList<>(request.getUris());

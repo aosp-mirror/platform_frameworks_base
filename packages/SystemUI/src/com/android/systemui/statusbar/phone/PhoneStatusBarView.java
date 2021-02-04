@@ -44,6 +44,7 @@ import com.android.systemui.plugins.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.util.leak.RotationUtils;
 
+import java.util.List;
 import java.util.Objects;
 
 public class PhoneStatusBarView extends PanelBar {
@@ -75,6 +76,8 @@ public class PhoneStatusBarView extends PanelBar {
     @Nullable
     private DisplayCutout mDisplayCutout;
     private int mStatusBarHeight;
+    @Nullable
+    private List<StatusBar.ExpansionChangedListener> mExpansionChangedListeners;
 
     /**
      * Draw this many pixels into the left/right side of the cutout to optimally use the space
@@ -91,6 +94,11 @@ public class PhoneStatusBarView extends PanelBar {
 
     public void setBar(StatusBar bar) {
         mBar = bar;
+    }
+
+    public void setExpansionChangedListeners(
+            @Nullable List<StatusBar.ExpansionChangedListener> listeners) {
+        mExpansionChangedListeners = listeners;
     }
 
     public void setScrimController(ScrimController scrimController) {
@@ -276,6 +284,12 @@ public class PhoneStatusBarView extends PanelBar {
         updateScrimFraction();
         if ((frac == 0 || frac == 1) && mBar.getNavigationBarView() != null) {
             mBar.getNavigationBarView().onStatusBarPanelStateChanged();
+        }
+
+        if (mExpansionChangedListeners != null) {
+            for (StatusBar.ExpansionChangedListener listener : mExpansionChangedListeners) {
+                listener.onExpansionChanged(frac, expanded);
+            }
         }
     }
 

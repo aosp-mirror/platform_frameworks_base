@@ -339,10 +339,8 @@ TEST(LoadedArscTest, GetOverlayableMap) {
 }
 
 TEST(LoadedArscTest, LoadCustomLoader) {
-  std::string contents;
-
-  std::unique_ptr<Asset>
-      asset = ApkAssets::CreateAssetFromFile(GetTestDataPath() + "/loader/resources.arsc");
+  auto asset = AssetsProvider::CreateAssetFromFile(GetTestDataPath() + "/loader/resources.arsc");
+  ASSERT_THAT(asset, NotNull());
 
   const StringPiece data(
       reinterpret_cast<const char*>(asset->getBuffer(true /*wordAligned*/)),

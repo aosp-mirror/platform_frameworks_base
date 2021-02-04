@@ -87,16 +87,6 @@
              theme does not set this value, meaning it is based on whether the
              window is floating. -->
         <attr name="backgroundDimEnabled" format="boolean" />
-        <!-- When windowBackgroundBlurEnabled is set, this is the amount of blur to apply
-             behind the window. The range is from 0, which means no blur, to 150.
-             @hide @SystemApi -->
-        <attr name="windowBackgroundBlurRadius" format="dimension"/>
-        <!-- If set, the area behind the window will be blurred with radius
-             windowBackgroundBlurRadius.
-             @hide @SystemApi -->
-        <attr name="windowBackgroundBlurEnabled" format="boolean" />
-
-
         <!-- Color of background imagery used for popup windows. -->
         <attr name="colorPopupBackground" format="color" />
         <!-- Color used for list divider. -->
@@ -1974,8 +1964,6 @@
         <attr name="textColor" />
         <attr name="backgroundDimEnabled" />
         <attr name="backgroundDimAmount" />
-        <attr name="windowBackgroundBlurEnabled" />
-        <attr name="windowBackgroundBlurRadius" />
         <attr name="windowActionBar" />
         <attr name="windowActionModeOverlay" />
         <attr name="windowActionBarOverlay" />
@@ -2192,6 +2180,10 @@
              Corresponds to setting {@link android.view.View#SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR} on
              the decor view. -->
         <attr name="windowLightNavigationBar" format="boolean" />
+
+        <!-- @hide -->
+        <attr name="windowBackgroundBlurRadius" format="dimension"/>
+
 
         <!-- Controls how the window is laid out if there is a {@code DisplayCutout}.
         <p>
@@ -4070,6 +4062,12 @@
         <attr name="hand_hour" format="reference"/>
         <attr name="hand_minute" format="reference"/>
         <attr name="hand_second" format="reference"/>
+        <!-- Specifies the time zone to use. When this attribute is specified, the
+             TextClock will ignore the time zone of the system. To use the user's
+             time zone, do not specify this attribute. The default value is the
+             user's time zone. Please refer to {@link java.util.TimeZone} for more
+             information about time zone ids. -->
+        <attr name="timeZone" format="string"/>
     </declare-styleable>
     <declare-styleable name="Button">
     </declare-styleable>
@@ -8436,6 +8434,9 @@
         <attr name="errorColor" format="color|reference" />
         <!-- The success color -->
         <attr name="successColor" format="color|reference"/>
+        <!-- The dot color -->
+        <attr name="dotColor" format="color|reference"/>
+
     </declare-styleable>
 
     <!-- =============================== -->
@@ -9194,6 +9195,9 @@
         <!-- @hide From Theme.colorBackground, used for the TaskDescription background
                    color. -->
         <attr name="colorBackground" />
+        <!-- @hide From Theme.colorBackgroundFloating, used for the TaskDescription background
+                   color floating. -->
+        <attr name="colorBackgroundFloating" />
         <!-- @hide From Theme.statusBarColor, used for the TaskDescription status bar color. -->
         <attr name="statusBarColor"/>
         <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar

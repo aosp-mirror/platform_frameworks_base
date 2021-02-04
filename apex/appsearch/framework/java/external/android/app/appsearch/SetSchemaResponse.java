@@ -179,9 +179,9 @@ public class SetSchemaResponse {
 
         /** Adds migratedTypes to the list of migrated schema types. */
         @NonNull
-        public Builder addMigratedType(@NonNull String migratedType) {
+        public Builder addMigratedType(@NonNull Collection<String> migratedTypes) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mMigratedTypes.add(Preconditions.checkNotNull(migratedType));
+            mMigratedTypes.addAll(Preconditions.checkNotNull(migratedTypes));
             return this;
         }
 

@@ -148,6 +148,7 @@ public class VpnTest {
         managedProfileA.profileGroupId = primaryUser.id;
     }
 
+    static final Network EGRESS_NETWORK = new Network(101);
     static final String EGRESS_IFACE = "wlan0";
     static final String TEST_VPN_PKG = "com.testvpn.vpn";
     private static final String TEST_VPN_SERVER = "1.2.3.4";
@@ -963,7 +964,7 @@ public class VpnTest {
                         InetAddresses.parseNumericAddress("192.0.2.0"), EGRESS_IFACE);
         lp.addRoute(defaultRoute);
 
-        vpn.startLegacyVpn(vpnProfile, mKeyStore, lp);
+        vpn.startLegacyVpn(vpnProfile, mKeyStore, EGRESS_NETWORK, lp);
         return vpn;
     }
 

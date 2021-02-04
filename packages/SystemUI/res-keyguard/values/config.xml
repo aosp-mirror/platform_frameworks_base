@@ -22,4 +22,5 @@
 
     <!-- Allow the menu hard key to be disabled in LockScreen on some devices [DO NOT TRANSLATE] -->
     <bool name="config_disableMenuKeyInLockScreen">false</bool>
+    <bool name="can_use_one_handed_bouncer">false</bool>
 </resources>

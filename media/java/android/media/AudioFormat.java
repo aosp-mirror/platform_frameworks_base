@@ -316,6 +316,15 @@ public final class AudioFormat implements Parcelable {
      * Not guaranteed to be supported by devices, may be emulated if not supported. */
     public static final int ENCODING_PCM_32BIT = 22;
 
+    /** Audio data format: MPEG-H baseline profile, level 3 */
+    public static final int ENCODING_MPEGH_BL_L3 = 23;
+    /** Audio data format: MPEG-H baseline profile, level 4 */
+    public static final int ENCODING_MPEGH_BL_L4 = 24;
+    /** Audio data format: MPEG-H low complexity profile, level 3 */
+    public static final int ENCODING_MPEGH_LC_L3 = 25;
+    /** Audio data format: MPEG-H low complexity profile, level 4 */
+    public static final int ENCODING_MPEGH_LC_L4 = 26;
+
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
         switch(enc) {
@@ -363,6 +372,14 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_PCM_24BIT_PACKED";
             case ENCODING_PCM_32BIT:
                 return "ENCODING_PCM_32BIT";
+            case ENCODING_MPEGH_BL_L3:
+                return "ENCODING_MPEGH_BL_L3";
+            case ENCODING_MPEGH_BL_L4:
+                return "ENCODING_MPEGH_BL_L4";
+            case ENCODING_MPEGH_LC_L3:
+                return "ENCODING_MPEGH_LC_L3";
+            case ENCODING_MPEGH_LC_L4:
+                return "ENCODING_MPEGH_LC_L4";
             default :
                 return "invalid encoding " + enc;
         }
@@ -594,6 +611,10 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_OPUS:
             case ENCODING_PCM_24BIT_PACKED:
             case ENCODING_PCM_32BIT:
+            case ENCODING_MPEGH_BL_L3:
+            case ENCODING_MPEGH_BL_L4:
+            case ENCODING_MPEGH_LC_L3:
+            case ENCODING_MPEGH_LC_L4:
                 return true;
             default:
                 return false;
@@ -625,6 +646,10 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_OPUS:
             case ENCODING_PCM_24BIT_PACKED:
             case ENCODING_PCM_32BIT:
+            case ENCODING_MPEGH_BL_L3:
+            case ENCODING_MPEGH_BL_L4:
+            case ENCODING_MPEGH_LC_L3:
+            case ENCODING_MPEGH_LC_L4:
                 return true;
             default:
                 return false;
@@ -659,6 +684,10 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_E_AC3_JOC:
             case ENCODING_DOLBY_MAT:
             case ENCODING_OPUS:
+            case ENCODING_MPEGH_BL_L3:
+            case ENCODING_MPEGH_BL_L4:
+            case ENCODING_MPEGH_LC_L3:
+            case ENCODING_MPEGH_LC_L4:
                 return false;
             case ENCODING_INVALID:
             default:
@@ -693,6 +722,10 @@ public final class AudioFormat implements Parcelable {
             case ENCODING_E_AC3_JOC:
             case ENCODING_DOLBY_MAT:
             case ENCODING_OPUS:
+            case ENCODING_MPEGH_BL_L3:
+            case ENCODING_MPEGH_BL_L4:
+            case ENCODING_MPEGH_LC_L3:
+            case ENCODING_MPEGH_LC_L4:
                 return false;
             case ENCODING_INVALID:
             default:
@@ -975,6 +1008,10 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_OPUS:
                 case ENCODING_PCM_24BIT_PACKED:
                 case ENCODING_PCM_32BIT:
+                case ENCODING_MPEGH_BL_L3:
+                case ENCODING_MPEGH_BL_L4:
+                case ENCODING_MPEGH_LC_L3:
+                case ENCODING_MPEGH_LC_L4:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1197,7 +1234,11 @@ public final class AudioFormat implements Parcelable {
         ENCODING_DOLBY_MAT,
         ENCODING_OPUS,
         ENCODING_PCM_24BIT_PACKED,
-        ENCODING_PCM_32BIT }
+        ENCODING_PCM_32BIT,
+        ENCODING_MPEGH_BL_L3,
+        ENCODING_MPEGH_BL_L4,
+        ENCODING_MPEGH_LC_L3,
+        ENCODING_MPEGH_LC_L4 }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
@@ -1213,6 +1254,10 @@ public final class AudioFormat implements Parcelable {
             ENCODING_AC4,
             ENCODING_E_AC3_JOC,
             ENCODING_DOLBY_MAT,
+            ENCODING_MPEGH_BL_L3,
+            ENCODING_MPEGH_BL_L4,
+            ENCODING_MPEGH_LC_L3,
+            ENCODING_MPEGH_LC_L4,
     };
 
     /** @hide */
@@ -1225,7 +1270,11 @@ public final class AudioFormat implements Parcelable {
             ENCODING_DOLBY_TRUEHD,
             ENCODING_AC4,
             ENCODING_E_AC3_JOC,
-            ENCODING_DOLBY_MAT }
+            ENCODING_DOLBY_MAT,
+            ENCODING_MPEGH_BL_L3,
+            ENCODING_MPEGH_BL_L4,
+            ENCODING_MPEGH_LC_L3,
+            ENCODING_MPEGH_LC_L4 }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface SurroundSoundEncoding {}
@@ -1259,6 +1308,14 @@ public final class AudioFormat implements Parcelable {
                 return "Dolby Atmos in Dolby Digital Plus";
             case ENCODING_DOLBY_MAT:
                 return "Dolby MAT";
+            case ENCODING_MPEGH_BL_L3:
+                return "MPEG-H 3D Audio baseline profile level 3";
+            case ENCODING_MPEGH_BL_L4:
+                return "MPEG-H 3D Audio baseline profile level 4";
+            case ENCODING_MPEGH_LC_L3:
+                return "MPEG-H 3D Audio low complexity profile level 3";
+            case ENCODING_MPEGH_LC_L4:
+                return "MPEG-H 3D Audio low complexity profile level 4";
             default:
                 return "Unknown surround sound format";
         }

@@ -518,6 +518,11 @@ message SecureSettingsProto {
     }
     optional Search search = 48;
 
+    message CameraAutorotate {
+        optional SettingProto enabled = 1 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    }
+    optional CameraAutorotate camera_autorotate = 88;
+
     message SpellChecker {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -642,5 +647,5 @@ message SecureSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 88;
+    // Next tag = 89;
 }

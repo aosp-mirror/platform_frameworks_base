@@ -40,8 +40,8 @@ public final class SearchSpecToProtoConverter {
         Preconditions.checkNotNull(spec);
         SearchSpecProto.Builder protoBuilder =
                 SearchSpecProto.newBuilder()
-                        .addAllSchemaTypeFilters(spec.getSchemaTypes())
-                        .addAllNamespaceFilters(spec.getNamespaces());
+                        .addAllSchemaTypeFilters(spec.getFilterSchemas())
+                        .addAllNamespaceFilters(spec.getFilterNamespaces());
 
         @SearchSpec.TermMatch int termMatchCode = spec.getTermMatch();
         TermMatchType.Code termMatchCodeProto = TermMatchType.Code.forNumber(termMatchCode);

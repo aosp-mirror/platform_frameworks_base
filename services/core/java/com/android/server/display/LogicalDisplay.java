@@ -195,6 +195,7 @@ final class LogicalDisplay {
                 info.logicalDensityDpi = mOverrideDisplayInfo.logicalDensityDpi;
                 info.physicalXDpi = mOverrideDisplayInfo.physicalXDpi;
                 info.physicalYDpi = mOverrideDisplayInfo.physicalYDpi;
+                info.roundedCorners = mOverrideDisplayInfo.roundedCorners;
             }
             mInfo.set(info);
         }
@@ -386,6 +387,7 @@ final class LogicalDisplay {
             mBaseDisplayInfo.brightnessMinimum = deviceInfo.brightnessMinimum;
             mBaseDisplayInfo.brightnessMaximum = deviceInfo.brightnessMaximum;
             mBaseDisplayInfo.brightnessDefault = deviceInfo.brightnessDefault;
+            mBaseDisplayInfo.roundedCorners = deviceInfo.roundedCorners;
             mPrimaryDisplayDeviceInfo = deviceInfo;
             mInfo.set(null);
         }

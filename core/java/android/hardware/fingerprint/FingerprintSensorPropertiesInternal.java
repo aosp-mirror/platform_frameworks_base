@@ -19,6 +19,8 @@ package android.hardware.fingerprint;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_OPTICAL;
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_UDFPS_ULTRASONIC;
 
+import android.annotation.NonNull;
+import android.content.Context;
 import android.hardware.biometrics.SensorProperties;
 import android.hardware.biometrics.SensorPropertiesInternal;
 import android.os.Parcel;
@@ -81,10 +83,36 @@ public class FingerprintSensorPropertiesInternal extends SensorPropertiesInterna
             @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
             @FingerprintSensorProperties.SensorType int sensorType,
             boolean resetLockoutRequiresHardwareAuthToken) {
-        // TODO: Value should be provided from the HAL
+        // TODO(b/179175438): Value should be provided from the HAL
         this(sensorId, strength, maxEnrollmentsPerUser, sensorType,
-                resetLockoutRequiresHardwareAuthToken, 540 /* sensorLocationX */,
-                1769 /* sensorLocationY */, 130 /* sensorRadius */);
+                resetLockoutRequiresHardwareAuthToken, 0 /* sensorLocationX */,
+                0 /* sensorLocationY */, 0 /* sensorRadius */);
+    }
+
+    /**
+     * Initializes SensorProperties with specified values and values obtained from resources using
+     * context.
+     */
+    // TODO(b/179175438): Remove this constructor once all HALs move to AIDL.
+    public FingerprintSensorPropertiesInternal(@NonNull Context context, int sensorId,
+            @SensorProperties.Strength int strength, int maxEnrollmentsPerUser,
+            @FingerprintSensorProperties.SensorType int sensorType,
+            boolean resetLockoutRequiresHardwareAuthToken) {
+        super(sensorId, strength, maxEnrollmentsPerUser);
+        this.sensorType = sensorType;
+        this.resetLockoutRequiresHardwareAuthToken = resetLockoutRequiresHardwareAuthToken;
+
+        int[] props = context.getResources().getIntArray(
+                com.android.internal.R.array.config_udfps_sensor_props);
+        if (props != null && props.length == 3) {
+            this.sensorLocationX = props[0];
+            this.sensorLocationY = props[1];
+            this.sensorRadius = props[2];
+        } else {
+            this.sensorLocationX = 0;
+            this.sensorLocationY = 0;
+            this.sensorRadius = 0;
+        }
     }
 
     protected FingerprintSensorPropertiesInternal(Parcel in) {
