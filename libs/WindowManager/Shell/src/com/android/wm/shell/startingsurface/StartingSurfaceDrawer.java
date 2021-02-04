@@ -74,8 +74,6 @@ public class StartingSurfaceDrawer {
     private final DisplayManager mDisplayManager;
     final ShellExecutor mMainExecutor;
     private final SplashscreenContentDrawer mSplashscreenContentDrawer;
-    private final IconAnimationFinishListener mIconAnimationFinishListener =
-            new IconAnimationFinishListener();
 
     // TODO(b/131727939) remove this when clearing ActivityRecord
     private static final int REMOVE_WHEN_TIMEOUT = 2000;
@@ -410,16 +408,7 @@ public class StartingSurfaceDrawer {
         SplashScreenViewParcelable parcelable;
         if (preView != null && preView.mContentView != null
                 && preView.mContentView.isCopyable()) {
-            if (preView.mContentView.isIconAnimating()) {
-                // if animating, wait until animation finish
-                if (DEBUG_SPLASH_SCREEN) {
-                    Slog.v(TAG, "Copying splash screen view but icon is animating " + taskId);
-                }
-                mIconAnimationFinishListener.waitingForCopyTask(taskId);
-                return;
-            } else {
-                parcelable = new SplashScreenViewParcelable(preView.mContentView);
-            }
+            parcelable = new SplashScreenViewParcelable(preView.mContentView);
         } else {
             parcelable = null;
         }
@@ -460,58 +449,10 @@ public class StartingSurfaceDrawer {
                 mMainExecutor.executeDelayed(() -> removeWindowSynced(taskId), REMOVE_WHEN_TIMEOUT);
                 final StartingWindowRecord tView = new StartingWindowRecord(view,
                         null /* TaskSnapshotWindow */, splashScreenView);
-                splashScreenView.startIntroAnimation(
-                        mIconAnimationFinishListener.makeListener(taskId));
+                splashScreenView.startIntroAnimation();
                 mStartingWindowRecords.put(taskId, tView);
             }
         });
-    }
-
-    private class IconAnimationFinishListener {
-        private final SparseArray<TaskListener> mListeners = new SparseArray<>();
-
-        private class TaskListener implements Runnable {
-            private int mTargetTaskId;
-            private boolean mWaitingForCopy;
-            private boolean mWaitingForRemove;
-            @Override
-            public void run() {
-                if (mWaitingForCopy) {
-                    if (DEBUG_SPLASH_SCREEN) {
-                        Slog.v(TAG, "Icon animation finish and waiting for copy at task "
-                                + mTargetTaskId);
-                    }
-                    copySplashScreenView(mTargetTaskId);
-                }
-                if (mWaitingForRemove) {
-                    if (DEBUG_SPLASH_SCREEN) {
-                        Slog.v(TAG, "Icon animation finish and waiting for remove at task "
-                                + mTargetTaskId);
-                    }
-                    mMainExecutor.execute(() -> removeWindowSynced(mTargetTaskId));
-                }
-                mListeners.remove(mTargetTaskId);
-            }
-        }
-
-        private Runnable makeListener(int taskId) {
-            final TaskListener listener = new TaskListener();
-            listener.mTargetTaskId = taskId;
-            mListeners.put(taskId, listener);
-            return listener;
-        }
-
-        private void waitingForCopyTask(int taskId) {
-            if (mListeners.contains(taskId)) {
-                mListeners.get(taskId).mWaitingForCopy = true;
-            }
-        }
-
-        private void waitingForRemove(int taskId) {
-            if (mListeners.contains(taskId)) {
-                mListeners.get(taskId).mWaitingForRemove = true;
-            }
-        }
     }
 
     protected void removeWindowSynced(int taskId) {
@@ -520,11 +461,6 @@ public class StartingSurfaceDrawer {
             if (record.mDecorView != null) {
                 if (DEBUG_SPLASH_SCREEN) {
                     Slog.v(TAG, "Removing splash screen window for task: " + taskId);
-                }
-                if (record.mContentView != null && record.mContentView.isIconAnimating()) {
-                    // do not remove until the animation is finish
-                    mIconAnimationFinishListener.waitingForRemove(taskId);
-                    return;
                 }
                 final WindowManager wm = record.mDecorView.getContext()
                         .getSystemService(WindowManager.class);

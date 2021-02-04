@@ -55842,6 +55842,8 @@ package android.window {
   }
 
   public final class SplashScreenView extends android.widget.FrameLayout {
+    method public long getIconAnimationDurationMillis();
+    method public long getIconAnimationStartMillis();
     method @Nullable public android.view.View getIconView();
     method public void remove();
   }

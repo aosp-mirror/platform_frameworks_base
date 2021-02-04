@@ -33,6 +33,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -71,10 +72,11 @@ public final class SplashScreenView extends FrameLayout {
     private Bitmap mParceledIconBitmap;
     private View mBrandingImageView;
     private Bitmap mParceledBrandingBitmap;
+    private long mIconAnimationDuration;
+    private long mIconAnimationStart;
 
     private Animatable mAnimatableIcon;
     private ValueAnimator mAnimator;
-    private Runnable mAnimationFinishListener;
 
     // cache original window and status
     private Window mWindow;
@@ -92,11 +94,12 @@ public final class SplashScreenView extends FrameLayout {
         private @ColorInt int mBackgroundColor;
         private Bitmap mParceledIconBitmap;
         private Drawable mIconDrawable;
-        private int mIconAnimationDuration;
         private int mBrandingImageWidth;
         private int mBrandingImageHeight;
         private Drawable mBrandingDrawable;
         private Bitmap mParceledBrandingBitmap;
+        private long mIconAnimationStart;
+        private long mIconAnimationDuration;
 
         public Builder(@NonNull Context context) {
             mContext = context;
@@ -119,6 +122,8 @@ public final class SplashScreenView extends FrameLayout {
                         parcelable.mBrandingHeight);
                 mParceledBrandingBitmap = parcelable.mBrandingBitmap;
             }
+            mIconAnimationStart = parcelable.mIconAnimationStart;
+            mIconAnimationDuration = parcelable.mIconAnimationDuration;
             return this;
         }
 
@@ -186,6 +191,8 @@ public final class SplashScreenView extends FrameLayout {
                 view.mIconView.setBackground(mIconDrawable);
                 view.initIconAnimation(mIconDrawable, mIconAnimationDuration);
             }
+            view.mIconAnimationStart = mIconAnimationStart;
+            view.mIconAnimationDuration = mIconAnimationDuration;
             if (mParceledIconBitmap != null) {
                 view.mParceledIconBitmap = mParceledIconBitmap;
             }
@@ -238,28 +245,44 @@ public final class SplashScreenView extends FrameLayout {
         return !mNotCopyable;
     }
 
-    void initIconAnimation(Drawable iconDrawable, int duration) {
+    /**
+     * Returns the duration of the icon animation if icon is animatable.
+     *
+     * @see android.R.attr#windowSplashScreenAnimatedIcon
+     * @see android.R.attr#windowSplashScreenAnimationDuration
+     */
+    public long getIconAnimationDurationMillis() {
+        return mIconAnimationDuration;
+    }
+
+    /**
+     * If the replaced icon is animatable, return the animation start time in millisecond based on
+     * system. The start time is set using {@link SystemClock#uptimeMillis()}.
+     */
+    public long getIconAnimationStartMillis() {
+        return mIconAnimationStart;
+    }
+
+    void initIconAnimation(Drawable iconDrawable, long duration) {
         if (iconDrawable instanceof Animatable) {
             mAnimatableIcon = (Animatable) iconDrawable;
             mAnimator = ValueAnimator.ofInt(0, 1);
             mAnimator.setDuration(duration);
-
             mAnimator.addListener(new Animator.AnimatorListener() {
                 @Override
                 public void onAnimationStart(Animator animation) {
+                    mIconAnimationStart = SystemClock.uptimeMillis();
                     mAnimatableIcon.start();
                 }
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
                     mAnimatableIcon.stop();
-                    onIconAnimationFinish();
                 }
 
                 @Override
                 public void onAnimationCancel(Animator animation) {
                     mAnimatableIcon.stop();
-                    onIconAnimationFinish();
                 }
 
                 @Override
@@ -271,30 +294,12 @@ public final class SplashScreenView extends FrameLayout {
         }
     }
 
-    private void onIconAnimationFinish() {
-        if (mAnimationFinishListener != null) {
-            mAnimationFinishListener.run();
-            mAnimationFinishListener = null;
-        }
-    }
-
     /**
      * @hide
      */
-    @TestApi
-    public boolean isIconAnimating() {
-        return mAnimatableIcon != null && mAnimator.isRunning();
-    }
-
-    /**
-     * @hide
-     */
-    public void startIntroAnimation(Runnable finishListener) {
+    public void startIntroAnimation() {
         if (mAnimatableIcon != null) {
-            mAnimationFinishListener = finishListener;
             mAnimator.start();
-        } else if (finishListener != null) {
-            finishListener.run();
         }
     }
 
@@ -403,6 +408,9 @@ public final class SplashScreenView extends FrameLayout {
         private int mBrandingHeight;
         private Bitmap mBrandingBitmap;
 
+        private long mIconAnimationStart;
+        private long mIconAnimationDuration;
+
         public SplashScreenViewParcelable(SplashScreenView view) {
             ViewGroup.LayoutParams params = view.getIconView().getLayoutParams();
             mIconSize = params.height;
@@ -414,6 +422,8 @@ public final class SplashScreenView extends FrameLayout {
             mBrandingWidth = params.width;
             mBrandingHeight = params.height;
 
+            mIconAnimationStart = view.getIconAnimationStartMillis();
+            mIconAnimationDuration = view.getIconAnimationDurationMillis();
         }
 
         private Bitmap copyDrawable(Drawable drawable) {
@@ -444,6 +454,8 @@ public final class SplashScreenView extends FrameLayout {
             mBrandingWidth = source.readInt();
             mBrandingHeight = source.readInt();
             mBrandingBitmap = source.readTypedObject(Bitmap.CREATOR);
+            mIconAnimationStart = source.readLong();
+            mIconAnimationDuration = source.readLong();
         }
 
         @Override
@@ -459,6 +471,8 @@ public final class SplashScreenView extends FrameLayout {
             dest.writeInt(mBrandingWidth);
             dest.writeInt(mBrandingHeight);
             dest.writeTypedObject(mBrandingBitmap, flags);
+            dest.writeLong(mIconAnimationStart);
+            dest.writeLong(mIconAnimationDuration);
         }
 
         public static final @NonNull Parcelable.Creator<SplashScreenViewParcelable> CREATOR =
