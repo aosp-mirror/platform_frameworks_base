@@ -73,7 +73,6 @@ public class BatteryUsageStatsTest {
         final UidBatteryConsumer.Builder uidBatteryConsumerBuilder =
                 builder.getOrCreateUidBatteryConsumerBuilder(batteryStatsUid);
         uidBatteryConsumerBuilder.setPackageWithHighestDrain("foo");
-        uidBatteryConsumerBuilder.setConsumedPower(200);
         uidBatteryConsumerBuilder.setConsumedPower(BatteryConsumer.POWER_COMPONENT_USAGE, 300);
         uidBatteryConsumerBuilder.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 400);
         uidBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
@@ -90,7 +89,6 @@ public class BatteryUsageStatsTest {
         final SystemBatteryConsumer.Builder systemBatteryConsumerBuilder =
                 builder.getOrCreateSystemBatteryConsumerBuilder(
                         SystemBatteryConsumer.DRAIN_TYPE_CAMERA);
-        systemBatteryConsumerBuilder.setConsumedPower(10000);
         systemBatteryConsumerBuilder.setConsumedPower(BatteryConsumer.POWER_COMPONENT_CPU, 10100);
         systemBatteryConsumerBuilder.setConsumedPowerForCustomComponent(
                 BatteryConsumer.FIRST_CUSTOM_POWER_COMPONENT_ID, 10200);
@@ -114,7 +112,6 @@ public class BatteryUsageStatsTest {
         for (UidBatteryConsumer uidBatteryConsumer : uidBatteryConsumers) {
             if (uidBatteryConsumer.getUid() == 2000) {
                 assertThat(uidBatteryConsumer.getPackageWithHighestDrain()).isEqualTo("foo");
-                assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(200);
                 assertThat(uidBatteryConsumer.getConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_USAGE)).isEqualTo(300);
                 assertThat(uidBatteryConsumer.getConsumedPower(
@@ -130,6 +127,7 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.TIME_COMPONENT_CPU_FOREGROUND)).isEqualTo(700);
                 assertThat(uidBatteryConsumer.getUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(800);
+                assertThat(uidBatteryConsumer.getConsumedPower()).isEqualTo(1710);
             } else {
                 fail("Unexpected UID " + uidBatteryConsumer.getUid());
             }
@@ -139,7 +137,6 @@ public class BatteryUsageStatsTest {
                 batteryUsageStats.getSystemBatteryConsumers();
         for (SystemBatteryConsumer systemBatteryConsumer : systemBatteryConsumers) {
             if (systemBatteryConsumer.getDrainType() == SystemBatteryConsumer.DRAIN_TYPE_CAMERA) {
-                assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(10000);
                 assertThat(systemBatteryConsumer.getConsumedPower(
                         BatteryConsumer.POWER_COMPONENT_CPU)).isEqualTo(10100);
                 assertThat(systemBatteryConsumer.getConsumedPowerForCustomComponent(
@@ -151,6 +148,7 @@ public class BatteryUsageStatsTest {
                         BatteryConsumer.TIME_COMPONENT_CPU)).isEqualTo(10300);
                 assertThat(systemBatteryConsumer.getUsageDurationForCustomComponentMillis(
                         BatteryConsumer.FIRST_CUSTOM_TIME_COMPONENT_ID)).isEqualTo(10400);
+                assertThat(systemBatteryConsumer.getConsumedPower()).isEqualTo(30510);
             } else {
                 fail("Unexpected drain type " + systemBatteryConsumer.getDrainType());
             }

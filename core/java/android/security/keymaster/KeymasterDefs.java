@@ -80,6 +80,7 @@ public final class KeymasterDefs {
     public static final int KM_TAG_MIN_SECONDS_BETWEEN_OPS =
             Tag.MIN_SECONDS_BETWEEN_OPS; // KM_UINT | 403;
     public static final int KM_TAG_MAX_USES_PER_BOOT = Tag.MAX_USES_PER_BOOT; // KM_UINT | 404;
+    public static final int KM_TAG_USAGE_COUNT_LIMIT = Tag.USAGE_COUNT_LIMIT; // KM_UINT | 405;
 
     public static final int KM_TAG_USER_ID = Tag.USER_ID; // KM_UINT | 501;
     public static final int KM_TAG_USER_SECURE_ID = Tag.USER_SECURE_ID; // KM_ULONG_REP | 502;

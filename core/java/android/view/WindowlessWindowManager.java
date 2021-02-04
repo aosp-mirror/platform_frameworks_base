@@ -24,7 +24,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.service.attestation.ImpressionToken;
+import android.service.screenshot.ScreenshotHash;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.window.ClientWindowFrames;
@@ -466,7 +466,7 @@ public class WindowlessWindowManager implements IWindowSession {
     }
 
     @Override
-    public ImpressionToken generateImpressionToken(IWindow window, Rect boundsInWindow,
+    public ScreenshotHash generateScreenshotHash(IWindow window, Rect boundsInWindow,
             String hashAlgorithm) {
         return null;
     }

@@ -29,6 +29,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -51,11 +52,13 @@ public class LetterboxTest {
     SurfaceControl.Transaction mTransaction;
 
     private boolean mAreCornersRounded = false;
+    private int mColor = Color.BLACK;
 
     @Before
     public void setUp() throws Exception {
         mSurfaces = new SurfaceControlMocker();
-        mLetterbox = new Letterbox(mSurfaces, StubTransaction::new, () -> mAreCornersRounded);
+        mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
+                () -> mAreCornersRounded, () -> Color.valueOf(mColor));
         mTransaction = spy(StubTransaction.class);
     }
 
@@ -168,6 +171,18 @@ public class LetterboxTest {
         mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
         mLetterbox.applySurfaceChanges(mTransaction);
         verify(mTransaction).setPosition(mSurfaces.top, -1000, -2000);
+    }
+
+    @Test
+    public void testApplySurfaceChanges_setColor() {
+        mLetterbox.layout(new Rect(0, 0, 10, 10), new Rect(0, 1, 10, 10), new Point(1000, 2000));
+        mLetterbox.applySurfaceChanges(mTransaction);
+
+        verify(mTransaction).setColor(mSurfaces.top, new float[]{0, 0, 0});
+
+        mColor = Color.GREEN;
+
+        assertTrue(mLetterbox.needsApplySurfaceChanges());
     }
 
     @Test

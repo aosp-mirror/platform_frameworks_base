@@ -26,7 +26,6 @@ import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.FontManager;
 import android.graphics.fonts.SystemFonts;
 import android.os.ParcelFileDescriptor;
-import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.SharedMemory;
 import android.os.ShellCallback;
@@ -67,13 +66,12 @@ public final class FontManagerService extends IFontManager.Stub {
     private static final String CRASH_MARKER_FILE = "/data/fonts/config/crash.txt";
 
     @Override
-    public FontConfig getFontConfig() throws RemoteException {
+    public FontConfig getFontConfig() {
         return getSystemFontConfig();
     }
 
     @Override
-    public int updateFont(ParcelFileDescriptor fd, byte[] signature, int baseVersion)
-            throws RemoteException {
+    public int updateFont(ParcelFileDescriptor fd, byte[] signature, int baseVersion) {
         Objects.requireNonNull(fd);
         Objects.requireNonNull(signature);
         Preconditions.checkArgumentNonnegative(baseVersion);
@@ -183,14 +181,21 @@ public final class FontManagerService extends IFontManager.Stub {
     @NonNull
     private final Context mContext;
 
-    @GuardedBy("FontManagerService.this")
+    private final Object mUpdatableFontDirLock = new Object();
+
+    @GuardedBy("mUpdatableFontDirLock")
     @NonNull
     private final FontCrashDetector mFontCrashDetector;
 
+    @GuardedBy("mUpdatableFontDirLock")
     @Nullable
     private final UpdatableFontDir mUpdatableFontDir;
 
-    @GuardedBy("FontManagerService.this")
+    // mSerializedFontMapLock can be acquired while holding mUpdatableFontDirLock.
+    // mUpdatableFontDirLock should not be newly acquired while holding mSerializedFontMapLock.
+    private final Object mSerializedFontMapLock = new Object();
+
+    @GuardedBy("mSerializedFontMapLock")
     @Nullable
     private SharedMemory mSerializedFontMap = null;
 
@@ -212,9 +217,9 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     private void initialize() {
-        synchronized (FontManagerService.this) {
+        synchronized (mUpdatableFontDirLock) {
             if (mUpdatableFontDir == null) {
-                mSerializedFontMap = buildNewSerializedFontMap();
+                updateSerializedFontMap();
                 return;
             }
             if (mFontCrashDetector.hasCrashed()) {
@@ -228,7 +233,7 @@ public final class FontManagerService extends IFontManager.Stub {
             }
             try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
                 mUpdatableFontDir.loadFontFileMap();
-                mSerializedFontMap = buildNewSerializedFontMap();
+                updateSerializedFontMap();
             }
         }
     }
@@ -239,7 +244,7 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     @Nullable /* package */ SharedMemory getCurrentFontMap() {
-        synchronized (FontManagerService.this) {
+        synchronized (mSerializedFontMapLock) {
             return mSerializedFontMap;
         }
     }
@@ -251,7 +256,7 @@ public final class FontManagerService extends IFontManager.Stub {
                     FontManager.RESULT_ERROR_FONT_UPDATER_DISABLED,
                     "The font updater is disabled.");
         }
-        synchronized (FontManagerService.this) {
+        synchronized (mUpdatableFontDirLock) {
             // baseVersion == -1 only happens from shell command. This is filtered and treated as
             // error from SystemApi call.
             if (baseVersion != -1 && mUpdatableFontDir.getConfigVersion() != baseVersion) {
@@ -261,7 +266,7 @@ public final class FontManagerService extends IFontManager.Stub {
             }
             try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
                 mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
-                mSerializedFontMap = buildNewSerializedFontMap();
+                updateSerializedFontMap();
             }
         }
     }
@@ -272,10 +277,10 @@ public final class FontManagerService extends IFontManager.Stub {
                     FontManager.RESULT_ERROR_FONT_UPDATER_DISABLED,
                     "The font updater is disabled.");
         }
-        synchronized (FontManagerService.this) {
+        synchronized (mUpdatableFontDirLock) {
             try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
                 mUpdatableFontDir.clearUpdates();
-                mSerializedFontMap = buildNewSerializedFontMap();
+                updateSerializedFontMap();
             }
         }
     }
@@ -283,7 +288,8 @@ public final class FontManagerService extends IFontManager.Stub {
     /* package */ Map<String, File> getFontFileMap() {
         if (mUpdatableFontDir == null) {
             return Collections.emptyMap();
-        } else {
+        }
+        synchronized (mUpdatableFontDirLock) {
             return mUpdatableFontDir.getFontFileMap();
         }
     }
@@ -301,7 +307,7 @@ public final class FontManagerService extends IFontManager.Stub {
             @Nullable FileDescriptor err,
             @NonNull String[] args,
             @Nullable ShellCallback callback,
-            @NonNull ResultReceiver result) throws RemoteException {
+            @NonNull ResultReceiver result) {
         new FontManagerShellCommand(this).exec(this, in, out, err, args, callback, result);
     }
 
@@ -309,24 +315,28 @@ public final class FontManagerService extends IFontManager.Stub {
      * Returns an active system font configuration.
      */
     public @NonNull FontConfig getSystemFontConfig() {
-        if (mUpdatableFontDir != null) {
-            return mUpdatableFontDir.getSystemFontConfig();
-        } else {
+        if (mUpdatableFontDir == null) {
             return SystemFonts.getSystemPreinstalledFontConfig();
+        }
+        synchronized (mUpdatableFontDirLock) {
+            return mUpdatableFontDir.getSystemFontConfig();
         }
     }
 
     /**
-     * Make new serialized font map data.
+     * Makes new serialized font map data and updates mSerializedFontMap.
      */
-    public @Nullable SharedMemory buildNewSerializedFontMap() {
+    public void updateSerializedFontMap() {
         try {
             final FontConfig fontConfig = getSystemFontConfig();
             final Map<String, FontFamily[]> fallback = SystemFonts.buildSystemFallback(fontConfig);
             final Map<String, Typeface> typefaceMap =
                     SystemFonts.buildSystemTypefaces(fontConfig, fallback);
 
-            return Typeface.serializeFontMap(typefaceMap);
+            SharedMemory serializeFontMap = Typeface.serializeFontMap(typefaceMap);
+            synchronized (mSerializedFontMapLock) {
+                mSerializedFontMap = serializeFontMap;
+            }
         } catch (IOException | ErrnoException e) {
             Slog.w(TAG, "Failed to serialize updatable font map. "
                     + "Retrying with system image fonts.", e);
@@ -338,11 +348,13 @@ public final class FontManagerService extends IFontManager.Stub {
             final Map<String, Typeface> typefaceMap =
                     SystemFonts.buildSystemTypefaces(fontConfig, fallback);
 
-            return Typeface.serializeFontMap(typefaceMap);
+            SharedMemory serializeFontMap = Typeface.serializeFontMap(typefaceMap);
+            synchronized (mSerializedFontMapLock) {
+                mSerializedFontMap = serializeFontMap;
+            }
         } catch (IOException | ErrnoException e) {
             Slog.e(TAG, "Failed to serialize SystemServer system font map", e);
         }
-        return null;
     }
 
 }

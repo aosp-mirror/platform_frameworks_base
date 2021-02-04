@@ -879,38 +879,37 @@ public final class MediaRouter2Manager {
     /**
      * Interface for receiving events about media routing changes.
      */
-    public static class Callback {
-
+    public interface Callback {
         /**
          * Called when routes are added.
          * @param routes the list of routes that have been added. It's never empty.
          */
-        public void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesAdded(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when routes are removed.
          * @param routes the list of routes that have been removed. It's never empty.
          */
-        public void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesRemoved(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when routes are changed.
          * @param routes the list of routes that have been changed. It's never empty.
          */
-        public void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
+        default void onRoutesChanged(@NonNull List<MediaRoute2Info> routes) {}
 
         /**
          * Called when a session is changed.
          * @param session the updated session
          */
-        public void onSessionUpdated(@NonNull RoutingSessionInfo session) {}
+        default void onSessionUpdated(@NonNull RoutingSessionInfo session) {}
 
         /**
          * Called when a session is released.
          * @param session the released session.
          * @see #releaseSession(RoutingSessionInfo)
          */
-        public void onSessionReleased(@NonNull RoutingSessionInfo session) {}
+        default void onSessionReleased(@NonNull RoutingSessionInfo session) {}
 
         /**
          * Called when media is transferred.
@@ -918,13 +917,13 @@ public final class MediaRouter2Manager {
          * @param oldSession the previous session
          * @param newSession the new session or {@code null} if the session is released.
          */
-        public void onTransferred(@NonNull RoutingSessionInfo oldSession,
+        default void onTransferred(@NonNull RoutingSessionInfo oldSession,
                 @Nullable RoutingSessionInfo newSession) { }
 
         /**
          * Called when {@link #transfer(RoutingSessionInfo, MediaRoute2Info)} fails.
          */
-        public void onTransferFailed(@NonNull RoutingSessionInfo session,
+        default void onTransferFailed(@NonNull RoutingSessionInfo session,
                 @NonNull MediaRoute2Info route) { }
 
         /**
@@ -933,7 +932,7 @@ public final class MediaRouter2Manager {
          * @param packageName the package name of the application
          * @param preferredFeatures the list of preferred route features set by an application.
          */
-        public void onPreferredFeaturesChanged(@NonNull String packageName,
+        default void onPreferredFeaturesChanged(@NonNull String packageName,
                 @NonNull List<String> preferredFeatures) {}
 
         /**
@@ -946,7 +945,7 @@ public final class MediaRouter2Manager {
          *               {@link MediaRoute2ProviderService#REASON_ROUTE_NOT_AVAILABLE},
          *               {@link MediaRoute2ProviderService#REASON_INVALID_COMMAND},
          */
-        public void onRequestFailed(int reason) {}
+        default void onRequestFailed(int reason) {}
     }
 
     final class CallbackRecord {

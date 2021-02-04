@@ -1484,5 +1484,5 @@
     <!-- Content description of the Ethernet connection when disconnected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_ethernet_disconnected">Ethernet disconnected.</string>
     <!-- Content description of the Ethernet connection when connected for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
-    <string name="accessibility_ethernet_connected">Ethernet connected.</string>
+    <string name="accessibility_ethernet_connected">Ethernet.</string>
 </resources>

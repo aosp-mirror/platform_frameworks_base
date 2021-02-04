@@ -4062,6 +4062,12 @@
         <attr name="hand_hour" format="reference"/>
         <attr name="hand_minute" format="reference"/>
         <attr name="hand_second" format="reference"/>
+        <!-- Specifies the time zone to use. When this attribute is specified, the
+             TextClock will ignore the time zone of the system. To use the user's
+             time zone, do not specify this attribute. The default value is the
+             user's time zone. Please refer to {@link java.util.TimeZone} for more
+             information about time zone ids. -->
+        <attr name="timeZone" format="string"/>
     </declare-styleable>
     <declare-styleable name="Button">
     </declare-styleable>
@@ -8428,6 +8434,9 @@
         <attr name="errorColor" format="color|reference" />
         <!-- The success color -->
         <attr name="successColor" format="color|reference"/>
+        <!-- The dot color -->
+        <attr name="dotColor" format="color|reference"/>
+
     </declare-styleable>
 
     <!-- =============================== -->
@@ -9186,6 +9195,9 @@
         <!-- @hide From Theme.colorBackground, used for the TaskDescription background
                    color. -->
         <attr name="colorBackground" />
+        <!-- @hide From Theme.colorBackgroundFloating, used for the TaskDescription background
+                   color floating. -->
+        <attr name="colorBackgroundFloating" />
         <!-- @hide From Theme.statusBarColor, used for the TaskDescription status bar color. -->
         <attr name="statusBarColor"/>
         <!-- @hide From Theme.navigationBarColor, used for the TaskDescription navigation bar

@@ -586,6 +586,13 @@ public abstract class AndroidKeyStoreKeyPairGeneratorSpi extends KeyPairGenerato
             ));
         }
 
+        if (mSpec.getMaxUsageCount() != KeyProperties.UNRESTRICTED_USAGE_COUNT) {
+            params.add(KeyStore2ParameterUtils.makeInt(
+                    KeymasterDefs.KM_TAG_USAGE_COUNT_LIMIT,
+                    mSpec.getMaxUsageCount()
+            ));
+        }
+
         addAlgorithmSpecificParameters(params);
 
         if (mSpec.isUniqueIdIncluded()) {

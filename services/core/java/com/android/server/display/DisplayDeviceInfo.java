@@ -23,6 +23,7 @@ import android.view.Display;
 import android.view.DisplayAddress;
 import android.view.DisplayCutout;
 import android.view.DisplayEventReceiver;
+import android.view.RoundedCorners;
 import android.view.Surface;
 
 import com.android.internal.BrightnessSynchronizer;
@@ -281,6 +282,11 @@ final class DisplayDeviceInfo {
     public DisplayCutout displayCutout;
 
     /**
+     * The {@link RoundedCorners} if present or {@code null} otherwise.
+     */
+    public RoundedCorners roundedCorners;
+
+    /**
      * The touch attachment, per {@link DisplayViewport#touch}.
      */
     public int touch;
@@ -401,7 +407,8 @@ final class DisplayDeviceInfo {
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
                 || !BrightnessSynchronizer.floatEquals(brightnessDefault,
-                other.brightnessDefault)) {
+                other.brightnessDefault)
+                || !Objects.equals(roundedCorners, other.roundedCorners)) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -444,6 +451,7 @@ final class DisplayDeviceInfo {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        roundedCorners = other.roundedCorners;
     }
 
     // For debugging purposes
@@ -487,6 +495,9 @@ final class DisplayDeviceInfo {
         sb.append(", brightnessMinimum ").append(brightnessMinimum);
         sb.append(", brightnessMaximum ").append(brightnessMaximum);
         sb.append(", brightnessDefault ").append(brightnessDefault);
+        if (roundedCorners != null) {
+            sb.append(", roundedCorners ").append(roundedCorners);
+        }
         sb.append(flagsToString(flags));
         sb.append("}");
         return sb.toString();

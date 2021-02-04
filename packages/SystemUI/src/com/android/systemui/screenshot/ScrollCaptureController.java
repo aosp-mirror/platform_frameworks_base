@@ -21,6 +21,7 @@ import android.annotation.UiThread;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.UserHandle;
 import android.text.TextUtils;
@@ -51,6 +52,13 @@ import java.util.function.Consumer;
 public class ScrollCaptureController implements OnComputeInternalInsetsListener {
     private static final String TAG = "ScrollCaptureController";
 
+    // TODO: Support saving without additional action.
+    private enum PendingAction {
+        SHARE,
+        EDIT,
+        SAVE
+    }
+
     public static final int MAX_PAGES = 5;
     public static final int MAX_HEIGHT = 12000;
 
@@ -68,12 +76,11 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private RequestCallback mCallback;
     private Window mWindow;
     private ImageView mPreview;
-    private View mClose;
+    private View mSave;
+    private View mCancel;
     private View mEdit;
     private View mShare;
-
-    private ListenableFuture<ImageExporter.Result> mExportFuture;
-    private Runnable mPendingAction;
+    private CropView mCropView;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
             Executor bgExecutor, ImageExporter exporter, UiEventLogger uiEventLogger) {
@@ -108,11 +115,14 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
                 .addOnComputeInternalInsetsListener(this);
         mPreview = findViewById(R.id.preview);
 
-        mClose = findViewById(R.id.close);
+        mSave = findViewById(R.id.save);
+        mCancel = findViewById(R.id.cancel);
         mEdit = findViewById(R.id.edit);
         mShare = findViewById(R.id.share);
+        mCropView = findViewById(R.id.crop_view);
 
-        mClose.setOnClickListener(this::onClicked);
+        mSave.setOnClickListener(this::onClicked);
+        mCancel.setOnClickListener(this::onClicked);
         mEdit.setOnClickListener(this::onClicked);
         mShare.setOnClickListener(this::onClicked);
 
@@ -127,7 +137,8 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     }
 
     void disableButtons() {
-        mClose.setEnabled(false);
+        mSave.setEnabled(false);
+        mCancel.setEnabled(false);
         mEdit.setEnabled(false);
         mShare.setEnabled(false);
     }
@@ -136,28 +147,18 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
         Log.d(TAG, "button clicked!");
 
         int id = v.getId();
-        if (id == R.id.close) {
-            v.setPressed(true);
-            disableButtons();
-            finish();
+        v.setPressed(true);
+        disableButtons();
+        if (id == R.id.save) {
+            startExport(PendingAction.SAVE);
+        } else if (id == R.id.cancel) {
+            doFinish();
         } else if (id == R.id.edit) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
-            v.setPressed(true);
-            disableButtons();
-            edit();
+            startExport(PendingAction.EDIT);
         } else if (id == R.id.share) {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
-            v.setPressed(true);
-            disableButtons();
-            share();
-        }
-    }
-
-    private void finish() {
-        if (mExportFuture == null) {
-            doFinish();
-        } else {
-            mExportFuture.addListener(this::doFinish, mUiExecutor);
+            startExport(PendingAction.SHARE);
         }
     }
 
@@ -169,31 +170,55 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
                 .removeOnComputeInternalInsetsListener(this);
     }
 
-    private void edit() {
-        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
-        sendIntentWhenReady(Intent.ACTION_EDIT, editorPackage);
-    }
-
-    private void share() {
-        sendIntentWhenReady(Intent.ACTION_SEND, null);
-    }
-
-    void sendIntentWhenReady(String action, String component) {
-        if (mExportFuture != null) {
-            mExportFuture.addListener(() -> {
-                try {
-                    ImageExporter.Result result = mExportFuture.get();
-                    sendIntent(action, component, result.uri);
-                    mCallback.onFinish();
-                } catch (InterruptedException | ExecutionException e) {
-                    Log.e(TAG, "failed to export", e);
-                    mCallback.onFinish();
+    private void startExport(PendingAction action) {
+        Rect croppedPortion = new Rect(
+                0,
+                (int) (mImageTileSet.getHeight() * mCropView.getTopBoundary()),
+                mImageTileSet.getWidth(),
+                (int) (mImageTileSet.getHeight() * mCropView.getBottomBoundary()));
+        ListenableFuture<ImageExporter.Result> exportFuture = mImageExporter.export(
+                mBgExecutor, mRequestId, mImageTileSet.toBitmap(croppedPortion), mCaptureTime);
+        exportFuture.addListener(() -> {
+            try {
+                ImageExporter.Result result = exportFuture.get();
+                if (action == PendingAction.EDIT) {
+                    doEdit(result.uri);
+                } else if (action == PendingAction.SHARE) {
+                    doShare(result.uri);
                 }
+                doFinish();
+            } catch (InterruptedException | ExecutionException e) {
+                Log.e(TAG, "failed to export", e);
+                mCallback.onFinish();
+            }
+        }, mUiExecutor);
+    }
 
-            }, mUiExecutor);
-        } else {
-            mPendingAction = this::edit;
+    private void doEdit(Uri uri) {
+        String editorPackage = mContext.getString(R.string.config_screenshotEditor);
+        Intent intent = new Intent(Intent.ACTION_EDIT);
+        if (!TextUtils.isEmpty(editorPackage)) {
+            intent.setComponent(ComponentName.unflattenFromString(editorPackage));
         }
+        intent.setType("image/png");
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
+    }
+
+    private void doShare(Uri uri) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("image/png");
+        intent.setData(uri);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        Intent sharingChooserIntent = Intent.createChooser(intent, null)
+                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        mContext.startActivityAsUser(sharingChooserIntent, UserHandle.CURRENT);
     }
 
     private void setContentView(@IdRes int id) {
@@ -248,25 +273,6 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
             session.end(mCallback::onFinish);
         } else {
             mPreview.setImageDrawable(mImageTileSet.getDrawable());
-            mExportFuture = mImageExporter.export(
-                    mBgExecutor, mRequestId, mImageTileSet.toBitmap(), mCaptureTime);
-            // The user chose an action already, link it to the result
-            if (mPendingAction != null) {
-                mExportFuture.addListener(mPendingAction, mUiExecutor);
-            }
         }
-    }
-
-    void sendIntent(String action, String component, Uri uri) {
-        Intent intent = new Intent(action);
-        if (!TextUtils.isEmpty(component)) {
-            intent.setComponent(ComponentName.unflattenFromString(component));
-        }
-        intent.setType("image/png");
-        intent.setData(uri);
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        mContext.startActivityAsUser(intent, UserHandle.CURRENT);
     }
 }

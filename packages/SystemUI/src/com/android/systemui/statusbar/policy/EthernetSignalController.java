@@ -53,10 +53,18 @@ public class EthernetSignalController extends
     public void notifyListeners(SignalCallback callback) {
         boolean ethernetVisible = mCurrentState.connected;
         String contentDescription = getTextIfExists(getContentDescription()).toString();
-
         // TODO: wire up data transfer using WifiSignalPoller.
         callback.setEthernetIndicators(new IconState(ethernetVisible, getCurrentIconId(),
                 contentDescription));
+    }
+
+    @Override
+    public int getContentDescription() {
+        if (mCurrentState.connected) {
+            return getIcons().contentDesc[1];
+        } else {
+            return getIcons().discContentDesc;
+        }
     }
 
     @Override

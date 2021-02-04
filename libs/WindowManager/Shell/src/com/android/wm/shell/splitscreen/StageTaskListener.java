@@ -58,6 +58,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     public interface StageListenerCallbacks {
         void onRootTaskAppeared();
         void onStatusChanged(boolean visible, boolean hasChildren);
+        void onChildTaskStatusChanged(int taskId, boolean present);
         void onRootTaskVanished();
     }
     private final StageListenerCallbacks mCallbacks;
@@ -83,9 +84,11 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mRootTaskInfo = taskInfo;
             mCallbacks.onRootTaskAppeared();
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
-            mChildrenLeashes.put(taskInfo.taskId, leash);
-            mChildrenTaskInfo.put(taskInfo.taskId, taskInfo);
+            final int taskId = taskInfo.taskId;
+            mChildrenLeashes.put(taskId, leash);
+            mChildrenTaskInfo.put(taskId, taskInfo);
             updateChildTaskSurface(taskInfo, leash, true /* firstAppeared */);
+            mCallbacks.onChildTaskStatusChanged(taskId, true /* present */);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -120,6 +123,7 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
             mChildrenTaskInfo.remove(taskId);
             mChildrenLeashes.remove(taskId);
             sendStatusChanged();
+            mCallbacks.onChildTaskStatusChanged(taskId, false /* present */);
         } else {
             throw new IllegalArgumentException(this + "\n Unknown task: " + taskInfo
                     + "\n mRootTaskInfo: " + mRootTaskInfo);
@@ -132,6 +136,13 @@ class StageTaskListener implements ShellTaskOrganizer.TaskListener {
 
     void setVisibility(boolean visible, WindowContainerTransaction wct) {
         wct.reorder(mRootTaskInfo.token, visible /* onTop */);
+    }
+
+    void onSplitScreenListenerRegistered(SplitScreen.SplitScreenListener listener,
+            @SplitScreen.StageType int stage) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; --i) {
+            listener.onTaskStageChanged(mChildrenTaskInfo.keyAt(i), stage);
+        }
     }
 
     private void updateChildTaskSurface(ActivityManager.RunningTaskInfo taskInfo,

@@ -39,14 +39,14 @@ import android.widget.FrameLayout;
 import com.android.systemui.R;
 import com.android.systemui.doze.DozeReceiver;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.StatusBar;
 
 /**
  * A view containing 1) A SurfaceView for HBM, and 2) A normal drawable view for all other
  * animations.
  */
 public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIlluminator,
-        StatusBarStateController.StateListener, ScrimController.ScrimChangedListener {
+        StatusBarStateController.StateListener, StatusBar.ExpansionChangedListener {
     private static final String TAG = "UdfpsView";
 
     private static final int DEBUG_TEXT_SIZE_PX = 32;
@@ -133,14 +133,18 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     }
 
     @Override
-    public void onAlphaChanged(float alpha) {
-        mAnimationView.onAlphaChanged(alpha);
+    public void onExpansionChanged(float expansion, boolean expanded) {
+        mAnimationView.onExpansionChanged(expansion, expanded);
     }
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mSensorRect.set(0, 0, 2 * mSensorProps.sensorRadius, 2 * mSensorProps.sensorRadius);
+        mSensorRect.set(0 + mAnimationView.getPaddingX(),
+                0 + mAnimationView.getPaddingY(),
+                2 * mSensorProps.sensorRadius + mAnimationView.getPaddingX(),
+                2 * mSensorProps.sensorRadius + mAnimationView.getPaddingY());
+
         mHbmSurfaceView.onSensorRectUpdated(new RectF(mSensorRect));
         mAnimationView.onSensorRectUpdated(new RectF(mSensorRect));
     }

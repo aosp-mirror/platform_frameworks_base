@@ -148,6 +148,7 @@ public class LockPatternView extends View {
     private int mRegularColor;
     private int mErrorColor;
     private int mSuccessColor;
+    private int mDotColor;
 
     private final Interpolator mFastOutSlowInInterpolator;
     private final Interpolator mLinearOutSlowInInterpolator;
@@ -318,6 +319,7 @@ public class LockPatternView extends View {
         mRegularColor = a.getColor(R.styleable.LockPatternView_regularColor, 0);
         mErrorColor = a.getColor(R.styleable.LockPatternView_errorColor, 0);
         mSuccessColor = a.getColor(R.styleable.LockPatternView_successColor, 0);
+        mDotColor = a.getColor(R.styleable.LockPatternView_dotColor, mRegularColor);
 
         int pathColor = a.getColor(R.styleable.LockPatternView_pathColor, mRegularColor);
         mPathPaint.setColor(pathColor);
@@ -522,7 +524,7 @@ public class LockPatternView extends View {
                 getCenterYForRow(cellState.row) + startTranslationY);
         cellState.hwCenterX = CanvasProperty.createFloat(getCenterXForColumn(cellState.col));
         cellState.hwRadius = CanvasProperty.createFloat(mDotSize/2 * startScale);
-        mPaint.setColor(getCurrentColor(false));
+        mPaint.setColor(getDotColor());
         mPaint.setAlpha((int) (startAlpha * 255));
         cellState.hwPaint = CanvasProperty.createPaint(new Paint(mPaint));
 
@@ -1163,29 +1165,6 @@ public class LockPatternView extends View {
         final Path currentPath = mCurrentPath;
         currentPath.rewind();
 
-        // draw the circles
-        for (int i = 0; i < 3; i++) {
-            float centerY = getCenterYForRow(i);
-            for (int j = 0; j < 3; j++) {
-                CellState cellState = mCellStates[i][j];
-                float centerX = getCenterXForColumn(j);
-                float translationY = cellState.translationY;
-
-                if (mUseLockPatternDrawable) {
-                    drawCellDrawable(canvas, i, j, cellState.radius, drawLookup[i][j]);
-                } else {
-                    if (isHardwareAccelerated() && cellState.hwAnimating) {
-                        RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
-                        recordingCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
-                                cellState.hwRadius, cellState.hwPaint);
-                    } else {
-                        drawCircle(canvas, (int) centerX, (int) centerY + translationY,
-                                cellState.radius, drawLookup[i][j], cellState.alpha);
-                    }
-                }
-            }
-        }
-
         // TODO: the path should be created and cached every time we hit-detect a cell
         // only the last segment of the path should be computed here
         // draw the path of the pattern (unless we are in stealth mode)
@@ -1256,6 +1235,29 @@ public class LockPatternView extends View {
                 canvas.drawPath(currentPath, mPathPaint);
             }
         }
+
+        // draw the circles
+        for (int i = 0; i < 3; i++) {
+            float centerY = getCenterYForRow(i);
+            for (int j = 0; j < 3; j++) {
+                CellState cellState = mCellStates[i][j];
+                float centerX = getCenterXForColumn(j);
+                float translationY = cellState.translationY;
+
+                if (mUseLockPatternDrawable) {
+                    drawCellDrawable(canvas, i, j, cellState.radius, drawLookup[i][j]);
+                } else {
+                    if (isHardwareAccelerated() && cellState.hwAnimating) {
+                        RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+                        recordingCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
+                                cellState.hwRadius, cellState.hwPaint);
+                    } else {
+                        drawCircle(canvas, (int) centerX, (int) centerY + translationY,
+                                cellState.radius, drawLookup[i][j], cellState.alpha);
+                    }
+                }
+            }
+        }
     }
 
     private float calculateLastSegmentAlpha(float x, float y, float lastX, float lastY) {
@@ -1264,6 +1266,17 @@ public class LockPatternView extends View {
         float dist = (float) Math.sqrt(diffX*diffX + diffY*diffY);
         float frac = dist/mSquareWidth;
         return Math.min(1f, Math.max(0f, (frac - 0.3f) * 4f));
+    }
+
+    private int getDotColor() {
+        if (mInStealthMode) {
+            // Always use the default color in this case
+            return mDotColor;
+        } else if (mPatternDisplayMode == DisplayMode.Wrong) {
+            // the pattern is wrong
+            return mErrorColor;
+        }
+        return mDotColor;
     }
 
     private int getCurrentColor(boolean partOfPattern) {
@@ -1286,7 +1299,7 @@ public class LockPatternView extends View {
      */
     private void drawCircle(Canvas canvas, float centerX, float centerY, float radius,
             boolean partOfPattern, float alpha) {
-        mPaint.setColor(getCurrentColor(partOfPattern));
+        mPaint.setColor(getDotColor());
         mPaint.setAlpha((int) (alpha * 255));
         canvas.drawCircle(centerX, centerY, radius, mPaint);
     }

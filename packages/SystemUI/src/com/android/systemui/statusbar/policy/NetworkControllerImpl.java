@@ -524,6 +524,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         return mWifiSignalController.isCarrierMergedWifi(subId);
     }
 
+    boolean isEthernetDefault() {
+        return mConnectedTransports.get(NetworkCapabilities.TRANSPORT_ETHERNET);
+    }
+
     String getNonDefaultMobileDataNetworkName(int subId) {
         MobileSignalController controller = getControllerWithSubId(subId);
         return controller != null ? controller.getNonDefaultCarrierName() : "";

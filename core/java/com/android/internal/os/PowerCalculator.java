@@ -162,4 +162,10 @@ public abstract class PowerCalculator {
         // Use English locale because this is never used in UI (only in checkin and dump).
         return String.format(Locale.ENGLISH, format, power);
     }
+
+    static double mAhToUJ(long energyUJ) {
+        // TODO(b/173765509): Convert properly. This is mJ / V * (h/3600s) = mAh with V = 3.7 fixed.
+        //                    Leaving for later since desired units of energy have yet to be decided
+        return energyUJ / 1000.0 / 3.7  / 3600;
+    }
 }
