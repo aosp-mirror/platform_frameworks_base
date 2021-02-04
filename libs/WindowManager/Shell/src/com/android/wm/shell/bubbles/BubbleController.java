@@ -892,10 +892,7 @@ public class BubbleController {
             return bubbleChildren;
         }
         for (Bubble bubble : mBubbleData.getActiveBubbles()) {
-            // TODO(178620678): Prevent calling into SysUI since this can be a part of a blocking
-            //                  call from SysUI to Shell
-            final BubbleEntry entry = mSysuiProxy.getPendingOrActiveEntry(bubble.getKey());
-            if (entry != null && groupKey.equals(entry.getStatusBarNotification().getGroupKey())) {
+            if (bubble.getGroupKey() != null && groupKey.equals(bubble.getGroupKey())) {
                 bubbleChildren.add(bubble);
             }
         }
@@ -1064,8 +1061,8 @@ public class BubbleController {
     private boolean isSummaryOfBubbles(BubbleEntry entry) {
         String groupKey = entry.getStatusBarNotification().getGroupKey();
         ArrayList<Bubble> bubbleChildren = getBubblesInGroup(groupKey);
-        boolean isSuppressedSummary = (mBubbleData.isSummarySuppressed(groupKey)
-                && mBubbleData.getSummaryKey(groupKey).equals(entry.getKey()));
+        boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey)
+                && mBubbleData.getSummaryKey(groupKey).equals(entry.getKey());
         boolean isSummary = entry.getStatusBarNotification().getNotification().isGroupSummary();
         return (isSuppressedSummary || isSummary) && !bubbleChildren.isEmpty();
     }
