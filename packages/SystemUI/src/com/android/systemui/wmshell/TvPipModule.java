@@ -29,15 +29,19 @@ import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.tv.TvPipController;
 import com.android.wm.shell.pip.tv.TvPipMenuController;
 import com.android.wm.shell.pip.tv.TvPipNotificationController;
+import com.android.wm.shell.pip.tv.TvPipTransition;
+import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
 
@@ -58,6 +62,7 @@ public abstract class TvPipModule {
             PipTaskOrganizer pipTaskOrganizer,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
+            PipTransitionController pipTransitionController,
             TvPipNotificationController tvPipNotificationController,
             TaskStackListenerImpl taskStackListener,
             WindowManagerShellWrapper windowManagerShellWrapper,
@@ -68,6 +73,7 @@ public abstract class TvPipModule {
                         pipBoundsState,
                         pipBoundsAlgorithm,
                         pipTaskOrganizer,
+                        pipTransitionController,
                         tvPipMenuController,
                         pipMediaController,
                         tvPipNotificationController,
@@ -92,6 +98,16 @@ public abstract class TvPipModule {
     // Handler needed for loadDrawableAsync() in PipControlsViewController
     @WMSingleton
     @Provides
+    static PipTransitionController provideTvPipTransition(
+            Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
+            PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipBoundsState pipBoundsState, TvPipMenuController pipMenuController) {
+        return new TvPipTransition(pipBoundsState, pipMenuController,
+                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
+    }
+
+    @WMSingleton
+    @Provides
     static TvPipMenuController providesTvPipMenuController(
             Context context,
             PipBoundsState pipBoundsState,
@@ -113,16 +129,26 @@ public abstract class TvPipModule {
 
     @WMSingleton
     @Provides
+    static PipAnimationController providePipAnimationController(PipSurfaceTransactionHelper
+            pipSurfaceTransactionHelper) {
+        return new PipAnimationController(pipSurfaceTransactionHelper);
+    }
+
+    @WMSingleton
+    @Provides
     static PipTaskOrganizer providePipTaskOrganizer(Context context,
             TvPipMenuController tvPipMenuController,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipAnimationController pipAnimationController,
+            PipTransitionController pipTransitionController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
             Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
-                tvPipMenuController, pipSurfaceTransactionHelper, splitScreenOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+                tvPipMenuController, pipAnimationController, pipSurfaceTransactionHelper,
+                pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
+                shellTaskOrganizer, mainExecutor);
     }
 }

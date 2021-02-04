@@ -25,7 +25,6 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Size;
 import android.view.Display;
-import android.view.DisplayInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.TriConsumer;
@@ -342,6 +341,16 @@ public final class PipBoundsState {
             mOnShelfVisibilityChangeCallback.accept(mIsShelfShowing, mShelfHeight,
                     updateMovementBounds);
         }
+    }
+
+    /**
+     * Initialize states when first entering PiP.
+     */
+    public void setBoundsStateForEntry(ComponentName componentName, float aspectRatio,
+            Size overrideMinSize) {
+        setLastPipComponentName(componentName);
+        setAspectRatio(aspectRatio);
+        setOverrideMinSize(overrideMinSize);
     }
 
     /** Returns whether the shelf is currently showing. */
