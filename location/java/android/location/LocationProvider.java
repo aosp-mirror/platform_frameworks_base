@@ -23,7 +23,9 @@ import android.location.provider.ProviderProperties;
  * Information about the properties of a location provider.
  *
  * @deprecated This class is incapable of representing unknown provider properties and may return
- * incorrect results when the properties are unknown.
+ * incorrect results on the rare occasion when a provider's properties are unknown. Prefer using
+ * {@link LocationManager#getProviderProperties(String)} to retrieve {@link ProviderProperties}
+ * instead.
  */
 @Deprecated
 public class LocationProvider {
