@@ -4664,6 +4664,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.READ_DEVICE_CONFIG) public boolean isProviderPackage(@Nullable String, @NonNull String, @Nullable String);
     method @Deprecated @RequiresPermission(allOf={android.Manifest.permission.LOCATION_HARDWARE, android.Manifest.permission.UPDATE_APP_OPS_STATS}) public boolean registerGnssBatchedLocationCallback(long, boolean, @NonNull android.location.BatchedLocationCallback, @Nullable android.os.Handler);
     method @Deprecated @RequiresPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) public boolean registerGnssMeasurementsCallback(@NonNull android.location.GnssRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.GnssMeasurementsEvent.Callback);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean registerProviderRequestListener(@NonNull java.util.concurrent.Executor, @NonNull android.location.provider.ProviderRequest.Listener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.location.LocationListener, @Nullable android.os.Looper);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull java.util.concurrent.Executor, @NonNull android.location.LocationListener);
     method @Deprecated @RequiresPermission(anyOf={android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION}) public void requestLocationUpdates(@Nullable android.location.LocationRequest, @NonNull android.app.PendingIntent);
@@ -4672,6 +4673,7 @@ package android.location {
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setLocationEnabledForUser(boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public boolean setProviderEnabledForUser(@NonNull String, boolean, @NonNull android.os.UserHandle);
     method @Deprecated @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public boolean unregisterGnssBatchedLocationCallback(@NonNull android.location.BatchedLocationCallback);
+    method @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE) public void unregisterProviderRequestListener(@NonNull android.location.provider.ProviderRequest.Listener);
   }
 
   public final class LocationRequest implements android.os.Parcelable {
@@ -4819,6 +4821,10 @@ package android.location.provider {
     method @NonNull public android.location.provider.ProviderRequest.Builder setMaxUpdateDelayMillis(@IntRange(from=0) long);
     method @NonNull public android.location.provider.ProviderRequest.Builder setQuality(int);
     method @NonNull public android.location.provider.ProviderRequest.Builder setWorkSource(@NonNull android.os.WorkSource);
+  }
+
+  public static interface ProviderRequest.Listener {
+    method public void onProviderRequestChanged(@NonNull String, @NonNull android.location.provider.ProviderRequest);
   }
 
 }

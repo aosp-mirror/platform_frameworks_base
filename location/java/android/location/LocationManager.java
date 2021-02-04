@@ -49,7 +49,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.provider.IProviderRequestListener;
 import android.location.provider.ProviderProperties;
+import android.location.provider.ProviderRequest;
+import android.location.provider.ProviderRequest.Listener;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
@@ -435,6 +438,9 @@ public class LocationManager {
         static final GnssNavigationTransportManager sGnssNavigationListeners =
                 new GnssNavigationTransportManager();
     }
+
+    private static final ProviderRequestTransportManager sProviderRequestListeners =
+            new ProviderRequestTransportManager();
 
     private final Context mContext;
     private final ILocationManager mService;
@@ -2772,6 +2778,37 @@ public class LocationManager {
     }
 
     /**
+     * Registers a {@link ProviderRequest.Listener} to all providers.
+     *
+     * @param executor the executor that the callback runs on
+     * @param listener the listener to register
+     * @return {@code true} always
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    public boolean registerProviderRequestListener(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull Listener listener) {
+        sProviderRequestListeners.addListener(listener,
+                new ProviderRequestTransport(executor, listener));
+        return true;
+    }
+
+    /**
+     * Unregisters a {@link ProviderRequest.Listener}.
+     *
+     * @param listener the listener to remove.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
+    public void unregisterProviderRequestListener(
+            @NonNull Listener listener) {
+        sProviderRequestListeners.removeListener(listener);
+    }
+
+    /**
      * Returns the batch size (in number of Location objects) that are supported by the batching
      * interface.
      *
@@ -2957,6 +2994,22 @@ public class LocationManager {
         protected void unregisterTransport(GnssNavigationTransport transport)
                             throws RemoteException {
             getService().removeGnssNavigationMessageListener(transport);
+        }
+    }
+
+    private static class ProviderRequestTransportManager extends
+            ListenerTransportManager<ProviderRequestTransport> {
+
+        @Override
+        protected void registerTransport(ProviderRequestTransport transport)
+                throws RemoteException {
+            getService().addProviderRequestListener(transport);
+        }
+
+        @Override
+        protected void unregisterTransport(ProviderRequestTransport transport)
+                throws RemoteException {
+            getService().removeProviderRequestListener(transport);
         }
     }
 
@@ -3356,6 +3409,36 @@ public class LocationManager {
         @Override
         public void onStatusChanged(int status) {
             execute(mExecutor, listener -> listener.onStatusChanged(status));
+        }
+    }
+
+    private static class ProviderRequestTransport extends IProviderRequestListener.Stub
+            implements ListenerTransport<ProviderRequest.Listener> {
+
+        private final Executor mExecutor;
+
+        private volatile @Nullable ProviderRequest.Listener mListener;
+
+        ProviderRequestTransport(Executor executor, ProviderRequest.Listener listener) {
+            Preconditions.checkArgument(executor != null, "invalid null executor");
+            Preconditions.checkArgument(listener != null, "invalid null callback");
+            mExecutor = executor;
+            mListener = listener;
+        }
+
+        @Override
+        public void unregister() {
+            mListener = null;
+        }
+
+        @Override
+        public @Nullable ProviderRequest.Listener getListener() {
+            return mListener;
+        }
+
+        @Override
+        public void onProviderRequestChanged(String provider, ProviderRequest request) {
+            execute(mExecutor, listener -> listener.onProviderRequestChanged(provider, request));
         }
     }
 
