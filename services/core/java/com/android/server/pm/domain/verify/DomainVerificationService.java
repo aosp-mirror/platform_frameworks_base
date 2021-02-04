@@ -45,11 +45,14 @@ import com.android.server.pm.PackageSetting;
 import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
 import com.android.server.pm.domain.verify.models.DomainVerificationStateMap;
 import com.android.server.pm.domain.verify.models.DomainVerificationUserState;
+import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
+import com.android.server.pm.domain.verify.proxy.DomainVerificationProxyUnavailable;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -89,6 +92,9 @@ public class DomainVerificationService extends SystemService
     @NonNull
     private final IDomainVerificationManager.Stub mStub = new DomainVerificationManagerStub(this);
 
+    @NonNull
+    private DomainVerificationProxy mProxy = new DomainVerificationProxyUnavailable();
+
     public DomainVerificationService(@NonNull Context context, @NonNull SystemConfig systemConfig,
             @NonNull PlatformCompat platformCompat, @NonNull Singleton<Connection> connection) {
         super(context);
@@ -101,6 +107,11 @@ public class DomainVerificationService extends SystemService
     @Override
     public void onStart() {
         publishBinderService(Context.DOMAIN_VERIFICATION_SERVICE, mStub);
+    }
+
+    @Override
+    public void setProxy(@NonNull DomainVerificationProxy proxy) {
+        mProxy = proxy;
     }
 
     @NonNull
@@ -417,8 +428,17 @@ public class DomainVerificationService extends SystemService
         mConnection.get().scheduleWriteSettings();
     }
 
+    @Override
+    public boolean runMessage(int messageCode, Object object) {
+        return mProxy.runMessage(messageCode, object);
+    }
+
     private void sendBroadcastForPackage(@NonNull String packageName) {
-        // TODO(b/159952358): Implement proxy
+        mProxy.sendBroadcastForPackages(Collections.singleton(packageName));
+    }
+
+    private boolean hasRealVerifier() {
+        return !(mProxy instanceof DomainVerificationProxyUnavailable);
     }
 
     public interface Connection {
@@ -428,5 +448,8 @@ public class DomainVerificationService extends SystemService
          * {@link #writeSettings(TypedXmlSerializer)} should be invoked by the parent.
          */
         void scheduleWriteSettings();
+
+        /** @see DomainVerificationProxy.Connection#schedule(int, java.lang.Object) */
+        void schedule(int code, @Nullable Object object);
     }
 }
