@@ -663,9 +663,15 @@
          The default is false. -->
     <bool name="config_lidControlsSleep">false</bool>
 
-    <!-- The device state (supplied by DeviceStateManager) that should be treated as folded by the
-         display fold controller. Default is DeviceStateManager.INVALID_DEVICE_STATE. -->
-    <integer name="config_foldedDeviceState">-1</integer>
+    <!-- The device states (supplied by DeviceStateManager) that should be treated as folded by the
+         display fold controller. Default is empty. -->
+    <integer-array name="config_foldedDeviceStates">
+        <!-- Example:
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        -->
+    </integer-array>
 
     <!-- Indicate the display area rect for foldable devices in folded state. -->
     <string name="config_foldedArea"></string>
