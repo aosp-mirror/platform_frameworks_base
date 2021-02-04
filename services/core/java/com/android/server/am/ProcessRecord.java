@@ -394,6 +394,9 @@ class ProcessRecord implements WindowProcessListener {
             if (processInfo.gwpAsanMode != ApplicationInfo.GWP_ASAN_DEFAULT) {
                 pw.print(prefix); pw.println("  gwpAsanMode=" + processInfo.gwpAsanMode);
             }
+            if (processInfo.memtagMode != ApplicationInfo.MEMTAG_DEFAULT) {
+                pw.print(prefix); pw.println("  memtagMode=" + processInfo.memtagMode);
+            }
         }
         pw.print(prefix); pw.print("mRequiredAbi="); pw.print(mRequiredAbi);
         pw.print(" instructionSet="); pw.println(mInstructionSet);
@@ -473,9 +476,12 @@ class ProcessRecord implements WindowProcessListener {
             if (processes != null) {
                 procInfo = processes.get(_processName);
                 if (procInfo != null && procInfo.deniedPermissions == null
-                        && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT) {
+                        && procInfo.gwpAsanMode == ApplicationInfo.GWP_ASAN_DEFAULT
+                        && procInfo.memtagMode == ApplicationInfo.MEMTAG_DEFAULT
+                        && procInfo.nativeHeapZeroInit == null) {
                     // If this process hasn't asked for permissions to be denied, or for a
-                    // non-default GwpAsan mode, then we don't care about it.
+                    // non-default GwpAsan mode, or any other non-default setting, then we don't
+                    // care about it.
                     procInfo = null;
                 }
             }
