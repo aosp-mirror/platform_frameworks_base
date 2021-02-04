@@ -219,7 +219,13 @@ public final class FontManagerService extends IFontManager.Stub {
     private void initialize() {
         synchronized (mUpdatableFontDirLock) {
             if (mUpdatableFontDir == null) {
-                updateSerializedFontMap();
+                synchronized (mSerializedFontMapLock) {
+                    try {
+                        mSerializedFontMap = Typeface.serializeFontMap(Typeface.getSystemFontMap());
+                    } catch (IOException | ErrnoException e) {
+                        mSerializedFontMap = null;
+                    }
+                }
                 return;
             }
             if (mFontCrashDetector.hasCrashed()) {
