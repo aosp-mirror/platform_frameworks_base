@@ -824,6 +824,17 @@ static jlong android_os_Debug_getIonPoolsSizeKb(JNIEnv* env, jobject clazz) {
     return poolsSizeKb;
 }
 
+static jlong android_os_Debug_getDmabufHeapPoolsSizeKb(JNIEnv* env, jobject clazz) {
+    jlong poolsSizeKb = -1;
+    uint64_t size;
+
+    if (meminfo::ReadDmabufHeapPoolsSizeKb(&size)) {
+        poolsSizeKb = size;
+    }
+
+    return poolsSizeKb;
+}
+
 static jlong android_os_Debug_getDmabufMappedSizeKb(JNIEnv* env, jobject clazz) {
     jlong dmabufPss = 0;
     std::vector<dmabufinfo::DmaBuffer> dmabufs;
@@ -936,6 +947,8 @@ static const JNINativeMethod gMethods[] = {
             (void*)android_os_Debug_getIonPoolsSizeKb },
     { "getDmabufMappedSizeKb", "()J",
             (void*)android_os_Debug_getDmabufMappedSizeKb },
+    { "getDmabufHeapPoolsSizeKb", "()J",
+            (void*)android_os_Debug_getDmabufHeapPoolsSizeKb },
     { "getGpuTotalUsageKb", "()J",
             (void*)android_os_Debug_getGpuTotalUsageKb },
     { "isVmapStack", "()Z",
