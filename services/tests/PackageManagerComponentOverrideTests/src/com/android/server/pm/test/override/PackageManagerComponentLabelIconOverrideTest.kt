@@ -54,6 +54,7 @@ import org.mockito.Mockito.same
 import org.mockito.Mockito.verify
 import org.testng.Assert.assertThrows
 import java.io.File
+import java.util.UUID
 
 @RunWith(Parameterized::class)
 class PackageManagerComponentLabelIconOverrideTest {
@@ -262,8 +263,13 @@ class PackageManagerComponentLabelIconOverrideTest {
                     .apply(block)
                     .hideAsFinal()
 
-    private fun makePkgSetting(pkgName: String) = spy(PackageSetting(pkgName, null, File("/test"),
-            null, null, null, null, 0, 0, 0, 0, null, null, null)) {
+    private fun makePkgSetting(pkgName: String) = spy(
+        PackageSetting(
+            pkgName, null, File("/test"),
+            null, null, null, null, 0, 0, 0, 0, null, null, null,
+            UUID.fromString("3f9d52b7-d7b4-406a-a1da-d9f19984c72c")
+        )
+    ) {
         this.pkgState.isUpdatedSystemApp = params.isUpdatedSystemApp
     }
 

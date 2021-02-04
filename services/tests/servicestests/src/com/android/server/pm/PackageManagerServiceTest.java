@@ -107,10 +107,15 @@ public class PackageManagerServiceTest {
 
         // Create a real (non-null) PackageSetting and confirm that the removed
         // users are copied properly
-        setting = new PackageSetting("name", "realName", new File("codePath"),
-                "legacyNativeLibraryPathString", "primaryCpuAbiString", "secondaryCpuAbiString",
-                "cpuAbiOverrideString", 0, 0, 0, 0,
-                null, null, null);
+        setting = new PackageSettingBuilder()
+                .setName("name")
+                .setRealName("realName")
+                .setCodePath("codePath")
+                .setLegacyNativeLibraryPathString("legacyNativeLibraryPathString")
+                .setPrimaryCpuAbiString("primaryCpuAbiString")
+                .setSecondaryCpuAbiString("secondaryCpuAbiString")
+                .setCpuAbiOverrideString("cpuAbiOverrideString")
+                .build();
         pri.populateUsers(new int[] {
                 1, 2, 3, 4, 5
         }, setting);

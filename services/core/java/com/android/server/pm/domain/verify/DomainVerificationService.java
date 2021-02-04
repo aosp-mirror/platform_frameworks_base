@@ -25,9 +25,17 @@ import android.content.pm.domain.verify.DomainVerificationSet;
 import android.content.pm.domain.verify.DomainVerificationUserSelection;
 import android.content.pm.domain.verify.IDomainVerificationManager;
 import android.util.Singleton;
+import android.util.TypedXmlPullParser;
+import android.util.TypedXmlSerializer;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.server.SystemService;
+import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
+import com.android.server.pm.domain.verify.models.DomainVerificationStateMap;
 
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -37,8 +45,26 @@ public class DomainVerificationService extends SystemService
 
     private static final String TAG = "DomainVerificationService";
 
+    /**
+     * States that are currently alive and attached to a package. Entries are exclusive with the
+     * state stored in {@link DomainVerificationSettings}, as any pending/restored state should be
+     * immediately attached once its available.
+     **/
+    @GuardedBy("mLock")
+    @NonNull
+    private final DomainVerificationStateMap<DomainVerificationPkgState> mAttachedPkgStates =
+            new DomainVerificationStateMap<>();
+
+    /**
+     * Lock for all state reads/writes.
+     */
+    private final Object mLock = new Object();
+
     @NonNull
     private final Singleton<Connection> mConnection;
+
+    @NonNull
+    private final DomainVerificationSettings mSettings;
 
     @NonNull
     private final IDomainVerificationManager.Stub mStub = new DomainVerificationManagerStub(this);
@@ -47,6 +73,7 @@ public class DomainVerificationService extends SystemService
             @NonNull Singleton<Connection> connection) {
         super(context);
         mConnection = connection;
+        mSettings = new DomainVerificationSettings();
     }
 
     @Override
@@ -70,31 +97,36 @@ public class DomainVerificationService extends SystemService
     @Override
     public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
             int state) throws InvalidDomainSetException, NameNotFoundException {
-
+        //TODO(b/163565712): Implement method
+        mConnection.get().scheduleWriteSettings();
     }
 
     @Override
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed) throws NameNotFoundException {
-
+        //TODO(b/163565712): Implement method
+        mConnection.get().scheduleWriteSettings();
     }
 
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed, @UserIdInt int userId) throws NameNotFoundException {
-
+        //TODO(b/163565712): Implement method
+        mConnection.get().scheduleWriteSettings();
     }
 
     @Override
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled)
             throws InvalidDomainSetException, NameNotFoundException {
-
+        //TODO(b/163565712): Implement method
+        mConnection.get().scheduleWriteSettings();
     }
 
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled, @UserIdInt int userId)
             throws InvalidDomainSetException, NameNotFoundException {
-
+        //TODO(b/163565712): Implement method
+        mConnection.get().scheduleWriteSettings();
     }
 
     @Nullable
@@ -110,7 +142,65 @@ public class DomainVerificationService extends SystemService
         return null;
     }
 
+    @NonNull
+    @Override
+    public UUID generateNewId() {
+        // TODO(b/159952358): Domain set ID collisions
+        return UUID.randomUUID();
+    }
+
+    @Override
+    public void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException {
+        synchronized (mLock) {
+            mSettings.writeSettings(serializer, mAttachedPkgStates);
+        }
+    }
+
+    @Override
+    public void readSettings(@NonNull TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        synchronized (mLock) {
+            mSettings.readSettings(parser, mAttachedPkgStates);
+        }
+    }
+
+    @Override
+    public void restoreSettings(@NonNull TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        synchronized (mLock) {
+            mSettings.restoreSettings(parser, mAttachedPkgStates);
+        }
+    }
+
+    @Override
+    public void clearPackage(@NonNull String packageName) {
+        synchronized (mLock) {
+            mAttachedPkgStates.remove(packageName);
+        }
+
+        mConnection.get().scheduleWriteSettings();
+    }
+
+    @Override
+    public void clearUser(@UserIdInt int userId) {
+        synchronized (mLock) {
+            int attachedSize = mAttachedPkgStates.size();
+            for (int index = 0; index < attachedSize; index++) {
+                mAttachedPkgStates.valueAt(index).removeUser(userId);
+            }
+
+            mSettings.removeUser(userId);
+        }
+
+        mConnection.get().scheduleWriteSettings();
+    }
+
     public interface Connection {
 
+        /**
+         * Notify that a settings change has been made and that eventually
+         * {@link #writeSettings(TypedXmlSerializer)} should be invoked by the parent.
+         */
+        void scheduleWriteSettings();
     }
 }

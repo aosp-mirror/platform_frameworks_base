@@ -33,6 +33,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
@@ -58,6 +59,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
@@ -80,6 +82,7 @@ import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -96,10 +99,14 @@ public class PackageManagerSettingsTests {
     LegacyPermissionDataProvider mPermissionDataProvider;
     @Mock
     IntentFilterVerificationManager mIntentFilterVerificationManager;
+    @Mock
+    DomainVerificationManagerInternal mDomainVerificationManager;
 
     @Before
     public void initializeMocks() {
         MockitoAnnotations.initMocks(this);
+        when(mDomainVerificationManager.generateNewId())
+                .thenAnswer(invocation -> UUID.randomUUID());
     }
 
     @Before
@@ -558,7 +565,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         final PackageSetting testPkgSetting01 = new PackageSetting(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -579,7 +587,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         final PackageSetting testPkgSetting01 = new PackageSetting(
                 PACKAGE_NAME /*pkgName*/,
                 REAL_PACKAGE_NAME /*realPkgName*/,
@@ -594,7 +603,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         testPkgSetting01.copyFrom(origPkgSetting01);
         verifySettingCopy(origPkgSetting01, testPkgSetting01);
     }
@@ -621,7 +631,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertThat(testPkgSetting01.pkgFlags, is(0));
@@ -654,7 +665,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.primaryCpuAbiString, is("arm64-v8a"));
         assertThat(testPkgSetting01.secondaryCpuAbiString, is("armeabi"));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
@@ -690,7 +702,8 @@ public class PackageManagerSettingsTests {
                     UserManagerService.getInstance(),
                     null /*usesStaticLibraries*/,
                     null /*usesStaticLibrariesVersions*/,
-                    null /*mimeGroups*/);
+                    null /*mimeGroups*/,
+                    UUID.randomUUID());
             fail("Expected a PackageManagerException");
         } catch (PackageManagerException expected) {
         }
@@ -722,7 +735,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
         assertThat(testPkgSetting01.pkgFlags, is(ApplicationInfo.FLAG_SYSTEM));
@@ -760,7 +774,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.appId, is(0));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -801,7 +816,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.appId, is(10064));
         assertThat(testPkgSetting01.getPath(), is(INITIAL_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -842,7 +858,8 @@ public class PackageManagerSettingsTests {
                 UserManagerService.getInstance(),
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
         assertThat(testPkgSetting01.appId, is(10064));
         assertThat(testPkgSetting01.getPath(), is(UPDATED_CODE_PATH));
         assertThat(testPkgSetting01.name, is(PACKAGE_NAME));
@@ -901,6 +918,7 @@ public class PackageManagerSettingsTests {
         assertThat(origPkgSetting.getPathString(), is(testPkgSetting.getPathString()));
         assertSame(origPkgSetting.cpuAbiOverrideString, testPkgSetting.cpuAbiOverrideString);
         assertThat(origPkgSetting.cpuAbiOverrideString, is(testPkgSetting.cpuAbiOverrideString));
+        assertThat(origPkgSetting.getDomainSetId(), is(testPkgSetting.getDomainSetId()));
         assertThat(origPkgSetting.firstInstallTime, is(testPkgSetting.firstInstallTime));
         assertSame(origPkgSetting.installSource, testPkgSetting.installSource);
         assertThat(origPkgSetting.installPermissionsFixed,
@@ -973,7 +991,8 @@ public class PackageManagerSettingsTests {
                 sharedUserId,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
     }
 
     private PackageSetting createPackageSetting(String packageName) {
@@ -991,7 +1010,8 @@ public class PackageManagerSettingsTests {
                 0,
                 null /*usesStaticLibraries*/,
                 null /*usesStaticLibrariesVersions*/,
-                null /*mimeGroups*/);
+                null /*mimeGroups*/,
+                UUID.randomUUID());
     }
 
     private @NonNull List<UserInfo> createFakeUsers() {
@@ -1182,7 +1202,7 @@ public class PackageManagerSettingsTests {
     private Settings makeSettings() {
         return new Settings(InstrumentationRegistry.getContext().getFilesDir(),
                 mRuntimePermissionsPersistence, mPermissionDataProvider,
-                mIntentFilterVerificationManager, new Object());
+                mIntentFilterVerificationManager, mDomainVerificationManager, new Object());
     }
 
     private void verifyKeySetMetaData(Settings settings)
