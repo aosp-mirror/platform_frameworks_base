@@ -24,8 +24,8 @@ import android.graphics.Typeface;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontFileUtil;
 import android.graphics.fonts.FontManager;
+import android.graphics.fonts.FontUpdateRequest;
 import android.graphics.fonts.SystemFonts;
-import android.os.ParcelFileDescriptor;
 import android.os.ResultReceiver;
 import android.os.SharedMemory;
 import android.os.ShellCallback;
@@ -54,6 +54,7 @@ import java.nio.NioUtils;
 import java.nio.channels.FileChannel;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -71,14 +72,15 @@ public final class FontManagerService extends IFontManager.Stub {
     }
 
     @Override
-    public int updateFont(ParcelFileDescriptor fd, byte[] signature, int baseVersion) {
-        Objects.requireNonNull(fd);
-        Objects.requireNonNull(signature);
+    public int updateFont(int baseVersion, @NonNull FontUpdateRequest request) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(request.getFd());
+        Objects.requireNonNull(request.getSignature());
         Preconditions.checkArgumentNonnegative(baseVersion);
         getContext().enforceCallingPermission(Manifest.permission.UPDATE_FONTS,
                 "UPDATE_FONTS permission required.");
         try {
-            installFontFile(fd.getFileDescriptor(), signature, baseVersion);
+            update(baseVersion, Collections.singletonList(request));
             return FontManager.RESULT_SUCCESS;
         } catch (SystemFontException e) {
             Slog.e(TAG, "Failed to update font file", e);
@@ -255,7 +257,7 @@ public final class FontManagerService extends IFontManager.Stub {
         }
     }
 
-    /* package */ void installFontFile(FileDescriptor fd, byte[] pkcs7Signature, int baseVersion)
+    /* package */ void update(int baseVersion, List<FontUpdateRequest> requests)
             throws SystemFontException {
         if (mUpdatableFontDir == null) {
             throw new SystemFontException(
@@ -271,7 +273,7 @@ public final class FontManagerService extends IFontManager.Stub {
                         "The base config version is older than current.");
             }
             try (FontCrashDetector.MonitoredBlock ignored = mFontCrashDetector.start()) {
-                mUpdatableFontDir.installFontFile(fd, pkcs7Signature);
+                mUpdatableFontDir.update(requests);
                 updateSerializedFontMap();
             }
         }
