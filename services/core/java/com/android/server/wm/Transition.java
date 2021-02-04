@@ -32,6 +32,7 @@ import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
 import static android.view.WindowManager.transitTypeToString;
+import static android.window.TransitionInfo.FLAG_IS_VOICE_INTERACTION;
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
@@ -849,8 +850,18 @@ class Transition extends Binder implements BLASTSyncEngine.TransactionReadyListe
                 //                    checks to use requested visibility.
                 flags |= FLAG_TRANSLUCENT;
             }
-            if (wc.asActivityRecord() != null && wc.asActivityRecord().mUseTransferredAnimation) {
-                flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+            final Task task = wc.asTask();
+            if (task != null && task.voiceSession != null) {
+                flags |= FLAG_IS_VOICE_INTERACTION;
+            }
+            final ActivityRecord record = wc.asActivityRecord();
+            if (record != null) {
+                if (record.mUseTransferredAnimation) {
+                    flags |= FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
+                }
+                if (record.mVoiceInteraction) {
+                    flags |= FLAG_IS_VOICE_INTERACTION;
+                }
             }
             if (isWallpaper(wc)) {
                 flags |= FLAG_IS_WALLPAPER;
