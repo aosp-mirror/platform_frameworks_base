@@ -7743,7 +7743,6 @@ package android.app.job {
     method public long getTriggerContentUpdateDelay();
     method @Nullable public android.app.job.JobInfo.TriggerContentUri[] getTriggerContentUris();
     method public boolean isExpedited();
-    method @Deprecated public boolean isForegroundJob();
     method public boolean isImportantWhileForeground();
     method public boolean isPeriodic();
     method public boolean isPersisted();
@@ -7776,7 +7775,6 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long, long);
     method @NonNull public android.app.job.JobInfo.Builder setExpedited(boolean);
     method public android.app.job.JobInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
-    method @Deprecated @NonNull public android.app.job.JobInfo.Builder setForeground(boolean);
     method @Deprecated public android.app.job.JobInfo.Builder setImportantWhileForeground(boolean);
     method public android.app.job.JobInfo.Builder setMinimumLatency(long);
     method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
