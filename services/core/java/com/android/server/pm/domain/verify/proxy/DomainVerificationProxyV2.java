@@ -100,4 +100,7 @@ public class DomainVerificationProxyV2 implements DomainVerificationProxy {
     public ComponentName getComponentName() {
         return mVerifierComponent;
     }
+
+    public interface Connection extends BaseConnection {
+    }
 }

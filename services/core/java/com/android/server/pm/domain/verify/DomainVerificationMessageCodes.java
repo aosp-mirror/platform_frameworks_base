@@ -31,4 +31,5 @@ import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
 public final class DomainVerificationMessageCodes {
 
     public static final int SEND_REQUEST = 1;
+    public static final int LEGACY_ON_INTENT_FILTER_VERIFIED = 2;
 }

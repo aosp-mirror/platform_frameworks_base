@@ -18,6 +18,7 @@ package com.android.server.pm.domain.verify;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -34,6 +35,7 @@ import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 
 public interface DomainVerificationManagerInternal extends DomainVerificationManager {
@@ -57,7 +59,7 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
     void setProxy(@NonNull DomainVerificationProxy proxy);
 
     /**
-     * @see DomainVerificationProxy.Connection#runMessage(int, Object)
+     * @see DomainVerificationProxy.BaseConnection#runMessage(int, Object)
      */
     boolean runMessage(int messageCode, Object object);
 
@@ -159,6 +161,9 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
     @NonNull
     DomainVerificationShell getShell();
 
+    @NonNull
+    DomainVerificationCollector getCollector();
+
     /**
      * Check if a resolving URI is approved to takeover the domain as the sole resolved target.
      * This can be because the domain was auto-verified for the package, or if the user manually
@@ -166,4 +171,16 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     boolean isApprovedForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
             @UserIdInt int userId);
+
+    /**
+     * @return the domain verification set ID for the given package, or null if the ID is
+     * unavailable
+     */
+    @Nullable
+    UUID getDomainVerificationSetId(@NonNull String packageName);
+
+    @RequiresPermission(android.Manifest.permission.DOMAIN_VERIFICATION_AGENT)
+    void setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
+            @NonNull Set<String> domains, int state)
+            throws InvalidDomainSetException, NameNotFoundException;
 }

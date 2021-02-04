@@ -177,6 +177,19 @@ public class DomainVerificationService extends SystemService
 
     @Nullable
     @Override
+    public UUID getDomainVerificationSetId(@NonNull String packageName) {
+        synchronized (mLock) {
+            DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
+            if (pkgState != null) {
+                return pkgState.getId();
+            } else {
+                return null;
+            }
+        }
+    }
+
+    @Nullable
+    @Override
     public DomainVerificationSet getDomainVerificationSet(@NonNull String packageName)
             throws NameNotFoundException {
         mEnforcer.assertApprovedQuerent(mConnection.get().getCallingUid(), mProxy);
@@ -213,7 +226,6 @@ public class DomainVerificationService extends SystemService
     @Override
     public void setDomainVerificationStatus(@NonNull UUID domainSetId, @NonNull Set<String> domains,
             int state) throws InvalidDomainSetException, NameNotFoundException {
-        mEnforcer.assertApprovedVerifier(mConnection.get().getCallingUid(), mProxy);
         if (state < DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED) {
             if (state != DomainVerificationState.STATE_SUCCESS) {
                 throw new IllegalArgumentException(
@@ -222,6 +234,15 @@ public class DomainVerificationService extends SystemService
             }
         }
 
+        setDomainVerificationStatusInternal(mConnection.get().getCallingUid(), domainSetId, domains,
+                state);
+    }
+
+    @Override
+    public void setDomainVerificationStatusInternal(int callingUid, @NonNull UUID domainSetId,
+            @NonNull Set<String> domains, int state)
+            throws InvalidDomainSetException, NameNotFoundException {
+        mEnforcer.assertApprovedVerifier(callingUid, mProxy);
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
                     true /* forAutoVerify */);
@@ -811,6 +832,12 @@ public class DomainVerificationService extends SystemService
         return mShell;
     }
 
+    @NonNull
+    @Override
+    public DomainVerificationCollector getCollector() {
+        return mCollector;
+    }
+
     private void sendBroadcastForPackage(@NonNull String packageName) {
         mProxy.sendBroadcastForPackages(Collections.singleton(packageName));
     }
@@ -1139,7 +1166,7 @@ public class DomainVerificationService extends SystemService
         int getCallingUserId();
 
         /**
-         * @see DomainVerificationProxy.Connection#schedule(int, java.lang.Object)
+         * @see DomainVerificationProxy.BaseConnection#schedule(int, java.lang.Object)
          */
         void schedule(int code, @Nullable Object object);
 

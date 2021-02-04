@@ -241,6 +241,14 @@ class DomainVerificationEnforcerTest {
                         DomainVerificationManager.STATE_SUCCESS
                     )
                 },
+                service(Type.VERIFIER, "setStatusInternalUid") { callingUid, _, _ ->
+                    setDomainVerificationStatusInternal(
+                        callingUid,
+                        uuid,
+                        setOf("example.com"),
+                        DomainVerificationManager.STATE_SUCCESS
+                    )
+                },
                 service(Type.SELECTOR, "setLinkHandlingAllowed") { _, _, _ ->
                     setDomainVerificationLinkHandlingAllowed(TEST_PKG, true)
                 },
