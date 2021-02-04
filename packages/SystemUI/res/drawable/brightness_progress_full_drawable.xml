@@ -15,18 +15,21 @@
   ~ limitations under the License.
   -->
 
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:autoMirrored="true">
     <item android:id="@+id/slider_foreground">
         <shape>
-            <size android:height="48dp" />
+            <size android:height="@dimen/rounded_slider_height" />
             <solid android:color="?android:attr/colorControlActivated" />
-            <corners android:radius="24dp"/>
+            <corners android:radius="@dimen/rounded_slider_corner_radius"/>
         </shape>
     </item>
     <item
         android:id="@+id/slider_icon"
-        android:gravity="center_vertical|start"
-        android:start="32dp">
+        android:gravity="center_vertical|right"
+        android:height="@dimen/rounded_slider_icon_size"
+        android:width="@dimen/rounded_slider_icon_size"
+        android:right="@dimen/rounded_slider_icon_inset">
         <com.android.systemui.util.AlphaTintDrawableWrapper
             android:drawable="@drawable/ic_brightness"
             android:tint="?android:attr/colorBackground"
