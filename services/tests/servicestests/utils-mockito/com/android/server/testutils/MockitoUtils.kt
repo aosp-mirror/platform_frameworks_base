@@ -26,25 +26,34 @@ import org.mockito.stubbing.Stubber
 object MockitoUtils {
     val ANSWER_THROWS = Answer<Any?> {
         when (val name = it.method.name) {
-            "toString" -> return@Answer Answers.CALLS_REAL_METHODS.answer(it)
+            "toString" -> return@Answer try {
+                Answers.CALLS_REAL_METHODS.answer(it)
+            } catch (e: Exception) {
+                "failure calling toString"
+            }
             else -> {
                 val arguments = it.arguments
                         ?.takeUnless { it.isEmpty() }
-                        ?.mapIndexed { index, arg ->
-                            try {
-                                arg?.toString()
-                            } catch (e: Exception) {
-                                "toString[$index] threw ${e.message}"
-                            }
-                        }
-                        ?.joinToString()
-                        ?.let {
-                            "with $it"
-                        }
+                        ?.mapIndexed { index, arg -> arg.attemptToString(index) }
+                        ?.joinToString { it.attemptToString(null) }
+                        ?.let { "with $it" }
                         .orEmpty()
 
                 throw UnsupportedOperationException("${it.mock::class.java.simpleName}#$name " +
                         "$arguments should not be called")
+            }
+        }
+    }
+
+    // Sometimes mocks won't have a toString method, so try-catch and return some default
+    private fun Any?.attemptToString(id: Any? = null): String {
+        return try {
+            toString()
+        } catch (e: Exception) {
+            if (id == null) {
+                e.message ?: "ERROR"
+            } else {
+                "$id ${e.message}"
             }
         }
     }
