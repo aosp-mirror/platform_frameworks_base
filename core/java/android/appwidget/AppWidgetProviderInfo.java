@@ -406,6 +406,14 @@ public class AppWidgetProviderInfo implements Parcelable {
         return new UserHandle(UserHandle.getUserId(providerInfo.applicationInfo.uid));
     }
 
+    /**
+     * Returns the broadcast receiver that is providing this widget.
+     */
+    @NonNull
+    public ActivityInfo getProviderInfo() {
+        return providerInfo;
+    }
+
     @Override
     @SuppressWarnings("deprecation")
     public void writeToParcel(Parcel out, int flags) {

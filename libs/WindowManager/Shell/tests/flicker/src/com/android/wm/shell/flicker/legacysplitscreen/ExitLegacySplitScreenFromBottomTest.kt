@@ -20,7 +20,6 @@ import android.platform.test.annotations.Presubmit
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
@@ -48,10 +47,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class ExitLegacySplitScreenFromBottomTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -59,9 +56,9 @@ class ExitLegacySplitScreenFromBottomTest(
             val instrumentation = InstrumentationRegistry.getInstrumentation()
             val splitScreenApp = SplitScreenHelper.getPrimary(instrumentation)
             // TODO(b/162923992) Use of multiple segments of flicker spec for testing
-            return FlickerTestRunnerFactory(instrumentation,
-                    listOf(Surface.ROTATION_0, Surface.ROTATION_90))
-                    .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0, Surface.ROTATION_90)) {
+                configuration ->
                         withTestName {
                             buildTestTag("exitSplitScreenFromBottom", configuration)
                         }
@@ -86,6 +83,11 @@ class ExitLegacySplitScreenFromBottomTest(
                         }
                         transitions {
                             device.exitSplitScreenFromBottom()
+                        }
+                        assertions {
+                            windowManagerTrace {
+                                all("isNotEmpty") { isNotEmpty() }
+                            }
                         }
                     }
         }

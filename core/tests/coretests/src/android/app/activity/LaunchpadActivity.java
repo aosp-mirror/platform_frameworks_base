@@ -253,16 +253,16 @@ public class LaunchpadActivity extends Activity {
                 sendBroadcast(makeBroadcastIntent(BROADCAST_REGISTERED));
             } else if (BROADCAST_LOCAL.equals(action)) {
                 setExpectedReceivers(new String[]{RECEIVER_LOCAL});
-                sendBroadcast(makeBroadcastIntent(BROADCAST_LOCAL));
+                sendBroadcast(makeBroadcastIntent(BROADCAST_LOCAL, true));
             } else if (BROADCAST_REMOTE.equals(action)) {
                 setExpectedReceivers(new String[]{RECEIVER_REMOTE});
-                sendBroadcast(makeBroadcastIntent(BROADCAST_REMOTE));
+                sendBroadcast(makeBroadcastIntent(BROADCAST_REMOTE, true));
             } else if (BROADCAST_ALL.equals(action)) {
                 setExpectedReceivers(new String[]{
                         RECEIVER_REMOTE, RECEIVER_REG, RECEIVER_LOCAL});
                 registerMyReceiver(new IntentFilter(BROADCAST_ALL));
                 sCallingTest.addIntermediate("after-register");
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
+                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL, true), null);
             } else if (BROADCAST_MULTI.equals(action)) {
                 setExpectedReceivers(new String[]{
                         RECEIVER_REMOTE, RECEIVER_REG, RECEIVER_LOCAL,
@@ -277,23 +277,26 @@ public class LaunchpadActivity extends Activity {
                         RECEIVER_REMOTE, RECEIVER_LOCAL});
                 registerMyReceiver(new IntentFilter(BROADCAST_ALL));
                 sCallingTest.addIntermediate("after-register");
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_LOCAL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_REMOTE), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_LOCAL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_REMOTE), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ALL), null);
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_REPEAT), null);
+                final Intent allIntent = makeBroadcastIntent(BROADCAST_ALL, true);
+                final Intent localIntent = makeBroadcastIntent(BROADCAST_LOCAL, true);
+                final Intent remoteIntent = makeBroadcastIntent(BROADCAST_REMOTE, true);
+                sendOrderedBroadcast(allIntent, null);
+                sendOrderedBroadcast(allIntent, null);
+                sendOrderedBroadcast(allIntent, null);
+                sendOrderedBroadcast(localIntent, null);
+                sendOrderedBroadcast(remoteIntent, null);
+                sendOrderedBroadcast(localIntent, null);
+                sendOrderedBroadcast(remoteIntent, null);
+                sendOrderedBroadcast(allIntent, null);
+                sendOrderedBroadcast(allIntent, null);
+                sendOrderedBroadcast(allIntent, null);
+                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_REPEAT, true), null);
             } else if (BROADCAST_ABORT.equals(action)) {
                 setExpectedReceivers(new String[]{
                         RECEIVER_REMOTE, RECEIVER_ABORT});
                 registerMyReceiver(new IntentFilter(BROADCAST_ABORT));
                 sCallingTest.addIntermediate("after-register");
-                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ABORT), null);
+                sendOrderedBroadcast(makeBroadcastIntent(BROADCAST_ABORT, true), null);
             } else if (BROADCAST_STICKY1.equals(action)) {
                 setExpectedReceivers(new String[]{RECEIVER_REG});
                 setExpectedData(new String[]{DATA_1});
@@ -436,7 +439,14 @@ public class LaunchpadActivity extends Activity {
     }
 
     private Intent makeBroadcastIntent(String action) {
+        return makeBroadcastIntent(action, false);
+    }
+
+    private Intent makeBroadcastIntent(String action, boolean makeImplicit) {
         Intent intent = new Intent(action, null);
+        if (makeImplicit) {
+            intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        }
         intent.putExtra("caller", mCallTarget);
         return intent;
     }

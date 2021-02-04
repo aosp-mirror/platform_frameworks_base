@@ -1225,4 +1225,44 @@ public class RollbackTest {
             InstallUtils.dropShellPermissionIdentity();
         }
     }
+
+    /**
+     * Tests an app can be rolled back to the previous signing key.
+     *
+     * <p>The rollback capability in the signing lineage allows an app to be updated to an APK
+     * signed with a previous signing key in the lineage; however this often defeats the purpose
+     * of key rotation as a compromised key could then be used to roll an app back to the previous
+     * key. To avoid requiring the rollback capability to support app rollbacks the PackageManager
+     * allows an app to be rolled back to the previous signing key if the rollback install reason
+     * is set.
+     */
+    @Test
+    public void testRollbackAfterKeyRotation() throws Exception {
+        try {
+            InstallUtils.adoptShellPermissionIdentity(
+                    Manifest.permission.INSTALL_PACKAGES,
+                    Manifest.permission.DELETE_PACKAGES,
+                    Manifest.permission.TEST_MANAGE_ROLLBACKS,
+                    Manifest.permission.MANAGE_ROLLBACKS);
+
+            // Uninstall TestApp.A
+            Uninstall.packages(TestApp.A);
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(-1);
+
+            // Install v1 of the app with the original signing key (without rollbacks enabled).
+            Install.single(TestApp.AOriginal1).commit();
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+
+            // Upgrade from v1 to v2 with the rotated signing key, with rollbacks enabled.
+            Install.single(TestApp.ARotated2).setEnableRollback().commit();
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(2);
+
+            // Roll back the app.
+            RollbackInfo available = waitForAvailableRollback(TestApp.A);
+            RollbackUtils.rollback(available.getRollbackId());
+            assertThat(InstallUtils.getInstalledVersion(TestApp.A)).isEqualTo(1);
+        } finally {
+            InstallUtils.dropShellPermissionIdentity();
+        }
+    }
 }

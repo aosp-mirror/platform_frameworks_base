@@ -38,6 +38,7 @@ java_library {
     static_libs: [
         "exoplayer2-extractor",
         "mediatranscoding_aidl_interface-java",
+        "modules-utils-build",
     ],
     jarjar_rules: "jarjar_rules.txt",
 
@@ -52,6 +53,7 @@ java_library {
     visibility: [
         "//frameworks/av/apex:__subpackages__",
         "//frameworks/base", // For framework-all
+        "//frameworks/base/apex/media/service",
     ],
 }
 
@@ -80,6 +82,7 @@ filegroup {
         "java/android/media/Session2CommandGroup.java",
         "java/android/media/Session2Link.java",
         "java/android/media/Session2Token.java",
+        "java/android/media/MediaCommunicationManager.java",
     ],
     path: "java",
 }

@@ -232,13 +232,13 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.policy.AttributeCache;
 import com.android.internal.policy.KeyguardDismissCallback;
 import com.android.internal.protolog.common.ProtoLog;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.AttributeCache;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
@@ -486,13 +486,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
      * Whether normal application switches are allowed; a call to {@link #stopAppSwitches()
      * disables this.
      */
-    private boolean mAppSwitchesAllowed = true;
+    private volatile boolean mAppSwitchesAllowed = true;
 
     /**
      * Last stop app switches time, apps finished before this time cannot start background activity
      * even if they are in grace period.
      */
-    private long mLastStopAppSwitchesTime;
+    private volatile long mLastStopAppSwitchesTime;
 
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
@@ -698,6 +698,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int OOM_ADJUSTMENT = 1;
         int LRU_UPDATE = 2;
         int PROCESS_CHANGE = 3;
+        int START_SERVICE = 4;
 
         int caller() default NONE;
     }
@@ -4744,6 +4745,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** A uid is considered to be foreground if it has a visible non-toast window. */
+    @HotPath(caller = HotPath.START_SERVICE)
     boolean hasActiveVisibleWindow(int uid) {
         if (mVisibleActivityProcessTracker.hasVisibleActivity(uid)) {
             return true;

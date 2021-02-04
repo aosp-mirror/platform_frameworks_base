@@ -61,4 +61,13 @@ public class FeatureFlags {
     public boolean isKeyguardLayoutEnabled() {
         return mFlagReader.isEnabled(R.bool.flag_keyguard_layout);
     }
+
+    /** b/178485354 */
+    public boolean useNewBrightnessSlider() {
+        return mFlagReader.isEnabled(R.bool.flag_brightness_slider);
+    }
+
+    public boolean isPeopleTileEnabled() {
+        return mFlagReader.isEnabled(R.bool.flag_conversations);
+    }
 }

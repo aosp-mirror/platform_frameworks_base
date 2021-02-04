@@ -21,7 +21,6 @@ import android.support.test.launcherhelper.LauncherStrategyFactory
 import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
-import com.android.server.wm.flicker.Flicker
 import com.android.server.wm.flicker.FlickerTestRunner
 import com.android.server.wm.flicker.FlickerTestRunnerFactory
 import com.android.server.wm.flicker.endRotation
@@ -60,10 +59,8 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 class LegacySplitScreenToLauncherTest(
-    testName: String,
-    flickerProvider: () -> Flicker,
-    cleanUp: Boolean
-) : FlickerTestRunner(testName, flickerProvider, cleanUp) {
+    testSpec: FlickerTestRunnerFactory.TestSpec
+) : FlickerTestRunner(testSpec) {
     companion object {
         @Parameterized.Parameters(name = "{0}")
         @JvmStatic
@@ -74,8 +71,8 @@ class LegacySplitScreenToLauncherTest(
             val testApp = SimpleAppHelper(instrumentation)
 
             // b/161435597 causes the test not to work on 90 degrees
-            return FlickerTestRunnerFactory(instrumentation, listOf(Surface.ROTATION_0))
-                .buildTest { configuration ->
+            return FlickerTestRunnerFactory.getInstance().buildTest(instrumentation,
+                supportedRotations = listOf(Surface.ROTATION_0)) { configuration ->
                     withTestName {
                         buildTestTag("splitScreenToLauncher", configuration)
                     }

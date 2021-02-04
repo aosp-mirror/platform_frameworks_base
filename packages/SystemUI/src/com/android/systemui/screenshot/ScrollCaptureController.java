@@ -29,6 +29,7 @@ import android.view.ViewTreeObserver.OnComputeInternalInsetsListener;
 import android.view.Window;
 import android.widget.ImageView;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.screenshot.ScrollCaptureClient.Connection;
 import com.android.systemui.screenshot.ScrollCaptureClient.Session;
@@ -58,6 +59,7 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private final Executor mBgExecutor;
     private final ImageExporter mImageExporter;
     private final ImageTileSet mImageTileSet;
+    private final UiEventLogger mUiEventLogger;
 
     private ZonedDateTime mCaptureTime;
     private UUID mRequestId;
@@ -72,12 +74,13 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
     private Runnable mPendingAction;
 
     public ScrollCaptureController(Context context, Connection connection, Executor uiExecutor,
-            Executor bgExecutor, ImageExporter exporter) {
+            Executor bgExecutor, ImageExporter exporter, UiEventLogger uiEventLogger) {
         mContext = context;
         mConnection = connection;
         mUiExecutor = uiExecutor;
         mBgExecutor = bgExecutor;
         mImageExporter = exporter;
+        mUiEventLogger = uiEventLogger;
         mImageTileSet = new ImageTileSet();
     }
 
@@ -136,10 +139,12 @@ public class ScrollCaptureController implements OnComputeInternalInsetsListener 
             disableButtons();
             finish();
         } else if (id == R.id.edit) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_EDIT);
             v.setPressed(true);
             disableButtons();
             edit();
         } else if (id == R.id.share) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_LONG_SCREENSHOT_SHARE);
             v.setPressed(true);
             disableButtons();
             share();
