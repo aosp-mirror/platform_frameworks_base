@@ -154,6 +154,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final DisplayPowerCallbacks mCallbacks;
 
     // Battery stats.
+    @Nullable
     private final IBatteryStats mBatteryStats;
 
     // The sensor manager.
@@ -172,6 +173,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private final int mDisplayId;
 
     // Tracker for brightness changes.
+    @Nullable
     private final BrightnessTracker mBrightnessTracker;
 
     // Tracker for brightness settings changes.
@@ -406,30 +408,30 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     private ObjectAnimator mColorFadeOffAnimator;
     private RampAnimator<DisplayPowerState> mScreenBrightnessRampAnimator;
 
-    // The brightness synchronizer to allow changes in the int brightness value to be reflected in
-    // the float brightness value and vice versa.
-    @Nullable
-    private final BrightnessSynchronizer mBrightnessSynchronizer;
-
     /**
      * Creates the display power controller.
      */
     public DisplayPowerController(Context context,
             DisplayPowerCallbacks callbacks, Handler handler,
             SensorManager sensorManager, DisplayBlanker blanker, LogicalDisplay logicalDisplay) {
+        mLogicalDisplay = logicalDisplay;
+        mDisplayId = mLogicalDisplay.getDisplayIdLocked();
         mHandler = new DisplayControllerHandler(handler.getLooper());
-        mBrightnessTracker = new BrightnessTracker(context, null);
+
+        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+            mBrightnessTracker = new BrightnessTracker(context, null);
+            mBatteryStats = BatteryStatsService.getService();
+        } else {
+            mBrightnessTracker = null;
+            mBatteryStats = null;
+        }
+
         mSettingsObserver = new SettingsObserver(mHandler);
         mCallbacks = callbacks;
-        mBatteryStats = BatteryStatsService.getService();
         mSensorManager = sensorManager;
         mWindowManagerPolicy = LocalServices.getService(WindowManagerPolicy.class);
         mBlanker = blanker;
         mContext = context;
-        mBrightnessSynchronizer = new BrightnessSynchronizer(context);
-        mBrightnessSynchronizer.startSynchronizing();
-        mLogicalDisplay = logicalDisplay;
-        mDisplayId = mLogicalDisplay.getDisplayIdLocked();
 
         PowerManager pm = context.getSystemService(PowerManager.class);
 
@@ -460,8 +462,12 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mScreenBrightnessForVrRangeMinimum = clampAbsoluteBrightness(
                 pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_MINIMUM_VR));
 
+        // Check the setting, but also verify that it is the default display. Only the default
+        // display has an automatic brightness controller running.
+        // TODO: b/179021925 - Fix to work with multiple displays
         mUseSoftwareAutoBrightnessConfig = resources.getBoolean(
-                com.android.internal.R.bool.config_automatic_brightness_available);
+                com.android.internal.R.bool.config_automatic_brightness_available)
+                && mDisplayId == Display.DEFAULT_DISPLAY;
 
         mAllowAutoBrightnessWhileDozingConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_allowAutoBrightnessWhileDozing);
@@ -557,7 +563,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
         mBrightnessBucketsInDozeConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_displayBrightnessBucketsInDoze);
 
-        if (!DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
+        if (mDisplayId == Display.DEFAULT_DISPLAY && !DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT) {
+            // TODO: b/178385123 Once there are sensor associations, we can enable proximity for
+            // non-default displays.
             mProximitySensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
             if (mProximitySensor != null) {
                 mProximityThreshold = Math.min(mProximitySensor.getMaximumRange(),
@@ -643,18 +651,28 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * @param userId userId to fetch data for
      * @param includePackage if false will null out the package name in events
      */
+    @Nullable
     public ParceledListSlice<BrightnessChangeEvent> getBrightnessEvents(
             @UserIdInt int userId, boolean includePackage) {
+        if (mBrightnessTracker == null) {
+            return null;
+        }
         return mBrightnessTracker.getEvents(userId, includePackage);
     }
 
     public void onSwitchUser(@UserIdInt int newUserId) {
         handleSettingsChange(true /* userSwitch */);
-        mBrightnessTracker.onSwitchUser(newUserId);
+        if (mBrightnessTracker != null) {
+            mBrightnessTracker.onSwitchUser(newUserId);
+        }
     }
 
+    @Nullable
     public ParceledListSlice<AmbientBrightnessDayStats> getAmbientBrightnessStats(
             @UserIdInt int userId) {
+        if (mBrightnessTracker == null) {
+            return null;
+        }
         return mBrightnessTracker.getAmbientBrightnessStats(userId);
     }
 
@@ -662,7 +680,9 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
      * Persist the brightness slider events and ambient brightness stats to disk.
      */
     public void persistBrightnessTrackerState() {
-        mBrightnessTracker.persistBrightnessTrackerState();
+        if (mBrightnessTracker != null) {
+            mBrightnessTracker.persistBrightnessTrackerState();
+        }
     }
 
     /**
@@ -766,20 +786,16 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 mPowerState, DisplayPowerState.SCREEN_BRIGHTNESS_FLOAT);
         mScreenBrightnessRampAnimator.setListener(mRampAnimatorListener);
 
-        // Initialize screen state for battery stats.
-        try {
-            mBatteryStats.noteScreenState(mPowerState.getScreenState());
-            mBatteryStats.noteScreenBrightness(BrightnessSynchronizer.brightnessFloatToInt(
-                    mPowerState.getScreenBrightness()));
-        } catch (RemoteException ex) {
-            // same process
-        }
+        noteScreenState(mPowerState.getScreenState());
+        noteScreenBrightness(mPowerState.getScreenBrightness());
+
         // Initialize all of the brightness tracking state
         final float brightness = convertToNits(BrightnessSynchronizer.brightnessFloatToInt(
                 mPowerState.getScreenBrightness()));
         if (brightness >= 0.0f) {
             mBrightnessTracker.start(brightness);
         }
+
         mContext.getContentResolver().registerContentObserver(
                 Settings.System.getUriFor(Settings.System.SCREEN_BRIGHTNESS_FLOAT),
                 false /*notifyForDescendants*/, mSettingsObserver, UserHandle.USER_ALL);
@@ -1366,11 +1382,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
                 SystemProperties.set("debug.tracing.screen_state", String.valueOf(state));
                 mPowerState.setScreenState(state);
                 // Tell battery stats about the transition.
-                try {
-                    mBatteryStats.noteScreenState(state);
-                } catch (RemoteException ex) {
-                    // same process
-                }
+                noteScreenState(state);
             }
         }
 
@@ -1442,13 +1454,7 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
             Trace.traceCounter(Trace.TRACE_TAG_POWER, "TargetScreenBrightness", (int) target);
             // TODO(b/153319140) remove when we can get this from the above trace invocation
             SystemProperties.set("debug.tracing.screen_brightness", String.valueOf(target));
-            try {
-                // TODO(brightnessfloat): change BatteryStats to use float
-                mBatteryStats.noteScreenBrightness(
-                        BrightnessSynchronizer.brightnessFloatToInt(target));
-            } catch (RemoteException ex) {
-                // same process
-            }
+            noteScreenBrightness(target);
         }
     }
 
@@ -1767,15 +1773,21 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void putScreenBrightnessSetting(float brightnessValue) {
-        mCurrentScreenBrightnessSetting = brightnessValue;
-        Settings.System.putFloatForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessValue, UserHandle.USER_CURRENT);
+        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+            mCurrentScreenBrightnessSetting = brightnessValue;
+            Settings.System.putFloatForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_BRIGHTNESS_FLOAT, brightnessValue,
+                    UserHandle.USER_CURRENT);
+        }
     }
 
     private void putAutoBrightnessAdjustmentSetting(float adjustment) {
-        mAutoBrightnessAdjustment = adjustment;
-        Settings.System.putFloatForUser(mContext.getContentResolver(),
-                Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, adjustment, UserHandle.USER_CURRENT);
+        if (mDisplayId == Display.DEFAULT_DISPLAY) {
+            mAutoBrightnessAdjustment = adjustment;
+            Settings.System.putFloatForUser(mContext.getContentResolver(),
+                    Settings.System.SCREEN_AUTO_BRIGHTNESS_ADJ, adjustment,
+                    UserHandle.USER_CURRENT);
+        }
     }
 
     private boolean updateAutoBrightnessAdjustment() {
@@ -2054,6 +2066,29 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
 
     private static float clampAutoBrightnessAdjustment(float value) {
         return MathUtils.constrain(value, -1.0f, 1.0f);
+    }
+
+    private void noteScreenState(int screenState) {
+        if (mBatteryStats != null) {
+            try {
+                // TODO(multi-display): make this multi-display
+                mBatteryStats.noteScreenState(screenState);
+            } catch (RemoteException e) {
+                // same process
+            }
+        }
+    }
+
+    private void noteScreenBrightness(float brightness) {
+        if (mBatteryStats != null) {
+            try {
+                // TODO(brightnessfloat): change BatteryStats to use float
+                mBatteryStats.noteScreenBrightness(BrightnessSynchronizer.brightnessFloatToInt(
+                        brightness));
+            } catch (RemoteException e) {
+                // same process
+            }
+        }
     }
 
     private final class DisplayControllerHandler extends Handler {
