@@ -358,8 +358,12 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @Constants.HandleMessageResult
     protected int handleReportArcInitiate(HdmiCecMessage message) {
         assertRunOnServiceThread();
-        // TODO(amyjojo): implement report arc initiate handler
-        HdmiLogger.debug(TAG + "Stub handleReportArcInitiate");
+        /*
+         * Ideally, we should have got this response before the {@link ArcInitiationActionFromAvr}
+         * has timed out. Even if the response is late, {@link ArcInitiationActionFromAvr
+         * #handleInitiateArcTimeout()} would not have disabled ARC. So nothing needs to be done
+         * here.
+         */
         return Constants.HANDLED;
     }
 
