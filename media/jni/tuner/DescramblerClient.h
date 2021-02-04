@@ -17,14 +17,15 @@
 #ifndef _ANDROID_MEDIA_TV_DESCRAMBLER_CLIENT_H_
 #define _ANDROID_MEDIA_TV_DESCRAMBLER_CLIENT_H_
 
-//#include <aidl/android/media/tv/tuner/ITunerDescrambler.h>
+#include <aidl/android/media/tv/tuner/ITunerDescrambler.h>
 #include <android/hardware/tv/tuner/1.0/IDescrambler.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
 
 #include "DemuxClient.h"
 #include "FilterClient.h"
 
-//using ::aidl::android::media::tv::tuner::ITunerDescrambler;
+using ::aidl::android::media::tv::tuner::ITunerDescrambler;
+using ::aidl::android::media::tv::tuner::TunerDemuxPid;
 
 using ::android::hardware::tv::tuner::V1_0::IDescrambler;
 using ::android::hardware::tv::tuner::V1_0::Result;
@@ -37,8 +38,7 @@ namespace android {
 struct DescramblerClient : public RefBase {
 
 public:
-    // TODO: pending hidl interface
-    DescramblerClient();
+    DescramblerClient(shared_ptr<ITunerDescrambler> tunerDescrambler);
     ~DescramblerClient();
 
     // TODO: remove after migration to Tuner Service is done.
@@ -70,12 +70,13 @@ public:
     Result close();
 
 private:
+    TunerDemuxPid getAidlDemuxPid(DemuxPid& pid);
+
     /**
      * An AIDL Tuner Descrambler Singleton assigned at the first time the Tuner Client
      * opens a descrambler. Default null when descrambler is not opened.
      */
-    // TODO: pending on aidl interface
-    //shared_ptr<ITunerDescrambler> mTunerDescrambler;
+    shared_ptr<ITunerDescrambler> mTunerDescrambler;
 
     /**
      * A Descrambler HAL interface that is ready before migrating to the TunerDescrambler.
