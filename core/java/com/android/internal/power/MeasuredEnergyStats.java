@@ -20,8 +20,10 @@ package com.android.internal.power;
 import static android.os.BatteryStats.ENERGY_DATA_UNAVAILABLE;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Parcel;
+import android.util.DebugUtils;
 import android.util.Slog;
 import android.view.Display;
 
@@ -33,7 +35,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Tracks the measured energy usage of various subsystems according to their {@link EnergyBucket}.
+ * Tracks the measured energy usage of various subsystems according to their
+ * {@link StandardEnergyBucket} or custom energy bucket (which is tied to
+ * {@link android.hardware.power.stats.EnergyConsumer.ordinal}).
  *
  * This class doesn't use a TimeBase, and instead requires manually decisions about when to
  * accumulate since it is trivial. However, in the future, a TimeBase could be used instead.
@@ -42,15 +46,13 @@ import java.lang.annotation.RetentionPolicy;
 public class MeasuredEnergyStats {
     private static final String TAG = "MeasuredEnergyStats";
 
-    // Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if energy
-    // bucket integers are modified.
+    // Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} MUST be updated if standard
+    // energy bucket integers are modified/added/removed.
     public static final int ENERGY_BUCKET_UNKNOWN = -1;
     public static final int ENERGY_BUCKET_SCREEN_ON = 0;
     public static final int ENERGY_BUCKET_SCREEN_DOZE = 1;
     public static final int ENERGY_BUCKET_SCREEN_OTHER = 2;
-    public static final int NUMBER_ENERGY_BUCKETS = 3;
-    private static final String[] ENERGY_BUCKET_NAMES =
-            {"screen-on", "screen-doze", "screen-other"};
+    public static final int NUMBER_STANDARD_ENERGY_BUCKETS = 3; // Buckets above this are custom.
 
     @IntDef(prefix = {"ENERGY_BUCKET_"}, value = {
             ENERGY_BUCKET_UNKNOWN,
@@ -59,28 +61,37 @@ public class MeasuredEnergyStats {
             ENERGY_BUCKET_SCREEN_OTHER,
     })
     @Retention(RetentionPolicy.SOURCE)
-    public @interface EnergyBucket {
+    public @interface StandardEnergyBucket {
     }
 
     /**
-     * Total energy (in microjoules) that an {@link EnergyBucket} has accumulated since the last
-     * reset. Values MUST be non-zero or ENERGY_DATA_UNAVAILABLE. Accumulation only occurs
+     * Total energy (in microjoules) that an energy bucket (including both
+     * {@link StandardEnergyBucket} and custom buckets) has accumulated since the last reset.
+     * Values MUST be non-zero or ENERGY_DATA_UNAVAILABLE. Accumulation only occurs
      * while the necessary conditions are satisfied (e.g. on battery).
+     *
+     * Energy for both {@link StandardEnergyBucket}s and custom energy buckets are stored in this
+     * array, and may internally both referred to as 'buckets'. This is an implementation detail;
+     * externally, we differentiate between these two data sources.
      *
      * Warning: Long array is used for access speed. If the number of supported subsystems
      * becomes large, consider using an alternate data structure such as a SparseLongArray.
      */
-    private final long[] mAccumulatedEnergiesMicroJoules = new long[NUMBER_ENERGY_BUCKETS];
+    private final long[] mAccumulatedEnergiesMicroJoules;
 
     /**
      * Creates a MeasuredEnergyStats set to support the provided energy buckets.
-     * supportedEnergyBuckets should generally be of size {@link #NUMBER_ENERGY_BUCKETS}.
+     * supportedStandardBuckets must be of size {@link #NUMBER_STANDARD_ENERGY_BUCKETS}.
+     * numCustomBuckets >= 0 is the number of (non-standard) custom energy buckets on the device.
      */
-    public MeasuredEnergyStats(boolean[] supportedEnergyBuckets) {
+    public MeasuredEnergyStats(boolean[] supportedStandardBuckets, int numCustomBuckets) {
+        final int numTotalBuckets = NUMBER_STANDARD_ENERGY_BUCKETS + numCustomBuckets;
+        mAccumulatedEnergiesMicroJoules = new long[numTotalBuckets];
         // Initialize to all zeros where supported, otherwise ENERGY_DATA_UNAVAILABLE.
-        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
-            if (!supportedEnergyBuckets[bucket]) {
-                mAccumulatedEnergiesMicroJoules[bucket] = ENERGY_DATA_UNAVAILABLE;
+        // All custom buckets are, by definition, supported, so their values stay at 0.
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_ENERGY_BUCKETS; stdBucket++) {
+            if (!supportedStandardBuckets[stdBucket]) {
+                mAccumulatedEnergiesMicroJoules[stdBucket] = ENERGY_DATA_UNAVAILABLE;
             }
         }
     }
@@ -90,10 +101,13 @@ public class MeasuredEnergyStats {
      * supported. This certainly does NOT produce an exact clone of the template.
      */
     private MeasuredEnergyStats(MeasuredEnergyStats template) {
+        final int numIndices = template.getNumberOfIndices();
+        mAccumulatedEnergiesMicroJoules = new long[numIndices];
         // Initialize to all zeros where supported, otherwise ENERGY_DATA_UNAVAILABLE.
-        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
-            if (!template.isEnergyBucketSupported(bucket)) {
-                mAccumulatedEnergiesMicroJoules[bucket] = ENERGY_DATA_UNAVAILABLE;
+        // All custom buckets are, by definition, supported, so their values stay at 0.
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_ENERGY_BUCKETS; stdBucket++) {
+            if (!template.isIndexSupported(stdBucket)) {
+                mAccumulatedEnergiesMicroJoules[stdBucket] = ENERGY_DATA_UNAVAILABLE;
             }
         }
     }
@@ -108,18 +122,22 @@ public class MeasuredEnergyStats {
 
     /**
      * Constructor for creating a temp MeasuredEnergyStats.
-     * See {@link #readSummaryFromParcel(MeasuredEnergyStats, Parcel)}.
+     * See {@link #createAndReadSummaryFromParcel(Parcel, MeasuredEnergyStats)}.
      */
-    private MeasuredEnergyStats() {
+    private MeasuredEnergyStats(int numIndices) {
+        mAccumulatedEnergiesMicroJoules = new long[numIndices];
     }
 
     /** Construct from parcel. */
     public MeasuredEnergyStats(Parcel in) {
+        final int size = in.readInt();
+        mAccumulatedEnergiesMicroJoules = new long[size];
         in.readLongArray(mAccumulatedEnergiesMicroJoules);
     }
 
     /** Write to parcel */
     public void writeToParcel(Parcel out) {
+        out.writeInt(mAccumulatedEnergiesMicroJoules.length);
         out.writeLongArray(mAccumulatedEnergiesMicroJoules);
     }
 
@@ -129,16 +147,18 @@ public class MeasuredEnergyStats {
      * summary parcel was written. Availability has already been correctly set in the constructor.
      * Note: {@link com.android.internal.os.BatteryStatsImpl#VERSION} must be updated if summary
      *       parceling changes.
+     *
+     * Corresponding write performed by {@link #writeSummaryToParcel(Parcel, boolean)}.
      */
     private void readSummaryFromParcel(Parcel in, boolean overwriteAvailability) {
-        final int size = in.readInt();
-        for (int i = 0; i < size; i++) {
-            final int bucket = in.readInt();
+        final int numWrittenEntries = in.readInt();
+        for (int entry = 0; entry < numWrittenEntries; entry++) {
+            final int index = in.readInt();
             final long energyUJ = in.readLong();
             if (overwriteAvailability) {
-                mAccumulatedEnergiesMicroJoules[bucket] = energyUJ;
+                mAccumulatedEnergiesMicroJoules[index] = energyUJ;
             } else {
-                setValueIfSupported(bucket, energyUJ);
+                setValueIfSupported(index, energyUJ);
             }
         }
     }
@@ -146,52 +166,90 @@ public class MeasuredEnergyStats {
     /**
      * Write to summary parcel.
      * Note: Measured subsystem availability may be different when the summary parcel is read.
+     *
+     * Corresponding read performed by {@link #readSummaryFromParcel(Parcel, boolean)}.
      */
     private void writeSummaryToParcel(Parcel out, boolean skipZero) {
-        final int sizePos = out.dataPosition();
+        final int posOfNumWrittenEntries = out.dataPosition();
         out.writeInt(0);
-        int size = 0;
-        // Write only the supported buckets with non-zero energy.
-        for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-            final long energy = mAccumulatedEnergiesMicroJoules[i];
+        int numWrittenEntries = 0;
+        // Write only the supported buckets (with non-zero energy, if applicable).
+        for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
+            final long energy = mAccumulatedEnergiesMicroJoules[index];
             if (energy < 0) continue;
             if (energy == 0 && skipZero) continue;
 
-            out.writeInt(i);
-            out.writeLong(mAccumulatedEnergiesMicroJoules[i]);
-            size++;
+            out.writeInt(index);
+            out.writeLong(mAccumulatedEnergiesMicroJoules[index]);
+            numWrittenEntries++;
         }
         final int currPos = out.dataPosition();
-        out.setDataPosition(sizePos);
-        out.writeInt(size);
+        out.setDataPosition(posOfNumWrittenEntries);
+        out.writeInt(numWrittenEntries);
         out.setDataPosition(currPos);
     }
 
-    /** Updates the given bucket with the given energy iff accumulate is true. */
-    public void updateBucket(@EnergyBucket int bucket, long energyDeltaUJ, boolean accumulate) {
+    /** Get number of possible buckets, including both standard and custom ones. */
+    private int getNumberOfIndices() {
+        return mAccumulatedEnergiesMicroJoules.length;
+    }
+
+    // TODO: Get rid of the 'accumulate' boolean. It's always true.
+    /** Updates the given standard energy bucket with the given energy if accumulate is true. */
+    public void updateStandardBucket(@StandardEnergyBucket int bucket, long energyDeltaUJ,
+            boolean accumulate) {
+        checkValidStandardBucket(bucket);
+        updateEntry(bucket, energyDeltaUJ, accumulate);
+    }
+
+    /** Updates the given custom energy bucket with the given energy if accumulate is true. */
+    public void updateCustomBucket(int customBucket, long energyDeltaUJ, boolean accumulate) {
+        if (!isValidCustomBucket(customBucket)) {
+            Slog.e(TAG, "Attempted to update invalid custom bucket " + customBucket);
+            return;
+        }
+        final int index = customBucketToIndex(customBucket);
+        updateEntry(index, energyDeltaUJ, accumulate);
+    }
+
+    /** Updates the given index with the given energy if accumulate is true. */
+    private void updateEntry(int index, long energyDeltaUJ, boolean accumulate) {
         if (accumulate) {
-            if (mAccumulatedEnergiesMicroJoules[bucket] >= 0L) {
-                mAccumulatedEnergiesMicroJoules[bucket] += energyDeltaUJ;
+            if (mAccumulatedEnergiesMicroJoules[index] >= 0L) {
+                mAccumulatedEnergiesMicroJoules[index] += energyDeltaUJ;
             } else {
                 Slog.wtf(TAG, "Attempting to add " + energyDeltaUJ + " to unavailable bucket "
-                        + ENERGY_BUCKET_NAMES[bucket] + " whose value was "
-                        + mAccumulatedEnergiesMicroJoules[bucket]);
+                        + getBucketName(index) + " whose value was "
+                        + mAccumulatedEnergiesMicroJoules[index]);
             }
         }
     }
 
     /**
-     * Return accumulated energy (in microjoules) for the given energy bucket since last reset.
-     * Returns {@link BatteryStats#ENERGY_DATA_UNAVAILABLE} if this energy data is unavailable.
+     * Return accumulated energy (in microjoules) for a standard energy bucket since last reset.
+     * Returns {@link android.os.BatteryStats#ENERGY_DATA_UNAVAILABLE} if this data is unavailable.
+     * @throws IllegalArgumentException if no such {@link StandardEnergyBucket}.
      */
-    public long getAccumulatedBucketEnergy(@EnergyBucket int bucket) {
+    public long getAccumulatedStandardBucketEnergy(@StandardEnergyBucket int bucket) {
+        checkValidStandardBucket(bucket);
         return mAccumulatedEnergiesMicroJoules[bucket];
     }
 
     /**
-     * Map {@link MeasuredEnergySubsystem} and device state to a Display {@link EnergyBucket}.
+     * Return accumulated energy (in microjoules) for the a custom energy bucket since last reset.
+     * Returns {@link android.os.BatteryStats#ENERGY_DATA_UNAVAILABLE} if this data is unavailable.
      */
-    public static @EnergyBucket int getDisplayEnergyBucket(int screenState) {
+    public long getAccumulatedCustomBucketEnergy(int customBucket) {
+        if (!isValidCustomBucket(customBucket)) {
+            return ENERGY_DATA_UNAVAILABLE;
+        }
+        return mAccumulatedEnergiesMicroJoules[customBucketToIndex(customBucket)];
+    }
+
+    /**
+     * Map {@link MeasuredEnergySubsystem} and device state to Display {@link StandardEnergyBucket}.
+     */
+    public static @StandardEnergyBucket int getDisplayEnergyBucket(int screenState) {
         if (Display.isOnState(screenState)) {
             return ENERGY_BUCKET_SCREEN_ON;
         }
@@ -204,15 +262,20 @@ public class MeasuredEnergyStats {
     /**
      * Create a MeasuredEnergyStats object from a summary parcel.
      *
+     * Corresponding write performed by
+     * {@link #writeSummaryToParcel(MeasuredEnergyStats, Parcel, boolean)}.
+     *
      * @return a new MeasuredEnergyStats object as described.
      *         Returns null if the parcel indicates there is no data to populate.
      */
     public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(Parcel in) {
+        final int arraySize = in.readInt();
         // Check if any MeasuredEnergyStats exists on the parcel
-        if (in.readInt() == 0) return null;
+        if (arraySize == 0) return null;
 
-        final MeasuredEnergyStats stats =
-                new MeasuredEnergyStats(new boolean[NUMBER_ENERGY_BUCKETS]);
+        final int numCustomBuckets = arraySize - NUMBER_STANDARD_ENERGY_BUCKETS;
+        final MeasuredEnergyStats stats = new MeasuredEnergyStats(
+                new boolean[NUMBER_STANDARD_ENERGY_BUCKETS], numCustomBuckets);
         stats.readSummaryFromParcel(in, true);
         return stats;
     }
@@ -220,6 +283,12 @@ public class MeasuredEnergyStats {
     /**
      * Create a MeasuredEnergyStats using the template to determine which buckets are supported,
      * and populate this new object from the given parcel.
+     *
+     * The parcel must be consistent with the template in terms of the number of
+     * possible (not necessarily supported) standard and custom buckets.
+     *
+     * Corresponding write performed by
+     * {@link #writeSummaryToParcel(MeasuredEnergyStats, Parcel, boolean)}.
      *
      * @return a new MeasuredEnergyStats object as described.
      *         Returns null if the stats contain no non-0 information (such as if template is null
@@ -229,12 +298,22 @@ public class MeasuredEnergyStats {
      */
     public static @Nullable MeasuredEnergyStats createAndReadSummaryFromParcel(Parcel in,
             @Nullable MeasuredEnergyStats template) {
+        final int arraySize = in.readInt();
         // Check if any MeasuredEnergyStats exists on the parcel
-        if (in.readInt() == 0) return null;
+        if (arraySize == 0) return null;
 
         if (template == null) {
-            // Nothing supported now. Create placeholder object just to consume the parcel data.
-            final MeasuredEnergyStats mes = new MeasuredEnergyStats();
+            // Nothing supported anymore. Create placeholder object just to consume the parcel data.
+            final MeasuredEnergyStats mes = new MeasuredEnergyStats(arraySize);
+            mes.readSummaryFromParcel(in, false);
+            return null;
+        }
+
+        if (arraySize != template.getNumberOfIndices()) {
+            Slog.wtf(TAG, "Size of MeasuredEnergyStats parcel (" + arraySize
+                    + ") does not match template (" + template.getNumberOfIndices() + ").");
+            // Something is horribly wrong. Just consume the parcel and return null.
+            final MeasuredEnergyStats mes = new MeasuredEnergyStats(arraySize);
             mes.readSummaryFromParcel(in, false);
             return null;
         }
@@ -251,14 +330,17 @@ public class MeasuredEnergyStats {
 
     /** Returns true iff any of the buckets are supported and non-zero. */
     private boolean containsInterestingData() {
-        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
-            if (mAccumulatedEnergiesMicroJoules[bucket] > 0) return true;
+        for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
+            if (mAccumulatedEnergiesMicroJoules[index] > 0) return true;
         }
         return false;
     }
 
     /**
      * Write a MeasuredEnergyStats to a parcel. If the stats is null, just write a 0.
+     *
+     * Corresponding read performed by {@link #createAndReadSummaryFromParcel(Parcel)}
+     * and {@link #createAndReadSummaryFromParcel(Parcel, MeasuredEnergyStats)}.
      */
     public static void writeSummaryToParcel(@Nullable MeasuredEnergyStats stats,
             Parcel dest, boolean skipZero) {
@@ -266,14 +348,15 @@ public class MeasuredEnergyStats {
             dest.writeInt(0);
             return;
         }
-        dest.writeInt(1);
+        dest.writeInt(stats.getNumberOfIndices());
         stats.writeSummaryToParcel(dest, skipZero);
     }
 
     /** Reset accumulated energy. */
     private void reset() {
-        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
-            setValueIfSupported(bucket, 0L);
+        final int numIndices = getNumberOfIndices();
+        for (int index = 0; index < numIndices; index++) {
+            setValueIfSupported(index, 0L);
         }
     }
 
@@ -282,33 +365,93 @@ public class MeasuredEnergyStats {
         if (stats != null) stats.reset();
     }
 
-    /** If the bucket is AVAILABLE, overwrite its value; otherwise leave it as UNAVAILABLE. */
-    private void setValueIfSupported(@EnergyBucket int bucket, long value) {
-        if (mAccumulatedEnergiesMicroJoules[bucket] != ENERGY_DATA_UNAVAILABLE) {
-            mAccumulatedEnergiesMicroJoules[bucket] = value;
+    /** If the index is AVAILABLE, overwrite its value; otherwise leave it as UNAVAILABLE. */
+    private void setValueIfSupported(int index, long value) {
+        if (mAccumulatedEnergiesMicroJoules[index] != ENERGY_DATA_UNAVAILABLE) {
+            mAccumulatedEnergiesMicroJoules[index] = value;
         }
     }
 
-    /** Check if measuring the energy of the given bucket is supported by this device. */
-    public boolean isEnergyBucketSupported(@EnergyBucket int bucket) {
-        return mAccumulatedEnergiesMicroJoules[bucket] != ENERGY_DATA_UNAVAILABLE;
+    /**
+     * Check if measuring the energy of the given bucket is supported by this device.
+     * @throws IllegalArgumentException if not a valid {@link StandardEnergyBucket}.
+     */
+    public boolean isStandardBucketSupported(@StandardEnergyBucket int bucket) {
+        checkValidStandardBucket(bucket);
+        return isIndexSupported(bucket);
+    }
+
+    private boolean isIndexSupported(int index) {
+        return mAccumulatedEnergiesMicroJoules[index] != ENERGY_DATA_UNAVAILABLE;
+    }
+
+    /** Check if the supported energy buckets are precisely those given. */
+    public boolean isSupportEqualTo(
+            @NonNull boolean[] queriedStandardBuckets, int numCustomBuckets) {
+
+        final int numBuckets = getNumberOfIndices();
+        // TODO(b/178504428): Detect whether custom buckets have changed qualitatively, not just
+        //                    quantitatively, and treat as mismatch if so.
+        if (numBuckets != NUMBER_STANDARD_ENERGY_BUCKETS + numCustomBuckets) {
+            return false;
+        }
+        for (int stdBucket = 0; stdBucket < NUMBER_STANDARD_ENERGY_BUCKETS; stdBucket++) {
+            if (isStandardBucketSupported(stdBucket) != queriedStandardBuckets[stdBucket]) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /** Dump debug data. */
     public void dump(PrintWriter pw) {
         pw.println("Accumulated energy since last reset (microjoules):");
         pw.print("   ");
-        for (int bucket = 0; bucket < NUMBER_ENERGY_BUCKETS; bucket++) {
-            pw.print(ENERGY_BUCKET_NAMES[bucket]);
+        for (int index = 0; index < mAccumulatedEnergiesMicroJoules.length; index++) {
+            pw.print(getBucketName(index));
             pw.print(" : ");
-            pw.print(mAccumulatedEnergiesMicroJoules[bucket]);
-            if (!isEnergyBucketSupported(bucket)) {
+            pw.print(mAccumulatedEnergiesMicroJoules[index]);
+            if (!isIndexSupported(index)) {
                 pw.print(" (unsupported)");
             }
-            if (bucket != NUMBER_ENERGY_BUCKETS - 1) {
+            if (index != mAccumulatedEnergiesMicroJoules.length - 1) {
                 pw.print(", ");
             }
         }
         pw.println();
+    }
+
+    /**
+     * If the index is a standard bucket, returns its name; otherwise returns its prefixed custom
+     * bucket number.
+     */
+    private static String getBucketName(int index) {
+        if (isValidStandardBucket(index)) {
+            return DebugUtils.valueToString(MeasuredEnergyStats.class, "ENERGY_BUCKET_", index);
+        }
+        return "CUSTOM_" + indexToCustomBucket(index);
+    }
+
+    private static int customBucketToIndex(int customBucket) {
+        return customBucket + NUMBER_STANDARD_ENERGY_BUCKETS;
+    }
+
+    private static int indexToCustomBucket(int index) {
+        return index - NUMBER_STANDARD_ENERGY_BUCKETS;
+    }
+
+    private static void checkValidStandardBucket(@StandardEnergyBucket int bucket) {
+        if (!isValidStandardBucket(bucket)) {
+            throw new IllegalArgumentException("Illegal StandardEnergyBucket " + bucket);
+        }
+    }
+
+    private static boolean isValidStandardBucket(@StandardEnergyBucket int bucket) {
+        return bucket >= 0 && bucket < NUMBER_STANDARD_ENERGY_BUCKETS;
+    }
+
+    private boolean isValidCustomBucket(int customBucket) {
+        return customBucket >= 0
+                && customBucketToIndex(customBucket) < mAccumulatedEnergiesMicroJoules.length;
     }
 }
