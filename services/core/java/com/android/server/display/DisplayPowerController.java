@@ -47,6 +47,7 @@ import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.util.TimeUtils;
@@ -619,6 +620,11 @@ final class DisplayPowerController implements AutomaticBrightnessController.Call
     }
 
     private void applyReduceBrightColorsSplineAdjustment() {
+        if (mBrightnessMapper == null) {
+            Log.w(TAG, "No brightness mapping available to recalculate splines");
+            return;
+        }
+
         float[] adjustedNits = new float[mNitsRange.length];
         for (int i = 0; i < mNitsRange.length; i++) {
             adjustedNits[i] = mCdsi.getReduceBrightColorsAdjustedBrightnessNits(mNitsRange[i]);
