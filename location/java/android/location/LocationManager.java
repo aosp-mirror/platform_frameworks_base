@@ -232,19 +232,26 @@ public class LocationManager {
 
     /**
      * Key used for an extra holding a {@link Location} value when a location change is sent using
-     * a PendingIntent.
+     * a PendingIntent. If the location change includes a list of batched locations via
+     * {@link #KEY_LOCATIONS} then this key will still be present, and will hold the last location
+     * in the batch. Use {@link Intent#getParcelableExtra(String)} to retrieve the location.
      *
      * @see #requestLocationUpdates(String, LocationRequest, PendingIntent)
      */
     public static final String KEY_LOCATION_CHANGED = "location";
 
     /**
-     * Key used for an extra holding a {@link LocationResult} value when a location change is sent
-     * using a PendingIntent.
+     * Key used for an extra holding a array of {@link Location}s when a location change is sent
+     * using a PendingIntent. This key will only be present if the location change includes
+     * multiple (ie, batched) locations, otherwise only {@link #KEY_LOCATION_CHANGED} will be
+     * present. Use {@link Intent#getParcelableArrayExtra(String)} to retrieve the locations.
+     *
+     * <p>The array of locations will never be empty, and will ordered from earliest location to
+     * latest location, the same as with {@link LocationListener#onLocationChanged(List)}.
      *
      * @see #requestLocationUpdates(String, LocationRequest, PendingIntent)
      */
-    public static final String KEY_LOCATION_RESULT = "locationResult";
+    public static final String KEY_LOCATIONS = "locations";
 
     /**
      * Key used for an extra holding an integer request code when location flush completion is sent
@@ -3018,12 +3025,12 @@ public class LocationManager {
         }
 
         @Override
-        public void onLocationChanged(LocationResult locationResult,
+        public void onLocationChanged(List<Location> locations,
                 @Nullable IRemoteCallback onCompleteCallback) {
             executeSafely(mExecutor, () -> mListener, new ListenerOperation<LocationListener>() {
                 @Override
                 public void operate(LocationListener listener) {
-                    listener.onLocationChanged(locationResult);
+                    listener.onLocationChanged(locations);
                 }
 
                 @Override
@@ -3366,8 +3373,8 @@ public class LocationManager {
         }
 
         @Override
-        public void onLocationChanged(@NonNull LocationResult locationResult) {
-            mCallback.onLocationBatch(locationResult.asList());
+        public void onLocationChanged(@NonNull List<Location> locations) {
+            mCallback.onLocationBatch(locations);
         }
     }
 

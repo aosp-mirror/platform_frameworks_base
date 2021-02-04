@@ -19457,7 +19457,7 @@ package android.location {
   public interface LocationListener {
     method public default void onFlushComplete(int);
     method public void onLocationChanged(@NonNull android.location.Location);
-    method public default void onLocationChanged(@NonNull android.location.LocationResult);
+    method public default void onLocationChanged(@NonNull java.util.List<android.location.Location>);
     method public default void onProviderDisabled(@NonNull String);
     method public default void onProviderEnabled(@NonNull String);
     method @Deprecated public default void onStatusChanged(String, int, android.os.Bundle);
@@ -19543,8 +19543,8 @@ package android.location {
     field public static final String FUSED_PROVIDER = "fused";
     field public static final String GPS_PROVIDER = "gps";
     field public static final String KEY_FLUSH_COMPLETE = "flushComplete";
+    field public static final String KEY_LOCATIONS = "locations";
     field public static final String KEY_LOCATION_CHANGED = "location";
-    field public static final String KEY_LOCATION_RESULT = "locationResult";
     field public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
     field public static final String KEY_PROXIMITY_ENTERING = "entering";
     field @Deprecated public static final String KEY_STATUS_CHANGED = "status";
@@ -19600,18 +19600,6 @@ package android.location {
     method @NonNull public android.location.LocationRequest.Builder setMinUpdateDistanceMeters(@FloatRange(from=0, to=java.lang.Float.MAX_VALUE) float);
     method @NonNull public android.location.LocationRequest.Builder setMinUpdateIntervalMillis(@IntRange(from=0) long);
     method @NonNull public android.location.LocationRequest.Builder setQuality(int);
-  }
-
-  public final class LocationResult implements android.os.Parcelable {
-    method @NonNull public java.util.List<android.location.Location> asList();
-    method @NonNull public static android.location.LocationResult create(@NonNull android.location.Location);
-    method @NonNull public static android.location.LocationResult create(@NonNull java.util.List<android.location.Location>);
-    method public int describeContents();
-    method @NonNull public android.location.Location get(@IntRange(from=0) int);
-    method @NonNull public android.location.Location getLastLocation();
-    method @IntRange(from=1) public int size();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.LocationResult> CREATOR;
   }
 
   public interface OnNmeaMessageListener {
