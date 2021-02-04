@@ -2905,6 +2905,35 @@ public class DevicePolicyManager {
         return DebugUtils.constantToString(DevicePolicyManager.class, PREFIX_OPERATION, operation);
     }
 
+    private static final String PREFIX_UNSAFE_OPERATION_REASON = "UNSAFE_OPERATION_REASON_";
+
+    /** @hide */
+    @IntDef(prefix = PREFIX_UNSAFE_OPERATION_REASON, value = {
+            UNSAFE_OPERATION_REASON_NONE,
+            UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public static @interface UnsafeOperationReason {
+    }
+
+    /** @hide */
+    @TestApi
+    public static final int UNSAFE_OPERATION_REASON_NONE = -1;
+
+    /**
+     * Indicates that a {@link UnsafeStateException} was thrown because the operation would distract
+     * the driver of the vehicle.
+     */
+    public static final int UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION = 1;
+
+    /** @hide */
+    @NonNull
+    @TestApi
+    public static String unsafeOperationReasonToString(@UnsafeOperationReason int reason) {
+        return DebugUtils.constantToString(DevicePolicyManager.class,
+                PREFIX_UNSAFE_OPERATION_REASON, reason);
+    }
+
     /** @hide */
     public void resetNewUserDisclaimer() {
         if (mService != null) {
@@ -13098,10 +13127,11 @@ public class DevicePolicyManager {
      */
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_DEVICE_ADMINS)
-    public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
+    public void setNextOperationSafety(@DevicePolicyOperation int operation,
+            @UnsafeOperationReason int reason) {
         if (mService != null) {
             try {
-                mService.setNextOperationSafety(operation, safe);
+                mService.setNextOperationSafety(operation, reason);
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

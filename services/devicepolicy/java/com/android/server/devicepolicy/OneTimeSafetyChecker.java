@@ -15,9 +15,12 @@
  */
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.UNSAFE_OPERATION_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.operationToString;
+import static android.app.admin.DevicePolicyManager.unsafeOperationReasonToString;
 
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
+import android.app.admin.DevicePolicyManager.UnsafeOperationReason;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.util.Slog;
 
@@ -40,31 +43,33 @@ final class OneTimeSafetyChecker implements DevicePolicySafetyChecker {
     private final DevicePolicyManagerService mService;
     private final DevicePolicySafetyChecker mRealSafetyChecker;
     private final @DevicePolicyOperation int mOperation;
-    private final boolean mSafe;
+    private final @UnsafeOperationReason int mReason;
 
     OneTimeSafetyChecker(DevicePolicyManagerService service,
-            @DevicePolicyOperation int operation, boolean safe) {
+            @DevicePolicyOperation int operation, @UnsafeOperationReason int reason) {
         mService = Objects.requireNonNull(service);
         mOperation = operation;
-        mSafe = safe;
+        mReason = reason;
         mRealSafetyChecker = service.getDevicePolicySafetyChecker();
         Slog.i(TAG, "Saving real DevicePolicySafetyChecker as " + mRealSafetyChecker);
     }
 
     @Override
-    public boolean isDevicePolicyOperationSafe(@DevicePolicyOperation int operation) {
+    @UnsafeOperationReason
+    public int getUnsafeOperationReason(@DevicePolicyOperation int operation) {
         String name = operationToString(operation);
-        boolean safe = true;
+        int reason = UNSAFE_OPERATION_REASON_NONE;
         if (operation == mOperation) {
-            safe = mSafe;
+            reason = mReason;
         } else {
             Slog.wtf(TAG, "invalid call to isDevicePolicyOperationSafe(): asked for " + name
                     + ", should be " + operationToString(mOperation));
         }
-        Slog.i(TAG, "isDevicePolicyOperationSafe(" + name + "): returning " + safe
+        Slog.i(TAG, "getDevicePolicyOperationSafety(" + name + "): returning "
+                + unsafeOperationReasonToString(reason)
                 + " and restoring DevicePolicySafetyChecker to " + mRealSafetyChecker);
         mService.setDevicePolicySafetyCheckerUnchecked(mRealSafetyChecker);
-        return safe;
+        return reason;
     }
 
     @Override
