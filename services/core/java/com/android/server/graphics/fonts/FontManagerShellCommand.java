@@ -24,6 +24,7 @@ import android.content.Context;
 import android.graphics.fonts.Font;
 import android.graphics.fonts.FontFamily;
 import android.graphics.fonts.FontManager;
+import android.graphics.fonts.FontUpdateRequest;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.os.Binder;
@@ -44,6 +45,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -315,6 +317,7 @@ public class FontManagerShellCommand extends ShellCommand {
                     "Signature file argument is required.");
         }
 
+        // TODO: close fontFd and sigFd.
         ParcelFileDescriptor fontFd = shell.openFileForSystem(fontPath, "r");
         if (fontFd == null) {
             throw new SystemFontException(
@@ -330,29 +333,24 @@ public class FontManagerShellCommand extends ShellCommand {
         }
 
         try (FileInputStream sigFis = new FileInputStream(sigFd.getFileDescriptor())) {
-            try (FileInputStream fontFis = new FileInputStream(fontFd.getFileDescriptor())) {
-                int len = sigFis.available();
-                if (len > MAX_SIGNATURE_FILE_SIZE_BYTES) {
-                    throw new SystemFontException(
-                            FontManager.RESULT_ERROR_SIGNATURE_TOO_LARGE,
-                            "Signature file is too large");
-                }
-                byte[] signature = new byte[len];
-                if (sigFis.read(signature, 0, len) != len) {
-                    throw new SystemFontException(
-                            FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
-                            "Invalid read length");
-                }
-                mService.installFontFile(fontFis.getFD(), signature, -1);
-            } catch (IOException e) {
+            int len = sigFis.available();
+            if (len > MAX_SIGNATURE_FILE_SIZE_BYTES) {
+                throw new SystemFontException(
+                        FontManager.RESULT_ERROR_SIGNATURE_TOO_LARGE,
+                        "Signature file is too large");
+            }
+            byte[] signature = new byte[len];
+            if (sigFis.read(signature, 0, len) != len) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
-                        "Failed to read signature file.", e);
+                        "Invalid read length");
             }
+            mService.update(
+                    -1, Collections.singletonList(new FontUpdateRequest(fontFd, signature)));
         } catch (IOException e) {
             throw new SystemFontException(
-                    FontManager.RESULT_ERROR_INVALID_FONT_FILE,
-                    "Failed to read font files.", e);
+                    FontManager.RESULT_ERROR_INVALID_SIGNATURE_FILE,
+                    "Failed to read signature file.", e);
         }
 
         shell.getOutPrintWriter().println("Success");  // TODO: Output more details.

@@ -21,6 +21,7 @@ import static com.android.server.graphics.fonts.FontManagerService.SystemFontExc
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.fonts.FontManager;
+import android.graphics.fonts.FontUpdateRequest;
 import android.graphics.fonts.SystemFonts;
 import android.os.FileUtils;
 import android.system.ErrnoException;
@@ -72,15 +73,6 @@ final class UpdatableFontDir {
         boolean rename(File src, File dest);
     }
 
-    /** Interface to mock persistent configuration */
-    interface PersistentConfig {
-        void loadFromXml(PersistentSystemFontConfig.Config out)
-                throws XmlPullParserException, IOException;
-        void writeToXml(PersistentSystemFontConfig.Config config)
-                throws IOException;
-        boolean rename(File src, File dest);
-    }
-
     /** Data class to hold font file path and revision. */
     private static final class FontFileInfo {
         private final File mFile;
@@ -116,9 +108,7 @@ final class UpdatableFontDir {
     private final File mConfigFile;
     private final File mTmpConfigFile;
 
-    private final PersistentSystemFontConfig.Config mConfig =
-            new PersistentSystemFontConfig.Config();
-
+    private long mLastModifiedDate;
     private int mConfigVersion = 1;
 
     /**
@@ -145,22 +135,36 @@ final class UpdatableFontDir {
     }
 
     /* package */ void loadFontFileMap() {
-        boolean success = false;
-
-        try (FileInputStream fis = new FileInputStream(mConfigFile)) {
-            PersistentSystemFontConfig.loadFromXml(fis, mConfig);
-        } catch (IOException | XmlPullParserException e) {
-            mConfig.reset();
-        }
-
         mFontFileInfoMap.clear();
+        mLastModifiedDate = 0;
+        boolean success = false;
         try {
+            PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+            try (FileInputStream fis = new FileInputStream(mConfigFile)) {
+                PersistentSystemFontConfig.loadFromXml(fis, config);
+            } catch (IOException | XmlPullParserException e) {
+                Slog.e(TAG, "Failed to load config xml file", e);
+                return;
+            }
+            mLastModifiedDate = config.lastModifiedDate;
+
             File[] dirs = mFilesDir.listFiles();
             if (dirs == null) return;
             for (File dir : dirs) {
-                if (!dir.getName().startsWith(RANDOM_DIR_PREFIX)) return;
+                if (!dir.getName().startsWith(RANDOM_DIR_PREFIX)) {
+                    Slog.e(TAG, "Unexpected dir found: " + dir);
+                    return;
+                }
+                if (!config.updatedFontDirs.contains(dir.getName())) {
+                    Slog.i(TAG, "Deleting obsolete dir: " + dir);
+                    FileUtils.deleteContentsAndDir(dir);
+                    continue;
+                }
                 File[] files = dir.listFiles();
-                if (files == null || files.length != 1) return;
+                if (files == null || files.length != 1) {
+                    Slog.e(TAG, "Unexpected files in dir: " + dir);
+                    return;
+                }
                 FontFileInfo fontFileInfo = validateFontFile(files[0]);
                 addFileToMapIfNewer(fontFileInfo, true /* deleteOldFile */);
             }
@@ -173,6 +177,7 @@ final class UpdatableFontDir {
             // Delete all files just in case if we find a problematic file.
             if (!success) {
                 mFontFileInfoMap.clear();
+                mLastModifiedDate = 0;
                 FileUtils.deleteContents(mFilesDir);
             }
         }
@@ -182,16 +187,56 @@ final class UpdatableFontDir {
         mFontFileInfoMap.clear();
         FileUtils.deleteContents(mFilesDir);
 
-        mConfig.reset();
-        mConfig.lastModifiedDate = Instant.now().getEpochSecond();
+        mLastModifiedDate = Instant.now().getEpochSecond();
         try (FileOutputStream fos = new FileOutputStream(mConfigFile)) {
-            PersistentSystemFontConfig.writeToXml(fos, mConfig);
+            PersistentSystemFontConfig.writeToXml(fos, getPersistentConfig());
         } catch (Exception e) {
             throw new SystemFontException(
                     FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
                     "Failed to write config XML.", e);
         }
         mConfigVersion++;
+    }
+
+    /**
+     * Applies multiple {@link FontUpdateRequest}s in transaction.
+     * If one of the request fails, the fonts and config are rolled back to the previous state
+     * before this method is called.
+     */
+    public void update(List<FontUpdateRequest> requests) throws SystemFontException {
+        // Backup the mapping for rollback.
+        HashMap<String, FontFileInfo> backupMap = new HashMap<>(mFontFileInfoMap);
+        long backupLastModifiedDate = mLastModifiedDate;
+        boolean success = false;
+        try {
+            for (FontUpdateRequest request : requests) {
+                installFontFile(request.getFd().getFileDescriptor(), request.getSignature());
+            }
+
+            // Write config file.
+            mLastModifiedDate = Instant.now().getEpochSecond();
+            try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
+                PersistentSystemFontConfig.writeToXml(fos, getPersistentConfig());
+            } catch (Exception e) {
+                throw new SystemFontException(
+                        FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
+                        "Failed to write config XML.", e);
+            }
+
+            if (!mFsverityUtil.rename(mTmpConfigFile, mConfigFile)) {
+                throw new SystemFontException(
+                        FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
+                        "Failed to stage the config file.");
+            }
+            mConfigVersion++;
+            success = true;
+        } finally {
+            if (!success) {
+                mFontFileInfoMap.clear();
+                mFontFileInfoMap.putAll(backupMap);
+                mLastModifiedDate = backupLastModifiedDate;
+            }
+        }
     }
 
     /**
@@ -205,7 +250,8 @@ final class UpdatableFontDir {
      * @param pkcs7Signature A PKCS#7 detached signature to enable fs-verity for the font file.
      * @throws SystemFontException if error occurs.
      */
-    void installFontFile(FileDescriptor fd, byte[] pkcs7Signature) throws SystemFontException {
+    private void installFontFile(FileDescriptor fd, byte[] pkcs7Signature)
+            throws SystemFontException {
         File newDir = getRandomDir(mFilesDir);
         if (!newDir.mkdir()) {
             throw new SystemFontException(
@@ -268,42 +314,11 @@ final class UpdatableFontDir {
                         "Failed to change mode to 711", e);
             }
             FontFileInfo fontFileInfo = validateFontFile(newFontFile);
-
-            // Write config file.
-            PersistentSystemFontConfig.Config copied = new PersistentSystemFontConfig.Config();
-            mConfig.copyTo(copied);
-
-            copied.lastModifiedDate = Instant.now().getEpochSecond();
-            try (FileOutputStream fos = new FileOutputStream(mTmpConfigFile)) {
-                PersistentSystemFontConfig.writeToXml(fos, copied);
-            } catch (Exception e) {
-                throw new SystemFontException(
-                        FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
-                        "Failed to write config XML.", e);
-            }
-
-            // Backup the mapping for rollback.
-            HashMap<String, FontFileInfo> backup = new HashMap<>(mFontFileInfoMap);
             if (!addFileToMapIfNewer(fontFileInfo, false)) {
                 throw new SystemFontException(
                         FontManager.RESULT_ERROR_DOWNGRADING,
                         "Downgrading font file is forbidden.");
             }
-
-            if (!mFsverityUtil.rename(mTmpConfigFile, mConfigFile)) {
-                // If we fail to stage the config file, need to rollback the config.
-                mFontFileInfoMap.clear();
-                mFontFileInfoMap.putAll(backup);
-                throw new SystemFontException(
-                        FontManager.RESULT_ERROR_FAILED_UPDATE_CONFIG,
-                        "Failed to stage the config file.");
-            }
-
-
-            // Now font update is succeeded. Update config version.
-            copied.copyTo(mConfig);
-            mConfigVersion++;
-
             success = true;
         } finally {
             if (!success) {
@@ -439,6 +454,15 @@ final class UpdatableFontDir {
         }
     }
 
+    private PersistentSystemFontConfig.Config getPersistentConfig() {
+        PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
+        config.lastModifiedDate = mLastModifiedDate;
+        for (FontFileInfo info : mFontFileInfoMap.values()) {
+            config.updatedFontDirs.add(info.getRandomizedFontDir().getName());
+        }
+        return config;
+    }
+
     Map<String, File> getFontFileMap() {
         Map<String, File> map = new HashMap<>();
         for (Map.Entry<String, FontFileInfo> entry : mFontFileInfoMap.entrySet()) {
@@ -448,11 +472,7 @@ final class UpdatableFontDir {
     }
 
     /* package */ FontConfig getSystemFontConfig() {
-        return SystemFonts.getSystemFontConfig(
-                getFontFileMap(),
-                mConfig.lastModifiedDate,
-                mConfigVersion
-        );
+        return SystemFonts.getSystemFontConfig(getFontFileMap(), mLastModifiedDate, mConfigVersion);
     }
 
     /* package */ int getConfigVersion() {
