@@ -101,15 +101,17 @@ public class UiTranslationController {
                 }
                 break;
             case STATE_UI_TRANSLATION_PAUSED:
-                runForEachView((view) -> view.onPauseUiTranslation(), STATE_UI_TRANSLATION_PAUSED);
+                runForEachView(View::onPauseUiTranslation);
                 break;
             case STATE_UI_TRANSLATION_RESUMED:
-                runForEachView((view) -> view.onRestoreUiTranslation(),
-                        STATE_UI_TRANSLATION_PAUSED);
+                runForEachView(View::onRestoreUiTranslation);
                 break;
             case STATE_UI_TRANSLATION_FINISHED:
                 destroyTranslators();
-                runForEachView((view) -> view.onFinishUiTranslation(), STATE_UI_TRANSLATION_PAUSED);
+                runForEachView(View::onFinishUiTranslation);
+                synchronized (mLock) {
+                    mViews.clear();
+                }
                 break;
             default:
                 Log.w(TAG, "onAutoTranslationStateChange(): unknown state: " + state);
@@ -191,9 +193,6 @@ public class UiTranslationController {
      */
     private void onUiTranslationStarted(Translator translator, List<AutofillId> views) {
         synchronized (mLock) {
-            if (views == null || views.size() == 0) {
-                throw new IllegalArgumentException("Invalid empty views: " + views);
-            }
             // Find Views collect the translation data
             // TODO(b/178084101): try to optimize, e.g. to this in a single traversal
             final int viewCounts = views.size();
@@ -223,21 +222,17 @@ public class UiTranslationController {
         }
     }
 
-    private void runForEachView(Consumer<View> action, @UiTranslationState int state) {
+    private void runForEachView(Consumer<View> action) {
         synchronized (mLock) {
+            final ArrayMap<AutofillId, WeakReference<View>> views = new ArrayMap<>(mViews);
             mActivity.runOnUiThread(() -> {
-                final int viewCounts = mViews.size();
+                final int viewCounts = views.size();
                 for (int i = 0; i < viewCounts; i++) {
-                    final View view = mViews.valueAt(i).get();
+                    final View view = views.valueAt(i).get();
                     if (view == null) {
-                        Log.w(TAG, "The View for autofill id " + mViews.keyAt(i)
-                                + " may be gone for state " + stateToString(state));
                         continue;
                     }
                     action.accept(view);
-                }
-                if (state == STATE_UI_TRANSLATION_FINISHED) {
-                    mViews.clear();
                 }
             });
         }
