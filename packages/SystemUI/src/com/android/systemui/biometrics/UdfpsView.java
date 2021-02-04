@@ -140,7 +140,11 @@ public class UdfpsView extends FrameLayout implements DozeReceiver, UdfpsIllumin
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        mSensorRect.set(0, 0, 2 * mSensorProps.sensorRadius, 2 * mSensorProps.sensorRadius);
+        mSensorRect.set(0 + mAnimationView.getPaddingX(),
+                0 + mAnimationView.getPaddingY(),
+                2 * mSensorProps.sensorRadius + mAnimationView.getPaddingX(),
+                2 * mSensorProps.sensorRadius + mAnimationView.getPaddingY());
+
         mHbmSurfaceView.onSensorRectUpdated(new RectF(mSensorRect));
         mAnimationView.onSensorRectUpdated(new RectF(mSensorRect));
     }
