@@ -9475,7 +9475,8 @@ package android.telephony {
 
   public final class DataSpecificRegistrationInfo implements android.os.Parcelable {
     method public int describeContents();
-    method @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method @Deprecated @NonNull public android.telephony.LteVopsSupportInfo getLteVopsSupportInfo();
+    method @Nullable public android.telephony.VopsSupportInfo getVopsSupportInfo();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.DataSpecificRegistrationInfo> CREATOR;
   }
@@ -9520,14 +9521,16 @@ package android.telephony {
     field public static final int LCE_TYPE_SECONDARY = 1; // 0x1
   }
 
-  public final class LteVopsSupportInfo implements android.os.Parcelable {
+  public final class LteVopsSupportInfo extends android.telephony.VopsSupportInfo {
     ctor public LteVopsSupportInfo(int, int);
-    method public int describeContents();
     method public int getEmcBearerSupport();
     method public int getVopsSupport();
-    method public void writeToParcel(android.os.Parcel, int);
+    method public boolean isEmergencyServiceFallbackSupported();
+    method public boolean isEmergencyServiceSupported();
+    method public boolean isVopsSupported();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.telephony.LteVopsSupportInfo> CREATOR;
-    field public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
+    field @Deprecated public static final int LTE_STATUS_NOT_AVAILABLE = 1; // 0x1
     field public static final int LTE_STATUS_NOT_SUPPORTED = 3; // 0x3
     field public static final int LTE_STATUS_SUPPORTED = 2; // 0x2
   }
@@ -9596,6 +9599,29 @@ package android.telephony {
     field public static final int RESULT_ERROR_INVALID_ARG = 2; // 0x2
     field public static final int RESULT_ERROR_UNSUPPORTED = 1; // 0x1
     field public static final int RESULT_SUCCESS = 0; // 0x0
+  }
+
+  public final class NrVopsSupportInfo extends android.telephony.VopsSupportInfo {
+    ctor public NrVopsSupportInfo(int, int, int);
+    method public int getEmcSupport();
+    method public int getEmfSupport();
+    method public int getVopsSupport();
+    method public boolean isEmergencyServiceFallbackSupported();
+    method public boolean isEmergencyServiceSupported();
+    method public boolean isVopsSupported();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.NrVopsSupportInfo> CREATOR;
+    field public static final int NR_STATUS_EMC_5GCN_ONLY = 1; // 0x1
+    field public static final int NR_STATUS_EMC_EUTRA_5GCN_ONLY = 2; // 0x2
+    field public static final int NR_STATUS_EMC_NOT_SUPPORTED = 0; // 0x0
+    field public static final int NR_STATUS_EMC_NR_EUTRA_5GCN = 3; // 0x3
+    field public static final int NR_STATUS_EMF_5GCN_ONLY = 1; // 0x1
+    field public static final int NR_STATUS_EMF_EUTRA_5GCN_ONLY = 2; // 0x2
+    field public static final int NR_STATUS_EMF_NOT_SUPPORTED = 0; // 0x0
+    field public static final int NR_STATUS_EMF_NR_EUTRA_5GCN = 3; // 0x3
+    field public static final int NR_STATUS_VOPS_3GPP_SUPPORTED = 1; // 0x1
+    field public static final int NR_STATUS_VOPS_NON_3GPP_SUPPORTED = 2; // 0x2
+    field public static final int NR_STATUS_VOPS_NOT_SUPPORTED = 0; // 0x0
   }
 
   public interface NumberVerificationCallback {
@@ -10394,6 +10420,16 @@ package android.telephony {
   public abstract class VisualVoicemailService extends android.app.Service {
     method public static final void sendVisualVoicemailSms(android.content.Context, android.telecom.PhoneAccountHandle, String, short, String, android.app.PendingIntent);
     method public static final void setSmsFilterSettings(android.content.Context, android.telecom.PhoneAccountHandle, android.telephony.VisualVoicemailSmsFilterSettings);
+  }
+
+  public abstract class VopsSupportInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public abstract boolean equals(Object);
+    method public abstract int hashCode();
+    method public abstract boolean isEmergencyServiceFallbackSupported();
+    method public abstract boolean isEmergencyServiceSupported();
+    method public abstract boolean isVopsSupported();
+    field @NonNull public static final android.os.Parcelable.Creator<android.telephony.VopsSupportInfo> CREATOR;
   }
 
 }
