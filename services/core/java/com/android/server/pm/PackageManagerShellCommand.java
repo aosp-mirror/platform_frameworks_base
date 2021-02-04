@@ -104,7 +104,7 @@ import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemConfig;
 import com.android.server.pm.PackageManagerShellCommandDataLoader.Metadata;
-import com.android.server.pm.domain.verify.DomainVerificationShell;
+import com.android.server.pm.verify.domain.DomainVerificationShell;
 import com.android.server.pm.permission.LegacyPermissionManagerInternal;
 
 import dalvik.system.DexFile;

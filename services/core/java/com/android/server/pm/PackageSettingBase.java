@@ -42,8 +42,8 @@ import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
-import com.android.server.pm.domain.verify.DomainVerificationService;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.io.File;

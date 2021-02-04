@@ -59,7 +59,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.permission.persistence.RuntimePermissionsPersistence;
 import com.android.server.LocalServices;
-import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.parsing.pkg.PackageImpl;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
 import com.android.server.pm.permission.LegacyPermissionDataProvider;

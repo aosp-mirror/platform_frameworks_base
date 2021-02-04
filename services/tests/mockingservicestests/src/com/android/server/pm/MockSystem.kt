@@ -59,12 +59,12 @@ import com.android.server.SystemServerInitThreadPool
 import com.android.server.compat.PlatformCompat
 import com.android.server.extendedtestutils.wheneverStatic
 import com.android.server.pm.dex.DexManager
-import com.android.server.pm.domain.verify.DomainVerificationManagerInternal
 import com.android.server.pm.parsing.PackageParser2
 import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.parsing.pkg.PackageImpl
 import com.android.server.pm.parsing.pkg.ParsedPackage
 import com.android.server.pm.permission.PermissionManagerServiceInternal
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal
 import com.android.server.testutils.TestHandler
 import com.android.server.testutils.mock
 import com.android.server.testutils.nullable
