@@ -50,18 +50,22 @@
             android:layout="@layout/qs_panel"
             android:layout_width="@dimen/qs_panel_width"
             android:layout_height="match_parent"
-            android:layout_gravity="@integer/notification_panel_layout_gravity"
             android:clipToPadding="false"
             android:clipChildren="false"
-            systemui:viewType="com.android.systemui.plugins.qs.QS" />
+            systemui:viewType="com.android.systemui.plugins.qs.QS"
+            systemui:layout_constraintStart_toStartOf="parent"
+            systemui:layout_constraintEnd_toEndOf="parent"
+        />
 
         <com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
             android:id="@+id/notification_stack_scroller"
             android:layout_marginTop="@dimen/notification_panel_margin_top"
             android:layout_width="@dimen/notification_panel_width"
             android:layout_height="match_parent"
-            android:layout_gravity="@integer/notification_panel_layout_gravity"
-            android:layout_marginBottom="@dimen/close_handle_underlap" />
+            android:layout_marginBottom="@dimen/close_handle_underlap"
+            systemui:layout_constraintStart_toStartOf="parent"
+            systemui:layout_constraintEnd_toEndOf="parent"
+        />
 
         <include layout="@layout/ambient_indication"
             android:id="@+id/ambient_indication_container" />
