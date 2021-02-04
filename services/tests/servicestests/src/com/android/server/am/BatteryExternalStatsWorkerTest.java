@@ -21,9 +21,13 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 
 import android.content.Context;
+import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyConsumerType;
+import android.hardware.power.stats.EnergyMeasurement;
+import android.hardware.power.stats.PowerEntity;
+import android.hardware.power.stats.StateResidencyResult;
 import android.power.PowerStatsInternal;
 import android.util.SparseArray;
 import android.util.SparseLongArray;
@@ -144,6 +148,28 @@ public class BatteryExternalStatsWorkerTest {
             }
             future.complete(results);
             return future;
+        }
+
+        @Override
+        public PowerEntity[] getPowerEntityInfo() {
+            return new PowerEntity[0];
+        }
+
+        @Override
+        public CompletableFuture<StateResidencyResult[]> getStateResidencyAsync(
+                int[] powerEntityIds) {
+            return new CompletableFuture<>();
+        }
+
+        @Override
+        public Channel[] getEnergyMeterInfo() {
+            return new Channel[0];
+        }
+
+        @Override
+        public CompletableFuture<EnergyMeasurement[]> readEnergyMeterAsync(
+                int[] channelIds) {
+            return new CompletableFuture<>();
         }
 
         /**
