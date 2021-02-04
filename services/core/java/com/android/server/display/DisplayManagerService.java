@@ -2761,22 +2761,8 @@ public final class DisplayManagerService extends SystemService {
         public boolean requestPowerState(int groupId, DisplayPowerRequest request,
                 boolean waitForNegativeProximity) {
             synchronized (mSyncRoot) {
-                final DisplayGroup displayGroup = mLogicalDisplayMapper.getDisplayGroupLocked(
-                        groupId);
-                if (displayGroup == null) {
-                    return true;
-                }
-
-                final int size = displayGroup.getSizeLocked();
-                boolean ready = true;
-                for (int i = 0; i < size; i++) {
-                    final DisplayPowerController displayPowerController =
-                            mDisplayPowerControllers.get(displayGroup.getIdLocked(i));
-                    ready &= displayPowerController.requestPowerState(request,
-                            waitForNegativeProximity);
-                }
-
-                return ready;
+                return mDisplayPowerControllers.get(Display.DEFAULT_DISPLAY)
+                        .requestPowerState(request, waitForNegativeProximity);
             }
         }
 
