@@ -74,11 +74,17 @@ import java.util.concurrent.atomic.AtomicReference;
  * mode" where the real binder clients are replaced by {@link
  * SimulatedLocationTimeZoneProviderProxy}. This means that the real client providers are never
  * bound (ensuring no real location events will be received) and simulated events / behaviors
- * can be injected via the command line. To enter simulation mode for a provider, use
- * "{@code adb shell setprop persist.sys.location_tz_simulation_mode.<provider name> 1}" and reboot.
- * e.g. "{@code adb shell setprop persist.sys.location_tz_simulation_mode.primary 1}}"
- * Then use "{@code adb shell cmd location_time_zone_manager help}" for injection. Set the system
- * properties to "0" and reboot to return to exit simulation mode.
+ * can be injected via the command line.
+ *
+ * <p>To enter simulation mode for a provider, use {@code adb shell cmd location_time_zone_manager
+ * set_provider_mode_override &lt;provider name&gt; simulated} and restart the service with {@code
+ * adb shell cmd location_time_zone_manager stop} and {@code adb shell cmd
+ * location_time_zone_manager start}.
+ *
+ * <p>e.g. {@code adb shell cmd location_time_zone_manager set_provider_mode_override primary
+ * simulated}.
+ *
+ * <p>See {@code adb shell cmd location_time_zone_manager help}" for more options.
  */
 public class LocationTimeZoneManagerService extends Binder {
 
@@ -96,7 +102,7 @@ public class LocationTimeZoneManagerService extends Binder {
         @Override
         public void onStart() {
             Context context = getContext();
-            if (TimeZoneDetectorService.isGeoLocationTimeZoneDetectionEnabled(context)) {
+            if (TimeZoneDetectorService.isGeoLocationTimeZoneDetectionSupported(context)) {
                 mService = new LocationTimeZoneManagerService(context);
 
                 // The service currently exposes no LocalService or Binder API, but it extends
@@ -110,7 +116,7 @@ public class LocationTimeZoneManagerService extends Binder {
         @Override
         public void onBootPhase(int phase) {
             Context context = getContext();
-            if (TimeZoneDetectorService.isGeoLocationTimeZoneDetectionEnabled(context)) {
+            if (TimeZoneDetectorService.isGeoLocationTimeZoneDetectionSupported(context)) {
                 if (phase == PHASE_SYSTEM_SERVICES_READY) {
                     // The location service must be functioning after this boot phase.
                     mService.onSystemReady();

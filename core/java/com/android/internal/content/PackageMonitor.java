@@ -16,6 +16,7 @@
 
 package com.android.internal.content;
 
+import android.annotation.NonNull;
 import android.app.Activity;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -234,7 +235,7 @@ public abstract class PackageMonitor extends android.content.BroadcastReceiver {
     /**
      * Called when an existing package is updated or its disabled state changes.
      */
-    public void onPackageModified(String packageName) {
+    public void onPackageModified(@NonNull String packageName) {
     }
     
     public boolean didSomePackagesChange() {

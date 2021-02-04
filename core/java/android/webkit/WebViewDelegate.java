@@ -218,4 +218,15 @@ public final class WebViewDelegate {
     public String getDataDirectorySuffix() {
         return WebViewFactory.getDataDirectorySuffix();
     }
+
+    /**
+     * Returns an array of startup timestamps. For the specification of array
+     * see {@link WebViewFactory.Timestamp}.
+     * This method must be called on the same thread where the
+     * WebViewChromiumFactoryProvider#create method was invoked.
+     */
+    @NonNull
+    public long[] getTimestamps() {
+        return WebViewFactory.getTimestamps();
+    }
 }

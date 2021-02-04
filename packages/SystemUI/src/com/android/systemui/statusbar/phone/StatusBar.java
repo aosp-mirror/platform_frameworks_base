@@ -338,6 +338,10 @@ public class StatusBar extends SystemUI implements DemoMode,
         ONLY_CORE_APPS = onlyCoreApps;
     }
 
+    public interface ExpansionChangedListener {
+        void onExpansionChanged(float expansion, boolean expanded);
+    }
+
     /**
      * The {@link StatusBarState} of the status bar.
      */
@@ -438,6 +442,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     private final KeyguardViewMediator mKeyguardViewMediator;
     protected final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private final BrightnessSlider.Factory mBrightnessSliderFactory;
+
+    private final List<ExpansionChangedListener> mExpansionChangedListeners;
 
     // for disabling the status bar
     private int mDisabled1 = 0;
@@ -838,6 +844,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationIconAreaController = notificationIconAreaController;
         mBrightnessSliderFactory = brightnessSliderFactory;
 
+        mExpansionChangedListeners = new ArrayList<>();
+
         mBubbleExpandListener =
                 (isExpanding, key) -> {
                     mContext.getMainExecutor().execute(() -> {
@@ -1077,6 +1085,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mStatusBarView.setBar(this);
                     mStatusBarView.setPanel(mNotificationPanelViewController);
                     mStatusBarView.setScrimController(mScrimController);
+                    mStatusBarView.setExpansionChangedListeners(mExpansionChangedListeners);
 
                     statusBarFragment.initNotificationIconArea(mNotificationIconAreaController);
                     // CollapsedStatusBarFragment re-inflated PhoneStatusBarView and both of
@@ -4549,5 +4558,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void suppressAmbientDisplay(boolean suppressed) {
         mDozeServiceHost.setDozeSuppressed(suppressed);
+    }
+
+    public void addExpansionChangedListener(@NonNull ExpansionChangedListener listener) {
+        mExpansionChangedListeners.add(listener);
     }
 }

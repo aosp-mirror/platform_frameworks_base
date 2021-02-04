@@ -16,11 +16,10 @@
 
 package com.android.server.devicestate;
 
-import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
-
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
+import java.util.Optional;
 
 /**
  * ShellCommands for {@link DeviceStateManagerService}.
@@ -52,24 +51,15 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     }
 
     private void printState(PrintWriter pw) {
-        int committedState = mInternal.getCommittedState();
-        int requestedState = mInternal.getRequestedState();
-        int requestedOverrideState = mInternal.getOverrideState();
+        DeviceState committedState = mInternal.getCommittedState();
+        Optional<DeviceState> requestedState = mInternal.getRequestedState();
+        Optional<DeviceState> requestedOverrideState = mInternal.getOverrideState();
 
-        if (committedState == INVALID_DEVICE_STATE) {
-            pw.println("Device state: (invalid)");
-        } else {
-            pw.println("Device state: " + committedState);
-        }
-
-        if (requestedOverrideState != INVALID_DEVICE_STATE) {
+        pw.println("Committed state: " + committedState);
+        if (requestedOverrideState.isPresent()) {
             pw.println("----------------------");
-            if (requestedState == INVALID_DEVICE_STATE) {
-                pw.println("Base state: (invalid)");
-            } else {
-                pw.println("Base state: " + requestedState);
-            }
-            pw.println("Override state: " + committedState);
+            pw.println("Base state: " + requestedState.orElse(null));
+            pw.println("Override state: " + requestedOverrideState.get());
         }
     }
 
@@ -102,15 +92,12 @@ public class DeviceStateManagerShellCommand extends ShellCommand {
     }
 
     private int runPrintStates(PrintWriter pw) {
-        int[] states = mInternal.getSupportedStates();
-        pw.print("Supported states: [ ");
+        DeviceState[] states = mInternal.getSupportedStates();
+        pw.print("Supported states: [\n");
         for (int i = 0; i < states.length; i++) {
-            pw.print(states[i]);
-            if (i < states.length - 1) {
-                pw.print(", ");
-            }
+            pw.print("  " + states[i] + ",\n");
         }
-        pw.println(" ]");
+        pw.println("]");
         return 0;
     }
 

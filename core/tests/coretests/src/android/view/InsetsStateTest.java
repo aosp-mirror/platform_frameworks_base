@@ -27,6 +27,10 @@ import static android.view.InsetsState.ITYPE_EXTRA_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.RoundedCorner.POSITION_BOTTOM_LEFT;
+import static android.view.RoundedCorner.POSITION_BOTTOM_RIGHT;
+import static android.view.RoundedCorner.POSITION_TOP_LEFT;
+import static android.view.RoundedCorner.POSITION_TOP_RIGHT;
 import static android.view.View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
 import static android.view.WindowInsets.Type.ime;
 import static android.view.WindowInsets.Type.navigationBars;
@@ -425,6 +429,27 @@ public class InsetsStateTest {
                 cutout.getBoundingRectRight());
         assertEquals(new Rect(196, 295, 199, 299),
                 cutout.getBoundingRectBottom());
+    }
+
+    @Test
+    public void testCalculateRelativeRoundedCorners() {
+        mState.setDisplayFrame(new Rect(0, 0, 200, 400));
+        mState.setRoundedCorners(new RoundedCorners(
+                new RoundedCorner(POSITION_TOP_LEFT, 10, 10, 10),
+                new RoundedCorner(POSITION_TOP_RIGHT, 10, 190, 10),
+                new RoundedCorner(POSITION_BOTTOM_RIGHT, 20, 180, 380),
+                new RoundedCorner(POSITION_BOTTOM_LEFT, 20, 20, 380)));
+        WindowInsets windowInsets = mState.calculateInsets(new Rect(1, 2, 197, 396), null, false,
+                false, SOFT_INPUT_ADJUST_UNSPECIFIED, 0, 0, TYPE_APPLICATION,
+                WINDOWING_MODE_UNDEFINED, new SparseIntArray());
+        assertEquals(new RoundedCorner(POSITION_TOP_LEFT, 10, 9, 8),
+                windowInsets.getRoundedCorner(POSITION_TOP_LEFT));
+        assertEquals(new RoundedCorner(POSITION_TOP_RIGHT, 10, 189, 8),
+                windowInsets.getRoundedCorner(POSITION_TOP_RIGHT));
+        assertEquals(new RoundedCorner(POSITION_BOTTOM_RIGHT, 20, 179, 378),
+                windowInsets.getRoundedCorner(POSITION_BOTTOM_RIGHT));
+        assertEquals(new RoundedCorner(POSITION_BOTTOM_LEFT, 20, 19, 378),
+                windowInsets.getRoundedCorner(POSITION_BOTTOM_LEFT));
     }
 
     private void assertEqualsAndHashCode() {

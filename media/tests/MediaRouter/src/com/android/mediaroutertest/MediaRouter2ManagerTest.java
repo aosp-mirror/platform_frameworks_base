@@ -256,7 +256,7 @@ public class MediaRouter2ManagerTest {
 
         CountDownLatch latch = new CountDownLatch(1);
 
-        addManagerCallback(new MediaRouter2Manager.Callback());
+        addManagerCallback(new MediaRouter2Manager.Callback() {});
         addRouterCallback(new MediaRouter2.RouteCallback() {});
         addTransferCallback(new MediaRouter2.TransferCallback() {
             @Override
@@ -530,7 +530,7 @@ public class MediaRouter2ManagerTest {
     @Test
     public void testSetSystemRouteVolume() throws Exception {
         // ensure client
-        addManagerCallback(new MediaRouter2Manager.Callback());
+        addManagerCallback(new MediaRouter2Manager.Callback() {});
         String selectedSystemRouteId =
                 MediaRouter2Utils.getOriginalId(
                 mManager.getActiveSessions().get(0).getSelectedRoutes().get(0));
@@ -902,7 +902,7 @@ public class MediaRouter2ManagerTest {
 
     private void releaseAllSessions() {
         // ensure ManagerRecord in MediaRouter2ServiceImpl
-        addManagerCallback(new MediaRouter2Manager.Callback());
+        addManagerCallback(new MediaRouter2Manager.Callback() {});
 
         for (RoutingSessionInfo session : mManager.getActiveSessions()) {
             mManager.releaseSession(session);

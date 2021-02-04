@@ -27,6 +27,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.Nullable;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.SystemClock;
@@ -54,6 +55,7 @@ import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.wm.shell.animation.FlingAnimationUtils;
@@ -145,6 +147,9 @@ public abstract class PanelViewController {
     private float mInitialTouchX;
     private boolean mTouchDisabled;
 
+    // AmbientState will never be null since it provides an @Inject constructor for Dagger to call.
+    private AmbientState mAmbientState;
+
     /**
      * Whether or not the PanelView can be expanded or collapsed with a drag.
      */
@@ -223,13 +228,19 @@ public abstract class PanelViewController {
         mJustPeeked = true;
     }
 
+    protected AmbientState getAmbientState() {
+        return mAmbientState;
+    }
+
     public PanelViewController(PanelView view,
             FalsingManager falsingManager, DozeLog dozeLog,
             KeyguardStateController keyguardStateController,
             SysuiStatusBarStateController statusBarStateController, VibratorHelper vibratorHelper,
             LatencyTracker latencyTracker,
             FlingAnimationUtils.Builder flingAnimationUtilsBuilder,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager) {
+            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            AmbientState ambientState) {
+        mAmbientState = ambientState;
         mView = view;
         mView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
             @Override
@@ -775,8 +786,6 @@ public abstract class PanelViewController {
      * conflicting gesture (opening QS) is happening
      */
     protected abstract boolean isTrackingBlocked();
-
-    protected abstract void setIsShadeOpening(boolean isShadeOpening);
 
     protected abstract void setSectionPadding(float padding);
 

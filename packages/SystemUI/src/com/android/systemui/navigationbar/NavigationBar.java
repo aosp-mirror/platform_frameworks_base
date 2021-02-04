@@ -545,6 +545,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
+        mNavigationBarView.setBehavior(mBehavior);
         mSplitScreenOptional.ifPresent(mNavigationBarView::registerDockedListener);
         mPipOptional.ifPresent(mNavigationBarView::registerPipExclusionBoundsChangeListener);
 
@@ -665,7 +666,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     private void initSecondaryHomeHandleForRotation() {
-        if (!canShowSecondaryHandle()) {
+        if (mNavBarMode != NAV_BAR_MODE_GESTURAL) {
             return;
         }
 
@@ -919,6 +920,9 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
         }
         if (mBehavior != behavior) {
             mBehavior = behavior;
+            if (mNavigationBarView != null) {
+                mNavigationBarView.setBehavior(behavior);
+            }
             updateSystemUiStateFlags(-1);
         }
     }
@@ -1520,7 +1524,7 @@ public class NavigationBar implements View.OnAttachStateChangeListener,
     }
 
     private boolean canShowSecondaryHandle() {
-        return mNavBarMode == NAV_BAR_MODE_GESTURAL;
+        return mNavBarMode == NAV_BAR_MODE_GESTURAL && mOrientationHandle != null;
     }
 
     private final Consumer<Integer> mRotationWatcher = rotation -> {

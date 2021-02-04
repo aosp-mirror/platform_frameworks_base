@@ -21,7 +21,9 @@ import android.content.Context;
 import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntity;
+import android.hardware.power.stats.StateResidencyResult;
 import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
@@ -245,10 +247,50 @@ public class PowerStatsService extends SystemService {
                             future, energyConsumerIds));
             return future;
         }
+
+        @Override
+        public PowerEntity[] getPowerEntityInfo() {
+            return getPowerStatsHal().getPowerEntityInfo();
+        }
+
+        @Override
+        public CompletableFuture<StateResidencyResult[]> getStateResidencyAsync(
+                int[] powerEntityIds) {
+            final CompletableFuture<StateResidencyResult[]> future = new CompletableFuture<>();
+            mHandler.sendMessage(
+                    PooledLambda.obtainMessage(PowerStatsService.this::getStateResidencyAsync,
+                            future, powerEntityIds));
+            return future;
+        }
+
+        @Override
+        public Channel[] getEnergyMeterInfo() {
+            return getPowerStatsHal().getEnergyMeterInfo();
+        }
+
+        @Override
+        public CompletableFuture<EnergyMeasurement[]> readEnergyMeterAsync(
+                int[] channelIds) {
+            final CompletableFuture<EnergyMeasurement[]> future = new CompletableFuture<>();
+            mHandler.sendMessage(
+                    PooledLambda.obtainMessage(PowerStatsService.this::readEnergyMeterAsync,
+                            future, channelIds));
+            return future;
+        }
     }
 
     private void getEnergyConsumedAsync(CompletableFuture<EnergyConsumerResult[]> future,
             int[] energyConsumerIds) {
         future.complete(getPowerStatsHal().getEnergyConsumed(energyConsumerIds));
+    }
+
+    private void getStateResidencyAsync(CompletableFuture<StateResidencyResult[]> future,
+            int[] powerEntityIds) {
+        future.complete(getPowerStatsHal().getStateResidency(powerEntityIds));
+    }
+
+    private void readEnergyMeterAsync(CompletableFuture<EnergyMeasurement[]> future,
+            int[] channelIds) {
+        future.complete(getPowerStatsHal().readEnergyMeters(channelIds));
     }
 }

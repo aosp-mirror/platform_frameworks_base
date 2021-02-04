@@ -33,7 +33,7 @@ import java.util.Set;
 public interface AppSearchSessionShim extends Closeable {
 
     /**
-     * Sets the schema that will be used by documents provided to the {@link #putDocuments} method.
+     * Sets the schema that will be used by documents provided to the {@link #put} method.
      *
      * <p>The schema provided here is compared to the stored copy of the schema previously supplied
      * to {@link #setSchema}, if any, to determine how to treat existing documents. The following
@@ -143,8 +143,7 @@ public interface AppSearchSessionShim extends Closeable {
      *     they were successfully indexed, or a failed {@link AppSearchResult} otherwise.
      */
     @NonNull
-    ListenableFuture<AppSearchBatchResult<String, Void>> putDocuments(
-            @NonNull PutDocumentsRequest request);
+    ListenableFuture<AppSearchBatchResult<String, Void>> put(@NonNull PutDocumentsRequest request);
 
     /**
      * Retrieves {@link GenericDocument}s by URI.
@@ -161,7 +160,7 @@ public interface AppSearchSessionShim extends Closeable {
             @NonNull GetByUriRequest request);
 
     /**
-     * Searches a document based on a given query string.
+     * Searches for documents based on a given query string.
      *
      * <p>Currently we support following features in the raw query format:
      *
@@ -200,7 +199,7 @@ public interface AppSearchSessionShim extends Closeable {
      * @return The search result of performing this operation.
      */
     @NonNull
-    SearchResultsShim query(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+    SearchResultsShim search(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /**
      * Reports usage of a particular document by URI and namespace.
@@ -208,7 +207,7 @@ public interface AppSearchSessionShim extends Closeable {
      * <p>A usage report represents an event in which a user interacted with or viewed a document.
      *
      * <p>For each call to {@link #reportUsage}, AppSearch updates usage count and usage recency
-     * metrics for that particular document. These metrics are used for ordering {@link #query}
+     * metrics for that particular document. These metrics are used for ordering {@link #search}
      * results by the {@link SearchSpec#RANKING_STRATEGY_USAGE_COUNT} and {@link
      * SearchSpec#RANKING_STRATEGY_USAGE_LAST_USED_TIMESTAMP} ranking strategies.
      *
@@ -231,13 +230,13 @@ public interface AppSearchSessionShim extends Closeable {
      *     {@link AppSearchResult} with a result code of {@link AppSearchResult#RESULT_NOT_FOUND}.
      */
     @NonNull
-    ListenableFuture<AppSearchBatchResult<String, Void>> removeByUri(
+    ListenableFuture<AppSearchBatchResult<String, Void>> remove(
             @NonNull RemoveByUriRequest request);
 
     /**
      * Removes {@link GenericDocument}s from the index by Query. Documents will be removed if they
      * match the {@code queryExpression} in given namespaces and schemaTypes which is set via {@link
-     * SearchSpec.Builder#addNamespace} and {@link SearchSpec.Builder#addSchemaType}.
+     * SearchSpec.Builder#addFilterNamespaces} and {@link SearchSpec.Builder#addFilterSchemas}.
      *
      * <p>An empty {@code queryExpression} matches all documents.
      *
@@ -251,8 +250,7 @@ public interface AppSearchSessionShim extends Closeable {
      * @return The pending result of performing this operation.
      */
     @NonNull
-    ListenableFuture<Void> removeByQuery(
-            @NonNull String queryExpression, @NonNull SearchSpec searchSpec);
+    ListenableFuture<Void> remove(@NonNull String queryExpression, @NonNull SearchSpec searchSpec);
 
     /**
      * Flush all schema and document updates, additions, and deletes to disk if possible.

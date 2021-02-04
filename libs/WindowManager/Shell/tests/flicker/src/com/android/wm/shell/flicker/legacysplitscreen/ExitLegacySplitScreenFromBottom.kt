@@ -78,7 +78,8 @@ class ExitLegacySplitScreenFromBottom(
                         statusBarWindowIsAlwaysVisible()
                         visibleWindowsShownMoreThanOneConsecutiveEntry(
                             listOf(LAUNCHER_PACKAGE_NAME, splitScreenApp.defaultWindowName,
-                                secondaryApp.defaultWindowName)
+                                secondaryApp.defaultWindowName),
+                            bugId = 178447631
                         )
                     }
                 }

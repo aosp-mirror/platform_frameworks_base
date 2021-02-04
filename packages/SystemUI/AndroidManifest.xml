@@ -116,7 +116,6 @@
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.MONITOR_INPUT" />
     <uses-permission android:name="android.permission.INPUT_CONSUMER" />
-    <uses-permission android:name="android.permission.USE_BACKGROUND_BLUR" />
 
     <!-- DreamManager -->
     <uses-permission android:name="android.permission.READ_DREAM_STATE" />

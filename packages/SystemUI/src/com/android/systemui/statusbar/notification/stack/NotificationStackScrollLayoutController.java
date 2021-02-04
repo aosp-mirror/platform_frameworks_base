@@ -271,10 +271,6 @@ public class NotificationStackScrollLayoutController {
         }
     };
 
-    public void setIsShadeOpening(boolean isOpening) {
-        mView.setIsShadeOpening(isOpening);
-    }
-
     public void setSectionPadding(float padding) {
         mView.setSectionPadding(padding);
     }
