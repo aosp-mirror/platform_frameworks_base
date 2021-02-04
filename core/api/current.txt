@@ -9815,6 +9815,7 @@ package android.content {
     method public int getMimeTypeCount();
     method public long getTimestamp();
     method public boolean hasMimeType(String);
+    method public boolean isStyledText();
     method public void setExtras(android.os.PersistableBundle);
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.content.ClipDescription> CREATOR;
