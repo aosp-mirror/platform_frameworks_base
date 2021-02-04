@@ -23,7 +23,6 @@ import static android.content.pm.Checksum.TYPE_WHOLE_MERKLE_ROOT_4K_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA1;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA256;
 import static android.content.pm.Checksum.TYPE_WHOLE_SHA512;
-import static android.content.pm.PackageManager.EXTRA_CHECKSUMS;
 import static android.content.pm.parsing.ApkLiteParseUtils.APK_FILE_EXTENSION;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA256;
 import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_CHUNKED_SHA512;
@@ -32,15 +31,15 @@ import static android.util.apk.ApkSigningBlockUtils.CONTENT_DIGEST_VERITY_CHUNKE
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
 import android.content.pm.ApkChecksum;
 import android.content.pm.Checksum;
+import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.Signature;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.incremental.IncrementalManager;
 import android.os.incremental.IncrementalStorage;
@@ -294,21 +293,21 @@ public class ApkChecksums {
     /**
      * Fetch or calculate checksums for the collection of files.
      *
-     * @param filesToChecksum       split name, null for base and File to fetch checksums for
-     * @param optional              mask to fetch readily available checksums
-     * @param required              mask to forcefully calculate if not available
-     * @param installerPackageName  package name of the installer of the packages
-     * @param trustedInstallers     array of certificate to trust, two specific cases:
-     *                              null - trust anybody,
-     *                              [] - trust nobody.
-     * @param statusReceiver        to receive the resulting checksums
+     * @param filesToChecksum          split name, null for base and File to fetch checksums for
+     * @param optional                 mask to fetch readily available checksums
+     * @param required                 mask to forcefully calculate if not available
+     * @param installerPackageName     package name of the installer of the packages
+     * @param trustedInstallers        array of certificate to trust, two specific cases:
+     *                                 null - trust anybody,
+     *                                 [] - trust nobody.
+     * @param onChecksumsReadyListener to receive the resulting checksums
      */
     public static void getChecksums(List<Pair<String, File>> filesToChecksum,
             @Checksum.Type int optional,
             @Checksum.Type int required,
             @Nullable String installerPackageName,
             @Nullable Certificate[] trustedInstallers,
-            @NonNull IntentSender statusReceiver,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener,
             @NonNull Injector injector) {
         List<Map<Integer, ApkChecksum>> result = new ArrayList<>(filesToChecksum.size());
         for (int i = 0, size = filesToChecksum.size(); i < size; ++i) {
@@ -326,14 +325,14 @@ public class ApkChecksums {
         }
 
         long startTime = SystemClock.uptimeMillis();
-        processRequiredChecksums(filesToChecksum, result, required, statusReceiver, injector,
-                startTime);
+        processRequiredChecksums(filesToChecksum, result, required, onChecksumsReadyListener,
+                injector, startTime);
     }
 
     private static void processRequiredChecksums(List<Pair<String, File>> filesToChecksum,
             List<Map<Integer, ApkChecksum>> result,
             @Checksum.Type int required,
-            @NonNull IntentSender statusReceiver,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener,
             @NonNull Injector injector,
             long startTime) {
         final boolean timeout =
@@ -350,7 +349,7 @@ public class ApkChecksums {
                         // Not ready, come back later.
                         injector.getHandler().postDelayed(() -> {
                             processRequiredChecksums(filesToChecksum, result, required,
-                                    statusReceiver, injector, startTime);
+                                    onChecksumsReadyListener, injector, startTime);
                         }, PROCESS_REQUIRED_CHECKSUMS_DELAY_MILLIS);
                         return;
                     }
@@ -363,13 +362,9 @@ public class ApkChecksums {
             }
         }
 
-        final Intent intent = new Intent();
-        intent.putExtra(EXTRA_CHECKSUMS,
-                allChecksums.toArray(new ApkChecksum[allChecksums.size()]));
-
         try {
-            statusReceiver.sendIntent(injector.getContext(), 1, intent, null, null);
-        } catch (IntentSender.SendIntentException e) {
+            onChecksumsReadyListener.onChecksumsReady(allChecksums);
+        } catch (RemoteException e) {
             Slog.w(TAG, e);
         }
     }

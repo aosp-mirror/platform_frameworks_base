@@ -12298,7 +12298,7 @@ package android.content.pm {
     method @Deprecated public abstract void removePackageFromPreferred(@NonNull String);
     method public abstract void removePermission(@NonNull String);
     method @RequiresPermission(value="android.permission.WHITELIST_RESTRICTED_PERMISSIONS", conditional=true) public boolean removeWhitelistedRestrictedPermission(@NonNull String, @NonNull String, int);
-    method public void requestChecksums(@NonNull String, boolean, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull android.content.IntentSender) throws java.security.cert.CertificateEncodingException, android.content.pm.PackageManager.NameNotFoundException;
+    method public void requestChecksums(@NonNull String, boolean, int, @NonNull java.util.List<java.security.cert.Certificate>, @NonNull android.content.pm.PackageManager.OnChecksumsReadyListener) throws java.security.cert.CertificateEncodingException, android.content.pm.PackageManager.NameNotFoundException;
     method @Nullable public abstract android.content.pm.ResolveInfo resolveActivity(@NonNull android.content.Intent, int);
     method @Nullable public abstract android.content.pm.ProviderInfo resolveContentProvider(@NonNull String, int);
     method @Nullable public abstract android.content.pm.ResolveInfo resolveService(@NonNull android.content.Intent, int);
@@ -12318,7 +12318,6 @@ package android.content.pm {
     field public static final int COMPONENT_ENABLED_STATE_DISABLED_USER = 3; // 0x3
     field public static final int COMPONENT_ENABLED_STATE_ENABLED = 1; // 0x1
     field public static final int DONT_KILL_APP = 1; // 0x1
-    field public static final String EXTRA_CHECKSUMS = "android.content.pm.extra.CHECKSUMS";
     field public static final String EXTRA_VERIFICATION_ID = "android.content.pm.extra.VERIFICATION_ID";
     field public static final String EXTRA_VERIFICATION_RESULT = "android.content.pm.extra.VERIFICATION_RESULT";
     field public static final String FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS = "android.software.activities_on_secondary_displays";
@@ -12502,6 +12501,10 @@ package android.content.pm {
   public static class PackageManager.NameNotFoundException extends android.util.AndroidException {
     ctor public PackageManager.NameNotFoundException();
     ctor public PackageManager.NameNotFoundException(String);
+  }
+
+  @java.lang.FunctionalInterface public static interface PackageManager.OnChecksumsReadyListener {
+    method public void onChecksumsReady(@NonNull java.util.List<android.content.pm.ApkChecksum>);
   }
 
   public static final class PackageManager.Property implements android.os.Parcelable {

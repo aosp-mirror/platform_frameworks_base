@@ -1137,7 +1137,8 @@ public abstract class PackageManagerInternal {
      */
     public abstract void requestChecksums(@NonNull String packageName, boolean includeSplits,
             @Checksum.Type int optional, @Checksum.Type int required,
-            @Nullable List trustedInstallers, @NonNull IntentSender statusReceiver, int userId,
+            @Nullable List trustedInstallers,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
             @NonNull Executor executor, @NonNull Handler handler);
 
     /**
