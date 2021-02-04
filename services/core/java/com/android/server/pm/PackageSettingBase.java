@@ -644,11 +644,11 @@ public abstract class PackageSettingBase extends SettingBase {
         return excludedUserIds;
     }
 
-    IntentFilterVerificationInfo getIntentFilterVerificationInfo() {
+    public IntentFilterVerificationInfo getIntentFilterVerificationInfo() {
         return verificationInfo;
     }
 
-    void setIntentFilterVerificationInfo(IntentFilterVerificationInfo info) {
+    public void setIntentFilterVerificationInfo(IntentFilterVerificationInfo info) {
         verificationInfo = info;
         onChanged();
     }
@@ -657,14 +657,14 @@ public abstract class PackageSettingBase extends SettingBase {
     //
     // high 'int'-sized word: link status: undefined/ask/never/always.
     // low 'int'-sized word: relative priority among 'always' results.
-    long getDomainVerificationStatusForUser(int userId) {
+    public long getDomainVerificationStatusForUser(int userId) {
         PackageUserState state = readUserState(userId);
         long result = (long) state.appLinkGeneration;
         result |= ((long) state.domainVerificationStatus) << 32;
         return result;
     }
 
-    void setDomainVerificationStatusForUser(final int status, int generation, int userId) {
+    public void setDomainVerificationStatusForUser(final int status, int generation, int userId) {
         PackageUserState state = modifyUserState(userId);
         state.domainVerificationStatus = status;
         if (status == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
@@ -673,7 +673,7 @@ public abstract class PackageSettingBase extends SettingBase {
         }
     }
 
-    void clearDomainVerificationStatusForUser(int userId) {
+    public void clearDomainVerificationStatusForUser(int userId) {
         modifyUserState(userId).domainVerificationStatus =
                 PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
     }
