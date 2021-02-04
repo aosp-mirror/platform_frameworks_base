@@ -120,11 +120,11 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
             @NonNull String callerPackage, @NonNull String enterpriseId, int userId) {}
 
     public UserHandle createAndProvisionManagedProfile(
-            @NonNull ManagedProfileProvisioningParams provisioningParams) {
+            @NonNull ManagedProfileProvisioningParams provisioningParams, String callerPackage) {
         return null;
     }
 
     public void provisionFullyManagedDevice(
-            FullyManagedDeviceProvisioningParams provisioningParams) {
+            FullyManagedDeviceProvisioningParams provisioningParams, String callerPackage) {
     }
 }
