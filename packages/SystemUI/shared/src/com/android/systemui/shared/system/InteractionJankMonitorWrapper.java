@@ -17,7 +17,6 @@
 package com.android.systemui.shared.system;
 
 import android.annotation.IntDef;
-import android.annotation.NonNull;
 import android.view.View;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -37,6 +36,10 @@ public final class InteractionJankMonitorWrapper {
             InteractionJankMonitor.CUJ_LAUNCHER_APP_CLOSE_TO_PIP;
     public static final int CUJ_QUICK_SWITCH =
             InteractionJankMonitor.CUJ_LAUNCHER_QUICK_SWITCH;
+    public static final int CUJ_OPEN_ALL_APPS =
+            InteractionJankMonitor.CUJ_LAUNCHER_OPEN_ALL_APPS;
+    public static final int CUJ_ALL_APPS_SCROLL =
+            InteractionJankMonitor.CUJ_LAUNCHER_ALL_APPS_SCROLL;
 
     @IntDef({
             CUJ_APP_LAUNCH_FROM_RECENTS,
