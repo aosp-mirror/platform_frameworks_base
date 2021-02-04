@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
+import android.hardware.power.stats.EnergyConsumerAttribution;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntity;
@@ -73,6 +74,7 @@ public class PowerStatsServiceTest {
     private static final String ENERGY_CONSUMER_NAME = "energyconsumer";
     private static final int ENERGY_METER_COUNT = 8;
     private static final int ENERGY_CONSUMER_COUNT = 2;
+    private static final int ENERGY_CONSUMER_ATTRIBUTION_COUNT = 5;
     private static final int POWER_ENTITY_COUNT = 3;
     private static final int STATE_INFO_COUNT = 5;
     private static final int STATE_RESIDENCY_COUNT = 4;
@@ -204,6 +206,13 @@ public class PowerStatsServiceTest {
                 energyConsumedList[i].id = i;
                 energyConsumedList[i].timestampMs = i;
                 energyConsumedList[i].energyUWs = i;
+                energyConsumedList[i].attribution =
+                    new EnergyConsumerAttribution[ENERGY_CONSUMER_ATTRIBUTION_COUNT];
+                for (int j = 0; j < energyConsumedList[i].attribution.length; j++) {
+                    energyConsumedList[i].attribution[j] = new EnergyConsumerAttribution();
+                    energyConsumedList[i].attribution[j].uid = j;
+                    energyConsumedList[i].attribution[j].energyUWs = j;
+                }
             }
             return energyConsumedList;
         }
@@ -250,7 +259,7 @@ public class PowerStatsServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Write data to on-device storage.
-        mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_TIMER);
+        mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY);
 
         // The above call puts a message on a handler.  Wait for
         // it to be processed.
@@ -293,7 +302,7 @@ public class PowerStatsServiceTest {
         mService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
 
         // Write data to on-device storage.
-        mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_TIMER);
+        mTimerTrigger.logPowerStatsData(PowerStatsLogger.MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY);
 
         // The above call puts a message on a handler.  Wait for
         // it to be processed.
@@ -324,6 +333,12 @@ public class PowerStatsServiceTest {
             assertTrue(pssProto.energyConsumerResult[i].id == i);
             assertTrue(pssProto.energyConsumerResult[i].timestampMs == i);
             assertTrue(pssProto.energyConsumerResult[i].energyUws == i);
+            assertTrue(pssProto.energyConsumerResult[i].attribution.length
+                    == ENERGY_CONSUMER_ATTRIBUTION_COUNT);
+            for (int j = 0; j < pssProto.energyConsumerResult[i].attribution.length; j++) {
+                assertTrue(pssProto.energyConsumerResult[i].attribution[j].uid == j);
+                assertTrue(pssProto.energyConsumerResult[i].attribution[j].energyUws  == j);
+            }
         }
     }
 
