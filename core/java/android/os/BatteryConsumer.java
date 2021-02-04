@@ -47,6 +47,7 @@ public abstract class BatteryConsumer {
             POWER_COMPONENT_SYSTEM_SERVICES,
             POWER_COMPONENT_SENSORS,
             POWER_COMPONENT_GNSS,
+            POWER_COMPONENT_WIFI,
             POWER_COMPONENT_WAKELOCK,
             POWER_COMPONENT_SCREEN,
             POWER_COMPONENT_REATTRIBUTED_TO_OTHER_CONSUMERS,
@@ -66,6 +67,7 @@ public abstract class BatteryConsumer {
     public static final int POWER_COMPONENT_MOBILE_RADIO = 8;
     public static final int POWER_COMPONENT_SENSORS = 9;
     public static final int POWER_COMPONENT_GNSS = 10;
+    public static final int POWER_COMPONENT_WIFI = 11;
     public static final int POWER_COMPONENT_WAKELOCK = 12;
     public static final int POWER_COMPONENT_SCREEN = 13;
     // Power that is re-attributed to other battery consumers. For example, for System Server
@@ -94,6 +96,7 @@ public abstract class BatteryConsumer {
             TIME_COMPONENT_MOBILE_RADIO,
             TIME_COMPONENT_SENSORS,
             TIME_COMPONENT_GNSS,
+            TIME_COMPONENT_WIFI,
             TIME_COMPONENT_WAKELOCK,
             TIME_COMPONENT_SCREEN,
     })
@@ -112,6 +115,7 @@ public abstract class BatteryConsumer {
     public static final int TIME_COMPONENT_MOBILE_RADIO = 8;
     public static final int TIME_COMPONENT_SENSORS = 9;
     public static final int TIME_COMPONENT_GNSS = 10;
+    public static final int TIME_COMPONENT_WIFI = 11;
     public static final int TIME_COMPONENT_WAKELOCK = 12;
     public static final int TIME_COMPONENT_SCREEN = 13;
 
