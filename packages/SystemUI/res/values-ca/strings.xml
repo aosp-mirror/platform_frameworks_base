@@ -33,10 +33,10 @@
     <string name="invalid_charger_title" msgid="938685362320735167">"No es pot carregar per USB"</string>
     <string name="invalid_charger_text" msgid="2339310107232691577">"Fes servir el carregador original del dispositiu"</string>
     <string name="battery_low_why" msgid="2056750982959359863">"Configuració"</string>
-    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vols activar l\'estalvi de bateria?"</string>
+    <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Vols activar la funció Estalvi de bateria?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Sobre la funció Estalvi de bateria"</string>
     <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Activa"</string>
-    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activa l\'estalvi de bateria"</string>
+    <string name="battery_saver_start_action" msgid="4553256017945469937">"Activa la funció Estalvi de bateria"</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Configuració"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"Gira pantalla automàticament"</string>
@@ -92,10 +92,10 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Processant gravació de pantalla"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Notificació en curs d\'una sessió de gravació de la pantalla"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Vols iniciar la gravació?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Quan graves contingut, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou les contrasenyes, la informació de pagament, les fotos, els missatges i l\'àudio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Durant la gravació, el sistema Android pot capturar qualsevol informació sensible que es mostri a la pantalla o que es reprodueixi al dispositiu. Això inclou contrasenyes, informació de pagament, fotos, missatges i àudio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Grava l\'àudio"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Àudio del dispositiu"</string>
-    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sons del dispositiu, com ara la música, les trucades i els sons de trucada"</string>
+    <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"So del dispositiu, com ara música, trucades i sons de trucada"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Micròfon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Àudio del dispositiu i micròfon"</string>
     <string name="screenrecord_start" msgid="330991441575775004">"Inicia"</string>
@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"La Wi‑Fi no està connectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"AUTOMÀTICA"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverteix els colors"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Inverteix colors"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Mode de correcció de color"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Més opcions"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"Fet"</string>
@@ -447,7 +447,7 @@
     <string name="zen_priority_introduction" msgid="3159291973383796646">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes, recordatoris, esdeveniments i trucades de les persones que especifiquis. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No t\'interromprà cap so ni cap vibració, tret dels de les alarmes. Continuaràs sentint tot allò que decideixis reproduir, com ara música, vídeos i jocs."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalitza"</string>
-    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades."</string>
+    <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música. Encara podràs fer trucades telefòniques."</string>
     <string name="zen_silence_introduction" msgid="6117517737057344014">"Es bloquejaran TOTS els sons i totes les vibracions, inclosos els de vídeos, jocs, alarmes i música."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificacions menys urgents a continuació"</string>
@@ -501,7 +501,7 @@
     <string name="user_remove_user_remove" msgid="8387386066949061256">"Suprimeix"</string>
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"S\'ha activat l\'estalvi de bateria"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"Redueix el rendiment i l\'ús de les dades en segon pla."</string>
-    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactiva l\'estalvi de bateria"</string>
+    <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"Desactiva la funció Estalvi de bateria"</string>
     <string name="media_projection_dialog_text" msgid="1755705274910034772">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> tindrà accés a tota la informació que es veu en pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"El servei que ofereix aquesta funció tindrà accés a tota la informació visible a la teva pantalla o que es reprodueix al dispositiu mentre graves o emets contingut, com ara contrasenyes, detalls dels pagaments, fotos, missatges i àudio que reprodueixis."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"Vols començar a gravar o emetre contingut?"</string>
@@ -709,7 +709,7 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desactiva les notificacions"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Vols continuar rebent notificacions d\'aquesta aplicació?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Silenci"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminada"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminat"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bombolla"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sense so ni vibració"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sense so ni vibració i es mostra més avall a la secció de converses"</string>
