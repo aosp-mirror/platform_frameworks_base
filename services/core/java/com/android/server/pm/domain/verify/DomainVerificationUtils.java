@@ -18,6 +18,7 @@ package com.android.server.pm.domain.verify;
 
 import android.annotation.CheckResult;
 import android.annotation.NonNull;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 
 final class DomainVerificationUtils {
@@ -30,5 +31,11 @@ final class DomainVerificationUtils {
     static NameNotFoundException throwPackageUnavailable(@NonNull String packageName)
             throws NameNotFoundException {
         throw new NameNotFoundException("Package " + packageName + " unavailable");
+    }
+
+    static boolean isDomainVerificationIntent(Intent intent) {
+        return intent.isWebIntent()
+                && intent.hasCategory(Intent.CATEGORY_BROWSABLE)
+                && intent.hasCategory(Intent.CATEGORY_DEFAULT);
     }
 }

@@ -100,6 +100,8 @@ public interface DomainVerificationManager {
                 return "restored";
             case DomainVerificationState.STATE_LEGACY_FAILURE:
                 return "legacy_failure";
+            case DomainVerificationState.STATE_SYS_CONFIG:
+                return "system_configured";
             default:
                 return String.valueOf(state);
         }
@@ -115,6 +117,7 @@ public interface DomainVerificationManager {
             case DomainVerificationState.STATE_APPROVED:
             case DomainVerificationState.STATE_MIGRATED:
             case DomainVerificationState.STATE_RESTORED:
+            case DomainVerificationState.STATE_SYS_CONFIG:
                 return true;
             case DomainVerificationState.STATE_NO_RESPONSE:
             case DomainVerificationState.STATE_DENIED:
@@ -140,6 +143,7 @@ public interface DomainVerificationManager {
                 return true;
             case DomainVerificationState.STATE_APPROVED:
             case DomainVerificationState.STATE_DENIED:
+            case DomainVerificationState.STATE_SYS_CONFIG:
                 return false;
             default:
                 return state >= DomainVerificationState.STATE_FIRST_VERIFIER_DEFINED;
@@ -161,6 +165,7 @@ public interface DomainVerificationManager {
             case DomainVerificationState.STATE_APPROVED:
             case DomainVerificationState.STATE_DENIED:
             case DomainVerificationState.STATE_LEGACY_FAILURE:
+            case DomainVerificationState.STATE_SYS_CONFIG:
             default:
                 return false;
         }

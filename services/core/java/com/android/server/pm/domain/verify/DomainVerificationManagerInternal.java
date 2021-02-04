@@ -19,6 +19,7 @@ package com.android.server.pm.domain.verify;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.pm.domain.verify.DomainVerificationSet;
@@ -157,4 +158,12 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
 
     @NonNull
     DomainVerificationShell getShell();
+
+    /**
+     * Check if a resolving URI is approved to takeover the domain as the sole resolved target.
+     * This can be because the domain was auto-verified for the package, or if the user manually
+     * chose to enable the domain for the package.
+     */
+    boolean isApprovedForDomain(@NonNull PackageSetting pkgSetting, @NonNull Intent intent,
+            @UserIdInt int userId);
 }

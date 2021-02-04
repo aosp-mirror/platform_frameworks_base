@@ -238,6 +238,7 @@ import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
 import android.content.pm.dex.DexMetadataHelper;
 import android.content.pm.dex.IArtManager;
+import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.ParsingPackageUtils;
@@ -1624,6 +1625,8 @@ public class PackageManagerService extends IPackageManager.Stub
     private static final long DEFAULT_UNUSED_STATIC_SHARED_LIB_MIN_CACHE_PERIOD =
             2 * 60 * 60 * 1000L; /* two hours */
 
+    private static final boolean USE_DOMAIN_VERIFICATION_V2 = true;
+
     final UserManagerService mUserManager;
 
     // Stores a list of users whose package restrictions file needs to be updated
@@ -2154,6 +2157,7 @@ public class PackageManagerService extends IPackageManager.Stub
         private final ComponentResolver mComponentResolver;
         private final InstantAppResolverConnection mInstantAppResolverConnection;
         private final DefaultAppProvider mDefaultAppProvider;
+        private final DomainVerificationManagerInternal mDomainVerificationManager;
 
         // PackageManagerService attributes that are primitives are referenced through the
         // pms object directly.  Primitives are the only attributes so referenced.
@@ -2199,6 +2203,7 @@ public class PackageManagerService extends IPackageManager.Stub
             mComponentResolver = args.service.mComponentResolver;
             mInstantAppResolverConnection = args.service.mInstantAppResolverConnection;
             mDefaultAppProvider = args.service.mDefaultAppProvider;
+            mDomainVerificationManager = args.service.mDomainVerificationManager;
 
             // Used to reference PMS attributes that are primitives and which are not
             // updated under control of the PMS lock.
@@ -2727,6 +2732,18 @@ public class PackageManagerService extends IPackageManager.Stub
                         matchAllList.add(info);
                         continue;
                     }
+
+                    if (USE_DOMAIN_VERIFICATION_V2) {
+                        boolean isAlways = mDomainVerificationManager
+                                .isApprovedForDomain(ps, intent, userId);
+                        if (isAlways) {
+                            alwaysList.add(info);
+                        } else {
+                            undefinedList.add(info);
+                        }
+                        continue;
+                    }
+
                     // Try to get the status from User settings first
                     long packedStatus = IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
                     int status = (int)(packedStatus >> 32);
@@ -2777,10 +2794,15 @@ public class PackageManagerService extends IPackageManager.Stub
                 // Add all undefined apps as we want them to appear in the disambiguation dialog.
                 result.addAll(undefinedList);
                 // Maybe add one for the other profile.
-                if (xpDomainInfo != null && (
-                        xpDomainInfo.bestDomainVerificationStatus
-                        != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER)) {
-                    result.add(xpDomainInfo.resolveInfo);
+                if (xpDomainInfo != null) {
+                    if (USE_DOMAIN_VERIFICATION_V2) {
+                        if (xpDomainInfo.wereAnyDomainsVerificationApproved) {
+                            result.add(xpDomainInfo.resolveInfo);
+                        }
+                    } else if (xpDomainInfo.bestDomainVerificationStatus
+                            != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+                        result.add(xpDomainInfo.resolveInfo);
+                    }
                 }
                 includeBrowser = true;
             }
@@ -2940,23 +2962,33 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps == null) {
                     continue;
                 }
-                long verificationState =
-                        IntentVerifyUtils.getDomainVerificationStatus(ps, parentUserId);
-                int status = (int)(verificationState >> 32);
                 if (result == null) {
                     result = new CrossProfileDomainInfo();
                     result.resolveInfo = createForwardingResolveInfoUnchecked(new IntentFilter(),
                             sourceUserId, parentUserId);
-                    result.bestDomainVerificationStatus = status;
+                }
+
+                if (USE_DOMAIN_VERIFICATION_V2) {
+                    result.wereAnyDomainsVerificationApproved |= mDomainVerificationManager
+                            .isApprovedForDomain(ps, intent, riTargetUser.targetUserId);
                 } else {
+                    long verificationState =
+                            IntentVerifyUtils.getDomainVerificationStatus(ps, parentUserId);
+                    int status = (int) (verificationState >> 32);
                     result.bestDomainVerificationStatus = bestDomainVerificationStatus(status,
                             result.bestDomainVerificationStatus);
                 }
             }
-            // Don't consider matches with status NEVER across profiles.
-            if (result != null && result.bestDomainVerificationStatus
-                    == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
-                return null;
+            if (result != null) {
+                if (USE_DOMAIN_VERIFICATION_V2) {
+                    if (!result.wereAnyDomainsVerificationApproved) {
+                        return null;
+                    }
+                } else if (result.bestDomainVerificationStatus
+                        == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER) {
+                    // Don't consider matches with status NEVER across profiles.
+                    return null;
+                }
             }
             return result;
         }
@@ -3198,6 +3230,25 @@ public class PackageManagerService extends IPackageManager.Stub
                     final String packageName = info.activityInfo.packageName;
                     final PackageSetting ps = mSettings.getPackageLPr(packageName);
                     if (ps.getInstantApp(userId)) {
+                        if (USE_DOMAIN_VERIFICATION_V2) {
+                            if (mDomainVerificationManager
+                                    .isApprovedForDomain(ps, intent, userId)) {
+                                if (DEBUG_INSTANT) {
+                                    Slog.v(TAG, "Instant app approvd for intent; pkg: "
+                                            + packageName);
+                                }
+                                localInstantApp = info;
+                                break;
+                            } else {
+                                if (DEBUG_INSTANT) {
+                                    Slog.v(TAG, "Instant app not approved for intent; pkg: "
+                                            + packageName);
+                                }
+                                blockResolution = true;
+                                break;
+                            }
+                        }
+
                         final long packedStatus =
                                 IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
                         final int status = (int)(packedStatus >> 32);
@@ -4132,17 +4183,29 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (ps != null) {
                     // only check domain verification status if the app is not a browser
                     if (!info.handleAllWebDataURI) {
-                        // Try to get the status from User settings first
-                        final long packedStatus =
-                                IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
-                        final int status = (int) (packedStatus >> 32);
-                        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
-                                || status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                            if (DEBUG_INSTANT) {
-                                Slog.v(TAG, "DENY instant app;"
-                                        + " pkg: " + packageName + ", status: " + status);
+                        if (USE_DOMAIN_VERIFICATION_V2) {
+                            if (mDomainVerificationManager
+                                    .isApprovedForDomain(ps, intent, userId)) {
+                                if (DEBUG_INSTANT) {
+                                    Slog.v(TAG, "DENY instant app;" + " pkg: " + packageName
+                                            + ", approved");
+                                }
+                                return false;
                             }
-                            return false;
+                        } else {
+                            // Try to get the status from User settings first
+                            final long packedStatus =
+                                    IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
+                            final int status = (int) (packedStatus >> 32);
+                            if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS
+                                    || status
+                                    == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                                if (DEBUG_INSTANT) {
+                                    Slog.v(TAG, "DENY instant app;"
+                                            + " pkg: " + packageName + ", status: " + status);
+                                }
+                                return false;
+                            }
                         }
                     }
                     if (ps.getInstantApp(userId)) {
@@ -9573,11 +9636,18 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (ri.activityInfo.applicationInfo.isInstantApp()) {
                         final String packageName = ri.activityInfo.packageName;
                         final PackageSetting ps = mSettings.getPackageLPr(packageName);
-                        final long packedStatus =
-                                IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
-                        final int status = (int)(packedStatus >> 32);
-                        if (status != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
-                            return ri;
+                        if (USE_DOMAIN_VERIFICATION_V2) {
+                            if (ps != null && mDomainVerificationManager
+                                    .isApprovedForDomain(ps, intent, userId)) {
+                                return ri;
+                            }
+                        } else {
+                            final long packedStatus =
+                                    IntentVerifyUtils.getDomainVerificationStatus(ps, userId);
+                            final int status = (int) (packedStatus >> 32);
+                            if (status != INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK) {
+                                return ri;
+                            }
                         }
                     }
                 }
@@ -10069,7 +10139,8 @@ public class PackageManagerService extends IPackageManager.Stub
         /* ResolveInfo for IntentForwarderActivity to send the intent to the other profile */
         ResolveInfo resolveInfo;
         /* Best domain verification status of the activities found in the other profile */
-        int bestDomainVerificationStatus;
+        int bestDomainVerificationStatus = INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER;
+        boolean wereAnyDomainsVerificationApproved;
     }
 
     private CrossProfileDomainInfo getCrossProfileDomainPreferredLpr(Intent intent,
