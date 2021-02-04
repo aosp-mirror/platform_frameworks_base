@@ -21,6 +21,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.hardware.power.stats.PowerEntity;
+import android.hardware.power.stats.State;
+import android.hardware.power.stats.StateResidency;
+import android.hardware.power.stats.StateResidencyResult;
 import android.net.INetworkManagementEventObserver;
 import android.net.NetworkCapabilities;
 import android.os.BatteryStats;
@@ -51,6 +55,7 @@ import android.os.connectivity.WifiBatteryStats;
 import android.os.health.HealthStatsParceler;
 import android.os.health.HealthStatsWriter;
 import android.os.health.UidHealthStats;
+import android.power.PowerStatsInternal;
 import android.provider.Settings;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.ModemActivityInfo;
@@ -87,10 +92,13 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * All information we are collecting about things that can happen that impact
@@ -112,22 +120,22 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     private final BatteryExternalStatsWorker mWorker;
     private final BatteryUsageStatsProvider mBatteryUsageStatsProvider;
 
-    private native void getLowPowerStats(RpmStats rpmStats);
-    private native int getPlatformLowPowerStats(ByteBuffer outBuffer);
-    private native int getSubsystemLowPowerStats(ByteBuffer outBuffer);
     private native void getRailEnergyPowerStats(RailStats railStats);
     private CharsetDecoder mDecoderStat = StandardCharsets.UTF_8
                     .newDecoder()
                     .onMalformedInput(CodingErrorAction.REPLACE)
                     .onUnmappableCharacter(CodingErrorAction.REPLACE)
                     .replaceWith("?");
-    private ByteBuffer mUtf8BufferStat = ByteBuffer.allocateDirect(MAX_LOW_POWER_STATS_SIZE);
-    private CharBuffer mUtf16BufferStat = CharBuffer.allocate(MAX_LOW_POWER_STATS_SIZE);
     private static final int MAX_LOW_POWER_STATS_SIZE = 4096;
+    private static final int POWER_STATS_QUERY_TIMEOUT_MILLIS = 2000;
 
     private final HandlerThread mHandlerThread;
     private final Handler mHandler;
     private final Object mLock = new Object();
+
+    private PowerStatsInternal mPowerStatsInternal = null;
+    private Map<Integer, String> mEntityNames = new HashMap();
+    private Map<Integer, Map<Integer, String>> mStateNames = new HashMap();
 
     @GuardedBy("mStats")
     private int mLastPowerStateFromRadio = DataConnectionRealTimeInfo.DC_POWER_STATE_LOW;
@@ -163,16 +171,57 @@ public final class BatteryStatsService extends IBatteryStats.Stub
                 }
             };
 
+    private void populatePowerEntityMaps() {
+        if (mPowerStatsInternal == null) {
+            // PowerStatsInternal unavailable, don't bother populating maps.
+            mEntityNames = null;
+            mStateNames = null;
+            return;
+        }
+
+        PowerEntity[] entities = mPowerStatsInternal.getPowerEntityInfo();
+        if (entities == null) {
+            return;
+        }
+
+        for (int i = 0; i < entities.length; i++) {
+            final PowerEntity entity = entities[i];
+            Map<Integer, String> states = new HashMap();
+            for (int j = 0; j < entity.states.length; j++) {
+                final State state = entity.states[j];
+                states.put(state.id, state.name);
+            }
+
+            mEntityNames.put(entity.id, entity.name);
+            mStateNames.put(entity.id, states);
+        }
+    }
+
     /**
      * Replaces the information in the given rpmStats with up-to-date information.
      */
     @Override
     public void fillLowPowerStats(RpmStats rpmStats) {
-        if (DBG) Slog.d(TAG, "begin getLowPowerStats");
+        final StateResidencyResult[] results;
         try {
-            getLowPowerStats(rpmStats);
-        } finally {
-            if (DBG) Slog.d(TAG, "end getLowPowerStats");
+            results = mPowerStatsInternal.getStateResidencyAsync(new int[0])
+                    .get(POWER_STATS_QUERY_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to getStateResidencyAsync", e);
+            return;
+        }
+
+        for (int i = 0; i < results.length; i++) {
+            final StateResidencyResult result = results[i];
+            RpmStats.PowerStateSubsystem subsystem =
+                    rpmStats.getSubsystem(mEntityNames.get(result.id));
+
+            for (int j = 0; j < result.stateResidencyData.length; j++) {
+                final StateResidency stateResidency = result.stateResidencyData[j];
+                subsystem.putState(mStateNames.get(result.id).get(stateResidency.id),
+                        stateResidency.totalTimeInStateMs,
+                        (int) stateResidency.totalStateEntryCount);
+            }
         }
     }
 
@@ -187,47 +236,46 @@ public final class BatteryStatsService extends IBatteryStats.Stub
     }
 
     @Override
-    public String getPlatformLowPowerStats() {
-        if (DBG) Slog.d(TAG, "begin getPlatformLowPowerStats");
-        try {
-            mUtf8BufferStat.clear();
-            mUtf16BufferStat.clear();
-            mDecoderStat.reset();
-            int bytesWritten = getPlatformLowPowerStats(mUtf8BufferStat);
-            if (bytesWritten < 0) {
-                return null;
-            } else if (bytesWritten == 0) {
-                return "Empty";
-            }
-            mUtf8BufferStat.limit(bytesWritten);
-            mDecoderStat.decode(mUtf8BufferStat, mUtf16BufferStat, true);
-            mUtf16BufferStat.flip();
-            return mUtf16BufferStat.toString();
-        } finally {
-            if (DBG) Slog.d(TAG, "end getPlatformLowPowerStats");
-        }
-    }
-
-    @Override
     public String getSubsystemLowPowerStats() {
-        if (DBG) Slog.d(TAG, "begin getSubsystemLowPowerStats");
+        final StateResidencyResult[] results;
         try {
-            mUtf8BufferStat.clear();
-            mUtf16BufferStat.clear();
-            mDecoderStat.reset();
-            int bytesWritten = getSubsystemLowPowerStats(mUtf8BufferStat);
-            if (bytesWritten < 0) {
-                return null;
-            } else if (bytesWritten == 0) {
-                return "Empty";
-            }
-            mUtf8BufferStat.limit(bytesWritten);
-            mDecoderStat.decode(mUtf8BufferStat, mUtf16BufferStat, true);
-            mUtf16BufferStat.flip();
-            return mUtf16BufferStat.toString();
-        } finally {
-            if (DBG) Slog.d(TAG, "end getSubsystemLowPowerStats");
+            results = mPowerStatsInternal.getStateResidencyAsync(new int[0])
+                    .get(POWER_STATS_QUERY_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            Slog.e(TAG, "Failed to getStateResidencyAsync", e);
+            return "Empty";
         }
+
+        if (results.length == 0) return "Empty";
+
+        int charsLeft = MAX_LOW_POWER_STATS_SIZE;
+        StringBuilder builder = new StringBuilder("SubsystemPowerState");
+        for (int i = 0; i < results.length; i++) {
+            final StateResidencyResult result = results[i];
+            StringBuilder subsystemBuilder = new StringBuilder();
+            subsystemBuilder.append(" subsystem_" + i);
+            subsystemBuilder.append(" name=" + mEntityNames.get(result.id));
+
+            for (int j = 0; j < result.stateResidencyData.length; j++) {
+                final StateResidency stateResidency = result.stateResidencyData[j];
+                subsystemBuilder.append(" state_" + j);
+                subsystemBuilder.append(" name=" + mStateNames.get(result.id).get(
+                        stateResidency.id));
+                subsystemBuilder.append(" time=" + stateResidency.totalTimeInStateMs);
+                subsystemBuilder.append(" count=" + stateResidency.totalStateEntryCount);
+                subsystemBuilder.append(" last entry=" + stateResidency.lastEntryTimestampMs);
+            }
+
+            if (subsystemBuilder.length() <= charsLeft) {
+                charsLeft -= subsystemBuilder.length();
+                builder.append(subsystemBuilder);
+            } else {
+                Slog.e(TAG, "getSubsystemLowPowerStats: buffer not enough");
+                break;
+            }
+        }
+
+        return builder.toString();
     }
 
     BatteryStatsService(Context context, File systemDir, Handler handler) {
@@ -274,6 +322,11 @@ public final class BatteryStatsService extends IBatteryStats.Stub
         } catch (RemoteException e) {
             Slog.e(TAG, "Could not register INetworkManagement event observer " + e);
         }
+        mPowerStatsInternal = LocalServices.getService(PowerStatsInternal.class);
+        if (mPowerStatsInternal != null) {
+            populatePowerEntityMaps();
+        }
+
         Watchdog.getInstance().addMonitor(this);
     }
 
