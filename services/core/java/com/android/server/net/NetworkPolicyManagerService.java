@@ -1253,7 +1253,7 @@ public class NetworkPolicyManagerService extends INetworkPolicyManager.Stub {
                 // identified carrier, which may want to manage their own notifications. This method
                 // should be called every time the carrier config changes anyways, and there's no
                 // reason to alert if there isn't a carrier.
-                return;
+                continue;
             }
 
             final boolean notifyWarning = getBooleanDefeatingNullable(config,
