@@ -468,6 +468,7 @@ applications that come with the platform
         <!-- Permission required for CTS test - CallLogTest -->
         <permission name="com.android.voicemail.permission.READ_VOICEMAIL"/>
         <permission name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"/>
+        <permission name="android.permission.MODIFY_QUIET_MODE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
