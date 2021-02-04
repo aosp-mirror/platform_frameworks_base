@@ -27,6 +27,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.UserHandle;
 import android.util.AndroidException;
+import android.util.ArrayMap;
+
+import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
 
 import java.util.List;
 import java.util.Set;

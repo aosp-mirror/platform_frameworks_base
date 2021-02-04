@@ -110,8 +110,9 @@ public class DomainVerificationDebug {
                         PackageUtils.computeSignaturesSha256Digests(
                                 pkg.getSigningDetails().signatures));
 
-                writer.println(pkgState.getPackageName() + " " + pkgState.getId() + ":");
+                writer.println(pkgState.getPackageName() + ":");
                 writer.increaseIndent();
+                writer.println("ID: " + pkgState.getId());
                 writer.println("Signatures: " + signaturesDigest);
                 writer.decreaseIndent();
                 printedHeader = true;

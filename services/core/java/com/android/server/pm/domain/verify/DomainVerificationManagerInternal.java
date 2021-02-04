@@ -154,4 +154,7 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable @UserIdInt Integer userId) throws NameNotFoundException;
+
+    @NonNull
+    DomainVerificationShell getShell();
 }
