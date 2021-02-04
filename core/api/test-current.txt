@@ -389,7 +389,8 @@ package android.app.admin {
     method public boolean isFactoryResetProtectionPolicySupported();
     method @NonNull public static String operationToString(int);
     method @RequiresPermission("android.permission.MANAGE_PROFILE_AND_DEVICE_OWNERS") public void provisionFullyManagedDevice(@NonNull android.app.admin.FullyManagedDeviceProvisioningParams) throws android.app.admin.ProvisioningException;
-    method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, boolean);
+    method @RequiresPermission("android.permission.MANAGE_DEVICE_ADMINS") public void setNextOperationSafety(int, int);
+    method @NonNull public static String unsafeOperationReasonToString(int);
     field public static final String ACTION_DATA_SHARING_RESTRICTION_APPLIED = "android.app.action.DATA_SHARING_RESTRICTION_APPLIED";
     field public static final String ACTION_MANAGED_PROFILE_CREATED = "android.app.action.MANAGED_PROFILE_CREATED";
     field public static final String ACTION_PROVISIONED_MANAGED_DEVICE = "android.app.action.PROVISIONED_MANAGED_DEVICE";
@@ -456,6 +457,7 @@ package android.app.admin {
     field public static final int PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED = 4; // 0x4
     field public static final int PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED = 7; // 0x7
     field public static final int PROVISIONING_RESULT_STARTING_PROFILE_FAILED = 5; // 0x5
+    field public static final int UNSAFE_OPERATION_REASON_NONE = -1; // 0xffffffff
   }
 
   public final class FullyManagedDeviceProvisioningParams implements android.os.Parcelable {
@@ -512,6 +514,7 @@ package android.app.admin {
   }
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
+    ctor public UnsafeStateException(int, int);
     method public int getOperation();
   }
 

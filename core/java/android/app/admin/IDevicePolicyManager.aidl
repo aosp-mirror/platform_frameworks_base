@@ -491,7 +491,7 @@ interface IDevicePolicyManager {
     void setManagedProfileMaximumTimeOff(in ComponentName admin, long timeoutMs);
     boolean canProfileOwnerResetPasswordWhenLocked(int userId);
 
-    void setNextOperationSafety(int operation, boolean safe);
+    void setNextOperationSafety(int operation, int reason);
 
     String getEnrollmentSpecificId(String callerPackage);
     void setOrganizationIdForUser(in String callerPackage, in String enterpriseId, int userId);
