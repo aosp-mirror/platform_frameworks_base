@@ -40,6 +40,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Slog;
@@ -109,6 +110,16 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
     TransitionController getTransitionController() {
         return mTransitionController;
+    }
+
+    @Override
+    public boolean onTransact(int code, Parcel data, Parcel reply, int flags)
+            throws RemoteException {
+        try {
+            return super.onTransact(code, data, reply, flags);
+        } catch (RuntimeException e) {
+            throw ActivityTaskManagerService.logAndRethrowRuntimeExceptionOnTransact(TAG, e);
+        }
     }
 
     @Override
