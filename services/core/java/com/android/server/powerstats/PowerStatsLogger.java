@@ -53,8 +53,9 @@ import java.io.IOException;
 public final class PowerStatsLogger extends Handler {
     private static final String TAG = PowerStatsLogger.class.getSimpleName();
     private static final boolean DEBUG = false;
-    protected static final int MSG_LOG_TO_DATA_STORAGE_TIMER = 0;
-    protected static final int MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP = 1;
+    protected static final int MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP = 0;
+    protected static final int MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY = 1;
+    protected static final int MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY = 2;
 
     private final PowerStatsDataStorage mPowerStatsMeterStorage;
     private final PowerStatsDataStorage mPowerStatsModelStorage;
@@ -64,8 +65,8 @@ public final class PowerStatsLogger extends Handler {
     @Override
     public void handleMessage(Message msg) {
         switch (msg.what) {
-            case MSG_LOG_TO_DATA_STORAGE_TIMER:
-                if (DEBUG) Slog.d(TAG, "Logging to data storage on timer");
+            case MSG_LOG_TO_DATA_STORAGE_HIGH_FREQUENCY:
+                if (DEBUG) Slog.d(TAG, "Logging to data storage on high frequency timer");
 
                 // Log power meter data.
                 EnergyMeasurement[] energyMeasurements =
@@ -74,12 +75,23 @@ public final class PowerStatsLogger extends Handler {
                         EnergyMeasurementUtils.getProtoBytes(energyMeasurements));
                 if (DEBUG) EnergyMeasurementUtils.print(energyMeasurements);
 
-                // Log power model data.
-                EnergyConsumerResult[] energyConsumerResults =
+                // Log power model data without attribution data.
+                EnergyConsumerResult[] ecrNoAttribution =
                     mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
                 mPowerStatsModelStorage.write(
-                        EnergyConsumerResultUtils.getProtoBytes(energyConsumerResults));
-                if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResults);
+                        EnergyConsumerResultUtils.getProtoBytes(ecrNoAttribution, false));
+                if (DEBUG) EnergyConsumerResultUtils.print(ecrNoAttribution);
+                break;
+
+            case MSG_LOG_TO_DATA_STORAGE_LOW_FREQUENCY:
+                if (DEBUG) Slog.d(TAG, "Logging to data storage on low frequency timer");
+
+                // Log power model data with attribution data.
+                EnergyConsumerResult[] ecrAttribution =
+                    mPowerStatsHALWrapper.getEnergyConsumed(new int[0]);
+                mPowerStatsModelStorage.write(
+                        EnergyConsumerResultUtils.getProtoBytes(ecrAttribution, true));
+                if (DEBUG) EnergyConsumerResultUtils.print(ecrAttribution);
                 break;
 
             case MSG_LOG_TO_DATA_STORAGE_BATTERY_DROP:
@@ -163,7 +175,7 @@ public final class PowerStatsLogger extends Handler {
                         // deserialize, then re-serialize.  This is computationally inefficient.
                         EnergyConsumerResult[] energyConsumerResult =
                             EnergyConsumerResultUtils.unpackProtoMessage(data);
-                        EnergyConsumerResultUtils.packProtoMessage(energyConsumerResult, pos);
+                        EnergyConsumerResultUtils.packProtoMessage(energyConsumerResult, pos, true);
                         if (DEBUG) EnergyConsumerResultUtils.print(energyConsumerResult);
                     } catch (IOException e) {
                         Slog.e(TAG, "Failed to write energy model data to incident report.");
