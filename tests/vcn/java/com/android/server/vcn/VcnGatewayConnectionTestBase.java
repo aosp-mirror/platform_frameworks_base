@@ -27,7 +27,9 @@ import static org.mockito.Mockito.verify;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.IpSecConfig;
 import android.net.IpSecManager;
+import android.net.IpSecTransform;
 import android.net.IpSecTunnelInterfaceResponse;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -48,7 +50,10 @@ import java.util.UUID;
 
 public class VcnGatewayConnectionTestBase {
     protected static final ParcelUuid TEST_SUB_GRP = new ParcelUuid(UUID.randomUUID());
-    protected static final int TEST_IPSEC_TUNNEL_RESOURCE_ID = 1;
+    protected static final int TEST_IPSEC_SPI_VALUE = 0x1234;
+    protected static final int TEST_IPSEC_SPI_RESOURCE_ID = 1;
+    protected static final int TEST_IPSEC_TRANSFORM_RESOURCE_ID = 2;
+    protected static final int TEST_IPSEC_TUNNEL_RESOURCE_ID = 3;
     protected static final String TEST_IPSEC_TUNNEL_IFACE = "IPSEC_IFACE";
     protected static final UnderlyingNetworkRecord TEST_UNDERLYING_NETWORK_RECORD_1 =
             new UnderlyingNetworkRecord(
@@ -110,6 +115,10 @@ public class VcnGatewayConnectionTestBase {
         doReturn(mMockIkeSession).when(mDeps).newIkeSession(any(), any(), any(), any(), any());
 
         mGatewayConnection = new VcnGatewayConnection(mVcnContext, TEST_SUB_GRP, mConfig, mDeps);
+    }
+
+    protected IpSecTransform makeDummyIpSecTransform() throws Exception {
+        return new IpSecTransform(mContext, new IpSecConfig());
     }
 
     protected IkeSessionCallback getIkeSessionCallback() {

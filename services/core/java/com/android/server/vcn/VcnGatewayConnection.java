@@ -17,8 +17,11 @@
 package com.android.server.vcn;
 
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 
 import static com.android.server.VcnManagementService.VDBG;
 
@@ -34,8 +37,10 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkAgent;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.RouteInfo;
+import android.net.TelephonyNetworkSpecifier;
 import android.net.annotations.PolicyDirection;
 import android.net.ipsec.ike.ChildSessionCallback;
 import android.net.ipsec.ike.ChildSessionConfiguration;
@@ -47,10 +52,13 @@ import android.net.ipsec.ike.IkeSessionParams;
 import android.net.ipsec.ike.exceptions.IkeException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.vcn.VcnGatewayConnectionConfig;
+import android.net.vcn.VcnTransportInfo;
+import android.net.wifi.WifiInfo;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.Message;
 import android.os.ParcelUuid;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -64,6 +72,7 @@ import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -112,6 +121,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class VcnGatewayConnection extends StateMachine {
     private static final String TAG = VcnGatewayConnection.class.getSimpleName();
+
+    private static final int[] MERGED_CAPABILITIES =
+            new int[] {NET_CAPABILITY_NOT_METERED, NET_CAPABILITY_NOT_ROAMING};
 
     private static final InetAddress DUMMY_ADDR = InetAddresses.parseNumericAddress("192.0.2.0");
     private static final int ARG_NOT_PRESENT = Integer.MIN_VALUE;
@@ -537,6 +549,8 @@ public class VcnGatewayConnection extends StateMachine {
         @Override
         public void onSelectedUnderlyingNetworkChanged(
                 @Nullable UnderlyingNetworkRecord underlying) {
+            // TODO(b/179091925): Move the delayed-message handling to BaseState
+
             // If underlying is null, all underlying networks have been lost. Disconnect VCN after a
             // timeout.
             if (underlying == null) {
@@ -921,6 +935,8 @@ public class VcnGatewayConnection extends StateMachine {
                     transitionTo(mDisconnectingState);
                     break;
                 case EVENT_SESSION_CLOSED:
+                    // Disconnecting state waits for EVENT_SESSION_CLOSED to shutdown, and this
+                    // message may not be posted again. Defer to ensure immediate shutdown.
                     deferMessage(msg);
 
                     transitionTo(mDisconnectingState);
@@ -941,7 +957,108 @@ public class VcnGatewayConnection extends StateMachine {
         }
     }
 
-    private abstract class ConnectedStateBase extends ActiveBaseState {}
+    private abstract class ConnectedStateBase extends ActiveBaseState {
+        protected void updateNetworkAgent(
+                @NonNull IpSecTunnelInterface tunnelIface,
+                @NonNull NetworkAgent agent,
+                @NonNull ChildSessionConfiguration childConfig) {
+            final NetworkCapabilities caps =
+                    buildNetworkCapabilities(mConnectionConfig, mUnderlying);
+            final LinkProperties lp =
+                    buildConnectedLinkProperties(mConnectionConfig, tunnelIface, childConfig);
+
+            agent.sendNetworkCapabilities(caps);
+            agent.sendLinkProperties(lp);
+        }
+
+        protected NetworkAgent buildNetworkAgent(
+                @NonNull IpSecTunnelInterface tunnelIface,
+                @NonNull ChildSessionConfiguration childConfig) {
+            final NetworkCapabilities caps =
+                    buildNetworkCapabilities(mConnectionConfig, mUnderlying);
+            final LinkProperties lp =
+                    buildConnectedLinkProperties(mConnectionConfig, tunnelIface, childConfig);
+
+            final NetworkAgent agent =
+                    new NetworkAgent(
+                            mVcnContext.getContext(),
+                            mVcnContext.getLooper(),
+                            TAG,
+                            caps,
+                            lp,
+                            Vcn.getNetworkScore(),
+                            new NetworkAgentConfig(),
+                            mVcnContext.getVcnNetworkProvider()) {
+                        @Override
+                        public void unwanted() {
+                            teardownAsynchronously();
+                        }
+                    };
+
+            agent.register();
+            agent.markConnected();
+
+            return agent;
+        }
+
+        protected void applyTransform(
+                int token,
+                @NonNull IpSecTunnelInterface tunnelIface,
+                @NonNull Network underlyingNetwork,
+                @NonNull IpSecTransform transform,
+                int direction) {
+            try {
+                // TODO: Set underlying network of tunnel interface
+
+                // Transforms do not need to be persisted; the IkeSession will keep them alive
+                mIpSecManager.applyTunnelModeTransform(tunnelIface, direction, transform);
+            } catch (IOException e) {
+                Slog.d(TAG, "Transform application failed for network " + token, e);
+                sessionLost(token, e);
+            }
+        }
+
+        protected void setupInterface(
+                int token,
+                @NonNull IpSecTunnelInterface tunnelIface,
+                @NonNull ChildSessionConfiguration childConfig) {
+            setupInterface(token, tunnelIface, childConfig, null);
+        }
+
+        protected void setupInterface(
+                int token,
+                @NonNull IpSecTunnelInterface tunnelIface,
+                @NonNull ChildSessionConfiguration childConfig,
+                @Nullable ChildSessionConfiguration oldChildConfig) {
+            try {
+                final Set<LinkAddress> newAddrs =
+                        new ArraySet<>(childConfig.getInternalAddresses());
+                final Set<LinkAddress> existingAddrs = new ArraySet<>();
+                if (oldChildConfig != null) {
+                    existingAddrs.addAll(oldChildConfig.getInternalAddresses());
+                }
+
+                final Set<LinkAddress> toAdd = new ArraySet<>();
+                toAdd.addAll(newAddrs);
+                toAdd.removeAll(existingAddrs);
+
+                final Set<LinkAddress> toRemove = new ArraySet<>();
+                toRemove.addAll(existingAddrs);
+                toRemove.removeAll(newAddrs);
+
+                for (LinkAddress address : toAdd) {
+                    tunnelIface.addAddress(address.getAddress(), address.getPrefixLength());
+                }
+
+                for (LinkAddress address : toRemove) {
+                    tunnelIface.removeAddress(address.getAddress(), address.getPrefixLength());
+                }
+            } catch (IOException e) {
+                Slog.d(TAG, "Adding address to tunnel failed for token " + token, e);
+                sessionLost(token, e);
+            }
+        }
+    }
 
     /**
      * Stable state representing a VCN that has a functioning connection to the mobility anchor.
@@ -951,7 +1068,89 @@ public class VcnGatewayConnection extends StateMachine {
      */
     class ConnectedState extends ConnectedStateBase {
         @Override
-        protected void processStateMsg(Message msg) {}
+        protected void enterState() throws Exception {
+            // Successful connection, clear failed attempt counter
+            mFailedAttempts = 0;
+        }
+
+        @Override
+        protected void processStateMsg(Message msg) {
+            switch (msg.what) {
+                case EVENT_UNDERLYING_NETWORK_CHANGED:
+                    handleUnderlyingNetworkChanged(msg);
+                    break;
+                case EVENT_SESSION_CLOSED:
+                    // Disconnecting state waits for EVENT_SESSION_CLOSED to shutdown, and this
+                    // message may not be posted again. Defer to ensure immediate shutdown.
+                    deferMessage(msg);
+                    transitionTo(mDisconnectingState);
+                    break;
+                case EVENT_SESSION_LOST:
+                    transitionTo(mDisconnectingState);
+                    break;
+                case EVENT_TRANSFORM_CREATED:
+                    final EventTransformCreatedInfo transformCreatedInfo =
+                            (EventTransformCreatedInfo) msg.obj;
+
+                    applyTransform(
+                            mCurrentToken,
+                            mTunnelIface,
+                            mUnderlying.network,
+                            transformCreatedInfo.transform,
+                            transformCreatedInfo.direction);
+                    break;
+                case EVENT_SETUP_COMPLETED:
+                    mChildConfig = ((EventSetupCompletedInfo) msg.obj).childSessionConfig;
+
+                    setupInterfaceAndNetworkAgent(mCurrentToken, mTunnelIface, mChildConfig);
+                    break;
+                case EVENT_DISCONNECT_REQUESTED:
+                    handleDisconnectRequested(((EventDisconnectRequestedInfo) msg.obj).reason);
+                    break;
+                default:
+                    logUnhandledMessage(msg);
+                    break;
+            }
+        }
+
+        private void handleUnderlyingNetworkChanged(@NonNull Message msg) {
+            final UnderlyingNetworkRecord oldUnderlying = mUnderlying;
+            mUnderlying = ((EventUnderlyingNetworkChangedInfo) msg.obj).newUnderlying;
+
+            if (mUnderlying == null) {
+                // Ignored for now; a new network may be coming up. If none does, the delayed
+                // NETWORK_LOST disconnect will be fired, and tear down the session + network.
+                return;
+            }
+
+            // mUnderlying assumed non-null, given check above.
+            // If network changed, migrate. Otherwise, update any existing networkAgent.
+            if (oldUnderlying == null || !oldUnderlying.network.equals(mUnderlying.network)) {
+                mIkeSession.setNetwork(mUnderlying.network);
+            } else {
+                // oldUnderlying is non-null & underlying network itself has not changed
+                // (only network properties were changed).
+
+                // Network not yet set up, or child not yet connected.
+                if (mNetworkAgent != null && mChildConfig != null) {
+                    // If only network properties changed and agent is active, update properties
+                    updateNetworkAgent(mTunnelIface, mNetworkAgent, mChildConfig);
+                }
+            }
+        }
+
+        protected void setupInterfaceAndNetworkAgent(
+                int token,
+                @NonNull IpSecTunnelInterface tunnelIface,
+                @NonNull ChildSessionConfiguration childConfig) {
+            setupInterface(token, tunnelIface, childConfig);
+
+            if (mNetworkAgent == null) {
+                mNetworkAgent = buildNetworkAgent(tunnelIface, childConfig);
+            } else {
+                updateNetworkAgent(tunnelIface, mNetworkAgent, childConfig);
+            }
+        }
     }
 
     /**
@@ -966,7 +1165,8 @@ public class VcnGatewayConnection extends StateMachine {
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     static NetworkCapabilities buildNetworkCapabilities(
-            @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig) {
+            @NonNull VcnGatewayConnectionConfig gatewayConnectionConfig,
+            @Nullable UnderlyingNetworkRecord underlying) {
         final NetworkCapabilities.Builder builder = new NetworkCapabilities.Builder();
 
         builder.addTransportType(TRANSPORT_CELLULAR);
@@ -977,6 +1177,52 @@ public class VcnGatewayConnection extends StateMachine {
         for (int cap : gatewayConnectionConfig.getAllExposedCapabilities()) {
             builder.addCapability(cap);
         }
+
+        if (underlying != null) {
+            final NetworkCapabilities underlyingCaps = underlying.networkCapabilities;
+
+            // Mirror merged capabilities.
+            for (int cap : MERGED_CAPABILITIES) {
+                if (underlyingCaps.hasCapability(cap)) {
+                    builder.addCapability(cap);
+                }
+            }
+
+            // Set admin UIDs for ConnectivityDiagnostics use.
+            final int[] underlyingAdminUids = underlyingCaps.getAdministratorUids();
+            Arrays.sort(underlyingAdminUids); // Sort to allow contains check below.
+
+            final int[] adminUids;
+            if (underlyingCaps.getOwnerUid() > 0 // No owner UID specified
+                    && 0 > Arrays.binarySearch(// Owner UID not found in admin UID list.
+                            underlyingAdminUids, underlyingCaps.getOwnerUid())) {
+                adminUids = Arrays.copyOf(underlyingAdminUids, underlyingAdminUids.length + 1);
+                adminUids[adminUids.length - 1] = underlyingCaps.getOwnerUid();
+                Arrays.sort(adminUids);
+            } else {
+                adminUids = underlyingAdminUids;
+            }
+            builder.setAdministratorUids(adminUids);
+
+            // Set TransportInfo for SysUI use (never parcelled out of SystemServer).
+            if (underlyingCaps.hasTransport(TRANSPORT_WIFI)
+                    && underlyingCaps.getTransportInfo() instanceof WifiInfo) {
+                final WifiInfo wifiInfo = (WifiInfo) underlyingCaps.getTransportInfo();
+                builder.setTransportInfo(new VcnTransportInfo(wifiInfo));
+            } else if (underlyingCaps.hasTransport(TRANSPORT_CELLULAR)
+                    && underlyingCaps.getNetworkSpecifier() instanceof TelephonyNetworkSpecifier) {
+                final TelephonyNetworkSpecifier telNetSpecifier =
+                        (TelephonyNetworkSpecifier) underlyingCaps.getNetworkSpecifier();
+                builder.setTransportInfo(new VcnTransportInfo(telNetSpecifier.getSubscriptionId()));
+            } else {
+                Slog.wtf(
+                        TAG,
+                        "Unknown transport type or missing TransportInfo/NetworkSpecifier for"
+                                + " non-null underlying network");
+            }
+        }
+
+        // TODO: Make a VcnNetworkSpecifier, and match all underlying subscription IDs.
 
         return builder.build();
     }
