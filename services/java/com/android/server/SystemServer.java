@@ -1064,7 +1064,8 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("StartDomainVerificationService");
         DomainVerificationService domainVerificationService = new DomainVerificationService(
-                mSystemContext, new Singleton<DomainVerificationService.Connection>() {
+                mSystemContext, SystemConfig.getInstance(), platformCompat,
+                new Singleton<DomainVerificationService.Connection>() {
             @Override
             protected DomainVerificationService.Connection create() {
                 // Deferred retrieval from PackageManagerService, since PMS is initialized after

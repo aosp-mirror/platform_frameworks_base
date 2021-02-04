@@ -17,6 +17,7 @@
 package com.android.server.pm.domain.verify;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.content.pm.domain.verify.DomainVerificationState;
 import android.os.UserHandle;
@@ -251,6 +252,20 @@ class DomainVerificationSettings {
         int restoredSize = mRestoredPkgStates.size();
         for (int index = 0; index < restoredSize; index++) {
             mRestoredPkgStates.valueAt(index).removeUser(userId);
+        }
+    }
+
+    @Nullable
+    public DomainVerificationPkgState getPendingState(@NonNull String pkgName) {
+        synchronized (mLock) {
+            return mPendingPkgStates.get(pkgName);
+        }
+    }
+
+    @Nullable
+    public DomainVerificationPkgState getRestoredState(@NonNull String pkgName) {
+        synchronized (mLock) {
+            return mRestoredPkgStates.get(pkgName);
         }
     }
 }
