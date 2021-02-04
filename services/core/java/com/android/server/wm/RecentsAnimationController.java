@@ -421,7 +421,10 @@ public class RecentsAnimationController implements DeathRecipient {
             if (skipAnimation(task)) {
                 continue;
             }
-            addAnimation(task, !recentTaskIds.get(task.mTaskId));
+            addAnimation(task, !recentTaskIds.get(task.mTaskId), false /* hidden */,
+                    (type, anim) -> task.forAllWindows(win -> {
+                        win.onAnimationFinished(type, anim);
+                    }, true /* traverseTopToBottom */));
         }
 
         // Skip the animation if there is nothing to animate
