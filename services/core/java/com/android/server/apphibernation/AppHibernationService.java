@@ -18,8 +18,6 @@ package com.android.server.apphibernation;
 
 import static android.content.Intent.ACTION_PACKAGE_ADDED;
 import static android.content.Intent.ACTION_PACKAGE_REMOVED;
-import static android.content.Intent.ACTION_USER_ADDED;
-import static android.content.Intent.ACTION_USER_REMOVED;
 import static android.content.Intent.EXTRA_REMOVED_FOR_ALL_USERS;
 import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PackageManager.MATCH_ALL;
@@ -36,7 +34,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
-import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -48,6 +45,7 @@ import android.os.UserManager;
 import android.provider.DeviceConfig;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -107,11 +105,6 @@ public final class AppHibernationService extends SystemService {
         final Context userAllContext = mContext.createContextAsUser(UserHandle.ALL, 0 /* flags */);
 
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(ACTION_USER_ADDED);
-        intentFilter.addAction(ACTION_USER_REMOVED);
-        userAllContext.registerReceiver(mBroadcastReceiver, intentFilter);
-
-        intentFilter = new IntentFilter();
         intentFilter.addAction(ACTION_PACKAGE_ADDED);
         intentFilter.addAction(ACTION_PACKAGE_REMOVED);
         intentFilter.addDataScheme("package");
@@ -123,19 +116,6 @@ public final class AppHibernationService extends SystemService {
         publishBinderService(Context.APP_HIBERNATION_SERVICE, mServiceStub);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        if (phase == PHASE_BOOT_COMPLETED) {
-            synchronized (mLock) {
-                final List<UserInfo> users = mUserManager.getUsers();
-                // TODO: Pull from persistent disk storage. For now, just make from scratch.
-                for (UserInfo user : users) {
-                    addUserPackageStatesL(user.id);
-                }
-            }
-        }
-    }
-
     /**
      * Whether a package is hibernating for a given user.
      *
@@ -145,11 +125,13 @@ public final class AppHibernationService extends SystemService {
      */
     boolean isHibernatingForUser(String packageName, int userId) {
         userId = handleIncomingUser(userId, "isHibernating");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            Slog.e(TAG, "Attempt to get hibernation state of stopped or nonexistent user "
+                    + userId);
+            return false;
+        }
         synchronized (mLock) {
             final Map<String, UserPackageState> packageStates = mUserStates.get(userId);
-            if (packageStates == null) {
-                throw new IllegalArgumentException("No user associated with user id " + userId);
-            }
             final UserPackageState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
                 throw new IllegalArgumentException(
@@ -181,10 +163,12 @@ public final class AppHibernationService extends SystemService {
      */
     void setHibernatingForUser(String packageName, int userId, boolean isHibernating) {
         userId = handleIncomingUser(userId, "setHibernating");
+        if (!mUserManager.isUserUnlockingOrUnlocked(userId)) {
+            Slog.w(TAG, "Attempt to set hibernation state for a stopped or nonexistent user "
+                    + userId);
+            return;
+        }
         synchronized (mLock) {
-            if (!mUserStates.contains(userId)) {
-                throw new IllegalArgumentException("No user associated with user id " + userId);
-            }
             Map<String, UserPackageState> packageStates = mUserStates.get(userId);
             UserPackageState pkgState = packageStates.get(packageName);
             if (pkgState == null) {
@@ -310,15 +294,19 @@ public final class AppHibernationService extends SystemService {
         mUserStates.put(userId, packages);
     }
 
-    private void onUserAdded(int userId) {
+    @Override
+    public void onUserUnlocking(@NonNull TargetUser user) {
+        // TODO: Pull from persistent disk storage. For now, just make from scratch.
         synchronized (mLock) {
-            addUserPackageStatesL(userId);
+            addUserPackageStatesL(user.getUserIdentifier());
         }
     }
 
-    private void onUserRemoved(int userId) {
+    @Override
+    public void onUserStopping(@NonNull TargetUser user) {
         synchronized (mLock) {
-            mUserStates.remove(userId);
+            // TODO: Flush to disk when persistence is implemented
+            mUserStates.remove(user.getUserIdentifier());
         }
     }
 
@@ -395,7 +383,7 @@ public final class AppHibernationService extends SystemService {
         }
     }
 
-    // Broadcast receiver for user and package add/removal events
+    // Broadcast receiver for package add/removal events
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -405,12 +393,6 @@ public final class AppHibernationService extends SystemService {
             }
 
             final String action = intent.getAction();
-            if (ACTION_USER_ADDED.equals(action)) {
-                onUserAdded(userId);
-            }
-            if (ACTION_USER_REMOVED.equals(action)) {
-                onUserRemoved(userId);
-            }
             if (ACTION_PACKAGE_ADDED.equals(action) || ACTION_PACKAGE_REMOVED.equals(action)) {
                 final String packageName = intent.getData().getSchemeSpecificPart();
                 if (intent.getBooleanExtra(EXTRA_REPLACING, false)) {
