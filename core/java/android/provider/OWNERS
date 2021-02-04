@@ -1,5 +1,6 @@
 per-file *BlockedNumber* = file:/telephony/OWNERS
 per-file *Telephony* = file:/telephony/OWNERS
+per-file *SimPhonebook* = file:/telephony/OWNERS
 
 per-file *CallLog* = file:platform/packages/providers/ContactsProvider:/OWNERS
 per-file *Contacts* = file:platform/packages/providers/ContactsProvider:/OWNERS
