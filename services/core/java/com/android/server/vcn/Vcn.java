@@ -214,7 +214,8 @@ public class Vcn extends Handler {
     }
 
     /** Retrieves the network score for a VCN Network */
-    private int getNetworkScore() {
+    // Package visibility for use in VcnGatewayConnection
+    static int getNetworkScore() {
         // TODO: STOPSHIP (b/173549607): Make this use new NetworkSelection, or some magic "max in
         //                               subGrp" value
         return 52;

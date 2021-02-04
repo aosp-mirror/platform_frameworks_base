@@ -16,19 +16,34 @@
 
 package com.android.server.vcn;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
+import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
+
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import android.annotation.NonNull;
 import android.content.Context;
+import android.net.LinkProperties;
+import android.net.Network;
 import android.net.NetworkCapabilities;
+import android.net.TelephonyNetworkSpecifier;
 import android.net.vcn.VcnGatewayConnectionConfigTest;
+import android.net.vcn.VcnTransportInfo;
+import android.net.wifi.WifiInfo;
 import android.os.ParcelUuid;
+import android.os.Process;
 import android.os.test.TestLooper;
 import android.telephony.SubscriptionInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -42,6 +57,7 @@ import java.util.UUID;
 @RunWith(AndroidJUnit4.class)
 @SmallTest
 public class VcnGatewayConnectionTest {
+    private static final int TEST_UID = Process.myUid();
     private static final ParcelUuid TEST_PARCEL_UUID = new ParcelUuid(UUID.randomUUID());
     private static final int TEST_SIM_SLOT_INDEX = 1;
     private static final int TEST_SUBSCRIPTION_ID_1 = 2;
@@ -61,22 +77,59 @@ public class VcnGatewayConnectionTest {
     @NonNull private final TestLooper mTestLooper;
     @NonNull private final VcnNetworkProvider mVcnNetworkProvider;
     @NonNull private final VcnGatewayConnection.Dependencies mDeps;
+    @NonNull private final WifiInfo mWifiInfo;
 
     public VcnGatewayConnectionTest() {
         mContext = mock(Context.class);
         mTestLooper = new TestLooper();
         mVcnNetworkProvider = mock(VcnNetworkProvider.class);
         mDeps = mock(VcnGatewayConnection.Dependencies.class);
+        mWifiInfo = mock(WifiInfo.class);
+    }
+
+    private void verifyBuildNetworkCapabilitiesCommon(int transportType) {
+        final NetworkCapabilities underlyingCaps = new NetworkCapabilities();
+        underlyingCaps.addTransportType(transportType);
+        underlyingCaps.addCapability(NET_CAPABILITY_NOT_METERED);
+        underlyingCaps.addCapability(NET_CAPABILITY_NOT_ROAMING);
+
+        if (transportType == TRANSPORT_WIFI) {
+            underlyingCaps.setTransportInfo(mWifiInfo);
+            underlyingCaps.setOwnerUid(TEST_UID);
+        } else if (transportType == TRANSPORT_CELLULAR) {
+            underlyingCaps.setAdministratorUids(new int[] {TEST_UID});
+            underlyingCaps.setNetworkSpecifier(
+                    new TelephonyNetworkSpecifier(TEST_SUBSCRIPTION_ID_1));
+        }
+
+        UnderlyingNetworkRecord record =
+                new UnderlyingNetworkRecord(
+                        new Network(0), underlyingCaps, new LinkProperties(), false);
+        final NetworkCapabilities vcnCaps =
+                VcnGatewayConnection.buildNetworkCapabilities(
+                        VcnGatewayConnectionConfigTest.buildTestConfig(), record);
+
+        assertTrue(vcnCaps.hasTransport(TRANSPORT_CELLULAR));
+        assertTrue(vcnCaps.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(vcnCaps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
+        assertArrayEquals(new int[] {TEST_UID}, vcnCaps.getAdministratorUids());
+        assertTrue(vcnCaps.getTransportInfo() instanceof VcnTransportInfo);
+
+        final VcnTransportInfo info = (VcnTransportInfo) vcnCaps.getTransportInfo();
+        if (transportType == TRANSPORT_WIFI) {
+            assertEquals(mWifiInfo, info.getWifiInfo());
+        } else if (transportType == TRANSPORT_CELLULAR) {
+            assertEquals(TEST_SUBSCRIPTION_ID_1, info.getSubId());
+        }
     }
 
     @Test
-    public void testBuildNetworkCapabilities() throws Exception {
-        final NetworkCapabilities caps =
-                VcnGatewayConnection.buildNetworkCapabilities(
-                        VcnGatewayConnectionConfigTest.buildTestConfig());
+    public void testBuildNetworkCapabilitiesUnderlyingWifi() throws Exception {
+        verifyBuildNetworkCapabilitiesCommon(TRANSPORT_WIFI);
+    }
 
-        for (int exposedCapability : VcnGatewayConnectionConfigTest.EXPOSED_CAPS) {
-            assertTrue(caps.hasCapability(exposedCapability));
-        }
+    @Test
+    public void testBuildNetworkCapabilitiesUnderlyingCell() throws Exception {
+        verifyBuildNetworkCapabilitiesCommon(TRANSPORT_CELLULAR);
     }
 }
