@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinamiese stelsel is gereed. Herbegin jou toestel om dit te begin gebruik."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Installeer tans"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Kon nie installeer nie"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Kon nie prent bekragtig nie. Staak installering."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Kon nie beeldafskrif bekragtig nie. Staak installering."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Laat loop tans \'n dinamiese stelsel. Herbegin om die oorspronklike Android-weergawe te gebruik."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Kanselleer"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Gooi weg"</string>

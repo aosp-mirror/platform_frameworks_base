@@ -923,7 +923,7 @@
     <string name="granularity_label_link" msgid="9007852307112046526">"линк"</string>
     <string name="granularity_label_line" msgid="376204904280620221">"ред"</string>
     <string name="factorytest_failed" msgid="3190979160945298006">"Фабричко тестирање није успело"</string>
-    <string name="factorytest_not_system" msgid="5658160199925519869">"Радња FACTORY_TEST је подржана само за пакете инсталиране у директоријуму /system/app."</string>
+    <string name="factorytest_not_system" msgid="5658160199925519869">"Радња FACTORY_TEST је подржана само за пакете инсталиране у фолдеру /system/app."</string>
     <string name="factorytest_no_action" msgid="339252838115675515">"Није пронађен ниједан пакет који обезбеђује радњу FACTORY_TEST."</string>
     <string name="factorytest_reboot" msgid="2050147445567257365">"Рестартуј"</string>
     <string name="js_dialog_title" msgid="7464775045615023241">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише:"</string>
@@ -2038,7 +2038,7 @@
     <string name="battery_saver_charged_notification_summary" product="default" msgid="5544457317418624367">"Батерија телефона је довољно напуњена. Функције више нису ограничене."</string>
     <string name="battery_saver_charged_notification_summary" product="tablet" msgid="4426317048139996888">"Батерија таблета је довољно напуњена. Функције више нису ограничене."</string>
     <string name="battery_saver_charged_notification_summary" product="device" msgid="1031562417867646649">"Батерија уређаја је довољно напуњена. Функције више нису ограничене."</string>
-    <string name="mime_type_folder" msgid="2203536499348787650">"Директоријум"</string>
+    <string name="mime_type_folder" msgid="2203536499348787650">"Фолдер"</string>
     <string name="mime_type_apk" msgid="3168784749499623902">"Android апликација"</string>
     <string name="mime_type_generic" msgid="4606589110116560228">"Датотека"</string>
     <string name="mime_type_generic_ext" msgid="9220220924380909486">"<xliff:g id="EXTENSION">%1$s</xliff:g> датотека"</string>

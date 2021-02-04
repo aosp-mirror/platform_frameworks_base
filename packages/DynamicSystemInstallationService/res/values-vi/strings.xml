@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Hệ thống động đã sẵn sàng. Để bắt đầu sử dụng hệ thống này, hãy khởi động lại thiết bị của bạn."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Đang cài đặt"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Không cài đặt được"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Không xác thực được hình ảnh. Hủy cài đặt."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Không xác thực được ảnh ổ đĩa. Hủy cài đặt."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Thiết bị đang chạy một hệ thống động. Hãy khởi động lại để sử dụng Android phiên bản gốc."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Hủy"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Hủy"</string>

@@ -354,7 +354,7 @@
     <string name="quick_settings_bluetooth_secondary_label_audio" msgid="780333390310051161">"Audio"</string>
     <string name="quick_settings_bluetooth_secondary_label_headset" msgid="2332093067553000852">"Headset"</string>
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Invoer"</string>
-    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Gehoorapparaten"</string>
+    <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="3003338571871392293">"Hoortoestellen"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Inschakelen..."</string>
     <string name="quick_settings_brightness_label" msgid="680259653088849563">"Helderheid"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatisch draaien"</string>
@@ -392,7 +392,7 @@
     <string name="quick_settings_inversion_label" msgid="5078769633069667698">"Kleuren omkeren"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"Modus voor kleurcorrectie"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"Meer instellingen"</string>
-    <string name="quick_settings_done" msgid="2163641301648855793">"Gereed"</string>
+    <string name="quick_settings_done" msgid="2163641301648855793">"Klaar"</string>
     <string name="quick_settings_connected" msgid="3873605509184830379">"Verbonden"</string>
     <string name="quick_settings_connected_battery_level" msgid="1322075669498906959">"Verbonden, batterij <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="quick_settings_connecting" msgid="2381969772953268809">"Verbinding maken…"</string>
@@ -694,7 +694,7 @@
     <string name="notification_channel_silenced" msgid="1995937493874511359">"Deze meldingen worden zonder geluid weergegeven"</string>
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Deze meldingen stellen je op de hoogte"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Meestal sluit je deze meldingen. \nWil je ze blijven weergeven?"</string>
-    <string name="inline_done_button" msgid="6043094985588909584">"Gereed"</string>
+    <string name="inline_done_button" msgid="6043094985588909584">"Klaar"</string>
     <string name="inline_ok_button" msgid="603075490581280343">"Toepassen"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Deze meldingen blijven weergeven?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Meldingen stoppen"</string>
@@ -712,11 +712,11 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"Standaard"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubbel"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Geen geluid of trilling"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt op een lagere positie in het gedeelte met gesprekken weergegeven"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Geen geluid of trilling en wordt lager in het gedeelte met gesprekken weergegeven"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gedeelte met gesprekken weergegeven, verschijnt als zwevende bubbel, geeft de profielfoto weer op het vergrendelscherm"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gespreksgedeelte weergegeven, verschijnt als zwevende bubbel, geeft profielfoto weer op vergrendelscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
@@ -741,7 +741,7 @@
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Meldingen van dit kanaal toestaan"</string>
     <string name="notification_more_settings" msgid="4936228656989201793">"Meer instellingen"</string>
     <string name="notification_app_settings" msgid="8963648463858039377">"Aanpassen"</string>
-    <string name="notification_done" msgid="6215117625922713976">"Gereed"</string>
+    <string name="notification_done" msgid="6215117625922713976">"Klaar"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Ongedaan maken"</string>
     <string name="demote" msgid="6225813324237153980">"Deze melding markeren als geen gesprek"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Belangrijk gesprek"</string>
