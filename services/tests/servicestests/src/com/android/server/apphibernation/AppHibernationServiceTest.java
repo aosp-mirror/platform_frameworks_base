@@ -25,7 +25,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import android.app.IActivityManager;
 import android.content.BroadcastReceiver;
@@ -87,7 +86,7 @@ public final class AppHibernationServiceTest {
         mAppHibernationService = new AppHibernationService(mContext, mIPackageManager,
                 mIActivityManager, mUserManager);
 
-        verify(mContext, times(2)).registerReceiver(mReceiverCaptor.capture(), any());
+        verify(mContext).registerReceiver(mReceiverCaptor.capture(), any());
         mBroadcastReceiver = mReceiverCaptor.getValue();
 
         doReturn(mUserInfos).when(mUserManager).getUsers();
@@ -95,12 +94,13 @@ public final class AppHibernationServiceTest {
         doAnswer(returnsArgAt(2)).when(mIActivityManager).handleIncomingUser(anyInt(), anyInt(),
                 anyInt(), anyBoolean(), anyBoolean(), any(), any());
 
-        addUser(USER_ID_1);
-        mAppHibernationService.onBootPhase(SystemService.PHASE_BOOT_COMPLETED);
+        UserInfo userInfo = addUser(USER_ID_1);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(userInfo));
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_1);
     }
 
     @Test
-    public void testSetHibernatingForUser_packageIsHibernating() throws RemoteException {
+    public void testSetHibernatingForUser_packageIsHibernating() {
         // WHEN we hibernate a package for a user
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
 
@@ -109,8 +109,7 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testSetHibernatingForUser_newPackageAdded_packageIsHibernating()
-            throws RemoteException {
+    public void testSetHibernatingForUser_newPackageAdded_packageIsHibernating() {
         // WHEN a new package is added and it is hibernated
         Intent intent = new Intent(Intent.ACTION_PACKAGE_ADDED,
                 Uri.fromParts(PACKAGE_SCHEME, PACKAGE_NAME_2, null /* fragment */));
@@ -124,17 +123,12 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testSetHibernatingForUser_newUserAdded_packageIsHibernating()
+    public void testSetHibernatingForUser_newUserUnlocked_packageIsHibernating()
             throws RemoteException {
         // WHEN a new user is added and a package from the user is hibernated
-        List<PackageInfo> userPackages = new ArrayList<>();
-        userPackages.add(makePackageInfo(PACKAGE_NAME_1));
-        doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
-                .getInstalledPackages(anyInt(), eq(USER_ID_2));
-        Intent intent = new Intent(Intent.ACTION_USER_ADDED);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, USER_ID_2);
-        mBroadcastReceiver.onReceive(mContext, intent);
-
+        UserInfo user2 = addUser(USER_ID_2);
+        mAppHibernationService.onUserUnlocking(new SystemService.TargetUser(user2));
+        doReturn(true).when(mUserManager).isUserUnlockingOrUnlocked(USER_ID_2);
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_2, true);
 
         // THEN the new user's package is hibernated
@@ -142,8 +136,7 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testIsHibernatingForUser_packageReplaced_stillReturnsHibernating()
-            throws RemoteException {
+    public void testIsHibernatingForUser_packageReplaced_stillReturnsHibernating() {
         // GIVEN a package is currently hibernated
         mAppHibernationService.setHibernatingForUser(PACKAGE_NAME_1, USER_ID_1, true);
 
@@ -159,7 +152,7 @@ public final class AppHibernationServiceTest {
     }
 
     @Test
-    public void testSetHibernatingGlobally_packageIsHibernatingGlobally() throws RemoteException {
+    public void testSetHibernatingGlobally_packageIsHibernatingGlobally() {
         // WHEN we hibernate a package
         mAppHibernationService.setHibernatingGlobally(PACKAGE_NAME_1, true);
 
@@ -168,25 +161,25 @@ public final class AppHibernationServiceTest {
     }
 
     /**
-     * Add a mock user with one package. Must be called before
-     * {@link AppHibernationService#onBootPhase(int)} to work properly.
+     * Add a mock user with one package.
      */
-    private void addUser(int userId) throws RemoteException {
-        addUser(userId, new String[]{PACKAGE_NAME_1});
+    private UserInfo addUser(int userId) throws RemoteException {
+        return addUser(userId, new String[]{PACKAGE_NAME_1});
     }
 
     /**
-     * Add a mock user with the packages specified. Must be called before
-     * {@link AppHibernationService#onBootPhase(int)} to work properly
+     * Add a mock user with the packages specified.
      */
-    private void addUser(int userId, String[] packageNames) throws RemoteException {
-        mUserInfos.add(new UserInfo(userId, "user_" + userId, 0 /* flags */));
+    private UserInfo addUser(int userId, String[] packageNames) throws RemoteException {
+        UserInfo userInfo = new UserInfo(userId, "user_" + userId, 0 /* flags */);
+        mUserInfos.add(userInfo);
         List<PackageInfo> userPackages = new ArrayList<>();
         for (String pkgName : packageNames) {
             userPackages.add(makePackageInfo(pkgName));
         }
         doReturn(new ParceledListSlice<>(userPackages)).when(mIPackageManager)
                 .getInstalledPackages(anyInt(), eq(userId));
+        return userInfo;
     }
 
     private static PackageInfo makePackageInfo(String packageName) {
