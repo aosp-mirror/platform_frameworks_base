@@ -17,6 +17,7 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Parcel;
@@ -62,6 +63,7 @@ public final class AutofillOptions implements Parcelable {
      * List of allowlisted activities.
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public ArraySet<ComponentName> whitelistedActivitiesForAugmentedAutofill;
 
     /**
@@ -73,6 +75,7 @@ public final class AutofillOptions implements Parcelable {
      * The disabled Activities of the package. key is component name string, value is when they
      * will be enabled.
      */
+    @SuppressLint("NullableCollection")
     @Nullable
     public ArrayMap<String, Long> disabledActivities;
 
