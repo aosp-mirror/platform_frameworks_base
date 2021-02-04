@@ -103,6 +103,11 @@ public class ParsedProcessUtils {
             }
 
             proc.gwpAsanMode = sa.getInt(R.styleable.AndroidManifestProcess_gwpAsanMode, -1);
+            proc.memtagMode = sa.getInt(R.styleable.AndroidManifestProcess_memtagMode, -1);
+            if (sa.hasValue(R.styleable.AndroidManifestProcess_nativeHeapZeroInit)) {
+                proc.nativeHeapZeroInit =
+                        sa.getBoolean(R.styleable.AndroidManifestProcess_nativeHeapZeroInit, false);
+            }
         } finally {
             sa.recycle();
         }
