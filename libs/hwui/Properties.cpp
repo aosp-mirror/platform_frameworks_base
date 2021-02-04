@@ -129,8 +129,9 @@ bool Properties::load() {
 
     runningInEmulator = base::GetBoolProperty(PROPERTY_QEMU_KERNEL, false);
 
-    defaultRenderAhead = std::max(-1, std::min(2, base::GetIntProperty(PROPERTY_RENDERAHEAD,
-            render_ahead().value_or(0))));
+    defaultRenderAhead = std::max(
+            -1,
+            std::min(2, base::GetIntProperty(PROPERTY_RENDERAHEAD, render_ahead().value_or(-1))));
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw);
 }
