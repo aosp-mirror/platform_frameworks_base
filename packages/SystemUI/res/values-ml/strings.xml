@@ -125,7 +125,7 @@
     <string name="accessibility_accessibility_button" msgid="4089042473497107709">"ഉപയോഗസഹായി"</string>
     <string name="accessibility_rotate_button" msgid="1238584767612362586">"സ്‌ക്രീൻ തിരിക്കുക"</string>
     <string name="accessibility_recent" msgid="901641734769533575">"അവലോകനം"</string>
-    <string name="accessibility_search_light" msgid="524741790416076988">"തിരയൽ"</string>
+    <string name="accessibility_search_light" msgid="524741790416076988">"Search"</string>
     <string name="accessibility_camera_button" msgid="2938898391716647247">"ക്യാമറ"</string>
     <string name="accessibility_phone_button" msgid="4256353121703100427">"ഫോണ്‍"</string>
     <string name="accessibility_voice_assist_button" msgid="6497706615649754510">"വോയ്‌സ് സഹായം"</string>
@@ -389,7 +389,7 @@
     <string name="quick_settings_cast_no_wifi" msgid="6980194769795014875">"വൈഫൈ കണക്റ്റ് ചെയ്‌തിട്ടില്ല"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="4980669966716685588">"തെളിച്ചം"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="2325362583903258677">"യാന്ത്രികം"</string>
-    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നിറം മാറ്റുക"</string>
+    <string name="quick_settings_inversion_label" msgid="5078769633069667698">"നെഗറ്റീവ് ലുക്ക്"</string>
     <string name="quick_settings_color_space_label" msgid="537528291083575559">"വർണ്ണം ശരിയാക്കൽ മോഡ്"</string>
     <string name="quick_settings_more_settings" msgid="2878235926753776694">"കൂടുതൽ ക്രമീകരണങ്ങൾ"</string>
     <string name="quick_settings_done" msgid="2163641301648855793">"പൂർത്തിയാക്കി"</string>
@@ -441,7 +441,7 @@
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"ഫുൾ ചാർജാകാൻ, <xliff:g id="CHARGING_TIME">%s</xliff:g>"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"ചാർജ്ജുചെയ്യുന്നില്ല"</string>
     <string name="ssl_ca_cert_warning" msgid="8373011375250324005">"നെറ്റ്‌വർക്ക്\nനിരീക്ഷിക്കപ്പെടാം"</string>
-    <string name="description_target_search" msgid="3875069993128855865">"തിരയൽ"</string>
+    <string name="description_target_search" msgid="3875069993128855865">"Search"</string>
     <string name="description_direction_up" msgid="3632251507574121434">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി മുകളിലേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="description_direction_left" msgid="4762708739096907741">"<xliff:g id="TARGET_DESCRIPTION">%s</xliff:g> എന്നതിനായി ഇടത്തേയ്‌ക്ക് സ്ലൈഡുചെയ്യുക."</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"നിങ്ങൾ സജ്ജീകരിച്ച അലാറങ്ങൾ, റിമൈൻഡറുകൾ, ഇവന്റുകൾ, കോളർമാർ എന്നിവയിൽ നിന്നുള്ള ശബ്‌ദങ്ങളും വൈബ്രേഷനുകളുമൊഴികെ മറ്റൊന്നും നിങ്ങളെ ശല്യപ്പെടുത്തുകയില്ല. സംഗീതം, വീഡിയോകൾ, ഗെയിമുകൾ എന്നിവയുൾപ്പെടെ പ്ലേ ചെയ്യുന്നതെന്തും നിങ്ങൾക്ക് ‌തുടർന്നും കേൾക്കാൻ കഴിയും."</string>
@@ -502,7 +502,7 @@
     <string name="battery_saver_notification_title" msgid="8419266546034372562">"ബാറ്ററി ലാഭിക്കൽ ഓണാണ്"</string>
     <string name="battery_saver_notification_text" msgid="2617841636449016951">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="battery_saver_notification_action_text" msgid="6022091913807026887">"ബാറ്ററി ലാഭിക്കൽ ഓഫാക്കുക"</string>
-    <string name="media_projection_dialog_text" msgid="1755705274910034772">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> എന്നതിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
+    <string name="media_projection_dialog_text" msgid="1755705274910034772">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g>-ന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഒഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="media_projection_dialog_service_text" msgid="958000992162214611">"റെക്കോർഡ് ചെയ്യുമ്പോഴോ കാസ്‌റ്റ് ചെയ്യുമ്പോഴോ നിങ്ങളുടെ ഉപകരണത്തിൽ നിന്ന് പ്ലേ ചെയ്യുന്നതോ നിങ്ങളുടെ സ്‌ക്രീനിൽ ദൃശ്യമാകുന്നതോ ആയ എല്ലാ വിവരങ്ങളിലേക്കും ഈ ഫംഗ്‌ഷൻ ലഭ്യമാക്കുന്ന സേവനത്തിന് ആക്‌സസ് ഉണ്ടായിരിക്കും. നിങ്ങൾ പ്ലേ ചെയ്യുന്ന ഓഡിയോ, സന്ദേശങ്ങൾ, ഫോട്ടോകൾ, പേയ്‌മെന്റ് വിശദാംശങ്ങൾ, പാസ്‌വേഡുകൾ എന്നിവ പോലുള്ള വിവരങ്ങൾ ഇതിൽ ഉൾപ്പെടുന്നു."</string>
     <string name="media_projection_dialog_service_title" msgid="2888507074107884040">"റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
     <string name="media_projection_dialog_title" msgid="3316063622495360646">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ഉപയോഗിച്ച് റെക്കോർഡ് ചെയ്യൽ അല്ലെങ്കിൽ കാസ്‌റ്റ് ചെയ്യൽ ആരംഭിക്കണോ?"</string>
@@ -767,7 +767,7 @@
       <item quantity="one">%d മിനിറ്റ്</item>
     </plurals>
     <string name="battery_panel_title" msgid="5931157246673665963">"ബാറ്ററി ഉപയോഗം"</string>
-    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ചാർജുചെയ്യുന്ന സമയത്ത് ബാറ്ററി ലാഭിക്കൽ നടക്കില്ല"</string>
+    <string name="battery_detail_charging_summary" msgid="8821202155297559706">"ചാർജ് ചെയ്യുമ്പോൾ ബാറ്ററി ലാഭിക്കൽ സാധ്യമല്ല"</string>
     <string name="battery_detail_switch_title" msgid="6940976502957380405">"ബാറ്ററി ലാഭിക്കൽ"</string>
     <string name="battery_detail_switch_summary" msgid="3668748557848025990">"പ്രവർത്തനവും പശ്ചാത്തല ഡാറ്റയും കുറയ്‌ക്കുന്നു"</string>
     <string name="keyboard_key_button_template" msgid="8005673627272051429">"ബട്ടൺ <xliff:g id="NAME">%1$s</xliff:g>"</string>
@@ -950,7 +950,7 @@
     <string name="notification_channel_general" msgid="4384774889645929705">"പൊതുവായ സന്ദേശങ്ങൾ"</string>
     <string name="notification_channel_storage" msgid="2720725707628094977">"സ്റ്റോറേജ്"</string>
     <string name="notification_channel_hints" msgid="7703783206000346876">"സൂചനകൾ"</string>
-    <string name="instant_apps" msgid="8337185853050247304">"ഇൻസ്റ്റന്റ് ആപ്പ്"</string>
+    <string name="instant_apps" msgid="8337185853050247304">"Instant Apps"</string>
     <string name="instant_apps_title" msgid="8942706782103036910">"<xliff:g id="APP">%1$s</xliff:g> റണ്‍ ചെയ്യുന്നു"</string>
     <string name="instant_apps_message" msgid="6112428971833011754">"ഇൻസ്‌റ്റാൾ ചെയ്യാതെ ആപ്പ് തുറന്നു."</string>
     <string name="instant_apps_message_with_help" msgid="1816952263531203932">"ഇൻസ്‌റ്റാൾ ചെയ്യാതെ ആപ്പ് തുറന്നു. കൂടുതലറിയാൻ ടാപ്പ് ചെയ്യുക."</string>
@@ -984,7 +984,7 @@
     <string name="auto_saver_text" msgid="3214960308353838764">"ബാറ്ററി ചാർജ് തീരാൻ സാധ്യതയുണ്ടെങ്കിൽ ഓണാക്കുക"</string>
     <string name="no_auto_saver_action" msgid="7467924389609773835">"വേണ്ട"</string>
     <string name="auto_saver_enabled_title" msgid="4294726198280286333">"ബാറ്ററി ലാഭിക്കൽ ഷെഡ്യൂൾ ഓണാക്കുക"</string>
-    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%% ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വമേധയാ ഓണാകും."</string>
+    <string name="auto_saver_enabled_text" msgid="7889491183116752719">"ബാറ്ററി <xliff:g id="PERCENTAGE">%d</xliff:g>%% ൽ താഴെയാകുമ്പോൾ, ബാറ്ററി ലാഭിക്കൽ സ്വയമേവ ഓണാകും."</string>
     <string name="open_saver_setting_action" msgid="2111461909782935190">"ക്രമീകരണം"</string>
     <string name="auto_saver_okay_action" msgid="7815925750741935386">"മനസ്സിലായി"</string>
     <string name="heap_dump_tile_name" msgid="2464189856478823046">"SysUI ഹീപ്പ് ഡമ്പ് ചെയ്യുക"</string>

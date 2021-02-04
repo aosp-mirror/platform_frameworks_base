@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Det dynamiska systemet är klart. Om du vill använda det startar du om enheten."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Installation pågår"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Installationen misslyckades"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Bildvalideringen misslyckades. Avbryt installationen."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Valideringen av diskavbildningen misslyckades. Avbryt installationen."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Ett dynamiskt system körs. Om du vill använda den ursprungliga Android-versionen startar du om."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Avbryt"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Ignorera"</string>

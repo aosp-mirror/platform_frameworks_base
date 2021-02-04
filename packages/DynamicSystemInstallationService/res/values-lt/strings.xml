@@ -5,7 +5,7 @@
     <string name="notification_install_completed" msgid="6252047868415172643">"Dinaminė sistema paruošta. Jei norite pradėti ją naudoti, paleiskite įrenginį iš naujo."</string>
     <string name="notification_install_inprogress" msgid="7383334330065065017">"Diegiama"</string>
     <string name="notification_install_failed" msgid="4066039210317521404">"Įdiegti nepavyko"</string>
-    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Nepavyko patvirtinti vaizdo. Nutraukti diegimą."</string>
+    <string name="notification_image_validation_failed" msgid="2720357826403917016">"Nepavyko patvirtinti atvaizdžio. Nutraukti diegimą."</string>
     <string name="notification_dynsystem_in_use" msgid="1053194595682188396">"Šiuo metu paleista dinaminė sistema. Paleiskite iš naujo, jei norite naudoti pradinę „Android“ versiją."</string>
     <string name="notification_action_cancel" msgid="5929299408545961077">"Atšaukti"</string>
     <string name="notification_action_discard" msgid="1817481003134947493">"Atmesti"</string>
