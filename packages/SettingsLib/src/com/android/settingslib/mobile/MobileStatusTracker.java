@@ -259,7 +259,12 @@ public class MobileStatusTracker {
                 .append("carrierNetworkChangeMode=").append(carrierNetworkChangeMode).append(',')
                 .append("dataState=").append(dataState).append(',')
                 .append("serviceState=").append(serviceState == null ? ""
-                        : serviceState.toString()).append(',')
+                        : "mVoiceRegState=" + serviceState.getState() + "("
+                                + ServiceState.rilServiceStateToString(serviceState.getState())
+                                + ")" + ", mDataRegState=" + serviceState.getDataRegState() + "("
+                                + ServiceState.rilServiceStateToString(
+                                        serviceState.getDataRegState()) + ")")
+                                        .append(',')
                 .append("signalStrength=").append(signalStrength == null ? ""
                         : signalStrength.toString()).append(',')
                 .append("telephonyDisplayInfo=").append(telephonyDisplayInfo == null ? ""

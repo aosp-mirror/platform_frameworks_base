@@ -76,6 +76,7 @@ import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceP
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collections;
@@ -100,6 +101,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private static final int EMERGENCY_VOICE_CONTROLLER = 200;
     private static final int EMERGENCY_NO_SUB = 300;
     private static final int EMERGENCY_ASSUMED_VOICE_CONTROLLER = 400;
+    private static final int HISTORY_SIZE = 16;
+    private static final SimpleDateFormat SSDF = new SimpleDateFormat("MM-dd HH:mm:ss.SSS");
 
     private final Context mContext;
     private final TelephonyManager mPhone;
@@ -149,6 +152,11 @@ public class NetworkControllerImpl extends BroadcastReceiver
     private Locale mLocale = null;
     // This list holds our ordering.
     private List<SubscriptionInfo> mCurrentSubscriptions = new ArrayList<>();
+
+    // Save the previous HISTORY_SIZE states for logging.
+    private final String[] mHistory = new String[HISTORY_SIZE];
+    // Where to copy the next state into.
+    private int mHistoryIndex;
 
     @VisibleForTesting
     boolean mListening;
@@ -307,6 +315,12 @@ public class NetworkControllerImpl extends BroadcastReceiver
             public void onLost(Network network) {
                 mLastNetwork = null;
                 mLastNetworkCapabilities = null;
+                String callback = new StringBuilder()
+                        .append(SSDF.format(System.currentTimeMillis())).append(",")
+                        .append("onLost: ")
+                        .append("network=").append(network)
+                        .toString();
+                recordLastNetworkCallback(callback);
                 updateConnectivity();
             }
 
@@ -327,6 +341,13 @@ public class NetworkControllerImpl extends BroadcastReceiver
                 }
                 mLastNetwork = network;
                 mLastNetworkCapabilities = networkCapabilities;
+                String callback = new StringBuilder()
+                        .append(SSDF.format(System.currentTimeMillis())).append(",")
+                        .append("onCapabilitiesChanged: ")
+                        .append("network=").append(network).append(",")
+                        .append("networkCapabilities=").append(networkCapabilities)
+                        .toString();
+                recordLastNetworkCallback(callback);
                 updateConnectivity();
             }
         };
@@ -996,6 +1017,19 @@ public class NetworkControllerImpl extends BroadcastReceiver
         pw.print("  mEmergencySource=");
         pw.println(emergencyToString(mEmergencySource));
 
+        pw.println("  - DefaultNetworkCallback -----");
+        int size = 0;
+        for (int i = 0; i < HISTORY_SIZE; i++) {
+            if (mHistory[i] != null) {
+                size++;
+            }
+        }
+        for (int i = mHistoryIndex + HISTORY_SIZE - 1;
+                i >= mHistoryIndex + HISTORY_SIZE - size; i--) {
+            pw.println("  Previous NetworkCallback(" + (mHistoryIndex + HISTORY_SIZE - i) + "): "
+                    + mHistory[i & (HISTORY_SIZE - 1)]);
+        }
+
         pw.println("  - config ------");
         for (int i = 0; i < mMobileSignalControllers.size(); i++) {
             MobileSignalController mobileSignalController = mMobileSignalControllers.valueAt(i);
@@ -1006,6 +1040,8 @@ public class NetworkControllerImpl extends BroadcastReceiver
         mEthernetSignalController.dump(pw);
 
         mAccessPoints.dump(pw);
+
+        mCallbackHandler.dump(pw);
     }
 
     private static final String emergencyToString(int emergencySource) {
@@ -1233,6 +1269,10 @@ public class NetworkControllerImpl extends BroadcastReceiver
         List<String> s = new ArrayList<>();
         s.add(DemoMode.COMMAND_NETWORK);
         return s;
+    }
+
+    private void recordLastNetworkCallback(String callback) {
+        mHistory[mHistoryIndex++ & (HISTORY_SIZE - 1)] = callback;
     }
 
     private SubscriptionInfo addSignalController(int id, int simSlotIndex) {
