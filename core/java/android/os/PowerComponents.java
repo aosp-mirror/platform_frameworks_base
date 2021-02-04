@@ -36,11 +36,15 @@ class PowerComponents {
     private final int mModeledPowerComponentOffset;
 
     PowerComponents(@NonNull Builder builder) {
-        mTotalPowerConsumed = builder.mTotalPowerConsumed;
         mCustomPowerComponentCount = builder.mCustomPowerComponentCount;
         mModeledPowerComponentOffset = builder.mModeledPowerComponentOffset;
         mPowerComponents = builder.mPowerComponents;
         mTimeComponents = builder.mTimeComponents;
+        double totalPower = 0;
+        for (int i = mPowerComponents.length - 1; i >= 0; i--) {
+            totalPower += mPowerComponents[i];
+        }
+        mTotalPowerConsumed = totalPower;
     }
 
     PowerComponents(@NonNull Parcel source) {
@@ -158,7 +162,6 @@ class PowerComponents {
      * Builder for PowerComponents.
      */
     static final class Builder {
-        private double mTotalPowerConsumed;
         private final double[] mPowerComponents;
         private final int mCustomPowerComponentCount;
         private final long[] mTimeComponents;
@@ -178,15 +181,6 @@ class PowerComponents {
                             - BatteryConsumer.FIRST_MODELED_POWER_COMPONENT_ID;
             mTimeComponents =
                     new long[BatteryConsumer.TIME_COMPONENT_COUNT + customTimeComponentCount];
-        }
-
-        /**
-         * Sets the sum amount of power consumed since BatteryStats reset.
-         */
-        @NonNull
-        public Builder setTotalPowerConsumed(double totalPowerConsumed) {
-            mTotalPowerConsumed = totalPowerConsumed;
-            return this;
         }
 
         /**

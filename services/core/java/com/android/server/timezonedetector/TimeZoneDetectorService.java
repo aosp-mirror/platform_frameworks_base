@@ -59,7 +59,7 @@ import java.util.Objects;
 public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         implements IBinder.DeathRecipient {
 
-    private static final String TAG = "TimeZoneDetectorService";
+    static final String TAG = "time_zone_detector";
 
     /**
      * A "feature switch" for location-based time zone detection. If this is {@code false}. It is
@@ -67,19 +67,19 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
      * is important.
      */
     @Nullable
-    private static Boolean sGeoLocationTimeZoneDetectionEnabled;
+    private static Boolean sGeoLocationTimeZoneDetectionSupported;
 
     /** Returns {@code true} if the location-based time zone detection feature is enabled. */
-    public static boolean isGeoLocationTimeZoneDetectionEnabled(Context context) {
-        if (sGeoLocationTimeZoneDetectionEnabled == null) {
+    public static boolean isGeoLocationTimeZoneDetectionSupported(Context context) {
+        if (sGeoLocationTimeZoneDetectionSupported == null) {
             // The config value is expected to be the main switch. Platform developers can also
             // enable the feature using a persistent system property.
-            sGeoLocationTimeZoneDetectionEnabled = context.getResources().getBoolean(
+            sGeoLocationTimeZoneDetectionSupported = context.getResources().getBoolean(
                     com.android.internal.R.bool.config_enableGeolocationTimeZoneDetection)
                     || SystemProperties.getBoolean(
                             "persist.sys.location_time_zone_detection_feature_enabled", false);
         }
-        return sGeoLocationTimeZoneDetectionEnabled;
+        return sGeoLocationTimeZoneDetectionSupported;
     }
 
     /**
@@ -98,11 +98,11 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             Context context = getContext();
             Handler handler = FgThread.getHandler();
 
-            boolean geolocationTimeZoneDetectionEnabled =
-                    isGeoLocationTimeZoneDetectionEnabled(context);
+            boolean geolocationTimeZoneDetectionSupported =
+                    isGeoLocationTimeZoneDetectionSupported(context);
             TimeZoneDetectorStrategy timeZoneDetectorStrategy =
                     TimeZoneDetectorStrategyImpl.create(
-                            context, handler, geolocationTimeZoneDetectionEnabled);
+                            context, handler, geolocationTimeZoneDetectionSupported);
 
             // Create and publish the local service for use by internal callers.
             TimeZoneDetectorInternal internal =
@@ -330,7 +330,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
     boolean isGeoTimeZoneDetectionSupported() {
         enforceManageTimeZoneDetectorPermission();
 
-        return isGeoLocationTimeZoneDetectionEnabled(mContext);
+        return isGeoLocationTimeZoneDetectionSupported(mContext);
     }
 
     @Override

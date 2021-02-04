@@ -40,6 +40,7 @@ import android.hardware.input.InputManagerInternal;
 import androidx.annotation.NonNull;
 
 import com.android.server.LocalServices;
+import com.android.server.devicestate.DeviceState;
 import com.android.server.devicestate.DeviceStateProvider;
 
 import org.junit.After;
@@ -61,7 +62,8 @@ import java.util.List;
  * Run with <code>atest DeviceStateProviderImplTest</code>.
  */
 public final class DeviceStateProviderImplTest {
-    private final ArgumentCaptor<int[]> mIntArrayCaptor = ArgumentCaptor.forClass(int[].class);
+    private final ArgumentCaptor<DeviceState[]> mDeviceStateArrayCaptor = ArgumentCaptor.forClass(
+            DeviceState[].class);
     private final ArgumentCaptor<Integer> mIntegerCaptor = ArgumentCaptor.forClass(Integer.class);
 
     private Context mContext;
@@ -120,11 +122,12 @@ public final class DeviceStateProviderImplTest {
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
 
-        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
-        assertArrayEquals(new int[] { DEFAULT_DEVICE_STATE }, mIntArrayCaptor.getValue());
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        assertArrayEquals(new DeviceState[]{DEFAULT_DEVICE_STATE},
+                mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
-        assertEquals(DEFAULT_DEVICE_STATE, mIntegerCaptor.getValue().intValue());
+        assertEquals(DEFAULT_DEVICE_STATE.getIdentifier(), mIntegerCaptor.getValue().intValue());
     }
 
     @Test
@@ -146,8 +149,10 @@ public final class DeviceStateProviderImplTest {
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
 
-        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
-        assertArrayEquals(new int[] { 1, 2 }, mIntArrayCaptor.getValue());
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, null),
+                new DeviceState(2, null) };
+        assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());
@@ -166,6 +171,7 @@ public final class DeviceStateProviderImplTest {
                 + "    </device-state>\n"
                 + "    <device-state>\n"
                 + "        <identifier>2</identifier>\n"
+                + "        <name>CLOSED</name>\n"
                 + "        <conditions>\n"
                 + "            <lid-switch>\n"
                 + "                <open>false</open>\n"
@@ -180,8 +186,10 @@ public final class DeviceStateProviderImplTest {
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
 
-        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
-        assertArrayEquals(new int[] { 1, 2 }, mIntArrayCaptor.getValue());
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        final DeviceState[] expectedStates = new DeviceState[]{ new DeviceState(1, null),
+                new DeviceState(2, "CLOSED") };
+        assertArrayEquals(expectedStates, mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(2, mIntegerCaptor.getValue().intValue());
@@ -189,8 +197,7 @@ public final class DeviceStateProviderImplTest {
         Mockito.clearInvocations(listener);
 
         provider.notifyLidSwitchChanged(0, true /* lidOpen */);
-
-        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());
     }
@@ -203,6 +210,7 @@ public final class DeviceStateProviderImplTest {
         String configString = "<device-state-config>\n"
                 + "    <device-state>\n"
                 + "        <identifier>1</identifier>\n"
+                + "        <name>CLOSED</name>\n"
                 + "        <conditions>\n"
                 + "            <sensor>\n"
                 + "                <type>" + sensor.getStringType() + "</type>\n"
@@ -215,6 +223,7 @@ public final class DeviceStateProviderImplTest {
                 + "    </device-state>\n"
                 + "    <device-state>\n"
                 + "        <identifier>2</identifier>\n"
+                + "        <name>HALF_OPENED</name>\n"
                 + "        <conditions>\n"
                 + "            <sensor>\n"
                 + "                <type>" + sensor.getStringType() + "</type>\n"
@@ -228,6 +237,7 @@ public final class DeviceStateProviderImplTest {
                 + "    </device-state>\n"
                 + "    <device-state>\n"
                 + "        <identifier>3</identifier>\n"
+                + "        <name>OPENED</name>\n"
                 + "        <conditions>\n"
                 + "            <sensor>\n"
                 + "                <type>" + sensor.getStringType() + "</type>\n"
@@ -246,8 +256,10 @@ public final class DeviceStateProviderImplTest {
         DeviceStateProvider.Listener listener = mock(DeviceStateProvider.Listener.class);
         provider.setListener(listener);
 
-        verify(listener).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
-        assertArrayEquals(new int[] { 1, 2, 3 }, mIntArrayCaptor.getValue());
+        verify(listener).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
+        assertArrayEquals(
+                new DeviceState[]{ new DeviceState(1, "CLOSED"), new DeviceState(2, "HALF_OPENED"),
+                        new DeviceState(3, "OPENED") }, mDeviceStateArrayCaptor.getValue());
 
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());
@@ -256,11 +268,11 @@ public final class DeviceStateProviderImplTest {
 
         SensorEvent event0 = mock(SensorEvent.class);
         event0.sensor = sensor;
-        FieldSetter.setField(event0, event0.getClass().getField("values"), new float[] { 180 });
+        FieldSetter.setField(event0, event0.getClass().getField("values"), new float[]{180});
 
         provider.onSensorChanged(event0);
 
-        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(3, mIntegerCaptor.getValue().intValue());
 
@@ -268,11 +280,11 @@ public final class DeviceStateProviderImplTest {
 
         SensorEvent event1 = mock(SensorEvent.class);
         event1.sensor = sensor;
-        FieldSetter.setField(event1, event1.getClass().getField("values"), new float[] { 90 });
+        FieldSetter.setField(event1, event1.getClass().getField("values"), new float[]{90});
 
         provider.onSensorChanged(event1);
 
-        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(2, mIntegerCaptor.getValue().intValue());
 
@@ -280,11 +292,11 @@ public final class DeviceStateProviderImplTest {
 
         SensorEvent event2 = mock(SensorEvent.class);
         event2.sensor = sensor;
-        FieldSetter.setField(event2, event2.getClass().getField("values"), new float[] { 0 });
+        FieldSetter.setField(event2, event2.getClass().getField("values"), new float[]{0});
 
         provider.onSensorChanged(event2);
 
-        verify(listener, never()).onSupportedDeviceStatesChanged(mIntArrayCaptor.capture());
+        verify(listener, never()).onSupportedDeviceStatesChanged(mDeviceStateArrayCaptor.capture());
         verify(listener).onStateChanged(mIntegerCaptor.capture());
         assertEquals(1, mIntegerCaptor.getValue().intValue());
     }

@@ -257,8 +257,8 @@ LoadedIdmap::LoadedIdmap(std::string&& idmap_path,
        target_apk_path_(target_apk_path),
        idmap_last_mod_time_(getFileModDate(idmap_path_.data())) {}
 
-std::unique_ptr<const LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
-                                                     const StringPiece& idmap_data) {
+std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(const StringPiece& idmap_path,
+                                               const StringPiece& idmap_data) {
   ATRACE_CALL();
   size_t data_size = idmap_data.size();
   auto data_ptr = reinterpret_cast<const uint8_t*>(idmap_data.data());

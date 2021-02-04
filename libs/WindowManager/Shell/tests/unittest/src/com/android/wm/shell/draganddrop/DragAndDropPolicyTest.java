@@ -29,6 +29,10 @@ import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPL
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_LEFT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_RIGHT;
 import static com.android.wm.shell.draganddrop.DragAndDropPolicy.Target.TYPE_SPLIT_TOP;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
 
 import static junit.framework.Assert.assertTrue;
 import static junit.framework.Assert.fail;
@@ -86,11 +90,9 @@ public class DragAndDropPolicyTest {
     @Mock
     private ActivityTaskManager mActivityTaskManager;
 
+    // Both the split-screen and start interface.
     @Mock
-    private SplitScreen mSplitScreen;
-
-    @Mock
-    private DragAndDropPolicy.Starter mStarter;
+    private SplitScreen mSplitScreenStarter;
 
     private DisplayLayout mLandscapeDisplayLayout;
     private DisplayLayout mPortraitDisplayLayout;
@@ -126,7 +128,7 @@ public class DragAndDropPolicyTest {
         mInsets = Insets.of(0, 0, 0, 0);
 
         mPolicy = new DragAndDropPolicy(
-                mContext, mActivityTaskManager, mSplitScreen, mStarter);
+                mContext, mActivityTaskManager, mSplitScreenStarter, mSplitScreenStarter);
         mActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         mNonResizeableActivityClipData = createClipData(MIMETYPE_APPLICATION_ACTIVITY);
         setClipDataResizeable(mNonResizeableActivityClipData, false);
@@ -191,7 +193,7 @@ public class DragAndDropPolicyTest {
     }
 
     private void setInSplitScreen(boolean inSplitscreen) {
-        doReturn(inSplitscreen).when(mSplitScreen).isSplitScreenVisible();
+        doReturn(inSplitscreen).when(mSplitScreenStarter).isSplitScreenVisible();
     }
 
     @Test
@@ -202,7 +204,8 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
     }
 
     @Test
@@ -213,12 +216,13 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).exitSplitScreen();
-        verify(mStarter).startIntent(any(), any());
-        reset(mStarter);
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
+        reset(mSplitScreenStarter);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_RIGHT), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_SIDE), eq(STAGE_POSITION_BOTTOM_OR_RIGHT));
     }
 
     @Test
@@ -229,12 +233,13 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).exitSplitScreen();
-        verify(mStarter).startIntent(any(), any());
-        reset(mStarter);
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
+        reset(mSplitScreenStarter);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_BOTTOM), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_SIDE), eq(STAGE_POSITION_BOTTOM_OR_RIGHT));
     }
 
     @Test
@@ -245,7 +250,8 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
     }
 
     @Test
@@ -256,7 +262,8 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
     }
 
     @Test
@@ -268,12 +275,14 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_LEFT, TYPE_SPLIT_RIGHT);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
-        reset(mStarter);
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
+        reset(mSplitScreenStarter);
 
         // TODO(b/169894807): Just verify starting for the non-docked task until we have app pairs
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_RIGHT), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_SIDE), eq(STAGE_POSITION_BOTTOM_OR_RIGHT));
     }
 
     @Test
@@ -285,12 +294,14 @@ public class DragAndDropPolicyTest {
                 mPolicy.getTargets(mInsets), TYPE_FULLSCREEN, TYPE_SPLIT_TOP, TYPE_SPLIT_BOTTOM);
 
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_FULLSCREEN), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
-        reset(mStarter);
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_UNDEFINED), eq(STAGE_POSITION_UNDEFINED));
+        reset(mSplitScreenStarter);
 
         // TODO(b/169894807): Just verify starting for the non-docked task until we have app pairs
         mPolicy.handleDrop(filterTargetByType(targets, TYPE_SPLIT_BOTTOM), mActivityClipData);
-        verify(mStarter).startIntent(any(), any());
+        verify(mSplitScreenStarter).startClipDescription(any(), any(),
+                eq(STAGE_TYPE_SIDE), eq(STAGE_POSITION_BOTTOM_OR_RIGHT));
     }
 
     @Test

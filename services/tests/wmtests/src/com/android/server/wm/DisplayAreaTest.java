@@ -541,7 +541,7 @@ public class DisplayAreaTest extends WindowTestsBase {
         return new WindowState(mWm, mock(Session.class), new TestIWindow(), token,
                 null /* parentWindow */, 0 /* appOp */, new WindowManager.LayoutParams(),
                 View.VISIBLE, 0 /* ownerId */, 0 /* showUserId */,
-                false /* ownerCanAddInternalSystemWindow */, false /* ownerCanUseBackgroundBlur */);
+                false /* ownerCanAddInternalSystemWindow */);
     }
 
     private WindowToken createWindowToken(int type) {

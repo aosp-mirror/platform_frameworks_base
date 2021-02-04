@@ -33,8 +33,14 @@
 using Status = ::ndk::ScopedAStatus;
 using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
 using ::aidl::android::media::tv::tuner::ITunerFilter;
+using ::aidl::android::media::tv::tuner::TunerDemuxIpAddress;
+using ::aidl::android::media::tv::tuner::TunerFilterAvSettings;
 using ::aidl::android::media::tv::tuner::TunerFilterConfiguration;
+using ::aidl::android::media::tv::tuner::TunerFilterDownloadSettings;
 using ::aidl::android::media::tv::tuner::TunerFilterEvent;
+using ::aidl::android::media::tv::tuner::TunerFilterPesDataSettings;
+using ::aidl::android::media::tv::tuner::TunerFilterRecordSettings;
+using ::aidl::android::media::tv::tuner::TunerFilterSectionSettings;
 using ::aidl::android::media::tv::tuner::TunerFilterSettings;
 
 using ::android::hardware::EventFlag;
@@ -43,8 +49,19 @@ using ::android::hardware::MQDescriptorSync;
 using ::android::hardware::Return;
 using ::android::hardware::Void;
 using ::android::hardware::hidl_handle;
+using ::android::hardware::tv::tuner::V1_0::DemuxAlpFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterAvSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterDownloadSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterPesDataSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterRecordSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxFilterSectionSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterType;
+using ::android::hardware::tv::tuner::V1_0::DemuxIpAddress;
+using ::android::hardware::tv::tuner::V1_0::DemuxIpFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxTlvFilterSettings;
+using ::android::hardware::tv::tuner::V1_0::DemuxTsFilterSettings;
 using ::android::hardware::tv::tuner::V1_0::IFilter;
 using ::android::hardware::tv::tuner::V1_0::Result;
 using ::android::hardware::tv::tuner::V1_1::AvStreamType;
@@ -201,6 +218,21 @@ public:
 
 private:
     TunerFilterConfiguration getAidlFilterSettings(DemuxFilterSettings configure);
+
+    TunerFilterConfiguration getAidlTsSettings(DemuxTsFilterSettings configure);
+    TunerFilterConfiguration getAidlMmtpSettings(DemuxMmtpFilterSettings mmtp);
+    TunerFilterConfiguration getAidlIpSettings(DemuxIpFilterSettings ip);
+    TunerFilterConfiguration getAidlTlvSettings(DemuxTlvFilterSettings tlv);
+    TunerFilterConfiguration getAidlAlpSettings(DemuxAlpFilterSettings alp);
+
+    TunerFilterAvSettings getAidlAvSettings(DemuxFilterAvSettings hidlAv);
+    TunerFilterSectionSettings getAidlSectionSettings(DemuxFilterSectionSettings hidlSection);
+    TunerFilterPesDataSettings getAidlPesDataSettings(DemuxFilterPesDataSettings hidlPesData);
+    TunerFilterRecordSettings getAidlRecordSettings(DemuxFilterRecordSettings hidlRecord);
+    TunerFilterDownloadSettings getAidlDownloadSettings(DemuxFilterDownloadSettings hidlDownload);
+
+    void getAidlIpAddress(DemuxIpAddress ipAddr,
+            TunerDemuxIpAddress& srcIpAddress, TunerDemuxIpAddress& dstIpAddress);
     Result getFilterMq();
     int copyData(uint8_t* buffer, int size);
     void checkIsMediaFilter(DemuxFilterType type);

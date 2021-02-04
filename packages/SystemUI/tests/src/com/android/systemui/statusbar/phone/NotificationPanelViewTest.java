@@ -80,6 +80,7 @@ import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.collection.legacy.NotificationGroupManagerLegacy;
+import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.NotificationRoundnessManager;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
@@ -202,7 +203,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     private ScrimController mScrimController;
     @Mock
     private MediaDataManager mMediaDataManager;
-
+    @Mock
+    private AmbientState mAmbientState;
     private NotificationPanelViewController mNotificationPanelViewController;
     private View.AccessibilityDelegate mAccessibiltyDelegate;
 
@@ -282,7 +284,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mAuthController,
                 new QSDetailDisplayer(),
                 mScrimController,
-                mMediaDataManager);
+                mMediaDataManager,
+                mAmbientState);
         mNotificationPanelViewController.initDependencies(
                 mStatusBar,
                 mNotificationShelfController);

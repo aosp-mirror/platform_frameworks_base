@@ -55,7 +55,7 @@ class LegacyTypeTrackerTest {
     private val supportedTypes = arrayOf(TYPE_MOBILE, TYPE_WIFI, TYPE_ETHERNET, TYPE_MOBILE_SUPL)
 
     private val mMockService = mock(ConnectivityService::class.java).apply {
-        doReturn(false).`when`(this).isDefaultNetwork(any())
+        doReturn(false).`when`(this).isFallbackNetwork(any())
     }
     private val mTracker = LegacyTypeTracker(mMockService).apply {
         supportedTypes.forEach {
@@ -126,11 +126,11 @@ class LegacyTypeTrackerTest {
     fun testBroadcastOnDisconnect() {
         val mobileNai1 = mock(NetworkAgentInfo::class.java)
         val mobileNai2 = mock(NetworkAgentInfo::class.java)
-        doReturn(false).`when`(mMockService).isDefaultNetwork(mobileNai1)
+        doReturn(false).`when`(mMockService).isFallbackNetwork(mobileNai1)
         mTracker.add(TYPE_MOBILE, mobileNai1)
         verify(mMockService).sendLegacyNetworkBroadcast(mobileNai1, CONNECTED, TYPE_MOBILE)
         reset(mMockService)
-        doReturn(false).`when`(mMockService).isDefaultNetwork(mobileNai2)
+        doReturn(false).`when`(mMockService).isFallbackNetwork(mobileNai2)
         mTracker.add(TYPE_MOBILE, mobileNai2)
         verify(mMockService, never()).sendLegacyNetworkBroadcast(any(), any(), anyInt())
         mTracker.remove(TYPE_MOBILE, mobileNai1, false /* wasDefault */)

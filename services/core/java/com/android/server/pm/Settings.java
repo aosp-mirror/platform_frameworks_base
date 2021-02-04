@@ -4881,7 +4881,7 @@ public final class Settings implements Watchable, Snappable {
         }
 
         if (ps.sharedUser == null || permissionNames != null || dumpAll) {
-            dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState);
+            dumpInstallPermissionsLPr(pw, prefix + "  ", permissionNames, permissionsState, users);
         }
 
         if (dumpAllComponents) {
@@ -5131,9 +5131,12 @@ public final class Settings implements Watchable, Snappable {
                     continue;
                 }
 
-                dumpInstallPermissionsLPr(pw, prefix, permissionNames, permissionsState);
+                List<UserInfo> users = getAllUsers(UserManagerService.getInstance());
 
-                for (int userId : UserManagerService.getInstance().getUserIds()) {
+                dumpInstallPermissionsLPr(pw, prefix, permissionNames, permissionsState, users);
+
+                for (UserInfo user : users) {
+                    final int userId = user.id;
                     final int[] gids = mPermissionDataProvider.getGidsForUid(UserHandle.getUid(
                             userId, su.userId));
                     final Collection<PermissionState> permissions =
@@ -5247,31 +5250,55 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    void dumpInstallPermissionsLPr(PrintWriter pw, String prefix, ArraySet<String> permissionNames,
-            LegacyPermissionState permissionsState) {
-        Collection<PermissionState> permissionStates = permissionsState.getPermissionStates(
-                UserHandle.USER_SYSTEM);
-        boolean hasInstallPermissions = false;
-        for (PermissionState permissionState : permissionStates) {
-            if (!permissionState.isRuntime()) {
-                hasInstallPermissions = true;
-                break;
-            }
-        }
-        if (hasInstallPermissions) {
-            pw.print(prefix); pw.println("install permissions:");
+    void dumpInstallPermissionsLPr(PrintWriter pw, String prefix,
+            ArraySet<String> filterPermissionNames, LegacyPermissionState permissionsState,
+            List<UserInfo> users) {
+        ArraySet<String> dumpPermissionNames = new ArraySet<>();
+        for (UserInfo user : users) {
+            int userId = user.id;
+            Collection<PermissionState> permissionStates = permissionsState.getPermissionStates(
+                    userId);
             for (PermissionState permissionState : permissionStates) {
                 if (permissionState.isRuntime()) {
                     continue;
                 }
-                if (permissionNames != null
-                        && !permissionNames.contains(permissionState.getName())) {
+                String permissionName = permissionState.getName();
+                if (filterPermissionNames != null
+                        && !filterPermissionNames.contains(permissionName)) {
                     continue;
                 }
-                pw.print(prefix); pw.print("  "); pw.print(permissionState.getName());
-                    pw.print(": granted="); pw.print(permissionState.isGranted());
-                    pw.println(permissionFlagsToString(", flags=",
-                        permissionState.getFlags()));
+                dumpPermissionNames.add(permissionName);
+            }
+        }
+        boolean printedSomething = false;
+        for (String permissionName : dumpPermissionNames) {
+            PermissionState systemPermissionState = permissionsState.getPermissionState(
+                    permissionName, UserHandle.USER_SYSTEM);
+            for (UserInfo user : users) {
+                int userId = user.id;
+                PermissionState permissionState;
+                if (userId == UserHandle.USER_SYSTEM) {
+                    permissionState = systemPermissionState;
+                } else {
+                    permissionState = permissionsState.getPermissionState(permissionName, userId);
+                    if (Objects.equals(permissionState, systemPermissionState)) {
+                        continue;
+                    }
+                }
+                if (!printedSomething) {
+                    pw.print(prefix); pw.println("install permissions:");
+                    printedSomething = true;
+                }
+                pw.print(prefix); pw.print("  "); pw.print(permissionName);
+                pw.print(": granted="); pw.print(
+                        permissionState != null && permissionState.isGranted());
+                pw.print(permissionFlagsToString(", flags=",
+                        permissionState != null ? permissionState.getFlags() : 0));
+                if (userId == UserHandle.USER_SYSTEM) {
+                    pw.println();
+                } else {
+                    pw.print(", userId="); pw.println(userId);
+                }
             }
         }
     }

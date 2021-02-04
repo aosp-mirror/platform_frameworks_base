@@ -86,7 +86,8 @@ class NonResizableDismissInLegacySplitScreen(
                             listOf(DOCKED_STACK_DIVIDER, LAUNCHER_PACKAGE_NAME,
                                 LETTERBOX_NAME, TOAST_NAME,
                                 splitScreenApp.defaultWindowName,
-                                nonResizeableApp.defaultWindowName)
+                                nonResizeableApp.defaultWindowName),
+                            bugId = 178447631
                         )
                     }
                 }

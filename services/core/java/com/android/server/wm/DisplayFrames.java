@@ -21,12 +21,12 @@ import static android.view.InsetsState.ITYPE_LEFT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_RIGHT_DISPLAY_CUTOUT;
 import static android.view.InsetsState.ITYPE_TOP_DISPLAY_CUTOUT;
 
-import android.annotation.NonNull;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
+import android.view.RoundedCorners;
 
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -47,9 +47,6 @@ public class DisplayFrames {
      */
     public final Rect mUnrestricted = new Rect();
 
-    /** The display cutout used for layout (after rotation) */
-    @NonNull public WmDisplayCutout mDisplayCutout = WmDisplayCutout.NO_CUTOUT;
-
     /**
      * During layout, the frame that is display-cutout safe, i.e. that does not intersect with it.
      */
@@ -61,26 +58,37 @@ public class DisplayFrames {
     public int mRotation;
 
     public DisplayFrames(int displayId, InsetsState insetsState, DisplayInfo info,
-            WmDisplayCutout displayCutout) {
+            WmDisplayCutout displayCutout, RoundedCorners roundedCorners) {
         mDisplayId = displayId;
         mInsetsState = insetsState;
-        onDisplayInfoUpdated(info, displayCutout);
+        onDisplayInfoUpdated(info, displayCutout, roundedCorners);
     }
 
-    public void onDisplayInfoUpdated(DisplayInfo info, WmDisplayCutout displayCutout) {
+    /**
+     * Update {@link DisplayFrames} when {@link DisplayInfo} is updated.
+     *
+     * @param info the updated {@link DisplayInfo}.
+     * @param displayCutout the updated {@link DisplayCutout}.
+     * @param roundedCorners the updated {@link RoundedCorners}.
+     */
+    public void onDisplayInfoUpdated(DisplayInfo info, WmDisplayCutout displayCutout,
+            RoundedCorners roundedCorners) {
         mDisplayWidth = info.logicalWidth;
         mDisplayHeight = info.logicalHeight;
         mRotation = info.rotation;
-        mDisplayCutout = displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
+        final WmDisplayCutout wmDisplayCutout =
+                displayCutout != null ? displayCutout : WmDisplayCutout.NO_CUTOUT;
 
         final InsetsState state = mInsetsState;
         final Rect unrestricted = mUnrestricted;
         final Rect safe = mDisplayCutoutSafe;
-        final DisplayCutout cutout = mDisplayCutout.getDisplayCutout();
+        final DisplayCutout cutout = wmDisplayCutout.getDisplayCutout();
         unrestricted.set(0, 0, mDisplayWidth, mDisplayHeight);
         safe.set(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
         state.setDisplayFrame(unrestricted);
         state.setDisplayCutout(cutout);
+        state.setRoundedCorners(roundedCorners != null ? roundedCorners
+                : RoundedCorners.NO_ROUNDED_CORNERS);
         if (!cutout.isEmpty()) {
             if (cutout.getSafeInsetLeft() > 0) {
                 safe.left = unrestricted.left + cutout.getSafeInsetLeft();
@@ -118,12 +126,5 @@ public class DisplayFrames {
     public void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "DisplayFrames w=" + mDisplayWidth + " h=" + mDisplayHeight
                 + " r=" + mRotation);
-        final String myPrefix = prefix + "  ";
-        dumpFrame(mUnrestricted, "mUnrestricted", myPrefix, pw);
-        pw.println(myPrefix + "mDisplayCutout=" + mDisplayCutout);
-    }
-
-    private void dumpFrame(Rect frame, String name, String prefix, PrintWriter pw) {
-        pw.print(prefix + name + "="); frame.printShortString(pw); pw.println();
     }
 }

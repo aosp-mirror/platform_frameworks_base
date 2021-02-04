@@ -479,7 +479,7 @@ public class InfoMediaManager extends MediaManager {
         }
     }
 
-    class RouterManagerCallback extends MediaRouter2Manager.Callback {
+    class RouterManagerCallback implements MediaRouter2Manager.Callback {
 
         @Override
         public void onRoutesAdded(List<MediaRoute2Info> routes) {

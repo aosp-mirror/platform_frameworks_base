@@ -102,10 +102,10 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
-    public ListenableFuture<AppSearchBatchResult<String, Void>> putDocuments(
+    public ListenableFuture<AppSearchBatchResult<String, Void>> put(
             @NonNull PutDocumentsRequest request) {
         SettableFuture<AppSearchBatchResult<String, Void>> future = SettableFuture.create();
-        mAppSearchSession.putDocuments(
+        mAppSearchSession.put(
                 request, mExecutor, new BatchResultCallbackAdapter<>(future));
         return future;
     }
@@ -122,10 +122,10 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
-    public SearchResultsShim query(
+    public SearchResultsShim search(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SearchResults searchResults =
-                mAppSearchSession.query(queryExpression, searchSpec, mExecutor);
+                mAppSearchSession.search(queryExpression, searchSpec, mExecutor);
         return new SearchResultsShimImpl(searchResults, mExecutor);
     }
 
@@ -139,19 +139,19 @@ public class AppSearchSessionShimImpl implements AppSearchSessionShim {
 
     @Override
     @NonNull
-    public ListenableFuture<AppSearchBatchResult<String, Void>> removeByUri(
+    public ListenableFuture<AppSearchBatchResult<String, Void>> remove(
             @NonNull RemoveByUriRequest request) {
         SettableFuture<AppSearchBatchResult<String, Void>> future = SettableFuture.create();
-        mAppSearchSession.removeByUri(request, mExecutor, new BatchResultCallbackAdapter<>(future));
+        mAppSearchSession.remove(request, mExecutor, new BatchResultCallbackAdapter<>(future));
         return future;
     }
 
     @Override
     @NonNull
-    public ListenableFuture<Void> removeByQuery(
+    public ListenableFuture<Void> remove(
             @NonNull String queryExpression, @NonNull SearchSpec searchSpec) {
         SettableFuture<AppSearchResult<Void>> future = SettableFuture.create();
-        mAppSearchSession.removeByQuery(queryExpression, searchSpec, mExecutor, future::set);
+        mAppSearchSession.remove(queryExpression, searchSpec, mExecutor, future::set);
         return Futures.transformAsync(future, this::transformResult, mExecutor);
     }
 

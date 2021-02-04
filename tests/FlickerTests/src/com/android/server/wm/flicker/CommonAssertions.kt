@@ -17,9 +17,9 @@
 package com.android.server.wm.flicker
 
 import android.platform.helpers.IAppHelper
-import com.android.server.wm.flicker.dsl.EventLogAssertionBuilder
-import com.android.server.wm.flicker.dsl.LayersAssertionBuilder
-import com.android.server.wm.flicker.dsl.WmAssertionBuilder
+import com.android.server.wm.flicker.dsl.EventLogAssertionBuilderLegacy
+import com.android.server.wm.flicker.dsl.LayersAssertionBuilderLegacy
+import com.android.server.wm.flicker.dsl.WmAssertionBuilderLegacy
 import com.android.server.wm.flicker.helpers.WindowUtils
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_LAYER_NAME
 import com.android.server.wm.traces.parser.windowmanager.WindowManagerStateHelper.Companion.NAV_BAR_WINDOW_NAME
@@ -31,7 +31,7 @@ const val DOCKED_STACK_DIVIDER = "DockedStackDivider"
 const val WALLPAPER_TITLE = "Wallpaper"
 
 @JvmOverloads
-fun WmAssertionBuilder.statusBarWindowIsAlwaysVisible(
+fun WmAssertionBuilderLegacy.statusBarWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -41,7 +41,7 @@ fun WmAssertionBuilder.statusBarWindowIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun WmAssertionBuilder.navBarWindowIsAlwaysVisible(
+fun WmAssertionBuilderLegacy.navBarWindowIsAlwaysVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -50,7 +50,7 @@ fun WmAssertionBuilder.navBarWindowIsAlwaysVisible(
     }
 }
 
-fun WmAssertionBuilder.visibleWindowsShownMoreThanOneConsecutiveEntry(
+fun WmAssertionBuilderLegacy.visibleWindowsShownMoreThanOneConsecutiveEntry(
     ignoreWindows: List<String> = emptyList(),
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -60,7 +60,7 @@ fun WmAssertionBuilder.visibleWindowsShownMoreThanOneConsecutiveEntry(
     }
 }
 
-fun WmAssertionBuilder.launcherReplacesAppWindowAsTopWindow(
+fun WmAssertionBuilderLegacy.launcherReplacesAppWindowAsTopWindow(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -72,7 +72,7 @@ fun WmAssertionBuilder.launcherReplacesAppWindowAsTopWindow(
     }
 }
 
-fun WmAssertionBuilder.wallpaperWindowBecomesVisible(
+fun WmAssertionBuilderLegacy.wallpaperWindowBecomesVisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -83,7 +83,7 @@ fun WmAssertionBuilder.wallpaperWindowBecomesVisible(
     }
 }
 
-fun WmAssertionBuilder.wallpaperWindowBecomesInvisible(
+fun WmAssertionBuilderLegacy.wallpaperWindowBecomesInvisible(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {
@@ -94,7 +94,7 @@ fun WmAssertionBuilder.wallpaperWindowBecomesInvisible(
     }
 }
 
-fun WmAssertionBuilder.appWindowAlwaysVisibleOnTop(
+fun WmAssertionBuilderLegacy.appWindowAlwaysVisibleOnTop(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -104,7 +104,7 @@ fun WmAssertionBuilder.appWindowAlwaysVisibleOnTop(
     }
 }
 
-fun WmAssertionBuilder.appWindowBecomesVisible(
+fun WmAssertionBuilderLegacy.appWindowBecomesVisible(
     appName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -116,7 +116,7 @@ fun WmAssertionBuilder.appWindowBecomesVisible(
     }
 }
 
-fun WmAssertionBuilder.appWindowBecomesInVisible(
+fun WmAssertionBuilderLegacy.appWindowBecomesInVisible(
     appName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -129,7 +129,7 @@ fun WmAssertionBuilder.appWindowBecomesInVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.noUncoveredRegions(
+fun LayersAssertionBuilderLegacy.noUncoveredRegions(
     beginRotation: Int,
     endRotation: Int = beginRotation,
     allStates: Boolean = true,
@@ -159,7 +159,7 @@ fun LayersAssertionBuilder.noUncoveredRegions(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.navBarLayerIsAlwaysVisible(
+fun LayersAssertionBuilderLegacy.navBarLayerIsAlwaysVisible(
     rotatesScreen: Boolean = false,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -180,7 +180,7 @@ fun LayersAssertionBuilder.navBarLayerIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.statusBarLayerIsAlwaysVisible(
+fun LayersAssertionBuilderLegacy.statusBarLayerIsAlwaysVisible(
     rotatesScreen: Boolean = false,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -201,7 +201,7 @@ fun LayersAssertionBuilder.statusBarLayerIsAlwaysVisible(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.navBarLayerRotatesAndScales(
+fun LayersAssertionBuilderLegacy.navBarLayerRotatesAndScales(
     beginRotation: Int,
     endRotation: Int = beginRotation,
     bugId: Int = 0,
@@ -225,7 +225,7 @@ fun LayersAssertionBuilder.navBarLayerRotatesAndScales(
 }
 
 @JvmOverloads
-fun LayersAssertionBuilder.statusBarLayerRotatesScales(
+fun LayersAssertionBuilderLegacy.statusBarLayerRotatesScales(
     beginRotation: Int,
     endRotation: Int = beginRotation,
     bugId: Int = 0,
@@ -242,7 +242,7 @@ fun LayersAssertionBuilder.statusBarLayerRotatesScales(
     }
 }
 
-fun LayersAssertionBuilder.visibleLayersShownMoreThanOneConsecutiveEntry(
+fun LayersAssertionBuilderLegacy.visibleLayersShownMoreThanOneConsecutiveEntry(
     ignoreLayers: List<String> = emptyList(),
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -252,7 +252,7 @@ fun LayersAssertionBuilder.visibleLayersShownMoreThanOneConsecutiveEntry(
     }
 }
 
-fun LayersAssertionBuilder.appLayerReplacesWallpaperLayer(
+fun LayersAssertionBuilderLegacy.appLayerReplacesWallpaperLayer(
     appName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -264,7 +264,7 @@ fun LayersAssertionBuilder.appLayerReplacesWallpaperLayer(
     }
 }
 
-fun LayersAssertionBuilder.wallpaperLayerReplacesAppLayer(
+fun LayersAssertionBuilderLegacy.wallpaperLayerReplacesAppLayer(
     testApp: IAppHelper,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -276,7 +276,7 @@ fun LayersAssertionBuilder.wallpaperLayerReplacesAppLayer(
     }
 }
 
-fun LayersAssertionBuilder.layerAlwaysVisible(
+fun LayersAssertionBuilderLegacy.layerAlwaysVisible(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -286,7 +286,7 @@ fun LayersAssertionBuilder.layerAlwaysVisible(
     }
 }
 
-fun LayersAssertionBuilder.layerBecomesVisible(
+fun LayersAssertionBuilderLegacy.layerBecomesVisible(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -298,7 +298,7 @@ fun LayersAssertionBuilder.layerBecomesVisible(
     }
 }
 
-fun LayersAssertionBuilder.layerBecomesInvisible(
+fun LayersAssertionBuilderLegacy.layerBecomesInvisible(
     packageName: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -310,7 +310,7 @@ fun LayersAssertionBuilder.layerBecomesInvisible(
     }
 }
 
-fun EventLogAssertionBuilder.focusChanges(
+fun EventLogAssertionBuilderLegacy.focusChanges(
     vararg windows: String,
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
@@ -320,7 +320,7 @@ fun EventLogAssertionBuilder.focusChanges(
     }
 }
 
-fun EventLogAssertionBuilder.focusDoesNotChange(
+fun EventLogAssertionBuilderLegacy.focusDoesNotChange(
     bugId: Int = 0,
     enabled: Boolean = bugId == 0
 ) {

@@ -19,7 +19,6 @@ package android.app.appsearch;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
-import android.annotation.SuppressLint;
 import android.app.appsearch.exceptions.IllegalSearchSpecException;
 import android.os.Bundle;
 import android.util.ArrayMap;
@@ -49,7 +48,7 @@ public final class SearchSpec {
     public static final String PROJECTION_SCHEMA_TYPE_WILDCARD = "*";
 
     static final String TERM_MATCH_TYPE_FIELD = "termMatchType";
-    static final String SCHEMA_TYPE_FIELD = "schemaType";
+    static final String SCHEMA_FIELD = "schema";
     static final String NAMESPACE_FIELD = "namespace";
     static final String PACKAGE_NAME_FIELD = "packageName";
     static final String NUM_PER_PAGE_FIELD = "numPerPage";
@@ -171,12 +170,12 @@ public final class SearchSpec {
      * <p>If empty, the query will search over all schema types.
      */
     @NonNull
-    public List<String> getSchemaTypes() {
-        List<String> schemaTypes = mBundle.getStringArrayList(SCHEMA_TYPE_FIELD);
-        if (schemaTypes == null) {
+    public List<String> getFilterSchemas() {
+        List<String> schemas = mBundle.getStringArrayList(SCHEMA_FIELD);
+        if (schemas == null) {
             return Collections.emptyList();
         }
-        return Collections.unmodifiableList(schemaTypes);
+        return Collections.unmodifiableList(schemas);
     }
 
     /**
@@ -185,7 +184,7 @@ public final class SearchSpec {
      * <p>If empty, the query will search over all namespaces.
      */
     @NonNull
-    public List<String> getNamespaces() {
+    public List<String> getFilterNamespaces() {
         List<String> namespaces = mBundle.getStringArrayList(NAMESPACE_FIELD);
         if (namespaces == null) {
             return Collections.emptyList();
@@ -202,24 +201,6 @@ public final class SearchSpec {
      */
     @NonNull
     public List<String> getFilterPackageNames() {
-        List<String> packageNames = mBundle.getStringArrayList(PACKAGE_NAME_FIELD);
-        if (packageNames == null) {
-            return Collections.emptyList();
-        }
-        return Collections.unmodifiableList(packageNames);
-    }
-
-    /**
-     * Returns the list of package names to search over.
-     *
-     * <p>If unset, the query will search over all packages that the caller has access to. If
-     * package names are specified which caller doesn't have access to, then those package names
-     * will be ignored.
-     *
-     * @hide
-     */
-    @NonNull
-    public List<String> getPackageNames() {
         List<String> packageNames = mBundle.getStringArrayList(PACKAGE_NAME_FIELD);
         if (packageNames == null) {
             return Collections.emptyList();
@@ -270,11 +251,10 @@ public final class SearchSpec {
     @NonNull
     public Map<String, List<String>> getProjections() {
         Bundle typePropertyPathsBundle = mBundle.getBundle(PROJECTION_TYPE_PROPERTY_PATHS_FIELD);
-        Set<String> schemaTypes = typePropertyPathsBundle.keySet();
-        Map<String, List<String>> typePropertyPathsMap = new ArrayMap<>(schemaTypes.size());
-        for (String schemaType : schemaTypes) {
-            typePropertyPathsMap.put(
-                    schemaType, typePropertyPathsBundle.getStringArrayList(schemaType));
+        Set<String> schemas = typePropertyPathsBundle.keySet();
+        Map<String, List<String>> typePropertyPathsMap = new ArrayMap<>(schemas.size());
+        for (String schema : schemas) {
+            typePropertyPathsMap.put(schema, typePropertyPathsBundle.getStringArrayList(schema));
         }
         return typePropertyPathsMap;
     }
@@ -283,7 +263,7 @@ public final class SearchSpec {
     public static final class Builder {
 
         private final Bundle mBundle;
-        private final ArrayList<String> mSchemaTypes = new ArrayList<>();
+        private final ArrayList<String> mSchemas = new ArrayList<>();
         private final ArrayList<String> mNamespaces = new ArrayList<>();
         private final ArrayList<String> mPackageNames = new ArrayList<>();
         private final Bundle mProjectionTypePropertyMasks = new Bundle();
@@ -312,10 +292,10 @@ public final class SearchSpec {
          * <p>If unset, the query will search over all schema types.
          */
         @NonNull
-        public Builder addSchemaType(@NonNull String... schemaTypes) {
-            Preconditions.checkNotNull(schemaTypes);
+        public Builder addFilterSchemas(@NonNull String... schemas) {
+            Preconditions.checkNotNull(schemas);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            return addSchemaType(Arrays.asList(schemaTypes));
+            return addFilterSchemas(Arrays.asList(schemas));
         }
 
         /**
@@ -325,10 +305,10 @@ public final class SearchSpec {
          * <p>If unset, the query will search over all schema types.
          */
         @NonNull
-        public Builder addSchemaType(@NonNull Collection<String> schemaTypes) {
-            Preconditions.checkNotNull(schemaTypes);
+        public Builder addFilterSchemas(@NonNull Collection<String> schemas) {
+            Preconditions.checkNotNull(schemas);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            mSchemaTypes.addAll(schemaTypes);
+            mSchemas.addAll(schemas);
             return this;
         }
 
@@ -339,10 +319,10 @@ public final class SearchSpec {
          * <p>If unset, the query will search over all namespaces.
          */
         @NonNull
-        public Builder addNamespace(@NonNull String... namespaces) {
+        public Builder addFilterNamespaces(@NonNull String... namespaces) {
             Preconditions.checkNotNull(namespaces);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            return addNamespace(Arrays.asList(namespaces));
+            return addFilterNamespaces(Arrays.asList(namespaces));
         }
 
         /**
@@ -352,7 +332,7 @@ public final class SearchSpec {
          * <p>If unset, the query will search over all namespaces.
          */
         @NonNull
-        public Builder addNamespace(@NonNull Collection<String> namespaces) {
+        public Builder addFilterNamespaces(@NonNull Collection<String> namespaces) {
             Preconditions.checkNotNull(namespaces);
             Preconditions.checkState(!mBuilt, "Builder has already been used");
             mNamespaces.addAll(namespaces);
@@ -367,9 +347,6 @@ public final class SearchSpec {
          * package names are specified which caller doesn't have access to, then those package names
          * will be ignored.
          */
-        // Getter is called "getFilterPackageNames" (as opposed to the suggested
-        // "getFilterPackageNameses")
-        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder addFilterPackageNames(@NonNull String... packageNames) {
             Preconditions.checkNotNull(packageNames);
@@ -385,9 +362,6 @@ public final class SearchSpec {
          * package names are specified which caller doesn't have access to, then those package names
          * will be ignored.
          */
-        // Getter is called "getFilterPackageNames" (as opposed to the suggested
-        // "getFilterPackageNameses")
-        @SuppressLint("MissingGetterMatchingBuilder")
         @NonNull
         public Builder addFilterPackageNames(@NonNull Collection<String> packageNames) {
             Preconditions.checkNotNull(packageNames);
@@ -537,7 +511,7 @@ public final class SearchSpec {
          * type property paths:
          *
          * <pre>{@code
-         * {schemaType: "Email", ["subject", "sender.name", "recipients.name"]}
+         * {schema: "Email", ["subject", "sender.name", "recipients.name"]}
          * }</pre>
          *
          * <p>The above document will be returned as:
@@ -561,9 +535,9 @@ public final class SearchSpec {
          */
         @NonNull
         public SearchSpec.Builder addProjection(
-                @NonNull String schemaType, @NonNull String... propertyPaths) {
+                @NonNull String schema, @NonNull String... propertyPaths) {
             Preconditions.checkNotNull(propertyPaths);
-            return addProjection(schemaType, Arrays.asList(propertyPaths));
+            return addProjection(schema, Arrays.asList(propertyPaths));
         }
 
         /**
@@ -583,16 +557,16 @@ public final class SearchSpec {
          */
         @NonNull
         public SearchSpec.Builder addProjection(
-                @NonNull String schemaType, @NonNull Collection<String> propertyPaths) {
+                @NonNull String schema, @NonNull Collection<String> propertyPaths) {
             Preconditions.checkState(!mBuilt, "Builder has already been used");
-            Preconditions.checkNotNull(schemaType);
+            Preconditions.checkNotNull(schema);
             Preconditions.checkNotNull(propertyPaths);
             ArrayList<String> propertyPathsArrayList = new ArrayList<>(propertyPaths.size());
             for (String propertyPath : propertyPaths) {
                 Preconditions.checkNotNull(propertyPath);
                 propertyPathsArrayList.add(propertyPath);
             }
-            mProjectionTypePropertyMasks.putStringArrayList(schemaType, propertyPathsArrayList);
+            mProjectionTypePropertyMasks.putStringArrayList(schema, propertyPathsArrayList);
             return this;
         }
 
@@ -608,7 +582,7 @@ public final class SearchSpec {
                 throw new IllegalSearchSpecException("Missing termMatchType field.");
             }
             mBundle.putStringArrayList(NAMESPACE_FIELD, mNamespaces);
-            mBundle.putStringArrayList(SCHEMA_TYPE_FIELD, mSchemaTypes);
+            mBundle.putStringArrayList(SCHEMA_FIELD, mSchemas);
             mBundle.putStringArrayList(PACKAGE_NAME_FIELD, mPackageNames);
             mBundle.putBundle(PROJECTION_TYPE_PROPERTY_PATHS_FIELD, mProjectionTypePropertyMasks);
             mBuilt = true;
