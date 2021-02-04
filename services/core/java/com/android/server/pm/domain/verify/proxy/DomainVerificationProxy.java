@@ -19,14 +19,66 @@ package com.android.server.pm.domain.verify.proxy;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ComponentName;
+import android.content.Context;
+import android.util.Slog;
 
 import com.android.server.DeviceIdleInternal;
 import com.android.server.pm.domain.verify.DomainVerificationMessageCodes;
+import com.android.server.pm.domain.verify.DomainVerificationCollector;
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 
+import java.util.Objects;
 import java.util.Set;
 
 // TODO(b/170321181): Combine the proxy versions for supporting v1 and v2 at once
 public interface DomainVerificationProxy {
+
+    String TAG = "DomainVerificationProxy";
+
+    boolean DEBUG_PROXIES = false;
+
+    static <ConnectionType extends DomainVerificationProxyV1.Connection
+            & DomainVerificationProxyV2.Connection> DomainVerificationProxy makeProxy(
+            @Nullable ComponentName componentV1, @Nullable ComponentName componentV2,
+            @NonNull Context context, @NonNull DomainVerificationManagerInternal manager,
+            @NonNull DomainVerificationCollector collector, @NonNull ConnectionType connection) {
+        if (DEBUG_PROXIES) {
+            Slog.d(TAG, "Intent filter verification agent: " + componentV1);
+            Slog.d(TAG, "Domain verification agent: " + componentV2);
+        }
+
+        if (componentV2 != null && componentV1 != null
+                && !Objects.equals(componentV2.getPackageName(), componentV1.getPackageName())) {
+            // Only allow a legacy verifier if it's in the same package as the v2 verifier
+            componentV1 = null;
+        }
+
+        DomainVerificationProxy proxyV1 = null;
+        DomainVerificationProxy proxyV2 = null;
+
+        if (componentV1 != null) {
+            proxyV1 = new DomainVerificationProxyV1(context, manager, collector, connection,
+                    componentV1);
+        }
+
+        if (componentV2 != null) {
+            proxyV2 = new DomainVerificationProxyV2(context, connection, componentV2);
+        }
+
+        if (proxyV1 != null && proxyV2 != null) {
+            return new DomainVerificationProxyCombined(proxyV1, proxyV2);
+        }
+
+        if (proxyV1 != null) {
+            return proxyV1;
+        }
+
+        if (proxyV2 != null) {
+            return proxyV2;
+        }
+
+        return new DomainVerificationProxyUnavailable();
+    }
 
     default void sendBroadcastForPackages(@NonNull Set<String> packageNames) {
     }

@@ -56,7 +56,7 @@ public class DomainVerificationProxyV2 implements DomainVerificationProxy {
 
     @Override
     public void sendBroadcastForPackages(@NonNull Set<String> packageNames) {
-        mConnection.schedule(DomainVerificationMessageCodes.SEND_REQUEST, packageNames);
+        mConnection.schedule(com.android.server.pm.domain.verify.DomainVerificationMessageCodes.SEND_REQUEST, packageNames);
     }
 
     @Override
