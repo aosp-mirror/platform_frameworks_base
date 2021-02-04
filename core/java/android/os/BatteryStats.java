@@ -1556,8 +1556,7 @@ public abstract class BatteryStats implements Parcelable {
         public int statSoftIrqTime;
         public int statIdlTime;
 
-        // Platform-level low power state stats
-        public String statPlatformIdleState;
+        // Low power state stats
         public String statSubsystemPowerState;
 
         public HistoryStepDetails() {
@@ -1589,7 +1588,6 @@ public abstract class BatteryStats implements Parcelable {
             out.writeInt(statIrqTime);
             out.writeInt(statSoftIrqTime);
             out.writeInt(statIdlTime);
-            out.writeString(statPlatformIdleState);
             out.writeString(statSubsystemPowerState);
         }
 
@@ -1611,7 +1609,6 @@ public abstract class BatteryStats implements Parcelable {
             statIrqTime = in.readInt();
             statSoftIrqTime = in.readInt();
             statIdlTime = in.readInt();
-            statPlatformIdleState = in.readString();
             statSubsystemPowerState = in.readString();
         }
     }
@@ -6600,9 +6597,6 @@ public abstract class BatteryStats implements Parcelable {
                             item.append(sb);
                             item.append(")");
                         }
-                        item.append(", PlatformIdleStat ");
-                        item.append(rec.stepDetails.statPlatformIdleState);
-                        item.append("\n");
 
                         item.append(", SubsystemPowerState ");
                         item.append(rec.stepDetails.statSubsystemPowerState);
@@ -6640,12 +6634,6 @@ public abstract class BatteryStats implements Parcelable {
                         item.append(',');
                         item.append(rec.stepDetails.statIdlTime);
                         item.append(',');
-                        if (rec.stepDetails.statPlatformIdleState != null) {
-                            item.append(rec.stepDetails.statPlatformIdleState);
-                            if (rec.stepDetails.statSubsystemPowerState != null) {
-                                item.append(',');
-                            }
-                        }
 
                         if (rec.stepDetails.statSubsystemPowerState != null) {
                             item.append(rec.stepDetails.statSubsystemPowerState);

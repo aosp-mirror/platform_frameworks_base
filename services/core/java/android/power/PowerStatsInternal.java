@@ -18,8 +18,12 @@ package android.power;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
 import android.hardware.power.stats.EnergyConsumerResult;
+import android.hardware.power.stats.EnergyMeasurement;
+import android.hardware.power.stats.PowerEntity;
+import android.hardware.power.stats.StateResidencyResult;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -51,4 +55,45 @@ public abstract class PowerStatsInternal {
     @NonNull
     public abstract CompletableFuture<EnergyConsumerResult[]> getEnergyConsumedAsync(
             int[] energyConsumerIds);
+
+    /**
+     * Returns the power entity info for all available {@link PowerEntity}
+     *
+     * @return List of available {@link PowerEntity}
+     */
+    public abstract PowerEntity[] getPowerEntityInfo();
+
+    /**
+     * Returns a CompletableFuture that will get a {@link StateResidencyResult} array for the
+     * available requested power entities.
+     *
+     * @param powerEntityIds Array of {@link PowerEntity.id} for which state residency is being
+     *                          requested.
+     *
+     * @return A Future containing a list of {@link StateResidencyResult} objects containing state
+     *         residency results for all listed {@link PowerEntity.id}.
+     */
+    @NonNull
+    public abstract CompletableFuture<StateResidencyResult[]> getStateResidencyAsync(
+            int[] powerEntityIds);
+
+    /**
+     * Returns the channel info for all available {@link Channel}
+     *
+     * @return List of available {@link Channel}
+     */
+    public abstract Channel[] getEnergyMeterInfo();
+
+    /**
+     * Returns a CompletableFuture that will get a {@link EnergyMeasurement} array for the
+     * available requested channels.
+     *
+     * @param channelIds Array of {@link Channel.id} for accumulated energy is being requested.
+     *
+     * @return A Future containing a list of {@link EnergyMeasurement} objects containing
+     *         accumulated energy measurements for all listed {@link Channel.id}.
+     */
+    @NonNull
+    public abstract CompletableFuture<EnergyMeasurement[]> readEnergyMeterAsync(
+            int[] channelIds);
 }
