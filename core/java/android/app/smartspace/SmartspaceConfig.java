@@ -17,6 +17,7 @@ package android.app.smartspace;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.content.Context;
 import android.os.Bundle;
@@ -98,6 +99,7 @@ public final class SmartspaceConfig implements Parcelable {
     }
 
     @Nullable
+    @SuppressLint("NullableCollection")
     public Bundle getExtras() {
         return mExtras;
     }
@@ -186,7 +188,7 @@ public final class SmartspaceConfig implements Parcelable {
          * Used to send a bundle containing extras for the {@link SmartspaceConfig}.
          */
         @NonNull
-        public Builder setExtras(@NonNull Bundle extras) {
+        public Builder setExtras(@SuppressLint("NullableCollection") @NonNull Bundle extras) {
             this.mExtras = extras;
             return this;
         }
