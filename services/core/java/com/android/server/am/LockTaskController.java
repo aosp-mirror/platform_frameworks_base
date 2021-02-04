@@ -472,7 +472,7 @@ public class LockTaskController {
             setStatusBarState(LOCK_TASK_MODE_NONE, userId);
             setKeyguardState(LOCK_TASK_MODE_NONE, userId);
             if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
-                lockKeyguardIfNeeded();
+                lockKeyguardIfNeeded(userId);
             }
             if (getDevicePolicyManager() != null) {
                 getDevicePolicyManager().notifyLockTaskModeChanged(false, null, userId);
@@ -776,15 +776,15 @@ public class LockTaskController {
      * Helper method for locking the device immediately. This may be necessary when the device
      * leaves the pinned mode.
      */
-    private void lockKeyguardIfNeeded() {
-        if (shouldLockKeyguard()) {
+    private void lockKeyguardIfNeeded(int userId) {
+        if (shouldLockKeyguard(userId)) {
             mWindowManager.lockNow(null);
             mWindowManager.dismissKeyguard(null /* callback */, null /* message */);
             getLockPatternUtils().requireCredentialEntry(USER_ALL);
         }
     }
 
-    private boolean shouldLockKeyguard() {
+    private boolean shouldLockKeyguard(int userId) {
         // This functionality should be kept consistent with
         // com.android.settings.security.ScreenPinningSettings (see b/127605586)
         try {
@@ -794,7 +794,7 @@ public class LockTaskController {
         } catch (Settings.SettingNotFoundException e) {
             // Log to SafetyNet for b/127605586
             android.util.EventLog.writeEvent(0x534e4554, "127605586", -1, "");
-            return getLockPatternUtils().isSecure(USER_CURRENT);
+            return getLockPatternUtils().isSecure(userId);
         }
     }
 
