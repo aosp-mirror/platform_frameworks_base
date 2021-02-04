@@ -61,7 +61,6 @@ import android.os.ParcelUuid;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.State;
@@ -404,9 +403,6 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull
     final RetryTimeoutState mRetryTimeoutState = new RetryTimeoutState();
 
-    @NonNull private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
 
     @NonNull private final VcnContext mVcnContext;
@@ -516,9 +512,7 @@ public class VcnGatewayConnection extends StateMachine {
                 Objects.requireNonNull(gatewayStatusCallback, "Missing gatewayStatusCallback");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
-        synchronized (mLock) {
-            mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
-        }
+        mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
 
         mUnderlyingNetworkTrackerCallback = new VcnUnderlyingNetworkTrackerCallback();
 
@@ -589,13 +583,10 @@ public class VcnGatewayConnection extends StateMachine {
      */
     public void updateSubscriptionSnapshot(@NonNull TelephonySubscriptionSnapshot snapshot) {
         Objects.requireNonNull(snapshot, "Missing snapshot");
+        mVcnContext.ensureRunningOnLooperThread();
 
-        // Vcn is the only user of this method and runs on the same Thread, but lock around
-        // mLastSnapshot to be technically correct.
-        synchronized (mLock) {
-            mLastSnapshot = snapshot;
-            mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
-        }
+        mLastSnapshot = snapshot;
+        mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
 
         sendMessage(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
     }
