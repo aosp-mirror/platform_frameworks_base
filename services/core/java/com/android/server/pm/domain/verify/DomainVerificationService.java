@@ -19,6 +19,8 @@ package com.android.server.pm.domain.verify;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.Disabled;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.IntentFilterVerificationInfo;
@@ -38,6 +40,7 @@ import android.util.IndentingPrintWriter;
 import android.util.Singleton;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.util.TypedXmlPullParser;
 import android.util.TypedXmlSerializer;
 
@@ -74,6 +77,19 @@ public class DomainVerificationService extends SystemService
     public static final boolean DEBUG_APPROVAL = true;
 
     /**
+     * The new user preference API for verifying domains marked autoVerify=true in
+     * AndroidManifest.xml intent filters is not yet implemented in the current platform preview.
+     * This is anticipated to ship before S releases.
+     *
+     * For now, it is possible to preview the new user preference changes by enabling this
+     * ChangeId and using the <code>adb shell pm set-app-links-user-selection</code> and similar
+     * commands.
+     */
+    @ChangeId
+    @Disabled
+    private static final long SETTINGS_API_V2 = 178111421;
+
+    /**
      * States that are currently alive and attached to a package. Entries are exclusive with the
      * state stored in {@link DomainVerificationSettings}, as any pending/restored state should be
      * immediately attached once its available.
@@ -100,6 +116,9 @@ public class DomainVerificationService extends SystemService
     private final SystemConfig mSystemConfig;
 
     @NonNull
+    private final PlatformCompat mPlatformCompat;
+
+    @NonNull
     private final DomainVerificationSettings mSettings;
 
     @NonNull
@@ -115,6 +134,9 @@ public class DomainVerificationService extends SystemService
     private final DomainVerificationShell mShell;
 
     @NonNull
+    private final DomainVerificationLegacySettings mLegacySettings;
+
+    @NonNull
     private final IDomainVerificationManager.Stub mStub = new DomainVerificationManagerStub(this);
 
     @NonNull
@@ -125,11 +147,13 @@ public class DomainVerificationService extends SystemService
         super(context);
         mConnection = connection;
         mSystemConfig = systemConfig;
+        mPlatformCompat = platformCompat;
         mSettings = new DomainVerificationSettings();
         mCollector = new DomainVerificationCollector(platformCompat, systemConfig);
         mEnforcer = new DomainVerificationEnforcer(context);
         mDebug = new DomainVerificationDebug(mCollector);
         mShell = new DomainVerificationShell(this);
+        mLegacySettings = new DomainVerificationLegacySettings();
     }
 
     @Override
@@ -401,6 +425,8 @@ public class DomainVerificationService extends SystemService
                         .setDisallowLinkHandling(!allowed);
             }
         }
+
+        mConnection.get().scheduleWriteSettings();
     }
 
     @Override
@@ -473,6 +499,8 @@ public class DomainVerificationService extends SystemService
                         enabled, domains);
             }
         }
+
+        mConnection.get().scheduleWriteSettings();
     }
 
     private void setDomainVerificationUserSelectionInternal(int userId,
@@ -500,6 +528,8 @@ public class DomainVerificationService extends SystemService
                 userState.removeHosts(domains);
             }
         }
+
+        mConnection.get().scheduleWriteSettings();
     }
 
     @Nullable
@@ -693,12 +723,11 @@ public class DomainVerificationService extends SystemService
             // and disable them if appropriate.
             ArraySet<String> webDomains = null;
 
-            @SuppressWarnings("deprecation")
-            SparseArray<PackageUserState> userState = newPkgSetting.getUserState();
-            int userStateSize = userState.size();
+            SparseIntArray legacyUserStates = mLegacySettings.getUserStates(pkgName);
+            int userStateSize = legacyUserStates == null ? 0 : legacyUserStates.size();
             for (int index = 0; index < userStateSize; index++) {
-                int userId = userState.keyAt(index);
-                int legacyStatus = userState.valueAt(index).domainVerificationStatus;
+                int userId = legacyUserStates.keyAt(index);
+                int legacyStatus = legacyUserStates.valueAt(index);
                 if (legacyStatus
                         == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
                     if (webDomains == null) {
@@ -709,8 +738,7 @@ public class DomainVerificationService extends SystemService
                 }
             }
 
-            IntentFilterVerificationInfo legacyInfo =
-                    newPkgSetting.getIntentFilterVerificationInfo();
+            IntentFilterVerificationInfo legacyInfo = mLegacySettings.remove(pkgName);
             if (legacyInfo != null
                     && legacyInfo.getStatus()
                     == PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
@@ -772,6 +800,8 @@ public class DomainVerificationService extends SystemService
         synchronized (mLock) {
             mSettings.writeSettings(serializer, mAttachedPkgStates);
         }
+
+        mLegacySettings.writeSettings(serializer);
     }
 
     @Override
@@ -783,11 +813,39 @@ public class DomainVerificationService extends SystemService
     }
 
     @Override
+    public void readLegacySettings(@NonNull TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException {
+        mLegacySettings.readSettings(parser);
+    }
+
+    @Override
     public void restoreSettings(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException {
         synchronized (mLock) {
             mSettings.restoreSettings(parser, mAttachedPkgStates);
         }
+    }
+
+    @Override
+    public void addLegacySetting(@NonNull String packageName,
+            @NonNull IntentFilterVerificationInfo info) {
+        mLegacySettings.add(packageName, info);
+    }
+
+    @Override
+    public void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state) {
+        mEnforcer.callerIsLegacyUserSelector(mConnection.get().getCallingUid());
+        mLegacySettings.add(packageName, userId, state);
+    }
+
+    @Override
+    public int getLegacyState(@NonNull String packageName, @UserIdInt int userId) {
+        return mLegacySettings.getUserState(packageName, userId);
+    }
+
+    @Override
+    public void writeLegacySettings(TypedXmlSerializer serializer, String name) {
+
     }
 
     @Override
@@ -1051,13 +1109,36 @@ public class DomainVerificationService extends SystemService
             return false;
         }
 
-        // To allow an instant app to immediately open domains after being installed by the user,
-        // auto approve them for any declared autoVerify domains.
         String host = intent.getData().getHost();
         final AndroidPackage pkg = pkgSetting.getPkg();
-        if (pkgSetting.getInstantApp(userId) && pkg != null
-                && mCollector.collectAutoVerifyDomains(pkg).contains(host)) {
-            return true;
+
+        // Should never be null, but if it is, skip this and assume that v2 is enabled
+        if (pkg != null) {
+            // To allow an instant app to immediately open domains after being installed by the
+            // user, auto approve them for any declared autoVerify domains.
+            if (pkgSetting.getInstantApp(userId)
+                    && mCollector.collectAutoVerifyDomains(pkg).contains(host)) {
+                return true;
+            }
+
+            if (!DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg, SETTINGS_API_V2)) {
+                int legacyState = mLegacySettings.getUserState(packageName, userId);
+                switch (legacyState) {
+                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED:
+                        // If nothing specifically set, assume v2 rules
+                        break;
+                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ASK:
+                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS:
+                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS_ASK:
+                        // With v2 split into 2 lists, always and undefined, the concept of whether
+                        // or not to ask is irrelevant. Assume the user wants this application to
+                        // open the domain.
+                        return true;
+                    case PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_NEVER:
+                        // Never has the same semantics are before
+                        return false;
+                }
+            }
         }
 
         synchronized (mLock) {

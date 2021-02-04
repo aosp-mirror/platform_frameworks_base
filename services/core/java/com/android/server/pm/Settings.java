@@ -21,7 +21,6 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
@@ -106,6 +105,7 @@ import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.domain.verify.DomainVerificationLegacySettings;
 import com.android.server.pm.domain.verify.DomainVerificationManagerInternal;
 import com.android.server.pm.domain.verify.DomainVerificationPersistence;
 import com.android.server.pm.intent.verify.legacy.IntentFilterVerificationManager;
@@ -557,7 +557,6 @@ public final class Settings implements Watchable, Snappable {
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
-        mNextAppLinkGeneration.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
     }
@@ -610,7 +609,6 @@ public final class Settings implements Watchable, Snappable {
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
-        mNextAppLinkGeneration.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
     }
@@ -659,7 +657,6 @@ public final class Settings implements Watchable, Snappable {
         mKeySetRefs.putAll(r.mKeySetRefs);
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
-        mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         // mReadMessages
         mPendingPackages.addAll(r.mPendingPackages);
         mSystemDir = null;
@@ -938,8 +935,6 @@ public final class Settings implements Watchable, Snappable {
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0 /*linkGeneration*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/);
@@ -1181,12 +1176,6 @@ public final class Settings implements Watchable, Snappable {
             if (userIdPs != null && userIdPs != sharedUser) {
                 replaceAppIdLPw(p.appId, sharedUser);
             }
-        }
-
-        IntentFilterVerificationInfo info =
-                mIntentFilterVerificationManager.getRestoredIntentFilterVerificationInfo(p.name);
-        if (info != null) {
-            p.setIntentFilterVerificationInfo(info);
         }
     }
 
@@ -1582,8 +1571,6 @@ public final class Settings implements Watchable, Snappable {
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0 /*linkGeneration*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/);
@@ -1607,8 +1594,6 @@ public final class Settings implements Watchable, Snappable {
                         "No start tag found in package manager stopped packages");
                 return;
             }
-
-            int maxAppLinkGeneration = 0;
 
             int outerDepth = parser.getDepth();
             PackageSetting ps = null;
@@ -1672,11 +1657,6 @@ public final class Settings implements Watchable, Snappable {
                     final int verifState = parser.getAttributeInt(null,
                             ATTR_DOMAIN_VERIFICATON_STATE,
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
-                    final int linkGeneration =
-                            parser.getAttributeInt(null, ATTR_APP_LINK_GENERATION, 0);
-                    if (linkGeneration > maxAppLinkGeneration) {
-                        maxAppLinkGeneration = linkGeneration;
-                    }
                     final int installReason = parser.getAttributeInt(null, ATTR_INSTALL_REASON,
                             PackageManager.INSTALL_REASON_UNKNOWN);
                     final int uninstallReason = parser.getAttributeInt(null, ATTR_UNINSTALL_REASON,
@@ -1752,9 +1732,10 @@ public final class Settings implements Watchable, Snappable {
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, distractionFlags, suspended, suspendParamsMap,
-                            instantApp, virtualPreload,
-                            enabledCaller, enabledComponents, disabledComponents, verifState,
-                            linkGeneration, installReason, uninstallReason, harmfulAppWarning);
+                            instantApp, virtualPreload, enabledCaller, enabledComponents,
+                            disabledComponents, installReason, uninstallReason, harmfulAppWarning);
+
+                    mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1773,9 +1754,6 @@ public final class Settings implements Watchable, Snappable {
             }
 
             str.close();
-
-            mNextAppLinkGeneration.put(userId, maxAppLinkGeneration + 1);
-
         } catch (XmlPullParserException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR,
@@ -2001,15 +1979,6 @@ public final class Settings implements Watchable, Snappable {
                         serializer.attribute(null, ATTR_ENABLED_CALLER,
                                 ustate.lastDisableAppCaller);
                     }
-                }
-                if (ustate.domainVerificationStatus !=
-                        PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-                    serializer.attributeInt(null, ATTR_DOMAIN_VERIFICATON_STATE,
-                            ustate.domainVerificationStatus);
-                }
-                if (ustate.appLinkGeneration != 0) {
-                    serializer.attributeInt(null, ATTR_APP_LINK_GENERATION,
-                            ustate.appLinkGeneration);
                 }
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
                     serializer.attributeInt(null, ATTR_INSTALL_REASON, ustate.installReason);
@@ -2747,8 +2716,7 @@ public final class Settings implements Watchable, Snappable {
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
-        mIntentFilterVerificationManager.writeDomainVerificationsLPr(serializer,
-                pkg.verificationInfo);
+        mDomainVerificationManager.writeLegacySettings(serializer, pkg.name);
         writeMimeGroupLPr(serializer, pkg.mimeGroups);
 
         serializer.endTag(null, "package");
@@ -2924,7 +2892,10 @@ public final class Settings implements Watchable, Snappable {
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
                 } else if (tagName.equals(DomainVerificationPersistence.TAG_DOMAIN_VERIFICATIONS)) {
                     mDomainVerificationManager.readSettings(parser);
-                }else {
+                } else if (tagName.equals(
+                        DomainVerificationLegacySettings.TAG_DOMAIN_VERIFICATIONS_LEGACY)) {
+                    mDomainVerificationManager.readLegacySettings(parser);
+                } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
                     XmlUtils.skipCurrentTag(parser);
@@ -3739,9 +3710,8 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.installSource =
                             packageSetting.installSource.setInitiatingPackageSignatures(signatures);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                    IntentFilterVerificationInfo ivi =
-                            mIntentFilterVerificationManager.readDomainVerificationLPw(parser);
-                    packageSetting.setIntentFilterVerificationInfo(ivi);
+                    IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
+                    mDomainVerificationManager.addLegacySetting(packageSetting.name, ivi);
                     if (DEBUG_PARSER) {
                         Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
                     }

@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.content.Intent;
+import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.domain.verify.DomainVerificationManager;
 import android.content.pm.domain.verify.DomainVerificationSet;
@@ -31,6 +32,7 @@ import android.util.TypedXmlSerializer;
 import com.android.server.pm.PackageSetting;
 import com.android.server.pm.domain.verify.models.DomainVerificationPkgState;
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -103,20 +105,28 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
 
     /**
      * Serializes the entire internal state. This is equivalent to a full backup of the existing
-     * verification state.
+     * verification state. This write includes legacy state, as a sibling tag the modern state.
      */
     void writeSettings(@NonNull TypedXmlSerializer serializer) throws IOException;
 
     /**
      * Read back a list of {@link DomainVerificationPkgState}s previously written by {@link
      * #writeSettings(TypedXmlSerializer)}. Assumes that the
-     * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS}
-     * tag has already been entered.
+     * {@link DomainVerificationPersistence#TAG_DOMAIN_VERIFICATIONS} tag has already been entered.
      * <p>
      * This is expected to only be used to re-attach states for packages already known to be on the
      * device. If restoring from a backup, use {@link #restoreSettings(TypedXmlPullParser)}.
      */
     void readSettings(@NonNull TypedXmlPullParser parser)
+            throws IOException, XmlPullParserException;
+
+    /**
+     * Read back data from
+     * {@link DomainVerificationLegacySettings#writeSettings(TypedXmlSerializer)}. Assumes that the
+     * {@link DomainVerificationLegacySettings#TAG_DOMAIN_VERIFICATIONS_LEGACY} tag has already
+     * been entered.
+     */
+    void readLegacySettings(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException;
 
     /**
@@ -147,6 +157,32 @@ public interface DomainVerificationManagerInternal extends DomainVerificationMan
      */
     void restoreSettings(@NonNull TypedXmlPullParser parser)
             throws IOException, XmlPullParserException;
+
+    /**
+     * Set aside a legacy {@link IntentFilterVerificationInfo} that will be restored to a pending
+     * {@link DomainVerificationPkgState} once it's added through
+     * {@link #addPackage(PackageSetting)}.
+     */
+    void addLegacySetting(@NonNull String packageName, @NonNull IntentFilterVerificationInfo info);
+
+    /**
+     * Set aside a legacy user selection that will be restored to a pending
+     * {@link DomainVerificationPkgState} once it's added through
+     * {@link #addPackage(PackageSetting)}.
+     */
+    void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state);
+
+    /**
+     * Until the legacy APIs are entirely removed, returns the legacy state from the previously
+     * written info stored in {@link com.android.server.pm.Settings}.
+     */
+    int getLegacyState(@NonNull String packageName, @UserIdInt int userId);
+
+    /**
+     * Serialize a legacy setting that wasn't attached yet.
+     * TODO: Does this even matter? Should consider for removal.
+     */
+    void writeLegacySettings(TypedXmlSerializer serializer, String name);
 
     /**
      * Print the verification state and user selection state of a package.

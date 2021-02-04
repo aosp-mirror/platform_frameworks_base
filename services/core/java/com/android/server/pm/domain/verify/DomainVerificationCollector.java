@@ -88,9 +88,8 @@ public class DomainVerificationCollector {
     @NonNull
     private ArraySet<String> collectDomains(@NonNull AndroidPackage pkg,
             boolean checkAutoVerify) {
-        @SuppressWarnings("ConstantConditions")
-        boolean restrictDomains = Binder.withCleanCallingIdentity(
-                () -> mPlatformCompat.isChangeEnabled(RESTRICT_DOMAINS, buildMockAppInfo(pkg)));
+        boolean restrictDomains =
+                DomainVerificationUtils.isChangeEnabled(mPlatformCompat, pkg, RESTRICT_DOMAINS);
 
         ArraySet<String> domains = new ArraySet<>();
 
@@ -197,20 +196,5 @@ public class DomainVerificationCollector {
                 }
             }
         }
-    }
-
-    /**
-     * Passed to {@link PlatformCompat} because this can be invoked mid-install process, and
-     * {@link PlatformCompat} will not be able to query the pending {@link ApplicationInfo} from
-     * {@link PackageManager}.
-     *
-     * TODO(b/177613575): Can a different API be used?
-     */
-    @NonNull
-    private ApplicationInfo buildMockAppInfo(@NonNull AndroidPackage pkg) {
-        ApplicationInfo appInfo = new ApplicationInfo();
-        appInfo.packageName = pkg.getPackageName();
-        appInfo.targetSdkVersion = pkg.getTargetSdkVersion();
-        return appInfo;
     }
 }

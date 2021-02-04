@@ -31,19 +31,4 @@ public class IntentVerifyUtils {
                 && (filter.hasDataScheme(IntentFilter.SCHEME_HTTP) ||
                 filter.hasDataScheme(IntentFilter.SCHEME_HTTPS));
     }
-
-    // Returns a packed value as a long:
-    //
-    // high 'int'-sized word: link status: undefined/ask/never/always.
-    // low 'int'-sized word: relative priority among 'always' results.
-    public static long getDomainVerificationStatus(PackageSetting ps, int userId) {
-        long result = ps.getDomainVerificationStatusForUser(userId);
-        // if none available, get the status
-        if (result >> 32 == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-            if (ps.getIntentFilterVerificationInfo() != null) {
-                result = ((long) ps.getIntentFilterVerificationInfo().getStatus()) << 32;
-            }
-        }
-        return result;
-    }
 }

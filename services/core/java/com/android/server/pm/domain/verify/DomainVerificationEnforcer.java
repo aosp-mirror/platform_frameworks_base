@@ -118,4 +118,11 @@ public class DomainVerificationEnforcer {
                 Binder.getCallingPid(), callingUid,
                 "Caller is not allowed to edit user selections");
     }
+
+    public void callerIsLegacyUserSelector(int callingUid) {
+        mContext.enforcePermission(
+                android.Manifest.permission.SET_PREFERRED_APPLICATIONS,
+                Binder.getCallingPid(), callingUid,
+                "Caller is not allowed to edit user state");
+    }
 }

@@ -176,10 +176,10 @@ public class IntentFilterVerificationSettings {
     public IntentFilterVerificationInfo updatePackageSetting(@NonNull PackageSetting pkgSetting,
             ArraySet<String> domains) {
         String pkgName = pkgSetting.name;
-        IntentFilterVerificationInfo ivi = pkgSetting.getIntentFilterVerificationInfo();
+        IntentFilterVerificationInfo ivi = null;//pkgSetting.getIntentFilterVerificationInfo();
         if (ivi == null) {
             ivi = new IntentFilterVerificationInfo(pkgName, domains);
-            pkgSetting.setIntentFilterVerificationInfo(ivi);
+            // pkgSetting.setIntentFilterVerificationInfo(ivi);
             mConnection.debugLog("Creating new IntentFilterVerificationInfo for pkg: " + pkgName);
         } else {
             ivi.setDomains(domains);
@@ -197,7 +197,7 @@ public class IntentFilterVerificationSettings {
             mConnection.warnLog("No package known: " + packageName);
             return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         }
-        return (int) (pkgSetting.getDomainVerificationStatusForUser(userId) >> 32);
+        return 0;//(int) (pkgSetting.getDomainVerificationStatusForUser(userId) >> 32);
     }
 
     @Nullable
@@ -208,7 +208,7 @@ public class IntentFilterVerificationSettings {
             mConnection.warnLog("No package known: " + packageName);
             return null;
         }
-        return ps.getIntentFilterVerificationInfo();
+        return null;//ps.getIntentFilterVerificationInfo();
     }
 
     boolean updateIntentFilterVerificationStatusLPw(String packageName, final int status,
@@ -222,14 +222,14 @@ public class IntentFilterVerificationSettings {
 
         final int alwaysGeneration;
         if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-            WatchedSparseIntArray nextAppLinkGeneration = mConnection.getNextAppLinkGeneration();
-            alwaysGeneration = nextAppLinkGeneration.get(userId) + 1;
-            nextAppLinkGeneration.put(userId, alwaysGeneration);
+//            WatchedSparseIntArray nextAppLinkGeneration = mConnection.getNextAppLinkGeneration();
+//            alwaysGeneration = nextAppLinkGeneration.get(userId) + 1;
+//            nextAppLinkGeneration.put(userId, alwaysGeneration);
         } else {
             alwaysGeneration = 0;
         }
 
-        current.setDomainVerificationStatusForUser(status, alwaysGeneration, userId);
+//        current.setDomainVerificationStatusForUser(status, alwaysGeneration, userId);
         return true;
     }
 
@@ -241,9 +241,8 @@ public class IntentFilterVerificationSettings {
             return false;
         }
         if (alsoResetStatus) {
-            ps.clearDomainVerificationStatusForUser(userId);
+//            ps.clearDomainVerificationStatusForUser(userId);
         }
-        ps.setIntentFilterVerificationInfo(null);
         return true;
     }
 
@@ -262,7 +261,7 @@ public class IntentFilterVerificationSettings {
         }
         ArrayList<IntentFilterVerificationInfo> result = new ArrayList<>();
         for (PackageSetting ps : mConnection.getPackageSettingsLPr().values()) {
-            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
+            IntentFilterVerificationInfo ivi = null;//ps.getIntentFilterVerificationInfo();
             if (ivi == null || TextUtils.isEmpty(ivi.getPackageName()) ||
                     !ivi.getPackageName().equalsIgnoreCase(packageName)) {
                 continue;
@@ -278,7 +277,7 @@ public class IntentFilterVerificationSettings {
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, Settings.TAG_ALL_INTENT_FILTER_VERIFICATION);
         for (PackageSetting value : pkgSettings.values()) {
-            IntentFilterVerificationInfo ivi = value.getIntentFilterVerificationInfo();
+            IntentFilterVerificationInfo ivi = null;//value.getIntentFilterVerificationInfo();
             if (ivi != null) {
                 writeDomainVerificationsLPr(serializer, ivi);
             }
@@ -318,7 +317,9 @@ public class IntentFilterVerificationSettings {
                 final PackageSetting ps = mConnection.getPackageSettingLPr(pkgName);
                 if (ps != null) {
                     // known/existing package; update in place
-                    ps.setIntentFilterVerificationInfo(ivi);
+                    // TODO: Removed, commented out to allow compile, awaiting removal of entire
+                    //  class
+                    // ps.setIntentFilterVerificationInfo(ivi);
                     mConnection.debugLog("Restored IVI for existing app " + pkgName
                             + " status=" + ivi.getStatusString());
                 } else {
