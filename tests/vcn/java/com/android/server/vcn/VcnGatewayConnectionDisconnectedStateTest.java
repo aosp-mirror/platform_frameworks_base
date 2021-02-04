@@ -44,7 +44,8 @@ public class VcnGatewayConnectionDisconnectedStateTest extends VcnGatewayConnect
     @Test
     public void testEnterWhileNotRunningTriggersQuit() throws Exception {
         final VcnGatewayConnection vgc =
-                new VcnGatewayConnection(mVcnContext, TEST_SUB_GRP, mConfig, mDeps);
+                new VcnGatewayConnection(
+                        mVcnContext, TEST_SUB_GRP, TEST_SUBSCRIPTION_SNAPSHOT, mConfig, mDeps);
 
         vgc.setIsRunning(false);
         vgc.transitionTo(vgc.mDisconnectedState);

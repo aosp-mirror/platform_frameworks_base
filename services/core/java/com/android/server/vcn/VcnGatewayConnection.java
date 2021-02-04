@@ -61,10 +61,12 @@ import android.os.ParcelUuid;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerCallback;
 
@@ -371,6 +373,16 @@ public class VcnGatewayConnection extends StateMachine {
      */
     private static final int EVENT_TEARDOWN_TIMEOUT_EXPIRED = 8;
 
+    /**
+     * Sent when this VcnGatewayConnection is notified of a change in TelephonySubscriptions.
+     *
+     * <p>Relevant in all states.
+     *
+     * @param arg1 The "all" token; this signal is always honored.
+     */
+    // TODO(b/178426520): implement handling of this event
+    private static final int EVENT_SUBSCRIPTIONS_CHANGED = 9;
+
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
     final DisconnectedState mDisconnectedState = new DisconnectedState();
@@ -390,6 +402,11 @@ public class VcnGatewayConnection extends StateMachine {
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     @NonNull
     final RetryTimeoutState mRetryTimeoutState = new RetryTimeoutState();
+
+    @NonNull private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
+    @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
@@ -469,14 +486,16 @@ public class VcnGatewayConnection extends StateMachine {
     public VcnGatewayConnection(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
+            @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig) {
-        this(vcnContext, subscriptionGroup, connectionConfig, new Dependencies());
+        this(vcnContext, subscriptionGroup, snapshot, connectionConfig, new Dependencies());
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     VcnGatewayConnection(
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
+            @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
             @NonNull Dependencies deps) {
         super(TAG, Objects.requireNonNull(vcnContext, "Missing vcnContext").getLooper());
@@ -485,12 +504,17 @@ public class VcnGatewayConnection extends StateMachine {
         mConnectionConfig = Objects.requireNonNull(connectionConfig, "Missing connectionConfig");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
+        synchronized (mLock) {
+            mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
+        }
+
         mUnderlyingNetworkTrackerCallback = new VcnUnderlyingNetworkTrackerCallback();
 
         mUnderlyingNetworkTracker =
                 mDeps.newUnderlyingNetworkTracker(
                         mVcnContext,
                         subscriptionGroup,
+                        mLastSnapshot,
                         mConnectionConfig.getAllUnderlyingCapabilities(),
                         mUnderlyingNetworkTrackerCallback);
         mIpSecManager = mVcnContext.getContext().getSystemService(IpSecManager.class);
@@ -543,6 +567,25 @@ public class VcnGatewayConnection extends StateMachine {
         }
 
         mUnderlyingNetworkTracker.teardown();
+    }
+
+    /**
+     * Notify this Gateway that subscriptions have changed.
+     *
+     * <p>This snapshot should be used to update any keepalive requests necessary for potential
+     * underlying Networks in this Gateway's subscription group.
+     */
+    public void updateSubscriptionSnapshot(@NonNull TelephonySubscriptionSnapshot snapshot) {
+        Objects.requireNonNull(snapshot, "Missing snapshot");
+
+        // Vcn is the only user of this method and runs on the same Thread, but lock around
+        // mLastSnapshot to be technically correct.
+        synchronized (mLock) {
+            mLastSnapshot = snapshot;
+            mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
+        }
+
+        sendMessage(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
     }
 
     private class VcnUnderlyingNetworkTrackerCallback implements UnderlyingNetworkTrackerCallback {
@@ -682,7 +725,8 @@ public class VcnGatewayConnection extends StateMachine {
                 case EVENT_TRANSFORM_CREATED: // Fallthrough
                 case EVENT_SETUP_COMPLETED: // Fallthrough
                 case EVENT_DISCONNECT_REQUESTED: // Fallthrough
-                case EVENT_TEARDOWN_TIMEOUT_EXPIRED:
+                case EVENT_TEARDOWN_TIMEOUT_EXPIRED: // Fallthrough
+                case EVENT_SUBSCRIPTIONS_CHANGED:
                     logUnexpectedEvent(msg.what);
                     break;
                 default:
@@ -1384,10 +1428,15 @@ public class VcnGatewayConnection extends StateMachine {
         public UnderlyingNetworkTracker newUnderlyingNetworkTracker(
                 VcnContext vcnContext,
                 ParcelUuid subscriptionGroup,
+                TelephonySubscriptionSnapshot snapshot,
                 Set<Integer> requiredUnderlyingNetworkCapabilities,
                 UnderlyingNetworkTrackerCallback callback) {
             return new UnderlyingNetworkTracker(
-                    vcnContext, subscriptionGroup, requiredUnderlyingNetworkCapabilities, callback);
+                    vcnContext,
+                    subscriptionGroup,
+                    snapshot,
+                    requiredUnderlyingNetworkCapabilities,
+                    callback);
         }
 
         /** Builds a new IkeSession. */
