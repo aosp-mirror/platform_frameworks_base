@@ -43,6 +43,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
 import com.android.server.FgThread;
 import com.android.server.SystemService;
+import com.android.server.timedetector.DeviceConfig;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 import com.android.server.timezonedetector.TimeZoneDetectorService;
 
@@ -227,10 +228,10 @@ public class LocationTimeZoneManagerService extends Binder {
                     LocationTimeZoneProvider secondary = createSecondaryProvider();
                     mLocationTimeZoneDetectorController =
                             new ControllerImpl(mThreadingDomain, primary, secondary);
-                    ControllerCallbackImpl callback = new ControllerCallbackImpl(
-                            mThreadingDomain);
+                    DeviceConfig deviceConfig = new DeviceConfig();
                     mEnvironment = new ControllerEnvironmentImpl(
-                            mThreadingDomain, mLocationTimeZoneDetectorController);
+                            mThreadingDomain, deviceConfig, mLocationTimeZoneDetectorController);
+                    ControllerCallbackImpl callback = new ControllerCallbackImpl(mThreadingDomain);
                     mLocationTimeZoneDetectorController.initialize(mEnvironment, callback);
                 }
             }

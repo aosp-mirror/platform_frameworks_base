@@ -19,6 +19,7 @@ package com.android.server.timezonedetector.location;
 import android.annotation.NonNull;
 
 import com.android.server.LocalServices;
+import com.android.server.timedetector.DeviceConfig;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ConfigurationInternal;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
@@ -32,18 +33,22 @@ import java.util.Objects;
  */
 class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Environment {
 
-    private static final Duration PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
-    private static final Duration PROVIDER_INITIALIZATION_TIMEOUT_FUZZ = Duration.ofMinutes(1);
-    private static final Duration PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(5);
+    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ =
+            Duration.ofMinutes(1);
+    private static final Duration DEFAULT_PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
 
     @NonNull private final TimeZoneDetectorInternal mTimeZoneDetectorInternal;
     @NonNull private final LocationTimeZoneProviderController mController;
+    @NonNull private final DeviceConfig mDeviceConfig;
     @NonNull private final ConfigurationChangeListener mConfigurationChangeListener;
 
     ControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
+            @NonNull DeviceConfig deviceConfig,
             @NonNull LocationTimeZoneProviderController controller) {
         super(threadingDomain);
         mController = Objects.requireNonNull(controller);
+        mDeviceConfig = Objects.requireNonNull(deviceConfig);
         mTimeZoneDetectorInternal = LocalServices.getService(TimeZoneDetectorInternal.class);
 
         // Listen for configuration changes.
@@ -66,18 +71,24 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
     @Override
     @NonNull
     Duration getProviderInitializationTimeout() {
-        return PROVIDER_INITIALIZATION_TIMEOUT;
+        return mDeviceConfig.getDurationFromMillis(
+                DeviceConfig.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
+                DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT);
     }
 
     @Override
     @NonNull
     Duration getProviderInitializationTimeoutFuzz() {
-        return PROVIDER_INITIALIZATION_TIMEOUT_FUZZ;
+        return mDeviceConfig.getDurationFromMillis(
+                DeviceConfig.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
+                DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ);
     }
 
     @Override
     @NonNull
     Duration getUncertaintyDelay() {
-        return PROVIDER_UNCERTAINTY_DELAY;
+        return mDeviceConfig.getDurationFromMillis(
+                DeviceConfig.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
+                DEFAULT_PROVIDER_UNCERTAINTY_DELAY);
     }
 }
