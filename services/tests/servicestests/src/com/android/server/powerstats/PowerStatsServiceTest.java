@@ -221,7 +221,7 @@ public class PowerStatsServiceTest {
         }
 
         @Override
-        public EnergyMeasurement[] readEnergyMeters(int[] channelIds) {
+        public EnergyMeasurement[] readEnergyMeter(int[] channelIds) {
             EnergyMeasurement[] energyMeasurementList = new EnergyMeasurement[ENERGY_METER_COUNT];
             for (int i = 0; i < energyMeasurementList.length; i++) {
                 energyMeasurementList[i] = new EnergyMeasurement();
