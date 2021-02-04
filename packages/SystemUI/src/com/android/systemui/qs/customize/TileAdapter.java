@@ -98,7 +98,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     private final UiEventLogger mUiEventLogger;
     private final AccessibilityDelegateCompat mAccessibilityDelegate;
     private RecyclerView mRecyclerView;
-    private final int mNumColumns;
+    private int mNumColumns;
 
     @Inject
     public TileAdapter(Context context, QSTileHost qsHost, UiEventLogger uiEventLogger) {
@@ -121,6 +121,21 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
     @Override
     public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
         mRecyclerView = null;
+    }
+
+    /**
+     * Update the number of columns to show, from resources.
+     *
+     * @return {@code true} if the number of columns changed, {@code false} otherwise
+     */
+    public boolean updateNumColumns() {
+        int numColumns = mContext.getResources().getInteger(R.integer.quick_settings_num_columns);
+        if (numColumns != mNumColumns) {
+            mNumColumns = numColumns;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public int getNumColumns() {
