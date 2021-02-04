@@ -20183,7 +20183,7 @@ package android.media {
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
-    ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
+    ctor @RequiresPermission(android.Manifest.permission.RECORD_AUDIO) public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
     method public void addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method @Deprecated public void addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler);
     method protected void finalize();
@@ -20244,7 +20244,7 @@ package android.media {
 
   public static class AudioRecord.Builder {
     ctor public AudioRecord.Builder();
-    method public android.media.AudioRecord build() throws java.lang.UnsupportedOperationException;
+    method @RequiresPermission(android.Manifest.permission.RECORD_AUDIO) public android.media.AudioRecord build() throws java.lang.UnsupportedOperationException;
     method public android.media.AudioRecord.Builder setAudioFormat(@NonNull android.media.AudioFormat) throws java.lang.IllegalArgumentException;
     method @NonNull public android.media.AudioRecord.Builder setAudioPlaybackCaptureConfig(@NonNull android.media.AudioPlaybackCaptureConfiguration);
     method public android.media.AudioRecord.Builder setAudioSource(int) throws java.lang.IllegalArgumentException;

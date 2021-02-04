@@ -21,6 +21,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
@@ -67,7 +68,14 @@ import java.util.concurrent.Executor;
  * fill with the new audio data. The size of this buffer, specified during the construction,
  * determines how long an AudioRecord can record before "over-running" data that has not
  * been read yet. Data should be read from the audio hardware in chunks of sizes inferior to
- * the total recording buffer size.
+ * the total recording buffer size.</p>
+ * <p>
+ * Applications creating an AudioRecord instance need
+ * {@link android.Manifest.permission#RECORD_AUDIO} or the Builder will throw
+ * {@link java.lang.UnsupportedOperationException} on
+ * {@link android.media.AudioRecord.Builder#build build()},
+ * and the constructor will return an instance in state
+ * {@link #STATE_UNINITIALIZED}.</p>
  */
 public class AudioRecord implements AudioRouting, MicrophoneDirection,
         AudioRecordingMonitor, AudioRecordingMonitorClient
@@ -297,6 +305,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      *   smaller than getMinBufferSize() will result in an initialization failure.
      * @throws java.lang.IllegalArgumentException
      */
+    @RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
     public AudioRecord(int audioSource, int sampleRateInHz, int channelConfig, int audioFormat,
             int bufferSizeInBytes)
     throws IllegalArgumentException {
@@ -334,6 +343,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
      * @throws IllegalArgumentException
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
     public AudioRecord(AudioAttributes attributes, AudioFormat format, int bufferSizeInBytes,
             int sessionId) throws IllegalArgumentException {
         mRecordingState = RECORDSTATE_STOPPED;
@@ -718,6 +728,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
          *     were incompatible, or if they are not supported by the device,
          *     or if the device was not available.
          */
+        @RequiresPermission(android.Manifest.permission.RECORD_AUDIO)
         public AudioRecord build() throws UnsupportedOperationException {
             if (mAudioPlaybackCaptureConfiguration != null) {
                 return buildAudioPlaybackCaptureRecord();
