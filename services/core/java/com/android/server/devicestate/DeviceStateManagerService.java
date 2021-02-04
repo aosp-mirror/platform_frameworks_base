@@ -19,7 +19,9 @@ package com.android.server.devicestate;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.hardware.devicestate.DeviceStateManager.INVALID_DEVICE_STATE;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.devicestate.IDeviceStateManager;
@@ -29,7 +31,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.util.IntArray;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -42,7 +43,7 @@ import com.android.server.policy.DeviceStatePolicyImpl;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * A system service that manages the state of a device with user-configurable hardware like a
@@ -74,26 +75,31 @@ public final class DeviceStateManagerService extends SystemService {
     @NonNull
     private final BinderService mBinderService;
 
+    // All supported device states keyed by identifier.
     @GuardedBy("mLock")
-    private IntArray mSupportedDeviceStates;
+    private SparseArray<DeviceState> mDeviceStates = new SparseArray<>();
 
-    // The current committed device state.
+    // The current committed device state. The default of INVALID_DEVICE_STATE will be replaced by
+    // the current state after the initial callback from the DeviceStateProvider.
     @GuardedBy("mLock")
-    private int mCommittedState = INVALID_DEVICE_STATE;
+    @NonNull
+    private DeviceState mCommittedState = new DeviceState(INVALID_DEVICE_STATE, "INVALID");
     // The device state that is currently awaiting callback from the policy to be committed.
     @GuardedBy("mLock")
-    private int mPendingState = INVALID_DEVICE_STATE;
+    @NonNull
+    private Optional<DeviceState> mPendingState = Optional.empty();
     // Whether or not the policy is currently waiting to be notified of the current pending state.
     @GuardedBy("mLock")
     private boolean mIsPolicyWaitingForState = false;
     // The device state that is currently requested and is next to be configured and committed.
     // Can be overwritten by an override state value if requested.
     @GuardedBy("mLock")
-    private int mRequestedState = INVALID_DEVICE_STATE;
-    // The most recently requested override state, or INVALID_DEVICE_STATE if no override is
-    // requested.
+    @NonNull
+    private Optional<DeviceState> mRequestedState = Optional.empty();
+    // The most recently requested override state, or empty if no override is requested.
     @GuardedBy("mLock")
-    private int mRequestedOverrideState = INVALID_DEVICE_STATE;
+    @NonNull
+    private Optional<DeviceState> mRequestedOverrideState = Optional.empty();
 
     // List of registered callbacks indexed by process id.
     @GuardedBy("mLock")
@@ -122,18 +128,20 @@ public final class DeviceStateManagerService extends SystemService {
      *
      * @see #getPendingState()
      */
-    int getCommittedState() {
+    @NonNull
+    DeviceState getCommittedState() {
         synchronized (mLock) {
             return mCommittedState;
         }
     }
 
     /**
-     * Returns the state the system is currently configuring, or {@link #INVALID_DEVICE_STATE} if
-     * the system is not in the process of configuring a state.
+     * Returns the state the system is currently configuring, or {@link Optional#empty()} if the
+     * system is not in the process of configuring a state.
      */
     @VisibleForTesting
-    int getPendingState() {
+    @NonNull
+    Optional<DeviceState> getPendingState() {
         synchronized (mLock) {
             return mPendingState;
         }
@@ -143,7 +151,8 @@ public final class DeviceStateManagerService extends SystemService {
      * Returns the requested state. The service will configure the device to match the requested
      * state when possible.
      */
-    int getRequestedState() {
+    @NonNull
+    Optional<DeviceState> getRequestedState() {
         synchronized (mLock) {
             return mRequestedState;
         }
@@ -165,7 +174,7 @@ public final class DeviceStateManagerService extends SystemService {
                 return false;
             }
 
-            mRequestedOverrideState = overrideState;
+            mRequestedOverrideState = getStateLocked(overrideState);
             updatePendingStateLocked();
         }
 
@@ -181,20 +190,24 @@ public final class DeviceStateManagerService extends SystemService {
     }
 
     /**
-     * Returns the current requested override state, or {@link #INVALID_DEVICE_STATE} is no override
+     * Returns the current requested override state, or {@link Optional#empty()} if no override
      * state is requested.
      */
-    int getOverrideState() {
+    @NonNull
+    Optional<DeviceState> getOverrideState() {
         synchronized (mLock) {
             return mRequestedOverrideState;
         }
     }
 
     /** Returns the list of currently supported device states. */
-    int[] getSupportedStates() {
+    DeviceState[] getSupportedStates() {
         synchronized (mLock) {
-            // Copy array to prevent external modification of internal state.
-            return Arrays.copyOf(mSupportedDeviceStates.toArray(), mSupportedDeviceStates.size());
+            DeviceState[] supportedStates = new DeviceState[mDeviceStates.size()];
+            for (int i = 0; i < supportedStates.length; i++) {
+                supportedStates[i] = mDeviceStates.valueAt(i);
+            }
+            return supportedStates;
         }
     }
 
@@ -203,24 +216,26 @@ public final class DeviceStateManagerService extends SystemService {
         return mBinderService;
     }
 
-    private void updateSupportedStates(int[] supportedDeviceStates) {
-        // Must ensure sorted as isSupportedStateLocked() impl uses binary search.
-        Arrays.sort(supportedDeviceStates, 0, supportedDeviceStates.length);
+    private void updateSupportedStates(DeviceState[] supportedDeviceStates) {
         synchronized (mLock) {
-            mSupportedDeviceStates = IntArray.wrap(supportedDeviceStates);
+            mDeviceStates.clear();
+            for (int i = 0; i < supportedDeviceStates.length; i++) {
+                DeviceState state = supportedDeviceStates[i];
+                mDeviceStates.put(state.getIdentifier(), state);
+            }
 
-            if (mRequestedState != INVALID_DEVICE_STATE
-                    && !isSupportedStateLocked(mRequestedState)) {
+            if (mRequestedState.isPresent()
+                    && !isSupportedStateLocked(mRequestedState.get().getIdentifier())) {
                 // The current requested state is no longer valid. We'll clear it here, though
                 // we won't actually update the current state until a callback comes from the
                 // provider with the most recent state.
-                mRequestedState = INVALID_DEVICE_STATE;
+                mRequestedState = Optional.empty();
             }
-            if (mRequestedOverrideState != INVALID_DEVICE_STATE
-                    && !isSupportedStateLocked(mRequestedOverrideState)) {
+            if (mRequestedOverrideState.isPresent()
+                    && !isSupportedStateLocked(mRequestedOverrideState.get().getIdentifier())) {
                 // The current override state is no longer valid. We'll clear it here and update
                 // the committed state if necessary.
-                mRequestedOverrideState = INVALID_DEVICE_STATE;
+                mRequestedOverrideState = Optional.empty();
             }
             updatePendingStateLocked();
         }
@@ -230,10 +245,19 @@ public final class DeviceStateManagerService extends SystemService {
 
     /**
      * Returns {@code true} if the provided state is supported. Requires that
-     * {@link #mSupportedDeviceStates} is sorted prior to calling.
+     * {@link #mDeviceStates} is sorted prior to calling.
      */
-    private boolean isSupportedStateLocked(int state) {
-        return mSupportedDeviceStates.binarySearch(state) >= 0;
+    private boolean isSupportedStateLocked(int identifier) {
+        return mDeviceStates.contains(identifier);
+    }
+
+    /**
+     * Returns the {@link DeviceState} with the supplied {@code identifier}, or {@code null} if
+     * there is no device state with the identifier.
+     */
+    @Nullable
+    private Optional<DeviceState> getStateLocked(int identifier) {
+        return Optional.ofNullable(mDeviceStates.get(identifier));
     }
 
     /**
@@ -242,10 +266,11 @@ public final class DeviceStateManagerService extends SystemService {
      *
      * @see #isSupportedStateLocked(int)
      */
-    private void requestState(int state) {
+    private void requestState(int identifier) {
         synchronized (mLock) {
-            if (isSupportedStateLocked(state)) {
-                mRequestedState = state;
+            final Optional<DeviceState> requestedState = getStateLocked(identifier);
+            if (requestedState.isPresent()) {
+                mRequestedState = requestedState;
             }
             updatePendingStateLocked();
         }
@@ -259,19 +284,19 @@ public final class DeviceStateManagerService extends SystemService {
      * changed.
      */
     private void updatePendingStateLocked() {
-        if (mPendingState != INVALID_DEVICE_STATE) {
+        if (mPendingState.isPresent()) {
             // Have pending state, can not configure a new state until the state is committed.
             return;
         }
 
-        int stateToConfigure;
-        if (mRequestedOverrideState != INVALID_DEVICE_STATE) {
-            stateToConfigure = mRequestedOverrideState;
+        final DeviceState stateToConfigure;
+        if (mRequestedOverrideState.isPresent()) {
+            stateToConfigure = mRequestedOverrideState.get();
         } else {
-            stateToConfigure = mRequestedState;
+            stateToConfigure = mRequestedState.orElse(null);
         }
 
-        if (stateToConfigure == INVALID_DEVICE_STATE) {
+        if (stateToConfigure == null) {
             // No currently requested state.
             return;
         }
@@ -281,7 +306,7 @@ public final class DeviceStateManagerService extends SystemService {
             return;
         }
 
-        mPendingState = stateToConfigure;
+        mPendingState = Optional.of(stateToConfigure);
         mIsPolicyWaitingForState = true;
     }
 
@@ -302,7 +327,7 @@ public final class DeviceStateManagerService extends SystemService {
                 return;
             }
             mIsPolicyWaitingForState = false;
-            state = mPendingState;
+            state = mPendingState.get().getIdentifier();
         }
 
         if (DEBUG) {
@@ -333,9 +358,9 @@ public final class DeviceStateManagerService extends SystemService {
             if (DEBUG) {
                 Slog.d(TAG, "Committing state: " + mPendingState);
             }
-            mCommittedState = mPendingState;
-            newState = mCommittedState;
-            mPendingState = INVALID_DEVICE_STATE;
+            mCommittedState = mPendingState.get();
+            newState = mCommittedState.getIdentifier();
+            mPendingState = Optional.empty();
             updatePendingStateLocked();
         }
 
@@ -389,7 +414,7 @@ public final class DeviceStateManagerService extends SystemService {
             }
 
             mCallbacks.put(callingPid, record);
-            currentState = mCommittedState;
+            currentState = mCommittedState.getIdentifier();
         }
 
         // Notify the callback of the state at registration.
@@ -406,10 +431,10 @@ public final class DeviceStateManagerService extends SystemService {
         pw.println("DEVICE STATE MANAGER (dumpsys device_state)");
 
         synchronized (mLock) {
-            pw.println("  mCommittedState=" + toString(mCommittedState));
-            pw.println("  mPendingState=" + toString(mPendingState));
-            pw.println("  mRequestedState=" + toString(mRequestedState));
-            pw.println("  mRequestedOverrideState=" + toString(mRequestedOverrideState));
+            pw.println("  mCommittedState=" + mCommittedState);
+            pw.println("  mPendingState=" + mPendingState);
+            pw.println("  mRequestedState=" + mRequestedState);
+            pw.println("  mRequestedOverrideState=" + mRequestedOverrideState);
 
             final int callbackCount = mCallbacks.size();
             pw.println();
@@ -421,30 +446,28 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private String toString(int state) {
-        return state == INVALID_DEVICE_STATE ? "(none)" : String.valueOf(state);
-    }
-
     private final class DeviceStateProviderListener implements DeviceStateProvider.Listener {
         @Override
-        public void onSupportedDeviceStatesChanged(int[] newDeviceStates) {
+        public void onSupportedDeviceStatesChanged(DeviceState[] newDeviceStates) {
+            if (newDeviceStates.length == 0) {
+                throw new IllegalArgumentException("Supported device states must not be empty");
+            }
             for (int i = 0; i < newDeviceStates.length; i++) {
-                if (newDeviceStates[i] < 0) {
-                    throw new IllegalArgumentException("Supported device states includes invalid"
-                            + " value: " + newDeviceStates[i]);
+                if (newDeviceStates[i].getIdentifier() == INVALID_DEVICE_STATE) {
+                    throw new IllegalArgumentException(
+                            "Supported device states includes INVALID_DEVICE_STATE identifier");
                 }
             }
-
             updateSupportedStates(newDeviceStates);
         }
 
         @Override
-        public void onStateChanged(int state) {
-            if (state < 0) {
-                throw new IllegalArgumentException("Invalid state: " + state);
+        public void onStateChanged(@IntRange(from = 0) int identifier) {
+            if (identifier < 0) {
+                throw new IllegalArgumentException("Invalid identifier: " + identifier);
             }
 
-            requestState(state);
+            requestState(identifier);
         }
     }
 
