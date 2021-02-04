@@ -1580,6 +1580,13 @@
        <enum name="always" value="1" />
     </attr>
 
+    <attr name="memtagMode">
+       <enum name="default" value="-1" />
+       <enum name="off" value="0" />
+       <enum name="async" value="1" />
+       <enum name="sync" value="2" />
+    </attr>
+
     <!-- The <code>manifest</code> tag is the root of an
          <code>AndroidManifest.xml</code> file,
          describing the contents of an Android package (.apk) file.  One
@@ -1846,6 +1853,10 @@
         <attr name="allowNativeHeapPointerTagging" format="boolean" />
 
         <attr name="gwpAsanMode" />
+
+        <attr name="memtagMode" />
+
+        <attr name="nativeHeapZeroInit" format="boolean" />
 
         <!-- @hide no longer used, kept to preserve padding -->
         <attr name="allowAutoRevokePermissionsExemption" format="boolean" />
@@ -2417,6 +2428,8 @@
         <!-- Required name of the process that is allowed -->
         <attr name="process" />
         <attr name="gwpAsanMode" />
+        <attr name="memtagMode" />
+        <attr name="nativeHeapZeroInit" />
     </declare-styleable>
 
     <!-- The <code>deny-permission</code> tag specifies that a permission is to be denied
