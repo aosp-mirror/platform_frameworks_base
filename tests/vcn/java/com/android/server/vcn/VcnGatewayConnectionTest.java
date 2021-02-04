@@ -24,10 +24,10 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
-import android.annotation.NonNull;
-import android.content.Context;
 import android.net.LinkProperties;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -37,14 +37,15 @@ import android.net.vcn.VcnTransportInfo;
 import android.net.wifi.WifiInfo;
 import android.os.ParcelUuid;
 import android.os.Process;
-import android.os.test.TestLooper;
 import android.telephony.SubscriptionInfo;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -56,8 +57,9 @@ import java.util.UUID;
 /** Tests for TelephonySubscriptionTracker */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class VcnGatewayConnectionTest {
+public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     private static final int TEST_UID = Process.myUid();
+
     private static final ParcelUuid TEST_PARCEL_UUID = new ParcelUuid(UUID.randomUUID());
     private static final int TEST_SIM_SLOT_INDEX = 1;
     private static final int TEST_SUBSCRIPTION_ID_1 = 2;
@@ -73,17 +75,12 @@ public class VcnGatewayConnectionTest {
         TEST_SUBID_TO_GROUP_MAP = Collections.unmodifiableMap(subIdToGroupMap);
     }
 
-    @NonNull private final Context mContext;
-    @NonNull private final TestLooper mTestLooper;
-    @NonNull private final VcnNetworkProvider mVcnNetworkProvider;
-    @NonNull private final VcnGatewayConnection.Dependencies mDeps;
-    @NonNull private final WifiInfo mWifiInfo;
+    private WifiInfo mWifiInfo;
 
-    public VcnGatewayConnectionTest() {
-        mContext = mock(Context.class);
-        mTestLooper = new TestLooper();
-        mVcnNetworkProvider = mock(VcnNetworkProvider.class);
-        mDeps = mock(VcnGatewayConnection.Dependencies.class);
+    @Before
+    public void setUp() throws Exception {
+        super.setUp();
+
         mWifiInfo = mock(WifiInfo.class);
     }
 
@@ -131,5 +128,14 @@ public class VcnGatewayConnectionTest {
     @Test
     public void testBuildNetworkCapabilitiesUnderlyingCell() throws Exception {
         verifyBuildNetworkCapabilitiesCommon(TRANSPORT_CELLULAR);
+    }
+
+    @Test
+    public void testSubscriptionSnapshotUpdateNotifiesUnderlyingNetworkTracker() {
+        final TelephonySubscriptionSnapshot updatedSnapshot =
+                mock(TelephonySubscriptionSnapshot.class);
+        mGatewayConnection.updateSubscriptionSnapshot(updatedSnapshot);
+
+        verify(mUnderlyingNetworkTracker).updateSubscriptionSnapshot(eq(updatedSnapshot));
     }
 }
