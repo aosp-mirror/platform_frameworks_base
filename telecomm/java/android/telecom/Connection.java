@@ -3390,11 +3390,20 @@ public abstract class Connection extends Conferenceable {
      *                  {@code true}, {@link #onDisconnect()} will be called soon after
      *                  this is called.
      * @param isInContacts Indicates whether the caller is in the user's contacts list.
+     * @param callScreeningResponse The response that was returned from the
+     *                              {@link CallScreeningService} that handled this call. If no
+     *                              response was received from a call screening service,
+     *                              this will be {@code null}.
+     * @param isResponseFromSystemDialer Whether {@code callScreeningResponse} was sent from the
+     *                                  system dialer. If {@code callScreeningResponse} is
+     *                                  {@code null}, this will be {@code false}.
      * @hide
      */
     @SystemApi
     @RequiresPermission(Manifest.permission.READ_CONTACTS)
-    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts) { }
+    public void onCallFilteringCompleted(boolean isBlocked, boolean isInContacts,
+            @Nullable CallScreeningService.CallResponse callScreeningResponse,
+            boolean isResponseFromSystemDialer) { }
 
     static String toLogSafePhoneNumber(String number) {
         // For unknown number, log empty string.

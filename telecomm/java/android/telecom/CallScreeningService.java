@@ -30,11 +30,15 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.os.RemoteException;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.telecom.ICallScreeningAdapter;
 import com.android.internal.telecom.ICallScreeningService;
+
+import java.util.Objects;
 
 /**
  * This service can be implemented by the default dialer (see
@@ -132,7 +136,10 @@ public abstract class CallScreeningService extends Service {
                                 .createFromParcelableCall((ParcelableCall) args.arg2);
                         onScreenCall(callDetails);
                         if (callDetails.getCallDirection() == Call.Details.DIRECTION_OUTGOING) {
-                            mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
+                            mCallScreeningAdapter.onScreeningResponse(
+                                    callDetails.getTelecomCallId(),
+                                    new ComponentName(getPackageName(), getClass().getName()),
+                                    null);
                         }
                     } catch (RemoteException e) {
                         Log.w(this, "Exception when screening call: " + e);
@@ -156,6 +163,106 @@ public abstract class CallScreeningService extends Service {
     }
 
     private ICallScreeningAdapter mCallScreeningAdapter;
+
+    /**
+     * Parcelable version of {@link CallResponse} used to do IPC.
+     * @hide
+     */
+    public static class ParcelableCallResponse implements Parcelable {
+        private final boolean mShouldDisallowCall;
+        private final boolean mShouldRejectCall;
+        private final boolean mShouldSilenceCall;
+        private final boolean mShouldSkipCallLog;
+        private final boolean mShouldSkipNotification;
+        private final boolean mShouldScreenCallViaAudioProcessing;
+
+        private ParcelableCallResponse(
+                 boolean shouldDisallowCall,
+                 boolean shouldRejectCall,
+                 boolean shouldSilenceCall,
+                 boolean shouldSkipCallLog,
+                 boolean shouldSkipNotification,
+                 boolean shouldScreenCallViaAudioProcessing) {
+            mShouldDisallowCall = shouldDisallowCall;
+            mShouldRejectCall = shouldRejectCall;
+            mShouldSilenceCall = shouldSilenceCall;
+            mShouldSkipCallLog = shouldSkipCallLog;
+            mShouldSkipNotification = shouldSkipNotification;
+            mShouldScreenCallViaAudioProcessing = shouldScreenCallViaAudioProcessing;
+        }
+
+        protected ParcelableCallResponse(Parcel in) {
+            mShouldDisallowCall = in.readBoolean();
+            mShouldRejectCall = in.readBoolean();
+            mShouldSilenceCall = in.readBoolean();
+            mShouldSkipCallLog = in.readBoolean();
+            mShouldSkipNotification = in.readBoolean();
+            mShouldScreenCallViaAudioProcessing = in.readBoolean();
+        }
+
+        public CallResponse toCallResponse() {
+            return new CallResponse.Builder()
+                    .setDisallowCall(mShouldDisallowCall)
+                    .setRejectCall(mShouldRejectCall)
+                    .setSilenceCall(mShouldSilenceCall)
+                    .setSkipCallLog(mShouldSkipCallLog)
+                    .setSkipNotification(mShouldSkipNotification)
+                    .setShouldScreenCallViaAudioProcessing(mShouldScreenCallViaAudioProcessing)
+                    .build();
+        }
+
+        public boolean shouldDisallowCall() {
+            return mShouldDisallowCall;
+        }
+
+        public boolean shouldRejectCall() {
+            return mShouldRejectCall;
+        }
+
+        public boolean shouldSilenceCall() {
+            return mShouldSilenceCall;
+        }
+
+        public boolean shouldSkipCallLog() {
+            return mShouldSkipCallLog;
+        }
+
+        public boolean shouldSkipNotification() {
+            return mShouldSkipNotification;
+        }
+
+        public boolean shouldScreenCallViaAudioProcessing() {
+            return mShouldScreenCallViaAudioProcessing;
+        }
+
+        public static final Creator<ParcelableCallResponse> CREATOR =
+                new Creator<ParcelableCallResponse>() {
+                    @Override
+                    public ParcelableCallResponse createFromParcel(Parcel in) {
+                        return new ParcelableCallResponse(in);
+                    }
+
+                    @Override
+                    public ParcelableCallResponse[] newArray(int size) {
+                        return new ParcelableCallResponse[size];
+                    }
+                };
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeBoolean(mShouldDisallowCall);
+            dest.writeBoolean(mShouldRejectCall);
+            dest.writeBoolean(mShouldSilenceCall);
+            dest.writeBoolean(mShouldSkipCallLog);
+            dest.writeBoolean(mShouldSkipNotification);
+            dest.writeBoolean(mShouldScreenCallViaAudioProcessing);
+        }
+    }
 
     /*
      * Information about how to respond to an incoming call.
@@ -235,6 +342,38 @@ public abstract class CallScreeningService extends Service {
          */
         public boolean getShouldScreenCallViaAudioProcessing() {
             return mShouldScreenCallViaAudioProcessing;
+        }
+
+        /** @hide */
+        public ParcelableCallResponse toParcelable() {
+            return new ParcelableCallResponse(
+                    mShouldDisallowCall,
+                    mShouldRejectCall,
+                    mShouldSilenceCall,
+                    mShouldSkipCallLog,
+                    mShouldSkipNotification,
+                    mShouldScreenCallViaAudioProcessing
+            );
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CallResponse that = (CallResponse) o;
+            return mShouldDisallowCall == that.mShouldDisallowCall &&
+                    mShouldRejectCall == that.mShouldRejectCall &&
+                    mShouldSilenceCall == that.mShouldSilenceCall &&
+                    mShouldSkipCallLog == that.mShouldSkipCallLog &&
+                    mShouldSkipNotification == that.mShouldSkipNotification &&
+                    mShouldScreenCallViaAudioProcessing == that.mShouldScreenCallViaAudioProcessing;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mShouldDisallowCall, mShouldRejectCall, mShouldSilenceCall,
+                    mShouldSkipCallLog, mShouldSkipNotification,
+                    mShouldScreenCallViaAudioProcessing);
         }
 
         public static class Builder {
@@ -423,21 +562,12 @@ public abstract class CallScreeningService extends Service {
     public final void respondToCall(@NonNull Call.Details callDetails,
             @NonNull CallResponse response) {
         try {
-            if (response.getDisallowCall()) {
-                mCallScreeningAdapter.disallowCall(
-                        callDetails.getTelecomCallId(),
-                        response.getRejectCall(),
-                        !response.getSkipCallLog(),
-                        !response.getSkipNotification(),
-                        new ComponentName(getPackageName(), getClass().getName()));
-            } else if (response.getSilenceCall()) {
-                mCallScreeningAdapter.silenceCall(callDetails.getTelecomCallId());
-            } else if (response.getShouldScreenCallViaAudioProcessing()) {
-                mCallScreeningAdapter.screenCallFurther(callDetails.getTelecomCallId());
-            } else {
-                mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
-            }
+            mCallScreeningAdapter.onScreeningResponse(
+                    callDetails.getTelecomCallId(),
+                    new ComponentName(getPackageName(), getClass().getName()),
+                    response.toParcelable());
         } catch (RemoteException e) {
+            Log.e(this, e, "Got remote exception when returning response");
         }
     }
 }
