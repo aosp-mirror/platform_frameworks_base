@@ -297,7 +297,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
     }
 
     private void updateSecurityViewGravity() {
-        View securityView = getChildAt(0);
+        View securityView = findKeyguardSecurityView();
 
         if (securityView == null) {
             return;
@@ -320,7 +320,7 @@ public class KeyguardSecurityContainer extends FrameLayout {
      * by the security view .
      */
     private void updateSecurityViewLocation(boolean animate) {
-        View securityView = getChildAt(0);
+        View securityView = findKeyguardSecurityView();
 
         if (securityView == null) {
             return;
@@ -353,6 +353,23 @@ public class KeyguardSecurityContainer extends FrameLayout {
         } else {
             securityView.setTranslationX(targetTranslation);
         }
+    }
+
+    @Nullable
+    private KeyguardSecurityViewFlipper findKeyguardSecurityView() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+
+            if (isKeyguardSecurityView(child)) {
+                return (KeyguardSecurityViewFlipper) child;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean isKeyguardSecurityView(View view) {
+        return view instanceof KeyguardSecurityViewFlipper;
     }
 
     public void onPause() {
@@ -640,39 +657,30 @@ public class KeyguardSecurityContainer extends FrameLayout {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        // This is a little hacky, but this element only ever has one wrap_content child, and is
-        // itself set to match_parent, so we can take a couple of shortcuts compared to
-        // FrameLayout#onMeasure
         int maxHeight = 0;
         int maxWidth = 0;
         int childState = 0;
-
-        int count = getChildCount();
 
         int halfWidthMeasureSpec = MeasureSpec.makeMeasureSpec(
                 MeasureSpec.getSize(widthMeasureSpec) / 2,
                 MeasureSpec.getMode(widthMeasureSpec));
 
-        if (count > 1) {
-            throw new IllegalStateException("KeyguardSecurityContainer should only have one child");
-        }
-
-        if (count > 0) {
-            final View securityView = getChildAt(0);
-            if (securityView.getVisibility() != GONE) {
-                if (mOneHandedMode) {
-                    measureChildWithMargins(securityView, halfWidthMeasureSpec, 0,
+        for (int i = 0; i < getChildCount(); i++) {
+            final View view = getChildAt(i);
+            if (view.getVisibility() != GONE) {
+                if (mOneHandedMode && isKeyguardSecurityView(view)) {
+                    measureChildWithMargins(view, halfWidthMeasureSpec, 0,
                             heightMeasureSpec, 0);
                 } else {
-                    measureChildWithMargins(securityView, widthMeasureSpec, 0,
+                    measureChildWithMargins(view, widthMeasureSpec, 0,
                             heightMeasureSpec, 0);
                 }
-                final LayoutParams lp = (LayoutParams) securityView.getLayoutParams();
+                final LayoutParams lp = (LayoutParams) view.getLayoutParams();
                 maxWidth = Math.max(maxWidth,
-                        securityView.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
+                        view.getMeasuredWidth() + lp.leftMargin + lp.rightMargin);
                 maxHeight = Math.max(maxHeight,
-                        securityView.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
-                childState = combineMeasuredStates(childState, securityView.getMeasuredState());
+                        view.getMeasuredHeight() + lp.topMargin + lp.bottomMargin);
+                childState = combineMeasuredStates(childState, view.getMeasuredState());
             }
         }
 
