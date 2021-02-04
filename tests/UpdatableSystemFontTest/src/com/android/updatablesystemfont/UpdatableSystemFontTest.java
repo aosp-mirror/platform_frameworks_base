@@ -21,7 +21,9 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import android.platform.test.annotations.RootPermissionTest;
 
+import com.android.blockdevicewriter.BlockDeviceWriter;
 import com.android.fsverity.AddFsVerityCertRule;
+import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
@@ -34,6 +36,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -126,6 +130,44 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
                 TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
     }
 
+    @Test
+    public void reboot() throws Exception {
+        expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
+                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(fontPath).startsWith("/data/fonts/files/");
+
+        expectRemoteCommandToSucceed("stop");
+        expectRemoteCommandToSucceed("start");
+        waitUntilFontCommandIsReady();
+        String fontPathAfterReboot = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(fontPathAfterReboot).isEqualTo(fontPath);
+    }
+
+    @Test
+    public void reboot_clearDamagedFiles() throws Exception {
+        expectRemoteCommandToSucceed(String.format("cmd font update %s %s",
+                TEST_NOTO_COLOR_EMOJI_V1_TTF, TEST_NOTO_COLOR_EMOJI_V1_TTF_FSV_SIG));
+        String fontPath = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertThat(fontPath).startsWith("/data/fonts/files/");
+        assertThat(BlockDeviceWriter.canReadByte(getDevice(), fontPath, 0)).isTrue();
+
+        BlockDeviceWriter.damageFileAgainstBlockDevice(getDevice(), fontPath, 0);
+        expectRemoteCommandToSucceed("stop");
+        // We have to make sure system_server is gone before dropping caches, because system_server
+        // process holds font memory maps and prevents cache eviction.
+        waitUntilSystemServerIsGone();
+        BlockDeviceWriter.assertFileNotOpen(getDevice(), fontPath);
+        BlockDeviceWriter.dropCaches(getDevice());
+        assertThat(BlockDeviceWriter.canReadByte(getDevice(), fontPath, 0)).isFalse();
+
+        expectRemoteCommandToSucceed("start");
+        waitUntilFontCommandIsReady();
+        String fontPathAfterReboot = getFontPath(NOTO_COLOR_EMOJI_TTF);
+        assertWithMessage("Damaged file should be deleted")
+                .that(fontPathAfterReboot).startsWith("/system");
+    }
+
     private String getFontPath(String fontFileName) throws Exception {
         // TODO: add a dedicated command for testing.
         String lines = expectRemoteCommandToSucceed("cmd font dump");
@@ -152,5 +194,40 @@ public class UpdatableSystemFontTest extends BaseHostJUnit4Test {
         assertWithMessage("Unexpected success from `" + cmd + "`: " + result.getStderr())
                 .that(result.getStatus())
                 .isNotEqualTo(CommandStatus.SUCCESS);
+    }
+
+    private void waitUntilFontCommandIsReady() {
+        waitUntil(TimeUnit.SECONDS.toMillis(30), () -> {
+            try {
+                return getDevice().executeShellV2Command("cmd font status").getStatus()
+                        == CommandStatus.SUCCESS;
+            } catch (DeviceNotAvailableException e) {
+                return false;
+            }
+        });
+    }
+
+    private void waitUntilSystemServerIsGone() {
+        waitUntil(TimeUnit.SECONDS.toMillis(30), () -> {
+            try {
+                return getDevice().executeShellV2Command("pid system_server").getStatus()
+                        == CommandStatus.FAILED;
+            } catch (DeviceNotAvailableException e) {
+                return false;
+            }
+        });
+    }
+
+    private void waitUntil(long timeoutMillis, Supplier<Boolean> func) {
+        long untilMillis = System.currentTimeMillis() + timeoutMillis;
+        do {
+            if (func.get()) return;
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new AssertionError("Interrupted", e);
+            }
+        } while (System.currentTimeMillis() < untilMillis);
+        throw new AssertionError("Timed out");
     }
 }
