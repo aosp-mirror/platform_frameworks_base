@@ -16,20 +16,23 @@
 
 package android.hardware.devicestate;
 
+import android.hardware.devicestate.DeviceStateInfo;
+
 /** @hide */
 interface IDeviceStateManagerCallback {
     /**
-     * Called in response to a change in device state. Guaranteed to be called once with the initial
-     * value on registration of the callback.
+     * Called in response to a change in {@link DeviceStateInfo}.
      *
-     * @param deviceState the new state of the device.
+     * @param info the new device state info.
+     *
+     * @see DeviceStateInfo
      */
-    oneway void onDeviceStateChanged(int deviceState);
+    oneway void onDeviceStateInfoChanged(in DeviceStateInfo info);
 
     /**
      * Called to notify the callback that a request has become active. Guaranteed to be called
-     * after a subsequent call to {@link #onDeviceStateChanged(int)} if the request becoming active
-     * resulted in a device state change.
+     * after a subsequent call to {@link #onDeviceStateInfoChanged(DeviceStateInfo)} if the request
+     * becoming active resulted in a change of device state info.
      *
      * @param token the request token previously registered with
      *        {@link IDeviceStateManager#requestState(IBinder, int, int)}
@@ -38,8 +41,8 @@ interface IDeviceStateManagerCallback {
 
     /**
      * Called to notify the callback that a request has become suspended. Guaranteed to be called
-     * before a subsequent call to {@link #onDeviceStateChanged(int)} if the request becoming
-     * suspended resulted in a device state change.
+     * before a subsequent call to {@link #onDeviceStateInfoChanged(DeviceStateInfo)} if the request
+     * becoming suspended resulted in a change of device state info.
      *
      * @param token the request token previously registered with
      *        {@link IDeviceStateManager#requestState(IBinder, int, int)}
@@ -49,8 +52,8 @@ interface IDeviceStateManagerCallback {
     /**
      * Called to notify the callback that a request has become canceled. No further callbacks will
      * be triggered for this request. Guaranteed to be called before a subsequent call to
-     * {@link #onDeviceStateChanged(int)} if the request becoming canceled resulted in a device
-     * state change.
+     * {@link #onDeviceStateInfoChanged(DeviceStateInfo)} if the request becoming canceled resulted
+     * in a change of device state info.
      *
      * @param token the request token previously registered with
      *        {@link IDeviceStateManager#requestState(IBinder, int, int)}

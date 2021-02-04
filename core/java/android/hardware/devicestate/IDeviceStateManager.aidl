@@ -16,24 +16,25 @@
 
 package android.hardware.devicestate;
 
+import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.IDeviceStateManagerCallback;
 
 /** @hide */
 interface IDeviceStateManager {
+    /** Returns the current device state info. */
+    DeviceStateInfo getDeviceStateInfo();
+
     /**
      * Registers a callback to receive notifications from the device state manager. Only one
      * callback can be registered per-process.
      * <p>
      * As the callback mechanism is used to alert the caller of changes to request status a callback
      * <b>MUST</b> be registered before calling {@link #requestState(IBinder, int, int)} or
-     * {@link #cancelRequest(IBinder)}. Otherwise an exception will be thrown.
+     * {@link #cancelRequest(IBinder)}, otherwise an exception will be thrown.
      *
      * @throws SecurityException if a callback is already registered for the calling process.
      */
     void registerCallback(in IDeviceStateManagerCallback callback);
-
-    /** Returns the array of supported device state identifiers. */
-    int[] getSupportedDeviceStates();
 
     /**
      * Requests that the device enter the supplied {@code state}. A callback <b>MUST</b> have been
