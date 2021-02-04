@@ -255,7 +255,7 @@
     <color name="system_main_400">#909090</color>
     <!-- Shade of the main system color at 50% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_main_500">#777777</color>
+    <color name="system_main_500">#757575</color>
     <!-- Shade of the main system color at 40% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_main_600">#5e5e5e</color>
@@ -292,7 +292,7 @@
     <color name="system_accent_400">#1fa293</color>
     <!-- Shade of the accent system color at 50% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
-    <color name="system_accent_500">#00877a</color>
+    <color name="system_accent_500">#008377</color>
     <!-- Shade of the accent system color at 40% lightness.
      This value can be overlaid at runtime by OverlayManager RROs. -->
     <color name="system_accent_600">#006d61</color>
