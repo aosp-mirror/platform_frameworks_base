@@ -211,11 +211,11 @@ import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
@@ -648,12 +648,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * The insets state of sources provided by windows above the current window.
      */
-    InsetsState mAboveInsetsState = new InsetsState();
+    final InsetsState mAboveInsetsState = new InsetsState();
 
     /**
      * The insets sources provided by this window.
      */
-    ArrayMap<Integer, InsetsSource> mProvidedInsetsSources = new ArrayMap<>();
+    final SparseArray<InsetsSource> mProvidedInsetsSources = new SparseArray<>();
 
     /**
      * Surface insets from the previous call to relayout(), used to track
@@ -2204,7 +2204,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
-  @Override
+    @Override
     void removeImmediately() {
         super.removeImmediately();
 

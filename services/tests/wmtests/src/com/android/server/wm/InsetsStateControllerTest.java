@@ -32,13 +32,14 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.DisplayContent.IME_TARGET_INPUT;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -208,7 +209,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
         app.mAboveInsetsState.getSource(ITYPE_IME).setFrame(mImeWindow.getFrame());
 
         // Make sure app got notified.
-        verify(app, atLeast(1)).notifyInsetsChanged();
+        verify(app, atLeastOnce()).notifyInsetsChanged();
 
         // app will get visible IME insets while below IME.
         assertTrue(getController().getInsetsForWindow(app).getSource(ITYPE_IME).isVisible());
@@ -334,6 +335,92 @@ public class InsetsStateControllerTest extends WindowTestsBase {
 
         assertTrue(mDisplayContent.getInsetsPolicy().isTransient(ITYPE_STATUS_BAR));
         assertFalse(app.getInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
+    }
+
+    @Test
+    public void testUpdateAboveInsetsState_provideInsets() {
+        final WindowState app = createTestWindow("app");
+        final WindowState statusBar = createTestWindow("statusBar");
+        final WindowState navBar = createTestWindow("navBar");
+
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+
+        assertNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNull(statusBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNull(navBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+
+        getController().updateAboveInsetsState(statusBar, true /* notifyInsetsChange */);
+
+        assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNull(statusBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNull(navBar.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+    }
+
+    @Test
+    public void testUpdateAboveInsetsState_receiveInsets() {
+        final WindowState app = createTestWindow("app");
+        final WindowState statusBar = createTestWindow("statusBar");
+        final WindowState navBar = createTestWindow("navBar");
+
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+        getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
+
+        assertNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNull(app.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
+
+        getController().updateAboveInsetsState(app, true /* notifyInsetsChange */);
+
+        assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
+
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+    }
+
+    @Test
+    public void testUpdateAboveInsetsState_zOrderChanged() {
+        final WindowState ime = createTestWindow("ime");
+        final WindowState app = createTestWindow("app");
+        final WindowState statusBar = createTestWindow("statusBar");
+        final WindowState navBar = createTestWindow("navBar");
+
+        getController().getSourceProvider(ITYPE_IME).setWindow(ime, null, null);
+        getController().getSourceProvider(ITYPE_IME).setClientVisible(true);
+        getController().getSourceProvider(ITYPE_STATUS_BAR).setWindow(statusBar, null, null);
+        getController().getSourceProvider(ITYPE_NAVIGATION_BAR).setWindow(navBar, null, null);
+        getController().updateAboveInsetsState(ime, false /* notifyInsetsChange */);
+        getController().updateAboveInsetsState(statusBar, false /* notifyInsetsChange */);
+        getController().updateAboveInsetsState(navBar, false /* notifyInsetsChange */);
+
+        // ime is below others.
+        assertNull(app.mAboveInsetsState.peekSource(ITYPE_IME));
+        assertNull(statusBar.mAboveInsetsState.peekSource(ITYPE_IME));
+        assertNull(navBar.mAboveInsetsState.peekSource(ITYPE_IME));
+        assertNotNull(ime.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNotNull(ime.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
+
+        ime.getParent().positionChildAt(POSITION_TOP, ime, true /* includingParents */);
+        getController().updateAboveInsetsState(ime, true /* notifyInsetsChange */);
+
+        // ime is above others.
+        assertNotNull(app.mAboveInsetsState.peekSource(ITYPE_IME));
+        assertNotNull(statusBar.mAboveInsetsState.peekSource(ITYPE_IME));
+        assertNotNull(navBar.mAboveInsetsState.peekSource(ITYPE_IME));
+        assertNull(ime.mAboveInsetsState.peekSource(ITYPE_STATUS_BAR));
+        assertNull(ime.mAboveInsetsState.peekSource(ITYPE_NAVIGATION_BAR));
+
+        verify(ime, atLeastOnce()).notifyInsetsChanged();
+        verify(app, atLeastOnce()).notifyInsetsChanged();
+        verify(statusBar, atLeastOnce()).notifyInsetsChanged();
+        verify(navBar, atLeastOnce()).notifyInsetsChanged();
+    }
+
+    private WindowState createTestWindow(String name) {
+        final WindowState win = createWindow(null, TYPE_APPLICATION, name);
+        win.setHasSurface(true);
+        spyOn(win);
+        return win;
     }
 
     private InsetsStateController getController() {
