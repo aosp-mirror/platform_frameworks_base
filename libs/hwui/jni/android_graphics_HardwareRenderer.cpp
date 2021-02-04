@@ -603,14 +603,12 @@ static void android_view_ThreadedRenderer_setDisplayDensityDpi(JNIEnv*, jclass, 
 
 static void android_view_ThreadedRenderer_initDisplayInfo(JNIEnv*, jclass, jint physicalWidth,
                                                           jint physicalHeight, jfloat refreshRate,
-                                                          jfloat maxRefreshRate,
                                                           jint wideColorDataspace,
                                                           jlong appVsyncOffsetNanos,
                                                           jlong presentationDeadlineNanos) {
     DeviceInfo::setWidth(physicalWidth);
     DeviceInfo::setHeight(physicalHeight);
     DeviceInfo::setRefreshRate(refreshRate);
-    DeviceInfo::setMaxRefreshRate(maxRefreshRate);
     DeviceInfo::setWideColorDataspace(static_cast<ADataSpace>(wideColorDataspace));
     DeviceInfo::setAppVsyncOffsetNanos(appVsyncOffsetNanos);
     DeviceInfo::setPresentationDeadlineNanos(presentationDeadlineNanos);
@@ -735,7 +733,7 @@ static const JNINativeMethod gMethods[] = {
         {"nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark},
         {"nSetDisplayDensityDpi", "(I)V",
          (void*)android_view_ThreadedRenderer_setDisplayDensityDpi},
-        {"nInitDisplayInfo", "(IIFFIJJ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
+        {"nInitDisplayInfo", "(IIFIJJ)V", (void*)android_view_ThreadedRenderer_initDisplayInfo},
         {"preload", "()V", (void*)android_view_ThreadedRenderer_preload},
 };
 

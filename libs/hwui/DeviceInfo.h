@@ -35,7 +35,6 @@ class DeviceInfo {
 
 public:
     static DeviceInfo* get();
-    static float getMaxRefreshRate() { return get()->mMaxRefreshRate; }
     static int32_t getWidth() { return get()->mWidth; }
     static int32_t getHeight() { return get()->mHeight; }
     // Gets the density in density-independent pixels
@@ -45,7 +44,6 @@ public:
     static int64_t getAppOffset() { return get()->mAppVsyncOffsetNanos; }
     // Sets the density in density-independent pixels
     static void setDensity(float density) { sDensity.store(density); }
-    static void setMaxRefreshRate(float refreshRate) { get()->mMaxRefreshRate = refreshRate; }
     static void setWidth(int32_t width) { get()->mWidth = width; }
     static void setHeight(int32_t height) { get()->mHeight = height; }
     static void setRefreshRate(float refreshRate) {
@@ -91,7 +89,6 @@ private:
     SkColorType mWideColorType = SkColorType::kN32_SkColorType;
     int mDisplaysSize = 0;
     int mPhysicalDisplayIndex = -1;
-    float mMaxRefreshRate = 60.0;
     int32_t mWidth = 1080;
     int32_t mHeight = 1920;
     int64_t mVsyncPeriod = 16666666;

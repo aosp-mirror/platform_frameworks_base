@@ -162,8 +162,6 @@ enum DebugLevel {
  */
 #define PROPERTY_QEMU_KERNEL "ro.kernel.qemu"
 
-#define PROPERTY_RENDERAHEAD "debug.hwui.render_ahead"
-
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -246,8 +244,6 @@ public:
     static bool isolatedProcess;
 
     static int contextPriority;
-
-    static int defaultRenderAhead;
 
     static float defaultSdrWhitePoint;
 
