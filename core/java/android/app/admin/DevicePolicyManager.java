@@ -13198,7 +13198,8 @@ public class DevicePolicyManager {
             return null;
         }
         try {
-            return mService.createAndProvisionManagedProfile(provisioningParams);
+            return mService.createAndProvisionManagedProfile(
+                    provisioningParams, mContext.getPackageName());
         } catch (ServiceSpecificException e) {
             throw new ProvisioningException(e, e.errorCode);
         } catch (RemoteException e) {
@@ -13229,7 +13230,7 @@ public class DevicePolicyManager {
             throws ProvisioningException {
         if (mService != null) {
             try {
-                mService.provisionFullyManagedDevice(provisioningParams);
+                mService.provisionFullyManagedDevice(provisioningParams, mContext.getPackageName());
             } catch (ServiceSpecificException e) {
                 throw new ProvisioningException(e, e.errorCode);
             } catch (RemoteException re) {
