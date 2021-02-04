@@ -114,4 +114,18 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
             ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentHelp();
         }
     }
+
+    public int getPaddingX() {
+        if (mUdfpsAnimation == null) {
+            return 0;
+        }
+        return mUdfpsAnimation.getPaddingX();
+    }
+
+    public int getPaddingY() {
+        if (mUdfpsAnimation == null) {
+            return 0;
+        }
+        return mUdfpsAnimation.getPaddingY();
+    }
 }
