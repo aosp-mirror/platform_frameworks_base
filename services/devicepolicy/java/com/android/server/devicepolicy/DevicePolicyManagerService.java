@@ -92,6 +92,7 @@ import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_REMOVE_N
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_STARTING_PROFILE_FAILED;
+import static android.app.admin.DevicePolicyManager.UNSAFE_OPERATION_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -158,6 +159,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
+import android.app.admin.DevicePolicyManager.UnsafeOperationReason;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.DeviceStateCache;
@@ -1083,30 +1085,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @throws UnsafeStateException if it's not safe to execute the operation.
      */
     private void checkCanExecuteOrThrowUnsafe(@DevicePolicyOperation int operation) {
-        if (!canExecute(operation)) {
-            if (mSafetyChecker == null) {
-                // Happens on CTS after it's set just once (by OneTimeSafetyChecker)
-                throw new UnsafeStateException(operation);
-            }
-            // Let mSafetyChecker customize it (for example, by explaining how to retry)
-            throw mSafetyChecker.newUnsafeStateException(operation);
+        int reason = getUnsafeOperationReason(operation);
+        if (reason == UNSAFE_OPERATION_REASON_NONE) return;
+
+        if (mSafetyChecker == null) {
+            // Happens on CTS after it's set just once (by OneTimeSafetyChecker)
+            throw new UnsafeStateException(operation, reason);
         }
+        // Let mSafetyChecker customize it (for example, by explaining how to retry)
+        throw mSafetyChecker.newUnsafeStateException(operation, reason);
     }
 
     /**
-     * Returns whether it's safe to execute the given {@code operation}.
+     * Returns whether it's safe to execute the given {@code operation}, and why.
      */
-    boolean canExecute(@DevicePolicyOperation int operation) {
-        return mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation);
+    @UnsafeOperationReason
+    int getUnsafeOperationReason(@DevicePolicyOperation int operation) {
+        return mSafetyChecker == null ? UNSAFE_OPERATION_REASON_NONE
+                : mSafetyChecker.getUnsafeOperationReason(operation);
     }
 
     @Override
-    public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
+    public void setNextOperationSafety(@DevicePolicyOperation int operation,
+            @UnsafeOperationReason int reason) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
-        Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %b)",
-                DevicePolicyManager.operationToString(operation), safe));
-        mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
+        Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %s)",
+                DevicePolicyManager.operationToString(operation),
+                DevicePolicyManager.unsafeOperationReasonToString(reason)));
+        mSafetyChecker = new OneTimeSafetyChecker(this, operation, reason);
     }
 
     /**
