@@ -29,6 +29,8 @@ import com.android.systemui.qs.QSPanel.QSTileLayout;
 import com.android.systemui.qs.TouchAnimator.Builder;
 import com.android.systemui.qs.TouchAnimator.Listener;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.qs.tileimpl.QSTileBaseView;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 
@@ -87,11 +89,13 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private final Executor mExecutor;
     private final TunerService mTunerService;
     private boolean mShowCollapsedOnKeyguard;
+    private final FeatureFlags mFeatureFlags;
 
     @Inject
     public QSAnimator(QS qs, QuickQSPanel quickPanel, QSPanelController qsPanelController,
             QuickQSPanelController quickQSPanelController, QSTileHost qsTileHost,
-            QSSecurityFooter securityFooter, @Main Executor executor, TunerService tunerService) {
+            QSSecurityFooter securityFooter, @Main Executor executor, TunerService tunerService,
+            FeatureFlags featureFlags) {
         mQs = qs;
         mQuickQsPanel = quickPanel;
         mQsPanelController = qsPanelController;
@@ -100,6 +104,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         mHost = qsTileHost;
         mExecutor = executor;
         mTunerService = tunerService;
+        mFeatureFlags = featureFlags;
         mHost.addCallback(this);
         mQsPanelController.addOnAttachStateChangeListener(this);
         qs.getView().addOnLayoutChangeListener(this);
@@ -228,6 +233,7 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                 // Quick tiles.
                 QSTileView quickTileView = mQuickQSPanelController.getTileView(tile);
                 if (quickTileView == null) continue;
+                View qqsBgCircle = ((QSTileBaseView) quickTileView).getBgCircle();
 
                 getRelativePosition(loc1, quickTileView.getIcon().getIconView(), view);
                 getRelativePosition(loc2, tileIcon, view);
@@ -248,6 +254,11 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
                     // location.
                     translationXBuilder.addFloat(tileView, "translationX", -xDiff, 0);
                     translationYBuilder.addFloat(tileView, "translationY", -yDiff, 0);
+
+                    if (mFeatureFlags.isQSLabelsEnabled()) {
+                        firstPageBuilder.addFloat(qqsBgCircle, "alpha", 1, 1, 0);
+                        mAllViews.add(qqsBgCircle);
+                    }
 
                 } else { // These tiles disappear when expanding
                     firstPageBuilder.addFloat(quickTileView, "alpha", 1, 0);
