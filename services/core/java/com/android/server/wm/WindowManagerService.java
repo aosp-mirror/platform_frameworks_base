@@ -2595,11 +2595,12 @@ public class WindowManagerService extends IWindowManager.Stub
         } else if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = true;
             win.mAnimatingExit = true;
-        } else if (win.isAnimating(TRANSITION | PARENTS)) {
+        } else if (win.mDisplayContent.okToAnimate() && win.isAnimating(TRANSITION | PARENTS)) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
-        } else if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
+        } else if (win.mDisplayContent.okToAnimate()
+                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
