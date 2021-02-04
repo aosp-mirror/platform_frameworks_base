@@ -45,6 +45,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
+import static android.view.WindowManager.LayoutParams.FLAG_BLUR_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DIM_BEHIND;
 import static android.view.WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS;
@@ -5269,7 +5270,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
             getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
-        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || mAttrs.backgroundBlurRadius != 0)
+        } else if (((mAttrs.flags & FLAG_DIM_BEHIND) != 0 || (mAttrs.flags & FLAG_BLUR_BEHIND) != 0)
                    && isVisibleNow() && !mHidden) {
             // Only show the Dimmer when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND or background blur is requested
@@ -5278,8 +5279,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 4. The WS is not hidden.
             mIsDimming = true;
             final float dimAmount = (mAttrs.flags & FLAG_DIM_BEHIND) != 0 ? mAttrs.dimAmount : 0;
+            final int blurRadius =
+                    (mAttrs.flags & FLAG_BLUR_BEHIND) != 0 ? mAttrs.blurBehindRadius : 0;
             getDimmer().dimBelow(
-                    getSyncTransaction(), this, mAttrs.dimAmount, mAttrs.backgroundBlurRadius);
+                    getSyncTransaction(), this, mAttrs.dimAmount, mAttrs.blurBehindRadius);
         }
     }
 
