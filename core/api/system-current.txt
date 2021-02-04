@@ -12220,8 +12220,14 @@ package android.telephony.ims.feature {
 package android.telephony.ims.stub {
 
   public interface CapabilityExchangeEventListener {
+    method public void onRemoteCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.List<java.lang.String>, @NonNull android.telephony.ims.stub.CapabilityExchangeEventListener.OptionsRequestCallback) throws android.telephony.ims.ImsException;
     method public void onRequestPublishCapabilities(int) throws android.telephony.ims.ImsException;
     method public void onUnpublish() throws android.telephony.ims.ImsException;
+  }
+
+  public static interface CapabilityExchangeEventListener.OptionsRequestCallback {
+    method public default void onRespondToCapabilityRequest(@NonNull android.telephony.ims.RcsContactUceCapability, boolean);
+    method public void onRespondToCapabilityRequestWithError(@IntRange(from=100, to=699) int, @NonNull String);
   }
 
   public interface DelegateConnectionMessageCallback {
@@ -12407,6 +12413,7 @@ package android.telephony.ims.stub {
   public class RcsCapabilityExchangeImplBase {
     ctor public RcsCapabilityExchangeImplBase(@NonNull java.util.concurrent.Executor);
     method public void publishCapabilities(@NonNull String, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.PublishResponseCallback);
+    method public void sendOptionsCapabilityRequest(@NonNull android.net.Uri, @NonNull java.util.List<java.lang.String>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.OptionsResponseCallback);
     method public void subscribeForCapabilities(@NonNull java.util.List<android.net.Uri>, @NonNull android.telephony.ims.stub.RcsCapabilityExchangeImplBase.SubscribeResponseCallback);
     field public static final int COMMAND_CODE_FETCH_ERROR = 3; // 0x3
     field public static final int COMMAND_CODE_GENERIC_FAILURE = 1; // 0x1
@@ -12419,6 +12426,11 @@ package android.telephony.ims.stub {
     field public static final int COMMAND_CODE_REQUEST_TIMEOUT = 4; // 0x4
     field public static final int COMMAND_CODE_SERVICE_UNAVAILABLE = 9; // 0x9
     field public static final int COMMAND_CODE_SERVICE_UNKNOWN = 0; // 0x0
+  }
+
+  public static interface RcsCapabilityExchangeImplBase.OptionsResponseCallback {
+    method public void onCommandError(int) throws android.telephony.ims.ImsException;
+    method public void onNetworkResponse(int, @NonNull String, @NonNull java.util.List<java.lang.String>) throws android.telephony.ims.ImsException;
   }
 
   public static interface RcsCapabilityExchangeImplBase.PublishResponseCallback {
