@@ -17,4 +17,4 @@
 package android.graphics.fonts;
 
 /** @hide */
-parcelable SystemFontState;
+parcelable FontUpdateRequest;
