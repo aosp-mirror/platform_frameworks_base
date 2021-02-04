@@ -1445,6 +1445,7 @@ public class LocationManager {
     @TestApi
     @RequiresPermission(Manifest.permission.READ_DEVICE_CONFIG)
     @Nullable
+    @SuppressWarnings("NullableCollection")
     public List<String> getProviderPackages(@NonNull String provider) {
         try {
             return mService.getProviderPackages(provider);
