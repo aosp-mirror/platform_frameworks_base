@@ -145,7 +145,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
 
         assertThat(surface).isNotNull();
         verify(session).addToDisplay(any(), argThat(this::isTrustedOverlay), anyInt(), anyInt(),
-                any(), any(), any(), any(), any());
+                any(), any(), any(), any());
     }
 
     @Test
