@@ -16,8 +16,10 @@
 
 package android.net;
 
+import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Build;
@@ -245,7 +247,19 @@ public final class Proxy {
 
     /** @hide */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public static final void setHttpProxySystemProperty(ProxyInfo p) {
+    @Deprecated
+    public static void setHttpProxySystemProperty(ProxyInfo p) {
+        setHttpProxyConfiguration(p);
+    }
+
+    /**
+     * Set HTTP proxy configuration for the process to match the provided ProxyInfo.
+     *
+     * If the provided ProxyInfo is null, the proxy configuration will be cleared.
+     * @hide
+     */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    public static void setHttpProxyConfiguration(@Nullable ProxyInfo p) {
         String host = null;
         String port = null;
         String exclList = null;
@@ -256,11 +270,11 @@ public final class Proxy {
             exclList = ProxyUtils.exclusionListAsString(p.getExclusionList());
             pacFileUrl = p.getPacFileUrl();
         }
-        setHttpProxySystemProperty(host, port, exclList, pacFileUrl);
+        setHttpProxyConfiguration(host, port, exclList, pacFileUrl);
     }
 
     /** @hide */
-    public static final void setHttpProxySystemProperty(String host, String port, String exclList,
+    public static void setHttpProxyConfiguration(String host, String port, String exclList,
             Uri pacFileUrl) {
         if (exclList != null) exclList = exclList.replace(",", "|");
         if (false) Log.d(TAG, "setHttpProxySystemProperty :"+host+":"+port+" - "+exclList);
