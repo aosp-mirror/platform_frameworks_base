@@ -39,7 +39,6 @@
         <item>com.android.systemui.shortcut.ShortcutKeyDispatcher</item>
         <item>@string/config_systemUIVendorServiceComponent</item>
         <item>com.android.systemui.SliceBroadcastRelayHandler</item>
-        <item>com.android.systemui.SizeCompatModeActivityController</item>
         <item>com.android.systemui.statusbar.notification.InstantAppNotifier</item>
         <item>com.android.systemui.toast.ToastUI</item>
         <item>com.android.systemui.wmshell.WMShell</item>

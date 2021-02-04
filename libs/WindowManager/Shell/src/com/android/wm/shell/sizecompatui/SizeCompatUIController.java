@@ -91,7 +91,6 @@ public class SizeCompatUIController implements DisplayController.OnDisplaysChang
         }
     }
 
-    // TODO move from SizeCompatModeActivityController from system UI.
     @Override
     public void onDisplayRemoved(int displayId) {
         mDisplayContextCache.remove(displayId);
