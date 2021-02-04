@@ -160,7 +160,7 @@ public final class Zygote {
      * GWP-ASan is activated unconditionally (but still, only a small subset of
      * allocations is protected).
      */
-    public static final int GWP_ASAN_LEVEL_ALWAYS = 2 << 21;
+    public static final int GWP_ASAN_LEVEL_ALWAYS = 1 << 22;
 
     /** No external storage should be mounted. */
     public static final int MOUNT_EXTERNAL_NONE = IVold.REMOUNT_MODE_NONE;
