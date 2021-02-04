@@ -87,7 +87,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.IndentingPrintWriter;
 import android.util.Pair;
-import android.util.Singleton;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.view.contentcapture.ContentCaptureManager;
@@ -1064,16 +1063,7 @@ public final class SystemServer implements Dumpable {
 
         t.traceBegin("StartDomainVerificationService");
         DomainVerificationService domainVerificationService = new DomainVerificationService(
-                mSystemContext, SystemConfig.getInstance(), platformCompat,
-                new Singleton<DomainVerificationService.Connection>() {
-            @Override
-            protected DomainVerificationService.Connection create() {
-                // Deferred retrieval from PackageManagerService, since PMS is initialized after
-                // DVS. The alternative would be to expose this through the PackageManagerInternal
-                // local service, but making it visible to consumers of that interface isn't useful.
-                return mPackageManagerService.getDomainVerificationConnection();
-            }
-        });
+                mSystemContext, SystemConfig.getInstance(), platformCompat);
         mSystemServiceManager.startService(domainVerificationService);
         t.traceEnd();
 

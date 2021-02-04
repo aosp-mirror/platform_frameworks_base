@@ -110,7 +110,7 @@ public class DomainVerificationService extends SystemService
     private final Object mLock = new Object();
 
     @NonNull
-    private final Singleton<Connection> mConnection;
+    private Connection mConnection;
 
     @NonNull
     private final SystemConfig mSystemConfig;
@@ -143,9 +143,8 @@ public class DomainVerificationService extends SystemService
     private DomainVerificationProxy mProxy = new DomainVerificationProxyUnavailable();
 
     public DomainVerificationService(@NonNull Context context, @NonNull SystemConfig systemConfig,
-            @NonNull PlatformCompat platformCompat, @NonNull Singleton<Connection> connection) {
+            @NonNull PlatformCompat platformCompat) {
         super(context);
-        mConnection = connection;
         mSystemConfig = systemConfig;
         mPlatformCompat = platformCompat;
         mSettings = new DomainVerificationSettings();
@@ -159,6 +158,11 @@ public class DomainVerificationService extends SystemService
     @Override
     public void onStart() {
         publishBinderService(Context.DOMAIN_VERIFICATION_SERVICE, mStub);
+    }
+
+    @Override
+    public void setConnection(@NonNull Connection connection) {
+        mConnection = connection;
     }
 
     @NonNull
@@ -185,7 +189,7 @@ public class DomainVerificationService extends SystemService
     @NonNull
     @Override
     public List<String> getValidVerificationPackageNames() {
-        mEnforcer.assertApprovedVerifier(mConnection.get().getCallingUid(), mProxy);
+        mEnforcer.assertApprovedVerifier(mConnection.getCallingUid(), mProxy);
         List<String> packageNames = new ArrayList<>();
         synchronized (mLock) {
             int size = mAttachedPkgStates.size();
@@ -216,14 +220,14 @@ public class DomainVerificationService extends SystemService
     @Override
     public DomainVerificationSet getDomainVerificationSet(@NonNull String packageName)
             throws NameNotFoundException {
-        mEnforcer.assertApprovedQuerent(mConnection.get().getCallingUid(), mProxy);
+        mEnforcer.assertApprovedQuerent(mConnection.getCallingUid(), mProxy);
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
                 return null;
             }
 
-            AndroidPackage pkg = mConnection.get().getPackageLocked(packageName);
+            AndroidPackage pkg = mConnection.getPackageLocked(packageName);
             if (pkg == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
@@ -258,7 +262,7 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        setDomainVerificationStatusInternal(mConnection.get().getCallingUid(), domainSetId, domains,
+        setDomainVerificationStatusInternal(mConnection.getCallingUid(), domainSetId, domains,
                 state);
     }
 
@@ -282,13 +286,13 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
     public void setDomainVerificationStatusInternal(@Nullable String packageName, int state,
             @Nullable ArraySet<String> domains) throws NameNotFoundException {
-        mEnforcer.assertInternal(mConnection.get().getCallingUid());
+        mEnforcer.assertInternal(mConnection.getCallingUid());
 
         switch (state) {
             case DomainVerificationState.STATE_NO_RESPONSE:
@@ -309,7 +313,7 @@ public class DomainVerificationService extends SystemService
                 for (int index = 0; index < size; index++) {
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
                     String pkgName = pkgState.getPackageName();
-                    PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(pkgName);
+                    PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
                     if (pkgSetting == null || pkgSetting.getPkg() == null) {
                         continue;
                     }
@@ -336,7 +340,7 @@ public class DomainVerificationService extends SystemService
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
                 }
 
-                PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(packageName);
+                PackageSetting pkgSetting = mConnection.getPackageSettingLocked(packageName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
                 }
@@ -352,7 +356,7 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     private void setDomainVerificationStatusInternal(@NonNull DomainVerificationPkgState pkgState,
@@ -368,14 +372,13 @@ public class DomainVerificationService extends SystemService
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed) throws NameNotFoundException {
         setDomainVerificationLinkHandlingAllowed(packageName, allowed,
-                mConnection.get().getCallingUserId());
+                mConnection.getCallingUserId());
     }
 
     public void setDomainVerificationLinkHandlingAllowed(@NonNull String packageName,
             boolean allowed, @UserIdInt int userId) throws NameNotFoundException {
-        Connection connection = mConnection.get();
-        mEnforcer.assertApprovedUserSelector(connection.getCallingUid(),
-                connection.getCallingUserId(), userId);
+        mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), userId);
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
@@ -386,13 +389,13 @@ public class DomainVerificationService extends SystemService
                     .setDisallowLinkHandling(!allowed);
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
     public void setDomainVerificationLinkHandlingAllowedInternal(@Nullable String packageName,
             boolean allowed, @UserIdInt int userId) throws NameNotFoundException {
-        mEnforcer.assertInternal(mConnection.get().getCallingUid());
+        mEnforcer.assertInternal(mConnection.getCallingUid());
         if (packageName == null) {
             synchronized (mLock) {
                 int pkgStateSize = mAttachedPkgStates.size();
@@ -426,7 +429,7 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
@@ -434,15 +437,14 @@ public class DomainVerificationService extends SystemService
             @NonNull Set<String> domains, boolean enabled)
             throws InvalidDomainSetException, NameNotFoundException {
         setDomainVerificationUserSelection(domainSetId, domains, enabled,
-                mConnection.get().getCallingUserId());
+                mConnection.getCallingUserId());
     }
 
     public void setDomainVerificationUserSelection(@NonNull UUID domainSetId,
             @NonNull Set<String> domains, boolean enabled, @UserIdInt int userId)
             throws InvalidDomainSetException, NameNotFoundException {
-        Connection connection = mConnection.get();
-        mEnforcer.assertApprovedUserSelector(connection.getCallingUid(),
-                connection.getCallingUserId(), userId);
+        mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), userId);
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = getAndValidateAttachedLocked(domainSetId, domains,
                     false /* forAutoVerify */);
@@ -454,14 +456,14 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
     public void setDomainVerificationUserSelectionInternal(@UserIdInt int userId,
             @Nullable String packageName, boolean enabled, @NonNull ArraySet<String> domains)
             throws NameNotFoundException {
-        mEnforcer.assertInternal(mConnection.get().getCallingUid());
+        mEnforcer.assertInternal(mConnection.getCallingUid());
 
         if (packageName == null) {
             synchronized (mLock) {
@@ -471,7 +473,7 @@ public class DomainVerificationService extends SystemService
                 for (int index = 0; index < size; index++) {
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
                     String pkgName = pkgState.getPackageName();
-                    PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(pkgName);
+                    PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
                     if (pkgSetting == null || pkgSetting.getPkg() == null) {
                         continue;
                     }
@@ -490,7 +492,7 @@ public class DomainVerificationService extends SystemService
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
                 }
 
-                PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(packageName);
+                PackageSetting pkgSetting = mConnection.getPackageSettingLocked(packageName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     throw DomainVerificationUtils.throwPackageUnavailable(packageName);
                 }
@@ -500,7 +502,7 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     private void setDomainVerificationUserSelectionInternal(int userId,
@@ -529,7 +531,7 @@ public class DomainVerificationService extends SystemService
             }
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Nullable
@@ -537,23 +539,22 @@ public class DomainVerificationService extends SystemService
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName) throws NameNotFoundException {
         return getDomainVerificationUserSelection(packageName,
-                mConnection.get().getCallingUserId());
+                mConnection.getCallingUserId());
     }
 
     @Nullable
     @Override
     public DomainVerificationUserSelection getDomainVerificationUserSelection(
             @NonNull String packageName, @UserIdInt int userId) throws NameNotFoundException {
-        Connection connection = mConnection.get();
-        mEnforcer.assertApprovedUserSelector(connection.getCallingUid(),
-                connection.getCallingUserId(), userId);
+        mEnforcer.assertApprovedUserSelector(mConnection.getCallingUid(),
+                mConnection.getCallingUserId(), userId);
         synchronized (mLock) {
             DomainVerificationPkgState pkgState = mAttachedPkgStates.get(packageName);
             if (pkgState == null) {
                 return null;
             }
 
-            AndroidPackage pkg = connection.getPackageLocked(packageName);
+            AndroidPackage pkg = mConnection.getPackageLocked(packageName);
             if (pkg == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
@@ -834,7 +835,7 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void setLegacyUserState(@NonNull String packageName, @UserIdInt int userId, int state) {
-        mEnforcer.callerIsLegacyUserSelector(mConnection.get().getCallingUid());
+        mEnforcer.callerIsLegacyUserSelector(mConnection.getCallingUid());
         mLegacySettings.add(packageName, userId, state);
     }
 
@@ -854,7 +855,7 @@ public class DomainVerificationService extends SystemService
             mAttachedPkgStates.remove(packageName);
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
@@ -868,7 +869,7 @@ public class DomainVerificationService extends SystemService
             mSettings.removeUser(userId);
         }
 
-        mConnection.get().scheduleWriteSettings();
+        mConnection.scheduleWriteSettings();
     }
 
     @Override
@@ -880,7 +881,7 @@ public class DomainVerificationService extends SystemService
     public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable @UserIdInt Integer userId) throws NameNotFoundException {
         synchronized (mLock) {
-            mDebug.printState(writer, packageName, userId, mConnection.get(), mAttachedPkgStates);
+            mDebug.printState(writer, packageName, userId, mConnection, mAttachedPkgStates);
         }
     }
 
@@ -925,7 +926,7 @@ public class DomainVerificationService extends SystemService
         }
 
         String pkgName = pkgState.getPackageName();
-        PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(pkgName);
+        PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
         if (pkgSetting == null || pkgSetting.getPkg() == null) {
             throw DomainVerificationUtils.throwPackageUnavailable(pkgName);
         }
@@ -949,7 +950,7 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void verifyPackages(@Nullable List<String> packageNames, boolean reVerify) {
-        mEnforcer.assertInternal(mConnection.get().getCallingUid());
+        mEnforcer.assertInternal(mConnection.getCallingUid());
         Set<String> packagesToBroadcast = new ArraySet<>();
 
         if (packageNames == null) {
@@ -1013,14 +1014,14 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void clearDomainVerificationState(@Nullable List<String> packageNames) {
-        mEnforcer.assertInternal(mConnection.get().getCallingUid());
+        mEnforcer.assertInternal(mConnection.getCallingUid());
         synchronized (mLock) {
             if (packageNames == null) {
                 int size = mAttachedPkgStates.size();
                 for (int index = 0; index < size; index++) {
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.valueAt(index);
                     String pkgName = pkgState.getPackageName();
-                    PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(pkgName);
+                    PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
                     if (pkgSetting == null || pkgSetting.getPkg() == null) {
                         continue;
                     }
@@ -1031,7 +1032,7 @@ public class DomainVerificationService extends SystemService
                 for (int index = 0; index < size; index++) {
                     String pkgName = packageNames.get(index);
                     DomainVerificationPkgState pkgState = mAttachedPkgStates.get(pkgName);
-                    PackageSetting pkgSetting = mConnection.get().getPackageSettingLocked(pkgName);
+                    PackageSetting pkgSetting = mConnection.getPackageSettingLocked(pkgName);
                     if (pkgSetting == null || pkgSetting.getPkg() == null) {
                         continue;
                     }
@@ -1071,7 +1072,7 @@ public class DomainVerificationService extends SystemService
 
     @Override
     public void clearUserSelections(@Nullable List<String> packageNames, @UserIdInt int userId) {
-        mEnforcer.assertInternal(mConnection.get().getCallingUid());
+        mEnforcer.assertInternal(mConnection.getCallingUid());
         synchronized (mLock) {
             if (packageNames == null) {
                 int size = mAttachedPkgStates.size();
@@ -1225,46 +1226,5 @@ public class DomainVerificationService extends SystemService
         String approvalString = approved ? "approved" : "denied";
         Slog.d(TAG + "Approval", packageName + " was " + approvalString + " for " + intent
                 + " for user " + userId + ": " + reason);
-    }
-
-    public interface Connection {
-
-        /**
-         * Notify that a settings change has been made and that eventually
-         * {@link #writeSettings(TypedXmlSerializer)} should be invoked by the parent.
-         */
-        void scheduleWriteSettings();
-
-        /**
-         * Delegate to {@link Binder#getCallingUid()} to allow mocking in tests.
-         */
-        int getCallingUid();
-
-        /**
-         * Delegate to {@link UserHandle#getCallingUserId()} to allow mocking in tests.
-         */
-        @UserIdInt
-        int getCallingUserId();
-
-        /**
-         * @see DomainVerificationProxy.BaseConnection#schedule(int, java.lang.Object)
-         */
-        void schedule(int code, @Nullable Object object);
-
-        /**
-         * This can only be called when the internal {@link #mLock} is held. Otherwise it's possible
-         * to deadlock with {@link PackageManagerService}.
-         */
-        @GuardedBy("mLock")
-        @Nullable
-        PackageSetting getPackageSettingLocked(@NonNull String pkgName);
-
-        /**
-         * This can only be called when the internal {@link #mLock} is held. Otherwise it's possible
-         * to deadlock with {@link PackageManagerService}.
-         */
-        @GuardedBy("mLock")
-        @Nullable
-        AndroidPackage getPackageLocked(@NonNull String pkgName);
     }
 }

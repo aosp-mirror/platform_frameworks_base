@@ -30,6 +30,7 @@ import android.util.SparseArray
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.pm.PackageSetting
 import com.android.server.pm.domain.verify.DomainVerificationEnforcer
+import com.android.server.pm.domain.verify.DomainVerificationManagerInternal
 import com.android.server.pm.domain.verify.DomainVerificationService
 import com.android.server.pm.domain.verify.proxy.DomainVerificationProxy
 import com.android.server.pm.parsing.pkg.AndroidPackage
@@ -140,18 +141,16 @@ class DomainVerificationEnforcerTest {
                                         any()
                                     )
                                 ) { true }
-                            },
-                            object : Singleton<DomainVerificationService.Connection>() {
-                                override fun create(): DomainVerificationService.Connection =
-                                    mockThrowOnUnmocked {
-                                        whenever(callingUid) { callingUidInt.get() }
-                                        whenever(callingUserId) { callingUserIdInt.get() }
-                                        whenever(getPackageSettingLocked(TEST_PKG)) { mockPkgSetting }
-                                        whenever(getPackageLocked(TEST_PKG)) { mockPkg }
-                                        whenever(schedule(anyInt(), any()))
-                                        whenever(scheduleWriteSettings())
-                                    }
-                            })
+                            }).apply {
+                                setConnection(mockThrowOnUnmocked {
+                                    whenever(callingUid) { callingUidInt.get() }
+                                    whenever(callingUserId) { callingUserIdInt.get() }
+                                    whenever(getPackageSettingLocked(TEST_PKG)) { mockPkgSetting }
+                                    whenever(getPackageLocked(TEST_PKG)) { mockPkg }
+                                    whenever(schedule(anyInt(), any()))
+                                    whenever(scheduleWriteSettings())
+                                })
+                        }
                     )
                 }
 
