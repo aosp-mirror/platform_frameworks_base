@@ -103,18 +103,6 @@ public class UdfpsAnimationView extends View implements DozeReceiver,
         postInvalidate();
     }
 
-    void onEnrollmentProgress(int remaining) {
-        if (mUdfpsAnimation instanceof UdfpsAnimationEnroll) {
-            ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentProgress(remaining);
-        }
-    }
-
-    void onEnrollmentHelp() {
-        if (mUdfpsAnimation instanceof UdfpsAnimationEnroll) {
-            ((UdfpsAnimationEnroll) mUdfpsAnimation).onEnrollmentHelp();
-        }
-    }
-
     public int getPaddingX() {
         if (mUdfpsAnimation == null) {
             return 0;
