@@ -108,6 +108,15 @@ class ImageTileSet {
     }
 
     Bitmap toBitmap() {
+        return toBitmap(new Rect(0, 0, getWidth(), getHeight()));
+    }
+
+    /**
+     * @param bounds Selected portion of the tile set's bounds (equivalent to tile bounds coord
+     *               space). For example, to get the whole doc, use Rect(0, 0, getWidth(),
+     *               getHeight()).
+     */
+    Bitmap toBitmap(Rect bounds) {
         if (mTiles.isEmpty()) {
             return null;
         }
@@ -115,6 +124,9 @@ class ImageTileSet {
         output.setPosition(0, 0, getWidth(), getHeight());
         RecordingCanvas canvas = output.beginRecording();
         canvas.translate(-getLeft(), -getTop());
+        // Additional translation to account for the requested bounds
+        canvas.translate(-bounds.left, -bounds.top);
+        canvas.clipRect(bounds);
         for (ImageTile tile : mTiles) {
             canvas.save();
             canvas.translate(tile.getLeft(), tile.getTop());
@@ -122,7 +134,7 @@ class ImageTileSet {
             canvas.restore();
         }
         output.endRecording();
-        return HardwareRenderer.createHardwareBitmap(output, getWidth(), getHeight());
+        return HardwareRenderer.createHardwareBitmap(output, bounds.width(), bounds.height());
     }
 
     int getLeft() {
