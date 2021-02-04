@@ -503,6 +503,9 @@ interface IDevicePolicyManager {
     UserHandle createAndProvisionManagedProfile(in ManagedProfileProvisioningParams provisioningParams, in String callerPackage);
     void provisionFullyManagedDevice(in FullyManagedDeviceProvisioningParams provisioningParams, in String callerPackage);
 
+    void setDeviceOwnerType(in ComponentName admin, in int deviceOwnerType);
+    int getDeviceOwnerType(in ComponentName admin);
+
     void resetDefaultCrossProfileIntentFilters(int userId);
     boolean canAdminGrantSensorsPermissionsForUser(int userId);
 

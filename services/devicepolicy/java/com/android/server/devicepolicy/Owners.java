@@ -16,10 +16,13 @@
 
 package com.android.server.devicepolicy;
 
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
+
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManagerInternal;
+import android.app.admin.DevicePolicyManager.DeviceOwnerType;
 import android.app.admin.SystemUpdateInfo;
 import android.app.admin.SystemUpdatePolicy;
 import android.content.ComponentName;
@@ -93,6 +96,7 @@ class Owners {
     private static final String TAG_PROFILE_OWNER = "profile-owner";
     // Holds "context" for device-owner, this must not be show up before device-owner.
     private static final String TAG_DEVICE_OWNER_CONTEXT = "device-owner-context";
+    private static final String TAG_DEVICE_OWNER_TYPE = "device-owner-type";
 
     private static final String ATTR_NAME = "name";
     private static final String ATTR_PACKAGE = "package";
@@ -109,6 +113,7 @@ class Owners {
     // New attribute for profile owner of organization-owned device.
     private static final String ATTR_PROFILE_OWNER_OF_ORG_OWNED_DEVICE =
             "isPoOrganizationOwnedDevice";
+    private static final String ATTR_DEVICE_OWNER_TYPE_VALUE = "value";
 
     private final UserManager mUserManager;
     private final UserManagerInternal mUserManagerInternal;
@@ -120,6 +125,9 @@ class Owners {
 
     // Internal state for the device owner package.
     private OwnerInfo mDeviceOwner;
+
+    // Device owner type for a managed device.
+    private final ArrayMap<String, Integer> mDeviceOwnerTypes = new ArrayMap<>();
 
     private int mDeviceOwnerUserId = UserHandle.USER_NULL;
 
@@ -334,6 +342,7 @@ class Owners {
 
     void clearDeviceOwner() {
         synchronized (mLock) {
+            mDeviceOwnerTypes.remove(mDeviceOwner.packageName);
             mDeviceOwner = null;
             mDeviceOwnerUserId = UserHandle.USER_NULL;
 
@@ -384,12 +393,16 @@ class Owners {
 
     void transferDeviceOwnership(ComponentName target) {
         synchronized (mLock) {
+            Integer previousDeviceOwnerType = mDeviceOwnerTypes.remove(mDeviceOwner.packageName);
             // We don't set a name because it's not used anyway.
             // See DevicePolicyManagerService#getDeviceOwnerName
             mDeviceOwner = new OwnerInfo(null, target,
                     mDeviceOwner.userRestrictionsMigrated, mDeviceOwner.remoteBugreportUri,
                     mDeviceOwner.remoteBugreportHash, /* isOrganizationOwnedDevice =*/
                     mDeviceOwner.isOrganizationOwnedDevice);
+            if (previousDeviceOwnerType != null) {
+                mDeviceOwnerTypes.put(mDeviceOwner.packageName, previousDeviceOwnerType);
+            }
             pushToPackageManagerLocked();
             pushToActivityTaskManagerLocked();
             pushToActivityManagerLocked();
@@ -593,6 +606,37 @@ class Owners {
                         "No profile owner for user %d to set as org-owned.", userId));
             }
             writeProfileOwner(userId);
+        }
+    }
+
+    void setDeviceOwnerType(String packageName, @DeviceOwnerType int deviceOwnerType) {
+        synchronized (mLock) {
+            if (!hasDeviceOwner()) {
+                Slog.e(TAG, "Attempting to set a device owner type when there is no device owner");
+                return;
+            } else if (isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
+                Slog.e(TAG, "Device owner type for " + packageName + " has already been set");
+                return;
+            }
+
+            mDeviceOwnerTypes.put(packageName, deviceOwnerType);
+            writeDeviceOwner();
+        }
+    }
+
+    @DeviceOwnerType
+    int getDeviceOwnerType(String packageName) {
+        synchronized (mLock) {
+            if (isDeviceOwnerTypeSetForDeviceOwner(packageName)) {
+                return mDeviceOwnerTypes.get(packageName);
+            }
+            return DEVICE_OWNER_TYPE_DEFAULT;
+        }
+    }
+
+    boolean isDeviceOwnerTypeSetForDeviceOwner(String packageName) {
+        synchronized (mLock) {
+            return !mDeviceOwnerTypes.isEmpty() && mDeviceOwnerTypes.containsKey(packageName);
         }
     }
 
@@ -880,6 +924,16 @@ class Owners {
                 out.startTag(null, TAG_DEVICE_OWNER_CONTEXT);
                 out.attributeInt(null, ATTR_USERID, mDeviceOwnerUserId);
                 out.endTag(null, TAG_DEVICE_OWNER_CONTEXT);
+
+            }
+
+            if (!mDeviceOwnerTypes.isEmpty()) {
+                for (ArrayMap.Entry<String, Integer> entry : mDeviceOwnerTypes.entrySet()) {
+                    out.startTag(null, TAG_DEVICE_OWNER_TYPE);
+                    out.attribute(null, ATTR_PACKAGE, entry.getKey());
+                    out.attributeInt(null, ATTR_DEVICE_OWNER_TYPE_VALUE, entry.getValue());
+                    out.endTag(null, TAG_DEVICE_OWNER_TYPE);
+                }
             }
 
             if (mSystemUpdatePolicy != null) {
@@ -941,6 +995,12 @@ class Owners {
                             mSystemUpdateFreezeEnd = null;
                         }
                     }
+                    break;
+                case TAG_DEVICE_OWNER_TYPE:
+                    String packageName = parser.getAttributeValue(null, ATTR_PACKAGE);
+                    int deviceOwnerType = parser.getAttributeInt(null, ATTR_DEVICE_OWNER_TYPE_VALUE,
+                            DEVICE_OWNER_TYPE_DEFAULT);
+                    mDeviceOwnerTypes.put(packageName, deviceOwnerType);
                     break;
                 default:
                     Slog.e(TAG, "Unexpected tag: " + tag);

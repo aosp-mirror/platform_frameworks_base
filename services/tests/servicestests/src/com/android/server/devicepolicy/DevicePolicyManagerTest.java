@@ -20,6 +20,8 @@ import static android.app.Notification.EXTRA_TITLE;
 import static android.app.admin.DevicePolicyManager.ACTION_CHECK_POLICY_COMPLIANCE;
 import static android.app.admin.DevicePolicyManager.DELEGATION_APP_RESTRICTIONS;
 import static android.app.admin.DevicePolicyManager.DELEGATION_CERT_INSTALL;
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_DEFAULT;
+import static android.app.admin.DevicePolicyManager.DEVICE_OWNER_TYPE_FINANCED;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_BASE_INFO;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_IMEI;
 import static android.app.admin.DevicePolicyManager.ID_TYPE_MEID;
@@ -7025,6 +7027,71 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         assertThrows(IllegalStateException.class,
                 () -> parentDpm.setPasswordQuality(admin1,
                         DevicePolicyManager.PASSWORD_QUALITY_COMPLEX));
+    }
+
+    @Test
+    public void testSetDeviceOwnerType_throwsExceptionWhenCallerNotAuthorized() {
+        assertThrows(SecurityException.class,
+                () -> dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_DEFAULT));
+    }
+
+    @Test
+    public void testSetDeviceOwnerType_throwsExceptionWhenThereIsNoDeviceOwner() {
+        mContext.binder.clearCallingIdentity();
+        assertThrows(IllegalStateException.class,
+                () -> dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_DEFAULT));
+    }
+
+    @Test
+    public void testSetDeviceOwnerType_throwsExceptionWhenNotAsDeviceOwnerAdmin() throws Exception {
+        setDeviceOwner();
+
+        assertThrows(IllegalStateException.class,
+                () -> dpm.setDeviceOwnerType(admin2, DEVICE_OWNER_TYPE_FINANCED));
+    }
+
+    @Test
+    public void testSetDeviceOwnerType_asDeviceOwner_toFinancedDevice() throws Exception {
+        setDeviceOwner();
+
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        int returnedDeviceOwnerType = dpm.getDeviceOwnerType(admin1);
+        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
+        assertThat(returnedDeviceOwnerType).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
+
+        initializeDpms();
+
+        returnedDeviceOwnerType = dpm.getDeviceOwnerType(admin1);
+        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
+        assertThat(returnedDeviceOwnerType).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
+    }
+
+    @Test
+    public void testSetDeviceOwnerType_asDeviceOwner_throwsExceptionWhenSetDeviceOwnerTypeAgain()
+            throws Exception {
+        setDeviceOwner();
+
+        dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_FINANCED);
+
+        int returnedDeviceOwnerType = dpm.getDeviceOwnerType(admin1);
+        assertThat(dpms.mOwners.hasDeviceOwner()).isTrue();
+        assertThat(returnedDeviceOwnerType).isEqualTo(DEVICE_OWNER_TYPE_FINANCED);
+
+        assertThrows(IllegalStateException.class,
+                () -> dpm.setDeviceOwnerType(admin1, DEVICE_OWNER_TYPE_DEFAULT));
+    }
+
+    @Test
+    public void testGetDeviceOwnerType_throwsExceptionWhenThereIsNoDeviceOwner() {
+        assertThrows(IllegalStateException.class, () -> dpm.getDeviceOwnerType(admin1));
+    }
+
+    @Test
+    public void testGetDeviceOwnerType_throwsExceptionWhenNotAsDeviceOwnerAdmin() throws Exception {
+        setDeviceOwner();
+
+        assertThrows(IllegalStateException.class, () -> dpm.getDeviceOwnerType(admin2));
     }
 
     @Test
