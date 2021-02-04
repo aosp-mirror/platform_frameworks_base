@@ -300,6 +300,8 @@ public abstract class BrightnessMappingStrategy {
     /** @return The default brightness configuration. */
     public abstract BrightnessConfiguration getDefaultConfig();
 
+    /** Recalculates the backlight-to-nits and nits-to-backlight splines. */
+    public abstract void recalculateSplines(boolean applyAdjustment, float[] adjustment);
 
     /**
      * Returns the timeout for the short term model
@@ -658,6 +660,11 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
+        public void recalculateSplines(boolean applyAdjustment, float[] adjustment) {
+            // Do nothing.
+        }
+
+        @Override
         public void dump(PrintWriter pw) {
             pw.println("SimpleMappingStrategy");
             pw.println("  mSpline=" + mSpline);
@@ -696,7 +703,7 @@ public abstract class BrightnessMappingStrategy {
 
         // A spline mapping from nits to the corresponding backlight value, normalized to the range
         // [0, 1.0].
-        private final Spline mNitsToBacklightSpline;
+        private Spline mNitsToBacklightSpline;
 
         // The default brightness configuration.
         private final BrightnessConfiguration mDefaultConfig;
@@ -704,6 +711,11 @@ public abstract class BrightnessMappingStrategy {
         // A spline mapping from the device's backlight value, normalized to the range [0, 1.0], to
         // a brightness in nits.
         private Spline mBacklightToNitsSpline;
+
+        private float[] mNits;
+        private int[] mBacklight;
+
+        private boolean mBrightnessRangeAdjustmentApplied;
 
         private float mMaxGamma;
         private float mAutoBrightnessAdjustment;
@@ -726,15 +738,9 @@ public abstract class BrightnessMappingStrategy {
             mUserLux = -1;
             mUserBrightness = -1;
 
-            // Setup the backlight spline
-            final int N = nits.length;
-            float[] normalizedBacklight = new float[N];
-            for (int i = 0; i < N; i++) {
-                normalizedBacklight[i] = normalizeAbsoluteBrightness(backlight[i]);
-            }
-
-            mNitsToBacklightSpline = Spline.createSpline(nits, normalizedBacklight);
-            mBacklightToNitsSpline = Spline.createSpline(normalizedBacklight, nits);
+            mNits = nits;
+            mBacklight = backlight;
+            computeNitsBrightnessSplines(mNits);
 
             mDefaultConfig = config;
             if (mLoggingEnabled) {
@@ -868,6 +874,12 @@ public abstract class BrightnessMappingStrategy {
         }
 
         @Override
+        public void recalculateSplines(boolean applyAdjustment, float[] adjustedNits) {
+            mBrightnessRangeAdjustmentApplied = applyAdjustment;
+            computeNitsBrightnessSplines(mBrightnessRangeAdjustmentApplied ? adjustedNits : mNits);
+        }
+
+        @Override
         public void dump(PrintWriter pw) {
             pw.println("PhysicalMappingStrategy");
             pw.println("  mConfig=" + mConfig);
@@ -878,6 +890,18 @@ public abstract class BrightnessMappingStrategy {
             pw.println("  mUserLux=" + mUserLux);
             pw.println("  mUserBrightness=" + mUserBrightness);
             pw.println("  mDefaultConfig=" + mDefaultConfig);
+            pw.println("  mBrightnessRangeAdjustmentApplied=" + mBrightnessRangeAdjustmentApplied);
+        }
+
+        private void computeNitsBrightnessSplines(float[] nits) {
+            final int len = nits.length;
+            float[] normalizedBacklight = new float[len];
+            for (int i = 0; i < len; i++) {
+                normalizedBacklight[i] = normalizeAbsoluteBrightness(mBacklight[i]);
+            }
+
+            mNitsToBacklightSpline = Spline.createSpline(nits, normalizedBacklight);
+            mBacklightToNitsSpline = Spline.createSpline(normalizedBacklight, nits);
         }
 
         private void computeSpline() {

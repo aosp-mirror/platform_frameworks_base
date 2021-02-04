@@ -227,6 +227,31 @@ public class BrightnessMappingStrategyTest {
     }
 
     @Test
+    public void testPhysicalStrategyRecalculateSplines() {
+        Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_NITS, DISPLAY_RANGE_NITS,
+                BACKLIGHT_RANGE);
+        BrightnessMappingStrategy strategy = BrightnessMappingStrategy.create(res);
+        float[] adjustedNits50p = new float[DISPLAY_RANGE_NITS.length];
+        for (int i = 0; i < DISPLAY_RANGE_NITS.length; i++) {
+            adjustedNits50p[i] = DISPLAY_RANGE_NITS[i] * 0.5f;
+        }
+
+        // Default is unadjusted
+        assertEquals(2.685f, strategy.convertToNits(BACKLIGHT_RANGE[0]), 0.01f /* tolerance */);
+        assertEquals(478.5f, strategy.convertToNits(BACKLIGHT_RANGE[1]), 0.01f /* tolerance */);
+
+        // When adjustment is turned on, adjustment array is used
+        strategy.recalculateSplines(true, adjustedNits50p);
+        assertEquals(1.3425f, strategy.convertToNits(BACKLIGHT_RANGE[0]), 0.01f /* tolerance */);
+        assertEquals(239.25f, strategy.convertToNits(BACKLIGHT_RANGE[1]), 0.01f /* tolerance */);
+
+        // When adjustment is turned off, adjustment array is ignored
+        strategy.recalculateSplines(false, adjustedNits50p);
+        assertEquals(2.685f, strategy.convertToNits(BACKLIGHT_RANGE[0]), 0.01f /* tolerance */);
+        assertEquals(478.5f, strategy.convertToNits(BACKLIGHT_RANGE[1]), 0.01f /* tolerance */);
+    }
+
+    @Test
     public void testDefaultStrategyIsPhysical() {
         Resources res = createResources(LUX_LEVELS, DISPLAY_LEVELS_BACKLIGHT,
                 DISPLAY_LEVELS_NITS, DISPLAY_RANGE_NITS, BACKLIGHT_RANGE);
