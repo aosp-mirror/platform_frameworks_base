@@ -21,21 +21,29 @@ import android.os.UserHandle;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.annotations.CompositeRWLock;
+import com.android.internal.annotations.GuardedBy;
+
 import java.io.PrintWriter;
 
 /** Class for tracking active uids for running processes. */
 final class ActiveUids {
 
-    private ActivityManagerService mService;
+    private final ActivityManagerService mService;
+    private final ActivityManagerGlobalLock mProcLock;
 
-    private boolean mPostChangesToAtm;
+    private final boolean mPostChangesToAtm;
+
+    @CompositeRWLock({"mService", "mProcLock"})
     private final SparseArray<UidRecord> mActiveUids = new SparseArray<>();
 
     ActiveUids(ActivityManagerService service, boolean postChangesToAtm) {
         mService = service;
+        mProcLock = service != null ? service.mProcLock : null;
         mPostChangesToAtm = postChangesToAtm;
     }
 
+    @GuardedBy({"mService", "mProcLock"})
     void put(int uid, UidRecord value) {
         mActiveUids.put(uid, value);
         if (mPostChangesToAtm) {
@@ -43,6 +51,7 @@ final class ActiveUids {
         }
     }
 
+    @GuardedBy({"mService", "mProcLock"})
     void remove(int uid) {
         mActiveUids.remove(uid);
         if (mPostChangesToAtm) {
@@ -50,38 +59,45 @@ final class ActiveUids {
         }
     }
 
+    @GuardedBy({"mService", "mProcLock"})
     void clear() {
         mActiveUids.clear();
         // It is only called for a temporal container with mPostChangesToAtm == false or test case.
         // So there is no need to notify activity task manager.
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     UidRecord get(int uid) {
         return mActiveUids.get(uid);
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int size() {
         return mActiveUids.size();
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     UidRecord valueAt(int index) {
         return mActiveUids.valueAt(index);
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int keyAt(int index) {
         return mActiveUids.keyAt(index);
     }
 
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int indexOfKey(int uid) {
         return mActiveUids.indexOfKey(uid);
     }
 
-    boolean dump(PrintWriter pw, String dumpPackage, int dumpAppId,
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    boolean dump(final PrintWriter pw, String dumpPackage, int dumpAppId,
             String header, boolean needSep) {
         boolean printed = false;
         for (int i = 0; i < mActiveUids.size(); i++) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != dumpAppId) {
+            if (dumpPackage != null && UserHandle.getAppId(uidRec.getUid()) != dumpAppId) {
                 continue;
             }
             if (!printed) {
@@ -91,16 +107,16 @@ final class ActiveUids {
                 }
                 pw.print("  "); pw.println(header);
             }
-            pw.print("    UID "); UserHandle.formatUid(pw, uidRec.uid);
+            pw.print("    UID "); UserHandle.formatUid(pw, uidRec.getUid());
             pw.print(": "); pw.println(uidRec);
-            pw.print("      curProcState="); pw.print(uidRec.mCurProcState);
+            pw.print("      curProcState="); pw.print(uidRec.getCurProcState());
             pw.print(" curCapability=");
-            ActivityManager.printCapabilitiesFull(pw, uidRec.curCapability);
+            ActivityManager.printCapabilitiesFull(pw, uidRec.getCurCapability());
             pw.println();
-            for (int j = uidRec.procRecords.size() - 1; j >= 0; j--) {
+            uidRec.forEachProcess(app -> {
                 pw.print("      proc=");
-                pw.println(uidRec.procRecords.valueAt(j));
-            }
+                pw.println(app);
+            });
         }
         return printed;
     }
@@ -108,7 +124,7 @@ final class ActiveUids {
     void dumpProto(ProtoOutputStream proto, String dumpPackage, int dumpAppId, long fieldId) {
         for (int i = 0; i < mActiveUids.size(); i++) {
             UidRecord uidRec = mActiveUids.valueAt(i);
-            if (dumpPackage != null && UserHandle.getAppId(uidRec.uid) != dumpAppId) {
+            if (dumpPackage != null && UserHandle.getAppId(uidRec.getUid()) != dumpAppId) {
                 continue;
             }
             uidRec.dumpDebug(proto, fieldId);
