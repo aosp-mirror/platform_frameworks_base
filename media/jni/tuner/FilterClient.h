@@ -25,12 +25,14 @@
 #include <android/hardware/tv/tuner/1.1/IFilter.h>
 #include <android/hardware/tv/tuner/1.1/IFilterCallback.h>
 #include <android/hardware/tv/tuner/1.1/types.h>
+#include <fmq/AidlMessageQueue.h>
 #include <fmq/MessageQueue.h>
 
 #include "ClientHelper.h"
 #include "FilterClientCallback.h"
 
 using Status = ::ndk::ScopedAStatus;
+using ::aidl::android::hardware::common::fmq::SynchronizedReadWrite;
 using ::aidl::android::media::tv::tuner::BnTunerFilterCallback;
 using ::aidl::android::media::tv::tuner::ITunerFilter;
 using ::aidl::android::media::tv::tuner::TunerDemuxIpAddress;
@@ -69,9 +71,12 @@ using ::android::hardware::tv::tuner::V1_1::IFilterCallback;
 
 using namespace std;
 
-using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
-
 namespace android {
+
+using MQ = MessageQueue<uint8_t, kSynchronizedReadWrite>;
+using MQDesc = MQDescriptorSync<uint8_t>;
+using AidlMQ = AidlMessageQueue<int8_t, SynchronizedReadWrite>;
+using AidlMQDesc = MQDescriptor<int8_t, SynchronizedReadWrite>;
 
 struct SharedHandleInfo {
     native_handle_t* sharedHandle;
@@ -139,7 +144,7 @@ public:
      *
      * @return the actual reading size. -1 if failed to read.
      */
-    int read(uint8_t* buffer, int size);
+    int read(int8_t* buffer, int size);
 
     /**
      * Get the a/v shared memory handle information
@@ -234,7 +239,7 @@ private:
     void getAidlIpAddress(DemuxIpAddress ipAddr,
             TunerDemuxIpAddress& srcIpAddress, TunerDemuxIpAddress& dstIpAddress);
     Result getFilterMq();
-    int copyData(uint8_t* buffer, int size);
+    int copyData(int8_t* buffer, int size);
     void checkIsMediaFilter(DemuxFilterType type);
     void handleAvShareMemory();
     void closeAvSharedMemory();
@@ -259,7 +264,7 @@ private:
      */
     sp<::android::hardware::tv::tuner::V1_1::IFilter> mFilter_1_1;
 
-    unique_ptr<MQ> mFilterMQ;
+    AidlMQ* mFilterMQ;
     EventFlag* mFilterMQEventFlag;
 
     sp<FilterClientCallback> mCallback;

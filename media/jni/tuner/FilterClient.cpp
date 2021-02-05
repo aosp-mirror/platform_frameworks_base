@@ -18,6 +18,7 @@
 
 #include <aidlcommonsupport/NativeHandle.h>
 #include <android-base/logging.h>
+#include <fmq/ConvertMQDescriptors.h>
 #include <utils/Log.h>
 
 #include "FilterClient.h"
@@ -68,18 +69,12 @@ void FilterClient::setHidlFilter(sp<IFilter> filter) {
     mFilter_1_1 = ::android::hardware::tv::tuner::V1_1::IFilter::castFrom(mFilter);
 }
 
-int FilterClient::read(uint8_t* buffer, int size) {
-    // TODO: pending aidl interface
-
-    if (mFilter != NULL) {
-        Result res = getFilterMq();
-        if (res != Result::SUCCESS) {
-            return -1;
-        }
-        return copyData(buffer, size);
+int FilterClient::read(int8_t* buffer, int size) {
+    Result res = getFilterMq();
+    if (res != Result::SUCCESS) {
+        return -1;
     }
-
-    return -1;
+    return copyData(buffer, size);
 }
 
 SharedHandleInfo FilterClient::getAvSharedHandleInfo() {
@@ -106,7 +101,10 @@ Result FilterClient::configure(DemuxFilterSettings configure) {
 }
 
 Result FilterClient::configureMonitorEvent(int monitorEventType) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->configureMonitorEvent(monitorEventType);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         return mFilter_1_1->configureMonitorEvent(monitorEventType);
@@ -116,7 +114,10 @@ Result FilterClient::configureMonitorEvent(int monitorEventType) {
 }
 
 Result FilterClient::configureIpFilterContextId(int cid) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->configureIpFilterContextId(cid);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         return mFilter_1_1->configureIpCid(cid);
@@ -126,7 +127,19 @@ Result FilterClient::configureIpFilterContextId(int cid) {
 }
 
 Result FilterClient::configureAvStreamType(AvStreamType avStreamType) {
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        int type;
+        switch (avStreamType.getDiscriminator()) {
+            case AvStreamType::hidl_discriminator::audio:
+                type = (int)avStreamType.audio();
+                break;
+            case AvStreamType::hidl_discriminator::video:
+                type = (int)avStreamType.video();
+                break;
+        }
+        Status s = mTunerFilter->configureAvStreamType(type);
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter_1_1 != NULL) {
         return mFilter_1_1->configureAvStreamType(avStreamType);
@@ -228,7 +241,10 @@ Result FilterClient::releaseAvHandle(native_handle_t* handle, uint64_t avDataId)
 }
 
 Result FilterClient::setDataSource(sp<FilterClient> filterClient){
-    // TODO: pending aidl interface
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->setDataSource(filterClient->getAidlFilter());
+        return ClientHelper::getServiceSpecificErrorCode(s);
+    }
 
     if (mFilter != NULL) {
         sp<IFilter> sourceFilter = filterClient->getHalFilter();
@@ -891,29 +907,43 @@ void TunerFilterCallback::getHidlRestartEvent(const vector<TunerFilterEvent>& fi
 }
 
 Result FilterClient::getFilterMq() {
-    if (mFilter == NULL) {
-        return Result::INVALID_STATE;
-    }
-
     if (mFilterMQ != NULL) {
         return Result::SUCCESS;
     }
 
-    Result getQueueDescResult = Result::UNKNOWN_ERROR;
-    MQDescriptorSync<uint8_t> filterMQDesc;
-    mFilter->getQueueDesc(
-            [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
-                filterMQDesc = desc;
-                getQueueDescResult = r;
-            });
-    if (getQueueDescResult == Result::SUCCESS) {
-        mFilterMQ = std::make_unique<MQ>(filterMQDesc, true);
-        EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
+    AidlMQDesc aidlMqDesc;
+    Result res = Result::UNAVAILABLE;
+
+    if (mTunerFilter != NULL) {
+        Status s = mTunerFilter->getQueueDesc(&aidlMqDesc);
+        res = ClientHelper::getServiceSpecificErrorCode(s);
+        if (res == Result::SUCCESS) {
+            mFilterMQ = new (nothrow) AidlMQ(aidlMqDesc);
+            EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
+        }
+        return res;
     }
-    return getQueueDescResult;
+
+    if (mFilter != NULL) {
+        MQDescriptorSync<uint8_t> filterMQDesc;
+        mFilter->getQueueDesc(
+                [&](Result r, const MQDescriptorSync<uint8_t>& desc) {
+                    filterMQDesc = desc;
+                    res = r;
+                });
+        if (res == Result::SUCCESS) {
+            AidlMQDesc aidlMQDesc;
+            unsafeHidlToAidlMQDescriptor<uint8_t, int8_t, SynchronizedReadWrite>(
+                    filterMQDesc,  &aidlMQDesc);
+            mFilterMQ = new (nothrow) AidlMessageQueue(aidlMQDesc);
+            EventFlag::createEventFlag(mFilterMQ->getEventFlagWord(), &mFilterMQEventFlag);
+        }
+    }
+
+    return res;
 }
 
-int FilterClient::copyData(uint8_t* buffer, int size) {
+int FilterClient::copyData(int8_t* buffer, int size) {
     if (mFilter == NULL || mFilterMQ == NULL || mFilterMQEventFlag == NULL) {
         return -1;
     }
