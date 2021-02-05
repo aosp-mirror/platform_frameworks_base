@@ -203,6 +203,7 @@ public class Vpn {
     protected final NetworkCapabilities mNetworkCapabilities;
     private final SystemServices mSystemServices;
     private final Ikev2SessionCreator mIkev2SessionCreator;
+    private final UserManager mUserManager;
 
     /**
      * Whether to keep the connection active after rebooting, or upgrading or reinstalling. This
@@ -409,6 +410,7 @@ public class Vpn {
         mLooper = looper;
         mSystemServices = systemServices;
         mIkev2SessionCreator = ikev2SessionCreator;
+        mUserManager = mContext.getSystemService(UserManager.class);
 
         mPackage = VpnConfig.LEGACY_VPN;
         mOwnerUID = getAppUid(mPackage, mUserId);
@@ -1435,7 +1437,7 @@ public class Vpn {
             final long token = Binder.clearCallingIdentity();
             List<UserInfo> users;
             try {
-                users = UserManager.get(mContext).getAliveUsers();
+                users = mUserManager.getAliveUsers();
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -1519,7 +1521,7 @@ public class Vpn {
      */
     public void onUserAdded(int userId) {
         // If the user is restricted tie them to the parent user's VPN
-        UserInfo user = UserManager.get(mContext).getUserInfo(userId);
+        UserInfo user = mUserManager.getUserInfo(userId);
         if (user.isRestricted() && user.restrictedProfileParentId == mUserId) {
             synchronized(Vpn.this) {
                 final Set<UidRange> existingRanges = mNetworkCapabilities.getUids();
@@ -1547,7 +1549,7 @@ public class Vpn {
      */
     public void onUserRemoved(int userId) {
         // clean up if restricted
-        UserInfo user = UserManager.get(mContext).getUserInfo(userId);
+        UserInfo user = mUserManager.getUserInfo(userId);
         if (user.isRestricted() && user.restrictedProfileParentId == mUserId) {
             synchronized(Vpn.this) {
                 final Set<UidRange> existingRanges = mNetworkCapabilities.getUids();
@@ -1972,8 +1974,7 @@ public class Vpn {
 
     private void enforceNotRestrictedUser() {
         Binder.withCleanCallingIdentity(() -> {
-            final UserManager mgr = UserManager.get(mContext);
-            final UserInfo user = mgr.getUserInfo(mUserId);
+            final UserInfo user = mUserManager.getUserInfo(mUserId);
 
             if (user.isRestricted()) {
                 throw new SecurityException("Restricted users cannot configure VPNs");
@@ -2008,9 +2009,8 @@ public class Vpn {
      */
     public void startLegacyVpnPrivileged(VpnProfile profile, KeyStore keyStore,
             @Nullable Network underlying, @NonNull LinkProperties egress) {
-        UserManager mgr = UserManager.get(mContext);
-        UserInfo user = mgr.getUserInfo(mUserId);
-        if (user.isRestricted() || mgr.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
+        UserInfo user = mUserManager.getUserInfo(mUserId);
+        if (user.isRestricted() || mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_VPN,
                     new UserHandle(mUserId))) {
             throw new SecurityException("Restricted users cannot establish VPNs");
         }
