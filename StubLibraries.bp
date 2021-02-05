@@ -87,6 +87,8 @@ stubs_defaults {
         // full sdk to ensure we can resolve them. If a new class gets added,
         // the prebuilts/sdk/current needs to be updated.
         "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
     ],
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
@@ -403,7 +405,11 @@ java_library_static {
         "android_defaults_stubs_current",
         "android_stubs_dists_default",
     ],
-    libs: ["sdk_system_current_android"],
+    libs: [
+        "sdk_system_current_android",
+        // NOTE: The below can be removed once the prebuilt stub contains IKE.
+        "sdk_system_current_android.net.ipsec.ike",
+    ],
     static_libs: ["art.module.public.api.stubs"],
     dist: {
         dir: "apistubs/android/module-lib",
