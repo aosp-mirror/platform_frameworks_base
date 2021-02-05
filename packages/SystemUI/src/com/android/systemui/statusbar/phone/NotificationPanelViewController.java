@@ -756,19 +756,16 @@ public class NotificationPanelViewController extends PanelViewController {
 
     public void updateResources() {
         int qsWidth = mResources.getDimensionPixelSize(R.dimen.qs_panel_width);
-        int panelGravity = mResources.getInteger(R.integer.notification_panel_layout_gravity);
-        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mQsFrame.getLayoutParams();
-        if (lp.width != qsWidth || lp.gravity != panelGravity) {
+        ViewGroup.LayoutParams lp = mQsFrame.getLayoutParams();
+        if (lp.width != qsWidth) {
             lp.width = qsWidth;
-            lp.gravity = panelGravity;
             mQsFrame.setLayoutParams(lp);
         }
 
         int panelWidth = mResources.getDimensionPixelSize(R.dimen.notification_panel_width);
         lp = mNotificationStackScrollLayoutController.getLayoutParams();
-        if (lp.width != panelWidth || lp.gravity != panelGravity) {
+        if (lp.width != panelWidth) {
             lp.width = panelWidth;
-            lp.gravity = panelGravity;
             mNotificationStackScrollLayoutController.setLayoutParams(lp);
         }
     }

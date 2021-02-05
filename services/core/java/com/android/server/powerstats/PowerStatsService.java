@@ -291,6 +291,6 @@ public class PowerStatsService extends SystemService {
 
     private void readEnergyMeterAsync(CompletableFuture<EnergyMeasurement[]> future,
             int[] channelIds) {
-        future.complete(getPowerStatsHal().readEnergyMeters(channelIds));
+        future.complete(getPowerStatsHal().readEnergyMeter(channelIds));
     }
 }

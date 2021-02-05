@@ -145,18 +145,6 @@ oneway interface ITaskStackListener {
     void onTaskSnapshotChanged(int taskId, in TaskSnapshot snapshot);
 
     /**
-     * Called when the resumed activity is in size compatibility mode and its override configuration
-     * is different from the current one of system.
-     *
-     * @param displayId Id of the display where the activity resides.
-     * @param activityToken Token of the size compatibility mode activity. It will be null when
-     *                      switching to a activity that is not in size compatibility mode or the
-     *                      configuration of the activity.
-     * @see com.android.server.wm.ActivityRecord#inSizeCompatMode
-     */
-    void onSizeCompatModeActivityChanged(int displayId, in IBinder activityToken);
-
-    /**
      * Reports that an Activity received a back key press when there were no additional activities
      * on the back stack.
      *

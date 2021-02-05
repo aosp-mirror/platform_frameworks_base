@@ -22,7 +22,6 @@ import static com.android.wm.shell.pip.PipBoundsState.STASH_TYPE_RIGHT;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -44,6 +43,7 @@ import com.android.wm.shell.common.magnetictarget.MagnetizedObject;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipSnapAlgorithm;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 
 import java.util.function.Consumer;
 
@@ -152,13 +152,13 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      */
     private Runnable mPostPipTransitionCallback;
 
-    private final PipTaskOrganizer.PipTransitionCallback mPipTransitionCallback =
-            new PipTaskOrganizer.PipTransitionCallback() {
+    private final PipTransitionController.PipTransitionCallback mPipTransitionCallback =
+            new PipTransitionController.PipTransitionCallback() {
         @Override
-        public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {}
+        public void onPipTransitionStarted(int direction, Rect pipBounds) {}
 
         @Override
-        public void onPipTransitionFinished(ComponentName activity, int direction) {
+        public void onPipTransitionFinished(int direction) {
             if (mPostPipTransitionCallback != null) {
                 mPostPipTransitionCallback.run();
                 mPostPipTransitionCallback = null;
@@ -166,20 +166,20 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
 
         @Override
-        public void onPipTransitionCanceled(ComponentName activity, int direction) {}
+        public void onPipTransitionCanceled(int direction) {}
     };
 
     public PipMotionHelper(Context context, @NonNull PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer, PhonePipMenuController menuController,
-            PipSnapAlgorithm snapAlgorithm, FloatingContentCoordinator floatingContentCoordinator,
-            ShellExecutor mainExecutor) {
+            PipSnapAlgorithm snapAlgorithm, PipTransitionController pipTransitionController,
+            FloatingContentCoordinator floatingContentCoordinator, ShellExecutor mainExecutor) {
         mContext = context;
         mPipTaskOrganizer = pipTaskOrganizer;
         mPipBoundsState = pipBoundsState;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
-        mPipTaskOrganizer.registerPipTransitionCallback(mPipTransitionCallback);
+        pipTransitionController.registerPipTransitionCallback(mPipTransitionCallback);
         mTemporaryBoundsPhysicsAnimator = PhysicsAnimator.getInstance(
                 mPipBoundsState.getMotionBoundsState().getBoundsInMotion());
 

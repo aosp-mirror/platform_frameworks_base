@@ -261,7 +261,7 @@ public class FontManager {
             @IntRange(from = 0) int baseVersion
     ) {
         try {
-            return mIFontManager.updateFont(pfd, signature, baseVersion);
+            return mIFontManager.updateFont(baseVersion, new FontUpdateRequest(pfd, signature));
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to call updateFont API", e);
             return RESULT_ERROR_REMOTE_EXCEPTION;

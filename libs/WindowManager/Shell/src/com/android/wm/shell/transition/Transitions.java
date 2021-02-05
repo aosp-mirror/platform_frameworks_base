@@ -232,6 +232,8 @@ public class Transitions {
         if (!info.getRootLeash().isValid()) {
             // Invalid root-leash implies that the transition is empty/no-op, so just do
             // housekeeping and return.
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, "Invalid root leash (%s): %s",
+                    transitionToken, info);
             t.apply();
             onFinish(transitionToken, null /* wct */, null /* wctCB */);
             return;
@@ -241,14 +243,22 @@ public class Transitions {
 
         final TransitionFinishCallback finishCb = (wct, cb) -> onFinish(transitionToken, wct, cb);
         // If a handler chose to uniquely run this animation, try delegating to it.
-        if (active.mFirstHandler != null && active.mFirstHandler.startAnimation(
-                transitionToken, info, t, finishCb)) {
-            return;
+        if (active.mFirstHandler != null) {
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try firstHandler %s",
+                    active.mFirstHandler);
+            if (active.mFirstHandler.startAnimation(transitionToken, info, t, finishCb)) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by firstHandler");
+                return;
+            }
         }
         // Otherwise give every other handler a chance (in order)
         for (int i = mHandlers.size() - 1; i >= 0; --i) {
             if (mHandlers.get(i) == active.mFirstHandler) continue;
+            ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " try handler %s",
+                    mHandlers.get(i));
             if (mHandlers.get(i).startAnimation(transitionToken, info, t, finishCb)) {
+                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_TRANSITIONS, " animated by %s",
+                        mHandlers.get(i));
                 return;
             }
         }

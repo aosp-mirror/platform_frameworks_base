@@ -325,8 +325,6 @@ public class ScreenshotView extends FrameLayout implements
             Log.d(TAG, "createAnim: bounds=" + bounds + " showFlash=" + showFlash);
         }
 
-        Rect previewBounds = new Rect();
-        mScreenshotPreview.getBoundsOnScreen(previewBounds);
         Rect targetPosition = new Rect();
         mScreenshotPreview.getHitRect(targetPosition);
 

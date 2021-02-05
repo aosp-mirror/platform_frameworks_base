@@ -8355,13 +8355,14 @@ public class ConnectivityServiceTest {
     private void setupConnectionOwnerUid(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
             throws Exception {
         final Set<UidRange> vpnRange = Collections.singleton(UidRange.createForUser(PRIMARY_USER));
+        mMockVpn.setVpnType(vpnType);
         mMockVpn.establish(new LinkProperties(), vpnOwnerUid, vpnRange);
         assertVpnUidRangesUpdated(true, vpnRange, vpnOwnerUid);
-        mMockVpn.setVpnType(vpnType);
 
         final UnderlyingNetworkInfo underlyingNetworkInfo =
                 new UnderlyingNetworkInfo(vpnOwnerUid, VPN_IFNAME, new ArrayList<String>());
         mMockVpn.setUnderlyingNetworkInfo(underlyingNetworkInfo);
+        when(mDeps.getConnectionOwnerUid(anyInt(), any(), any())).thenReturn(42);
     }
 
     private void setupConnectionOwnerUidAsVpnApp(int vpnOwnerUid, @VpnManager.VpnType int vpnType)
@@ -8410,8 +8411,7 @@ public class ConnectivityServiceTest {
         final int myUid = Process.myUid();
         setupConnectionOwnerUidAsVpnApp(myUid, VpnManager.TYPE_VPN_SERVICE);
 
-        // TODO: Test the returned UID
-        mService.getConnectionOwnerUid(getTestConnectionInfo());
+        assertEquals(42, mService.getConnectionOwnerUid(getTestConnectionInfo()));
     }
 
     @Test
@@ -8421,8 +8421,7 @@ public class ConnectivityServiceTest {
         mServiceContext.setPermission(
                 android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
 
-        // TODO: Test the returned UID
-        mService.getConnectionOwnerUid(getTestConnectionInfo());
+        assertEquals(42, mService.getConnectionOwnerUid(getTestConnectionInfo()));
     }
 
     @Test
@@ -8433,8 +8432,7 @@ public class ConnectivityServiceTest {
         mServiceContext.setPermission(
                 NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK, PERMISSION_GRANTED);
 
-        // TODO: Test the returned UID
-        mService.getConnectionOwnerUid(getTestConnectionInfo());
+        assertEquals(42, mService.getConnectionOwnerUid(getTestConnectionInfo()));
     }
 
     private static PackageInfo buildPackageInfo(boolean hasSystemPermission, int uid) {

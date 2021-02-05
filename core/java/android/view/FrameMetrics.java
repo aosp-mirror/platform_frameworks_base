@@ -149,7 +149,7 @@ public final class FrameMetrics {
      * <p>
      * The time value that was used in all the vsync listeners and drawing for
      * the frame (Choreographer frame callbacks, animations,
-     * {@link View#getDrawingTime()}, etc…)
+     * {@link View#getDrawingTime()}, etc.)
      * </p>
      */
     public static final int VSYNC_TIMESTAMP = 11;

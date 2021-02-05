@@ -42,7 +42,6 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.ServiceThread;
 
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -153,9 +152,14 @@ public final class CachedAppOptimizer {
      */
     final ServiceThread mCachedAppOptimizerThread;
 
+    @GuardedBy("mProcLock")
     private final ArrayList<ProcessRecord> mPendingCompactionProcesses =
             new ArrayList<ProcessRecord>();
+
     private final ActivityManagerService mAm;
+
+    private final ActivityManagerGlobalLock mProcLock;
+
     private final OnPropertiesChangedListener mOnFlagsChangedListener =
             new OnPropertiesChangedListener() {
                 @Override
@@ -234,7 +238,7 @@ public final class CachedAppOptimizer {
     @VisibleForTesting
     Handler mCompactionHandler;
     private Handler mFreezeHandler;
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     private boolean mFreezerOverride = false;
 
     // Maps process ID to last compaction statistics for processes that we've fully compacted. Used
@@ -242,6 +246,7 @@ public final class CachedAppOptimizer {
     // data for "some" compactions. Uses LinkedHashMap to ensure insertion order is kept and
     // facilitate removal of the oldest entry.
     @VisibleForTesting
+    @GuardedBy("mProcLock")
     LinkedHashMap<Integer, LastCompactionStats> mLastCompactionStats =
             new LinkedHashMap<Integer, LastCompactionStats>() {
                 @Override
@@ -264,6 +269,7 @@ public final class CachedAppOptimizer {
     CachedAppOptimizer(ActivityManagerService am, PropertyChangedCallbackForTest callback,
             ProcessDependencies processDependencies) {
         mAm = am;
+        mProcLock = am.mProcLock;
         mCachedAppOptimizerThread = new ServiceThread("CachedAppOptimizerThread",
             Process.THREAD_GROUP_SYSTEM, true);
         mProcStateThrottle = new HashSet<>();
@@ -309,7 +315,7 @@ public final class CachedAppOptimizer {
         }
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     void dump(PrintWriter pw) {
         pw.println("CachedAppOptimizer settings");
         synchronized (mPhenotypeFlagLock) {
@@ -350,58 +356,57 @@ public final class CachedAppOptimizer {
         }
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     void compactAppSome(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_SOME;
+        app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_SOME);
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
                 mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
+                COMPACT_PROCESS_MSG, app.mState.getSetAdj(), app.mState.getSetProcState()));
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     void compactAppFull(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_FULL;
+        app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_FULL);
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
                 mCompactionHandler.obtainMessage(
-                COMPACT_PROCESS_MSG, app.setAdj, app.setProcState));
+                COMPACT_PROCESS_MSG, app.mState.getSetAdj(), app.mState.getSetProcState()));
 
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     void compactAppPersistent(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_PERSISTENT;
+        app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_PERSISTENT);
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
                 mCompactionHandler.obtainMessage(
-                    COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+                    COMPACT_PROCESS_MSG, app.mState.getCurAdj(), app.mState.getSetProcState()));
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     boolean shouldCompactPersistent(ProcessRecord app, long now) {
-        return (app.lastCompactTime == 0
-                || (now - app.lastCompactTime) > mCompactThrottlePersistent);
+        return (app.mOptRecord.getLastCompactTime() == 0
+                || (now - app.mOptRecord.getLastCompactTime()) > mCompactThrottlePersistent);
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     void compactAppBfgs(ProcessRecord app) {
-        app.reqCompactAction = COMPACT_PROCESS_BFGS;
+        app.mOptRecord.setReqCompactAction(COMPACT_PROCESS_BFGS);
         mPendingCompactionProcesses.add(app);
         mCompactionHandler.sendMessage(
                 mCompactionHandler.obtainMessage(
-                    COMPACT_PROCESS_MSG, app.curAdj, app.setProcState));
+                    COMPACT_PROCESS_MSG, app.mState.getCurAdj(), app.mState.getSetProcState()));
     }
 
-    @GuardedBy("mAm")
+    @GuardedBy("mProcLock")
     boolean shouldCompactBFGS(ProcessRecord app, long now) {
-        return (app.lastCompactTime == 0
-                || (now - app.lastCompactTime) > mCompactThrottleBFGS);
+        return (app.mOptRecord.getLastCompactTime() == 0
+                || (now - app.mOptRecord.getLastCompactTime()) > mCompactThrottleBFGS);
     }
 
-    @GuardedBy("mAm")
     void compactAllSystem() {
-        if (mUseCompaction) {
+        if (useCompaction()) {
             mCompactionHandler.sendMessage(mCompactionHandler.obtainMessage(
                                               COMPACT_SYSTEM_MSG));
         }
@@ -468,29 +473,28 @@ public final class CachedAppOptimizer {
 
         // Override is applied immediately, restore is delayed
         synchronized (mAm) {
-            int processCount = mAm.mProcessList.mLruProcesses.size();
+            synchronized (mProcLock) {
+                mFreezerOverride = !enable;
+                Slog.d(TAG_AM, "freezer override set to " + mFreezerOverride);
 
-            mFreezerOverride = !enable;
-            Slog.d(TAG_AM, "freezer override set to " + mFreezerOverride);
+                mAm.mProcessList.forEachLruProcessesLOSP(true, process -> {
+                    if (process == null) {
+                        return;
+                    }
 
-            for (int i = 0; i < processCount; i++) {
-                ProcessRecord process = mAm.mProcessList.mLruProcesses.get(i);
+                    final ProcessCachedOptimizerRecord opt = process.mOptRecord;
+                    if (enable && opt.hasFreezerOverride()) {
+                        freezeAppAsyncLSP(process);
+                        opt.setFreezerOverride(false);
+                    }
 
-                if (process == null) {
-                    continue;
-                }
+                    if (!enable && opt.isFrozen()) {
+                        unfreezeAppLSP(process);
 
-                if (enable && process.freezerOverride) {
-                    freezeAppAsync(process);
-                    process.freezerOverride = false;
-                }
-
-                if (!enable && process.frozen) {
-                    unfreezeAppLocked(process);
-
-                    // Set freezerOverride *after* calling unfreezeAppLocked (it resets the flag)
-                    process.freezerOverride = true;
-                }
+                        // Set freezerOverride *after* calling unfreezeAppLSP (it resets the flag)
+                        opt.setFreezerOverride(true);
+                    }
+                });
             }
         }
 
@@ -740,19 +744,20 @@ public final class CachedAppOptimizer {
     }
 
     // This will ensure app will be out of the freezer for at least FREEZE_TIMEOUT_MS
+    @GuardedBy("mAm")
     void unfreezeTemporarily(ProcessRecord app) {
         if (mUseFreezer) {
-            synchronized (mAm) {
-                if (app.frozen) {
-                    unfreezeAppLocked(app);
-                    freezeAppAsync(app);
+            synchronized (mProcLock) {
+                if (app.mOptRecord.isFrozen()) {
+                    unfreezeAppLSP(app);
+                    freezeAppAsyncLSP(app);
                 }
             }
         }
     }
 
-    @GuardedBy("mAm")
-    void freezeAppAsync(ProcessRecord app) {
+    @GuardedBy({"mAm", "mProcLock"})
+    void freezeAppAsyncLSP(ProcessRecord app) {
         mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
 
         mFreezeHandler.sendMessageDelayed(
@@ -761,16 +766,17 @@ public final class CachedAppOptimizer {
                 FREEZE_TIMEOUT_MS);
     }
 
-    @GuardedBy("mAm")
-    void unfreezeAppLocked(ProcessRecord app) {
+    @GuardedBy({"mAm", "mProcLock"})
+    void unfreezeAppLSP(ProcessRecord app) {
         mFreezeHandler.removeMessages(SET_FROZEN_PROCESS_MSG, app);
 
-        app.freezerOverride = false;
-
-        if (!app.frozen) {
+        final int pid = app.getPid();
+        final ProcessCachedOptimizerRecord opt = app.mOptRecord;
+        opt.setFreezerOverride(false);
+        if (!opt.isFrozen()) {
             if (DEBUG_FREEZER) {
                 Slog.d(TAG_AM,
-                        "Skipping unfreeze for process " + app.pid + " "
+                        "Skipping unfreeze for process " + pid + " "
                         + app.processName + " (not frozen)");
             }
             return;
@@ -781,25 +787,25 @@ public final class CachedAppOptimizer {
         boolean processKilled = false;
 
         try {
-            int freezeInfo = getBinderFreezeInfo(app.pid);
+            int freezeInfo = getBinderFreezeInfo(pid);
 
             if ((freezeInfo & SYNC_RECEIVED_WHILE_FROZEN) != 0) {
-                Slog.d(TAG_AM, "pid " + app.pid + " " + app.processName + " "
+                Slog.d(TAG_AM, "pid " + pid + " " + app.processName + " "
                         + " received sync transactions while frozen, killing");
-                app.kill("Sync transaction while in frozen state",
+                app.killLocked("Sync transaction while in frozen state",
                         ApplicationExitInfo.REASON_OTHER,
                         ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
                 processKilled = true;
             }
 
             if ((freezeInfo & ASYNC_RECEIVED_WHILE_FROZEN) != 0) {
-                Slog.d(TAG_AM, "pid " + app.pid + " " + app.processName + " "
+                Slog.d(TAG_AM, "pid " + pid + " " + app.processName + " "
                         + " received async transactions while frozen");
             }
         } catch (Exception e) {
-            Slog.d(TAG_AM, "Unable to query binder frozen info for pid " + app.pid + " "
+            Slog.d(TAG_AM, "Unable to query binder frozen info for pid " + pid + " "
                     + app.processName + ". Killing it. Exception: " + e);
-            app.kill("Unable to query binder frozen stats",
+            app.killLocked("Unable to query binder frozen stats",
                     ApplicationExitInfo.REASON_OTHER,
                     ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
             processKilled = true;
@@ -809,38 +815,38 @@ public final class CachedAppOptimizer {
             return;
         }
 
-        long freezeTime = app.freezeUnfreezeTime;
+        long freezeTime = opt.getFreezeUnfreezeTime();
 
         try {
-            freezeBinder(app.pid, false);
+            freezeBinder(pid, false);
         } catch (RuntimeException e) {
-            Slog.e(TAG_AM, "Unable to unfreeze binder for " + app.pid + " " + app.processName
+            Slog.e(TAG_AM, "Unable to unfreeze binder for " + pid + " " + app.processName
                     + ". Killing it");
-            app.kill("Unable to unfreeze",
+            app.killLocked("Unable to unfreeze",
                     ApplicationExitInfo.REASON_OTHER,
                     ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
             return;
         }
 
         try {
-            Process.setProcessFrozen(app.pid, app.uid, false);
+            Process.setProcessFrozen(pid, app.uid, false);
 
-            app.freezeUnfreezeTime = SystemClock.uptimeMillis();
-            app.frozen = false;
+            opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
+            opt.setFrozen(false);
         } catch (Exception e) {
-            Slog.e(TAG_AM, "Unable to unfreeze " + app.pid + " " + app.processName
+            Slog.e(TAG_AM, "Unable to unfreeze " + pid + " " + app.processName
                     + ". This might cause inconsistency or UI hangs.");
         }
 
-        if (!app.frozen) {
+        if (!opt.isFrozen()) {
             if (DEBUG_FREEZER) {
-                Slog.d(TAG_AM, "sync unfroze " + app.pid + " " + app.processName);
+                Slog.d(TAG_AM, "sync unfroze " + pid + " " + app.processName);
             }
 
             mFreezeHandler.sendMessage(
                     mFreezeHandler.obtainMessage(REPORT_UNFREEZE_MSG,
-                        app.pid,
-                        (int) Math.min(app.freezeUnfreezeTime - freezeTime, Integer.MAX_VALUE),
+                        pid,
+                        (int) Math.min(opt.getFreezeUnfreezeTime() - freezeTime, Integer.MAX_VALUE),
                         app.processName));
         }
     }
@@ -869,6 +875,7 @@ public final class CachedAppOptimizer {
                 case COMPACT_PROCESS_MSG: {
                     long start = SystemClock.uptimeMillis();
                     ProcessRecord proc;
+                    final ProcessCachedOptimizerRecord opt;
                     int pid;
                     String action;
                     final String name;
@@ -877,18 +884,19 @@ public final class CachedAppOptimizer {
                     LastCompactionStats lastCompactionStats;
                     int lastOomAdj = msg.arg1;
                     int procState = msg.arg2;
-                    synchronized (mAm) {
+                    synchronized (mProcLock) {
                         proc = mPendingCompactionProcesses.remove(0);
+                        opt = proc.mOptRecord;
 
-                        pendingAction = proc.reqCompactAction;
-                        pid = proc.pid;
+                        pendingAction = opt.getReqCompactAction();
+                        pid = proc.getPid();
                         name = proc.processName;
 
                         // don't compact if the process has returned to perceptible
                         // and this is only a cached/home/prev compaction
                         if ((pendingAction == COMPACT_PROCESS_SOME
                                 || pendingAction == COMPACT_PROCESS_FULL)
-                                && (proc.setAdj <= ProcessList.PERCEPTIBLE_APP_ADJ)) {
+                                && (proc.mState.getSetAdj() <= ProcessList.PERCEPTIBLE_APP_ADJ)) {
                             if (DEBUG_COMPACTION) {
                                 Slog.d(TAG_AM,
                                         "Skipping compaction as process " + name + " is "
@@ -897,8 +905,8 @@ public final class CachedAppOptimizer {
                             return;
                         }
 
-                        lastCompactAction = proc.lastCompactAction;
-                        lastCompactTime = proc.lastCompactTime;
+                        lastCompactAction = opt.getLastCompactAction();
+                        lastCompactTime = opt.getLastCompactTime();
                         lastCompactionStats = mLastCompactionStats.get(pid);
                     }
 
@@ -1076,9 +1084,9 @@ public final class CachedAppOptimizer {
                                     lastOomAdj, ActivityManager.processStateAmToProto(procState),
                                     zramFreeKbBefore, zramFreeKbAfter);
                         }
-                        synchronized (mAm) {
-                            proc.lastCompactTime = end;
-                            proc.lastCompactAction = pendingAction;
+                        synchronized (mProcLock) {
+                            opt.setLastCompactTime(end);
+                            opt.setLastCompactAction(pendingAction);
                         }
                         if (action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_FULL])
                                 || action.equals(COMPACT_ACTION_STRING[COMPACT_ACTION_ANON])) {
@@ -1126,11 +1134,12 @@ public final class CachedAppOptimizer {
             }
         }
 
-        private void freezeProcess(ProcessRecord proc) {
-            final int pid = proc.pid;
+        private void freezeProcess(final ProcessRecord proc) {
+            int pid = proc.getPid(); // Unlocked intentionally
             final String name = proc.processName;
             final long unfrozenDuration;
             final boolean frozen;
+            final ProcessCachedOptimizerRecord opt = proc.mOptRecord;
 
             try {
                 // pre-check for locks to avoid unnecessary freeze/unfreeze operations
@@ -1146,26 +1155,27 @@ public final class CachedAppOptimizer {
                 return;
             }
 
-            synchronized (mAm) {
-                if (proc.curAdj < ProcessList.CACHED_APP_MIN_ADJ
-                        || proc.shouldNotFreeze) {
+            synchronized (mProcLock) {
+                pid = proc.getPid();
+                if (proc.mState.getCurAdj() < ProcessList.CACHED_APP_MIN_ADJ
+                        || opt.shouldNotFreeze()) {
                     if (DEBUG_FREEZER) {
                         Slog.d(TAG_AM, "Skipping freeze for process " + pid
-                                + " " + name + " curAdj = " + proc.curAdj
-                                + ", shouldNotFreeze = " + proc.shouldNotFreeze);
+                                + " " + name + " curAdj = " + proc.mState.getCurAdj()
+                                + ", shouldNotFreeze = " + opt.shouldNotFreeze());
                     }
                     return;
                 }
 
                 if (mFreezerOverride) {
-                    proc.freezerOverride = true;
+                    opt.setFreezerOverride(true);
                     Slog.d(TAG_AM, "Skipping freeze for process " + pid
-                            + " " + name + " curAdj = " + proc.curAdj
+                            + " " + name + " curAdj = " + proc.mState.getCurAdj()
                             + "(override)");
                     return;
                 }
 
-                if (pid == 0 || proc.frozen) {
+                if (pid == 0 || opt.isFrozen()) {
                     // Already frozen or not a real process, either one being
                     // launched or one being killed
                     return;
@@ -1177,24 +1187,28 @@ public final class CachedAppOptimizer {
                     freezeBinder(pid, true);
                 } catch (RuntimeException e) {
                     Slog.e(TAG_AM, "Unable to freeze binder for " + pid + " " + name);
-                    proc.kill("Unable to freeze binder interface",
-                            ApplicationExitInfo.REASON_OTHER,
-                            ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                    mFreezeHandler.post(() -> {
+                        synchronized (mAm) {
+                            proc.killLocked("Unable to freeze binder interface",
+                                    ApplicationExitInfo.REASON_OTHER,
+                                    ApplicationExitInfo.SUBREASON_INVALID_STATE, true);
+                        }
+                    });
                 }
 
-                long unfreezeTime = proc.freezeUnfreezeTime;
+                long unfreezeTime = opt.getFreezeUnfreezeTime();
 
                 try {
                     Process.setProcessFrozen(pid, proc.uid, true);
 
-                    proc.freezeUnfreezeTime = SystemClock.uptimeMillis();
-                    proc.frozen = true;
+                    opt.setFreezeUnfreezeTime(SystemClock.uptimeMillis());
+                    opt.setFrozen(true);
                 } catch (Exception e) {
                     Slog.w(TAG_AM, "Unable to freeze " + pid + " " + name);
                 }
 
-                unfrozenDuration = proc.freezeUnfreezeTime - unfreezeTime;
-                frozen = proc.frozen;
+                unfrozenDuration = opt.getFreezeUnfreezeTime() - unfreezeTime;
+                frozen = opt.isFrozen();
             }
 
             if (!frozen) {
@@ -1225,13 +1239,17 @@ public final class CachedAppOptimizer {
                     }
 
                     synchronized (mAm) {
-                        unfreezeAppLocked(proc);
+                        synchronized (mProcLock) {
+                            unfreezeAppLSP(proc);
+                        }
                     }
                 }
             } catch (IOException e) {
                 Slog.e(TAG_AM, "Unable to check file locks for " + name + "(" + pid + "): " + e);
                 synchronized (mAm) {
-                    unfreezeAppLocked(proc);
+                    synchronized (mProcLock) {
+                        unfreezeAppLSP(proc);
+                    }
                 }
             }
         }

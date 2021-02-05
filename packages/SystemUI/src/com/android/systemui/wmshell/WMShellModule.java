@@ -17,13 +17,11 @@
 package com.android.systemui.wmshell;
 
 import android.animation.AnimationHandler;
-import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.os.Handler;
 import android.view.IWindowManager;
 
 import com.android.systemui.dagger.WMSingleton;
-import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
 import com.android.wm.shell.apppairs.AppPairs;
@@ -41,18 +39,19 @@ import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
+import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransition;
+import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip.PipUiEventLogger;
 import com.android.wm.shell.pip.phone.PhonePipMenuController;
 import com.android.wm.shell.pip.phone.PipAppOpsListener;
 import com.android.wm.shell.pip.phone.PipController;
 import com.android.wm.shell.pip.phone.PipTouchHandler;
-import com.android.wm.shell.splitscreen.SplitScreen;
-import com.android.wm.shell.splitscreen.SplitScreenController;
 import com.android.wm.shell.transition.Transitions;
 
 import java.util.Optional;
@@ -104,12 +103,13 @@ public class WMShellModule {
             PipAppOpsListener pipAppOpsListener, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState, PipMediaController pipMediaController,
             PhonePipMenuController phonePipMenuController, PipTaskOrganizer pipTaskOrganizer,
-            PipTouchHandler pipTouchHandler, WindowManagerShellWrapper windowManagerShellWrapper,
+            PipTouchHandler pipTouchHandler, PipTransitionController pipTransitionController,
+            WindowManagerShellWrapper windowManagerShellWrapper,
             TaskStackListenerImpl taskStackListener,
             @ShellMainThread ShellExecutor mainExecutor) {
         return Optional.ofNullable(PipController.create(context, displayController,
                 pipAppOpsListener, pipBoundsAlgorithm, pipBoundsState, pipMediaController,
-                phonePipMenuController, pipTaskOrganizer, pipTouchHandler,
+                phonePipMenuController, pipTaskOrganizer, pipTouchHandler, pipTransitionController,
                 windowManagerShellWrapper, taskStackListener, mainExecutor));
     }
 
@@ -143,12 +143,13 @@ public class WMShellModule {
             PhonePipMenuController menuPhoneController, PipBoundsAlgorithm pipBoundsAlgorithm,
             PipBoundsState pipBoundsState,
             PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionController pipTransitionController,
             FloatingContentCoordinator floatingContentCoordinator,
             PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTouchHandler(context, menuPhoneController, pipBoundsAlgorithm,
-                pipBoundsState, pipTaskOrganizer, floatingContentCoordinator, pipUiEventLogger,
-                mainExecutor);
+                pipBoundsState, pipTaskOrganizer, pipTransitionController,
+                floatingContentCoordinator, pipUiEventLogger, mainExecutor);
     }
 
     @WMSingleton
@@ -157,12 +158,32 @@ public class WMShellModule {
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PhonePipMenuController menuPhoneController,
+            PipAnimationController pipAnimationController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
+            PipTransitionController pipTransitionController,
             Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
-                menuPhoneController, pipSurfaceTransactionHelper, splitScreenOptional,
-                displayController, pipUiEventLogger, shellTaskOrganizer, mainExecutor);
+                menuPhoneController, pipAnimationController, pipSurfaceTransactionHelper,
+                pipTransitionController, splitScreenOptional, displayController, pipUiEventLogger,
+                shellTaskOrganizer, mainExecutor);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipAnimationController providePipAnimationController(PipSurfaceTransactionHelper
+            pipSurfaceTransactionHelper) {
+        return new PipAnimationController(pipSurfaceTransactionHelper);
+    }
+
+    @WMSingleton
+    @Provides
+    static PipTransitionController providePipTransitionController(Context context,
+            Transitions transitions, ShellTaskOrganizer shellTaskOrganizer,
+            PipAnimationController pipAnimationController, PipBoundsAlgorithm pipBoundsAlgorithm,
+            PipBoundsState pipBoundsState, PhonePipMenuController pipMenuController) {
+        return new PipTransition(context, pipBoundsState, pipMenuController,
+                pipBoundsAlgorithm, pipAnimationController, transitions, shellTaskOrganizer);
     }
 }

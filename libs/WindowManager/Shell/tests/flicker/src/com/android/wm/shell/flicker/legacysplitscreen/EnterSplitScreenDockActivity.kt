@@ -18,6 +18,7 @@ package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.os.Bundle
 import android.platform.test.annotations.Presubmit
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
@@ -47,6 +48,7 @@ import org.junit.runners.Parameterized
 @RequiresDevice
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+// @FlakyTest(bugId = 179116910)
 class EnterSplitScreenDockActivity(
     testSpec: FlickerTestRunnerFactory.TestSpec
 ) : FlickerTestRunner(testSpec) {
@@ -92,7 +94,9 @@ class EnterSplitScreenDockActivity(
             }
             return FlickerTestRunnerFactory.getInstance().buildTest(
                 instrumentation, defaultTransitionSetup, testSpec,
-                repetitions = SplitScreenHelper.TEST_REPETITIONS)
+                repetitions = SplitScreenHelper.TEST_REPETITIONS,
+                supportedRotations = listOf(Surface.ROTATION_0) // bugId = 179116910
+            )
         }
     }
 }

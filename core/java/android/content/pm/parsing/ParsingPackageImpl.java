@@ -380,6 +380,11 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     private int autoRevokePermissions;
 
     protected int gwpAsanMode;
+    protected int memtagMode;
+
+    @Nullable
+    @DataClass.ParcelWith(ForBoolean.class)
+    private Boolean nativeHeapZeroInit;
 
     // TODO(chiuwinson): Non-null
     @Nullable
@@ -1058,6 +1063,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         appInfo.volumeUuid = volumeUuid;
         appInfo.zygotePreloadName = zygotePreloadName;
         appInfo.setGwpAsanMode(gwpAsanMode);
+        appInfo.setMemtagMode(memtagMode);
+        appInfo.setNativeHeapZeroInit(nativeHeapZeroInit);
         appInfo.setBaseCodePath(mBaseApkPath);
         appInfo.setBaseResourcePath(mBaseApkPath);
         appInfo.setCodePath(mPath);
@@ -1190,6 +1197,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         dest.writeSparseIntArray(this.minExtensionVersions);
         dest.writeLong(this.mBooleans);
         dest.writeMap(this.mProperties);
+        dest.writeInt(this.memtagMode);
+        sForBoolean.parcel(this.nativeHeapZeroInit, dest, flags);
     }
 
     public ParsingPackageImpl(Parcel in) {
@@ -1310,6 +1319,8 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
         this.minExtensionVersions = in.readSparseIntArray();
         this.mBooleans = in.readLong();
         this.mProperties = in.createTypedArrayMap(Property.CREATOR);
+        this.memtagMode = in.readInt();
+        this.nativeHeapZeroInit = sForBoolean.unparcel(in);
         assignDerivedFields();
     }
 
@@ -2062,6 +2073,17 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     }
 
     @Override
+    public int getMemtagMode() {
+        return memtagMode;
+    }
+
+    @Nullable
+    @Override
+    public Boolean isNativeHeapZeroInit() {
+        return nativeHeapZeroInit;
+    }
+
+    @Override
     public boolean isPartiallyDirectBootAware() {
         return getBoolean(Booleans.PARTIALLY_DIRECT_BOOT_AWARE);
     }
@@ -2489,6 +2511,18 @@ public class ParsingPackageImpl implements ParsingPackage, Parcelable {
     @Override
     public ParsingPackageImpl setGwpAsanMode(int value) {
         gwpAsanMode = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setMemtagMode(int value) {
+        memtagMode = value;
+        return this;
+    }
+
+    @Override
+    public ParsingPackageImpl setNativeHeapZeroInit(@Nullable Boolean value) {
+        nativeHeapZeroInit = value;
         return this;
     }
 

@@ -21,6 +21,7 @@ import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import android.annotation.Nullable;
 import android.content.ComponentName;
 import android.content.Context;
+import android.location.Location;
 import android.location.LocationResult;
 import android.location.provider.ILocationProvider;
 import android.location.provider.ILocationProviderManager;
@@ -40,6 +41,7 @@ import com.android.server.location.provider.AbstractLocationProvider;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -260,13 +262,25 @@ public class ProxyLocationProvider extends AbstractLocationProvider {
 
         // executed on binder thread
         @Override
-        public void onReportLocation(LocationResult locationResult) {
+        public void onReportLocation(Location location) {
             synchronized (mLock) {
                 if (mProxy != this) {
                     return;
                 }
 
-                reportLocation(locationResult.validate());
+                reportLocation(LocationResult.wrap(location).validate());
+            }
+        }
+
+        // executed on binder thread
+        @Override
+        public void onReportLocations(List<Location> locations) {
+            synchronized (mLock) {
+                if (mProxy != this) {
+                    return;
+                }
+
+                reportLocation(LocationResult.wrap(locations).validate());
             }
         }
 

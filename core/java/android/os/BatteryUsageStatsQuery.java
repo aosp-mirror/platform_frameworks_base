@@ -38,18 +38,19 @@ public final class BatteryUsageStatsQuery implements Parcelable {
      * @hide
      */
     @IntDef(flag = true, prefix = { "FLAG_BATTERY_USAGE_STATS_" }, value = {
-            FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED,
+            FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BatteryUsageStatsFlags {}
 
     /**
-     * Indicates that modeled battery usage stats should be returned along with
-     * measured ones.
+     * Indicates that power estimations should be based on the usage time and
+     * average power constants provided in the PowerProfile, even if on-device power monitoring
+     * is available.
      *
      * @hide
      */
-    public static final int FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED = 1;
+    public static final int FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL = 1;
 
     private final int mFlags;
 
@@ -112,11 +113,13 @@ public final class BatteryUsageStatsQuery implements Parcelable {
         }
 
         /**
-         * Requests to include modeled battery usage stats along with measured ones.
+         * Requests to return modeled battery usage stats only, even if on-device
+         * power monitoring data is available.
+         *
          * Should only be used for testing and debugging.
          */
-        public Builder includeModeled() {
-            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_MODELED;
+        public Builder powerProfileModeledOnly() {
+            mFlags |= BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_POWER_PROFILE_MODEL;
             return this;
         }
     }

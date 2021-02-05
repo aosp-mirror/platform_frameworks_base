@@ -192,32 +192,30 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public int addToDisplay(IWindow window, WindowManager.LayoutParams attrs,
-            int viewVisibility, int displayId, InsetsState requestedVisibility, Rect outFrame,
+            int viewVisibility, int displayId, InsetsState requestedVisibility,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), requestedVisibility, outFrame, outInputChannel,
-                outInsetsState, outActiveControls);
+                UserHandle.getUserId(mUid), requestedVisibility, outInputChannel, outInsetsState,
+                outActiveControls);
     }
 
 
     @Override
     public int addToDisplayAsUser(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, int userId, InsetsState requestedVisibility,
-            Rect outFrame, InputChannel outInputChannel, InsetsState outInsetsState,
+            InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId, userId,
-                requestedVisibility, outFrame, outInputChannel, outInsetsState,
-                outActiveControls);
+                requestedVisibility, outInputChannel, outInsetsState, outActiveControls);
     }
 
     @Override
     public int addToDisplayWithoutInputChannel(IWindow window, WindowManager.LayoutParams attrs,
             int viewVisibility, int displayId, InsetsState outInsetsState) {
         return mService.addWindow(this, window, attrs, viewVisibility, displayId,
-                UserHandle.getUserId(mUid), mDummyRequestedVisibility,
-                new Rect() /* outFrame */, null /* outInputChannel */, outInsetsState,
-                mDummyControls);
+                UserHandle.getUserId(mUid), mDummyRequestedVisibility, null /* outInputChannel */,
+                outInsetsState, mDummyControls);
     }
 
     @Override

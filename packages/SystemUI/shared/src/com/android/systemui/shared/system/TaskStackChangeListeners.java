@@ -18,15 +18,14 @@ package com.android.systemui.shared.system;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityTaskManager;
-import android.window.TaskSnapshot;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Trace;
 import android.util.Log;
+import android.window.TaskSnapshot;
 
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -88,13 +87,12 @@ public class TaskStackChangeListeners {
         private static final int ON_TASK_MOVED_TO_FRONT = 14;
         private static final int ON_ACTIVITY_REQUESTED_ORIENTATION_CHANGE = 15;
         private static final int ON_ACTIVITY_LAUNCH_ON_SECONDARY_DISPLAY_REROUTED = 16;
-        private static final int ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED = 17;
-        private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 18;
-        private static final int ON_TASK_DISPLAY_CHANGED = 19;
-        private static final int ON_TASK_LIST_UPDATED = 20;
-        private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 21;
-        private static final int ON_TASK_DESCRIPTION_CHANGED = 22;
-        private static final int ON_ACTIVITY_ROTATION = 23;
+        private static final int ON_BACK_PRESSED_ON_TASK_ROOT = 17;
+        private static final int ON_TASK_DISPLAY_CHANGED = 18;
+        private static final int ON_TASK_LIST_UPDATED = 19;
+        private static final int ON_TASK_LIST_FROZEN_UNFROZEN = 20;
+        private static final int ON_TASK_DESCRIPTION_CHANGED = 21;
+        private static final int ON_ACTIVITY_ROTATION = 22;
 
         /**
          * List of {@link TaskStackChangeListener} registered from {@link #addListener}.
@@ -248,13 +246,6 @@ public class TaskStackChangeListeners {
         }
 
         @Override
-        public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) {
-            mHandler.obtainMessage(ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED, displayId,
-                    0 /* unused */,
-                    activityToken).sendToTarget();
-        }
-
-        @Override
         public void onTaskDisplayChanged(int taskId, int newDisplayId) {
             mHandler.obtainMessage(ON_TASK_DISPLAY_CHANGED, taskId, newDisplayId).sendToTarget();
         }
@@ -388,13 +379,6 @@ public class TaskStackChangeListeners {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
                             mTaskStackListeners.get(i)
                                     .onActivityRequestedOrientationChanged(msg.arg1, msg.arg2);
-                        }
-                        break;
-                    }
-                    case ON_SIZE_COMPAT_MODE_ACTIVITY_CHANGED: {
-                        for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onSizeCompatModeActivityChanged(
-                                    msg.arg1, (IBinder) msg.obj);
                         }
                         break;
                     }

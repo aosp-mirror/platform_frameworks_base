@@ -96,6 +96,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -383,7 +384,7 @@ public class LocationProviderManagerTest {
 
         LocationResult loc = createLocationResult(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        verify(listener).onLocationChanged(eq(loc), nullable(IRemoteCallback.class));
+        verify(listener).onLocationChanged(eq(loc.asList()), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -406,13 +407,13 @@ public class LocationProviderManagerTest {
 
         LocationResult loc = createLocationResult(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        verify(listener).onLocationChanged(eq(loc), nullable(IRemoteCallback.class));
+        verify(listener).onLocationChanged(eq(loc.asList()), nullable(IRemoteCallback.class));
 
         mInjector.getSettingsHelper().setLocationEnabled(false, CURRENT_USER);
         verify(listener, timeout(TIMEOUT_MS).times(1)).onProviderEnabledChanged(NAME, false);
         loc = createLocationResult(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        verify(listener, times(1)).onLocationChanged(any(LocationResult.class),
+        verify(listener, times(1)).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
 
         mInjector.getSettingsHelper().setLocationEnabled(true, CURRENT_USER);
@@ -422,7 +423,7 @@ public class LocationProviderManagerTest {
         verify(listener, timeout(TIMEOUT_MS).times(2)).onProviderEnabledChanged(NAME, false);
         loc = createLocationResult(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        verify(listener, times(1)).onLocationChanged(any(LocationResult.class),
+        verify(listener, times(1)).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
 
         mProvider.setAllowed(true);
@@ -430,7 +431,7 @@ public class LocationProviderManagerTest {
 
         loc = createLocationResult(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        verify(listener).onLocationChanged(eq(loc), nullable(IRemoteCallback.class));
+        verify(listener).onLocationChanged(eq(loc.asList()), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -447,7 +448,7 @@ public class LocationProviderManagerTest {
 
         LocationResult loc = createLocationResult(NAME, mRandom);
         mProvider.setProviderLocation(loc);
-        verify(listener, timeout(TIMEOUT_MS).times(1)).onLocationChanged(eq(loc),
+        verify(listener, timeout(TIMEOUT_MS).times(1)).onLocationChanged(eq(loc.asList()),
                 nullable(IRemoteCallback.class));
     }
 
@@ -462,7 +463,7 @@ public class LocationProviderManagerTest {
         mManager.unregisterLocationRequest(listener);
 
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
-        verify(listener, never()).onLocationChanged(any(LocationResult.class),
+        verify(listener, never()).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
 
         mInjector.getSettingsHelper().setLocationEnabled(false, CURRENT_USER);
@@ -493,7 +494,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         mManager.unregisterLocationRequest(listener);
         blocker.countDown();
-        verify(listener, after(TIMEOUT_MS).never()).onLocationChanged(any(LocationResult.class),
+        verify(listener, after(TIMEOUT_MS).never()).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
     }
 
@@ -513,7 +514,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
 
-        verify(listener, times(5)).onLocationChanged(any(LocationResult.class),
+        verify(listener, times(5)).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
     }
 
@@ -528,7 +529,7 @@ public class LocationProviderManagerTest {
 
         mInjector.getAlarmHelper().incrementAlarmTime(5000);
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
-        verify(listener, never()).onLocationChanged(any(LocationResult.class),
+        verify(listener, never()).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
     }
 
@@ -544,7 +545,7 @@ public class LocationProviderManagerTest {
         Thread.sleep(25);
 
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
-        verify(listener, never()).onLocationChanged(any(LocationResult.class),
+        verify(listener, never()).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
     }
 
@@ -561,7 +562,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
 
         verify(listener, times(1)).onLocationChanged(
-                any(LocationResult.class), nullable(IRemoteCallback.class));
+                any(List.class), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -578,7 +579,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(loc);
 
         verify(listener, times(1)).onLocationChanged(
-                any(LocationResult.class), nullable(IRemoteCallback.class));
+                any(List.class), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -592,7 +593,7 @@ public class LocationProviderManagerTest {
 
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
 
-        verify(listener, never()).onLocationChanged(any(LocationResult.class),
+        verify(listener, never()).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
     }
 
@@ -622,7 +623,7 @@ public class LocationProviderManagerTest {
         verify(mWakeLock, never()).release();
 
         blocker.countDown();
-        verify(listener, timeout(TIMEOUT_MS)).onLocationChanged(any(LocationResult.class),
+        verify(listener, timeout(TIMEOUT_MS)).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
         verify(mWakeLock).acquire(anyLong());
         verify(mWakeLock, timeout(TIMEOUT_MS)).release();
@@ -640,7 +641,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         verify(listener, times(1))
-                .onLocationChanged(any(LocationResult.class), nullable(IRemoteCallback.class));
+                .onLocationChanged(any(List.class), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -657,7 +658,7 @@ public class LocationProviderManagerTest {
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         mProvider.setProviderLocation(createLocation(NAME, mRandom));
         verify(listener, times(1))
-                .onLocationChanged(any(LocationResult.class), nullable(IRemoteCallback.class));
+                .onLocationChanged(any(List.class), nullable(IRemoteCallback.class));
     }
 
     @Test
@@ -746,7 +747,7 @@ public class LocationProviderManagerTest {
         mProvider.completeFlushes();
 
         InOrder inOrder = inOrder(listener);
-        inOrder.verify(listener).onLocationChanged(eq(loc), any(IRemoteCallback.class));
+        inOrder.verify(listener).onLocationChanged(eq(loc.asList()), any(IRemoteCallback.class));
         inOrder.verify(listener).onFlushComplete(99);
     }
 
@@ -838,7 +839,7 @@ public class LocationProviderManagerTest {
                 .build();
         mManager.registerLocationRequest(request1, IDENTITY, PERMISSION_FINE, listener1);
 
-        verify(listener1).onLocationChanged(any(LocationResult.class),
+        verify(listener1).onLocationChanged(any(List.class),
                 nullable(IRemoteCallback.class));
 
         assertThat(mProvider.getRequest().isActive()).isFalse();
@@ -989,7 +990,7 @@ public class LocationProviderManagerTest {
     private ILocationListener createMockLocationListener() {
         return spy(new ILocationListener.Stub() {
             @Override
-            public void onLocationChanged(LocationResult location,
+            public void onLocationChanged(List<Location> locations,
                     IRemoteCallback onCompleteCallback) {
                 if (onCompleteCallback != null) {
                     try {

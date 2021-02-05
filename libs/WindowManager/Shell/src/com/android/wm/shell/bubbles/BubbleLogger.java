@@ -61,7 +61,10 @@ public class BubbleLogger {
         BUBBLE_OVERFLOW_REMOVE_BLOCKED(490),
 
         @UiEvent(doc = "User selected the overflow.")
-        BUBBLE_OVERFLOW_SELECTED(600);
+        BUBBLE_OVERFLOW_SELECTED(600),
+
+        @UiEvent(doc = "Restore bubble to overflow after phone reboot.")
+        BUBBLE_OVERFLOW_RECOVER(691);
 
         private final int mId;
 
@@ -112,6 +115,8 @@ public class BubbleLogger {
             log(b, Event.BUBBLE_OVERFLOW_ADD_AGED);
         } else if (r == Bubbles.DISMISS_USER_GESTURE) {
             log(b, Event.BUBBLE_OVERFLOW_ADD_USER_GESTURE);
+        } else if (r == Bubbles.DISMISS_RELOAD_FROM_DISK) {
+            log(b, Event.BUBBLE_OVERFLOW_RECOVER);
         }
     }
 

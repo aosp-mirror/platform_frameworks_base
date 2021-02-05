@@ -191,6 +191,14 @@ message EnergyConsumerProto {
     optional string name = 4;
 }
 
+message EnergyConsumerAttributionProto {
+    /** Android ID / Linux UID, the accumulated energy should be attributed to. */
+    optional int32 uid = 1;
+
+    /** Accumulated energy since boot in microwatt-seconds (uWs) for this AID. */
+    optional int64 energy_uws = 2;
+}
+
 /**
  * Energy consumer result:
  * An estimate of energy consumption since boot for the subsystem identified
@@ -205,6 +213,9 @@ message EnergyConsumerResultProto {
 
     /** Accumulated energy since device boot in microwatt-seconds (uWs) */
     optional int64 energy_uws = 3;
+
+    /** Optional attribution per UID for this EnergyConsumer. */
+    repeated EnergyConsumerAttributionProto attribution = 4;
 }
 
 /**

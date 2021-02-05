@@ -605,7 +605,7 @@ public final class LocationRequest implements Parcelable {
      * When available, batching can provide substantial power savings to the device, and clients are
      * encouraged to take advantage where appropriate for the use case.
      *
-     * @see LocationListener#onLocationChanged(LocationResult)
+     * @see LocationListener#onLocationChanged(java.util.List)
      * @return the maximum time by which a location update may be delayed
      */
     public @IntRange(from = 0) long getMaxUpdateDelayMillis() {

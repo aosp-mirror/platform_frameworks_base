@@ -63,7 +63,6 @@ import android.view.Display;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.RingBuffer;
 import com.android.server.LocalServices;
 
@@ -71,7 +70,6 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -80,7 +78,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -118,6 +115,9 @@ public class BrightnessTracker {
     private static final String ATTR_BATTERY_LEVEL = "batteryLevel";
     private static final String ATTR_NIGHT_MODE = "nightMode";
     private static final String ATTR_COLOR_TEMPERATURE = "colorTemperature";
+    private static final String ATTR_REDUCE_BRIGHT_COLORS = "reduceBrightColors";
+    private static final String ATTR_REDUCE_BRIGHT_COLORS_STRENGTH = "reduceBrightColorsStrength";
+    private static final String ATTR_REDUCE_BRIGHT_COLORS_OFFSET = "reduceBrightColorsOffset";
     private static final String ATTR_LAST_NITS = "lastNits";
     private static final String ATTR_DEFAULT_CONFIG = "defaultConfig";
     private static final String ATTR_POWER_SAVE = "powerSaveFactor";
@@ -398,6 +398,10 @@ public class BrightnessTracker {
 
         builder.setNightMode(mInjector.isNightDisplayActivated(mContext));
         builder.setColorTemperature(mInjector.getNightDisplayColorTemperature(mContext));
+        builder.setReduceBrightColors(mInjector.isReduceBrightColorsActivated(mContext));
+        builder.setReduceBrightColorsStrength(mInjector.getReduceBrightColorsStrength(mContext));
+        builder.setReduceBrightColorsOffset(mInjector.getReduceBrightColorsOffsetFactor(mContext)
+                * brightness);
 
         if (mColorSamplingEnabled) {
             DisplayedContentSample sample = mInjector.sampleColor(mNoFramesToSample);
@@ -563,6 +567,12 @@ public class BrightnessTracker {
                 out.attributeBoolean(null, ATTR_NIGHT_MODE, toWrite[i].nightMode);
                 out.attributeInt(null, ATTR_COLOR_TEMPERATURE,
                         toWrite[i].colorTemperature);
+                out.attributeBoolean(null, ATTR_REDUCE_BRIGHT_COLORS,
+                        toWrite[i].reduceBrightColors);
+                out.attributeInt(null, ATTR_REDUCE_BRIGHT_COLORS_STRENGTH,
+                        toWrite[i].reduceBrightColorsStrength);
+                out.attributeFloat(null, ATTR_REDUCE_BRIGHT_COLORS_OFFSET,
+                        toWrite[i].reduceBrightColorsOffset);
                 out.attributeFloat(null, ATTR_LAST_NITS,
                         toWrite[i].lastBrightness);
                 out.attributeBoolean(null, ATTR_DEFAULT_CONFIG,
@@ -641,6 +651,12 @@ public class BrightnessTracker {
                     builder.setNightMode(parser.getAttributeBoolean(null, ATTR_NIGHT_MODE));
                     builder.setColorTemperature(
                             parser.getAttributeInt(null, ATTR_COLOR_TEMPERATURE));
+                    builder.setReduceBrightColors(
+                            parser.getAttributeBoolean(null, ATTR_REDUCE_BRIGHT_COLORS));
+                    builder.setReduceBrightColorsStrength(
+                            parser.getAttributeInt(null, ATTR_REDUCE_BRIGHT_COLORS_STRENGTH));
+                    builder.setReduceBrightColorsOffset(
+                            parser.getAttributeFloat(null, ATTR_REDUCE_BRIGHT_COLORS_OFFSET));
                     builder.setLastBrightness(parser.getAttributeFloat(null, ATTR_LAST_NITS));
 
                     String luxValue = parser.getAttributeValue(null, ATTR_LUX);
@@ -1112,6 +1128,21 @@ public class BrightnessTracker {
 
         public boolean isNightDisplayActivated(Context context) {
             return context.getSystemService(ColorDisplayManager.class).isNightDisplayActivated();
+        }
+
+        public int getReduceBrightColorsStrength(Context context) {
+            return context.getSystemService(ColorDisplayManager.class)
+                    .getReduceBrightColorsStrength();
+        }
+
+        public float getReduceBrightColorsOffsetFactor(Context context) {
+            return context.getSystemService(ColorDisplayManager.class)
+                    .getReduceBrightColorsOffsetFactor();
+        }
+
+        public boolean isReduceBrightColorsActivated(Context context) {
+            return context.getSystemService(ColorDisplayManager.class)
+                    .isReduceBrightColorsActivated();
         }
 
         public DisplayedContentSample sampleColor(int noFramesToSample) {

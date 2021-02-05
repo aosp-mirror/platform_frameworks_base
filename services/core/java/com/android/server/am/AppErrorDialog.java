@@ -38,6 +38,7 @@ import android.widget.TextView;
 final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListener {
 
     private final ActivityManagerService mService;
+    private final ActivityManagerGlobalLock mProcLock;
     private final AppErrorResult mResult;
     private final ProcessRecord mProc;
     private final boolean mIsRestartable;
@@ -63,6 +64,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         Resources res = context.getResources();
 
         mService = service;
+        mProcLock = service.mProcLock;
         mProc = data.proc;
         mResult = data.result;
         mIsRestartable = (data.taskId != INVALID_TASK_ID || data.isRestartableForService)
@@ -71,7 +73,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         BidiFormatter bidi = BidiFormatter.getInstance();
 
         CharSequence name;
-        if ((mProc.getPkgList().size() == 1)
+        if (mProc.getPkgList().size() == 1
                 && (name = context.getPackageManager().getApplicationLabel(mProc.info)) != null) {
             setTitle(res.getString(
                     data.repeating ? com.android.internal.R.string.aerr_application_repeated
@@ -112,7 +114,7 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
         LayoutInflater.from(context).inflate(
                 com.android.internal.R.layout.app_error_dialog, frame, true);
 
-        final boolean hasReceiver = mProc.errorReportReceiver != null;
+        final boolean hasReceiver = mProc.mErrorState.getErrorReportReceiver() != null;
 
         final TextView restart = findViewById(com.android.internal.R.id.aerr_restart);
         restart.setOnClickListener(this);
@@ -166,11 +168,11 @@ final class AppErrorDialog extends BaseErrorDialog implements View.OnClickListen
     }
 
     private void setResult(int result) {
-        synchronized (mService) {
+        synchronized (mProcLock) {
             if (mProc != null) {
                 // Don't dismiss again since it leads to recursive call between dismiss and this
                 // method.
-                mProc.getDialogController().clearCrashDialogs(false /* needDismiss */);
+                mProc.mErrorState.getDialogController().clearCrashDialogs(false /* needDismiss */);
             }
         }
         mResult.set(result);
