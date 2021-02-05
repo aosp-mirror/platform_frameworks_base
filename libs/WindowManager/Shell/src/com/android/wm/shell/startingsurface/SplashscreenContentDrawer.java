@@ -16,6 +16,8 @@
 
 package com.android.wm.shell.startingsurface;
 
+import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.app.ActivityThread;
@@ -31,6 +33,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.os.Trace;
 import android.util.Slog;
 import android.view.SurfaceControl;
 import android.window.SplashScreenView;
@@ -110,7 +113,8 @@ public class SplashscreenContentDrawer {
         return new ColorDrawable(getSystemBGColor());
     }
 
-    @ColorInt int peekWindowBGColor(Context context) {
+    private @ColorInt int peekWindowBGColor(Context context) {
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "peekWindowBGColor");
         final Drawable themeBGDrawable;
         if (mTmpAttrs.mWindowBgColor != 0) {
             themeBGDrawable = new ColorDrawable(mTmpAttrs.mWindowBgColor);
@@ -120,7 +124,9 @@ public class SplashscreenContentDrawer {
             Slog.w(TAG, "Window background not exist!");
             themeBGDrawable = createDefaultBackgroundDrawable();
         }
-        return estimateWindowBGColor(themeBGDrawable);
+        final int estimatedWindowBGColor = estimateWindowBGColor(themeBGDrawable);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        return estimatedWindowBGColor;
     }
 
     private int estimateWindowBGColor(Drawable themeBGDrawable) {
@@ -278,6 +284,7 @@ public class SplashscreenContentDrawer {
                 return false;
             }
 
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "processAdaptiveIcon");
             final AdaptiveIconDrawable adaptiveIconDrawable = (AdaptiveIconDrawable) mIconDrawable;
             final DrawableColorTester backIconTester =
                     new DrawableColorTester(adaptiveIconDrawable.getBackground());
@@ -329,11 +336,13 @@ public class SplashscreenContentDrawer {
                 }
                 createIconDrawable(adaptiveIconDrawable, mIconSize);
             }
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return true;
         }
 
         private SplashScreenView fillViewWithIcon(Context context,
                 int iconSize, Drawable iconDrawable) {
+            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "fillViewWithIcon");
             final SplashScreenView.Builder builder = new SplashScreenView.Builder(context);
             builder.setIconSize(iconSize).setBackgroundColor(mThemeColor)
                     .setIconBackground(mIconBackground);
@@ -350,6 +359,7 @@ public class SplashscreenContentDrawer {
                 Slog.d(TAG, "fillViewWithIcon surfaceWindowView " + splashScreenView);
             }
             splashScreenView.makeSystemUIColorsTransparent();
+            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             return splashScreenView;
         }
     }
@@ -511,6 +521,7 @@ public class SplashscreenContentDrawer {
                     new TransparentFilterQuantizer();
 
             ComplexDrawableTester(Drawable drawable, boolean filterTransparent) {
+                Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "ComplexDrawableTester");
                 final Rect initialBounds = drawable.copyBounds();
                 int width = drawable.getIntrinsicWidth();
                 int height = drawable.getIntrinsicHeight();
@@ -545,6 +556,7 @@ public class SplashscreenContentDrawer {
                 }
                 mPalette = builder.generate();
                 bitmap.recycle();
+                Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
             }
 
             @Override
