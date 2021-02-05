@@ -24,30 +24,44 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
+import android.os.Binder;
+import android.os.IBinder;
 import android.os.RemoteException;
 import android.speech.IRecognitionListener;
 import android.speech.IRecognitionService;
 import android.speech.IRecognitionServiceManagerCallback;
+import android.speech.SpeechRecognizer;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.infra.AbstractPerUserSystemService;
 
+import com.google.android.collect.Sets;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 final class SpeechRecognitionManagerServiceImpl extends
         AbstractPerUserSystemService<SpeechRecognitionManagerServiceImpl,
             SpeechRecognitionManagerService> {
-
     private static final String TAG = SpeechRecognitionManagerServiceImpl.class.getSimpleName();
 
+    private static final int MAX_CONCURRENT_CONNECTIONS_BY_CLIENT = 10;
+
+    private final Object mLock = new Object();
+
+    @NonNull
     @GuardedBy("mLock")
-    @Nullable
-    private RemoteSpeechRecognitionService mRemoteService;
+    private final Map<Integer, Set<RemoteSpeechRecognitionService>> mRemoteServicesByUid =
+            new HashMap<>();
 
     SpeechRecognitionManagerServiceImpl(
             @NonNull SpeechRecognitionManagerService master,
             @NonNull Object lock, @UserIdInt int userId, boolean disabled) {
         super(master, lock, userId);
-        updateRemoteServiceLocked();
     }
 
     @GuardedBy("mLock")
@@ -67,33 +81,49 @@ final class SpeechRecognitionManagerServiceImpl extends
     @Override // from PerUserSystemService
     protected boolean updateLocked(boolean disabled) {
         final boolean enabledChanged = super.updateLocked(disabled);
-        updateRemoteServiceLocked();
         return enabledChanged;
     }
 
-    /**
-     * Updates the reference to the remote service.
-     */
-    @GuardedBy("mLock")
-    private void updateRemoteServiceLocked() {
-        if (mRemoteService != null) {
-            if (mMaster.debug) {
-                Slog.d(TAG, "updateRemoteService(): destroying old remote service");
-            }
-            mRemoteService.unbind();
-            mRemoteService = null;
+    void createSessionLocked(
+            ComponentName componentName,
+            IBinder clientToken,
+            boolean onDevice,
+            IRecognitionServiceManagerCallback callback) {
+        if (mMaster.debug) {
+            Slog.i(TAG, String.format("#createSessionLocked, component=%s, onDevice=%s",
+                    componentName, onDevice));
         }
-    }
 
-    void createSessionLocked(IRecognitionServiceManagerCallback callback) {
-        // TODO(b/176578753): check clients have record audio permission.
-        // TODO(b/176578753): verify caller package is the one supplied
+        ComponentName serviceComponent = componentName;
+        if (onDevice) {
+            serviceComponent = getOnDeviceComponentNameLocked();
+        }
 
-        RemoteSpeechRecognitionService service = ensureRemoteServiceLocked();
+        if (serviceComponent == null) {
+            tryRespondWithError(callback, SpeechRecognizer.ERROR_CLIENT);
+            return;
+        }
+
+        final int creatorCallingUid = Binder.getCallingUid();
+        Set<String> creatorPackageNames =
+                Sets.newArraySet(
+                        getContext().getPackageManager().getPackagesForUid(creatorCallingUid));
+
+        RemoteSpeechRecognitionService service = createService(creatorCallingUid, serviceComponent);
 
         if (service == null) {
-            tryRespondWithError(callback);
+            tryRespondWithError(callback, SpeechRecognizer.ERROR_TOO_MANY_REQUESTS);
             return;
+        }
+
+        IBinder.DeathRecipient deathRecipient =
+                () -> handleClientDeath(creatorCallingUid, service, true /* invoke #cancel */);
+
+        try {
+            clientToken.linkToDeath(deathRecipient, 0);
+        } catch (RemoteException e) {
+            // RemoteException == binder already died, schedule disconnect anyway.
+            handleClientDeath(creatorCallingUid, service, true /* invoke #cancel */);
         }
 
         service.connect().thenAccept(binderService -> {
@@ -101,58 +131,146 @@ final class SpeechRecognitionManagerServiceImpl extends
                 try {
                     callback.onSuccess(new IRecognitionService.Stub() {
                         @Override
-                        public void startListening(Intent recognizerIntent,
+                        public void startListening(
+                                Intent recognizerIntent,
                                 IRecognitionListener listener,
-                                String packageName, String featureId) throws RemoteException {
+                                String packageName,
+                                String featureId,
+                                int callingUid) throws RemoteException {
+                            verifyCallerIdentity(
+                                    creatorCallingUid, packageName, creatorPackageNames, listener);
+                            if (callingUid != creatorCallingUid) {
+                                listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
+                                return;
+                            }
+
                             service.startListening(
                                     recognizerIntent, listener, packageName, featureId);
                         }
 
                         @Override
-                        public void stopListening(IRecognitionListener listener,
+                        public void stopListening(
+                                IRecognitionListener listener,
                                 String packageName,
                                 String featureId) throws RemoteException {
+                            verifyCallerIdentity(
+                                    creatorCallingUid, packageName, creatorPackageNames, listener);
+
                             service.stopListening(listener, packageName, featureId);
                         }
 
                         @Override
-                        public void cancel(IRecognitionListener listener,
+                        public void cancel(
+                                IRecognitionListener listener,
                                 String packageName,
-                                String featureId) throws RemoteException {
-                            service.cancel(listener, packageName, featureId);
+                                String featureId,
+                                boolean isShutdown) throws RemoteException {
+                            verifyCallerIdentity(
+                                    creatorCallingUid, packageName, creatorPackageNames, listener);
+
+                            service.cancel(listener, packageName, featureId, isShutdown);
+
+                            if (isShutdown) {
+                                handleClientDeath(
+                                        creatorCallingUid,
+                                        service,
+                                        false /* invoke #cancel */);
+                                clientToken.unlinkToDeath(deathRecipient, 0);
+                            }
                         }
                     });
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Error creating a speech recognition session", e);
-                    tryRespondWithError(callback);
+                    tryRespondWithError(callback, SpeechRecognizer.ERROR_CLIENT);
                 }
             } else {
-                tryRespondWithError(callback);
+                tryRespondWithError(callback, SpeechRecognizer.ERROR_CLIENT);
             }
         });
     }
 
-    @GuardedBy("mLock")
-    @Nullable
-    private RemoteSpeechRecognitionService ensureRemoteServiceLocked() {
-        if (mRemoteService == null) {
-            final String serviceName = getComponentNameLocked();
-            if (serviceName == null) {
-                if (mMaster.verbose) {
-                    Slog.v(TAG, "ensureRemoteServiceLocked(): no service component name.");
-                }
-                return null;
-            }
-            final ComponentName serviceComponent = ComponentName.unflattenFromString(serviceName);
-            mRemoteService =
-                    new RemoteSpeechRecognitionService(getContext(), serviceComponent, mUserId);
+    private void verifyCallerIdentity(
+            int creatorCallingUid,
+            String packageName,
+            Set<String> creatorPackageNames,
+            IRecognitionListener listener) throws RemoteException {
+        if (creatorCallingUid != Binder.getCallingUid()
+                || !creatorPackageNames.contains(packageName)) {
+            listener.onError(SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS);
         }
-        return mRemoteService;
     }
 
-    private static void tryRespondWithError(IRecognitionServiceManagerCallback callback) {
+    private void handleClientDeath(
+            int callingUid,
+            RemoteSpeechRecognitionService service, boolean invokeCancel) {
+        if (invokeCancel) {
+            service.shutdown();
+        }
+        removeService(callingUid, service);
+    }
+
+    @GuardedBy("mLock")
+    @Nullable
+    private ComponentName getOnDeviceComponentNameLocked() {
+        final String serviceName = getComponentNameLocked();
+        if (serviceName == null) {
+            if (mMaster.verbose) {
+                Slog.v(TAG, "ensureRemoteServiceLocked(): no service component name.");
+            }
+            return null;
+        }
+        return ComponentName.unflattenFromString(serviceName);
+    }
+
+    private RemoteSpeechRecognitionService createService(
+            int callingUid, ComponentName serviceComponent) {
+        synchronized (mLock) {
+            Set<RemoteSpeechRecognitionService> servicesForClient =
+                    mRemoteServicesByUid.get(callingUid);
+
+            if (servicesForClient != null
+                    && servicesForClient.size() >= MAX_CONCURRENT_CONNECTIONS_BY_CLIENT) {
+                return null;
+            }
+
+            if (servicesForClient != null) {
+                Optional<RemoteSpeechRecognitionService> existingService =
+                        servicesForClient
+                                .stream()
+                                .filter(service ->
+                                        service.getServiceComponentName().equals(serviceComponent))
+                                .findFirst();
+                if (existingService.isPresent()) {
+                    return existingService.get();
+                }
+            }
+
+            RemoteSpeechRecognitionService service =
+                    new RemoteSpeechRecognitionService(
+                            getContext(), serviceComponent, getUserId(), callingUid);
+
+            Set<RemoteSpeechRecognitionService> valuesByCaller =
+                    mRemoteServicesByUid.computeIfAbsent(callingUid, key -> new HashSet<>());
+            valuesByCaller.add(service);
+
+            return service;
+        }
+    }
+
+    private void removeService(int callingUid, RemoteSpeechRecognitionService service) {
+        synchronized (mLock) {
+            Set<RemoteSpeechRecognitionService> valuesByCaller =
+                    mRemoteServicesByUid.get(callingUid);
+            if (valuesByCaller != null) {
+                valuesByCaller.remove(service);
+            }
+        }
+    }
+
+    private static void tryRespondWithError(IRecognitionServiceManagerCallback callback,
+            int errorCode) {
         try {
-            callback.onError();
+            callback.onError(errorCode);
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to respond with error");
         }

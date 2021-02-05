@@ -18,7 +18,9 @@ package com.android.server.speech;
 
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.ComponentName;
 import android.content.Context;
+import android.os.IBinder;
 import android.os.UserHandle;
 import android.speech.IRecognitionServiceManager;
 import android.speech.IRecognitionServiceManagerCallback;
@@ -42,6 +44,7 @@ public final class SpeechRecognitionManagerService extends
 
     public SpeechRecognitionManagerService(@NonNull Context context) {
         super(context,
+                // TODO(b/176578753): think if we want to favor the particular service here.
                 new FrameworkResourcesServiceNameResolver(
                         context,
                         R.string.config_defaultOnDeviceSpeechRecognitionService),
@@ -63,11 +66,15 @@ public final class SpeechRecognitionManagerService extends
     final class SpeechRecognitionManagerServiceStub extends IRecognitionServiceManager.Stub {
 
         @Override
-        public void createSession(IRecognitionServiceManagerCallback callback) {
+        public void createSession(
+                ComponentName componentName,
+                IBinder clientToken,
+                boolean onDevice,
+                IRecognitionServiceManagerCallback callback) {
             int userId = UserHandle.getCallingUserId();
             synchronized (mLock) {
                 SpeechRecognitionManagerServiceImpl service = getServiceForUserLocked(userId);
-                service.createSessionLocked(callback);
+                service.createSessionLocked(componentName, clientToken, onDevice, callback);
             }
         }
     }

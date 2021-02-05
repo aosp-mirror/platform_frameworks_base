@@ -38726,7 +38726,9 @@ package android.speech {
     field public static final int ERROR_NO_MATCH = 7; // 0x7
     field public static final int ERROR_RECOGNIZER_BUSY = 8; // 0x8
     field public static final int ERROR_SERVER = 4; // 0x4
+    field public static final int ERROR_SERVER_DISCONNECTED = 11; // 0xb
     field public static final int ERROR_SPEECH_TIMEOUT = 6; // 0x6
+    field public static final int ERROR_TOO_MANY_REQUESTS = 10; // 0xa
     field public static final String RESULTS_RECOGNITION = "results_recognition";
   }
 
