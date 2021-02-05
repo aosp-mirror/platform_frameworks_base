@@ -116,15 +116,7 @@ class WindowStateAnimator {
     boolean mAnimationIsEntrance;
 
     WindowSurfaceController mSurfaceController;
-    private WindowSurfaceController mPendingDestroySurface;
 
-    /**
-     * Set if the client has asked that the destroy of its surface be delayed
-     * until it explicitly says it is okay.
-     */
-    boolean mSurfaceDestroyDeferred;
-
-    private boolean mDestroyPreservedSurfaceUponRedraw;
     float mShownAlpha = 0;
     float mAlpha = 0;
     float mLastAlpha = 0;
@@ -257,11 +249,6 @@ class WindowStateAnimator {
             //dump();
             mLastHidden = true;
 
-            // We may have a preserved surface which we no longer need. If there was a quick
-            // VISIBLE, GONE, VISIBLE, GONE sequence, the surface may never draw, so we don't mark
-            // it to be destroyed in prepareSurfaceLocked.
-            markPreservedSurfaceForDestroy();
-
             if (mSurfaceController != null) {
                 mSurfaceController.hide(transaction, reason);
             }
@@ -321,70 +308,6 @@ class WindowStateAnimator {
             result = mWin.performShowLocked();
         }
         return result;
-    }
-
-    void preserveSurfaceLocked(SurfaceControl.Transaction t) {
-        if (mDestroyPreservedSurfaceUponRedraw) {
-            // This could happen when switching the surface mode very fast. For example,
-            // we preserved a surface when dragResizing changed to true. Then before the
-            // preserved surface is removed, dragResizing changed to false again.
-            // In this case, we need to leave the preserved surface alone, and destroy
-            // the actual surface, so that the createSurface call could create a surface
-            // of the proper size. The preserved surface will still be removed when client
-            // finishes drawing to the new surface.
-            mSurfaceDestroyDeferred = false;
-
-            // Make sure to reparent any children of the new surface back to the preserved
-            // surface before destroying it.
-            if (mSurfaceController != null && mPendingDestroySurface != null) {
-                mPostDrawTransaction.reparentChildren(
-                    mSurfaceController.mSurfaceControl,
-                    mPendingDestroySurface.mSurfaceControl).apply();
-            }
-            destroySurfaceLocked(t);
-            mSurfaceDestroyDeferred = true;
-            return;
-        }
-        ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE SET FREEZE LAYER: %s", mWin);
-        if (mSurfaceController != null) {
-            // Our SurfaceControl is always at layer 0 within the parent Surface managed by
-            // window-state. We want this old Surface to stay on top of the new one
-            // until we do the swap, so we place it at a positive layer.
-            t.setLayer(mSurfaceController.mSurfaceControl, PRESERVED_SURFACE_LAYER);
-        }
-        mDestroyPreservedSurfaceUponRedraw = true;
-        mSurfaceDestroyDeferred = true;
-        destroySurfaceLocked(t);
-    }
-
-    void destroyPreservedSurfaceLocked(SurfaceControl.Transaction t) {
-        if (!mDestroyPreservedSurfaceUponRedraw) {
-            return;
-        }
-
-        // If we are preserving a surface but we aren't relaunching that means
-        // we are just doing an in-place switch. In that case any SurfaceFlinger side
-        // child layers need to be reparented to the new surface to make this
-        // transparent to the app.
-        // If the children are detached, we don't want to reparent them to the new surface.
-        // Instead let the children get removed when the old surface is deleted.
-        if (mSurfaceController != null && mPendingDestroySurface != null
-                && !mPendingDestroySurface.mChildrenDetached
-                && (mWin.mActivityRecord == null || !mWin.mActivityRecord.isRelaunching())) {
-            mPostDrawTransaction.reparentChildren(
-                    mPendingDestroySurface.mSurfaceControl,
-                    mSurfaceController.mSurfaceControl).apply();
-        }
-
-        destroyDeferredSurfaceLocked(t);
-        mDestroyPreservedSurfaceUponRedraw = false;
-    }
-
-    private void markPreservedSurfaceForDestroy() {
-        if (mDestroyPreservedSurfaceUponRedraw
-                && !mService.mDestroyPreservedSurface.contains(mWin)) {
-            mService.mDestroyPreservedSurface.add(mWin);
-        }
     }
 
     void resetDrawState() {
@@ -508,39 +431,23 @@ class WindowStateAnimator {
             return;
         }
 
-        // When destroying a surface we want to make sure child windows are hidden. If we are
-        // preserving the surface until redraw though we intend to swap it out with another surface
-        // for resizing. In this case the window always remains visible to the user and the child
-        // windows should likewise remain visible.
-        if (!mDestroyPreservedSurfaceUponRedraw) {
-            mWin.mHidden = true;
-        }
+        mWin.mHidden = true;
 
         try {
-            if (DEBUG_VISIBILITY) logWithStack(TAG, "Window " + this + " destroying surface "
-                    + mSurfaceController + ", session " + mSession);
-            if (mSurfaceDestroyDeferred) {
-                if (mSurfaceController != null && mPendingDestroySurface != mSurfaceController) {
-                    if (mPendingDestroySurface != null) {
-                        ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
-                                mWin, new RuntimeException().fillInStackTrace());
-                        mPendingDestroySurface.destroy(t);
-                    }
-                    mPendingDestroySurface = mSurfaceController;
-                }
-            } else {
-                ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
-                        mWin, new RuntimeException().fillInStackTrace());
-                destroySurface(t);
+            if (DEBUG_VISIBILITY) {
+                logWithStack(TAG, "Window " + this + " destroying surface "
+                        + mSurfaceController + ", session " + mSession);
             }
+            ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY: %s. %s",
+                    mWin, new RuntimeException().fillInStackTrace());
+            destroySurface(t);
             // Don't hide wallpaper if we're deferring the surface destroy
             // because of a surface change.
-            if (!mDestroyPreservedSurfaceUponRedraw) {
-                mWallpaperControllerLocked.hideWallpapers(mWin);
-            }
+            mWallpaperControllerLocked.hideWallpapers(mWin);
         } catch (RuntimeException e) {
             Slog.w(TAG, "Exception thrown when destroying Window " + this
-                + " surface " + mSurfaceController + " session " + mSession + ": " + e.toString());
+                    + " surface " + mSurfaceController + " session " + mSession + ": "
+                    + e.toString());
         }
 
         // Whether the surface was preserved (and copied to mPendingDestroySurface) or not, it
@@ -552,27 +459,6 @@ class WindowStateAnimator {
         }
         mSurfaceController = null;
         mDrawState = NO_SURFACE;
-    }
-
-    void destroyDeferredSurfaceLocked(SurfaceControl.Transaction t) {
-        try {
-            if (mPendingDestroySurface != null) {
-                ProtoLog.i(WM_SHOW_SURFACE_ALLOC, "SURFACE DESTROY PENDING: %s. %s",
-                        mWin, new RuntimeException().fillInStackTrace());
-                mPendingDestroySurface.destroy(t);
-                // Don't hide wallpaper if we're destroying a deferred surface
-                // after a surface mode change.
-                if (!mDestroyPreservedSurfaceUponRedraw) {
-                    mWallpaperControllerLocked.hideWallpapers(mWin);
-                }
-            }
-        } catch (RuntimeException e) {
-            Slog.w(TAG, "Exception thrown when destroying Window "
-                    + this + " surface " + mPendingDestroySurface
-                    + " session " + mSession + ": " + e.toString());
-        }
-        mSurfaceDestroyDeferred = false;
-        mPendingDestroySurface = null;
     }
 
     void computeShownFrameLocked() {
@@ -744,7 +630,6 @@ class WindowStateAnimator {
             if (prepared && mDrawState == HAS_DRAWN) {
                 if (mLastHidden) {
                     if (showSurfaceRobustlyLocked(t)) {
-                        markPreservedSurfaceForDestroy();
                         mAnimator.requestRemovalOfReplacedWindows(w);
                         mLastHidden = false;
                         if (mIsWallpaper) {
@@ -905,20 +790,6 @@ class WindowStateAnimator {
         if (!shown)
             return false;
 
-        // If we had a preserved surface it's no longer needed, and it may be harmful
-        // if we are transparent.
-        if (mPendingDestroySurface != null && mDestroyPreservedSurfaceUponRedraw) {
-            final SurfaceControl pendingSurfaceControl = mPendingDestroySurface.mSurfaceControl;
-            mPostDrawTransaction.reparent(pendingSurfaceControl, null);
-            // If the children are detached, we don't want to reparent them to the new surface.
-            // Instead let the children get removed when the old surface is deleted.
-            if (!mPendingDestroySurface.mChildrenDetached) {
-                mPostDrawTransaction.reparentChildren(
-                        mPendingDestroySurface.mSurfaceControl,
-                        mSurfaceController.mSurfaceControl);
-            }
-        }
-
         t.merge(mPostDrawTransaction);
         return true;
     }
@@ -1058,13 +929,6 @@ class WindowStateAnimator {
             pw.println();
         }
 
-        if (mPendingDestroySurface != null) {
-            pw.print(prefix); pw.print("mPendingDestroySurface=");
-                    pw.println(mPendingDestroySurface);
-        }
-        if (mSurfaceDestroyDeferred) {
-                    pw.print(" mSurfaceDestroyDeferred="); pw.println(mSurfaceDestroyDeferred);
-        }
         if (mShownAlpha != 1 || mAlpha != 1 || mLastAlpha != 1) {
             pw.print(prefix); pw.print("mShownAlpha="); pw.print(mShownAlpha);
                     pw.print(" mAlpha="); pw.print(mAlpha);
