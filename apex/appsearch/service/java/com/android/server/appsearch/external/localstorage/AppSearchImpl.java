@@ -317,7 +317,7 @@ public final class AppSearchImpl {
             }
 
             Map<String, List<PackageIdentifier>> prefixedSchemasPackageAccessible =
-                    new ArrayMap<>(schemasNotPlatformSurfaceable.size());
+                    new ArrayMap<>(schemasPackageAccessible.size());
             for (Map.Entry<String, List<PackageIdentifier>> entry :
                     schemasPackageAccessible.entrySet()) {
                 prefixedSchemasPackageAccessible.put(prefix + entry.getKey(), entry.getValue());
