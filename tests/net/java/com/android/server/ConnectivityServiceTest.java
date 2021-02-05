@@ -358,8 +358,15 @@ public class ConnectivityServiceTest {
 
     private static final String INTERFACE_NAME = "interface";
 
-    private static final String TEST_VENUE_URL_NA = "https://android.com/";
+    private static final String TEST_VENUE_URL_NA_PASSPOINT = "https://android.com/";
+    private static final String TEST_VENUE_URL_NA_OTHER = "https://example.com/";
+    private static final String TEST_TERMS_AND_CONDITIONS_URL_NA_PASSPOINT =
+            "https://android.com/terms/";
+    private static final String TEST_TERMS_AND_CONDITIONS_URL_NA_OTHER =
+            "https://example.com/terms/";
     private static final String TEST_VENUE_URL_CAPPORT = "https://android.com/capport/";
+    private static final String TEST_USER_PORTAL_API_URL_CAPPORT =
+            "https://android.com/user/api/capport/";
     private static final String TEST_FRIENDLY_NAME = "Network friendly name";
     private static final String TEST_REDIRECT_URL = "http://example.com/firstPath";
 
@@ -3216,39 +3223,68 @@ public class ConnectivityServiceTest {
     }
 
     private class CaptivePortalTestData {
-        CaptivePortalTestData(CaptivePortalData naData, CaptivePortalData capportData,
-                CaptivePortalData expectedMergedData) {
-            mNaData = naData;
+        CaptivePortalTestData(CaptivePortalData naPasspointData, CaptivePortalData capportData,
+                CaptivePortalData naOtherData, CaptivePortalData expectedMergedPasspointData,
+                CaptivePortalData expectedMergedOtherData) {
+            mNaPasspointData = naPasspointData;
             mCapportData = capportData;
-            mExpectedMergedData = expectedMergedData;
+            mNaOtherData = naOtherData;
+            mExpectedMergedPasspointData = expectedMergedPasspointData;
+            mExpectedMergedOtherData = expectedMergedOtherData;
         }
 
-        public final CaptivePortalData mNaData;
+        public final CaptivePortalData mNaPasspointData;
         public final CaptivePortalData mCapportData;
-        public final CaptivePortalData mExpectedMergedData;
+        public final CaptivePortalData mNaOtherData;
+        public final CaptivePortalData mExpectedMergedPasspointData;
+        public final CaptivePortalData mExpectedMergedOtherData;
+
     }
 
     private CaptivePortalTestData setupCaptivePortalData() {
         final CaptivePortalData capportData = new CaptivePortalData.Builder()
                 .setUserPortalUrl(Uri.parse(TEST_REDIRECT_URL))
                 .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_CAPPORT))
+                .setUserPortalUrl(Uri.parse(TEST_USER_PORTAL_API_URL_CAPPORT))
                 .setExpiryTime(1000000L)
                 .setBytesRemaining(12345L)
                 .build();
 
-        final CaptivePortalData naData = new CaptivePortalData.Builder()
+        final CaptivePortalData naPasspointData = new CaptivePortalData.Builder()
                 .setBytesRemaining(80802L)
-                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA))
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
+                .setUserPortalUrl(Uri.parse(TEST_TERMS_AND_CONDITIONS_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
                 .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
 
-        final CaptivePortalData expectedMergedData = new CaptivePortalData.Builder()
+        final CaptivePortalData naOtherData = new CaptivePortalData.Builder()
+                .setBytesRemaining(80802L)
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA_OTHER),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER)
+                .setUserPortalUrl(Uri.parse(TEST_TERMS_AND_CONDITIONS_URL_NA_OTHER),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_OTHER)
+                .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
+
+        final CaptivePortalData expectedMergedPasspointData = new CaptivePortalData.Builder()
                 .setUserPortalUrl(Uri.parse(TEST_REDIRECT_URL))
                 .setBytesRemaining(12345L)
                 .setExpiryTime(1000000L)
-                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA))
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
+                .setUserPortalUrl(Uri.parse(TEST_TERMS_AND_CONDITIONS_URL_NA_PASSPOINT),
+                        CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT)
                 .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
 
-        return new CaptivePortalTestData(naData, capportData, expectedMergedData);
+        final CaptivePortalData expectedMergedOtherData = new CaptivePortalData.Builder()
+                .setUserPortalUrl(Uri.parse(TEST_REDIRECT_URL))
+                .setBytesRemaining(12345L)
+                .setExpiryTime(1000000L)
+                .setVenueInfoUrl(Uri.parse(TEST_VENUE_URL_CAPPORT))
+                .setUserPortalUrl(Uri.parse(TEST_USER_PORTAL_API_URL_CAPPORT))
+                .setVenueFriendlyName(TEST_FRIENDLY_NAME).build();
+        return new CaptivePortalTestData(naPasspointData, capportData, naOtherData,
+                expectedMergedPasspointData, expectedMergedOtherData);
     }
 
     @Test
@@ -3262,15 +3298,26 @@ public class ConnectivityServiceTest {
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
                 lp -> captivePortalTestData.mCapportData.equals(lp.getCaptivePortalData()));
 
-        // Venue URL and friendly name from Network agent, confirm that API data gets precedence
-        // on the bytes remaining.
+        // Venue URL, T&C URL and friendly name from Network agent with Passpoint source, confirm
+        // that API data gets precedence on the bytes remaining.
         final LinkProperties linkProperties = new LinkProperties();
-        linkProperties.setCaptivePortalData(captivePortalTestData.mNaData);
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaPasspointData);
         mWiFiNetworkAgent.sendLinkProperties(linkProperties);
 
         // Make sure that the capport data is merged
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mExpectedMergedData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mExpectedMergedPasspointData
+                        .equals(lp.getCaptivePortalData()));
+
+        // Now send this information from non-Passpoint source, confirm that Capport data takes
+        // precedence
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaOtherData);
+        mWiFiNetworkAgent.sendLinkProperties(linkProperties);
+
+        // Make sure that the capport data is merged
+        captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
+                lp -> captivePortalTestData.mExpectedMergedOtherData
+                        .equals(lp.getCaptivePortalData()));
 
         // Create a new LP with no Network agent capport data
         final LinkProperties newLps = new LinkProperties();
@@ -3287,12 +3334,12 @@ public class ConnectivityServiceTest {
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
                 lp -> lp.getCaptivePortalData() == null);
 
-        newLps.setCaptivePortalData(captivePortalTestData.mNaData);
+        newLps.setCaptivePortalData(captivePortalTestData.mNaPasspointData);
         mWiFiNetworkAgent.sendLinkProperties(newLps);
 
         // Make sure that only the network agent capport data is available
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mNaData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mNaPasspointData.equals(lp.getCaptivePortalData()));
     }
 
     @Test
@@ -3303,12 +3350,12 @@ public class ConnectivityServiceTest {
         // Venue URL and friendly name from Network agent, confirm that API data gets precedence
         // on the bytes remaining.
         final LinkProperties linkProperties = new LinkProperties();
-        linkProperties.setCaptivePortalData(captivePortalTestData.mNaData);
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaPasspointData);
         mWiFiNetworkAgent.sendLinkProperties(linkProperties);
 
         // Make sure that the data is saved correctly
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mNaData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mNaPasspointData.equals(lp.getCaptivePortalData()));
 
         // Expected merged data: Network agent data is preferred, and values that are not used by
         // it are merged from capport data
@@ -3316,7 +3363,8 @@ public class ConnectivityServiceTest {
 
         // Make sure that the Capport data is merged correctly
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
-                lp -> captivePortalTestData.mExpectedMergedData.equals(lp.getCaptivePortalData()));
+                lp -> captivePortalTestData.mExpectedMergedPasspointData.equals(
+                        lp.getCaptivePortalData()));
 
         // Now set the naData to null
         linkProperties.setCaptivePortalData(null);
@@ -3325,6 +3373,32 @@ public class ConnectivityServiceTest {
         // Make sure that the Capport data is retained correctly
         captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
                 lp -> captivePortalTestData.mCapportData.equals(lp.getCaptivePortalData()));
+    }
+
+    @Test
+    public void testMergeCaptivePortalDataFromNetworkAgentOtherSourceFirstThenCapport()
+            throws Exception {
+        final TestNetworkCallback captivePortalCallback = setupNetworkCallbackAndConnectToWifi();
+        final CaptivePortalTestData captivePortalTestData = setupCaptivePortalData();
+
+        // Venue URL and friendly name from Network agent, confirm that API data gets precedence
+        // on the bytes remaining.
+        final LinkProperties linkProperties = new LinkProperties();
+        linkProperties.setCaptivePortalData(captivePortalTestData.mNaOtherData);
+        mWiFiNetworkAgent.sendLinkProperties(linkProperties);
+
+        // Make sure that the data is saved correctly
+        captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
+                lp -> captivePortalTestData.mNaOtherData.equals(lp.getCaptivePortalData()));
+
+        // Expected merged data: Network agent data is preferred, and values that are not used by
+        // it are merged from capport data
+        mWiFiNetworkAgent.notifyCapportApiDataChanged(captivePortalTestData.mCapportData);
+
+        // Make sure that the Capport data is merged correctly
+        captivePortalCallback.expectLinkPropertiesThat(mWiFiNetworkAgent,
+                lp -> captivePortalTestData.mExpectedMergedOtherData.equals(
+                        lp.getCaptivePortalData()));
     }
 
     private NetworkRequest.Builder newWifiRequestBuilder() {

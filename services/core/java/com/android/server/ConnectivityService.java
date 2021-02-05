@@ -6298,20 +6298,18 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     Math.max(naData.getRefreshTimeMillis(), apiData.getRefreshTimeMillis()));
         }
 
-        // Prioritize the user portal URL from the network agent.
-        if (apiData.getUserPortalUrl() != null && (naData.getUserPortalUrl() == null
-                || TextUtils.isEmpty(naData.getUserPortalUrl().toSafeString()))) {
-            captivePortalBuilder.setUserPortalUrl(apiData.getUserPortalUrl());
+        // Prioritize the user portal URL from the network agent if the source is authenticated.
+        if (apiData.getUserPortalUrl() != null && naData.getUserPortalUrlSource()
+                != CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT) {
+            captivePortalBuilder.setUserPortalUrl(apiData.getUserPortalUrl(),
+                    apiData.getUserPortalUrlSource());
         }
-        // Prioritize the venue information URL from the network agent.
-        if (apiData.getVenueInfoUrl() != null && (naData.getVenueInfoUrl() == null
-                || TextUtils.isEmpty(naData.getVenueInfoUrl().toSafeString()))) {
-            captivePortalBuilder.setVenueInfoUrl(apiData.getVenueInfoUrl());
-
-            // Note that venue friendly name can only come from the network agent because it is not
-            // in use in RFC8908. However, if using the Capport venue URL, make sure that the
-            // friendly name is not set from the network agent.
-            captivePortalBuilder.setVenueFriendlyName(null);
+        // Prioritize the venue information URL from the network agent if the source is
+        // authenticated.
+        if (apiData.getVenueInfoUrl() != null && naData.getVenueInfoUrlSource()
+                != CaptivePortalData.CAPTIVE_PORTAL_DATA_SOURCE_PASSPOINT) {
+            captivePortalBuilder.setVenueInfoUrl(apiData.getVenueInfoUrl(),
+                    apiData.getVenueInfoUrlSource());
         }
         return captivePortalBuilder.build();
     }
