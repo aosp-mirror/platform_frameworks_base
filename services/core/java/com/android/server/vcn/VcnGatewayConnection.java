@@ -61,7 +61,6 @@ import android.os.ParcelUuid;
 import android.util.ArraySet;
 import android.util.Slog;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.util.State;
@@ -69,6 +68,7 @@ import com.android.internal.util.StateMachine;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkRecord;
 import com.android.server.vcn.UnderlyingNetworkTracker.UnderlyingNetworkTrackerCallback;
+import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -403,15 +403,13 @@ public class VcnGatewayConnection extends StateMachine {
     @NonNull
     final RetryTimeoutState mRetryTimeoutState = new RetryTimeoutState();
 
-    @NonNull private final Object mLock = new Object();
-
-    @GuardedBy("mLock")
     @NonNull private TelephonySubscriptionSnapshot mLastSnapshot;
 
     @NonNull private final VcnContext mVcnContext;
     @NonNull private final ParcelUuid mSubscriptionGroup;
     @NonNull private final UnderlyingNetworkTracker mUnderlyingNetworkTracker;
     @NonNull private final VcnGatewayConnectionConfig mConnectionConfig;
+    @NonNull private final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull private final Dependencies mDeps;
 
     @NonNull private final VcnUnderlyingNetworkTrackerCallback mUnderlyingNetworkTrackerCallback;
@@ -487,8 +485,15 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull VcnContext vcnContext,
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
-            @NonNull VcnGatewayConnectionConfig connectionConfig) {
-        this(vcnContext, subscriptionGroup, snapshot, connectionConfig, new Dependencies());
+            @NonNull VcnGatewayConnectionConfig connectionConfig,
+            @NonNull VcnGatewayStatusCallback gatewayStatusCallback) {
+        this(
+                vcnContext,
+                subscriptionGroup,
+                snapshot,
+                connectionConfig,
+                gatewayStatusCallback,
+                new Dependencies());
     }
 
     @VisibleForTesting(visibility = Visibility.PRIVATE)
@@ -497,16 +502,17 @@ public class VcnGatewayConnection extends StateMachine {
             @NonNull ParcelUuid subscriptionGroup,
             @NonNull TelephonySubscriptionSnapshot snapshot,
             @NonNull VcnGatewayConnectionConfig connectionConfig,
+            @NonNull VcnGatewayStatusCallback gatewayStatusCallback,
             @NonNull Dependencies deps) {
         super(TAG, Objects.requireNonNull(vcnContext, "Missing vcnContext").getLooper());
         mVcnContext = vcnContext;
         mSubscriptionGroup = Objects.requireNonNull(subscriptionGroup, "Missing subscriptionGroup");
         mConnectionConfig = Objects.requireNonNull(connectionConfig, "Missing connectionConfig");
+        mGatewayStatusCallback =
+                Objects.requireNonNull(gatewayStatusCallback, "Missing gatewayStatusCallback");
         mDeps = Objects.requireNonNull(deps, "Missing deps");
 
-        synchronized (mLock) {
-            mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
-        }
+        mLastSnapshot = Objects.requireNonNull(snapshot, "Missing snapshot");
 
         mUnderlyingNetworkTrackerCallback = new VcnUnderlyingNetworkTrackerCallback();
 
@@ -577,13 +583,10 @@ public class VcnGatewayConnection extends StateMachine {
      */
     public void updateSubscriptionSnapshot(@NonNull TelephonySubscriptionSnapshot snapshot) {
         Objects.requireNonNull(snapshot, "Missing snapshot");
+        mVcnContext.ensureRunningOnLooperThread();
 
-        // Vcn is the only user of this method and runs on the same Thread, but lock around
-        // mLastSnapshot to be technically correct.
-        synchronized (mLock) {
-            mLastSnapshot = snapshot;
-            mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
-        }
+        mLastSnapshot = snapshot;
+        mUnderlyingNetworkTracker.updateSubscriptionSnapshot(mLastSnapshot);
 
         sendMessage(EVENT_SUBSCRIPTIONS_CHANGED, TOKEN_ALL);
     }
