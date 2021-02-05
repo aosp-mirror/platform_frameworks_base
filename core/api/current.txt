@@ -41213,7 +41213,9 @@ package android.telephony {
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void removeSubscriptionsFromGroup(@NonNull java.util.List<java.lang.Integer>, @NonNull android.os.ParcelUuid);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean setOpportunistic(boolean, int);
     method public void setSubscriptionOverrideCongested(int, boolean, long);
+    method public void setSubscriptionOverrideCongested(int, boolean, @NonNull int[], long);
     method public void setSubscriptionOverrideUnmetered(int, boolean, long);
+    method public void setSubscriptionOverrideUnmetered(int, boolean, @NonNull int[], long);
     method public void setSubscriptionPlans(int, @NonNull java.util.List<android.telephony.SubscriptionPlan>);
     method @RequiresPermission("android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS") public void switchToSubscription(int, @NonNull android.app.PendingIntent);
     field public static final String ACTION_DEFAULT_SMS_SUBSCRIPTION_CHANGED = "android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED";
