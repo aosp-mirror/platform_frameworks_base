@@ -178,6 +178,14 @@
         <attr name="scrimColor" format="color" />
     </declare-styleable>
 
+    <declare-styleable name="MagnifierView">
+        <attr name="handleThickness" format="dimension" />
+        <attr name="handleColor" format="color" />
+        <attr name="scrimColor" format="color" />
+        <attr name="borderThickness" format="dimension" />
+        <attr name="borderColor" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="RoundedCornerProgressDrawable">
         <attr name="android:drawable" />
     </declare-styleable>
