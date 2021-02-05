@@ -132,6 +132,13 @@ import java.util.function.Consumer;
  *   <li>{@link android.widget.TextClock}</li>
  *   <li>{@link android.widget.TextView}</li>
  * </ul>
+ * <p>As of API 31, the following widgets and layouts may also be used:</p>
+ * <ul>
+ *     <li>{@link android.widget.CheckBox}</li>
+ *     <li>{@link android.widget.RadioButton}</li>
+ *     <li>{@link android.widget.RadioGroup}</li>
+ *     <li>{@link android.widget.Switch}</li>
+ * </ul>
  * <p>Descendants of these classes are not supported.</p>
  */
 public class RemoteViews implements Parcelable, Filter {
@@ -185,6 +192,8 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int REMOVE_FROM_PARENT_ACTION_TAG = 23;
     private static final int RESOURCE_REFLECTION_ACTION_TAG = 24;
     private static final int COMPLEX_UNIT_DIMENSION_REFLECTION_ACTION_TAG = 25;
+    private static final int SET_COMPOUND_BUTTON_CHECKED_TAG = 26;
+    private static final int SET_RADIO_GROUP_CHECKED = 27;
 
     /** @hide **/
     @IntDef(prefix = "MARGIN_", value = {
@@ -2552,6 +2561,87 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
+    private static class SetCompoundButtonCheckedAction extends Action {
+
+        private final boolean mChecked;
+
+        SetCompoundButtonCheckedAction(@IdRes int viewId, boolean checked) {
+            this.viewId = viewId;
+            mChecked = checked;
+        }
+
+        SetCompoundButtonCheckedAction(Parcel in) {
+            viewId = in.readInt();
+            mChecked = in.readBoolean();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(viewId);
+            dest.writeBoolean(mChecked);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
+                throws ActionException {
+            final View target = root.findViewById(viewId);
+            if (target == null) return;
+
+            if (!(target instanceof CompoundButton)) {
+                Log.w(LOG_TAG, "Cannot set checked to view "
+                        + viewId + " because it is not a CompoundButton");
+                return;
+            }
+
+            ((CompoundButton) target).setChecked(mChecked);
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_COMPOUND_BUTTON_CHECKED_TAG;
+        }
+    }
+
+    private static class SetRadioGroupCheckedAction extends Action {
+
+        @IdRes private final int mCheckedId;
+
+        SetRadioGroupCheckedAction(@IdRes int viewId, @IdRes int checkedId) {
+            this.viewId = viewId;
+            mCheckedId = checkedId;
+        }
+
+        SetRadioGroupCheckedAction(Parcel in) {
+            viewId = in.readInt();
+            mCheckedId = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(viewId);
+            dest.writeInt(mCheckedId);
+        }
+
+        @Override
+        public void apply(View root, ViewGroup rootParent, OnClickHandler handler)
+                throws ActionException {
+            final View target = root.findViewById(viewId);
+            if (target == null) return;
+
+            if (!(target instanceof RadioGroup)) {
+                Log.w(LOG_TAG, "Cannot check " + viewId + " because it's not a RadioGroup");
+                return;
+            }
+
+            ((RadioGroup) target).check(mCheckedId);
+        }
+
+        @Override
+        public int getActionTag() {
+            return SET_RADIO_GROUP_CHECKED;
+        }
+    }
+
     /**
      * Create a new RemoteViews object that will display the views contained
      * in the specified layout file.
@@ -2766,6 +2856,10 @@ public class RemoteViews implements Parcelable, Filter {
                 return new ResourceReflectionAction(parcel);
             case COMPLEX_UNIT_DIMENSION_REFLECTION_ACTION_TAG:
                 return new ComplexUnitDimensionReflectionAction(parcel);
+            case SET_COMPOUND_BUTTON_CHECKED_TAG:
+                return new SetCompoundButtonCheckedAction(parcel);
+            case SET_RADIO_GROUP_CHECKED:
+                return new SetRadioGroupCheckedAction(parcel);
             default:
                 throw new ActionException("Tag " + tag + " not found");
         }
@@ -3843,6 +3937,26 @@ public class RemoteViews implements Parcelable, Filter {
      */
     public void setLabelFor(@IdRes int viewId, @IdRes int labeledId) {
         setInt(viewId, "setLabelFor", labeledId);
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.CompoundButton#setChecked(boolean)}.
+     *
+     * @param viewId The id of the view whose property to set.
+     * @param checked true to check the button, false to uncheck it.
+     */
+    public void setCompoundButtonChecked(@IdRes int viewId, boolean checked) {
+        addAction(new SetCompoundButtonCheckedAction(viewId, checked));
+    }
+
+    /**
+     * Equivalent to calling {@link android.widget.RadioGroup#check(int)}.
+     *
+     * @param viewId The id of the view whose property to set.
+     * @param checkedId The unique id of the radio button to select in the group.
+     */
+    public void setRadioGroupChecked(@IdRes int viewId, @IdRes int checkedId) {
+        addAction(new SetRadioGroupCheckedAction(viewId, checkedId));
     }
 
     /**
