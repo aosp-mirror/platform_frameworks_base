@@ -405,6 +405,8 @@ public class WindowManagerService extends IWindowManager.Stub
     // trying to apply a new one.
     private static final boolean ALWAYS_KEEP_CURRENT = true;
 
+    static final int LOGTAG_INPUT_FOCUS = 62001;
+
     /**
      * Restrict ability of activities overriding transition animation in a way such that
      * an activity can do it only when the transition happens within a same task.
@@ -413,13 +415,25 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     private static final String DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY =
             "persist.wm.disable_custom_task_animation";
-    static final int LOGTAG_INPUT_FOCUS = 62001;
 
     /**
      * @see #DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY
      */
     static boolean sDisableCustomTaskAnimationProperty =
             SystemProperties.getBoolean(DISABLE_CUSTOM_TASK_ANIMATION_PROPERTY, true);
+
+    /**
+     * Run Keyguard animation as remote animation in System UI instead of local animation in
+     * the server process.
+     */
+    private static final String ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY =
+            "persist.wm.enable_remote_keyguard_animation";
+
+    /**
+     * @see #ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY
+     */
+    public static boolean sEnableRemoteKeyguardAnimation =
+            SystemProperties.getBoolean(ENABLE_REMOTE_KEYGUARD_ANIMATION_PROPERTY, false);
 
     private static final String DISABLE_TRIPLE_BUFFERING_PROPERTY =
             "ro.sf.disable_triple_buffer";
@@ -7759,6 +7773,15 @@ public class WindowManagerService extends IWindowManager.Stub
         public void registerAppTransitionListener(AppTransitionListener listener) {
             synchronized (mGlobalLock) {
                 getDefaultDisplayContentLocked().mAppTransition.registerListenerLocked(listener);
+            }
+        }
+
+        @Override
+        public void registerKeyguardExitAnimationStartListener(
+                KeyguardExitAnimationStartListener listener) {
+            synchronized (mGlobalLock) {
+                getDefaultDisplayContentLocked().mAppTransition
+                        .registerKeygaurdExitAnimationStartListener(listener);
             }
         }
 
