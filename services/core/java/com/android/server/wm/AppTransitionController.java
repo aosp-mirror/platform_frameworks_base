@@ -709,6 +709,13 @@ public class AppTransitionController {
         applyAnimations(closingWcs, closingApps, transit, false /* visible */, animLp,
                 voiceInteraction);
 
+        for (int i = 0; i < openingApps.size(); ++i) {
+            openingApps.valueAtUnchecked(i).mOverrideTaskTransition = false;
+        }
+        for (int i = 0; i < closingApps.size(); ++i) {
+            closingApps.valueAtUnchecked(i).mOverrideTaskTransition = false;
+        }
+
         final AccessibilityController accessibilityController =
                 mDisplayContent.mWmService.mAccessibilityController;
         if (accessibilityController != null) {

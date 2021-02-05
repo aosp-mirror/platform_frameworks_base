@@ -72,9 +72,13 @@ public abstract class ActivityOptionsCompat {
         return ActivityOptions.makeRemoteTransition(remoteTransition.getTransition());
     }
 
+    /**
+     * Returns ActivityOptions for overriding task transition animation.
+     */
     public static ActivityOptions makeCustomAnimation(Context context, int enterResId,
             int exitResId, final Runnable callback, final Handler callbackHandler) {
-        return ActivityOptions.makeCustomAnimation(context, enterResId, exitResId, callbackHandler,
+        return ActivityOptions.makeCustomTaskAnimation(context, enterResId, exitResId,
+                callbackHandler,
                 new ActivityOptions.OnAnimationStartedListener() {
                     @Override
                     public void onAnimationStarted() {
