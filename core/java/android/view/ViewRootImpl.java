@@ -315,7 +315,7 @@ public final class ViewRootImpl implements ViewParent,
      * In that case we receive a call back from {@link ActivityThread} and this flag is used to
      * preserve the initial value.
      *
-     * @see #performConfigurationChange(Configuration, Configuration, boolean, int)
+     * @see #performConfigurationChange(MergedConfiguration, boolean, int)
      */
     private boolean mForceNextConfigUpdate;
 
