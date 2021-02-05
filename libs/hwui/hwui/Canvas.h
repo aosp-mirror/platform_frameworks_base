@@ -61,6 +61,14 @@ class Bitmap;
 class Paint;
 struct Typeface;
 
+enum class DrawTextBlobMode {
+    Normal,
+    HctOutline,
+    HctInner,
+};
+
+inline DrawTextBlobMode gDrawTextBlobMode = DrawTextBlobMode::Normal;
+
 class ANDROID_API Canvas {
 public:
     virtual ~Canvas(){};
