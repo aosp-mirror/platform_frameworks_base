@@ -32,6 +32,7 @@
 
 using Status = ::ndk::ScopedAStatus;
 
+using ::aidl::android::media::tv::tuner::TunerDemuxCapabilities;
 using ::aidl::android::media::tv::tuner::ITunerService;
 using ::aidl::android::media::tv::tuner::TunerFrontendInfo;
 using ::aidl::android::media::tv::tunerresourcemanager::ITunerResourceManager;
@@ -145,6 +146,7 @@ private:
     sp<ILnb> openHidlLnbByName(string name, LnbId& lnbId);
     sp<IDescrambler> openHidlDescrambler();
     vector<int> getLnbHandles();
+    DemuxCapabilities getHidlDemuxCaps(TunerDemuxCapabilities& aidlCaps);
     FrontendInfo FrontendInfoAidlToHidl(TunerFrontendInfo aidlFrontendInfo);
     void updateTunerResources();
     void updateFrontendResources();
