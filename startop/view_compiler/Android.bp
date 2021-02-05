@@ -84,7 +84,6 @@ cc_test_host {
     static_libs: [
         "libviewcompiler",
     ],
-    test_suites: ["general-tests"],
 }
 
 cc_binary_host {
