@@ -163,48 +163,4 @@
         android:src="@drawable/ic_notifications_alerted"
         android:visibility="gone"
         />
-
-    <LinearLayout
-        android:id="@+id/app_ops"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:paddingTop="3dp"
-        android:layout_marginStart="2dp"
-        android:background="?android:selectableItemBackgroundBorderless"
-        android:orientation="horizontal"
-        >
-
-        <ImageView
-            android:layout_marginStart="4dp"
-            android:id="@+id/camera"
-            android:layout_width="?attr/notificationHeaderIconSize"
-            android:layout_height="?attr/notificationHeaderIconSize"
-            android:src="@drawable/ic_camera"
-            android:visibility="gone"
-            android:focusable="false"
-            android:contentDescription="@string/notification_appops_camera_active"
-            />
-
-        <ImageView
-            android:id="@+id/mic"
-            android:layout_width="?attr/notificationHeaderIconSize"
-            android:layout_height="?attr/notificationHeaderIconSize"
-            android:src="@drawable/ic_mic"
-            android:layout_marginStart="4dp"
-            android:visibility="gone"
-            android:focusable="false"
-            android:contentDescription="@string/notification_appops_microphone_active"
-            />
-
-        <ImageView
-            android:id="@+id/overlay"
-            android:layout_width="?attr/notificationHeaderIconSize"
-            android:layout_height="?attr/notificationHeaderIconSize"
-            android:src="@drawable/ic_alert_window_layer"
-            android:layout_marginStart="4dp"
-            android:visibility="gone"
-            android:focusable="false"
-            android:contentDescription="@string/notification_appops_overlay_active"
-            />
-    </LinearLayout>
 </LinearLayout>
