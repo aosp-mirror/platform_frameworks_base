@@ -678,6 +678,7 @@ gensrcs {
     srcs: [
         ":ipconnectivity-proto-src",
         ":libstats_atom_enum_protos",
+        ":libtombstone_proto-src",
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
     ],
