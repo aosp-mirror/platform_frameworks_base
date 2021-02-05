@@ -35,7 +35,7 @@ using ::aidl::android::media::tv::tuner::TunerFilterSectionTableInfo;
 using ::aidl::android::media::tv::tuner::TunerFilterSharedHandleInfo;
 using ::aidl::android::media::tv::tuner::TunerFilterTlvConfiguration;
 using ::aidl::android::media::tv::tuner::TunerFilterTsConfiguration;
-
+using ::android::hardware::hidl_vec;
 using ::android::hardware::tv::tuner::V1_0::DemuxFilterMainType;
 using ::android::hardware::tv::tuner::V1_0::DemuxMmtpFilterType;
 using ::android::hardware::tv::tuner::V1_0::DemuxQueueNotifyBits;
@@ -703,10 +703,10 @@ void TunerFilterCallback::getHidlFilterEvent(const vector<TunerFilterEvent>& fil
 
 void TunerFilterCallback::getHidlMediaEvent(
         const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         hidl_handle handle = hidl_handle(makeFromAidl(filterEvents[i]
                 .get<TunerFilterEvent::media>().avMemory));
-        event.events.resize(i + 1);
         event.events[i].media({
             .avMemory = handle,
             .streamId = static_cast<DemuxStreamId>(filterEvents[i]
@@ -752,9 +752,9 @@ void TunerFilterCallback::getHidlMediaEvent(
 
 void TunerFilterCallback::getHidlSectionEvent(
         const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto section = filterEvents[i].get<TunerFilterEvent::section>();
-        event.events.resize(i + 1);
         event.events[i].section({
             .tableId = static_cast<uint16_t>(section.tableId),
             .version = static_cast<uint16_t>(section.version),
@@ -766,9 +766,9 @@ void TunerFilterCallback::getHidlSectionEvent(
 
 void TunerFilterCallback::getHidlPesEvent(
         const vector<TunerFilterEvent>& filterEvents, DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto pes = filterEvents[i].get<TunerFilterEvent::pes>();
-        event.events.resize(i + 1);
         event.events[i].pes({
             .streamId = static_cast<DemuxStreamId>(pes.streamId),
             .dataLength = static_cast<uint16_t>(pes.dataLength),
@@ -779,9 +779,10 @@ void TunerFilterCallback::getHidlPesEvent(
 
 void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
+    event.events.resize(filterEvents.size());
+    eventExt.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto ts = filterEvents[i].get<TunerFilterEvent::tsRecord>();
-        event.events.resize(i + 1);
         event.events[i].tsRecord({
             .tsIndexMask = static_cast<uint32_t>(ts.tsIndexMask),
             .byteNumber = static_cast<uint64_t>(ts.byteNumber),
@@ -803,7 +804,6 @@ void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& f
                 break;
         }
 
-        eventExt.events.resize(i + 1);
         if (ts.isExtended) {
             eventExt.events[i].tsRecord({
                 .pts = static_cast<uint64_t>(ts.pts),
@@ -817,15 +817,15 @@ void TunerFilterCallback::getHidlTsRecordEvent(const vector<TunerFilterEvent>& f
 
 void TunerFilterCallback::getHidlMmtpRecordEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event, DemuxFilterEventExt& eventExt) {
+    event.events.resize(filterEvents.size());
+    eventExt.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto mmtp = filterEvents[i].get<TunerFilterEvent::mmtpRecord>();
-        event.events.resize(i + 1);
         event.events[i].mmtpRecord({
             .scHevcIndexMask = static_cast<uint32_t>(mmtp.scHevcIndexMask),
             .byteNumber = static_cast<uint64_t>(mmtp.byteNumber),
         });
 
-        eventExt.events.resize(i + 1);
         if (mmtp.isExtended) {
             eventExt.events[i].mmtpRecord({
                 .pts = static_cast<uint64_t>(mmtp.pts),
@@ -841,9 +841,9 @@ void TunerFilterCallback::getHidlMmtpRecordEvent(const vector<TunerFilterEvent>&
 
 void TunerFilterCallback::getHidlDownloadEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto download = filterEvents[i].get<TunerFilterEvent::download>();
-        event.events.resize(i + 1);
         event.events[i].download({
             .itemId = static_cast<uint32_t>(download.itemId),
             .mpuSequenceNumber = static_cast<uint32_t>(download.mpuSequenceNumber),
@@ -856,9 +856,9 @@ void TunerFilterCallback::getHidlDownloadEvent(const vector<TunerFilterEvent>& f
 
 void TunerFilterCallback::getHidlIpPayloadEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto ip = filterEvents[i].get<TunerFilterEvent::ipPayload>();
-        event.events.resize(i + 1);
         event.events[i].ipPayload({
             .dataLength = static_cast<uint16_t>(ip.dataLength),
         });
@@ -867,15 +867,15 @@ void TunerFilterCallback::getHidlIpPayloadEvent(const vector<TunerFilterEvent>& 
 
 void TunerFilterCallback::getHidlTemiEvent(const vector<TunerFilterEvent>& filterEvents,
         DemuxFilterEvent& event) {
+    event.events.resize(filterEvents.size());
     for (int i = 0; i < filterEvents.size(); i++) {
         auto temi = filterEvents[i].get<TunerFilterEvent::temi>();
-        event.events.resize(i + 1);
         event.events[i].temi({
             .pts = static_cast<uint64_t>(temi.pts),
             .descrTag = static_cast<uint8_t>(temi.descrTag),
         });
-        vector<uint8_t> descrData(temi.descrData.size());
-        copy(temi.descrData.begin(), temi.descrData.end(), descrData.begin());
+        hidl_vec<uint8_t> descrData(temi.descrData.begin(), temi.descrData.end());
+        event.events[i].temi().descrData = descrData;
     }
 }
 

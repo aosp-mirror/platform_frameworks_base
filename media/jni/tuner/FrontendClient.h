@@ -43,6 +43,7 @@ using ::aidl::android::media::tv::tuner::TunerFrontendIsdbs3Settings;
 using ::aidl::android::media::tv::tuner::TunerFrontendIsdbtSettings;
 using ::aidl::android::media::tv::tuner::TunerFrontendScanMessage;
 using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendStatus;
 
 using ::android::hardware::Return;
 using ::android::hardware::Void;
@@ -182,6 +183,9 @@ public:
     int getId();
 
 private:
+    vector<FrontendStatus> getHidlStatus(vector<TunerFrontendStatus>& aidlStatus);
+    vector<FrontendStatusExt1_1> getHidlStatusExt(vector<TunerFrontendStatus>& aidlStatus);
+
     TunerFrontendSettings getAidlFrontendSettings(
             const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
     TunerFrontendAnalogSettings getAidlAnalogSettings(
