@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (C) 2021 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.location.injector;
+package com.android.server.location.eventlog;
 
 import static android.os.PowerManager.LOCATION_MODE_ALL_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_FOREGROUND_ONLY;
 import static android.os.PowerManager.LOCATION_MODE_GPS_DISABLED_WHEN_SCREEN_OFF;
 import static android.os.PowerManager.LOCATION_MODE_NO_CHANGE;
 import static android.os.PowerManager.LOCATION_MODE_THROTTLE_REQUESTS_WHEN_SCREEN_OFF;
+import static android.util.TimeUtils.formatDuration;
 
 import static com.android.server.location.LocationManagerService.D;
+
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 import android.annotation.Nullable;
 import android.location.LocationRequest;
@@ -30,8 +35,11 @@ import android.location.provider.ProviderRequest;
 import android.location.util.identity.CallerIdentity;
 import android.os.Build;
 import android.os.PowerManager.LocationPowerSaveMode;
+import android.os.SystemClock;
+import android.util.ArrayMap;
 
-import com.android.server.location.eventlog.LocalEventLog;
+import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 
 /** In memory event log for location events. */
 public class LocationEventLog extends LocalEventLog {
@@ -54,8 +62,39 @@ public class LocationEventLog extends LocalEventLog {
     private static final int EVENT_PROVIDER_DELIVER_LOCATION = 8;
     private static final int EVENT_LOCATION_POWER_SAVE_MODE_CHANGE = 9;
 
+    @GuardedBy("mAggregateStats")
+    private final ArrayMap<String, ArrayMap<String, AggregateStats>> mAggregateStats;
+
     public LocationEventLog() {
         super(getLogSize());
+        mAggregateStats = new ArrayMap<>(4);
+    }
+
+    public ArrayMap<String, ArrayMap<String, AggregateStats>> copyAggregateStats() {
+        synchronized (mAggregateStats) {
+            ArrayMap<String, ArrayMap<String, AggregateStats>> copy = new ArrayMap<>(
+                    mAggregateStats);
+            for (int i = 0; i < copy.size(); i++) {
+                copy.setValueAt(i, new ArrayMap<>(copy.valueAt(i)));
+            }
+            return copy;
+        }
+    }
+
+    private AggregateStats getAggregateStats(String provider, String packageName) {
+        synchronized (mAggregateStats) {
+            ArrayMap<String, AggregateStats> packageMap = mAggregateStats.get(provider);
+            if (packageMap == null) {
+                packageMap = new ArrayMap<>(2);
+                mAggregateStats.put(provider, packageMap);
+            }
+            AggregateStats stats = packageMap.get(packageName);
+            if (stats == null) {
+                stats = new AggregateStats();
+                packageMap.put(packageName, stats);
+            }
+            return stats;
+        }
     }
 
     /** Logs a location enabled/disabled event. */
@@ -77,12 +116,34 @@ public class LocationEventLog extends LocalEventLog {
     public void logProviderClientRegistered(String provider, CallerIdentity identity,
             LocationRequest request) {
         addLogEvent(EVENT_PROVIDER_REGISTER_CLIENT, provider, identity, request);
+        getAggregateStats(provider, identity.getPackageName())
+                .markRequestAdded(request.getIntervalMillis());
     }
 
     /** Logs a client unregistration for a location provider. */
-    public void logProviderClientUnregistered(String provider,
-            CallerIdentity identity) {
+    public void logProviderClientUnregistered(String provider, CallerIdentity identity) {
         addLogEvent(EVENT_PROVIDER_UNREGISTER_CLIENT, provider, identity);
+        getAggregateStats(provider, identity.getPackageName()).markRequestRemoved();
+    }
+
+    /** Logs a client for a location provider entering the active state. */
+    public void logProviderClientActive(String provider, CallerIdentity identity) {
+        getAggregateStats(provider, identity.getPackageName()).markRequestActive();
+    }
+
+    /** Logs a client for a location provider leaving the active state. */
+    public void logProviderClientInactive(String provider, CallerIdentity identity) {
+        getAggregateStats(provider, identity.getPackageName()).markRequestInactive();
+    }
+
+    /** Logs a client for a location provider entering the foreground state. */
+    public void logProviderClientForeground(String provider, CallerIdentity identity) {
+        getAggregateStats(provider, identity.getPackageName()).markRequestForeground();
+    }
+
+    /** Logs a client for a location provider leaving the foreground state. */
+    public void logProviderClientBackground(String provider, CallerIdentity identity) {
+        getAggregateStats(provider, identity.getPackageName()).markRequestBackground();
     }
 
     /** Logs a change to the provider request for a location provider. */
@@ -143,16 +204,29 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class ProviderEnabledEvent extends LogEvent {
+    private abstract static class ProviderEvent extends LogEvent {
 
-        private final String mProvider;
+        protected final String mProvider;
+
+        protected ProviderEvent(long timeDelta, String provider) {
+            super(timeDelta);
+            mProvider = provider;
+        }
+
+        @Override
+        public boolean filter(String filter) {
+            return mProvider.equals(filter);
+        }
+    }
+
+    private static final class ProviderEnabledEvent extends ProviderEvent {
+
         private final int mUserId;
         private final boolean mEnabled;
 
         protected ProviderEnabledEvent(long timeDelta, String provider, int userId,
                 boolean enabled) {
-            super(timeDelta);
-            mProvider = provider;
+            super(timeDelta, provider);
             mUserId = userId;
             mEnabled = enabled;
         }
@@ -164,14 +238,12 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class ProviderMockedEvent extends LogEvent {
+    private static final class ProviderMockedEvent extends ProviderEvent {
 
-        private final String mProvider;
         private final boolean mMocked;
 
         protected ProviderMockedEvent(long timeDelta, String provider, boolean mocked) {
-            super(timeDelta);
-            mProvider = provider;
+            super(timeDelta, provider);
             mMocked = mocked;
         }
 
@@ -185,17 +257,15 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class ProviderRegisterEvent extends LogEvent {
+    private static final class ProviderRegisterEvent extends ProviderEvent {
 
-        private final String mProvider;
         private final boolean mRegistered;
         private final CallerIdentity mIdentity;
         @Nullable private final LocationRequest mLocationRequest;
 
         private ProviderRegisterEvent(long timeDelta, String provider, boolean registered,
                 CallerIdentity identity, @Nullable LocationRequest locationRequest) {
-            super(timeDelta);
-            mProvider = provider;
+            super(timeDelta, provider);
             mRegistered = registered;
             mIdentity = identity;
             mLocationRequest = locationRequest;
@@ -212,14 +282,12 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class ProviderUpdateEvent extends LogEvent {
+    private static final class ProviderUpdateEvent extends ProviderEvent {
 
-        private final String mProvider;
         private final ProviderRequest mRequest;
 
         private ProviderUpdateEvent(long timeDelta, String provider, ProviderRequest request) {
-            super(timeDelta);
-            mProvider = provider;
+            super(timeDelta, provider);
             mRequest = request;
         }
 
@@ -229,14 +297,12 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class ProviderReceiveLocationEvent extends LogEvent {
+    private static final class ProviderReceiveLocationEvent extends ProviderEvent {
 
-        private final String mProvider;
         private final int mNumLocations;
 
         private ProviderReceiveLocationEvent(long timeDelta, String provider, int numLocations) {
-            super(timeDelta);
-            mProvider = provider;
+            super(timeDelta, provider);
             mNumLocations = numLocations;
         }
 
@@ -246,16 +312,14 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class ProviderDeliverLocationEvent extends LogEvent {
+    private static final class ProviderDeliverLocationEvent extends ProviderEvent {
 
-        private final String mProvider;
         private final int mNumLocations;
         @Nullable private final CallerIdentity mIdentity;
 
         private ProviderDeliverLocationEvent(long timeDelta, String provider, int numLocations,
                 @Nullable CallerIdentity identity) {
-            super(timeDelta);
-            mProvider = provider;
+            super(timeDelta, provider);
             mNumLocations = numLocations;
             mIdentity = identity;
         }
@@ -267,7 +331,7 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class LocationPowerSaveModeEvent extends LogEvent {
+    private static final class LocationPowerSaveModeEvent extends LogEvent {
 
         @LocationPowerSaveMode
         private final int mLocationPowerSaveMode;
@@ -305,7 +369,7 @@ public class LocationEventLog extends LocalEventLog {
         }
     }
 
-    private static class LocationEnabledEvent extends LogEvent {
+    private static final class LocationEnabledEvent extends LogEvent {
 
         private final int mUserId;
         private final boolean mEnabled;
@@ -319,6 +383,120 @@ public class LocationEventLog extends LocalEventLog {
         @Override
         public String getLogString() {
             return "[u" + mUserId + "] location setting " + (mEnabled ? "enabled" : "disabled");
+        }
+    }
+
+    /**
+     * Aggregate statistics for a single package under a single provider.
+     */
+    public static final class AggregateStats {
+
+        @GuardedBy("this")
+        private int mAddedRequestCount;
+        @GuardedBy("this")
+        private int mActiveRequestCount;
+        @GuardedBy("this")
+        private int mForegroundRequestCount;
+
+        @GuardedBy("this")
+        private long mFastestIntervalMs = Long.MAX_VALUE;
+        @GuardedBy("this")
+        private long mSlowestIntervalMs = 0;
+
+        @GuardedBy("this")
+        private long mAddedTimeTotalMs;
+        @GuardedBy("this")
+        private long mAddedTimeLastUpdateRealtimeMs;
+
+        @GuardedBy("this")
+        private long mActiveTimeTotalMs;
+        @GuardedBy("this")
+        private long mActiveTimeLastUpdateRealtimeMs;
+
+        @GuardedBy("this")
+        private long mForegroundTimeTotalMs;
+        @GuardedBy("this")
+        private long mForegroundTimeLastUpdateRealtimeMs;
+
+        AggregateStats() {}
+
+        synchronized void markRequestAdded(long intervalMillis) {
+            if (mAddedRequestCount++ == 0) {
+                mAddedTimeLastUpdateRealtimeMs = SystemClock.elapsedRealtime();
+            }
+
+            mFastestIntervalMs = min(intervalMillis, mFastestIntervalMs);
+            mSlowestIntervalMs = max(intervalMillis, mSlowestIntervalMs);
+        }
+
+        synchronized void markRequestRemoved() {
+            updateTotals();
+            --mAddedRequestCount;
+            Preconditions.checkState(mAddedRequestCount >= 0);
+
+            mActiveRequestCount = min(mAddedRequestCount, mActiveRequestCount);
+            mForegroundRequestCount = min(mAddedRequestCount, mForegroundRequestCount);
+        }
+
+        synchronized void markRequestActive() {
+            Preconditions.checkState(mAddedRequestCount > 0);
+            if (mActiveRequestCount++ == 0) {
+                mActiveTimeLastUpdateRealtimeMs = SystemClock.elapsedRealtime();
+            }
+        }
+
+        synchronized void markRequestInactive() {
+            updateTotals();
+            --mActiveRequestCount;
+            Preconditions.checkState(mActiveRequestCount >= 0);
+        }
+
+        synchronized void markRequestForeground() {
+            Preconditions.checkState(mAddedRequestCount > 0);
+            if (mForegroundRequestCount++ == 0) {
+                mForegroundTimeLastUpdateRealtimeMs = SystemClock.elapsedRealtime();
+            }
+        }
+
+        synchronized void markRequestBackground() {
+            updateTotals();
+            --mForegroundRequestCount;
+            Preconditions.checkState(mForegroundRequestCount >= 0);
+        }
+
+        public synchronized void updateTotals() {
+            if (mAddedRequestCount > 0) {
+                long realtimeMs = SystemClock.elapsedRealtime();
+                mAddedTimeTotalMs += realtimeMs - mAddedTimeLastUpdateRealtimeMs;
+                mAddedTimeLastUpdateRealtimeMs = realtimeMs;
+            }
+            if (mActiveRequestCount > 0) {
+                long realtimeMs = SystemClock.elapsedRealtime();
+                mActiveTimeTotalMs += realtimeMs - mActiveTimeLastUpdateRealtimeMs;
+                mActiveTimeLastUpdateRealtimeMs = realtimeMs;
+            }
+            if (mForegroundRequestCount > 0) {
+                long realtimeMs = SystemClock.elapsedRealtime();
+                mForegroundTimeTotalMs += realtimeMs - mForegroundTimeLastUpdateRealtimeMs;
+                mForegroundTimeLastUpdateRealtimeMs = realtimeMs;
+            }
+        }
+
+        @Override
+        public synchronized String toString() {
+            return "min/max interval = " + intervalToString(mFastestIntervalMs) + "/"
+                    + intervalToString(mSlowestIntervalMs)
+                    + ", total/active/foreground duration = " + formatDuration(mAddedTimeTotalMs)
+                    + "/" + formatDuration(mActiveTimeTotalMs) + "/"
+                    + formatDuration(mForegroundTimeTotalMs);
+        }
+
+        private static String intervalToString(long intervalMs) {
+            if (intervalMs == LocationRequest.PASSIVE_INTERVAL) {
+                return "passive";
+            } else {
+                return MILLISECONDS.toSeconds(intervalMs) + "s";
+            }
         }
     }
 }
