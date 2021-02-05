@@ -1829,11 +1829,11 @@ public class NetworkPolicyManagerServiceTest {
     }
 
     /**
-     * Exhaustively test isUidNetworkingBlocked to output the expected results based on external
+     * Exhaustively test checkUidNetworkingBlocked to output the expected results based on external
      * conditions.
      */
     @Test
-    public void testIsUidNetworkingBlocked() {
+    public void testCheckUidNetworkingBlocked() {
         final ArrayList<Pair<Boolean, Integer>> expectedBlockedStates = new ArrayList<>();
 
         // Metered network. Data saver on.
@@ -1877,17 +1877,16 @@ public class NetworkPolicyManagerServiceTest {
 
     private void verifyNetworkBlockedState(boolean metered, boolean backgroundRestricted,
             ArrayList<Pair<Boolean, Integer>> expectedBlockedStateForRules) {
-        final NetworkPolicyManagerInternal npmi = LocalServices
-                .getService(NetworkPolicyManagerInternal.class);
 
         for (Pair<Boolean, Integer> pair : expectedBlockedStateForRules) {
             final boolean expectedResult = pair.first;
             final int rule = pair.second;
             assertEquals(formatBlockedStateError(UID_A, rule, metered, backgroundRestricted),
-                    expectedResult,
-                    npmi.isUidNetworkingBlocked(UID_A, rule, metered, backgroundRestricted));
+                    expectedResult, mService.checkUidNetworkingBlocked(UID_A, rule,
+                            metered, backgroundRestricted));
             assertFalse(formatBlockedStateError(SYSTEM_UID, rule, metered, backgroundRestricted),
-                    npmi.isUidNetworkingBlocked(SYSTEM_UID, rule, metered, backgroundRestricted));
+                    mService.checkUidNetworkingBlocked(SYSTEM_UID, rule, metered,
+                            backgroundRestricted));
         }
     }
 
