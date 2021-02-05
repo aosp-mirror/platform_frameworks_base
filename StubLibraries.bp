@@ -79,12 +79,11 @@ stubs_defaults {
         "android.hardware.vibrator-V1.3-java",
         "framework-protos",
         "stable.core.platform.api.stubs",
-        // There are a few classes from modules used as type arguments that
-        // need to be resolved by metalava. For now, we can use a previously
-        // finalized stub library to resolve them. If a new class gets added,
-        // this may be need to be revisited to use a manually maintained stub
-        // library with empty classes in order to resolve those references.
-        "sdk_system_30_android",
+        // There are a few classes from modules used by the core that
+        // need to be resolved by metalava. We use a prebuilt stub of the
+        // full sdk to ensure we can resolve them. If a new class gets added,
+        // the prebuilts/sdk/current needs to be updated.
+        "sdk_system_current_android",
     ],
     high_mem: true, // Lots of sources => high memory use, see b/170701554
     installable: false,
@@ -392,7 +391,7 @@ java_library_static {
         "android_defaults_stubs_current",
         "android_stubs_dists_default",
     ],
-    libs: ["sdk_system_29_android"],
+    libs: ["sdk_system_current_android"],
     static_libs: ["art.module.public.api.stubs"],
     dist: {
         dir: "apistubs/android/module-lib",
