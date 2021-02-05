@@ -277,6 +277,10 @@ public class Vpn {
             return LocalServices.getService(DeviceIdleInternal.class);
         }
 
+        public PendingIntent getIntentForStatusPanel(Context context) {
+            return VpnConfig.getIntentForStatusPanel(context);
+        }
+
         public void sendArgumentsToDaemon(
                 final String daemon, final LocalSocket socket, final String[] arguments,
                 final RetryScheduler retryScheduler) throws IOException, InterruptedException {
@@ -1768,7 +1772,7 @@ public class Vpn {
     private void prepareStatusIntent() {
         final long token = Binder.clearCallingIdentity();
         try {
-            mStatusIntent = VpnConfig.getIntentForStatusPanel(mContext);
+            mStatusIntent = mDeps.getIntentForStatusPanel(mContext);
         } finally {
             Binder.restoreCallingIdentity(token);
         }
