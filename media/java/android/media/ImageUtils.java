@@ -45,6 +45,7 @@ class ImageUtils {
             case ImageFormat.YV12:
             case ImageFormat.YUV_420_888:
             case ImageFormat.NV21:
+            case ImageFormat.YCBCR_P010:
                 return 3;
             case ImageFormat.NV16:
                 return 2;
@@ -225,6 +226,7 @@ class ImageUtils {
             case ImageFormat.RAW_SENSOR:
             case ImageFormat.RAW_PRIVATE: // round estimate, real size is unknown
             case ImageFormat.DEPTH16:
+            case ImageFormat.YCBCR_P010:
                 estimatedBytePerPixel = 2.0;
                 break;
             case PixelFormat.RGB_888:
@@ -244,6 +246,7 @@ class ImageUtils {
 
     private static Size getEffectivePlaneSizeForImage(Image image, int planeIdx) {
         switch (image.getFormat()) {
+            case ImageFormat.YCBCR_P010:
             case ImageFormat.YV12:
             case ImageFormat.YUV_420_888:
             case ImageFormat.NV21:
