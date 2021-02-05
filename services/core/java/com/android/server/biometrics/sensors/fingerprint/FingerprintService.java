@@ -197,7 +197,7 @@ public class FingerprintService extends SystemService implements BiometricServic
         @Override // Binder call
         public void enroll(final IBinder token, final byte[] hardwareAuthToken, final int userId,
                 final IFingerprintServiceReceiver receiver, final String opPackageName,
-                boolean shouldLogMetrics) {
+                @FingerprintManager.EnrollReason int enrollReason) {
             Utils.checkPermission(getContext(), MANAGE_FINGERPRINT);
 
             final Pair<Integer, ServiceProvider> provider = getSingleProvider();
@@ -207,7 +207,7 @@ public class FingerprintService extends SystemService implements BiometricServic
             }
 
             provider.second.scheduleEnroll(provider.first, token, hardwareAuthToken, userId,
-                    receiver, opPackageName, shouldLogMetrics);
+                    receiver, opPackageName, enrollReason);
         }
 
         @Override // Binder call

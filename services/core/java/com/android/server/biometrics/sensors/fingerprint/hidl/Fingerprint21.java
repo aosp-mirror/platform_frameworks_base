@@ -33,6 +33,7 @@ import android.hardware.biometrics.ITestSession;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.hardware.biometrics.fingerprint.V2_2.IBiometricsFingerprintClientCallback;
 import android.hardware.fingerprint.Fingerprint;
+import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintSensorProperties;
 import android.hardware.fingerprint.FingerprintSensorPropertiesInternal;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
@@ -547,7 +548,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
     public void scheduleEnroll(int sensorId, @NonNull IBinder token,
             @NonNull byte[] hardwareAuthToken, int userId,
             @NonNull IFingerprintServiceReceiver receiver, @NonNull String opPackageName,
-            boolean shouldLogMetrics) {
+            @FingerprintManager.EnrollReason int enrollReason) {
         mHandler.post(() -> {
             scheduleUpdateActiveUserWithoutHandler(userId);
 
@@ -555,7 +556,7 @@ public class Fingerprint21 implements IHwBinder.DeathRecipient, ServiceProvider 
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
                     hardwareAuthToken, opPackageName, FingerprintUtils.getLegacyInstance(mSensorId),
                     ENROLL_TIMEOUT_SEC, mSensorProperties.sensorId, mUdfpsOverlayController,
-                    shouldLogMetrics);
+                    enrollReason);
             mScheduler.scheduleClientMonitor(client, new BaseClientMonitor.Callback() {
                 @Override
                 public void onClientFinished(@NonNull BaseClientMonitor clientMonitor,
