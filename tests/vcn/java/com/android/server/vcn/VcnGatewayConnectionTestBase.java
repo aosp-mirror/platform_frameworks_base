@@ -43,6 +43,7 @@ import android.os.test.TestLooper;
 
 import com.android.server.IpSecService;
 import com.android.server.vcn.TelephonySubscriptionTracker.TelephonySubscriptionSnapshot;
+import com.android.server.vcn.Vcn.VcnGatewayStatusCallback;
 
 import org.junit.Before;
 import org.mockito.ArgumentCaptor;
@@ -80,6 +81,7 @@ public class VcnGatewayConnectionTestBase {
     @NonNull protected final VcnNetworkProvider mVcnNetworkProvider;
     @NonNull protected final VcnContext mVcnContext;
     @NonNull protected final VcnGatewayConnectionConfig mConfig;
+    @NonNull protected final VcnGatewayStatusCallback mGatewayStatusCallback;
     @NonNull protected final VcnGatewayConnection.Dependencies mDeps;
     @NonNull protected final UnderlyingNetworkTracker mUnderlyingNetworkTracker;
 
@@ -94,6 +96,7 @@ public class VcnGatewayConnectionTestBase {
         mVcnNetworkProvider = mock(VcnNetworkProvider.class);
         mVcnContext = mock(VcnContext.class);
         mConfig = VcnGatewayConnectionConfigTest.buildTestConfig();
+        mGatewayStatusCallback = mock(VcnGatewayStatusCallback.class);
         mDeps = mock(VcnGatewayConnection.Dependencies.class);
         mUnderlyingNetworkTracker = mock(UnderlyingNetworkTracker.class);
 
@@ -123,7 +126,12 @@ public class VcnGatewayConnectionTestBase {
 
         mGatewayConnection =
                 new VcnGatewayConnection(
-                        mVcnContext, TEST_SUB_GRP, TEST_SUBSCRIPTION_SNAPSHOT, mConfig, mDeps);
+                        mVcnContext,
+                        TEST_SUB_GRP,
+                        TEST_SUBSCRIPTION_SNAPSHOT,
+                        mConfig,
+                        mGatewayStatusCallback,
+                        mDeps);
     }
 
     protected IpSecTransform makeDummyIpSecTransform() throws Exception {
