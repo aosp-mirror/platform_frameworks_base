@@ -1903,6 +1903,12 @@
       "group": "WM_DEBUG_FOCUS_LIGHT",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "123161180": {
+      "message": "SEVER CHILDREN",
+      "level": "INFO",
+      "group": "WM_SHOW_TRANSACTIONS",
+      "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
     "140319294": {
       "message": "IME target changed within ActivityRecord",
       "level": "DEBUG",
@@ -2136,12 +2142,6 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
-    },
-    "332390227": {
-      "message": "Sandbox max bounds for uid %s to bounds %s due to letterboxing? %s mismatch with parent bounds? %s size compat mode %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
     "342460966": {
       "message": "DRAG %s: pos=(%d,%d)",
@@ -2622,12 +2622,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_WINDOW_ORGANIZER",
       "at": "com\/android\/server\/wm\/WindowOrganizerController.java"
-    },
-    "910200295": {
-      "message": "Sandbox max bounds due to mismatched orientation with parent, to %s vs DisplayArea %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_CONFIGURATION",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "913494177": {
       "message": "removeAllWindowsIfPossible: removing win=%s",
