@@ -267,9 +267,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
      */
     final SparseArray<SleepToken> mSleepTokens = new SparseArray<>();
 
-    /** Set when a power mode launch has started, but not ended. */
-    private boolean mPowerModeLaunchStarted;
-
     // The default minimal size that will be used if the activity doesn't specify its minimal size.
     // It will be calculated when the default display gets added.
     int mDefaultMinSizeOfResizeableTaskDp = -1;
@@ -3327,7 +3324,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
         // End power mode launch when idle.
-        endPowerModeLaunchIfNeeded();
+        mService.endLaunchPowerMode(ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
         return true;
     }
 
@@ -3540,17 +3537,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             sendPowerModeLaunch = noResumedActivities[0] || allFocusedProcessesDiffer[0];
         }
 
-        if (sendPowerModeLaunch && mService.mPowerManagerInternal != null) {
-            mService.mPowerManagerInternal.setPowerMode(Mode.LAUNCH, true);
-            mPowerModeLaunchStarted = true;
-        }
-    }
-
-    void endPowerModeLaunchIfNeeded() {
-        // Trigger launch power mode off if activity is launched
-        if (mPowerModeLaunchStarted && mService.mPowerManagerInternal != null) {
-            mService.mPowerManagerInternal.setPowerMode(Mode.LAUNCH, false);
-            mPowerModeLaunchStarted = false;
+        if (sendPowerModeLaunch) {
+            mService.startLaunchPowerMode(
+                    ActivityTaskManagerService.POWER_MODE_REASON_START_ACTIVITY);
         }
     }
 
