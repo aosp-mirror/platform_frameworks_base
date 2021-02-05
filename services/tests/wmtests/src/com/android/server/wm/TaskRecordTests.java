@@ -1004,6 +1004,26 @@ public class TaskRecordTests extends WindowTestsBase {
     }
 
     @Test
+    public void testNotSaveLaunchingStateForNonLeafTask() {
+        LaunchParamsPersister persister = mAtm.mTaskSupervisor.mLaunchParamsPersister;
+        spyOn(persister);
+
+        final Task task = getTestTask();
+        task.setHasBeenVisible(false);
+        task.getDisplayContent().setDisplayWindowingMode(WINDOWING_MODE_FREEFORM);
+        task.getRootTask().setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+
+        final Task leafTask = createTaskInStack(task, 0 /* userId */);
+
+        leafTask.setHasBeenVisible(true);
+        task.setHasBeenVisible(true);
+        task.onConfigurationChanged(task.getParent().getConfiguration());
+
+        verify(persister, never()).saveTask(same(task), any());
+        verify(persister).saveTask(same(leafTask), any());
+    }
+
+    @Test
     public void testNotSpecifyOrientationByFloatingTask() {
         final Task task = new TaskBuilder(mSupervisor)
                 .setCreateActivity(true).setCreateParentTask(true).build();
