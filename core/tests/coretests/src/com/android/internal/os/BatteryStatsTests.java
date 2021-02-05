@@ -68,6 +68,7 @@ import org.junit.runners.Suite;
         SystemServicePowerCalculatorTest.class,
         UserPowerCalculatorTest.class,
         VideoPowerCalculatorTest.class,
+        WakelockPowerCalculatorTest.class,
 
         com.android.internal.power.MeasuredEnergyStatsTest.class
     })
