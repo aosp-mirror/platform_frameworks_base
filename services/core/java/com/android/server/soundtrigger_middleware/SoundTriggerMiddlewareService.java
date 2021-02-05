@@ -238,7 +238,7 @@ public class SoundTriggerMiddlewareService extends ISoundTriggerMiddlewareServic
             HalFactory[] factories = new HalFactory[]{() -> {
                 try {
                     Log.d(TAG, "Connecting to default ISoundTriggerHw");
-                    return new SoundTriggerHw2Compat(ISoundTriggerHw.getService(true),
+                    return SoundTriggerHw2Compat.create(ISoundTriggerHw.getService(true),
                             () -> {
                                 // This property needs to be defined in an init.rc script and
                                 // trigger a HAL reboot.

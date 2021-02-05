@@ -94,7 +94,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
     @NonNull private ISoundTriggerHw2 mHalService;
     @NonNull private final SoundTriggerMiddlewareImpl.AudioSessionProvider mAudioSessionProvider;
     private final Set<Session> mActiveSessions = new HashSet<>();
-    private int mNumLoadedModels = 0;
     private final SoundTriggerModuleProperties mProperties;
     private boolean mRecognitionAvailable;
 
@@ -207,7 +206,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
         attachToHal();
         // We conservatively assume that external capture is active until explicitly told otherwise.
         mRecognitionAvailable = mProperties.concurrentCapture;
-        mNumLoadedModels = 0;
     }
 
     /**
@@ -297,13 +295,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             try {
                 synchronized (SoundTriggerModule.this) {
                     checkValid();
-                    if (mNumLoadedModels == mProperties.maxSoundModels) {
-                        throw new RecoverableException(Status.RESOURCE_CONTENTION,
-                                "Maximum number of models loaded.");
-                    }
                     Model loadedModel = new Model();
                     int result = loadedModel.load(model, audioSession);
-                    ++mNumLoadedModels;
                     return result;
                 }
             } catch (Exception e) {
@@ -328,13 +321,8 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             try {
                 synchronized (SoundTriggerModule.this) {
                     checkValid();
-                    if (mNumLoadedModels == mProperties.maxSoundModels) {
-                        throw new RecoverableException(Status.RESOURCE_CONTENTION,
-                                "Maximum number of models loaded.");
-                    }
                     Model loadedModel = new Model();
                     int result = loadedModel.load(model, audioSession);
-                    ++mNumLoadedModels;
                     Log.d(TAG, String.format("loadPhraseModel()->%d", result));
                     return result;
                 }
@@ -356,7 +344,6 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient, ISoundTriggerHw2.G
             synchronized (SoundTriggerModule.this) {
                 checkValid();
                 sessionId = mLoadedModels.get(modelHandle).unload();
-                --mNumLoadedModels;
             }
 
             // We must do this outside the lock, to avoid possible deadlocks with the remote process

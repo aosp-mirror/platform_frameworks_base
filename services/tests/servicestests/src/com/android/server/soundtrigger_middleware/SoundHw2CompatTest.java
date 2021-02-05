@@ -20,11 +20,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -67,7 +68,6 @@ public class SoundHw2CompatTest {
 
     @Before
     public void setUp() throws Exception {
-        clearInvocations(mHalDriver);
         clearInvocations(mRebootRunnable);
 
         // This binder is associated with the mock, so it can be cast to either version of the
@@ -118,9 +118,34 @@ public class SoundHw2CompatTest {
             }
         };
         when(mHalDriver.asBinder()).thenReturn(binder);
-        mCanonical = new SoundTriggerHw2Compat(mHalDriver, mRebootRunnable);
-        // This method can be called any number of times.
-        verify(mHalDriver, atLeast(0)).asBinder();
+
+        android.hardware.soundtrigger.V2_3.Properties halProperties =
+                TestUtil.createDefaultProperties_2_3(true);
+        doAnswer(invocation -> {
+            ((android.hardware.soundtrigger.V2_0.ISoundTriggerHw.getPropertiesCallback)
+                    invocation.getArgument(
+                            0)).onValues(0,
+                    halProperties.base);
+            return null;
+        }).when(mHalDriver).getProperties(any());
+
+        if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
+            android.hardware.soundtrigger.V2_3.ISoundTriggerHw driver =
+                    (android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver;
+            doAnswer(invocation -> {
+                ((android.hardware.soundtrigger.V2_3.ISoundTriggerHw.getProperties_2_3Callback)
+                        invocation.getArgument(
+                                0)).onValues(0,
+                        halProperties);
+                return null;
+            }).when(driver).getProperties_2_3(any());
+        }
+
+        mCanonical = SoundTriggerHw2Compat.create(mHalDriver, mRebootRunnable);
+
+        // During initialization any method can be called, but after we're starting to enforce that
+        // no additional methods are called.
+        clearInvocations(mHalDriver);
     }
 
     @After
@@ -143,36 +168,19 @@ public class SoundHw2CompatTest {
     public void testGetProperties() throws Exception {
         android.hardware.soundtrigger.V2_3.Properties halProperties =
                 TestUtil.createDefaultProperties_2_3(true);
-
-        doAnswer(invocation -> {
-            ((android.hardware.soundtrigger.V2_0.ISoundTriggerHw.getPropertiesCallback)
-                    invocation.getArgument(
-                            0)).onValues(0,
-                    halProperties.base);
-            return null;
-        }).when(mHalDriver).getProperties(any());
-
-        if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
-            android.hardware.soundtrigger.V2_3.ISoundTriggerHw driver =
-                    (android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver;
-            doAnswer(invocation -> {
-                ((android.hardware.soundtrigger.V2_3.ISoundTriggerHw.getProperties_2_3Callback)
-                        invocation.getArgument(
-                                0)).onValues(0,
-                        halProperties);
-                return null;
-            }).when(driver).getProperties_2_3(any());
-        }
-
         android.hardware.soundtrigger.V2_3.Properties properties = mCanonical.getProperties();
 
         if (mHalDriver instanceof android.hardware.soundtrigger.V2_3.ISoundTriggerHw) {
             android.hardware.soundtrigger.V2_3.ISoundTriggerHw driver =
                     (android.hardware.soundtrigger.V2_3.ISoundTriggerHw) mHalDriver;
-            verify(driver).getProperties_2_3(any());
+            // It is OK for the SUT to cache the properties, so the underlying method doesn't
+            // need to be called every single time.
+            verify(driver, atMost(1)).getProperties_2_3(any());
             assertEquals(halProperties, properties);
         } else {
-            verify(mHalDriver).getProperties(any());
+            // It is OK for the SUT to cache the properties, so the underlying method doesn't
+            // need to be called every single time.
+            verify(mHalDriver, atMost(1)).getProperties(any());
             assertEquals(halProperties.base, properties.base);
             assertEquals(0, properties.audioCapabilities);
             assertEquals("", properties.supportedModelArch);
@@ -290,6 +298,32 @@ public class SoundHw2CompatTest {
             testLoadGenericModel_2_1();
         } else {
             testLoadGenericModel_2_0();
+        }
+    }
+
+    @Test
+    public void testMaxModels() throws Exception {
+        assumeFalse(mHalDriver instanceof android.hardware.soundtrigger.V2_4.ISoundTriggerHw);
+
+        final int maxModels = TestUtil.createDefaultProperties(false).maxSoundModels;
+        // Load as many models as we're allowed.
+        for (int i = 0; i < maxModels; ++i) {
+            testLoadGenericModel();
+            verifyNoMoreInteractions(mHalDriver);
+            clearInvocations(mHalDriver);
+        }
+
+        // Now try to load an additional one and expect failure without invoking the underlying
+        // driver.
+        ISoundTriggerHw2.ModelCallback canonicalCallback = mock(
+                ISoundTriggerHw2.ModelCallback.class);
+
+        try {
+            mCanonical.loadPhraseSoundModel(TestUtil.createPhraseSoundModel_2_1(),
+                    canonicalCallback);
+            fail("Expected an exception");
+        } catch (RecoverableException e) {
+            assertEquals(Status.RESOURCE_CONTENTION, e.errorCode);
         }
     }
 

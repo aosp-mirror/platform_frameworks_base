@@ -18,7 +18,6 @@ package com.android.server.soundtrigger_middleware;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.hardware.soundtrigger.V2_0.ISoundTriggerHw;
 import android.media.soundtrigger_middleware.Status;
 import android.os.IHwBinder;
 import android.os.RemoteException;
@@ -48,11 +47,11 @@ import java.util.concurrent.atomic.AtomicReference;
 final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     private final @NonNull Runnable mRebootRunnable;
     private final @NonNull IHwBinder mBinder;
-    private final @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw mUnderlying_2_0;
-    private final @Nullable android.hardware.soundtrigger.V2_1.ISoundTriggerHw mUnderlying_2_1;
-    private final @Nullable android.hardware.soundtrigger.V2_2.ISoundTriggerHw mUnderlying_2_2;
-    private final @Nullable android.hardware.soundtrigger.V2_3.ISoundTriggerHw mUnderlying_2_3;
-    private final @Nullable android.hardware.soundtrigger.V2_4.ISoundTriggerHw mUnderlying_2_4;
+    private @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw mUnderlying_2_0;
+    private @Nullable android.hardware.soundtrigger.V2_1.ISoundTriggerHw mUnderlying_2_1;
+    private @Nullable android.hardware.soundtrigger.V2_2.ISoundTriggerHw mUnderlying_2_2;
+    private @Nullable android.hardware.soundtrigger.V2_3.ISoundTriggerHw mUnderlying_2_3;
+    private @Nullable android.hardware.soundtrigger.V2_4.ISoundTriggerHw mUnderlying_2_4;
 
     // HAL <=2.1 requires us to pass a callback argument to startRecognition. We will store the one
     // passed on load and then pass it on start. We don't bother storing the callback on newer
@@ -60,15 +59,36 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
     private final @NonNull ConcurrentMap<Integer, ModelCallback> mModelCallbacks =
             new ConcurrentHashMap<>();
 
-    SoundTriggerHw2Compat(
-            @NonNull ISoundTriggerHw underlying, Runnable rebootRunnable) {
-        this(rebootRunnable, underlying.asBinder());
+    // The properties are read at construction time and cached, since we need to use some of them
+    // to enforce constraints.
+    private final @NonNull android.hardware.soundtrigger.V2_3.Properties mProperties;
+
+    static ISoundTriggerHw2 create(
+            @NonNull android.hardware.soundtrigger.V2_0.ISoundTriggerHw underlying,
+            @NonNull Runnable rebootRunnable) {
+        return create(underlying.asBinder(), rebootRunnable);
     }
 
-    SoundTriggerHw2Compat(Runnable rebootRunnable, IHwBinder binder) {
+    static ISoundTriggerHw2 create(@NonNull IHwBinder binder,
+            @NonNull Runnable rebootRunnable) {
+        SoundTriggerHw2Compat compat = new SoundTriggerHw2Compat(binder, rebootRunnable);
+        ISoundTriggerHw2 result = compat;
+        // Add max model limiter for versions <2.4.
+        if (compat.mUnderlying_2_4 == null) {
+            result = new SoundTriggerHw2MaxModelLimiter(result,
+                    compat.mProperties.base.maxSoundModels);
+        }
+        return result;
+    }
+
+    private SoundTriggerHw2Compat(@NonNull IHwBinder binder, @NonNull Runnable rebootRunnable) {
         mRebootRunnable = Objects.requireNonNull(rebootRunnable);
         mBinder = Objects.requireNonNull(binder);
+        initUnderlying(binder);
+        mProperties = Objects.requireNonNull(getPropertiesInternal());
+    }
 
+    private void initUnderlying(IHwBinder binder) {
         // We want to share the proxy instances rather than create a separate proxy for every
         // version, so we go down the versions in descending order to find the latest one supported,
         // and then simply up-cast it to obtain all the versions that are earlier.
@@ -141,6 +161,10 @@ final class SoundTriggerHw2Compat implements ISoundTriggerHw2 {
 
     @Override
     public android.hardware.soundtrigger.V2_3.Properties getProperties() {
+        return mProperties;
+    }
+
+    private android.hardware.soundtrigger.V2_3.Properties getPropertiesInternal() {
         try {
             AtomicInteger retval = new AtomicInteger(-1);
             AtomicReference<android.hardware.soundtrigger.V2_3.Properties>
