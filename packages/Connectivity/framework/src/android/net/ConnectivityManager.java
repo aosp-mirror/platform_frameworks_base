@@ -3231,32 +3231,6 @@ public class ConnectivityManager {
         }
     }
 
-    /** {@hide} - returns the factory serial number */
-    @UnsupportedAppUsage
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public int registerNetworkFactory(Messenger messenger, String name) {
-        try {
-            return mService.registerNetworkFactory(messenger, name);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /** {@hide} */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
-    @RequiresPermission(anyOf = {
-            NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK,
-            android.Manifest.permission.NETWORK_FACTORY})
-    public void unregisterNetworkFactory(Messenger messenger) {
-        try {
-            mService.unregisterNetworkFactory(messenger);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
     /**
      * Registers the specified {@link NetworkProvider}.
      * Each listener must only be registered once. The listener can be unregistered with

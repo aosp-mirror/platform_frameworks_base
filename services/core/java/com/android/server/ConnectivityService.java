@@ -3357,7 +3357,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (VDBG) log("NetworkFactory connected");
                 // Finish setting up the full connection
                 NetworkProviderInfo npi = mNetworkProviderInfos.get(msg.replyTo);
-                npi.completeConnection();
                 sendAllRequestsToProvider(npi);
             } else {
                 loge("Error connecting NetworkFactory");
@@ -5443,25 +5442,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static class NetworkProviderInfo {
         public final String name;
         public final Messenger messenger;
-        private final AsyncChannel mAsyncChannel;
         private final IBinder.DeathRecipient mDeathRecipient;
         public final int providerId;
 
         NetworkProviderInfo(String name, Messenger messenger, AsyncChannel asyncChannel,
-                int providerId, IBinder.DeathRecipient deathRecipient) {
+                int providerId, @NonNull IBinder.DeathRecipient deathRecipient) {
             this.name = name;
             this.messenger = messenger;
             this.providerId = providerId;
-            mAsyncChannel = asyncChannel;
             mDeathRecipient = deathRecipient;
 
-            if ((mAsyncChannel == null) == (mDeathRecipient == null)) {
-                throw new AssertionError("Must pass exactly one of asyncChannel or deathRecipient");
+            if (mDeathRecipient == null) {
+                throw new AssertionError("Must pass a deathRecipient");
             }
-        }
-
-        boolean isLegacyNetworkFactory() {
-            return mAsyncChannel != null;
         }
 
         void sendMessageToNetworkProvider(int what, int arg1, int arg2, Object obj) {
@@ -5474,38 +5467,19 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         void requestNetwork(NetworkRequest request, int score, int servingProviderId) {
-            if (isLegacyNetworkFactory()) {
-                mAsyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score,
-                        servingProviderId, request);
-            } else {
-                sendMessageToNetworkProvider(NetworkProvider.CMD_REQUEST_NETWORK, score,
+            sendMessageToNetworkProvider(NetworkProvider.CMD_REQUEST_NETWORK, score,
                             servingProviderId, request);
-            }
         }
 
         void cancelRequest(NetworkRequest request) {
-            if (isLegacyNetworkFactory()) {
-                mAsyncChannel.sendMessage(android.net.NetworkFactory.CMD_CANCEL_REQUEST, request);
-            } else {
-                sendMessageToNetworkProvider(NetworkProvider.CMD_CANCEL_REQUEST, 0, 0, request);
-            }
+            sendMessageToNetworkProvider(NetworkProvider.CMD_CANCEL_REQUEST, 0, 0, request);
         }
 
         void connect(Context context, Handler handler) {
-            if (isLegacyNetworkFactory()) {
-                mAsyncChannel.connect(context, handler, messenger);
-            } else {
-                try {
-                    messenger.getBinder().linkToDeath(mDeathRecipient, 0);
-                } catch (RemoteException e) {
-                    mDeathRecipient.binderDied();
-                }
-            }
-        }
-
-        void completeConnection() {
-            if (isLegacyNetworkFactory()) {
-                mAsyncChannel.sendMessage(AsyncChannel.CMD_CHANNEL_FULL_CONNECTION);
+            try {
+                messenger.getBinder().linkToDeath(mDeathRecipient, 0);
+            } catch (RemoteException e) {
+                mDeathRecipient.binderDied();
             }
         }
     }
@@ -6000,15 +5974,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 EVENT_RELEASE_NETWORK_REQUEST, getCallingUid(), 0, networkRequest));
     }
 
-    @Override
-    public int registerNetworkFactory(Messenger messenger, String name) {
-        enforceNetworkFactoryPermission();
-        NetworkProviderInfo npi = new NetworkProviderInfo(name, messenger, new AsyncChannel(),
-                nextNetworkProviderId(), null /* deathRecipient */);
-        mHandler.sendMessage(mHandler.obtainMessage(EVENT_REGISTER_NETWORK_PROVIDER, npi));
-        return npi.providerId;
-    }
-
     private void handleRegisterNetworkProvider(NetworkProviderInfo npi) {
         if (mNetworkProviderInfos.containsKey(npi.messenger)) {
             // Avoid creating duplicates. even if an app makes a direct AIDL call.
@@ -6022,10 +5987,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (DBG) log("Got NetworkProvider Messenger for " + npi.name);
         mNetworkProviderInfos.put(npi.messenger, npi);
         npi.connect(mContext, mTrackerHandler);
-        if (!npi.isLegacyNetworkFactory()) {
-            // Legacy NetworkFactories get their requests when their AsyncChannel connects.
-            sendAllRequestsToProvider(npi);
-        }
+        sendAllRequestsToProvider(npi);
     }
 
     @Override
@@ -6042,11 +6004,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     public void unregisterNetworkProvider(Messenger messenger) {
         enforceNetworkFactoryOrSettingsPermission();
         mHandler.sendMessage(mHandler.obtainMessage(EVENT_UNREGISTER_NETWORK_PROVIDER, messenger));
-    }
-
-    @Override
-    public void unregisterNetworkFactory(Messenger messenger) {
-        unregisterNetworkProvider(messenger);
     }
 
     private void handleUnregisterNetworkProvider(Messenger messenger) {
