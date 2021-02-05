@@ -16023,8 +16023,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     provisioningParams.isKeepAccountMigrated(), callerPackage);
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
-                markIsProfileOwnerOnOrganizationOwnedDevice(admin, userInfo.id);
-                restrictRemovalOfManagedProfile(admin, userInfo.id);
+                setProfileOwnerOnOrgOwnedDeviceState(admin, userInfo.id, caller.getUserId());
             }
 
             return userInfo.getUserHandle();
@@ -16256,21 +16255,20 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void markIsProfileOwnerOnOrganizationOwnedDevice(
-            ComponentName admin, @UserIdInt int profileId) {
-        getDpmForProfile(profileId).markProfileOwnerOnOrganizationOwnedDevice(admin);
+    private void setProfileOwnerOnOrgOwnedDeviceState(
+            ComponentName admin, @UserIdInt int profileId, @UserIdInt int parentUserId) {
+        synchronized (getLockObject()) {
+            markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(admin, profileId);
+        }
+        restrictRemovalOfManagedProfile(parentUserId);
     }
 
-    private void restrictRemovalOfManagedProfile(
-            ComponentName admin, @UserIdInt int profileId) {
-        getDpmForProfile(profileId).addUserRestriction(
-                admin, UserManager.DISALLOW_REMOVE_MANAGED_PROFILE);
-    }
-
-    private DevicePolicyManager getDpmForProfile(@UserIdInt int profileId) {
-        final Context profileContext = mContext.createContextAsUser(
-                UserHandle.of(profileId), /* flags= */ 0);
-        return profileContext.getSystemService(DevicePolicyManager.class);
+    private void restrictRemovalOfManagedProfile(@UserIdInt int parentUserId) {
+        final UserHandle parentUserHandle = UserHandle.of(parentUserId);
+        mUserManager.setUserRestriction(
+                UserManager.DISALLOW_REMOVE_MANAGED_PROFILE,
+                /* value= */ true,
+                parentUserHandle);
     }
 
     @Override
