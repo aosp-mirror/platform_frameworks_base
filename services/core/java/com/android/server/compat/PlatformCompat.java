@@ -211,9 +211,9 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     @Override
-    public void clearOverrideForTest(long changeId, String packageName) {
+    public boolean clearOverrideForTest(long changeId, String packageName) {
         checkCompatChangeOverridePermission();
-        mCompatConfig.removeOverride(changeId, packageName);
+        return mCompatConfig.removeOverride(changeId, packageName);
     }
 
     @Override
