@@ -64,7 +64,9 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.wm.shell.common.DisplayLayout;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.splitscreen.SplitScreen.StagePosition;
+import com.android.wm.shell.splitscreen.SplitScreen.StageType;
+import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -81,18 +83,18 @@ public class DragAndDropPolicy {
     private final Context mContext;
     private final ActivityTaskManager mActivityTaskManager;
     private final Starter mStarter;
-    private final SplitScreen mSplitScreen;
+    private final SplitScreenController mSplitScreen;
     private final ArrayList<DragAndDropPolicy.Target> mTargets = new ArrayList<>();
 
     private DragSession mSession;
 
-    public DragAndDropPolicy(Context context, SplitScreen splitScreen) {
+    public DragAndDropPolicy(Context context, SplitScreenController splitScreen) {
         this(context, ActivityTaskManager.getInstance(), splitScreen, new DefaultStarter(context));
     }
 
     @VisibleForTesting
     DragAndDropPolicy(Context context, ActivityTaskManager activityTaskManager,
-            SplitScreen splitScreen, Starter starter) {
+            SplitScreenController splitScreen, Starter starter) {
         mContext = context;
         mActivityTaskManager = activityTaskManager;
         mSplitScreen = splitScreen;
@@ -200,8 +202,8 @@ public class DragAndDropPolicy {
         final boolean inSplitScreen = mSplitScreen != null && mSplitScreen.isSplitScreenVisible();
         final boolean leftOrTop = target.type == TYPE_SPLIT_TOP || target.type == TYPE_SPLIT_LEFT;
 
-        @SplitScreen.StageType int stage = STAGE_TYPE_UNDEFINED;
-        @SplitScreen.StagePosition int position = STAGE_POSITION_UNDEFINED;
+        @StageType int stage = STAGE_TYPE_UNDEFINED;
+        @StagePosition int position = STAGE_POSITION_UNDEFINED;
         if (target.type != TYPE_FULLSCREEN && mSplitScreen != null) {
             // Update launch options for the split side we are targeting.
             position = leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT;
@@ -213,7 +215,28 @@ public class DragAndDropPolicy {
 
         final ClipDescription description = data.getDescription();
         final Intent dragData = mSession.dragData;
-        mStarter.startClipDescription(description, dragData, stage, position);
+        startClipDescription(description, dragData, stage, position);
+    }
+
+    private void startClipDescription(ClipDescription description, Intent intent,
+            @StageType int stage, @StagePosition int position) {
+        final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
+        final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
+        final Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
+                ? intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS) : new Bundle();
+
+        if (isTask) {
+            final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
+            mStarter.startTask(taskId, stage, position, opts);
+        } else if (isShortcut) {
+            final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
+            final String id = intent.getStringExtra(EXTRA_SHORTCUT_ID);
+            final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
+            mStarter.startShortcut(packageName, id, stage, position, opts, user);
+        } else {
+            mStarter.startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT), stage, position,
+                    opts);
+        }
     }
 
     /**
@@ -267,34 +290,13 @@ public class DragAndDropPolicy {
     /**
      * Interface for actually committing the task launches.
      */
-    @VisibleForTesting
     public interface Starter {
-        default void startClipDescription(ClipDescription description, Intent intent,
-                @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position) {
-            final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
-            final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
-            final Bundle opts = intent.hasExtra(EXTRA_ACTIVITY_OPTIONS)
-                    ? intent.getBundleExtra(EXTRA_ACTIVITY_OPTIONS) : new Bundle();
-
-            if (isTask) {
-                final int taskId = intent.getIntExtra(EXTRA_TASK_ID, INVALID_TASK_ID);
-                startTask(taskId, stage, position, opts);
-            } else if (isShortcut) {
-                final String packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME);
-                final String id = intent.getStringExtra(EXTRA_SHORTCUT_ID);
-                final UserHandle user = intent.getParcelableExtra(EXTRA_USER);
-                startShortcut(packageName, id, stage, position, opts, user);
-            } else {
-                startIntent(intent.getParcelableExtra(EXTRA_PENDING_INTENT), stage, position, opts);
-            }
-        }
-        void startTask(int taskId, @SplitScreen.StageType int stage,
-                @SplitScreen.StagePosition int position, @Nullable Bundle options);
-        void startShortcut(String packageName, String shortcutId,
-                @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position,
-                @Nullable Bundle options, UserHandle user);
-        void startIntent(PendingIntent intent, @SplitScreen.StageType int stage,
-                @SplitScreen.StagePosition int position, @Nullable Bundle options);
+        void startTask(int taskId, @StageType int stage, @StagePosition int position,
+                @Nullable Bundle options);
+        void startShortcut(String packageName, String shortcutId, @StageType int stage,
+                @StagePosition int position, @Nullable Bundle options, UserHandle user);
+        void startIntent(PendingIntent intent, @StageType int stage, @StagePosition int position,
+                @Nullable Bundle options);
         void enterSplitScreen(int taskId, boolean leftOrTop);
         void exitSplitScreen();
     }

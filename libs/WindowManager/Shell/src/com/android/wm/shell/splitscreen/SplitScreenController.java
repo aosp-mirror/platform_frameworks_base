@@ -18,6 +18,13 @@ package com.android.wm.shell.splitscreen;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_TOP_OR_LEFT;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_UNDEFINED;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_MAIN;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_SIDE;
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.PendingIntent;
@@ -35,7 +42,9 @@ import androidx.annotation.Nullable;
 
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
+import com.android.wm.shell.draganddrop.DragAndDropPolicy;
 
 import java.io.PrintWriter;
 
@@ -44,25 +53,33 @@ import java.io.PrintWriter;
  * {@link SplitScreen}.
  * @see StageCoordinator
  */
-public class SplitScreenController implements SplitScreen {
+public class SplitScreenController implements DragAndDropPolicy.Starter {
     private static final String TAG = SplitScreenController.class.getSimpleName();
 
     private final ShellTaskOrganizer mTaskOrganizer;
     private final SyncTransactionQueue mSyncQueue;
     private final Context mContext;
     private final RootTaskDisplayAreaOrganizer mRootTDAOrganizer;
+    private final ShellExecutor mMainExecutor;
+    private final SplitScreenImpl mImpl = new SplitScreenImpl();
+
     private StageCoordinator mStageCoordinator;
 
     public SplitScreenController(ShellTaskOrganizer shellTaskOrganizer,
             SyncTransactionQueue syncQueue, Context context,
-            RootTaskDisplayAreaOrganizer rootTDAOrganizer) {
+            RootTaskDisplayAreaOrganizer rootTDAOrganizer,
+            ShellExecutor mainExecutor) {
         mTaskOrganizer = shellTaskOrganizer;
         mSyncQueue = syncQueue;
         mContext = context;
         mRootTDAOrganizer = rootTDAOrganizer;
+        mMainExecutor = mainExecutor;
     }
 
-    @Override
+    public SplitScreen asSplitScreen() {
+        return mImpl;
+    }
+
     public void onOrganizerRegistered() {
         if (mStageCoordinator == null) {
             // TODO: Multi-display
@@ -71,13 +88,11 @@ public class SplitScreenController implements SplitScreen {
         }
     }
 
-    @Override
     public boolean isSplitScreenVisible() {
         return mStageCoordinator.isSplitScreenVisible();
     }
 
-    @Override
-    public boolean moveToSideStage(int taskId, @StagePosition int sideStagePosition) {
+    public boolean moveToSideStage(int taskId, @SplitScreen.StagePosition int sideStagePosition) {
         final ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
         if (task == null) {
             throw new IllegalArgumentException("Unknown taskId" + taskId);
@@ -85,50 +100,46 @@ public class SplitScreenController implements SplitScreen {
         return moveToSideStage(task, sideStagePosition);
     }
 
-    @Override
     public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
-            @StagePosition int sideStagePosition) {
+            @SplitScreen.StagePosition int sideStagePosition) {
         return mStageCoordinator.moveToSideStage(task, sideStagePosition);
     }
 
-    @Override
     public boolean removeFromSideStage(int taskId) {
         return mStageCoordinator.removeFromSideStage(taskId);
     }
 
-    @Override
-    public void setSideStagePosition(@StagePosition int sideStagePosition) {
+    public void setSideStagePosition(@SplitScreen.StagePosition int sideStagePosition) {
         mStageCoordinator.setSideStagePosition(sideStagePosition);
     }
 
-    @Override
     public void setSideStageVisibility(boolean visible) {
         mStageCoordinator.setSideStageVisibility(visible);
     }
 
-    @Override
+    public void enterSplitScreen(int taskId, boolean leftOrTop) {
+        moveToSideStage(taskId,
+                leftOrTop ? STAGE_POSITION_TOP_OR_LEFT : STAGE_POSITION_BOTTOM_OR_RIGHT);
+    }
+
     public void exitSplitScreen() {
         mStageCoordinator.exitSplitScreen();
     }
 
-    @Override
     public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
         mStageCoordinator.getStageBounds(outTopOrLeftBounds, outBottomOrRightBounds);
     }
 
-    @Override
-    public void registerSplitScreenListener(SplitScreenListener listener) {
+    public void registerSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         mStageCoordinator.registerSplitScreenListener(listener);
     }
 
-    @Override
-    public void unregisterSplitScreenListener(SplitScreenListener listener) {
+    public void unregisterSplitScreenListener(SplitScreen.SplitScreenListener listener) {
         mStageCoordinator.unregisterSplitScreenListener(listener);
     }
 
-    @Override
-    public void startTask(int taskId,
-            @StageType int stage, @StagePosition int position, @Nullable Bundle options) {
+    public void startTask(int taskId, @SplitScreen.StageType int stage,
+            @SplitScreen.StagePosition int position, @Nullable Bundle options) {
         options = resolveStartStage(stage, position, options);
 
         try {
@@ -138,9 +149,9 @@ public class SplitScreenController implements SplitScreen {
         }
     }
 
-    @Override
-    public void startShortcut(String packageName, String shortcutId, @StageType int stage,
-            @StagePosition int position, @Nullable Bundle options, UserHandle user) {
+    public void startShortcut(String packageName, String shortcutId,
+            @SplitScreen.StageType int stage, @SplitScreen.StagePosition int position,
+            @Nullable Bundle options, UserHandle user) {
         options = resolveStartStage(stage, position, options);
 
         try {
@@ -153,9 +164,8 @@ public class SplitScreenController implements SplitScreen {
         }
     }
 
-    @Override
-    public void startIntent(PendingIntent intent,
-            @StageType int stage, @StagePosition int position, @Nullable Bundle options) {
+    public void startIntent(PendingIntent intent, @SplitScreen.StageType int stage,
+            @SplitScreen.StagePosition int position, @Nullable Bundle options) {
         options = resolveStartStage(stage, position, options);
 
         try {
@@ -165,8 +175,8 @@ public class SplitScreenController implements SplitScreen {
         }
     }
 
-    private Bundle resolveStartStage(@StageType int stage, @StagePosition int position,
-            @Nullable Bundle options) {
+    private Bundle resolveStartStage(@SplitScreen.StageType int stage,
+            @SplitScreen.StagePosition int position, @Nullable Bundle options) {
         switch (stage) {
             case STAGE_TYPE_UNDEFINED: {
                 // Use the stage of the specified position is valid.
@@ -216,11 +226,119 @@ public class SplitScreenController implements SplitScreen {
         return options;
     }
 
-    @Override
     public void dump(@NonNull PrintWriter pw, String prefix) {
         pw.println(prefix + TAG);
         if (mStageCoordinator != null) {
             mStageCoordinator.dump(pw, prefix);
+        }
+    }
+
+    private class SplitScreenImpl implements SplitScreen {
+        @Override
+        public boolean isSplitScreenVisible() {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.isSplitScreenVisible();
+            }, Boolean.class);
+        }
+
+        @Override
+        public boolean moveToSideStage(int taskId, int sideStagePosition) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.moveToSideStage(taskId, sideStagePosition);
+            }, Boolean.class);
+        }
+
+        @Override
+        public boolean moveToSideStage(ActivityManager.RunningTaskInfo task,
+                int sideStagePosition) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.moveToSideStage(task, sideStagePosition);
+            }, Boolean.class);
+        }
+
+        @Override
+        public boolean removeFromSideStage(int taskId) {
+            return mMainExecutor.executeBlockingForResult(() -> {
+                return SplitScreenController.this.removeFromSideStage(taskId);
+            }, Boolean.class);
+        }
+
+        @Override
+        public void setSideStagePosition(int sideStagePosition) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.setSideStagePosition(sideStagePosition);
+            });
+        }
+
+        @Override
+        public void setSideStageVisibility(boolean visible) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.setSideStageVisibility(visible);
+            });
+        }
+
+        @Override
+        public void enterSplitScreen(int taskId, boolean leftOrTop) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.enterSplitScreen(taskId, leftOrTop);
+            });
+        }
+
+        @Override
+        public void exitSplitScreen() {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.exitSplitScreen();
+            });
+        }
+
+        @Override
+        public void getStageBounds(Rect outTopOrLeftBounds, Rect outBottomOrRightBounds) {
+            try {
+                mMainExecutor.executeBlocking(() -> {
+                    SplitScreenController.this.getStageBounds(outTopOrLeftBounds,
+                            outBottomOrRightBounds);
+                });
+            } catch (InterruptedException e) {
+                Slog.e(TAG, "Failed to get stage bounds in 2s");
+            }
+        }
+
+        @Override
+        public void registerSplitScreenListener(SplitScreenListener listener) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.registerSplitScreenListener(listener);
+            });
+        }
+
+        @Override
+        public void unregisterSplitScreenListener(SplitScreenListener listener) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.unregisterSplitScreenListener(listener);
+            });
+        }
+
+        @Override
+        public void startTask(int taskId, int stage, int position, @Nullable Bundle options) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.startTask(taskId, stage, position, options);
+            });
+        }
+
+        @Override
+        public void startShortcut(String packageName, String shortcutId, int stage, int position,
+                @Nullable Bundle options, UserHandle user) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.startShortcut(packageName, shortcutId, stage, position,
+                        options, user);
+            });
+        }
+
+        @Override
+        public void startIntent(PendingIntent intent, int stage, int position,
+                @Nullable Bundle options) {
+            mMainExecutor.execute(() -> {
+                SplitScreenController.this.startIntent(intent, stage, position, options);
+            });
         }
     }
 
