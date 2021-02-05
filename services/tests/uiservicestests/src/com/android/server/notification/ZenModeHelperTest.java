@@ -33,8 +33,8 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+import static android.util.StatsLog.ANNOTATION_ID_IS_UID;
 
-import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.os.AtomsProto.DNDModeProto.CHANNELS_BYPASSING_FIELD_NUMBER;
 import static com.android.os.AtomsProto.DNDModeProto.ENABLED_FIELD_NUMBER;
