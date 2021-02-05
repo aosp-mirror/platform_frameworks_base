@@ -69,6 +69,7 @@ bool isPossiblyYUV(PixelFormat format) {
         case HAL_PIXEL_FORMAT_RAW_OPAQUE:
         case HAL_PIXEL_FORMAT_BLOB:
         case HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED:
+        case HAL_PIXEL_FORMAT_YCBCR_P010:
             return false;
 
         case HAL_PIXEL_FORMAT_YV12:
@@ -260,6 +261,32 @@ status_t getLockedImageInfo(LockedImage* buffer, int idx,
             dataSize = (idx == 0) ? ySize : cSize;
             pStride = 1;
             rStride = (idx == 0) ? buffer->stride : ALIGN(buffer->stride / 2, 16);
+            break;
+        case HAL_PIXEL_FORMAT_YCBCR_P010:
+            if (buffer->height % 2 != 0) {
+                ALOGE("YCBCR_P010: height (%d) should be a multiple of 2", buffer->height);
+                return BAD_VALUE;
+            }
+
+            if (buffer->width <= 0) {
+                ALOGE("YCBCR_P010: width (%d) should be a > 0", buffer->width);
+                return BAD_VALUE;
+            }
+
+            if (buffer->height <= 0) {
+                ALOGE("YCBCR_P010: height (%d) should be a > 0", buffer->height);
+                return BAD_VALUE;
+            }
+
+            ySize = (buffer->stride * 2) * buffer->height;
+            cSize = ySize / 2;
+            pStride = (idx == 0) ? 2 : 4;
+            cb = buffer->data + ySize;
+            cr = cb + 2;
+
+            pData = (idx == 0) ?  buffer->data : (idx == 1) ?  cb : cr;
+            dataSize = (idx == 0) ? ySize : cSize;
+            rStride = buffer->stride * 2;
             break;
         case HAL_PIXEL_FORMAT_Y8:
             // Single plane, 8bpp.
