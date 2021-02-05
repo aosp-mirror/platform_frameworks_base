@@ -59,7 +59,6 @@ import android.view.ViewRootImpl;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.android.wm.shell.R;
@@ -403,7 +402,7 @@ public class PipMenuView extends FrameLayout {
                 // Ensure we have as many buttons as actions
                 final LayoutInflater inflater = LayoutInflater.from(mContext);
                 while (mActionsGroup.getChildCount() < mActions.size()) {
-                    final ImageButton actionView = (ImageButton) inflater.inflate(
+                    final PipMenuActionView actionView = (PipMenuActionView) inflater.inflate(
                             R.layout.pip_menu_action, mActionsGroup, false);
                     mActionsGroup.addView(actionView);
                 }
@@ -420,7 +419,8 @@ public class PipMenuView extends FrameLayout {
                         && (stackBounds.width() > stackBounds.height());
                 for (int i = 0; i < mActions.size(); i++) {
                     final RemoteAction action = mActions.get(i);
-                    final ImageButton actionView = (ImageButton) mActionsGroup.getChildAt(i);
+                    final PipMenuActionView actionView =
+                            (PipMenuActionView) mActionsGroup.getChildAt(i);
 
                     // TODO: Check if the action drawable has changed before we reload it
                     action.getIcon().loadDrawableAsync(mContext, d -> {
