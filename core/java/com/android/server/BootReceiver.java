@@ -23,7 +23,6 @@ import android.content.pm.IPackageManager;
 import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
-import android.os.FileObserver;
 import android.os.FileUtils;
 import android.os.RecoverySystem;
 import android.os.RemoteException;
@@ -74,7 +73,6 @@ public class BootReceiver extends BroadcastReceiver {
         SystemProperties.getInt("ro.debuggable", 0) == 1 ? 196608 : 65536;
     private static final int GMSCORE_LASTK_LOG_SIZE = 196608;
 
-    private static final File TOMBSTONE_DIR = new File("/data/tombstones");
     private static final String TAG_TOMBSTONE = "SYSTEM_TOMBSTONE";
 
     // The pre-froyo package and class of the system updater, which
@@ -84,9 +82,6 @@ public class BootReceiver extends BroadcastReceiver {
         "com.google.android.systemupdater";
     private static final String OLD_UPDATER_CLASS =
         "com.google.android.systemupdater.SystemUpdateReceiver";
-
-    // Keep a reference to the observer so the finalizer doesn't disable it.
-    private static FileObserver sTombstoneObserver = null;
 
     private static final String LOG_FILES_FILE = "log-files.xml";
     private static final AtomicFile sFile = new AtomicFile(new File(
@@ -153,7 +148,7 @@ public class BootReceiver extends BroadcastReceiver {
         Downloads.removeAllDownloadsByPackage(context, OLD_UPDATER_PACKAGE, OLD_UPDATER_CLASS);
     }
 
-    private String getPreviousBootHeaders() {
+    private static String getPreviousBootHeaders() {
         try {
             return FileUtils.readTextFile(lastHeaderFile, 0, null);
         } catch (IOException e) {
@@ -161,7 +156,7 @@ public class BootReceiver extends BroadcastReceiver {
         }
     }
 
-    private String getCurrentBootHeaders() throws IOException {
+    private static String getCurrentBootHeaders() throws IOException {
         return new StringBuilder(512)
             .append("Build: ").append(Build.FINGERPRINT).append("\n")
             .append("Hardware: ").append(Build.BOARD).append("\n")
@@ -175,7 +170,7 @@ public class BootReceiver extends BroadcastReceiver {
     }
 
 
-    private String getBootHeadersToLogAndUpdate() throws IOException {
+    private static String getBootHeadersToLogAndUpdate() throws IOException {
         final String oldHeaders = getPreviousBootHeaders();
         final String newHeaders = getCurrentBootHeaders();
 
@@ -247,38 +242,27 @@ public class BootReceiver extends BroadcastReceiver {
         logFsMountTime();
         addFsckErrorsToDropBoxAndLogFsStat(db, timestamps, headers, -LOG_SIZE, "SYSTEM_FSCK");
         logSystemServerShutdownTimeMetrics();
-
-        // Scan existing tombstones (in case any new ones appeared)
-        File[] tombstoneFiles = TOMBSTONE_DIR.listFiles();
-        for (int i = 0; tombstoneFiles != null && i < tombstoneFiles.length; i++) {
-            if (tombstoneFiles[i].isFile()) {
-                addFileToDropBox(db, timestamps, headers, tombstoneFiles[i].getPath(),
-                        LOG_SIZE, "SYSTEM_TOMBSTONE");
-            }
-        }
-
         writeTimestamps(timestamps);
+    }
 
-        // Start watching for new tombstone files; will record them as they occur.
-        // This gets registered with the singleton file observer thread.
-        sTombstoneObserver = new FileObserver(TOMBSTONE_DIR.getPath(), FileObserver.CREATE) {
-            @Override
-            public void onEvent(int event, String path) {
-                HashMap<String, Long> timestamps = readTimestamps();
-                try {
-                    File file = new File(TOMBSTONE_DIR, path);
-                    if (file.isFile() && file.getName().startsWith("tombstone_")) {
-                        addFileToDropBox(db, timestamps, headers, file.getPath(), LOG_SIZE,
-                                TAG_TOMBSTONE);
-                    }
-                } catch (IOException e) {
-                    Slog.e(TAG, "Can't log tombstone", e);
-                }
-                writeTimestamps(timestamps);
-            }
-        };
-
-        sTombstoneObserver.startWatching();
+    /**
+     * Add a tombstone to the DropBox.
+     *
+     * @param ctx Context
+     * @param tombstone path to the tombstone
+     */
+    public static void addTombstoneToDropBox(Context ctx, File tombstone) {
+        final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
+        final String bootReason = SystemProperties.get("ro.boot.bootreason", null);
+        HashMap<String, Long> timestamps = readTimestamps();
+        try {
+            final String headers = getBootHeadersToLogAndUpdate();
+            addFileToDropBox(db, timestamps, headers, tombstone.getPath(), LOG_SIZE,
+                    TAG_TOMBSTONE);
+        } catch (IOException e) {
+            Slog.e(TAG, "Can't log tombstone", e);
+        }
+        writeTimestamps(timestamps);
     }
 
     private static void addLastkToDropBox(
@@ -761,7 +745,7 @@ public class BootReceiver extends BroadcastReceiver {
         }
     }
 
-    private void writeTimestamps(HashMap<String, Long> timestamps) {
+    private static void writeTimestamps(HashMap<String, Long> timestamps) {
         synchronized (sFile) {
             final FileOutputStream stream;
             try {
