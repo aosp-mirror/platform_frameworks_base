@@ -31,7 +31,7 @@ import android.location.util.identity.CallerIdentity;
 import android.os.Build;
 import android.os.PowerManager.LocationPowerSaveMode;
 
-import com.android.server.utils.eventlog.LocalEventLog;
+import com.android.server.location.eventlog.LocalEventLog;
 
 /** In memory event log for location events. */
 public class LocationEventLog extends LocalEventLog {
