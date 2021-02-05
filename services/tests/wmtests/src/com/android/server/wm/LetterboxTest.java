@@ -183,6 +183,10 @@ public class LetterboxTest {
         mColor = Color.GREEN;
 
         assertTrue(mLetterbox.needsApplySurfaceChanges());
+
+        mLetterbox.applySurfaceChanges(mTransaction);
+
+        verify(mTransaction).setColor(mSurfaces.top, new float[]{0, 1, 0});
     }
 
     @Test
