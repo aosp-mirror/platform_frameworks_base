@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
+import android.annotation.UserHandleAware;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.compat.annotation.UnsupportedAppUsage;
@@ -437,11 +438,12 @@ public final class UsageStatsManager {
      * @see #INTERVAL_YEARLY
      * @see #INTERVAL_BEST
      */
+    @UserHandleAware
     public List<UsageStats> queryUsageStats(int intervalType, long beginTime, long endTime) {
         try {
             @SuppressWarnings("unchecked")
             ParceledListSlice<UsageStats> slice = mService.queryUsageStats(intervalType, beginTime,
-                    endTime, mContext.getOpPackageName());
+                    endTime, mContext.getOpPackageName(), mContext.getUserId());
             if (slice != null) {
                 return slice.getList();
             }
