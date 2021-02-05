@@ -52,7 +52,7 @@ interface IBatteryStats {
 
     // Remaining methods are only used in Java.
 
-    BatteryUsageStats getBatteryUsageStats(in BatteryUsageStatsQuery query);
+    List<BatteryUsageStats> getBatteryUsageStats(in List<BatteryUsageStatsQuery> queries);
 
     @UnsupportedAppUsage
     byte[] getStatistics();

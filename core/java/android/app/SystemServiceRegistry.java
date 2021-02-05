@@ -69,6 +69,9 @@ import android.content.pm.IShortcutService;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
+import android.content.pm.verify.domain.DomainVerificationManager;
+import android.content.pm.verify.domain.DomainVerificationManagerImpl;
+import android.content.pm.verify.domain.IDomainVerificationManager;
 import android.content.res.Resources;
 import android.content.rollback.RollbackManagerFrameworkInitializer;
 import android.debug.AdbManager;
@@ -1385,6 +1388,20 @@ public final class SystemServiceRegistry {
                             throws ServiceNotFoundException {
                         return new GameManager(ctx.getOuterContext(),
                                 ctx.mMainThread.getHandler());
+                    }
+                });
+
+        // TODO(b/159952358): Only register this service for the domain verification agent?
+        registerService(Context.DOMAIN_VERIFICATION_SERVICE, DomainVerificationManager.class,
+                new CachedServiceFetcher<DomainVerificationManager>() {
+                    @Override
+                    public DomainVerificationManager createService(ContextImpl context)
+                            throws ServiceNotFoundException {
+                        IBinder binder = ServiceManager.getServiceOrThrow(
+                                Context.DOMAIN_VERIFICATION_SERVICE);
+                        IDomainVerificationManager service =
+                                IDomainVerificationManager.Stub.asInterface(binder);
+                        return new DomainVerificationManagerImpl(context, service);
                     }
                 });
 

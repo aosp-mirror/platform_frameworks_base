@@ -26,6 +26,7 @@ import android.os.SystemClock;
 import android.util.DebugUtils;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.CompositeRWLock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
@@ -141,13 +142,13 @@ final class ProcessProfileRecord {
     /**
      * Last selected memory trimming level.
      */
-    @GuardedBy("mService")
+    @CompositeRWLock({"mService", "mProcLock"})
     private int mTrimMemoryLevel;
 
     /**
      * Want to clean up resources from showing UI?
      */
-    @GuardedBy("mService")
+    @GuardedBy("mProcLock")
     private boolean mPendingUiClean;
 
     /**
@@ -164,7 +165,7 @@ final class ProcessProfileRecord {
     /**
      * When we last told the app that memory is low.
      */
-    @GuardedBy("mService")
+    @CompositeRWLock({"mService", "mProfilerLock"})
     private long mLastLowMemory;
 
     /**
@@ -193,9 +194,12 @@ final class ProcessProfileRecord {
     @GuardedBy("mProfilerLock")
     private long mLastStateTime;
 
+    private final ActivityManagerGlobalLock mProcLock;
+
     ProcessProfileRecord(final ProcessRecord app) {
         mApp = app;
         mService = app.mService;
+        mProcLock = mService.mProcLock;
         mProfilerLock = mService.mAppProfiler.mProfilerLock;
     }
 
@@ -410,22 +414,22 @@ final class ProcessProfileRecord {
         mPssStatType = pssStatType;
     }
 
-    @GuardedBy("mService")
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
     int getTrimMemoryLevel() {
         return mTrimMemoryLevel;
     }
 
-    @GuardedBy("mService")
+    @GuardedBy({"mService", "mProcLock"})
     void setTrimMemoryLevel(int trimMemoryLevel) {
         mTrimMemoryLevel = trimMemoryLevel;
     }
 
-    @GuardedBy("mService")
+    @GuardedBy("mProcLock")
     boolean hasPendingUiClean() {
         return mPendingUiClean;
     }
 
-    @GuardedBy("mService")
+    @GuardedBy("mProcLock")
     void setPendingUiClean(boolean pendingUiClean) {
         mPendingUiClean = pendingUiClean;
         mApp.getWindowProcessController().setPendingUiClean(pendingUiClean);
@@ -449,12 +453,12 @@ final class ProcessProfileRecord {
         mLastRequestedGc = lastRequestedGc;
     }
 
-    @GuardedBy("mService")
+    @GuardedBy(anyOf = {"mService", "mProfilerLock"})
     long getLastLowMemory() {
         return mLastLowMemory;
     }
 
-    @GuardedBy("mService")
+    @GuardedBy({"mService", "mProfilerLock"})
     void setLastLowMemory(long lastLowMemory) {
         mLastLowMemory = lastLowMemory;
     }
@@ -593,11 +597,11 @@ final class ProcessProfileRecord {
     }
 
     @GuardedBy({"mService", "mProfilerLock"})
-    void updateProcState(ProcessRecord app) {
-        mSetProcState = app.getCurProcState();
-        mSetAdj = app.curAdj;
-        mCurRawAdj = app.getCurRawAdj();
-        mLastStateTime = app.lastStateTime;
+    void updateProcState(ProcessStateRecord state) {
+        mSetProcState = state.getCurProcState();
+        mSetAdj = state.getCurAdj();
+        mCurRawAdj = state.getCurRawAdj();
+        mLastStateTime = state.getLastStateTime();
     }
 
     @GuardedBy("mService")

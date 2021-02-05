@@ -18,6 +18,7 @@ package com.android.server.powerstats;
 
 import android.hardware.power.stats.Channel;
 import android.hardware.power.stats.EnergyConsumer;
+import android.hardware.power.stats.EnergyConsumerAttribution;
 import android.hardware.power.stats.EnergyConsumerResult;
 import android.hardware.power.stats.EnergyMeasurement;
 import android.hardware.power.stats.PowerEntity;
@@ -433,23 +434,40 @@ public class ProtoStreamUtils {
     }
 
     static class EnergyConsumerResultUtils {
-        public static byte[] getProtoBytes(EnergyConsumerResult[] energyConsumerResult) {
+        public static byte[] getProtoBytes(EnergyConsumerResult[] energyConsumerResult,
+                boolean includeAttribution) {
             ProtoOutputStream pos = new ProtoOutputStream();
-            packProtoMessage(energyConsumerResult, pos);
+            packProtoMessage(energyConsumerResult, pos, includeAttribution);
             return pos.getBytes();
         }
 
         public static void packProtoMessage(EnergyConsumerResult[] energyConsumerResult,
-                ProtoOutputStream pos) {
+                ProtoOutputStream pos, boolean includeAttribution) {
             if (energyConsumerResult == null) return;
 
             for (int i = 0; i < energyConsumerResult.length; i++) {
-                long token = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
+                long ecrToken = pos.start(PowerStatsServiceModelProto.ENERGY_CONSUMER_RESULT);
                 pos.write(EnergyConsumerResultProto.ID, energyConsumerResult[i].id);
                 pos.write(EnergyConsumerResultProto.TIMESTAMP_MS,
                         energyConsumerResult[i].timestampMs);
                 pos.write(EnergyConsumerResultProto.ENERGY_UWS, energyConsumerResult[i].energyUWs);
-                pos.end(token);
+
+                if (includeAttribution) {
+                    final int attributionLength = energyConsumerResult[i].attribution.length;
+
+                    for (int j = 0; j < attributionLength; j++) {
+                        final EnergyConsumerAttribution energyConsumerAttribution =
+                                energyConsumerResult[i].attribution[j];
+                        final long ecaToken = pos.start(EnergyConsumerResultProto.ATTRIBUTION);
+                        pos.write(EnergyConsumerAttributionProto.UID,
+                                energyConsumerAttribution.uid);
+                        pos.write(EnergyConsumerAttributionProto.ENERGY_UWS,
+                                energyConsumerAttribution.energyUWs);
+                        pos.end(ecaToken);
+                    }
+                }
+
+                pos.end(ecrToken);
             }
         }
 
@@ -480,9 +498,45 @@ public class ProtoStreamUtils {
             }
         }
 
+        private static EnergyConsumerAttribution unpackEnergyConsumerAttributionProto(
+                ProtoInputStream pis) throws IOException {
+            final EnergyConsumerAttribution energyConsumerAttribution =
+                    new EnergyConsumerAttribution();
+
+            while (true) {
+                try {
+                    switch (pis.nextField()) {
+                        case (int) EnergyConsumerAttributionProto.UID:
+                            energyConsumerAttribution.uid =
+                                pis.readInt(EnergyConsumerAttributionProto.UID);
+                            break;
+
+                        case (int) EnergyConsumerAttributionProto.ENERGY_UWS:
+                            energyConsumerAttribution.energyUWs =
+                                pis.readLong(EnergyConsumerAttributionProto.ENERGY_UWS);
+                            break;
+
+                        case ProtoInputStream.NO_MORE_FIELDS:
+                            return energyConsumerAttribution;
+
+                        default:
+                            Slog.e(TAG, "Unhandled field in EnergyConsumerAttributionProto: "
+                                    + ProtoUtils.currentFieldToString(pis));
+                            break;
+
+                    }
+                } catch (WireTypeMismatchException wtme) {
+                    Slog.e(TAG, "Wire Type mismatch in EnergyConsumerAttributionProto: "
+                            + ProtoUtils.currentFieldToString(pis));
+                }
+            }
+        }
+
         private static EnergyConsumerResult unpackEnergyConsumerResultProto(ProtoInputStream pis)
                 throws IOException {
             EnergyConsumerResult energyConsumerResult = new EnergyConsumerResult();
+            final List<EnergyConsumerAttribution> energyConsumerAttributionList =
+                    new ArrayList<EnergyConsumerAttribution>();
 
             while (true) {
                 try {
@@ -501,7 +555,18 @@ public class ProtoStreamUtils {
                                 pis.readLong(EnergyConsumerResultProto.ENERGY_UWS);
                             break;
 
+                        case (int) EnergyConsumerResultProto.ATTRIBUTION:
+                            final long token = pis.start(EnergyConsumerResultProto.ATTRIBUTION);
+                            energyConsumerAttributionList.add(
+                                    unpackEnergyConsumerAttributionProto(pis));
+                            pis.end(token);
+                            break;
+
                         case ProtoInputStream.NO_MORE_FIELDS:
+                            energyConsumerResult.attribution =
+                                energyConsumerAttributionList.toArray(
+                                    new EnergyConsumerAttribution[
+                                        energyConsumerAttributionList.size()]);
                             return energyConsumerResult;
 
                         default:
@@ -520,9 +585,16 @@ public class ProtoStreamUtils {
             if (energyConsumerResult == null) return;
 
             for (int i = 0; i < energyConsumerResult.length; i++) {
-                Slog.d(TAG, "EnergyConsumerId: " + energyConsumerResult[i].id
-                        + ", Timestamp (ms): " + energyConsumerResult[i].timestampMs
-                        + ", Energy (uWs): " + energyConsumerResult[i].energyUWs);
+                final EnergyConsumerResult result = energyConsumerResult[i];
+                Slog.d(TAG, "EnergyConsumerId: " + result.id
+                        + ", Timestamp (ms): " + result.timestampMs
+                        + ", Energy (uWs): " + result.energyUWs);
+                final int attributionLength = result.attribution.length;
+                for (int j = 0; j < attributionLength; j++) {
+                    final EnergyConsumerAttribution attribution = result.attribution[j];
+                    Slog.d(TAG, "  UID: " + attribution.uid
+                            + "  Energy (uWs): " + attribution.energyUWs);
+                }
             }
         }
     }

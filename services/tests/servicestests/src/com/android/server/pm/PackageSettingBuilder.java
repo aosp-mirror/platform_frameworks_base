@@ -22,10 +22,10 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 
 import com.android.server.pm.parsing.pkg.AndroidPackage;
-import com.android.server.pm.parsing.pkg.PackageImpl;
 
 import java.io.File;
 import java.util.Map;
+import java.util.UUID;
 
 public class PackageSettingBuilder {
     private String mName;
@@ -48,6 +48,7 @@ public class PackageSettingBuilder {
     private long[] mUsesStaticLibrariesVersions;
     private Map<String, ArraySet<String>> mMimeGroups;
     private PackageParser.SigningDetails mSigningDetails;
+    private UUID mDomainSetId = UUID.randomUUID();
 
     public PackageSettingBuilder setPackage(AndroidPackage pkg) {
         this.mPkg = pkg;
@@ -163,12 +164,17 @@ public class PackageSettingBuilder {
         return this;
     }
 
+    public PackageSettingBuilder setDomainSetId(UUID domainSetId) {
+        mDomainSetId = domainSetId;
+        return this;
+    }
+
     public PackageSetting build() {
         final PackageSetting packageSetting = new PackageSetting(mName, mRealName,
                 new File(mCodePath), mLegacyNativeLibraryPathString, mPrimaryCpuAbiString,
                 mSecondaryCpuAbiString, mCpuAbiOverrideString, mPVersionCode, mPkgFlags,
                 mPrivateFlags, mSharedUserId, mUsesStaticLibraries, mUsesStaticLibrariesVersions,
-                mMimeGroups);
+                mMimeGroups, mDomainSetId);
         packageSetting.signatures = mSigningDetails != null
                 ? new PackageSignatures(mSigningDetails)
                 : new PackageSignatures();

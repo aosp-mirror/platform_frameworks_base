@@ -185,8 +185,8 @@ public class MockableLocationProviderTest {
 
     @Test
     public void testReportLocation() {
-        LocationResult realLocation = LocationResult.create(new Location("real"));
-        LocationResult mockLocation = LocationResult.create(new Location("mock"));
+        LocationResult realLocation = LocationResult.wrap(new Location("real"));
+        LocationResult mockLocation = LocationResult.wrap(new Location("mock"));
 
         mRealProvider.reportLocation(realLocation);
         assertThat(mListener.getNextLocationResult()).isEqualTo(realLocation);

@@ -24,6 +24,7 @@ import static android.view.DisplayInfoProto.LOGICAL_WIDTH;
 import static android.view.DisplayInfoProto.NAME;
 
 import android.annotation.Nullable;
+import android.app.WindowConfiguration;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -615,9 +616,27 @@ public final class DisplayInfo implements Parcelable {
         getMetricsWithSize(outMetrics, ci, configuration, appWidth, appHeight);
     }
 
+    /**
+     * Populates {@code outMetrics} with details of the logical display. Bounds are limited
+     * by the logical size of the display.
+     *
+     * @param outMetrics the {@link DisplayMetrics} to be populated
+     * @param compatInfo the {@link CompatibilityInfo} to be applied
+     * @param configuration the {@link Configuration}
+     */
     public void getLogicalMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
             Configuration configuration) {
         getMetricsWithSize(outMetrics, compatInfo, configuration, logicalWidth, logicalHeight);
+    }
+
+    /**
+     * Similar to {@link #getLogicalMetrics}, but the limiting bounds are determined from
+     * {@link WindowConfiguration#getMaxBounds()}
+     */
+    public void getMaxBoundsMetrics(DisplayMetrics outMetrics, CompatibilityInfo compatInfo,
+            Configuration configuration) {
+        Rect bounds = configuration.windowConfiguration.getMaxBounds();
+        getMetricsWithSize(outMetrics, compatInfo, configuration, bounds.width(), bounds.height());
     }
 
     public int getNaturalWidth() {

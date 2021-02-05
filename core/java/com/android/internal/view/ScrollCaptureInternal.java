@@ -59,6 +59,11 @@ public class ScrollCaptureInternal {
     public static final int TYPE_RECYCLING = 2;
 
     /**
+     * The ViewGroup scrolls, but has no child views in
+     */
+    private static final int TYPE_OPAQUE = 3;
+
+    /**
      * Performs tests on the given View and determines:
      * 1. If scrolling is possible
      * 2. What mechanisms are used for scrolling.
@@ -95,8 +100,15 @@ public class ScrollCaptureInternal {
             }
             return TYPE_RECYCLING;
         }
+        // At least one child view is required.
+        if (((ViewGroup) view).getChildCount() < 1) {
+            if (DEBUG_VERBOSE) {
+                Log.v(TAG, "scrollable with no children");
+            }
+            return TYPE_OPAQUE;
+        }
         if (DEBUG_VERBOSE) {
-            Log.v(TAG, "hint: less than two child views");
+            Log.v(TAG, "hint: single child view");
         }
         //Because recycling containers don't use scrollY, a non-zero value means Scroll view.
         if (view.getScrollY() != 0) {

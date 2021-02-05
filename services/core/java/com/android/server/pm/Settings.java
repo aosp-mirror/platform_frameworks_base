@@ -21,15 +21,12 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
 import static android.content.pm.PackageManager.INSTALL_FAILED_SHARED_USER_INCOMPATIBLE;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS;
-import static android.content.pm.PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
 import static android.content.pm.PackageManager.MATCH_DEFAULT_ONLY;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_UNKNOWN;
 import static android.content.pm.PackageManager.UNINSTALL_REASON_USER_TYPE;
 import static android.os.Process.PACKAGE_INFO_GID;
 import static android.os.Process.SYSTEM_UID;
 
-import static com.android.server.pm.PackageManagerService.DEBUG_DOMAIN_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.annotation.NonNull;
@@ -108,6 +105,9 @@ import com.android.permission.persistence.RuntimePermissionsState;
 import com.android.server.LocalServices;
 import com.android.server.backup.PreferredActivityBackupHelper;
 import com.android.server.pm.Installer.InstallerException;
+import com.android.server.pm.verify.domain.DomainVerificationLegacySettings;
+import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
+import com.android.server.pm.verify.domain.DomainVerificationPersistence;
 import com.android.server.pm.parsing.PackageInfoUtils;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
@@ -131,6 +131,7 @@ import libcore.io.IoUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -147,7 +148,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -155,6 +155,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 /**
  * Holds information about dynamic settings.
@@ -283,9 +284,9 @@ public final class Settings implements Watchable, Snappable {
             "persistent-preferred-activities";
     static final String TAG_CROSS_PROFILE_INTENT_FILTERS =
             "crossProfile-intent-filters";
-    private static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
+    public static final String TAG_DOMAIN_VERIFICATION = "domain-verification";
     private static final String TAG_DEFAULT_APPS = "default-apps";
-    private static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
+    public static final String TAG_ALL_INTENT_FILTER_VERIFICATION =
             "all-intent-filter-verifications";
     private static final String TAG_DEFAULT_BROWSER = "default-browser";
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
@@ -390,12 +391,6 @@ public final class Settings implements Watchable, Snappable {
     private final WatchedSparseArray<ArraySet<String>> mBlockUninstallPackages =
             new WatchedSparseArray<>();
 
-    // Set of restored intent-filter verification states
-    @Watched
-    private final WatchedArrayMap<String, IntentFilterVerificationInfo>
-            mRestoredIntentFilterVerifications =
-            new WatchedArrayMap<String, IntentFilterVerificationInfo>();
-
     private static final class KernelPackageState {
         int appId;
         int[] excludedUserIds;
@@ -487,7 +482,10 @@ public final class Settings implements Watchable, Snappable {
     @Watched
     final WatchedSparseArray<String> mDefaultBrowserApp = new WatchedSparseArray<String>();
 
+    // TODO(b/161161364): This seems unused, and is probably not relevant in the new API, but should
+    //  verify.
     // App-link priority tracking, per-user
+    @NonNull
     @Watched
     final WatchedSparseIntArray mNextAppLinkGeneration = new WatchedSparseIntArray();
 
@@ -511,6 +509,8 @@ public final class Settings implements Watchable, Snappable {
     final LegacyPermissionSettings mPermissions;
 
     private final LegacyPermissionDataProvider mPermissionDataProvider;
+
+    private final DomainVerificationManagerInternal mDomainVerificationManager;
 
     /**
      * The observer that watches for changes from array members
@@ -538,13 +538,12 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = null;
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
-
+        mDomainVerificationManager = null;
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
         mDisabledSysPackages.registerObserver(mObserver);
         mBlockUninstallPackages.registerObserver(mObserver);
-        mRestoredIntentFilterVerifications.registerObserver(mObserver);
         mVersion.registerObserver(mObserver);
         mPreferredActivities.registerObserver(mObserver);
         mPersistentPreferredActivities.registerObserver(mObserver);
@@ -554,13 +553,14 @@ public final class Settings implements Watchable, Snappable {
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
-        mNextAppLinkGeneration.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
     }
 
     Settings(File dataDir, RuntimePermissionsPersistence runtimePermissionsPersistence,
-            LegacyPermissionDataProvider permissionDataProvider, Object lock) {
+            LegacyPermissionDataProvider permissionDataProvider,
+            @NonNull DomainVerificationManagerInternal domainVerificationManager,
+            @NonNull Object lock)  {
         mLock = lock;
         mAppIds = new WatchedArrayList<>();
         mOtherAppIds = new WatchedSparseArray<>();
@@ -587,12 +587,13 @@ public final class Settings implements Watchable, Snappable {
         mStoppedPackagesFilename = new File(mSystemDir, "packages-stopped.xml");
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
 
+        mDomainVerificationManager = domainVerificationManager;
+
         mPackages.registerObserver(mObserver);
         mInstallerPackages.registerObserver(mObserver);
         mKernelMapping.registerObserver(mObserver);
         mDisabledSysPackages.registerObserver(mObserver);
         mBlockUninstallPackages.registerObserver(mObserver);
-        mRestoredIntentFilterVerifications.registerObserver(mObserver);
         mVersion.registerObserver(mObserver);
         mPreferredActivities.registerObserver(mObserver);
         mPersistentPreferredActivities.registerObserver(mObserver);
@@ -602,7 +603,6 @@ public final class Settings implements Watchable, Snappable {
         mOtherAppIds.registerObserver(mObserver);
         mRenamedPackages.registerObserver(mObserver);
         mDefaultBrowserApp.registerObserver(mObserver);
-        mNextAppLinkGeneration.registerObserver(mObserver);
 
         Watchable.verifyWatchedAttributes(this, mObserver);
     }
@@ -629,11 +629,12 @@ public final class Settings implements Watchable, Snappable {
         mBackupStoppedPackagesFilename = null;
         mKernelMappingFilename = null;
 
+        mDomainVerificationManager = r.mDomainVerificationManager;
+
         mInstallerPackages.addAll(r.mInstallerPackages);
         mKernelMapping.putAll(r.mKernelMapping);
         mDisabledSysPackages.putAll(r.mDisabledSysPackages);
         mBlockUninstallPackages.snapshot(r.mBlockUninstallPackages);
-        mRestoredIntentFilterVerifications.putAll(r.mRestoredIntentFilterVerifications);
         mVersion.putAll(r.mVersion);
         mVerifierDeviceIdentity = r.mVerifierDeviceIdentity;
         WatchedSparseArray.snapshot(
@@ -649,7 +650,6 @@ public final class Settings implements Watchable, Snappable {
         mKeySetRefs.putAll(r.mKeySetRefs);
         mRenamedPackages.snapshot(r.mRenamedPackages);
         mDefaultBrowserApp.snapshot(r.mDefaultBrowserApp);
-        mNextAppLinkGeneration.snapshot(r.mNextAppLinkGeneration);
         // mReadMessages
         mPendingPackages.addAll(r.mPendingPackages);
         mSystemDir = null;
@@ -766,7 +766,8 @@ public final class Settings implements Watchable, Snappable {
                 p.legacyNativeLibraryPathString, p.primaryCpuAbiString,
                 p.secondaryCpuAbiString, p.cpuAbiOverrideString,
                 p.appId, p.versionCode, p.pkgFlags, p.pkgPrivateFlags,
-                p.usesStaticLibraries, p.usesStaticLibrariesVersions, p.mimeGroups);
+                p.usesStaticLibraries, p.usesStaticLibrariesVersions, p.mimeGroups,
+                mDomainVerificationManager.generateNewId());
         if (ret != null) {
             ret.getPkgState().setUpdatedSystemApp(false);
         }
@@ -786,7 +787,8 @@ public final class Settings implements Watchable, Snappable {
             String legacyNativeLibraryPathString, String primaryCpuAbiString,
             String secondaryCpuAbiString, String cpuAbiOverrideString, int uid, long vc, int
             pkgFlags, int pkgPrivateFlags, String[] usesStaticLibraries,
-            long[] usesStaticLibraryNames, Map<String, ArraySet<String>> mimeGroups) {
+            long[] usesStaticLibraryNames, Map<String, ArraySet<String>> mimeGroups,
+            @NonNull UUID domainSetId) {
         PackageSetting p = mPackages.get(name);
         if (p != null) {
             if (p.appId == uid) {
@@ -799,7 +801,7 @@ public final class Settings implements Watchable, Snappable {
         p = new PackageSetting(name, realName, codePath, legacyNativeLibraryPathString,
                 primaryCpuAbiString, secondaryCpuAbiString, cpuAbiOverrideString, vc, pkgFlags,
                 pkgPrivateFlags, 0 /*userId*/, usesStaticLibraries, usesStaticLibraryNames,
-                mimeGroups);
+                mimeGroups, domainSetId);
         p.appId = uid;
         if (registerExistingAppIdLPw(uid, p, name)) {
             mPackages.put(name, p);
@@ -863,7 +865,7 @@ public final class Settings implements Watchable, Snappable {
             UserHandle installUser, boolean allowInstall, boolean instantApp,
             boolean virtualPreload, UserManagerService userManager,
             String[] usesStaticLibraries, long[] usesStaticLibrariesVersions,
-            Set<String> mimeGroupNames) {
+            Set<String> mimeGroupNames, @NonNull UUID domainSetId) {
         final PackageSetting pkgSetting;
         if (originalPkg != null) {
             if (PackageManagerService.DEBUG_UPGRADE) Log.v(PackageManagerService.TAG, "Package "
@@ -883,12 +885,13 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting.usesStaticLibrariesVersions = usesStaticLibrariesVersions;
             // Update new package state.
             pkgSetting.setTimeStamp(codePath.lastModified());
+            pkgSetting.setDomainSetId(domainSetId);
         } else {
             pkgSetting = new PackageSetting(pkgName, realPkgName, codePath,
                     legacyNativeLibraryPath, primaryCpuAbi, secondaryCpuAbi,
                     null /*cpuAbiOverrideString*/, versionCode, pkgFlags, pkgPrivateFlags,
                     0 /*sharedUserId*/, usesStaticLibraries,
-                    usesStaticLibrariesVersions, createMimeGroups(mimeGroupNames));
+                    usesStaticLibrariesVersions, createMimeGroups(mimeGroupNames), domainSetId);
             pkgSetting.setTimeStamp(codePath.lastModified());
             pkgSetting.sharedUser = sharedUser;
             // If this is not a system app, it starts out stopped.
@@ -925,8 +928,6 @@ public final class Settings implements Watchable, Snappable {
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0 /*linkGeneration*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/);
@@ -983,7 +984,7 @@ public final class Settings implements Watchable, Snappable {
             @Nullable String primaryCpuAbi, @Nullable String secondaryCpuAbi, int pkgFlags,
             int pkgPrivateFlags, @NonNull UserManagerService userManager,
             @Nullable String[] usesStaticLibraries, @Nullable long[] usesStaticLibrariesVersions,
-            @Nullable Set<String> mimeGroupNames)
+            @Nullable Set<String> mimeGroupNames, @NonNull UUID domainSetId)
                     throws PackageManagerException {
         final String pkgName = pkgSetting.name;
         if (pkgSetting.sharedUser != sharedUser) {
@@ -1059,6 +1060,7 @@ public final class Settings implements Watchable, Snappable {
             pkgSetting.usesStaticLibrariesVersions = null;
         }
         pkgSetting.updateMimeGroups(mimeGroupNames);
+        pkgSetting.setDomainSetId(domainSetId);
     }
 
     /**
@@ -1167,15 +1169,6 @@ public final class Settings implements Watchable, Snappable {
             if (userIdPs != null && userIdPs != sharedUser) {
                 replaceAppIdLPw(p.appId, sharedUser);
             }
-        }
-
-        IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.get(p.name);
-        if (ivi != null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.i(TAG, "Applying restored IVI for " + p.name + " : " + ivi.getStatusString());
-            }
-            mRestoredIntentFilterVerifications.remove(p.name);
-            p.setIntentFilterVerificationInfo(ivi);
         }
     }
 
@@ -1305,129 +1298,6 @@ public final class Settings implements Watchable, Snappable {
             mCrossProfileIntentResolvers.put(userId, cpir);
         }
         return cpir;
-    }
-
-    /**
-     * The following functions suppose that you have a lock for managing access to the
-     * mIntentFiltersVerifications map.
-     */
-
-    /* package protected */
-    IntentFilterVerificationInfo getIntentFilterVerificationLPr(String packageName) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return null;
-        }
-        return ps.getIntentFilterVerificationInfo();
-    }
-
-    /* package protected */
-    IntentFilterVerificationInfo createIntentFilterVerificationIfNeededLPw(String packageName,
-            ArraySet<String> domains) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return null;
-        }
-        IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-        if (ivi == null) {
-            ivi = new IntentFilterVerificationInfo(packageName, domains);
-            ps.setIntentFilterVerificationInfo(ivi);
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(PackageManagerService.TAG,
-                        "Creating new IntentFilterVerificationInfo for pkg: " + packageName);
-            }
-        } else {
-            ivi.setDomains(domains);
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(PackageManagerService.TAG,
-                        "Setting domains to existing IntentFilterVerificationInfo for pkg: " +
-                                packageName + " and with domains: " + ivi.getDomainsString());
-            }
-        }
-        return ivi;
-    }
-
-    int getIntentFilterVerificationStatusLPr(String packageName, int userId) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
-        }
-        return (int)(ps.getDomainVerificationStatusForUser(userId) >> 32);
-    }
-
-    boolean updateIntentFilterVerificationStatusLPw(String packageName, final int status, int userId) {
-        // Update the status for the current package
-        PackageSetting current = mPackages.get(packageName);
-        if (current == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return false;
-        }
-
-        final int alwaysGeneration;
-        if (status == INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_ALWAYS) {
-            alwaysGeneration = mNextAppLinkGeneration.get(userId) + 1;
-            mNextAppLinkGeneration.put(userId, alwaysGeneration);
-        } else {
-            alwaysGeneration = 0;
-        }
-
-        current.setDomainVerificationStatusForUser(status, alwaysGeneration, userId);
-        return true;
-    }
-
-    /**
-     * Used for Settings App and PackageManagerService dump. Should be read only.
-     */
-    List<IntentFilterVerificationInfo> getIntentFilterVerificationsLPr(
-            String packageName) {
-        if (packageName == null) {
-            return Collections.<IntentFilterVerificationInfo>emptyList();
-        }
-        ArrayList<IntentFilterVerificationInfo> result = new ArrayList<>();
-        for (PackageSetting ps : mPackages.values()) {
-            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-            if (ivi == null || TextUtils.isEmpty(ivi.getPackageName()) ||
-                    !ivi.getPackageName().equalsIgnoreCase(packageName)) {
-                continue;
-            }
-            result.add(ivi);
-        }
-        return result;
-    }
-
-    boolean removeIntentFilterVerificationLPw(String packageName, int userId,
-            boolean alsoResetStatus) {
-        PackageSetting ps = mPackages.get(packageName);
-        if (ps == null) {
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.w(PackageManagerService.TAG, "No package known: " + packageName);
-            }
-            return false;
-        }
-        if (alsoResetStatus) {
-            ps.clearDomainVerificationStatusForUser(userId);
-        }
-        ps.setIntentFilterVerificationInfo(null);
-        return true;
-    }
-
-    boolean removeIntentFilterVerificationLPw(String packageName, int[] userIds) {
-        boolean result = false;
-        for (int userId : userIds) {
-            result |= removeIntentFilterVerificationLPw(packageName, userId, true);
-        }
-        return result;
     }
 
     String removeDefaultBrowserPackageNameLPw(int userId) {
@@ -1591,40 +1461,7 @@ public final class Settings implements Watchable, Snappable {
         }
     }
 
-    private void readDomainVerificationLPw(TypedXmlPullParser parser,
-            PackageSettingBase packageSetting) throws XmlPullParserException, IOException {
-        IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
-        packageSetting.setIntentFilterVerificationInfo(ivi);
-        if (DEBUG_PARSER) {
-            Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
-        }
-    }
-
-    private void readRestoredIntentFilterVerifications(TypedXmlPullParser parser)
-            throws XmlPullParserException, IOException {
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-            final String tagName = parser.getName();
-            if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
-                if (DEBUG_DOMAIN_VERIFICATION) {
-                    Slog.i(TAG, "Restored IVI for " + ivi.getPackageName()
-                            + " status=" + ivi.getStatusString());
-                }
-                mRestoredIntentFilterVerifications.put(ivi.getPackageName(), ivi);
-            } else {
-                Slog.w(TAG, "Unknown element: " + tagName);
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    void readDefaultAppsLPw(TypedXmlPullParser parser, int userId)
+    void readDefaultAppsLPw(XmlPullParser parser, int userId)
             throws XmlPullParserException, IOException {
         int outerDepth = parser.getDepth();
         int type;
@@ -1727,8 +1564,6 @@ public final class Settings implements Watchable, Snappable {
                                 null /*lastDisableAppCaller*/,
                                 null /*enabledComponents*/,
                                 null /*disabledComponents*/,
-                                INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED,
-                                0 /*linkGeneration*/,
                                 PackageManager.INSTALL_REASON_UNKNOWN,
                                 PackageManager.UNINSTALL_REASON_UNKNOWN,
                                 null /*harmfulAppWarning*/);
@@ -1752,8 +1587,6 @@ public final class Settings implements Watchable, Snappable {
                         "No start tag found in package manager stopped packages");
                 return;
             }
-
-            int maxAppLinkGeneration = 0;
 
             int outerDepth = parser.getDepth();
             PackageSetting ps = null;
@@ -1817,11 +1650,6 @@ public final class Settings implements Watchable, Snappable {
                     final int verifState = parser.getAttributeInt(null,
                             ATTR_DOMAIN_VERIFICATON_STATE,
                             PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED);
-                    final int linkGeneration =
-                            parser.getAttributeInt(null, ATTR_APP_LINK_GENERATION, 0);
-                    if (linkGeneration > maxAppLinkGeneration) {
-                        maxAppLinkGeneration = linkGeneration;
-                    }
                     final int installReason = parser.getAttributeInt(null, ATTR_INSTALL_REASON,
                             PackageManager.INSTALL_REASON_UNKNOWN);
                     final int uninstallReason = parser.getAttributeInt(null, ATTR_UNINSTALL_REASON,
@@ -1897,9 +1725,10 @@ public final class Settings implements Watchable, Snappable {
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
                             hidden, distractionFlags, suspended, suspendParamsMap,
-                            instantApp, virtualPreload,
-                            enabledCaller, enabledComponents, disabledComponents, verifState,
-                            linkGeneration, installReason, uninstallReason, harmfulAppWarning);
+                            instantApp, virtualPreload, enabledCaller, enabledComponents,
+                            disabledComponents, installReason, uninstallReason, harmfulAppWarning);
+
+                    mDomainVerificationManager.setLegacyUserState(name, userId, verifState);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -1918,9 +1747,6 @@ public final class Settings implements Watchable, Snappable {
             }
 
             str.close();
-
-            mNextAppLinkGeneration.put(userId, maxAppLinkGeneration + 1);
-
         } catch (XmlPullParserException e) {
             mReadMessages.append("Error reading: " + e.toString());
             PackageManagerService.reportSettingsProblem(Log.ERROR,
@@ -2038,77 +1864,7 @@ public final class Settings implements Watchable, Snappable {
         serializer.endTag(null, TAG_CROSS_PROFILE_INTENT_FILTERS);
     }
 
-    void writeDomainVerificationsLPr(TypedXmlSerializer serializer,
-                                     IntentFilterVerificationInfo verificationInfo)
-            throws IllegalArgumentException, IllegalStateException, IOException {
-        if (verificationInfo != null && verificationInfo.getPackageName() != null) {
-            serializer.startTag(null, TAG_DOMAIN_VERIFICATION);
-            verificationInfo.writeToXml(serializer);
-            if (DEBUG_DOMAIN_VERIFICATION) {
-                Slog.d(TAG, "Wrote domain verification for package: "
-                        + verificationInfo.getPackageName());
-            }
-            serializer.endTag(null, TAG_DOMAIN_VERIFICATION);
-        }
-    }
-
-    // Specifically for backup/restore
-    void writeAllDomainVerificationsLPr(TypedXmlSerializer serializer, int userId)
-            throws IllegalArgumentException, IllegalStateException, IOException {
-        serializer.startTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
-        final int N = mPackages.size();
-        for (int i = 0; i < N; i++) {
-            PackageSetting ps = mPackages.valueAt(i);
-            IntentFilterVerificationInfo ivi = ps.getIntentFilterVerificationInfo();
-            if (ivi != null) {
-                writeDomainVerificationsLPr(serializer, ivi);
-            }
-        }
-        serializer.endTag(null, TAG_ALL_INTENT_FILTER_VERIFICATION);
-    }
-
-    // Specifically for backup/restore
-    void readAllDomainVerificationsLPr(TypedXmlPullParser parser, int userId)
-            throws XmlPullParserException, IOException {
-        mRestoredIntentFilterVerifications.clear();
-
-        int outerDepth = parser.getDepth();
-        int type;
-        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
-                && (type != XmlPullParser.END_TAG || parser.getDepth() > outerDepth)) {
-            if (type == XmlPullParser.END_TAG || type == XmlPullParser.TEXT) {
-                continue;
-            }
-
-            String tagName = parser.getName();
-            if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
-                final String pkgName = ivi.getPackageName();
-                final PackageSetting ps = mPackages.get(pkgName);
-                if (ps != null) {
-                    // known/existing package; update in place
-                    ps.setIntentFilterVerificationInfo(ivi);
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.d(TAG, "Restored IVI for existing app " + pkgName
-                                + " status=" + ivi.getStatusString());
-                    }
-                } else {
-                    mRestoredIntentFilterVerifications.put(pkgName, ivi);
-                    if (DEBUG_DOMAIN_VERIFICATION) {
-                        Slog.d(TAG, "Restored IVI for pending app " + pkgName
-                                + " status=" + ivi.getStatusString());
-                    }
-                }
-            } else {
-                PackageManagerService.reportSettingsProblem(Log.WARN,
-                        "Unknown element under <all-intent-filter-verification>: "
-                        + parser.getName());
-                XmlUtils.skipCurrentTag(parser);
-            }
-        }
-    }
-
-    void writeDefaultAppsLPr(TypedXmlSerializer serializer, int userId)
+    void writeDefaultAppsLPr(XmlSerializer serializer, int userId)
             throws IllegalArgumentException, IllegalStateException, IOException {
         serializer.startTag(null, TAG_DEFAULT_APPS);
         String defaultBrowser = mDefaultBrowserApp.get(userId);
@@ -2216,15 +1972,6 @@ public final class Settings implements Watchable, Snappable {
                         serializer.attribute(null, ATTR_ENABLED_CALLER,
                                 ustate.lastDisableAppCaller);
                     }
-                }
-                if (ustate.domainVerificationStatus !=
-                        PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED) {
-                    serializer.attributeInt(null, ATTR_DOMAIN_VERIFICATON_STATE,
-                            ustate.domainVerificationStatus);
-                }
-                if (ustate.appLinkGeneration != 0) {
-                    serializer.attributeInt(null, ATTR_APP_LINK_GENERATION,
-                            ustate.appLinkGeneration);
                 }
                 if (ustate.installReason != PackageManager.INSTALL_REASON_UNKNOWN) {
                     serializer.attributeInt(null, ATTR_INSTALL_REASON, ustate.installReason);
@@ -2569,22 +2316,7 @@ public final class Settings implements Watchable, Snappable {
                 }
             }
 
-            final int numIVIs = mRestoredIntentFilterVerifications.size();
-            if (numIVIs > 0) {
-                if (DEBUG_DOMAIN_VERIFICATION) {
-                    Slog.i(TAG, "Writing restored-ivi entries to packages.xml");
-                }
-                serializer.startTag(null, "restored-ivi");
-                for (int i = 0; i < numIVIs; i++) {
-                    IntentFilterVerificationInfo ivi = mRestoredIntentFilterVerifications.valueAt(i);
-                    writeDomainVerificationsLPr(serializer, ivi);
-                }
-                serializer.endTag(null, "restored-ivi");
-            } else {
-                if (DEBUG_DOMAIN_VERIFICATION) {
-                    Slog.i(TAG, "  no restored IVI entries to write");
-                }
-            }
+            mDomainVerificationManager.writeSettings(serializer);
 
             mKeySetManagerService.writeKeySetManagerServiceLPr(serializer);
 
@@ -2961,6 +2693,8 @@ public final class Settings implements Watchable, Snappable {
         serializer.attributeFloat(null, "loadingProgress",
                 pkg.getIncrementalStates().getProgress());
 
+        serializer.attribute(null, "domainSetId", pkg.getDomainSetId().toString());
+
         writeUsesStaticLibLPw(serializer, pkg.usesStaticLibraries, pkg.usesStaticLibrariesVersions);
 
         pkg.signatures.writeXml(serializer, "sigs", mPastSignatures);
@@ -2973,7 +2707,7 @@ public final class Settings implements Watchable, Snappable {
         writeSigningKeySetLPr(serializer, pkg.keySetData);
         writeUpgradeKeySetsLPr(serializer, pkg.keySetData);
         writeKeySetAliasesLPr(serializer, pkg.keySetData);
-        writeDomainVerificationsLPr(serializer, pkg.verificationInfo);
+        mDomainVerificationManager.writeLegacySettings(serializer, pkg.name);
         writeMimeGroupLPr(serializer, pkg.mimeGroups);
 
         serializer.endTag(null, "package");
@@ -3104,8 +2838,6 @@ public final class Settings implements Watchable, Snappable {
                     if (nname != null && oname != null) {
                         mRenamedPackages.put(nname, oname);
                     }
-                } else if (tagName.equals("restored-ivi")) {
-                    readRestoredIntentFilterVerifications(parser);
                 } else if (tagName.equals("last-platform-version")) {
                     // Upgrade from older XML schema
                     final VersionInfo internal = findOrCreateVersion(
@@ -3147,6 +2879,11 @@ public final class Settings implements Watchable, Snappable {
                     ver.sdkVersion = parser.getAttributeInt(null, ATTR_SDK_VERSION);
                     ver.databaseVersion = parser.getAttributeInt(null, ATTR_DATABASE_VERSION);
                     ver.fingerprint = XmlUtils.readStringAttribute(parser, ATTR_FINGERPRINT);
+                } else if (tagName.equals(DomainVerificationPersistence.TAG_DOMAIN_VERIFICATIONS)) {
+                    mDomainVerificationManager.readSettings(parser);
+                } else if (tagName.equals(
+                        DomainVerificationLegacySettings.TAG_DOMAIN_VERIFICATIONS_LEGACY)) {
+                    mDomainVerificationManager.readLegacySettings(parser);
                 } else {
                     Slog.w(PackageManagerService.TAG, "Unknown element under <packages>: "
                             + parser.getName());
@@ -3628,9 +3365,15 @@ public final class Settings implements Watchable, Snappable {
         if (codePathStr.contains("/priv-app/")) {
             pkgPrivateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
         }
+
+        // When reading a disabled setting, use a disabled domainSetId, which makes it easier to
+        // debug invalid entries. The actual logic for migrating to a new ID is done in other
+        // methods that use DomainVerificationManagerInternal#generateNewId
+        UUID domainSetId = DomainVerificationManagerInternal.DISABLED_ID;
         PackageSetting ps = new PackageSetting(name, realName, new File(codePathStr),
                 legacyNativeLibraryPathStr, primaryCpuAbiStr, secondaryCpuAbiStr, cpuAbiOverrideStr,
-                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null);
+                versionCode, pkgFlags, pkgPrivateFlags, 0 /*sharedUserId*/, null, null, null,
+                domainSetId);
         long timeStamp = parser.getAttributeLongHex(null, "ft", 0);
         if (timeStamp == 0) {
             timeStamp = parser.getAttributeLong(null, "ts", 0);
@@ -3703,6 +3446,7 @@ public final class Settings implements Watchable, Snappable {
         boolean isStartable = false;
         boolean isLoading = false;
         float loadingProgress = 0;
+        UUID domainSetId;
         try {
             name = parser.getAttributeValue(null, ATTR_NAME);
             realName = parser.getAttributeValue(null, "realName");
@@ -3738,6 +3482,15 @@ public final class Settings implements Watchable, Snappable {
             volumeUuid = parser.getAttributeValue(null, "volumeUuid");
             categoryHint = parser.getAttributeInt(null, "categoryHint",
                     ApplicationInfo.CATEGORY_UNDEFINED);
+
+            String domainSetIdString = parser.getAttributeValue(null, "domainSetId");
+
+            if (TextUtils.isEmpty(domainSetIdString)) {
+                // If empty, assume restoring from previous platform version and generate an ID
+                domainSetId = mDomainVerificationManager.generateNewId();
+            } else {
+                domainSetId = UUID.fromString(domainSetIdString);
+            }
 
             systemStr = parser.getAttributeValue(null, "publicFlags");
             if (systemStr != null) {
@@ -3810,7 +3563,7 @@ public final class Settings implements Watchable, Snappable {
                         legacyNativeLibraryPathStr, primaryCpuAbiString, secondaryCpuAbiString,
                         cpuAbiOverrideString, userId, versionCode, pkgFlags, pkgPrivateFlags,
                         null /*usesStaticLibraries*/, null /*usesStaticLibraryVersions*/,
-                        null /*mimeGroups*/);
+                        null /*mimeGroups*/, domainSetId);
                 if (PackageManagerService.DEBUG_SETTINGS)
                     Log.i(PackageManagerService.TAG, "Reading package " + name + ": userId="
                             + userId + " pkg=" + packageSetting);
@@ -3831,7 +3584,7 @@ public final class Settings implements Watchable, Snappable {
                             versionCode, pkgFlags, pkgPrivateFlags, sharedUserId,
                             null /*usesStaticLibraries*/,
                             null /*usesStaticLibraryVersions*/,
-                            null /*mimeGroups*/);
+                            null /*mimeGroups*/, domainSetId);
                     packageSetting.setTimeStamp(timeStamp);
                     packageSetting.firstInstallTime = firstInstallTime;
                     packageSetting.lastUpdateTime = lastUpdateTime;
@@ -3946,7 +3699,11 @@ public final class Settings implements Watchable, Snappable {
                     packageSetting.installSource =
                             packageSetting.installSource.setInitiatingPackageSignatures(signatures);
                 } else if (tagName.equals(TAG_DOMAIN_VERIFICATION)) {
-                    readDomainVerificationLPw(parser, packageSetting);
+                    IntentFilterVerificationInfo ivi = new IntentFilterVerificationInfo(parser);
+                    mDomainVerificationManager.addLegacySetting(packageSetting.name, ivi);
+                    if (DEBUG_PARSER) {
+                        Log.d(TAG, "Read domain verification for package: " + ivi.getPackageName());
+                    }
                 } else if (tagName.equals(TAG_MIME_GROUP)) {
                     packageSetting.mimeGroups = readMimeGroupLPw(parser, packageSetting.mimeGroups);
                 } else if (tagName.equals(TAG_USES_STATIC_LIB)) {
@@ -4212,6 +3969,7 @@ public final class Settings implements Watchable, Snappable {
         removeCrossProfileIntentFiltersLPw(userId);
 
         mRuntimePermissionsPersistence.onUserRemovedLPw(userId);
+        mDomainVerificationManager.clearUser(userId);
 
         writePackageListLPr();
 

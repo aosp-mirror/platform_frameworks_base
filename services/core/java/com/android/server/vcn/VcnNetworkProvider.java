@@ -25,6 +25,9 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
+
 import java.util.Objects;
 import java.util.Set;
 
@@ -52,8 +55,13 @@ public class VcnNetworkProvider extends NetworkProvider {
         super(context, looper, VcnNetworkProvider.class.getSimpleName());
     }
 
-    // Package-private
-    void registerListener(@NonNull NetworkRequestListener listener) {
+    /**
+     * Registers a NetworkRequestListener with this NetworkProvider.
+     *
+     * <p>Upon registering, the provided listener will receive all cached requests.
+     */
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void registerListener(@NonNull NetworkRequestListener listener) {
         mListeners.add(listener);
 
         // Send listener all cached requests
@@ -62,8 +70,9 @@ public class VcnNetworkProvider extends NetworkProvider {
         }
     }
 
-    // Package-private
-    void unregisterListener(@NonNull NetworkRequestListener listener) {
+    /** Unregisters the specified listener from receiving future NetworkRequests. */
+    @VisibleForTesting(visibility = Visibility.PACKAGE)
+    public void unregisterListener(@NonNull NetworkRequestListener listener) {
         mListeners.remove(listener);
     }
 

@@ -77,18 +77,19 @@ public class WorkCountTrackerTest {
             for (int i = running.get(WORK_TYPE_BG); i > 0; i--) {
                 if (mRandom.nextDouble() < stopRatio) {
                     running.put(WORK_TYPE_BG, running.get(WORK_TYPE_BG) - 1);
+                    mWorkCountTracker.onJobFinished(WORK_TYPE_BG);
                 }
             }
             for (int i = running.get(WORK_TYPE_TOP); i > 0; i--) {
                 if (mRandom.nextDouble() < stopRatio) {
                     running.put(WORK_TYPE_TOP, running.get(WORK_TYPE_TOP) - 1);
+                    mWorkCountTracker.onJobFinished(WORK_TYPE_TOP);
                 }
             }
         }
     }
 
-
-    private void startPendingJobs(Jobs jobs, int totalMax,
+    private void recount(Jobs jobs, int totalMax,
             @NonNull List<Pair<Integer, Integer>> minLimits,
             @NonNull List<Pair<Integer, Integer>> maxLimits) {
         mWorkCountTracker.setConfig(new JobConcurrencyManager.WorkTypeConfig(
@@ -113,7 +114,9 @@ public class WorkCountTrackerTest {
         }
 
         mWorkCountTracker.onCountDone();
+    }
 
+    private void startPendingJobs(Jobs jobs) {
         while ((jobs.pending.get(WORK_TYPE_TOP) > 0
                 && mWorkCountTracker.canJobStart(WORK_TYPE_TOP) != WORK_TYPE_NONE)
                 || (jobs.pending.get(WORK_TYPE_BG) > 0
@@ -151,7 +154,8 @@ public class WorkCountTrackerTest {
             jobs.maybeFinishJobs(stopRatio);
             jobs.maybeEnqueueJobs(startRatio, fgJobRatio);
 
-            startPendingJobs(jobs, totalMax, minLimits, maxLimits);
+            recount(jobs, totalMax, minLimits, maxLimits);
+            startPendingJobs(jobs);
 
             int totalRunning = 0;
             for (int r = 0; r < jobs.running.size(); ++r) {
@@ -316,7 +320,8 @@ public class WorkCountTrackerTest {
             jobs.pending.put(pend.first, pend.second);
         }
 
-        startPendingJobs(jobs, totalMax, minLimits, maxLimits);
+        recount(jobs, totalMax, minLimits, maxLimits);
+        startPendingJobs(jobs);
 
         for (Pair<Integer, Integer> run : resultRunning) {
             assertWithMessage("Incorrect running result for work type " + run.first)
@@ -420,5 +425,82 @@ public class WorkCountTrackerTest {
                 /* pen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)),
                 /* resRun */ List.of(Pair.create(WORK_TYPE_BG, 6)),
                 /* resPen */ List.of(Pair.create(WORK_TYPE_TOP, 10), Pair.create(WORK_TYPE_BG, 3)));
+    }
+
+    /** Tests that the counter updates properly when jobs are stopped. */
+    @Test
+    public void testJobLifecycleLoop() {
+        final Jobs jobs = new Jobs();
+        jobs.pending.put(WORK_TYPE_TOP, 11);
+        jobs.pending.put(WORK_TYPE_BG, 10);
+
+        final int totalMax = 6;
+        final List<Pair<Integer, Integer>> minLimits = List.of(Pair.create(WORK_TYPE_BG, 1));
+        final List<Pair<Integer, Integer>> maxLimits = List.of(Pair.create(WORK_TYPE_BG, 5));
+
+        recount(jobs, totalMax, minLimits, maxLimits);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(5);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(6);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(9);
+
+        // Stop all jobs
+        jobs.maybeFinishJobs(1);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_TOP);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(5);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(8);
+
+        // Stop only a bg job and make sure the counter only allows another bg job to start.
+        jobs.running.put(WORK_TYPE_BG, jobs.running.get(WORK_TYPE_BG) - 1);
+        mWorkCountTracker.onJobFinished(WORK_TYPE_BG);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_NONE);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(5);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(7);
+
+        // Stop only a top job and make sure the counter only allows another top job to start.
+        jobs.running.put(WORK_TYPE_TOP, jobs.running.get(WORK_TYPE_TOP) - 1);
+        mWorkCountTracker.onJobFinished(WORK_TYPE_TOP);
+
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_TOP)).isEqualTo(WORK_TYPE_TOP);
+        assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_NONE);
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(5);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(1);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(7);
+
+        // Now that there are no more TOP jobs pending, BG should be able to start when TOP stops.
+        for (int i = jobs.running.get(WORK_TYPE_TOP); i > 0; --i) {
+            jobs.running.put(WORK_TYPE_TOP, jobs.running.get(WORK_TYPE_TOP) - 1);
+            mWorkCountTracker.onJobFinished(WORK_TYPE_TOP);
+
+            assertThat(mWorkCountTracker.canJobStart(WORK_TYPE_BG)).isEqualTo(WORK_TYPE_BG);
+        }
+
+        startPendingJobs(jobs);
+
+        assertThat(jobs.running.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.running.get(WORK_TYPE_BG)).isEqualTo(5);
+        assertThat(jobs.pending.get(WORK_TYPE_TOP)).isEqualTo(0);
+        assertThat(jobs.pending.get(WORK_TYPE_BG)).isEqualTo(3);
     }
 }

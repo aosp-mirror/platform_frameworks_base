@@ -207,12 +207,13 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
             if (mPowerStatsInternal != null) {
                 populateEnergyConsumerSubsystemMapsLocked();
                 final MeasuredEnergyArray initialMeasuredEnergies = getEnergyConsumptionData();
-                final boolean[] supportedBuckets = getSupportedEnergyBuckets(
-                        initialMeasuredEnergies);
                 mMeasuredEnergySnapshot = initialMeasuredEnergies == null
                         ? null : new MeasuredEnergySnapshot(initialMeasuredEnergies);
+                final boolean[] supportedStdBuckets
+                        = getSupportedEnergyBuckets(initialMeasuredEnergies);
+                final int numCustomBuckets = 0; // TODO: Get this from initialMeasuredEnergies
                 synchronized (mStats) {
-                    mStats.initMeasuredEnergyStatsLocked(supportedBuckets);
+                    mStats.initMeasuredEnergyStatsLocked(supportedStdBuckets, numCustomBuckets);
                 }
             }
         }
@@ -740,15 +741,16 @@ class BatteryExternalStatsWorker implements BatteryStatsImpl.ExternalStatsSync {
 
     /**
      * Map the {@link MeasuredEnergyArray.MeasuredEnergySubsystem}s in the given energyArray to
-     * their corresponding {@link MeasuredEnergyStats.EnergyBucket}s.
+     * their corresponding {@link MeasuredEnergyStats.StandardEnergyBucket}s.
+     * Does not include custom energy buckets (which are always, by definition, supported).
      *
-     * @return array with true for index i if energy bucket i is supported.
+     * @return array with true for index i if standard energy bucket i is supported.
      */
     private static @Nullable boolean[] getSupportedEnergyBuckets(MeasuredEnergyArray energyArray) {
         if (energyArray == null) {
             return null;
         }
-        final boolean[] buckets = new boolean[MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS];
+        final boolean[] buckets = new boolean[MeasuredEnergyStats.NUMBER_STANDARD_ENERGY_BUCKETS];
         final int size = energyArray.size();
         for (int energyIdx = 0; energyIdx < size; energyIdx++) {
             switch (energyArray.getSubsystem(energyIdx)) {

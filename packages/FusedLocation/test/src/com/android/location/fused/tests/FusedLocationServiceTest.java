@@ -26,7 +26,6 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationRequest;
-import android.location.LocationResult;
 import android.location.provider.ILocationProvider;
 import android.location.provider.ILocationProviderManager;
 import android.location.provider.ProviderProperties;
@@ -49,6 +48,7 @@ import org.junit.runner.RunWith;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -167,10 +167,13 @@ public class FusedLocationServiceTest {
         }
 
         @Override
-        public void onReportLocation(LocationResult locationResult) {
-            for (int i = 0; i < locationResult.size(); i++) {
-                mLocations.add(locationResult.get(i));
-            }
+        public void onReportLocation(Location location) {
+            mLocations.add(location);
+        }
+
+        @Override
+        public void onReportLocations(List<Location> locations) {
+            mLocations.addAll(locations);
         }
 
         @Override

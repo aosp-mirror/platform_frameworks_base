@@ -21,7 +21,6 @@ import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.os.Binder;
 import android.os.Build;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.window.TaskSnapshot;
 
@@ -160,12 +159,6 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
             // Preemptively clear any reference to the buffer
             snapshot.getHardwareBuffer().close();
         }
-    }
-
-    @Override
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-    public void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken)
-            throws RemoteException {
     }
 
     @Override

@@ -19,7 +19,6 @@ package com.android.wm.shell.common;
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ITaskStackListener;
 import android.content.ComponentName;
-import android.os.IBinder;
 import android.window.TaskSnapshot;
 
 import androidx.annotation.BinderThread;
@@ -85,6 +84,4 @@ public interface TaskStackListenerCallback {
     default void onActivityRequestedOrientationChanged(int taskId, int requestedOrientation) { }
 
     default void onActivityRotation(int displayId) { }
-
-    default void onSizeCompatModeActivityChanged(int displayId, IBinder activityToken) { }
 }

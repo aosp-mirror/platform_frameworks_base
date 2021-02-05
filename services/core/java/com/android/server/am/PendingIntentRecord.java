@@ -24,7 +24,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
-import android.app.BroadcastOptions;
 import android.app.PendingIntent;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
@@ -65,7 +64,8 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     boolean canceled = false;
     /**
      * Map IBinder to duration specified as Pair<Long, Integer>, Long is allowlist duration in
-     * milliseconds, Integer is allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * milliseconds, Integer is allowlist type defined at
+     * {@link android.os.PowerWhitelistManager.TempAllowListType}
      */
     private ArrayMap<IBinder, Pair<Long, Integer>> mWhitelistDuration;
     private RemoteCallbackList<IResultReceiver> mCancelCallbacks;
