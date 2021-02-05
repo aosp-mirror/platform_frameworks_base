@@ -5616,43 +5616,52 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     public void testDisallowSharingIntoProfileSetRestriction() {
         when(mServiceContext.resources.getString(R.string.config_managed_provisioning_package))
                 .thenReturn("com.android.managedprovisioning");
+        when(getServices().userManagerInternal.getProfileParentId(anyInt()))
+                .thenReturn(UserHandle.USER_SYSTEM);
+        mServiceContext.binder.callingPid = DpmMockContext.SYSTEM_PID;
+        mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         Bundle restriction = new Bundle();
         restriction.putBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, true);
 
-        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
-        RestrictionsListener listener = new RestrictionsListener(mContext);
+        RestrictionsListener listener = new RestrictionsListener(
+                mServiceContext, getServices().userManagerInternal, dpms);
         listener.onUserRestrictionsChanged(CALLER_USER_HANDLE, restriction, new Bundle());
-        verifyDataSharingChangedBroadcast();
+
+        verifyDataSharingAppliedBroadcast();
     }
 
     @Test
     public void testDisallowSharingIntoProfileClearRestriction() {
         when(mServiceContext.resources.getString(R.string.config_managed_provisioning_package))
                 .thenReturn("com.android.managedprovisioning");
+        when(getServices().userManagerInternal.getProfileParentId(anyInt()))
+                .thenReturn(UserHandle.USER_SYSTEM);
+        mServiceContext.binder.callingPid = DpmMockContext.SYSTEM_PID;
+        mServiceContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         Bundle restriction = new Bundle();
         restriction.putBoolean(UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE, true);
 
-        mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
-        RestrictionsListener listener = new RestrictionsListener(mContext);
+        RestrictionsListener listener = new RestrictionsListener(
+                mServiceContext, getServices().userManagerInternal, dpms);
         listener.onUserRestrictionsChanged(CALLER_USER_HANDLE, new Bundle(), restriction);
-        verifyDataSharingChangedBroadcast();
+
+        verifyDataSharingAppliedBroadcast();
     }
 
     @Test
     public void testDisallowSharingIntoProfileUnchanged() {
-        RestrictionsListener listener = new RestrictionsListener(mContext);
+        RestrictionsListener listener = new RestrictionsListener(
+                mContext, getServices().userManagerInternal, dpms);
         listener.onUserRestrictionsChanged(CALLER_USER_HANDLE, new Bundle(), new Bundle());
         verify(mContext.spiedContext, never()).sendBroadcastAsUser(any(), any());
     }
 
-    private void verifyDataSharingChangedBroadcast() {
+    private void verifyDataSharingAppliedBroadcast() {
         Intent expectedIntent = new Intent(
-                DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_CHANGED);
-        expectedIntent.setPackage("com.android.managedprovisioning");
-        expectedIntent.putExtra(Intent.EXTRA_USER_ID, CALLER_USER_HANDLE);
+                DevicePolicyManager.ACTION_DATA_SHARING_RESTRICTION_APPLIED);
         verify(mContext.spiedContext, times(1)).sendBroadcastAsUser(
                 MockUtils.checkIntent(expectedIntent),
-                MockUtils.checkUserHandle(UserHandle.USER_SYSTEM));
+                MockUtils.checkUserHandle(CALLER_USER_HANDLE));
     }
 
     @Test
