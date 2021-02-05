@@ -1262,6 +1262,13 @@ public class ConnectivityServiceTest {
         }
     }
 
+    private void processBroadcastForVpn(Intent intent) {
+        // The BroadcastReceiver for this broadcast checks it is being run on the handler thread.
+        final Handler handler = new Handler(mCsHandlerThread.getLooper());
+        handler.post(() -> mServiceContext.sendBroadcast(intent));
+        waitForIdle();
+    }
+
     private void mockUidNetworkingBlocked() {
         doAnswer(i -> mContext.getSystemService(NetworkPolicyManager.class)
                 .checkUidNetworkingBlocked(i.getArgument(0) /* uid */, mUidRules,
@@ -5300,20 +5307,20 @@ public class ConnectivityServiceTest {
         // MOBILE_IFNAME even though the default network is wifi.
         // TODO: fix this to pass in the actual default network interface. Whether or not the VPN
         // applies to the system server UID should not have any bearing on network stats.
-        mService.setUnderlyingNetworksForVpn(onlyCell);
+        mMockVpn.setUnderlyingNetworks(onlyCell);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, MOBILE_IFNAME, Process.myUid(), VPN_IFNAME,
                 new String[]{MOBILE_IFNAME});
         reset(mStatsService);
 
-        mService.setUnderlyingNetworksForVpn(cellAndWifi);
+        mMockVpn.setUnderlyingNetworks(cellAndWifi);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, MOBILE_IFNAME, Process.myUid(), VPN_IFNAME,
                 new String[]{MOBILE_IFNAME, WIFI_IFNAME});
         reset(mStatsService);
 
         // Null underlying networks are ignored.
-        mService.setUnderlyingNetworksForVpn(cellNullAndWifi);
+        mMockVpn.setUnderlyingNetworks(cellNullAndWifi);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, MOBILE_IFNAME, Process.myUid(), VPN_IFNAME,
                 new String[]{MOBILE_IFNAME, WIFI_IFNAME});
@@ -5362,25 +5369,25 @@ public class ConnectivityServiceTest {
         // is probably a performance improvement (though it's very unlikely that a VPN would declare
         // no underlying networks).
         // Also, for the same reason as above, the active interface passed in is null.
-        mService.setUnderlyingNetworksForVpn(new Network[0]);
+        mMockVpn.setUnderlyingNetworks(new Network[0]);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, null);
         reset(mStatsService);
 
         // Specifying only a null underlying network is the same as no networks.
-        mService.setUnderlyingNetworksForVpn(onlyNull);
+        mMockVpn.setUnderlyingNetworks(onlyNull);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, null);
         reset(mStatsService);
 
         // Specifying networks that are all disconnected is the same as specifying no networks.
-        mService.setUnderlyingNetworksForVpn(onlyCell);
+        mMockVpn.setUnderlyingNetworks(onlyCell);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, null);
         reset(mStatsService);
 
         // Passing in null again means follow the default network again.
-        mService.setUnderlyingNetworksForVpn(null);
+        mMockVpn.setUnderlyingNetworks(null);
         waitForIdle();
         expectForceUpdateIfaces(wifiAndVpn, WIFI_IFNAME, Process.myUid(), VPN_IFNAME,
                 new String[]{WIFI_IFNAME});
@@ -5855,7 +5862,7 @@ public class ConnectivityServiceTest {
         mMockVpn.establishForMyUid(false, true, false);
         assertUidRangesUpdatedForMyUid(true);
         final Network wifiNetwork = new Network(mNetIdManager.peekNextNetId());
-        mService.setUnderlyingNetworksForVpn(new Network[]{wifiNetwork});
+        mMockVpn.setUnderlyingNetworks(new Network[]{wifiNetwork});
         callback.expectAvailableCallbacksUnvalidated(mMockVpn);
         assertTrue(mCm.getNetworkCapabilities(mMockVpn.getNetwork())
                 .hasTransport(TRANSPORT_VPN));
@@ -6049,7 +6056,7 @@ public class ConnectivityServiceTest {
 
         final Set<UidRange> ranges = uidRangesForUid(uid);
         mMockVpn.registerAgent(ranges);
-        mService.setUnderlyingNetworksForVpn(new Network[0]);
+        mMockVpn.setUnderlyingNetworks(new Network[0]);
 
         // VPN networks do not satisfy the default request and are automatically validated
         // by NetworkMonitor
@@ -6297,7 +6304,7 @@ public class ConnectivityServiceTest {
         mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mCellNetworkAgent.connect(true);
 
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
@@ -6312,7 +6319,7 @@ public class ConnectivityServiceTest {
         mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mWiFiNetworkAgent.connect(true);
 
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
@@ -6323,7 +6330,7 @@ public class ConnectivityServiceTest {
         assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Don't disconnect, but note the VPN is not using wifi any more.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
@@ -6354,7 +6361,7 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectCallback(CallbackEntry.RESUMED, mMockVpn);
 
         // Use Wifi but not cell. Note the VPN is now unmetered and not suspended.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mWiFiNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
@@ -6365,7 +6372,7 @@ public class ConnectivityServiceTest {
         assertDefaultNetworkCapabilities(userId, mWiFiNetworkAgent);
 
         // Use both again.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
@@ -6380,7 +6387,7 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.assertNoCallback();
 
         // Stop using WiFi. The VPN is suspended again.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork() });
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
@@ -6391,7 +6398,7 @@ public class ConnectivityServiceTest {
         assertDefaultNetworkCapabilities(userId, mCellNetworkAgent, mWiFiNetworkAgent);
 
         // Use both again.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(mMockVpn,
@@ -6526,9 +6533,7 @@ public class ConnectivityServiceTest {
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
 
         // Send a USER_ADDED broadcast for it.
-        // The BroadcastReceiver for this broadcast checks that is being run on the handler thread.
-        final Handler handler = new Handler(mCsHandlerThread.getLooper());
-        handler.post(() -> mServiceContext.sendBroadcast(addedIntent));
+        processBroadcastForVpn(addedIntent);
 
         // Expect that the VPN UID ranges contain both |uid| and the UID range for the newly-added
         // restricted user.
@@ -6552,7 +6557,7 @@ public class ConnectivityServiceTest {
         // Send a USER_REMOVED broadcast and expect to lose the UID range for the restricted user.
         final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
         removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
-        handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
+        processBroadcastForVpn(removedIntent);
 
         // Expect that the VPN gains the UID range for the restricted user, and that the capability
         // change made just before that (i.e., loss of TRANSPORT_WIFI) is preserved.
@@ -6609,9 +6614,7 @@ public class ConnectivityServiceTest {
         // TODO: check that VPN app within restricted profile still has access, etc.
         final Intent addedIntent = new Intent(ACTION_USER_ADDED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
-        final Handler handler = new Handler(mCsHandlerThread.getLooper());
-        handler.post(() -> mServiceContext.sendBroadcast(addedIntent));
-        waitForIdle();
+        processBroadcastForVpn(addedIntent);
         assertNull(mCm.getActiveNetworkForUid(uid));
         assertNull(mCm.getActiveNetworkForUid(restrictedUid));
 
@@ -6621,8 +6624,7 @@ public class ConnectivityServiceTest {
         // Send a USER_REMOVED broadcast and expect to lose the UID range for the restricted user.
         final Intent removedIntent = new Intent(ACTION_USER_REMOVED);
         removedIntent.putExtra(Intent.EXTRA_USER_HANDLE, RESTRICTED_USER);
-        handler.post(() -> mServiceContext.sendBroadcast(removedIntent));
-        waitForIdle();
+        processBroadcastForVpn(removedIntent);
         assertNull(mCm.getActiveNetworkForUid(uid));
         assertNotNull(mCm.getActiveNetworkForUid(restrictedUid));
 
@@ -6724,7 +6726,7 @@ public class ConnectivityServiceTest {
         // Ensure VPN is now the active network.
         assertEquals(mMockVpn.getNetwork(), mCm.getActiveNetwork());
         // VPN is using Cell
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork() });
         waitForIdle();
 
@@ -6732,7 +6734,7 @@ public class ConnectivityServiceTest {
         assertTrue(mCm.isActiveNetworkMetered());
 
         // VPN is now using WiFi
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mWiFiNetworkAgent.getNetwork() });
         waitForIdle();
 
@@ -6740,7 +6742,7 @@ public class ConnectivityServiceTest {
         assertFalse(mCm.isActiveNetworkMetered());
 
         // VPN is using Cell | WiFi.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork() });
         waitForIdle();
 
@@ -6748,7 +6750,7 @@ public class ConnectivityServiceTest {
         assertTrue(mCm.isActiveNetworkMetered());
 
         // VPN is using WiFi | Cell.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mWiFiNetworkAgent.getNetwork(), mCellNetworkAgent.getNetwork() });
         waitForIdle();
 
@@ -6756,7 +6758,7 @@ public class ConnectivityServiceTest {
         assertTrue(mCm.isActiveNetworkMetered());
 
         // VPN is not using any underlying networks.
-        mService.setUnderlyingNetworksForVpn(new Network[0]);
+        mMockVpn.setUnderlyingNetworks(new Network[0]);
         waitForIdle();
 
         // VPN without underlying networks is treated as metered.
@@ -6783,7 +6785,7 @@ public class ConnectivityServiceTest {
         assertEquals(mMockVpn.getNetwork(), mCm.getActiveNetwork());
 
         // VPN is tracking current platform default (WiFi).
-        mService.setUnderlyingNetworksForVpn(null);
+        mMockVpn.setUnderlyingNetworks(null);
         waitForIdle();
 
         // Despite VPN using WiFi (which is unmetered), VPN itself is marked as always metered.
@@ -6791,7 +6793,7 @@ public class ConnectivityServiceTest {
 
 
         // VPN explicitly declares WiFi as its underlying network.
-        mService.setUnderlyingNetworksForVpn(
+        mMockVpn.setUnderlyingNetworks(
                 new Network[] { mWiFiNetworkAgent.getNetwork() });
         waitForIdle();
 
@@ -7199,9 +7201,7 @@ public class ConnectivityServiceTest {
         final int userId = UserHandle.getUserId(Process.myUid());
         final Intent addedIntent = new Intent(ACTION_USER_UNLOCKED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
-        final Handler handler = new Handler(mCsHandlerThread.getLooper());
-        handler.post(() -> mServiceContext.sendBroadcast(addedIntent));
-        waitForIdle();
+        processBroadcastForVpn(addedIntent);
 
         // Lockdown VPN disables teardown and enables lockdown.
         assertFalse(mMockVpn.getEnableTeardown());
@@ -8643,7 +8643,7 @@ public class ConnectivityServiceTest {
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
 
-        assertTrue(mService.setUnderlyingNetworksForVpn(new Network[] {naiWithoutUid.network}));
+        assertTrue(mMockVpn.setUnderlyingNetworks(new Network[] {naiWithoutUid.network}));
         waitForIdle();
         assertTrue(
                 "Active VPN permission not applied",
@@ -8651,7 +8651,7 @@ public class ConnectivityServiceTest {
                         Process.myPid(), Process.myUid(), naiWithoutUid,
                         mContext.getOpPackageName()));
 
-        assertTrue(mService.setUnderlyingNetworksForVpn(null));
+        assertTrue(mMockVpn.setUnderlyingNetworks(null));
         waitForIdle();
         assertFalse(
                 "VPN shouldn't receive callback on non-underlying network",
