@@ -3858,13 +3858,6 @@ public abstract class PackageManager {
     public static final String EXTRA_FAILURE_EXISTING_PERMISSION
             = "android.content.pm.extra.FAILURE_EXISTING_PERMISSION";
 
-    /**
-     * Extra field name for the ID of a package pending verification. Passed to
-     * a package verifier and is used to call back to
-     * @see #requestChecksums
-     */
-    public static final String EXTRA_CHECKSUMS = "android.content.pm.extra.CHECKSUMS";
-
    /**
     * Permission flag: The permission is set in its current state
     * by the user and apps can still request it at runtime.
@@ -8709,9 +8702,20 @@ public abstract class PackageManager {
      */
     public static final @NonNull List<Certificate> TRUST_NONE = Collections.singletonList(null);
 
+    /** Listener that gets notified when checksums are available. */
+    @FunctionalInterface
+    public interface OnChecksumsReadyListener {
+        /**
+         * Called when the checksums are available.
+         *
+         * @param checksums array of checksums.
+         */
+        void onChecksumsReady(@NonNull List<ApkChecksum> checksums);
+    }
+
     /**
      * Requesting the checksums for APKs within a package.
-     * The checksums will be returned asynchronously via statusReceiver.
+     * The checksums will be returned asynchronously via onChecksumsReadyListener.
      *
      * By default returns all readily available checksums:
      * - enforced by platform,
@@ -8730,15 +8734,14 @@ public abstract class PackageManager {
      *                          {@link #TRUST_ALL} will return checksums from any installer,
      *                          {@link #TRUST_NONE} disables optimized installer-enforced checksums,
      *                          otherwise the list has to be non-empty list of certificates.
-     * @param statusReceiver called once when the results are available as
-     *                       {@link #EXTRA_CHECKSUMS} of type {@link ApkChecksum}[].
+     * @param onChecksumsReadyListener called once when the results are available.
      * @throws CertificateEncodingException if an encoding error occurs for trustedInstallers.
      * @throws IllegalArgumentException if the list of trusted installer certificates is empty.
      * @throws NameNotFoundException if a package with the given name cannot be found on the system.
      */
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
             @Checksum.Type int required, @NonNull List<Certificate> trustedInstallers,
-            @NonNull IntentSender statusReceiver)
+            @NonNull OnChecksumsReadyListener onChecksumsReadyListener)
             throws CertificateEncodingException, NameNotFoundException {
         throw new UnsupportedOperationException("requestChecksums not implemented in subclass");
     }

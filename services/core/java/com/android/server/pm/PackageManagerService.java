@@ -177,6 +177,7 @@ import android.content.pm.DataLoaderType;
 import android.content.pm.FallbackCategoryProvider;
 import android.content.pm.FeatureInfo;
 import android.content.pm.IDexModuleRegisterCallback;
+import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageChangeObserver;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
@@ -5523,19 +5524,19 @@ public class PackageManagerService extends IPackageManager.Stub
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
             @Checksum.Type int optional,
             @Checksum.Type int required, @Nullable List trustedInstallers,
-            @NonNull IntentSender statusReceiver, int userId) {
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId) {
         requestChecksumsInternal(packageName, includeSplits, optional, required, trustedInstallers,
-                statusReceiver, userId, mInjector.getBackgroundExecutor(),
+                onChecksumsReadyListener, userId, mInjector.getBackgroundExecutor(),
                 mInjector.getBackgroundHandler());
     }
 
     private void requestChecksumsInternal(@NonNull String packageName, boolean includeSplits,
-            @Checksum.Type int optional,
-            @Checksum.Type int required, @Nullable List trustedInstallers,
-            @NonNull IntentSender statusReceiver, int userId, @NonNull Executor executor,
-            @NonNull Handler handler) {
+            @Checksum.Type int optional, @Checksum.Type int required,
+            @Nullable List trustedInstallers,
+            @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
+            @NonNull Executor executor, @NonNull Handler handler) {
         Objects.requireNonNull(packageName);
-        Objects.requireNonNull(statusReceiver);
+        Objects.requireNonNull(onChecksumsReadyListener);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(handler);
 
@@ -5571,7 +5572,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     () -> mInjector.getIncrementalManager(),
                     () -> mPmInternal);
             ApkChecksums.getChecksums(filesToChecksum, optional, required, installerPackageName,
-                    trustedCerts, statusReceiver, injector);
+                    trustedCerts, onChecksumsReadyListener, injector);
         });
     }
 
@@ -27110,12 +27111,14 @@ public class PackageManagerService extends IPackageManager.Stub
             ps.setStatesOnCrashOrAnr();
         }
 
+        @Override
         public void requestChecksums(@NonNull String packageName, boolean includeSplits,
                 @Checksum.Type int optional, @Checksum.Type int required,
-                @Nullable List trustedInstallers, @NonNull IntentSender statusReceiver, int userId,
+                @Nullable List trustedInstallers,
+                @NonNull IOnChecksumsReadyListener onChecksumsReadyListener, int userId,
                 @NonNull Executor executor, @NonNull Handler handler) {
             requestChecksumsInternal(packageName, includeSplits, optional, required,
-                    trustedInstallers, statusReceiver, userId, executor, handler);
+                    trustedInstallers, onChecksumsReadyListener, userId, executor, handler);
         }
 
         @Override

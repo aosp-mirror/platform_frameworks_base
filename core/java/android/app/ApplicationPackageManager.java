@@ -39,11 +39,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
+import android.content.pm.ApkChecksum;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.ChangedPackages;
 import android.content.pm.Checksum;
 import android.content.pm.ComponentInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.IOnChecksumsReadyListener;
 import android.content.pm.IPackageDataObserver;
 import android.content.pm.IPackageDeleteObserver;
 import android.content.pm.IPackageManager;
@@ -880,10 +882,10 @@ public class ApplicationPackageManager extends PackageManager {
     @Override
     public void requestChecksums(@NonNull String packageName, boolean includeSplits,
             @Checksum.Type int required, @NonNull List<Certificate> trustedInstallers,
-            @NonNull IntentSender statusReceiver)
+            @NonNull OnChecksumsReadyListener onChecksumsReadyListener)
             throws CertificateEncodingException, NameNotFoundException {
         Objects.requireNonNull(packageName);
-        Objects.requireNonNull(statusReceiver);
+        Objects.requireNonNull(onChecksumsReadyListener);
         Objects.requireNonNull(trustedInstallers);
         try {
             if (trustedInstallers == TRUST_ALL) {
@@ -895,8 +897,17 @@ public class ApplicationPackageManager extends PackageManager {
                         "trustedInstallers has to be one of TRUST_ALL/TRUST_NONE or a non-empty "
                                 + "list of certificates.");
             }
+            IOnChecksumsReadyListener onChecksumsReadyListenerDelegate =
+                    new IOnChecksumsReadyListener.Stub() {
+                        @Override
+                        public void onChecksumsReady(List<ApkChecksum> checksums)
+                                throws RemoteException {
+                            onChecksumsReadyListener.onChecksumsReady(checksums);
+                        }
+                    };
             mPM.requestChecksums(packageName, includeSplits, DEFAULT_CHECKSUMS, required,
-                    encodeCertificates(trustedInstallers), statusReceiver, getUserId());
+                    encodeCertificates(trustedInstallers), onChecksumsReadyListenerDelegate,
+                    getUserId());
         } catch (ParcelableException e) {
             e.maybeRethrow(PackageManager.NameNotFoundException.class);
             throw new RuntimeException(e);
