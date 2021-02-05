@@ -362,34 +362,6 @@ public class PeopleSpaceUtilsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testAugmentTileFromStorageWithNotification() {
-        PeopleSpaceTile tile =
-                new PeopleSpaceTile
-                        .Builder("id", "userName", ICON, new Intent())
-                        .build();
-        PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromStorage(tile, mAppWidgetManager, WIDGET_ID_WITH_SHORTCUT);
-
-        assertThat(actual.getNotificationKey()).isEqualTo(NOTIFICATION_KEY);
-        assertThat(actual.getNotificationContent()).isEqualTo(NOTIFICATION_CONTENT);
-        assertThat(actual.getNotificationDataUri()).isEqualTo(URI);
-    }
-
-    @Test
-    public void testAugmentTileFromStorageWithoutNotification() {
-        PeopleSpaceTile tile =
-                new PeopleSpaceTile
-                        .Builder("id", "userName", ICON, new Intent())
-                        .build();
-        PeopleSpaceTile actual = PeopleSpaceUtils
-                .augmentTileFromStorage(tile, mAppWidgetManager, WIDGET_ID_WITHOUT_SHORTCUT);
-
-        assertThat(actual.getNotificationKey()).isEqualTo(null);
-        assertThat(actual.getNotificationKey()).isEqualTo(null);
-        assertThat(actual.getNotificationDataUri()).isEqualTo(null);
-    }
-
-    @Test
     public void testDoNotUpdateSingleConversationAppWidgetWhenNotBirthday() {
         int[] widgetIdsArray = {WIDGET_ID_WITH_SHORTCUT};
         when(mMockCursor.moveToNext()).thenReturn(true, false);
