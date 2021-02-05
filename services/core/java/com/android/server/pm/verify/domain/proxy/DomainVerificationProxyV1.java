@@ -37,10 +37,10 @@ import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.verify.domain.DomainVerificationCollector;
 import com.android.server.pm.verify.domain.DomainVerificationManagerInternal;
 import com.android.server.pm.verify.domain.DomainVerificationMessageCodes;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 
 import java.util.Collections;
 import java.util.List;
@@ -152,18 +152,22 @@ public class DomainVerificationProxyV1 implements DomainVerificationProxy {
 
                 UUID domainSetId = pair.first;
                 String packageName = pair.second;
-                DomainVerificationInfo set;
+                DomainVerificationInfo info;
                 try {
-                    set = mManager.getDomainVerificationInfo(packageName);
+                    info = mManager.getDomainVerificationInfo(packageName);
                 } catch (PackageManager.NameNotFoundException ignored) {
                     return true;
                 }
 
-                if (!Objects.equals(domainSetId, set.getIdentifier())) {
+                if (info == null) {
                     return true;
                 }
 
-                Set<String> successfulDomains = new ArraySet<>(set.getHostToStateMap().keySet());
+                if (!Objects.equals(domainSetId, info.getIdentifier())) {
+                    return true;
+                }
+
+                Set<String> successfulDomains = new ArraySet<>(info.getHostToStateMap().keySet());
                 successfulDomains.removeAll(response.failedDomains);
 
                 int callingUid = response.callingUid;
