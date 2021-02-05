@@ -38,6 +38,9 @@ import com.android.server.pm.verify.domain.models.DomainVerificationStateMap;
 import com.android.server.pm.verify.domain.models.DomainVerificationUserState;
 
 import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 
 @SuppressWarnings("PointlessBooleanExpression")
 public class DomainVerificationDebug {
@@ -62,7 +65,7 @@ public class DomainVerificationDebug {
 
     public void printState(@NonNull IndentingPrintWriter writer, @Nullable String packageName,
             @Nullable @UserIdInt Integer userId,
-            @NonNull DomainVerificationService.Connection connection,
+            @NonNull Function<String, PackageSetting> pkgSettingFunction,
             @NonNull DomainVerificationStateMap<DomainVerificationPkgState> stateMap)
             throws NameNotFoundException {
         ArrayMap<String, Integer> reusedMap = new ArrayMap<>();
@@ -73,7 +76,7 @@ public class DomainVerificationDebug {
             for (int index = 0; index < size; index++) {
                 DomainVerificationPkgState pkgState = stateMap.valueAt(index);
                 String pkgName = pkgState.getPackageName();
-                PackageSetting pkgSetting = connection.getPackageSettingLocked(pkgName);
+                PackageSetting pkgSetting = pkgSettingFunction.apply(pkgName);
                 if (pkgSetting == null || pkgSetting.getPkg() == null) {
                     continue;
                 }
@@ -89,7 +92,7 @@ public class DomainVerificationDebug {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
 
-            PackageSetting pkgSetting = connection.getPackageSettingLocked(packageName);
+            PackageSetting pkgSetting = pkgSettingFunction.apply(packageName);
             if (pkgSetting == null || pkgSetting.getPkg() == null) {
                 throw DomainVerificationUtils.throwPackageUnavailable(packageName);
             }
