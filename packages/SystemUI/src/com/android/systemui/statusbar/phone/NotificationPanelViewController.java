@@ -95,6 +95,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.plugins.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.qs.QSDetailDisplayer;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
@@ -292,6 +293,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private final KeyguardStatusViewComponent.Factory mKeyguardStatusViewComponentFactory;
     private final QSDetailDisplayer mQSDetailDisplayer;
+    private final FeatureFlags mFeatureFlags;
     private final ScrimController mScrimController;
     // Maximum # notifications to show on Keyguard; extras will be collapsed in an overflow card.
     // If there are exactly 1 + mMaxKeyguardNotifications, then still shows all notifications
@@ -554,7 +556,9 @@ public class NotificationPanelViewController extends PanelViewController {
             QSDetailDisplayer qsDetailDisplayer,
             ScrimController scrimController,
             MediaDataManager mediaDataManager,
-            AmbientState ambientState) {
+            AmbientState ambientState,
+            FeatureFlags featureFlags
+    ) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
                 latencyTracker, flingAnimationUtilsBuilder.get(), statusBarTouchableRegionManager,
@@ -571,6 +575,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationIconAreaController = notificationIconAreaController;
         mKeyguardStatusViewComponentFactory = keyguardStatusViewComponentFactory;
         mQSDetailDisplayer = qsDetailDisplayer;
+        mFeatureFlags = featureFlags;
         mView.setWillNotDraw(!DEBUG);
         mLayoutInflater = layoutInflater;
         mFalsingManager = falsingManager;
@@ -767,6 +772,26 @@ public class NotificationPanelViewController extends PanelViewController {
         if (lp.width != panelWidth) {
             lp.width = panelWidth;
             mNotificationStackScrollLayoutController.setLayoutParams(lp);
+        }
+
+        if (shouldUseSplitNotificationShade()) {
+            // In order to change the constraints at runtime, all children of the Constraint Layout
+            // must have ids.
+            ensureAllViewsHaveIds(mNotificationContainerParent);
+        }
+    }
+
+    private boolean shouldUseSplitNotificationShade() {
+        return mFeatureFlags.isTwoColumnNotificationShadeEnabled()
+                && mResources.getBoolean(R.bool.config_use_split_notification_shade);
+    }
+
+    private static void ensureAllViewsHaveIds(ViewGroup parentView) {
+        for (int i = 0; i < parentView.getChildCount(); i++) {
+            View childView = parentView.getChildAt(i);
+            if (childView.getId() == View.NO_ID) {
+                childView.setId(View.generateViewId());
+            }
         }
     }
 
