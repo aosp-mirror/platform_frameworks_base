@@ -933,7 +933,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
                 }
                 win.destroySurfaceUnchecked();
-                win.mWinAnimator.destroyPreservedSurfaceLocked(win.getSyncTransaction());
             } while (i > 0);
             mWmService.mDestroySurface.clear();
         }

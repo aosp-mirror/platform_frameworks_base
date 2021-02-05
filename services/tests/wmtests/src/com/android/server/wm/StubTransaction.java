@@ -152,12 +152,6 @@ public class StubTransaction extends SurfaceControl.Transaction {
     }
 
     @Override
-    public SurfaceControl.Transaction reparentChildren(SurfaceControl sc,
-            SurfaceControl newParent) {
-        return this;
-    }
-
-    @Override
     public SurfaceControl.Transaction reparent(SurfaceControl sc, SurfaceControl newParent) {
         return this;
     }

@@ -220,8 +220,6 @@ public class WindowAnimator {
             mRemoveReplacedWindows = false;
         }
 
-        mService.destroyPreservedSurfaceLocked();
-
         mService.mAtmService.mTaskOrganizerController.dispatchPendingEvents();
         executeAfterPrepareSurfacesRunnables();
 
