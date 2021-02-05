@@ -556,6 +556,10 @@ public final class CachedAppOptimizer {
 
             if (state == '1' || state == '0') {
                 supported = true;
+                // This is a workaround after reverting the cgroup v2 uid/pid hierarchy due to
+                // http://b/179006802.
+                // TODO: remove once the uid/pid hierarchy is restored
+                enableFreezerInternal(true);
             } else {
                 Slog.e(TAG_AM, "unexpected value in cgroup.freeze");
             }
