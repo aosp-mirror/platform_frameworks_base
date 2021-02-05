@@ -604,13 +604,13 @@ public class InsetsState implements Parcelable {
                 return Type.CAPTION_BAR;
             case ITYPE_IME:
                 return Type.IME;
-            case ITYPE_TOP_GESTURES:
-            case ITYPE_BOTTOM_GESTURES:
             case ITYPE_TOP_MANDATORY_GESTURES:
             case ITYPE_BOTTOM_MANDATORY_GESTURES:
             case ITYPE_LEFT_MANDATORY_GESTURES:
             case ITYPE_RIGHT_MANDATORY_GESTURES:
                 return Type.MANDATORY_SYSTEM_GESTURES;
+            case ITYPE_TOP_GESTURES:
+            case ITYPE_BOTTOM_GESTURES:
             case ITYPE_LEFT_GESTURES:
             case ITYPE_RIGHT_GESTURES:
                 return Type.SYSTEM_GESTURES;
