@@ -464,7 +464,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
         // Setup managed services
         when(mNlf.isTypeAllowed(anyInt())).thenReturn(true);
-        when(mNlf.isPackageAllowed(anyString())).thenReturn(true);
+        when(mNlf.isPackageAllowed(any())).thenReturn(true);
         when(mNlf.isPackageAllowed(null)).thenReturn(true);
         when(mListeners.getNotificationListenerFilter(any())).thenReturn(mNlf);
         mListener = mListeners.new ManagedServiceInfo(
@@ -7307,7 +7307,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
 
     @Test
     public void testIsVisibleToListener_disallowedPackage() {
-        when(mNlf.isPackageAllowed(null)).thenReturn(false);
+        when(mNlf.isPackageAllowed(any())).thenReturn(false);
 
         StatusBarNotification sbn = mock(StatusBarNotification.class);
         when(sbn.getUserId()).thenReturn(10);
