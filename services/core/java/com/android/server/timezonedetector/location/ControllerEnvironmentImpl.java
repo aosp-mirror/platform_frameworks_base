@@ -19,9 +19,9 @@ package com.android.server.timezonedetector.location;
 import android.annotation.NonNull;
 
 import com.android.server.LocalServices;
-import com.android.server.timedetector.DeviceConfig;
 import com.android.server.timezonedetector.ConfigurationChangeListener;
 import com.android.server.timezonedetector.ConfigurationInternal;
+import com.android.server.timezonedetector.ServiceConfigAccessor;
 import com.android.server.timezonedetector.TimeZoneDetectorInternal;
 
 import java.time.Duration;
@@ -33,28 +33,19 @@ import java.util.Objects;
  */
 class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Environment {
 
-    // TODO(b/179488561): Put this back to 5 minutes when primary provider is fully implemented
-    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT = Duration.ofMinutes(1);
-    // TODO(b/179488561): Put this back to 5 minutes when primary provider is fully implemented
-    private static final Duration DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ =
-            Duration.ofSeconds(20);
-    private static final Duration DEFAULT_PROVIDER_UNCERTAINTY_DELAY = Duration.ofMinutes(5);
-
     @NonNull private final TimeZoneDetectorInternal mTimeZoneDetectorInternal;
-    @NonNull private final LocationTimeZoneProviderController mController;
-    @NonNull private final DeviceConfig mDeviceConfig;
+    @NonNull private final ServiceConfigAccessor mServiceConfigAccessor;
     @NonNull private final ConfigurationChangeListener mConfigurationChangeListener;
 
     ControllerEnvironmentImpl(@NonNull ThreadingDomain threadingDomain,
-            @NonNull DeviceConfig deviceConfig,
+            @NonNull ServiceConfigAccessor serviceConfigAccessor,
             @NonNull LocationTimeZoneProviderController controller) {
         super(threadingDomain);
-        mController = Objects.requireNonNull(controller);
-        mDeviceConfig = Objects.requireNonNull(deviceConfig);
+        mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
         mTimeZoneDetectorInternal = LocalServices.getService(TimeZoneDetectorInternal.class);
 
         // Listen for configuration changes.
-        mConfigurationChangeListener = () -> mThreadingDomain.post(mController::onConfigChanged);
+        mConfigurationChangeListener = () -> mThreadingDomain.post(controller::onConfigChanged);
         mTimeZoneDetectorInternal.addConfigurationListener(mConfigurationChangeListener);
     }
 
@@ -73,24 +64,18 @@ class ControllerEnvironmentImpl extends LocationTimeZoneProviderController.Envir
     @Override
     @NonNull
     Duration getProviderInitializationTimeout() {
-        return mDeviceConfig.getDurationFromMillis(
-                DeviceConfig.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_MILLIS,
-                DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT);
+        return mServiceConfigAccessor.getLocationTimeZoneProviderInitializationTimeout();
     }
 
     @Override
     @NonNull
     Duration getProviderInitializationTimeoutFuzz() {
-        return mDeviceConfig.getDurationFromMillis(
-                DeviceConfig.KEY_LOCATION_TIME_ZONE_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ_MILLIS,
-                DEFAULT_PROVIDER_INITIALIZATION_TIMEOUT_FUZZ);
+        return mServiceConfigAccessor.getLocationTimeZoneProviderInitializationTimeoutFuzz();
     }
 
     @Override
     @NonNull
     Duration getUncertaintyDelay() {
-        return mDeviceConfig.getDurationFromMillis(
-                DeviceConfig.KEY_LOCATION_TIME_ZONE_DETECTION_UNCERTAINTY_DELAY_MILLIS,
-                DEFAULT_PROVIDER_UNCERTAINTY_DELAY);
+        return mServiceConfigAccessor.getLocationTimeZoneUncertaintyDelay();
     }
 }

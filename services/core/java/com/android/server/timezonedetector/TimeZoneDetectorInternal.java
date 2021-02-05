@@ -27,16 +27,21 @@ import android.annotation.NonNull;
  */
 public interface TimeZoneDetectorInternal extends Dumpable.Container {
 
-    /** Adds a listener that will be invoked when time zone detection configuration is changed. */
-    void addConfigurationListener(ConfigurationChangeListener listener);
+    /** Adds a listener that will be invoked when {@link ConfigurationInternal} may have changed. */
+    void addConfigurationListener(@NonNull ConfigurationChangeListener listener);
 
     /**
      * Removes a listener previously added via {@link
      * #addConfigurationListener(ConfigurationChangeListener)}.
      */
-    void removeConfigurationListener(ConfigurationChangeListener listener);
+    void removeConfigurationListener(@NonNull ConfigurationChangeListener listener);
 
-    /** Returns the {@link ConfigurationInternal} for the current user. */
+    /**
+     * Returns a snapshot of the {@link ConfigurationInternal} for the current user. This is only a
+     * snapshot so callers must use {@link #addConfigurationListener(ConfigurationChangeListener)}
+     * to be notified when it changes.
+     */
+    @NonNull
     ConfigurationInternal getCurrentUserConfigurationInternal();
 
     /**

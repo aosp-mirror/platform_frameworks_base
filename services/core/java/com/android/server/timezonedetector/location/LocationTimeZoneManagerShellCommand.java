@@ -21,6 +21,7 @@ import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_DI
 import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_NONE;
 import static android.app.time.LocationTimeZoneManager.PROVIDER_MODE_OVERRIDE_SIMULATED;
 import static android.app.time.LocationTimeZoneManager.SECONDARY_PROVIDER_NAME;
+import static android.app.time.LocationTimeZoneManager.SERVICE_NAME;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_DUMP_STATE;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_RECORD_PROVIDER_STATES;
 import static android.app.time.LocationTimeZoneManager.SHELL_COMMAND_SEND_PROVIDER_TEST_COMMAND;
@@ -102,7 +103,7 @@ class LocationTimeZoneManagerShellCommand extends ShellCommand {
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
-        pw.println("Location Time Zone Manager (location_time_zone_manager) commands for tests:");
+        pw.printf("Location Time Zone Manager (%s) commands for tests:\n", SERVICE_NAME);
         pw.println("  help");
         pw.println("    Print this help text.");
         pw.printf("  %s\n", SHELL_COMMAND_START);
