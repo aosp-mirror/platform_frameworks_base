@@ -534,7 +534,7 @@ public final class RouteInfo implements Parcelable {
      * Compares this RouteInfo object against the specified object and indicates if they are equal.
      * @return {@code true} if the objects are equal, {@code false} otherwise.
      */
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
 
         if (!(obj instanceof RouteInfo)) return false;
@@ -570,7 +570,7 @@ public final class RouteInfo implements Parcelable {
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(@Nullable Object o) {
             if (!(o instanceof RouteKey)) {
                 return false;
             }

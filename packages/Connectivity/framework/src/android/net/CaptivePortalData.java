@@ -276,7 +276,7 @@ public final class CaptivePortalData implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (!(obj instanceof CaptivePortalData)) return false;
         final CaptivePortalData other = (CaptivePortalData) obj;
         return mRefreshTimeMillis == other.mRefreshTimeMillis

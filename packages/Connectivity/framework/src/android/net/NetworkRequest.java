@@ -567,7 +567,7 @@ public class NetworkRequest implements Parcelable {
         proto.end(token);
     }
 
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj instanceof NetworkRequest == false) return false;
         NetworkRequest that = (NetworkRequest)obj;
         return (that.legacyType == this.legacyType &&
