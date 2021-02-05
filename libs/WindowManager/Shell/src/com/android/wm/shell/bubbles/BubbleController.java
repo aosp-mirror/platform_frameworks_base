@@ -192,9 +192,9 @@ public class BubbleController {
     private boolean mIsStatusBarShade = true;
 
     /**
-     * Injected constructor.
+     * Creates an instance of the BubbleController.
      */
-    public static Bubbles create(Context context,
+    public static BubbleController create(Context context,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
             @Nullable IStatusBarService statusBarService,
@@ -211,14 +211,14 @@ public class BubbleController {
         return new BubbleController(context, data, synchronizer, floatingContentCoordinator,
                 new BubbleDataRepository(context, launcherApps, mainExecutor),
                 statusBarService, windowManager, windowManagerShellWrapper, launcherApps,
-                logger, organizer, positioner, mainExecutor, mainHandler).mImpl;
+                logger, organizer, positioner, mainExecutor, mainHandler);
     }
 
     /**
      * Testing constructor.
      */
     @VisibleForTesting
-    public BubbleController(Context context,
+    protected BubbleController(Context context,
             BubbleData data,
             @Nullable BubbleStackView.SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
@@ -322,7 +322,7 @@ public class BubbleController {
     }
 
     @VisibleForTesting
-    public Bubbles getImpl() {
+    public Bubbles asBubbles() {
         return mImpl;
     }
 

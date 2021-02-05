@@ -16,6 +16,11 @@
 
 package com.android.systemui.dagger;
 
+import android.content.Context;
+
+import com.android.systemui.SystemUIFactory;
+import com.android.systemui.tv.TvWMComponent;
+import com.android.systemui.wmshell.TvWMShellModule;
 import com.android.systemui.wmshell.WMShellModule;
 import com.android.wm.shell.ShellCommandHandler;
 import com.android.wm.shell.ShellInit;
@@ -34,7 +39,13 @@ import java.util.Optional;
 import dagger.Subcomponent;
 
 /**
- * Dagger Subcomponent for WindowManager.
+ * Dagger Subcomponent for WindowManager.  This class explicitly describes the interfaces exported
+ * from the WM component into the SysUI component (in
+ * {@link SystemUIFactory#init(Context, boolean)}), and references the specific dependencies
+ * provided by its particular device/form-factor SystemUI implementation.
+ *
+ * ie. {@link WMComponent} includes {@link WMShellModule}
+ *     and {@link TvWMComponent} includes {@link TvWMShellModule}
  */
 @WMSingleton
 @Subcomponent(modules = {WMShellModule.class})

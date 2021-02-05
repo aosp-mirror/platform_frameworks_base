@@ -51,18 +51,7 @@ public class AppPairsController {
     private final SparseArray<AppPair> mActiveAppPairs = new SparseArray<>();
     private final DisplayController mDisplayController;
 
-    /**
-     * Creates {@link AppPairs}, returns {@code null} if the feature is not supported.
-     */
-    @Nullable
-    public static AppPairs create(ShellTaskOrganizer organizer,
-            SyncTransactionQueue syncQueue, DisplayController displayController,
-            ShellExecutor mainExecutor) {
-        return new AppPairsController(organizer, syncQueue, displayController,
-                mainExecutor).mImpl;
-    }
-
-    AppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
+    public AppPairsController(ShellTaskOrganizer organizer, SyncTransactionQueue syncQueue,
                 DisplayController displayController, ShellExecutor mainExecutor) {
         mTaskOrganizer = organizer;
         mSyncQueue = syncQueue;
@@ -70,18 +59,22 @@ public class AppPairsController {
         mMainExecutor = mainExecutor;
     }
 
-    void onOrganizerRegistered() {
+    public AppPairs asAppPairs() {
+        return mImpl;
+    }
+
+    public void onOrganizerRegistered() {
         if (mPairsPool == null) {
             setPairsPool(new AppPairsPool(this));
         }
     }
 
     @VisibleForTesting
-    void setPairsPool(AppPairsPool pool) {
+    public void setPairsPool(AppPairsPool pool) {
         mPairsPool = pool;
     }
 
-    boolean pair(int taskId1, int taskId2) {
+    public boolean pair(int taskId1, int taskId2) {
         final ActivityManager.RunningTaskInfo task1 = mTaskOrganizer.getRunningTaskInfo(taskId1);
         final ActivityManager.RunningTaskInfo task2 = mTaskOrganizer.getRunningTaskInfo(taskId2);
         if (task1 == null || task2 == null) {
@@ -90,13 +83,13 @@ public class AppPairsController {
         return pair(task1, task2);
     }
 
-    boolean pair(ActivityManager.RunningTaskInfo task1,
+    public boolean pair(ActivityManager.RunningTaskInfo task1,
             ActivityManager.RunningTaskInfo task2) {
         return pairInner(task1, task2) != null;
     }
 
     @VisibleForTesting
-    AppPair pairInner(
+    public AppPair pairInner(
             @NonNull ActivityManager.RunningTaskInfo task1,
             @NonNull ActivityManager.RunningTaskInfo task2) {
         final AppPair pair = mPairsPool.acquire();
@@ -109,11 +102,11 @@ public class AppPairsController {
         return pair;
     }
 
-    void unpair(int taskId) {
+    public void unpair(int taskId) {
         unpair(taskId, true /* releaseToPool */);
     }
 
-    void unpair(int taskId, boolean releaseToPool) {
+    public void unpair(int taskId, boolean releaseToPool) {
         AppPair pair = mActiveAppPairs.get(taskId);
         if (pair == null) {
             for (int i = mActiveAppPairs.size() - 1; i >= 0; --i) {
@@ -137,19 +130,19 @@ public class AppPairsController {
         }
     }
 
-    ShellTaskOrganizer getTaskOrganizer() {
+    public ShellTaskOrganizer getTaskOrganizer() {
         return mTaskOrganizer;
     }
 
-    SyncTransactionQueue getSyncTransactionQueue() {
+    public SyncTransactionQueue getSyncTransactionQueue() {
         return mSyncQueue;
     }
 
-    DisplayController getDisplayController() {
+    public DisplayController getDisplayController() {
         return mDisplayController;
     }
 
-    private void dump(@NonNull PrintWriter pw, String prefix) {
+    public void dump(@NonNull PrintWriter pw, String prefix) {
         final String innerPrefix = prefix + "  ";
         final String childPrefix = innerPrefix + "  ";
         pw.println(prefix + this);
@@ -201,22 +194,6 @@ public class AppPairsController {
             mMainExecutor.execute(() -> {
                 AppPairsController.this.unpair(taskId);
             });
-        }
-
-        @Override
-        public void onOrganizerRegistered() {
-            mMainExecutor.execute(() -> {
-                AppPairsController.this.onOrganizerRegistered();
-            });
-        }
-
-        @Override
-        public void dump(@NonNull PrintWriter pw, String prefix) {
-            try {
-                mMainExecutor.executeBlocking(() -> AppPairsController.this.dump(pw, prefix));
-            } catch (InterruptedException e) {
-                Slog.e(TAG, "Failed to dump AppPairsController in 2s");
-            }
         }
     }
 }

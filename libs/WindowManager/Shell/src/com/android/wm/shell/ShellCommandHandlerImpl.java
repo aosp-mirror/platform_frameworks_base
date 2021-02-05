@@ -18,13 +18,12 @@ package com.android.wm.shell;
 
 import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_POSITION_BOTTOM_OR_RIGHT;
 
-import com.android.wm.shell.apppairs.AppPairs;
+import com.android.wm.shell.apppairs.AppPairsController;
 import com.android.wm.shell.common.ShellExecutor;
-import com.android.wm.shell.hidedisplaycutout.HideDisplayCutout;
-import com.android.wm.shell.onehanded.OneHanded;
 import com.android.wm.shell.pip.Pip;
-import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
-import com.android.wm.shell.splitscreen.SplitScreen;
+import com.android.wm.shell.hidedisplaycutout.HideDisplayCutoutController;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
+import com.android.wm.shell.onehanded.OneHandedController;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
 import java.io.PrintWriter;
@@ -38,24 +37,24 @@ import java.util.Optional;
 public final class ShellCommandHandlerImpl {
     private static final String TAG = ShellCommandHandlerImpl.class.getSimpleName();
 
-    private final Optional<LegacySplitScreen> mLegacySplitScreenOptional;
+    private final Optional<LegacySplitScreenController> mLegacySplitScreenOptional;
     private final Optional<SplitScreenController> mSplitScreenOptional;
     private final Optional<Pip> mPipOptional;
-    private final Optional<OneHanded> mOneHandedOptional;
-    private final Optional<HideDisplayCutout> mHideDisplayCutout;
+    private final Optional<OneHandedController> mOneHandedOptional;
+    private final Optional<HideDisplayCutoutController> mHideDisplayCutout;
+    private final Optional<AppPairsController> mAppPairsOptional;
     private final ShellTaskOrganizer mShellTaskOrganizer;
-    private final Optional<AppPairs> mAppPairsOptional;
     private final ShellExecutor mMainExecutor;
     private final HandlerImpl mImpl = new HandlerImpl();
 
     public static ShellCommandHandler create(
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
-            Optional<OneHanded> oneHandedOptional,
-            Optional<HideDisplayCutout> hideDisplayCutout,
-            Optional<AppPairs> appPairsOptional,
+            Optional<OneHandedController> oneHandedOptional,
+            Optional<HideDisplayCutoutController> hideDisplayCutout,
+            Optional<AppPairsController> appPairsOptional,
             ShellExecutor mainExecutor) {
         return new ShellCommandHandlerImpl(shellTaskOrganizer, legacySplitScreenOptional,
                 splitScreenOptional, pipOptional, oneHandedOptional, hideDisplayCutout,
@@ -64,12 +63,12 @@ public final class ShellCommandHandlerImpl {
 
     private ShellCommandHandlerImpl(
             ShellTaskOrganizer shellTaskOrganizer,
-            Optional<LegacySplitScreen> legacySplitScreenOptional,
+            Optional<LegacySplitScreenController> legacySplitScreenOptional,
             Optional<SplitScreenController> splitScreenOptional,
             Optional<Pip> pipOptional,
-            Optional<OneHanded> oneHandedOptional,
-            Optional<HideDisplayCutout> hideDisplayCutout,
-            Optional<AppPairs> appPairsOptional,
+            Optional<OneHandedController> oneHandedOptional,
+            Optional<HideDisplayCutoutController> hideDisplayCutout,
+            Optional<AppPairsController> appPairsOptional,
             ShellExecutor mainExecutor) {
         mShellTaskOrganizer = shellTaskOrganizer;
         mLegacySplitScreenOptional = legacySplitScreenOptional;

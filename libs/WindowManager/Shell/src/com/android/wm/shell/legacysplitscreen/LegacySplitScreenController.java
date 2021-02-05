@@ -115,21 +115,6 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
     private volatile boolean mAdjustedForIme = false;
     private boolean mHomeStackResizable = false;
 
-    /**
-     * Creates {@link SplitScreen}, returns {@code null} if the feature is not supported.
-     */
-    @Nullable
-    public static LegacySplitScreen create(Context context,
-            DisplayController displayController, SystemWindows systemWindows,
-            DisplayImeController imeController, TransactionPool transactionPool,
-            ShellTaskOrganizer shellTaskOrganizer, SyncTransactionQueue syncQueue,
-            TaskStackListenerImpl taskStackListener, Transitions transitions,
-            ShellExecutor mainExecutor, AnimationHandler sfVsyncAnimationHandler) {
-        return new LegacySplitScreenController(context, displayController, systemWindows,
-                imeController, transactionPool, shellTaskOrganizer, syncQueue, taskStackListener,
-                transitions, mainExecutor, sfVsyncAnimationHandler).mImpl;
-    }
-
     public LegacySplitScreenController(Context context,
             DisplayController displayController, SystemWindows systemWindows,
             DisplayImeController imeController, TransactionPool transactionPool,
@@ -228,8 +213,12 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
                     }
                 });
     }
+    
+    public LegacySplitScreen asLegacySplitScreen() {
+        return mImpl;
+    }
 
-    void onSplitScreenSupported() {
+    public void onSplitScreenSupported() {
         // Set starting tile bounds based on middle target
         final WindowContainerTransaction tct = new WindowContainerTransaction();
         int midPos = mSplitLayout.getSnapAlgorithm().getMiddleTarget().position;
@@ -237,7 +226,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         mTaskOrganizer.applyTransaction(tct);
     }
 
-    private void onKeyguardVisibilityChanged(boolean showing) {
+    public void onKeyguardVisibilityChanged(boolean showing) {
         if (!isSplitActive() || mView == null) {
             return;
         }
@@ -293,19 +282,19 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    boolean isMinimized() {
+    public boolean isMinimized() {
         return mMinimized;
     }
 
-    boolean isHomeStackResizable() {
+    public boolean isHomeStackResizable() {
         return mHomeStackResizable;
     }
 
-    DividerView getDividerView() {
+    public DividerView getDividerView() {
         return mView;
     }
 
-    boolean isDividerVisible() {
+    public boolean isDividerVisible() {
         return mView != null && mView.getVisibility() == View.VISIBLE;
     }
 
@@ -314,13 +303,13 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
      * isDividerVisible because the divider is only visible once *everything* is in split mode
      * while this only cares if some things are (eg. while entering/exiting as well).
      */
-    private boolean isSplitActive() {
+    public boolean isSplitActive() {
         return mSplits.mPrimary != null && mSplits.mSecondary != null
                 && (mSplits.mPrimary.topActivityType != ACTIVITY_TYPE_UNDEFINED
                 || mSplits.mSecondary.topActivityType != ACTIVITY_TYPE_UNDEFINED);
     }
 
-    private void addDivider(Configuration configuration) {
+    public void addDivider(Configuration configuration) {
         Context dctx = mDisplayController.getDisplayContext(mContext.getDisplayId());
         mView = (DividerView)
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
@@ -338,14 +327,14 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         mWindowManager.add(mView, width, height, mContext.getDisplayId());
     }
 
-    private void removeDivider() {
+    public void removeDivider() {
         if (mView != null) {
             mView.onDividerRemoved();
         }
         mWindowManager.remove();
     }
 
-    private void update(Configuration configuration) {
+    public void update(Configuration configuration) {
         final boolean isDividerHidden = mView != null && mIsKeyguardShowing;
 
         removeDivider();
@@ -358,11 +347,11 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         mView.setHidden(isDividerHidden);
     }
 
-    void onTaskVanished() {
+    public void onTaskVanished() {
         removeDivider();
     }
 
-    private void updateVisibility(final boolean visible) {
+    public void updateVisibility(final boolean visible) {
         if (DEBUG) Slog.d(TAG, "Updating visibility " + mVisible + "->" + visible);
         if (mVisible != visible) {
             mVisible = visible;
@@ -390,7 +379,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    private void setMinimized(final boolean minimized) {
+    public void setMinimized(final boolean minimized) {
         if (DEBUG) Slog.d(TAG, "posting ext setMinimized " + minimized + " vis:" + mVisible);
         mMainExecutor.execute(() -> {
             if (DEBUG) Slog.d(TAG, "run posted ext setMinimized " + minimized + " vis:" + mVisible);
@@ -401,7 +390,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         });
     }
 
-    private void setHomeMinimized(final boolean minimized) {
+    public void setHomeMinimized(final boolean minimized) {
         if (DEBUG) {
             Slog.d(TAG, "setHomeMinimized  min:" + mMinimized + "->" + minimized + " hrsz:"
                     + mHomeStackResizable + " split:" + isDividerVisible());
@@ -441,7 +430,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    void setAdjustedForIme(boolean adjustedForIme) {
+    public void setAdjustedForIme(boolean adjustedForIme) {
         if (mAdjustedForIme == adjustedForIme) {
             return;
         }
@@ -449,30 +438,30 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         updateTouchable();
     }
 
-    private void updateTouchable() {
+    public void updateTouchable() {
         mWindowManager.setTouchable(!mAdjustedForIme);
     }
 
-    private void onUndockingTask() {
+    public void onUndockingTask() {
         if (mView != null) {
             mView.onUndockingTask();
         }
     }
 
-    private void onAppTransitionFinished() {
+    public void onAppTransitionFinished() {
         if (mView == null) {
             return;
         }
         mForcedResizableController.onAppTransitionFinished();
     }
 
-    private void dump(PrintWriter pw) {
+    public void dump(PrintWriter pw) {
         pw.print("  mVisible="); pw.println(mVisible);
         pw.print("  mMinimized="); pw.println(mMinimized);
         pw.print("  mAdjustedForIme="); pw.println(mAdjustedForIme);
     }
 
-    long getAnimDuration() {
+    public long getAnimDuration() {
         float transitionScale = Settings.Global.getFloat(mContext.getContentResolver(),
                 Settings.Global.TRANSITION_ANIMATION_SCALE,
                 mContext.getResources().getFloat(
@@ -482,14 +471,14 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         return (long) (transitionDuration * transitionScale);
     }
 
-    void registerInSplitScreenListener(Consumer<Boolean> listener) {
+    public void registerInSplitScreenListener(Consumer<Boolean> listener) {
         listener.accept(isDividerVisible());
         synchronized (mDockedStackExistsListeners) {
             mDockedStackExistsListeners.add(new WeakReference<>(listener));
         }
     }
 
-    void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
+    public void unregisterInSplitScreenListener(Consumer<Boolean> listener) {
         synchronized (mDockedStackExistsListeners) {
             for (int i = mDockedStackExistsListeners.size() - 1; i >= 0; i--) {
                 if (mDockedStackExistsListeners.get(i) == listener) {
@@ -499,13 +488,13 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    private void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
+    public void registerBoundsChangeListener(BiConsumer<Rect, Rect> listener) {
         synchronized (mBoundsChangedListeners) {
             mBoundsChangedListeners.add(new WeakReference<>(listener));
         }
     }
 
-    private boolean splitPrimaryTask() {
+    public boolean splitPrimaryTask() {
         try {
             if (ActivityTaskManager.getService().getLockTaskModeState() == LOCK_TASK_MODE_PINNED
                     || isSplitActive()) {
@@ -538,12 +527,12 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
                 topRunningTask.taskId, true /* onTop */);
     }
 
-    private void dismissSplitToPrimaryTask() {
+    public void dismissSplitToPrimaryTask() {
         startDismissSplit(true /* toPrimaryTask */);
     }
 
     /** Notifies the bounds of split screen changed. */
-    void notifyBoundsChanged(Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
+    public void notifyBoundsChanged(Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
         synchronized (mBoundsChangedListeners) {
             mBoundsChangedListeners.removeIf(wf -> {
                 BiConsumer<Rect, Rect> l = wf.get();
@@ -553,19 +542,19 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    void startEnterSplit() {
+    public void startEnterSplit() {
         update(mDisplayController.getDisplayContext(
                 mContext.getDisplayId()).getResources().getConfiguration());
         // Set resizable directly here because applyEnterSplit already resizes home stack.
         mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
     }
 
-    void prepareEnterSplitTransition(WindowContainerTransaction outWct) {
+    public void prepareEnterSplitTransition(WindowContainerTransaction outWct) {
         // Set resizable directly here because buildEnterSplit already resizes home stack.
         mHomeStackResizable = mWindowManagerProxy.buildEnterSplit(outWct, mSplits, mSplitLayout);
     }
 
-    void finishEnterSplitTransition(boolean minimized) {
+    public void finishEnterSplitTransition(boolean minimized) {
         update(mDisplayController.getDisplayContext(
                 mContext.getDisplayId()).getResources().getConfiguration());
         if (minimized) {
@@ -575,11 +564,11 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    void startDismissSplit(boolean toPrimaryTask) {
+    public void startDismissSplit(boolean toPrimaryTask) {
         startDismissSplit(toPrimaryTask, false /* snapped */);
     }
 
-    void startDismissSplit(boolean toPrimaryTask, boolean snapped) {
+    public void startDismissSplit(boolean toPrimaryTask, boolean snapped) {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             mSplits.getSplitTransitions().dismissSplit(
                     mSplits, mSplitLayout, !toPrimaryTask, snapped);
@@ -589,7 +578,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    void onDismissSplit() {
+    public void onDismissSplit() {
         updateVisibility(false /* visible */);
         mMinimized = false;
         // Resets divider bar position to undefined, so new divider bar will apply default position
@@ -599,7 +588,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         mImePositionProcessor.reset();
     }
 
-    void ensureMinimizedSplit() {
+    public void ensureMinimizedSplit() {
         setHomeMinimized(true /* minimized */);
         if (mView != null && !isDividerVisible()) {
             // Wasn't in split-mode yet, so enter now.
@@ -610,7 +599,7 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    void ensureNormalSplit() {
+    public void ensureNormalSplit() {
         setHomeMinimized(false /* minimized */);
         if (mView != null && !isDividerVisible()) {
             // Wasn't in split-mode, so enter now.
@@ -621,15 +610,15 @@ public class LegacySplitScreenController implements DisplayController.OnDisplays
         }
     }
 
-    LegacySplitDisplayLayout getSplitLayout() {
+    public LegacySplitDisplayLayout getSplitLayout() {
         return mSplitLayout;
     }
 
-    WindowManagerProxy getWmProxy() {
+    public WindowManagerProxy getWmProxy() {
         return mWindowManagerProxy;
     }
 
-    WindowContainerToken getSecondaryRoot() {
+    public WindowContainerToken getSecondaryRoot() {
         if (mSplits == null || mSplits.mSecondary == null) {
             return null;
         }

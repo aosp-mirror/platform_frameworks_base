@@ -19,6 +19,7 @@ package com.android.systemui.wmshell;
 import android.content.Context;
 import android.os.Handler;
 
+import com.android.systemui.dagger.WMComponent;
 import com.android.systemui.dagger.WMSingleton;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.WindowManagerShellWrapper;
@@ -28,6 +29,7 @@ import com.android.wm.shell.common.SystemWindows;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.annotations.ShellMainThread;
 import com.android.wm.shell.legacysplitscreen.LegacySplitScreen;
+import com.android.wm.shell.legacysplitscreen.LegacySplitScreenController;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.pip.PipAnimationController;
 import com.android.wm.shell.pip.PipBoundsAlgorithm;
@@ -49,7 +51,7 @@ import dagger.Module;
 import dagger.Provides;
 
 /**
- * Dagger module for TV Pip.
+ * Provides TV specific dependencies for Pip.
  */
 @Module(includes = {WMShellBaseModule.class})
 public abstract class TvPipModule {
@@ -143,7 +145,8 @@ public abstract class TvPipModule {
             PipAnimationController pipAnimationController,
             PipTransitionController pipTransitionController,
             PipSurfaceTransactionHelper pipSurfaceTransactionHelper,
-            Optional<LegacySplitScreen> splitScreenOptional, DisplayController displayController,
+            Optional<LegacySplitScreenController> splitScreenOptional,
+            DisplayController displayController,
             PipUiEventLogger pipUiEventLogger, ShellTaskOrganizer shellTaskOrganizer,
             @ShellMainThread ShellExecutor mainExecutor) {
         return new PipTaskOrganizer(context, pipBoundsState, pipBoundsAlgorithm,
