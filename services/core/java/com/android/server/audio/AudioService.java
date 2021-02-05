@@ -300,6 +300,7 @@ public class AudioService extends IAudioService.Stub
     private static final int MSG_STREAM_DEVICES_CHANGED = 32;
     private static final int MSG_UPDATE_VOLUME_STATES_FOR_DEVICE = 33;
     private static final int MSG_REINIT_VOLUMES = 34;
+    private static final int MSG_UPDATE_A11Y_SERVICE_UIDS = 35;
     // start of messages handled under wakelock
     //   these messages can only be queued, i.e. sent with queueMsgUnderWakeLock(),
     //   and not with sendMsg(..., ..., SENDMSG_QUEUE, ...)
@@ -699,8 +700,9 @@ public class AudioService extends IAudioService.Stub
     private long mLoweredFromNormalToVibrateTime;
 
     // Array of Uids of valid accessibility services to check if caller is one of them
-    private int[] mAccessibilityServiceUids;
     private final Object mAccessibilityServiceUidsLock = new Object();
+    @GuardedBy("mAccessibilityServiceUidsLock")
+    private int[] mAccessibilityServiceUids;
 
     // Uid of the active input method service to check if caller is the one or not.
     private int mInputMethodServiceUid = android.os.Process.INVALID_UID;
@@ -7082,6 +7084,10 @@ public class AudioService extends IAudioService.Stub
                 case MSG_REINIT_VOLUMES:
                     onReinitVolumes((String) msg.obj);
                     break;
+                case MSG_UPDATE_A11Y_SERVICE_UIDS:
+                    onUpdateAccessibilityServiceUids();
+                    break;
+
             }
         }
     }
@@ -8148,6 +8154,9 @@ public class AudioService extends IAudioService.Stub
                         + " FromRestrictions=" + mMicMuteFromRestrictions
                         + " FromApi=" + mMicMuteFromApi
                         + " from system=" + mMicMuteFromSystemCached);
+        pw.print("\n  mAssistantUid="); pw.println(mAssistantUid);
+        pw.print("  mCurrentImeUid="); pw.println(mCurrentImeUid);
+        dumpAccessibilityServiceUids(pw);
 
         dumpAudioPolicies(pw);
         mDynPolicyLogger.dump(pw);
@@ -8177,6 +8186,19 @@ public class AudioService extends IAudioService.Stub
         synchronized (mSupportedSystemUsagesLock) {
             for (int i = 0; i < mSupportedSystemUsages.length; i++) {
                 pw.printf("\t%s\n", AudioAttributes.usageToString(mSupportedSystemUsages[i]));
+            }
+        }
+    }
+
+    private void dumpAccessibilityServiceUids(PrintWriter pw) {
+        synchronized (mSupportedSystemUsagesLock) {
+            if (mAccessibilityServiceUids != null && mAccessibilityServiceUids.length > 0) {
+                pw.println("  Accessibility service Uids:");
+                for (int uid : mAccessibilityServiceUids) {
+                    pw.println("  - " + uid);
+                }
+            } else {
+                pw.println("  No accessibility service Uids.");
             }
         }
     }
@@ -8484,7 +8506,8 @@ public class AudioService extends IAudioService.Stub
                         mAccessibilityServiceUids = uids.toArray();
                     }
                 }
-                AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
+                sendMsg(mAudioHandler, MSG_UPDATE_A11Y_SERVICE_UIDS, SENDMSG_REPLACE,
+                        0, 0, null, 0);
             }
         }
 
@@ -8500,6 +8523,14 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
+    }
+
+    private void onUpdateAccessibilityServiceUids() {
+        int[] accessibilityServiceUids;
+        synchronized (mAccessibilityServiceUidsLock) {
+            accessibilityServiceUids = mAccessibilityServiceUids;
+        }
+        AudioSystem.setA11yServicesUids(accessibilityServiceUids);
     }
 
     //==========================================================================================
