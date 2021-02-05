@@ -140,6 +140,9 @@ public class RcsCapabilityExchangeImplBase {
          * Provide the framework with a subsequent network response update to
          * {@link #publishCapabilities(String, PublishResponseCallback)}.
          *
+         * If this network response also contains a “Reason” header, then the
+         * {@link onNetworkResponse(int, String, int, String)} method should be used instead.
+         *
          * @param sipCode The SIP response code sent from the network for the operation
          * token specified.
          * @param reason The optional reason response from the network. If there is a reason header
@@ -154,6 +157,31 @@ public class RcsCapabilityExchangeImplBase {
          */
         void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
                 @NonNull String reason) throws ImsException;
+
+        /**
+         * Provide the framework with a subsequent network response update to
+         * {@link #publishCapabilities(RcsContactUceCapability, int)} that also
+         * includes a reason provided in the “reason” header. See RFC3326 for more
+         * information.
+         *
+         * @param sipCode The SIP response code sent from the network.
+         * @param reasonPhrase The optional reason response from the network. If the
+         * network provided no reason with the sip code, the string should be empty.
+         * @param reasonHeaderCause The “cause” parameter of the “reason” header
+         * included in the SIP message.
+         * @param reasonHeaderText The “text” parameter of the “reason” header
+         * included in the SIP message.
+         * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is
+         * not currently connected to the framework. This can happen if the
+         * {@link RcsFeature} is not
+         * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
+         * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in
+         * rare cases when the Telephony stack has crashed.
+         */
+        void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
+                @NonNull String reasonPhrase,
+                @IntRange(from = 100, to = 699) int reasonHeaderCause,
+                @NonNull String reasonHeaderText) throws ImsException;
     }
 
     /**
@@ -222,6 +250,9 @@ public class RcsCapabilityExchangeImplBase {
          * {@link #onResourceTerminated}, and {@link #onTerminated} as required for the
          * subsequent NOTIFY responses to the subscription.
          *
+         * If this network response also contains a “Reason” header, then the
+         * {@link onNetworkResponse(int, String, int, String)} method should be used instead.
+         *
          * @param sipCode The SIP response code sent from the network for the operation
          * token specified.
          * @param reason The optional reason response from the network. If the network
@@ -234,6 +265,31 @@ public class RcsCapabilityExchangeImplBase {
          */
         void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
                 @NonNull String reason) throws ImsException;
+
+        /**
+         * Notify the framework  of the response to the SUBSCRIBE request from
+         * {@link #subscribeForCapabilities(RcsContactUceCapability, int)} that also
+         * includes a reason provided in the “reason” header. See RFC3326 for more
+         * information.
+         *
+         * @param sipCode The SIP response code sent from the network,
+         * @param reasonPhrase The optional reason response from the network. If the
+         * network provided no reason with the sip code, the string should be empty.
+         * @param reasonHeaderCause The “cause” parameter of the “reason” header
+         * included in the SIP message.
+         * @param reasonHeaderText The “text” parameter of the “reason” header
+         * included in the SIP message.
+         * @throws ImsException If this {@link RcsCapabilityExchangeImplBase} instance is
+         * not currently connected to the framework. This can happen if the
+         * {@link RcsFeature} is not
+         * {@link ImsFeature#STATE_READY} and the {@link RcsFeature} has not received
+         * the {@link ImsFeature#onFeatureReady()} callback. This may also happen in
+         * rare cases when the Telephony stack has crashed.
+         */
+        void onNetworkResponse(@IntRange(from = 100, to = 699) int sipCode,
+                @NonNull String reasonPhrase,
+                @IntRange(from = 100, to = 699) int reasonHeaderCause,
+                @NonNull String reasonHeaderText) throws ImsException;
 
         /**
          * Notify the framework of the latest XML PIDF documents included in the network response

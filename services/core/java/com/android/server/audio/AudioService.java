@@ -1076,7 +1076,6 @@ public class AudioService extends IAudioService.Stub
 
         if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_HDMI_CEC)) {
             synchronized (mHdmiClientLock) {
-                mHdmiCecSink = false;
                 mHdmiManager = mContext.getSystemService(HdmiControlManager.class);
                 if (mHdmiManager != null) {
                     mHdmiManager.addHdmiControlStatusChangeListener(
@@ -1508,7 +1507,8 @@ public class AudioService extends IAudioService.Stub
             if (isPlatformTelevision()) {
                 synchronized (mHdmiClientLock) {
                     if (mHdmiManager != null && mHdmiPlaybackClient != null) {
-                        updateHdmiCecSinkLocked(mHdmiCecSink | false);
+                        updateHdmiCecSinkLocked(
+                                mFullVolumeDevices.contains(AudioSystem.DEVICE_OUT_HDMI));
                     }
                 }
             }
@@ -1518,7 +1518,8 @@ public class AudioService extends IAudioService.Stub
             if (isPlatformTelevision()) {
                 synchronized (mHdmiClientLock) {
                     if (mHdmiManager != null) {
-                        updateHdmiCecSinkLocked(mHdmiCecSink | false);
+                        updateHdmiCecSinkLocked(
+                                mFullVolumeDevices.contains(AudioSystem.DEVICE_OUT_HDMI));
                     }
                 }
             }
@@ -2670,8 +2671,7 @@ public class AudioService extends IAudioService.Stub
         if (adjustVolume) {
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager != null) {
-                    // mHdmiCecSink true => mHdmiPlaybackClient != null
-                    if (mHdmiCecSink
+                    if (mHdmiPlaybackClient != null
                             && mHdmiCecVolumeControlEnabled
                             && streamTypeAlias == AudioSystem.STREAM_MUSIC
                             // vol change on a full volume device
@@ -7825,9 +7825,8 @@ public class AudioService extends IAudioService.Stub
 
     @GuardedBy("mHdmiClientLock")
     private void updateHdmiCecSinkLocked(boolean hdmiCecSink) {
-        mHdmiCecSink = hdmiCecSink;
         if (!hasDeviceVolumeBehavior(AudioSystem.DEVICE_OUT_HDMI)) {
-            if (mHdmiCecSink) {
+            if (hdmiCecSink) {
                 if (DEBUG_VOL) {
                     Log.d(TAG, "CEC sink: setting HDMI as full vol device");
                 }
@@ -7885,9 +7884,6 @@ public class AudioService extends IAudioService.Stub
     // Set only when device is a set-top box.
     @GuardedBy("mHdmiClientLock")
     private HdmiPlaybackClient mHdmiPlaybackClient;
-    // true if we are a set-top box, an HDMI sink is connected and it supports CEC.
-    @GuardedBy("mHdmiClientLock")
-    private boolean mHdmiCecSink;
     // Set only when device is an audio system.
     @GuardedBy("mHdmiClientLock")
     private HdmiAudioSystemClient mHdmiAudioSystemClient;
@@ -8142,7 +8138,6 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mFixedVolumeDevices="); pw.println(dumpDeviceTypes(mFixedVolumeDevices));
         pw.print("  mFullVolumeDevices="); pw.println(dumpDeviceTypes(mFullVolumeDevices));
         pw.print("  mExtVolumeController="); pw.println(mExtVolumeController);
-        pw.print("  mHdmiCecSink="); pw.println(mHdmiCecSink);
         pw.print("  mHdmiAudioSystemClient="); pw.println(mHdmiAudioSystemClient);
         pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
         pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);

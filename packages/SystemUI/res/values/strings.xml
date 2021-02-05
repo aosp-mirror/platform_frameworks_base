@@ -2816,4 +2816,6 @@
 
     <!-- No translation [CHAR LIMIT=0] -->
     <string name="qs_remove_labels" translatable="false"></string>
+
+    <string name="qs_tile_label_fontFamily" translatable="false">@*android:string/config_headlineFontFamily</string>
 </resources>

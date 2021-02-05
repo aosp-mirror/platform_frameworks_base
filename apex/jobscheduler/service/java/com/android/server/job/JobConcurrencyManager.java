@@ -62,6 +62,7 @@ class JobConcurrencyManager {
             CONFIG_KEY_PREFIX_CONCURRENCY + "screen_off_adjustment_delay_ms";
     private static final long DEFAULT_SCREEN_OFF_ADJUSTMENT_DELAY_MS = 30_000;
 
+    // Try to give higher priority types lower values.
     static final int WORK_TYPE_NONE = 0;
     static final int WORK_TYPE_TOP = 1 << 0;
     static final int WORK_TYPE_BG = 1 << 1;
@@ -520,6 +521,120 @@ class JobConcurrencyManager {
         }
     }
 
+    void onJobCompletedLocked(@NonNull JobServiceContext worker, @NonNull JobStatus jobStatus,
+            @WorkType final int workType) {
+        mWorkCountTracker.onJobFinished(workType);
+        mRunningJobs.remove(jobStatus);
+        final List<JobStatus> pendingJobs = mService.mPendingJobs;
+        if (worker.getPreferredUid() != JobServiceContext.NO_PREFERRED_UID) {
+            updateCounterConfigLocked();
+            // Preemption case needs special care.
+            updateNonRunningPriorities(pendingJobs, false);
+
+            JobStatus highestPriorityJob = null;
+            int highPriWorkType = workType;
+            JobStatus backupJob = null;
+            int backupWorkType = WORK_TYPE_NONE;
+            for (int i = 0; i < pendingJobs.size(); i++) {
+                final JobStatus nextPending = pendingJobs.get(i);
+
+                if (mRunningJobs.contains(nextPending)) {
+                    continue;
+                }
+
+                if (worker.getPreferredUid() != nextPending.getUid()) {
+                    if (backupJob == null) {
+                        int workAsType =
+                                mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+                        if (workAsType != WORK_TYPE_NONE) {
+                            backupJob = nextPending;
+                            backupWorkType = workAsType;
+                        }
+                    }
+                    continue;
+                }
+
+                if (highestPriorityJob == null
+                        || highestPriorityJob.lastEvaluatedPriority
+                        < nextPending.lastEvaluatedPriority) {
+                    highestPriorityJob = nextPending;
+                } else {
+                    continue;
+                }
+
+                // In this path, we pre-empted an existing job. We don't fully care about the
+                // reserved slots. We should just run the highest priority job we can find,
+                // though it would be ideal to use an available WorkType slot instead of
+                // overloading slots.
+                final int workAsType = mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+                if (workAsType == WORK_TYPE_NONE) {
+                    // Just use the preempted job's work type since this new one is technically
+                    // replacing it anyway.
+                    highPriWorkType = workType;
+                } else {
+                    highPriWorkType = workAsType;
+                }
+            }
+            if (highestPriorityJob != null) {
+                if (DEBUG) {
+                    Slog.d(TAG, "Running job " + jobStatus + " as preemption");
+                }
+                mWorkCountTracker.stageJob(highPriWorkType);
+                startJobLocked(worker, highestPriorityJob, highPriWorkType);
+            } else {
+                if (DEBUG) {
+                    Slog.d(TAG, "Couldn't find preemption job for uid " + worker.getPreferredUid());
+                }
+                worker.clearPreferredUid();
+                if (backupJob != null) {
+                    if (DEBUG) {
+                        Slog.d(TAG, "Running job " + jobStatus + " instead");
+                    }
+                    mWorkCountTracker.stageJob(backupWorkType);
+                    startJobLocked(worker, backupJob, backupWorkType);
+                }
+            }
+        } else if (pendingJobs.size() > 0) {
+            updateCounterConfigLocked();
+            updateNonRunningPriorities(pendingJobs, false);
+
+            // This slot is now free and we have pending jobs. Start the highest priority job we
+            // find.
+            JobStatus highestPriorityJob = null;
+            int highPriWorkType = workType;
+            for (int i = 0; i < pendingJobs.size(); i++) {
+                final JobStatus nextPending = pendingJobs.get(i);
+
+                if (mRunningJobs.contains(nextPending)) {
+                    continue;
+                }
+
+                final int workAsType = mWorkCountTracker.canJobStart(getJobWorkTypes(nextPending));
+                if (workAsType == WORK_TYPE_NONE) {
+                    continue;
+                }
+                if (highestPriorityJob == null
+                        || highestPriorityJob.lastEvaluatedPriority
+                        < nextPending.lastEvaluatedPriority) {
+                    highestPriorityJob = nextPending;
+                    highPriWorkType = workAsType;
+                }
+            }
+
+            if (highestPriorityJob != null) {
+                // This slot is free, and we haven't yet hit the limit on
+                // concurrent jobs...  we can just throw the job in to here.
+                if (DEBUG) {
+                    Slog.d(TAG, "About to run job: " + jobStatus);
+                }
+                mWorkCountTracker.stageJob(highPriWorkType);
+                startJobLocked(worker, highestPriorityJob, highPriWorkType);
+            }
+        }
+
+        noteConcurrency();
+    }
+
     @GuardedBy("mLock")
     private String printPendingQueueLocked() {
         StringBuilder s = new StringBuilder("Pending queue: ");
@@ -855,7 +970,25 @@ class JobConcurrencyManager {
             if (numRemainingForType < mNumActuallyReservedSlots.get(workType)) {
                 // We've run all jobs for this type. Let another type use it now.
                 mNumActuallyReservedSlots.put(workType, numRemainingForType);
-                mNumUnspecializedRemaining++;
+                int assignWorkType = WORK_TYPE_NONE;
+                for (int i = 0; i < mNumActuallyReservedSlots.size(); ++i) {
+                    int wt = mNumActuallyReservedSlots.keyAt(i);
+                    if (assignWorkType == WORK_TYPE_NONE || wt < assignWorkType) {
+                        // Try to give this slot to the highest priority one within its limits.
+                        int total = mNumRunningJobs.get(wt) + mNumStartingJobs.get(wt)
+                                + mNumPendingJobs.get(wt);
+                        if (mNumActuallyReservedSlots.valueAt(i) < mConfigAbsoluteMaxSlots.get(wt)
+                                && total > mNumActuallyReservedSlots.valueAt(i)) {
+                            assignWorkType = wt;
+                        }
+                    }
+                }
+                if (assignWorkType != WORK_TYPE_NONE) {
+                    mNumActuallyReservedSlots.put(assignWorkType,
+                            mNumActuallyReservedSlots.get(assignWorkType) + 1);
+                } else {
+                    mNumUnspecializedRemaining++;
+                }
             }
         }
 
@@ -869,6 +1002,18 @@ class JobConcurrencyManager {
             } else {
                 mNumStartingJobs.put(workType, oldNumStartingJobs - 1);
             }
+        }
+
+        void onJobFinished(@WorkType int workType) {
+            final int newNumRunningJobs = mNumRunningJobs.get(workType) - 1;
+            if (newNumRunningJobs < 0) {
+                // We are in a bad state. We will eventually recover when the pending list is
+                // regenerated.
+                Slog.e(TAG, "# running jobs for " + workType + " went negative.");
+                return;
+            }
+            mNumRunningJobs.put(workType, newNumRunningJobs);
+            maybeAdjustReservations(workType);
         }
 
         void onCountDone() {

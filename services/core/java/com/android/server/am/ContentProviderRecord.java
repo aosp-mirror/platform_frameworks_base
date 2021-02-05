@@ -19,6 +19,7 @@ package com.android.server.am;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 import android.app.ContentProviderHolder;
+import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
@@ -211,9 +212,10 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                                 + " caller=" + client);
                     }
                 }
-                if (client.thread != null) {
+                final IApplicationThread thread = client.getThread();
+                if (thread != null) {
                     try {
-                        client.thread.notifyContentProviderPublishStatus(
+                        thread.notifyContentProviderPublishStatus(
                                 newHolder(status ? conn : null, false),
                                 info.authority, userId, status);
                     } catch (RemoteException e) {
@@ -343,8 +345,8 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                     && mAssociation == null && provider.proc != null
                     && (provider.appInfo.uid != mOwningUid
                             || !provider.info.processName.equals(mOwningProcessName))) {
-                ProcessStats.ProcessStateHolder holder = provider.proc.getPkgList().get(
-                        provider.name.getPackageName());
+                ProcessStats.ProcessStateHolder holder =
+                        provider.proc.getPkgList().get(provider.name.getPackageName());
                 if (holder == null) {
                     Slog.wtf(TAG_AM, "No package in referenced provider "
                             + provider.name.toShortString() + ": proc=" + provider.proc);
@@ -373,7 +375,7 @@ final class ContentProviderRecord implements ComponentName.WithComponentName {
                 if (hasExternalProcessHandles() &&
                         externalProcessTokenToHandle.get(mToken) != null) {
                     removeExternalProcessHandleInternalLocked(mToken);
-                }                        
+                }
             }
         }
     }

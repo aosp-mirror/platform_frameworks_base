@@ -49,7 +49,7 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
         mProc = app;
         mResult = result;
         CharSequence name;
-        if ((app.getPkgList().size() == 1)
+        if (app.getPkgList().size() == 1
                 && (name = context.getPackageManager().getApplicationLabel(app.info)) != null) {
             setMessage(res.getString(
                     com.android.internal.R.string.smv_application,
@@ -67,7 +67,7 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
                   res.getText(com.android.internal.R.string.dlg_ok),
                   mHandler.obtainMessage(ACTION_OK));
 
-        if (app.errorReportReceiver != null) {
+        if (app.mErrorState.getErrorReportReceiver() != null) {
             setButton(DialogInterface.BUTTON_NEGATIVE,
                       res.getText(com.android.internal.R.string.report),
                       mHandler.obtainMessage(ACTION_OK_AND_REPORT));
@@ -84,9 +84,9 @@ final class StrictModeViolationDialog extends BaseErrorDialog {
 
     private final Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
-            synchronized (mService) {
+            synchronized (mService.mProcLock) {
                 if (mProc != null) {
-                    mProc.getDialogController().clearViolationDialogs();
+                    mProc.mErrorState.getDialogController().clearViolationDialogs();
                 }
             }
             mResult.set(msg.what);

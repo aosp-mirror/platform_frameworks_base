@@ -42,6 +42,8 @@ public final class PersistentSystemFontConfigTest {
         long expectedModifiedDate = 1234567890;
         PersistentSystemFontConfig.Config config = new PersistentSystemFontConfig.Config();
         config.lastModifiedDate = expectedModifiedDate;
+        config.updatedFontDirs.add("~~abc");
+        config.updatedFontDirs.add("~~def");
 
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             PersistentSystemFontConfig.writeToXml(baos, config);
@@ -54,6 +56,7 @@ public final class PersistentSystemFontConfigTest {
                 PersistentSystemFontConfig.loadFromXml(bais, another);
 
                 assertThat(another.lastModifiedDate).isEqualTo(expectedModifiedDate);
+                assertThat(another.updatedFontDirs).containsExactly("~~abc", "~~def");
             }
         }
     }

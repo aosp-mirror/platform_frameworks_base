@@ -15,22 +15,24 @@
   ~ limitations under the License.
   -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
-            android:paddingMode="stack">
+            android:paddingMode="stack" >
     <item android:id="@android:id/background"
         android:gravity="center_vertical|fill_horizontal">
-        <layer-list >
+        <layer-list>
             <item>
                 <shape
                     android:tint="?android:attr/colorControlActivated"
                     android:alpha="?android:attr/disabledAlpha">
-                    <size android:height="48dp" />
+                    <size android:height="@dimen/rounded_slider_height" />
                     <solid android:color="@color/white_disabled" />
-                    <corners android:radius="24dp" />
+                    <corners android:radius="@dimen/rounded_slider_corner_radius" />
                 </shape>
             </item>
             <item
-                android:gravity="center_vertical|start"
-                android:start="32dp">
+                android:gravity="center_vertical|left"
+                android:height="@dimen/rounded_slider_icon_size"
+                android:width="@dimen/rounded_slider_icon_size"
+                android:left="@dimen/rounded_slider_icon_inset">
                 <com.android.systemui.util.AlphaTintDrawableWrapper
                     android:drawable="@drawable/ic_brightness"
                     android:tint="?android:attr/colorControlActivated" />
@@ -39,10 +41,8 @@
     </item>
     <item android:id="@android:id/progress"
           android:gravity="center_vertical|fill_horizontal">
-        <clip
-            android:drawable="@drawable/brightness_progress_full_drawable"
-            android:clipOrientation="horizontal"
-            android:gravity="left"
-        />
+            <com.android.systemui.util.RoundedCornerProgressDrawable
+                android:drawable="@drawable/brightness_progress_full_drawable"
+            />
     </item>
 </layer-list>

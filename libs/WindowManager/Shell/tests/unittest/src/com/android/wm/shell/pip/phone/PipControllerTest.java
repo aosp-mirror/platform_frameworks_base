@@ -46,6 +46,7 @@ import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -68,6 +69,7 @@ public class PipControllerTest extends ShellTestCase {
     @Mock private PipBoundsAlgorithm mMockPipBoundsAlgorithm;
     @Mock private PipMediaController mMockPipMediaController;
     @Mock private PipTaskOrganizer mMockPipTaskOrganizer;
+    @Mock private PipTransitionController mMockPipTransitionController;
     @Mock private PipTouchHandler mMockPipTouchHandler;
     @Mock private WindowManagerShellWrapper mMockWindowManagerShellWrapper;
     @Mock private PipBoundsState mMockPipBoundsState;
@@ -80,8 +82,8 @@ public class PipControllerTest extends ShellTestCase {
         mPipController = new PipController(mContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
-                mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockTaskStackListener,
-                mMockExecutor);
+                mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
+                mMockTaskStackListener, mMockExecutor);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -90,7 +92,7 @@ public class PipControllerTest extends ShellTestCase {
 
     @Test
     public void instantiatePipController_registersPipTransitionCallback() {
-        verify(mMockPipTaskOrganizer).registerPipTransitionCallback(any());
+        verify(mMockPipTransitionController).registerPipTransitionCallback(any());
     }
 
     @Test
@@ -113,8 +115,8 @@ public class PipControllerTest extends ShellTestCase {
         assertNull(PipController.create(spyContext, mMockDisplayController,
                 mMockPipAppOpsListener, mMockPipBoundsAlgorithm, mMockPipBoundsState,
                 mMockPipMediaController, mMockPhonePipMenuController, mMockPipTaskOrganizer,
-                mMockPipTouchHandler, mMockWindowManagerShellWrapper, mMockTaskStackListener,
-                mMockExecutor));
+                mMockPipTouchHandler, mMockPipTransitionController, mMockWindowManagerShellWrapper,
+                mMockTaskStackListener, mMockExecutor));
     }
 
     @Test

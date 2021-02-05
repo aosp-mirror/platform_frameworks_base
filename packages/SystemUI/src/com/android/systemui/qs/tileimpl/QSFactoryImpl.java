@@ -14,7 +14,7 @@
 
 package com.android.systemui.qs.tileimpl;
 
-import static com.android.systemui.qs.dagger.QSFlagsModule.QS_SIDE_LABELS;
+import static com.android.systemui.qs.dagger.QSFlagsModule.QS_LABELS_FLAG;
 
 import android.content.Context;
 import android.os.Build;
@@ -98,7 +98,7 @@ public class QSFactoryImpl implements QSFactory {
     @Inject
     public QSFactoryImpl(
             Lazy<QSHost> qsHostLazy,
-            @Named(QS_SIDE_LABELS) boolean useSideLabels,
+            @Named(QS_LABELS_FLAG) boolean useSideLabels,
             Provider<CustomTile.Builder> customTileBuilderProvider,
             Provider<WifiTile> wifiTileProvider,
             Provider<InternetTile> internetTileProvider,

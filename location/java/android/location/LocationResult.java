@@ -19,7 +19,6 @@ package android.location;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,21 +33,14 @@ import java.util.function.Predicate;
 
 /**
  * A location result representing a list of locations, ordered from earliest to latest.
+ *
+ * @hide
  */
 public final class LocationResult implements Parcelable {
 
     /**
-     * Creates a new LocationResult from the given location.
-     */
-    public static @NonNull LocationResult create(@NonNull Location location) {
-        ArrayList<Location> locations = new ArrayList<>(1);
-        locations.add(new Location(Objects.requireNonNull(location)));
-        return new LocationResult(locations);
-    }
-
-    /**
-     * Creates a new LocationResult from the given locations. Locations must be ordered in the same
-     * order they were derived (earliest to latest).
+     * Creates a new LocationResult from the given locations, making a copy of each location.
+     * Locations must be ordered in the same order they were derived (earliest to latest).
      */
     public static @NonNull LocationResult create(@NonNull List<Location> locations) {
         Preconditions.checkArgument(!locations.isEmpty());
@@ -60,16 +52,40 @@ public final class LocationResult implements Parcelable {
     }
 
     /**
-     * Creates a new LocationResult that takes ownership of the given location without copying it.
-     * Callers must ensure the given location is never mutated after this method is called.
-     *
-     * @hide
+     * Creates a new LocationResult from the given locations, making a copy of each location.
+     * Locations must be ordered in the same order they were derived (earliest to latest).
      */
-    @SystemApi
-    public static @NonNull LocationResult wrap(@NonNull Location location) {
-        ArrayList<Location> locations = new ArrayList<>(1);
-        locations.add(Objects.requireNonNull(location));
-        return new LocationResult(locations);
+    public static @NonNull LocationResult create(@NonNull Location... locations) {
+        Preconditions.checkArgument(locations.length > 0);
+        ArrayList<Location> locationsCopy = new ArrayList<>(locations.length);
+        for (Location location : locations) {
+            locationsCopy.add(new Location(Objects.requireNonNull(location)));
+        }
+        return new LocationResult(locationsCopy);
+    }
+
+    /**
+     * Creates a new LocationResult that takes ownership of the given locations without copying
+     * them. Callers must ensure the given locations are never mutated after this method is called.
+     * Locations must be ordered in the same order they were derived (earliest to latest).
+     */
+    public static @NonNull LocationResult wrap(@NonNull List<Location> locations) {
+        Preconditions.checkArgument(!locations.isEmpty());
+        return new LocationResult(new ArrayList<>(locations));
+    }
+
+    /**
+     * Creates a new LocationResult that takes ownership of the given locations without copying
+     * them. Callers must ensure the given locations are never mutated after this method is called.
+     * Locations must be ordered in the same order they were derived (earliest to latest).
+     */
+    public static @NonNull LocationResult wrap(@NonNull Location... locations) {
+        Preconditions.checkArgument(locations.length > 0);
+        ArrayList<Location> newLocations = new ArrayList<>(locations.length);
+        for (Location location : locations) {
+            newLocations.add(Objects.requireNonNull(location));
+        }
+        return new LocationResult(newLocations);
     }
 
     private final ArrayList<Location> mLocations;
@@ -112,7 +128,7 @@ public final class LocationResult implements Parcelable {
     }
 
     /**
-     * Returns the numer of locations in this location result.
+     * Returns the number of locations in this location result.
      */
     public @IntRange(from = 1) int size() {
         return mLocations.size();
@@ -139,9 +155,9 @@ public final class LocationResult implements Parcelable {
      * @hide
      */
     public @NonNull LocationResult deepCopy() {
-        ArrayList<Location> copy = new ArrayList<>(mLocations.size());
         final int size = mLocations.size();
-        for (int i = 0; i < size; ++i) {
+        ArrayList<Location> copy = new ArrayList<>(size);
+        for (int i = 0; i < size; i++) {
             copy.add(new Location(mLocations.get(i)));
         }
         return new LocationResult(copy);
@@ -164,7 +180,7 @@ public final class LocationResult implements Parcelable {
      * Returns a LocationResult with only locations that pass the given predicate. This
      * implementation will avoid allocations when no locations are filtered out. The predicate is
      * guaranteed to be invoked once per location, in order from earliest to latest. If all
-     * locations are filtered out a null value is returned instead of an empty LocationResult.
+     * locations are filtered out a null value is returned.
      *
      * @hide
      */

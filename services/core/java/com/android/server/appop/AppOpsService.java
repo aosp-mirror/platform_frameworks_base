@@ -2796,6 +2796,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (callback == null) {
             return;
         }
+        final boolean mayWatchPackageName =
+                packageName != null && !filterAppAccessUnlocked(packageName);
         synchronized (this) {
             int switchOp = (op != AppOpsManager.OP_NONE) ? AppOpsManager.opToSwitch(op) : op;
 
@@ -2824,7 +2826,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
                 cbs.add(cb);
             }
-            if (packageName != null) {
+            if (mayWatchPackageName) {
                 ArraySet<ModeCallback> cbs = mPackageModeWatchers.get(packageName);
                 if (cbs == null) {
                     cbs = new ArraySet<>();
@@ -3008,11 +3010,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         Objects.requireNonNull(packageName);
         try {
             verifyAndGetBypass(uid, packageName, null);
-
+            if (filterAppAccessUnlocked(packageName)) {
+                return AppOpsManager.MODE_ERRORED;
+            }
             return AppOpsManager.MODE_ALLOWED;
         } catch (SecurityException ignored) {
             return AppOpsManager.MODE_ERRORED;
         }
+    }
+
+    /**
+     * This method will check with PackageManager to determine if the package provided should
+     * be visible to the {@link Binder#getCallingUid()}.
+     *
+     * NOTE: This must not be called while synchronized on {@code this} to avoid dead locks
+     */
+    private boolean filterAppAccessUnlocked(String packageName) {
+        final int callingUid = Binder.getCallingUid();
+        return LocalServices.getService(PackageManagerInternal.class)
+                .filterAppAccess(packageName, callingUid, UserHandle.getUserId(callingUid));
     }
 
     @Override

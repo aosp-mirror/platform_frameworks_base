@@ -46,6 +46,7 @@ import com.android.wm.shell.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.pip.PipBoundsState;
 import com.android.wm.shell.pip.PipMediaController;
 import com.android.wm.shell.pip.PipTaskOrganizer;
+import com.android.wm.shell.pip.PipTransitionController;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -53,7 +54,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Manages the picture-in-picture (PIP) UI and states.
  */
-public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
+public class TvPipController implements PipTransitionController.PipTransitionCallback,
         TvPipMenuController.Delegate, TvPipNotificationController.Delegate {
     private static final String TAG = "TvPipController";
     static final boolean DEBUG = true;
@@ -105,6 +106,7 @@ public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionController pipTransitionController,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
             TvPipNotificationController pipNotificationController,
@@ -116,6 +118,7 @@ public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
                 pipBoundsState,
                 pipBoundsAlgorithm,
                 pipTaskOrganizer,
+                pipTransitionController,
                 tvPipMenuController,
                 pipMediaController,
                 pipNotificationController,
@@ -129,6 +132,7 @@ public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
             PipBoundsState pipBoundsState,
             PipBoundsAlgorithm pipBoundsAlgorithm,
             PipTaskOrganizer pipTaskOrganizer,
+            PipTransitionController pipTransitionController,
             TvPipMenuController tvPipMenuController,
             PipMediaController pipMediaController,
             TvPipNotificationController pipNotificationController,
@@ -152,7 +156,7 @@ public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
         mTvPipMenuController.setDelegate(this);
 
         mPipTaskOrganizer = pipTaskOrganizer;
-        mPipTaskOrganizer.registerPipTransitionCallback(this);
+        pipTransitionController.registerPipTransitionCallback(this);
 
         loadConfigurations();
 
@@ -302,17 +306,17 @@ public class TvPipController implements PipTaskOrganizer.PipTransitionCallback,
     }
 
     @Override
-    public void onPipTransitionStarted(ComponentName activity, int direction, Rect pipBounds) {
+    public void onPipTransitionStarted(int direction, Rect pipBounds) {
         if (DEBUG) Log.d(TAG, "onPipTransition_Started(), state=" + stateToName(mState));
     }
 
     @Override
-    public void onPipTransitionCanceled(ComponentName activity, int direction) {
+    public void onPipTransitionCanceled(int direction) {
         if (DEBUG) Log.d(TAG, "onPipTransition_Canceled(), state=" + stateToName(mState));
     }
 
     @Override
-    public void onPipTransitionFinished(ComponentName activity, int direction) {
+    public void onPipTransitionFinished(int direction) {
         if (DEBUG) Log.d(TAG, "onPipTransition_Finished(), state=" + stateToName(mState));
 
         if (mState == STATE_PIP_MENU) {

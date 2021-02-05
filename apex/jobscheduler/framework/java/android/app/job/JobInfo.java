@@ -593,15 +593,6 @@ public class JobInfo implements Parcelable {
     }
 
     /**
-     * @see JobInfo.Builder#setExpedited(boolean)
-     * @deprecated Use {@link #isExpedited()} instead
-     */
-    @Deprecated
-    public boolean isForegroundJob() {
-        return (flags & FLAG_EXPEDITED) != 0;
-    }
-
-    /**
      * @see JobInfo.Builder#setImportantWhileForeground(boolean)
      */
     public boolean isImportantWhileForeground() {
@@ -1495,20 +1486,6 @@ public class JobInfo implements Parcelable {
         @NonNull
         public Builder setExpedited(boolean expedited) {
             if (expedited) {
-                mFlags |= FLAG_EXPEDITED;
-            } else {
-                mFlags &= (~FLAG_EXPEDITED);
-            }
-            return this;
-        }
-
-        /**
-         * @deprecated Use {@link #setExpedited(boolean)} instead.
-         */
-        @Deprecated
-        @NonNull
-        public Builder setForeground(boolean foreground) {
-            if (foreground) {
                 mFlags |= FLAG_EXPEDITED;
             } else {
                 mFlags &= (~FLAG_EXPEDITED);

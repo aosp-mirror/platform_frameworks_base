@@ -17,6 +17,7 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.os.Parcel;
@@ -73,6 +74,7 @@ public final class ContentCaptureOptions implements Parcelable {
      * for all acitivites in the package).
      */
     @Nullable
+    @SuppressLint("NullableCollection")
     public final ArraySet<ComponentName> whitelistedComponents;
 
     /**
@@ -96,6 +98,7 @@ public final class ContentCaptureOptions implements Parcelable {
      */
     public ContentCaptureOptions(int loggingLevel, int maxBufferSize, int idleFlushingFrequencyMs,
             int textChangeFlushingFrequencyMs, int logHistorySize,
+            @SuppressLint("NullableCollection")
             @Nullable ArraySet<ComponentName> whitelistedComponents) {
         this(/* lite= */ false, loggingLevel, maxBufferSize, idleFlushingFrequencyMs,
                 textChangeFlushingFrequencyMs, logHistorySize, whitelistedComponents);

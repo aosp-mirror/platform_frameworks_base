@@ -21,8 +21,6 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.os.BatteryStatsManager.NUM_WIFI_STATES;
 import static android.os.BatteryStatsManager.NUM_WIFI_SUPPL_STATES;
 
-import static com.android.internal.power.MeasuredEnergyStats.NUMBER_ENERGY_BUCKETS;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -107,7 +105,7 @@ import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidClusterTimeRea
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidFreqTimeReader;
 import com.android.internal.os.KernelCpuUidTimeReader.KernelCpuUidUserSysTimeReader;
 import com.android.internal.power.MeasuredEnergyStats;
-import com.android.internal.power.MeasuredEnergyStats.EnergyBucket;
+import com.android.internal.power.MeasuredEnergyStats.StandardEnergyBucket;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
@@ -173,7 +171,7 @@ public class BatteryStatsImpl extends BatteryStats {
     private static final int MAGIC = 0xBA757475; // 'BATSTATS'
 
     // Current on-disk Parcel version
-    static final int VERSION = 192 + (USE_OLD_HISTORY ? 1000 : 0);
+    static final int VERSION = 193 + (USE_OLD_HISTORY ? 1000 : 0);
 
     // The maximum number of names wakelocks we will keep track of
     // per uid; once the limit is reached, we batch the remaining wakelocks
@@ -7161,8 +7159,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mGlobalMeasuredEnergyStats == null) {
             return ENERGY_DATA_UNAVAILABLE;
         }
-        return mGlobalMeasuredEnergyStats.getAccumulatedBucketEnergy(
-                MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
+        return mGlobalMeasuredEnergyStats
+                .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON);
     }
 
     @Override
@@ -7170,8 +7168,8 @@ public class BatteryStatsImpl extends BatteryStats {
         if (mGlobalMeasuredEnergyStats == null) {
             return ENERGY_DATA_UNAVAILABLE;
         }
-        return mGlobalMeasuredEnergyStats.getAccumulatedBucketEnergy(
-                MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
+        return mGlobalMeasuredEnergyStats
+                .getAccumulatedStandardBucketEnergy(MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_DOZE);
     }
 
     @Override public long getStartClockTime() {
@@ -7935,27 +7933,27 @@ public class BatteryStatsImpl extends BatteryStats {
             return mUidMeasuredEnergyStats;
         }
 
-        /** Adds the given energy to the given energy bucket for this uid. */
-        private void addEnergyToEnergyBucketLocked(long energyDeltaUJ,
-                @MeasuredEnergyStats.EnergyBucket int energyBucket, boolean accumulate) {
+        /** Adds the given energy to the given standard energy bucket for this uid. */
+        private void addEnergyToStandardBucketLocked(long energyDeltaUJ,
+                @StandardEnergyBucket int energyBucket, boolean accumulate) {
             getOrCreateMeasuredEnergyStatsLocked()
-                    .updateBucket(energyBucket, energyDeltaUJ, accumulate);
+                    .updateStandardBucket(energyBucket, energyDeltaUJ, accumulate);
         }
 
         /**
-         * Returns the energy used by this uid for an energy bucket of interest.
-         * @param bucket energy bucket of interest
+         * Returns the energy used by this uid for a standard energy bucket of interest.
+         * @param bucket standard energy bucket of interest
          * @return energy (in microjoules) used by this uid for this energy bucket
          */
-        public long getMeasuredEnergyMicroJoules(@MeasuredEnergyStats.EnergyBucket int bucket) {
+        public long getMeasuredEnergyMicroJoules(@StandardEnergyBucket int bucket) {
             if (mBsi.mGlobalMeasuredEnergyStats == null
-                    || !mBsi.mGlobalMeasuredEnergyStats.isEnergyBucketSupported(bucket)) {
+                    || !mBsi.mGlobalMeasuredEnergyStats.isStandardBucketSupported(bucket)) {
                 return ENERGY_DATA_UNAVAILABLE;
             }
             if (mUidMeasuredEnergyStats == null) {
                 return 0L; // It is supported, but was never filled, so it must be 0
             }
-            return mUidMeasuredEnergyStats.getAccumulatedBucketEnergy(bucket);
+            return mUidMeasuredEnergyStats.getAccumulatedStandardBucketEnergy(bucket);
         }
 
         /**
@@ -12396,7 +12394,7 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        final @EnergyBucket int energyBucket =
+        final @StandardEnergyBucket int energyBucket =
                 MeasuredEnergyStats.getDisplayEnergyBucket(mScreenStateAtLastEnergyMeasurement);
         mScreenStateAtLastEnergyMeasurement = screenState;
 
@@ -12415,7 +12413,7 @@ public class BatteryStatsImpl extends BatteryStats {
             return;
         }
 
-        mGlobalMeasuredEnergyStats.updateBucket(energyBucket, energyUJ, true);
+        mGlobalMeasuredEnergyStats.updateStandardBucket(energyBucket, energyUJ, true);
 
         // Now we blame individual apps, but only if the display was ON.
         if (energyBucket != MeasuredEnergyStats.ENERGY_BUCKET_SCREEN_ON) {
@@ -12453,7 +12451,7 @@ public class BatteryStatsImpl extends BatteryStats {
             final long appDisplayEnergyMJ =
                     (totalDisplayEnergyMJ * fgTimeMs + (totalFgTimeMs / 2))
                     / totalFgTimeMs;
-            uid.addEnergyToEnergyBucketLocked(appDisplayEnergyMJ * 1000, energyBucket, true);
+            uid.addEnergyToStandardBucketLocked(appDisplayEnergyMJ * 1000, energyBucket, true);
 
             // To mitigate round-off errors, remove this app from numerator & denominator totals
             totalDisplayEnergyMJ -= appDisplayEnergyMJ;
@@ -14138,33 +14136,34 @@ public class BatteryStatsImpl extends BatteryStats {
     /**
      * Initialize the measured energy stats data structures.
      *
-     * @param supportedEnergyBuckets boolean array indicating which buckets are currently supported
+     * @param supportedStandardBuckets boolean array indicating which {@link StandardEnergyBucket}s
+     *                                 are currently supported.
+     *                                 If null, none are supported (regardless of numCustomBuckets).
+     * @param numCustomBuckets number of custom (OTHER) EnergyConsumers on this device
      */
     @GuardedBy("this")
-    public void initMeasuredEnergyStatsLocked(boolean[] supportedEnergyBuckets) {
+    public void initMeasuredEnergyStatsLocked(@Nullable boolean[] supportedStandardBuckets,
+            int numCustomBuckets) {
         boolean supportedBucketMismatch = false;
         mScreenStateAtLastEnergyMeasurement = mScreenState;
 
-        if (supportedEnergyBuckets == null) {
+        if (supportedStandardBuckets == null) {
             if (mGlobalMeasuredEnergyStats != null) {
                 // Measured energy buckets no longer supported, wipe out the existing data.
                 supportedBucketMismatch = true;
             }
         } else if (mGlobalMeasuredEnergyStats == null) {
-            mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(supportedEnergyBuckets);
+            mGlobalMeasuredEnergyStats
+                    = new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
             return;
         } else {
-            for (int i = 0; i < NUMBER_ENERGY_BUCKETS; i++) {
-                if (mGlobalMeasuredEnergyStats.isEnergyBucketSupported(i)
-                        != supportedEnergyBuckets[i]) {
-                    mGlobalMeasuredEnergyStats = new MeasuredEnergyStats(supportedEnergyBuckets);
-                    supportedBucketMismatch = true;
-                    break;
-                }
-            }
+            supportedBucketMismatch = !mGlobalMeasuredEnergyStats.isSupportEqualTo(
+                    supportedStandardBuckets, numCustomBuckets);
         }
 
         if (supportedBucketMismatch) {
+            mGlobalMeasuredEnergyStats = supportedStandardBuckets == null ?
+                    null : new MeasuredEnergyStats(supportedStandardBuckets, numCustomBuckets);
             // Supported energy buckets changed since last boot.
             // Existing data is no longer reliable.
             resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime());

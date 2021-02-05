@@ -23,6 +23,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.Nullable;
+import android.app.IApplicationThread;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -281,7 +282,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         proto.write(ServiceRecordProto.SHORT_NAME, this.shortInstanceName);
         proto.write(ServiceRecordProto.IS_RUNNING, app != null);
         if (app != null) {
-            proto.write(ServiceRecordProto.PID, app.pid);
+            proto.write(ServiceRecordProto.PID, app.getPid());
         }
         if (intent != null) {
             intent.getIntent().dumpDebug(proto, ServiceRecordProto.INTENT, false, true, false,
@@ -582,13 +583,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         restartTracker.setRestarting(true, memFactor, now);
     }
 
-    public void setProcess(ProcessRecord _proc) {
-        if (_proc != null) {
+    public void setProcess(ProcessRecord proc, IApplicationThread thread, int pid,
+            UidRecord uidRecord) {
+        if (proc != null) {
             // We're starting a new process for this service, but a previous one is allowed to start
             // background activities. Remove that ability now (unless the new process is the same as
             // the previous one, which is a common case).
             if (mAppForAllowingBgActivityStartsByStart != null) {
-                if (mAppForAllowingBgActivityStartsByStart != _proc) {
+                if (mAppForAllowingBgActivityStartsByStart != proc) {
                     mAppForAllowingBgActivityStartsByStart
                             .removeAllowBackgroundActivityStartsToken(this);
                     ams.mHandler.removeCallbacks(mCleanUpAllowBgActivityStartsByStartCallback);
@@ -596,34 +598,35 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             }
             // Make sure the cleanup callback knows about the new process.
             mAppForAllowingBgActivityStartsByStart = mIsAllowedBgActivityStartsByStart
-                    ? _proc : null;
+                    ? proc : null;
             if (mIsAllowedBgActivityStartsByStart
                     || mIsAllowedBgActivityStartsByBinding) {
-                _proc.addOrUpdateAllowBackgroundActivityStartsToken(this,
+                proc.addOrUpdateAllowBackgroundActivityStartsToken(this,
                         getExclusiveOriginatingToken());
             } else {
-                _proc.removeAllowBackgroundActivityStartsToken(this);
+                proc.removeAllowBackgroundActivityStartsToken(this);
             }
             if (mIsAllowedBgFgsStartsByBinding) {
-                _proc.addAllowBackgroundFgsStartsToken(this);
+                proc.mState.addAllowBackgroundFgsStartsToken(this);
             } else {
-                _proc.removeAllowBackgroundFgsStartsToken(this);
+                proc.mState.removeAllowBackgroundFgsStartsToken(this);
             }
         }
-        if (app != null && app != _proc) {
+        if (app != null && app != proc) {
             // If the old app is allowed to start bg activities because of a service start, leave it
             // that way until the cleanup callback runs. Otherwise we can remove its bg activity
             // start ability immediately (it can't be bound now).
             if (!mIsAllowedBgActivityStartsByStart) {
                 app.removeAllowBackgroundActivityStartsToken(this);
             }
-            app.updateBoundClientUids();
+            app.mServices.updateBoundClientUids();
         }
-        app = _proc;
-        if (pendingConnectionGroup > 0 && _proc != null) {
-            _proc.connectionService = this;
-            _proc.connectionGroup = pendingConnectionGroup;
-            _proc.connectionImportance = pendingConnectionImportance;
+        app = proc;
+        if (pendingConnectionGroup > 0 && proc != null) {
+            final ProcessServiceRecord psr = proc.mServices;
+            psr.setConnectionService(this);
+            psr.setConnectionGroup(pendingConnectionGroup);
+            psr.setConnectionImportance(pendingConnectionImportance);
             pendingConnectionGroup = pendingConnectionImportance = 0;
         }
         if (ActivityManagerService.TRACK_PROCSTATS_ASSOCIATIONS) {
@@ -631,7 +634,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 ArrayList<ConnectionRecord> cr = connections.valueAt(conni);
                 for (int i = 0; i < cr.size(); i++) {
                     final ConnectionRecord conn = cr.get(i);
-                    if (_proc != null) {
+                    if (proc != null) {
                         conn.startAssociationIfNeeded();
                     } else {
                         conn.stopAssociation();
@@ -639,8 +642,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
                 }
             }
         }
-        if (_proc != null) {
-            _proc.updateBoundClientUids();
+        if (proc != null) {
+            proc.mServices.updateBoundClientUids();
         }
     }
 
@@ -658,7 +661,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
         // if we have a process attached, add bound client uid of this connection to it
         if (app != null) {
-            app.addBoundClientUid(c.clientUid);
+            app.mServices.addBoundClientUid(c.clientUid);
         }
     }
 
@@ -666,7 +669,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         connections.remove(binder);
         // if we have a process attached, tell it to update the state of bound clients
         if (app != null) {
-            app.updateBoundClientUids();
+            app.mServices.updateBoundClientUids();
         }
     }
 
@@ -820,9 +823,9 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
             return;
         }
         if (mIsAllowedBgFgsStartsByBinding) {
-            app.addAllowBackgroundFgsStartsToken(this);
+            app.mState.addAllowBackgroundFgsStartsToken(this);
         } else {
-            app.removeAllowBackgroundFgsStartsToken(this);
+            app.mState.removeAllowBackgroundFgsStartsToken(this);
         }
     }
 
@@ -937,7 +940,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
 
     public void postNotification() {
         final int appUid = appInfo.uid;
-        final int appPid = app.pid;
+        final int appPid = app.getPid();
         if (foregroundId != 0 && foregroundNoti != null) {
             // Do asynchronous communication with notification manager to
             // avoid deadlocks.
@@ -1057,7 +1060,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         final String localPackageName = packageName;
         final int localForegroundId = foregroundId;
         final int appUid = appInfo.uid;
-        final int appPid = app != null ? app.pid : 0;
+        final int appPid = app != null ? app.getPid() : 0;
         ams.mHandler.post(new Runnable() {
             public void run() {
                 NotificationManagerInternal nm = LocalServices.getService(

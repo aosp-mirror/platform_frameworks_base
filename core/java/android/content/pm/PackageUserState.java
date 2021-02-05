@@ -77,8 +77,6 @@ public class PackageUserState {
     public boolean virtualPreload;
     public int enabled;
     public String lastDisableAppCaller;
-    public int domainVerificationStatus;
-    public int appLinkGeneration;
     public int categoryHint = ApplicationInfo.CATEGORY_UNDEFINED;
     public int installReason;
     public @PackageManager.UninstallReason int uninstallReason;
@@ -100,8 +98,6 @@ public class PackageUserState {
         hidden = false;
         suspended = false;
         enabled = COMPONENT_ENABLED_STATE_DEFAULT;
-        domainVerificationStatus =
-                PackageManager.INTENT_FILTER_DOMAIN_VERIFICATION_STATUS_UNDEFINED;
         installReason = PackageManager.INSTALL_REASON_UNKNOWN;
         uninstallReason = PackageManager.UNINSTALL_REASON_UNKNOWN;
     }
@@ -120,8 +116,6 @@ public class PackageUserState {
         virtualPreload = o.virtualPreload;
         enabled = o.enabled;
         lastDisableAppCaller = o.lastDisableAppCaller;
-        domainVerificationStatus = o.domainVerificationStatus;
-        appLinkGeneration = o.appLinkGeneration;
         categoryHint = o.categoryHint;
         installReason = o.installReason;
         uninstallReason = o.uninstallReason;
@@ -416,12 +410,6 @@ public class PackageUserState {
                         && !lastDisableAppCaller.equals(oldState.lastDisableAppCaller))) {
             return false;
         }
-        if (domainVerificationStatus != oldState.domainVerificationStatus) {
-            return false;
-        }
-        if (appLinkGeneration != oldState.appLinkGeneration) {
-            return false;
-        }
         if (categoryHint != oldState.categoryHint) {
             return false;
         }
@@ -481,8 +469,6 @@ public class PackageUserState {
         hashCode = 31 * hashCode + Boolean.hashCode(virtualPreload);
         hashCode = 31 * hashCode + enabled;
         hashCode = 31 * hashCode + Objects.hashCode(lastDisableAppCaller);
-        hashCode = 31 * hashCode + domainVerificationStatus;
-        hashCode = 31 * hashCode + appLinkGeneration;
         hashCode = 31 * hashCode + categoryHint;
         hashCode = 31 * hashCode + installReason;
         hashCode = 31 * hashCode + uninstallReason;
