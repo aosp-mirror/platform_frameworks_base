@@ -22,6 +22,7 @@ import android.graphics.FontListParser;
 import android.graphics.Typeface;
 import android.text.FontConfig;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
@@ -36,8 +37,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +75,7 @@ public final class SystemFonts {
             if (Typeface.ENABLE_LAZY_TYPEFACE_INITIALIZATION) {
                 sAvailableFonts = collectAllFonts();
             } else {
-                Set<Font> set = new HashSet<>();
+                Set<Font> set = new ArraySet<>();
                 for (FontFamily[] items : sFamilyMap.values()) {
                     for (FontFamily family : items) {
                         for (int i = 0; i < family.getSize(); ++i) {
@@ -96,7 +95,7 @@ public final class SystemFonts {
         FontConfig fontConfig = getSystemPreinstalledFontConfig();
         Map<String, FontFamily[]> map = buildSystemFallback(fontConfig);
 
-        Set<Font> res = new HashSet<>();
+        Set<Font> res = new ArraySet<>();
         for (FontFamily[] families : map.values()) {
             for (FontFamily family : families) {
                 for (int i = 0; i < family.getSize(); ++i) {
@@ -218,7 +217,7 @@ public final class SystemFonts {
     }
 
     private static void appendNamedFamily(@NonNull FontConfig.FontFamily xmlFamily,
-            @NonNull HashMap<String, ByteBuffer> bufferCache,
+            @NonNull ArrayMap<String, ByteBuffer> bufferCache,
             @NonNull ArrayMap<String, ArrayList<FontFamily>> fallbackListMap) {
         final String familyName = xmlFamily.getName();
         final FontFamily family = createFontFamily(
@@ -284,8 +283,8 @@ public final class SystemFonts {
      */
     @VisibleForTesting
     public static Map<String, FontFamily[]> buildSystemFallback(FontConfig fontConfig) {
-        final Map<String, FontFamily[]> fallbackMap = new HashMap<>();
-        final HashMap<String, ByteBuffer> bufferCache = new HashMap<>();
+        final Map<String, FontFamily[]> fallbackMap = new ArrayMap<>();
+        final ArrayMap<String, ByteBuffer> bufferCache = new ArrayMap<>();
         final List<FontConfig.FontFamily> xmlFamilies = fontConfig.getFontFamilies();
 
         final ArrayMap<String, ArrayList<FontFamily>> fallbackListMap = new ArrayMap<>();
@@ -326,7 +325,7 @@ public final class SystemFonts {
     public static Map<String, Typeface> buildSystemTypefaces(
             FontConfig fontConfig,
             Map<String, FontFamily[]> fallbackMap) {
-        final HashMap<String, Typeface> result = new HashMap<>();
+        final ArrayMap<String, Typeface> result = new ArrayMap<>();
         Typeface.initSystemDefaultTypefaces(fallbackMap, fontConfig.getAliases(), result);
         return result;
     }

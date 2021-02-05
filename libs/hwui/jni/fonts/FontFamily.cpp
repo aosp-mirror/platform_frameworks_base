@@ -83,6 +83,23 @@ static jlong FontFamily_Builder_GetReleaseFunc(CRITICAL_JNI_PARAMS) {
     return reinterpret_cast<jlong>(releaseFontFamily);
 }
 
+// FastNative
+static jstring FontFamily_getLangTags(JNIEnv* env, jobject, jlong familyPtr) {
+    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
+    uint32_t localeListId = family->family->localeListId();
+    if (localeListId == 0) {
+        return nullptr;
+    }
+    std::string langTags = minikin::getLocaleString(localeListId);
+    return env->NewStringUTF(langTags.c_str());
+}
+
+// CriticalNative
+static jint FontFamily_getVariant(jlong familyPtr) {
+    FontFamilyWrapper* family = reinterpret_cast<FontFamilyWrapper*>(familyPtr);
+    return static_cast<jint>(family->family->variant());
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 static const JNINativeMethod gFontFamilyBuilderMethods[] = {
@@ -93,9 +110,16 @@ static const JNINativeMethod gFontFamilyBuilderMethods[] = {
     { "nGetReleaseNativeFamily", "()J", (void*) FontFamily_Builder_GetReleaseFunc },
 };
 
+static const JNINativeMethod gFontFamilyMethods[] = {
+        {"nGetLangTags", "(J)Ljava/lang/String;", (void*)FontFamily_getLangTags},
+        {"nGetVariant", "(J)I", (void*)FontFamily_getVariant},
+};
+
 int register_android_graphics_fonts_FontFamily(JNIEnv* env) {
     return RegisterMethodsOrDie(env, "android/graphics/fonts/FontFamily$Builder",
-            gFontFamilyBuilderMethods, NELEM(gFontFamilyBuilderMethods));
+                                gFontFamilyBuilderMethods, NELEM(gFontFamilyBuilderMethods)) +
+           RegisterMethodsOrDie(env, "android/graphics/fonts/FontFamily", gFontFamilyMethods,
+                                NELEM(gFontFamilyMethods));
 }
 
 }
