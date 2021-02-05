@@ -17,6 +17,7 @@
 package com.android.wm.shell.flicker.legacysplitscreen
 
 import android.os.Bundle
+import android.view.Surface
 import androidx.test.filters.RequiresDevice
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.server.wm.flicker.FlickerTestRunner
@@ -87,7 +88,9 @@ class ExitPrimarySplitScreenShowSecondaryFullscreen(
             }
             return FlickerTestRunnerFactory.getInstance().buildTest(
                 instrumentation, defaultTransitionSetup, testSpec,
-                repetitions = SplitScreenHelper.TEST_REPETITIONS)
+                repetitions = SplitScreenHelper.TEST_REPETITIONS,
+                supportedRotations = listOf(Surface.ROTATION_0) // bugId = 179116910
+            )
         }
     }
 }
