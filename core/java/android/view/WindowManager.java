@@ -97,6 +97,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -3455,6 +3456,22 @@ public interface WindowManager extends ViewManager {
         public @InsetsState.InternalInsetsType int[] providesInsetsTypes;
 
         /**
+         * If specified, the insets provided by this window will be our window frame minus the
+         * insets specified by providedInternalInsets.
+         *
+         * @hide
+         */
+        public Insets providedInternalInsets = Insets.NONE;
+
+        /**
+         * {@link LayoutParams} to be applied to the window when layout with a assigned rotation.
+         * This will make layout during rotation change smoothly.
+         *
+         * @hide
+         */
+        public LayoutParams[] paramsForRotation;
+
+        /**
          * Specifies types of insets that this window should avoid overlapping during layout.
          *
          * @param types which {@link WindowInsets.Type}s of insets that this window should avoid.
@@ -3551,6 +3568,18 @@ public interface WindowManager extends ViewManager {
          */
         public boolean isFitInsetsIgnoringVisibility() {
             return mFitInsetsIgnoringVisibility;
+        }
+
+        private void checkNonRecursiveParams() {
+            if (paramsForRotation == null) {
+                return;
+            }
+            for (int i = paramsForRotation.length - 1; i >= 0; i--) {
+                if (paramsForRotation[i].paramsForRotation != null) {
+                    throw new IllegalArgumentException(
+                            "Params cannot contain params recursively.");
+                }
+            }
         }
 
         public LayoutParams() {
@@ -3805,6 +3834,14 @@ public interface WindowManager extends ViewManager {
             } else {
                 out.writeInt(0);
             }
+            providedInternalInsets.writeToParcel(out, 0 /* parcelableFlags */);
+            if (paramsForRotation != null) {
+                checkNonRecursiveParams();
+                out.writeInt(paramsForRotation.length);
+                out.writeTypedArray(paramsForRotation, 0 /* parcelableFlags */);
+            } else {
+                out.writeInt(0);
+            }
         }
 
         public static final @android.annotation.NonNull Parcelable.Creator<LayoutParams> CREATOR
@@ -3873,6 +3910,12 @@ public interface WindowManager extends ViewManager {
             if (insetsTypesLength > 0) {
                 providesInsetsTypes = new int[insetsTypesLength];
                 in.readIntArray(providesInsetsTypes);
+            }
+            providedInternalInsets = Insets.CREATOR.createFromParcel(in);
+            int paramsForRotationLength = in.readInt();
+            if (paramsForRotationLength > 0) {
+                paramsForRotation = new LayoutParams[paramsForRotationLength];
+                in.readTypedArray(paramsForRotation, LayoutParams.CREATOR);
             }
         }
 
@@ -4156,6 +4199,17 @@ public interface WindowManager extends ViewManager {
                 changes |= LAYOUT_CHANGED;
             }
 
+            if (!providedInternalInsets.equals(o.providedInternalInsets)) {
+                providedInternalInsets = o.providedInternalInsets;
+                changes |= LAYOUT_CHANGED;
+            }
+
+            if (!Arrays.equals(paramsForRotation, o.paramsForRotation)) {
+                paramsForRotation = o.paramsForRotation;
+                checkNonRecursiveParams();
+                changes |= LAYOUT_CHANGED;
+            }
+
             return changes;
         }
 
@@ -4341,6 +4395,18 @@ public interface WindowManager extends ViewManager {
                 for (int i = 0; i < providesInsetsTypes.length; ++i) {
                     if (i > 0) sb.append(' ');
                     sb.append(InsetsState.typeToString(providesInsetsTypes[i]));
+                }
+            }
+            if (!providedInternalInsets.equals(Insets.NONE)) {
+                sb.append(" providedInternalInsets=");
+                sb.append(providedInternalInsets);
+            }
+            if (paramsForRotation != null && paramsForRotation.length != 0) {
+                sb.append(System.lineSeparator());
+                sb.append(prefix).append("  paramsForRotation=");
+                for (int i = 0; i < paramsForRotation.length; ++i) {
+                    if (i > 0) sb.append(' ');
+                    sb.append(paramsForRotation[i].toString());
                 }
             }
 

@@ -284,6 +284,21 @@ public final class ViewRootImpl implements ViewParent,
      */
     private static final int SCROLL_CAPTURE_REQUEST_TIMEOUT_MILLIS = 2500;
 
+    /**
+     * If set to {@code true}, the new logic to layout system bars as normal window and to use
+     * layout result to get insets will be applied. Otherwise, the old hard-coded window logic will
+     * be applied.
+     */
+    private static final String USE_FLEXIBLE_INSETS = "persist.debug.flexible_insets";
+
+    /**
+     * A flag to indicate to use the new generalized insets window logic, or the old hard-coded
+     * insets window layout logic.
+     * {@hide}
+     */
+    public static final boolean INSETS_LAYOUT_GENERALIZATION =
+            SystemProperties.getBoolean(USE_FLEXIBLE_INSETS, false);
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     static final ThreadLocal<HandlerActionQueue> sRunQueues = new ThreadLocal<HandlerActionQueue>();
 

@@ -313,7 +313,9 @@ public class DisplayPolicyTests extends WindowTestsBase {
         displayInfo.logicalHeight = 2000;
         displayInfo.rotation = ROTATION_0;
 
-        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
+        WindowManager.LayoutParams attrs = mNavBarWindow.mAttrs;
+        displayPolicy.addWindowLw(mNavBarWindow, attrs);
+        mNavBarWindow.setRequestedSize(attrs.width, attrs.height);
         mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
         final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
         mImeWindow.mAboveInsetsState.set(state);

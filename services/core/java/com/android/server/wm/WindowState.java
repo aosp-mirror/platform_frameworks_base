@@ -34,6 +34,7 @@ import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.SurfaceControl.Transaction;
 import static android.view.SurfaceControl.getGlobalTransaction;
+import static android.view.ViewRootImpl.INSETS_LAYOUT_GENERALIZATION;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_CONTENT;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_FRAME;
 import static android.view.ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION;
@@ -1258,8 +1259,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         frame.inset(left, top, right, bottom);
     }
 
-    void computeFrameAndUpdateSourceFrame() {
-        computeFrame();
+    void computeFrameAndUpdateSourceFrame(DisplayFrames displayFrames) {
+        computeFrame(displayFrames);
         // Update the source frame to provide insets to other windows during layout. If the
         // simulated frames exist, then this is not computing a stable result so just skip.
         if (mControllableInsetProvider != null && mSimulatedWindowFrames == null) {
@@ -1270,7 +1271,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /**
      * Perform standard frame computation. The result can be obtained with getFrame() if so desired.
      */
-    void computeFrame() {
+    void computeFrame(DisplayFrames displayFrames) {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
             // removed or we are still waiting for some information. Because of this we don't
@@ -1383,7 +1384,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final int fw = windowFrames.mFrame.width();
         final int fh = windowFrames.mFrame.height();
 
-        applyGravityAndUpdateFrame(windowFrames, layoutContainingFrame, layoutDisplayFrame);
+        applyGravityAndUpdateFrame(windowFrames, layoutContainingFrame, layoutDisplayFrame,
+                displayFrames);
 
         if (mAttrs.type == TYPE_DOCK_DIVIDER) {
             if (!windowFrames.mFrame.equals(windowFrames.mLastFrame)) {
@@ -1474,6 +1476,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public WindowManager.LayoutParams getAttrs() {
         return mAttrs;
+    }
+
+    WindowManager.LayoutParams getLayoutingAttrs(int rotation) {
+        if (!INSETS_LAYOUT_GENERALIZATION) {
+            return mAttrs;
+        }
+        final WindowManager.LayoutParams[] paramsForRotation = mAttrs.paramsForRotation;
+        if (paramsForRotation == null || paramsForRotation.length != 4
+                || paramsForRotation[rotation] == null) {
+            return mAttrs;
+        }
+        return paramsForRotation[rotation];
     }
 
     /** Retrieves the flags used to disable system UI functions. */
@@ -4395,12 +4409,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void applyGravityAndUpdateFrame(WindowFrames windowFrames, Rect containingFrame,
-            Rect displayFrame) {
+            Rect displayFrame, DisplayFrames displayFrames) {
         final int pw = containingFrame.width();
         final int ph = containingFrame.height();
         final Task task = getTask();
         final boolean inNonFullscreenContainer = !inAppWindowThatMatchesParentBounds();
-        final boolean noLimits = (mAttrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
+        final WindowManager.LayoutParams attrs = getLayoutingAttrs(displayFrames.mRotation);
+        final boolean noLimits = (attrs.flags & FLAG_LAYOUT_NO_LIMITS) != 0;
 
         // We need to fit it to the display if either
         // a) The window is in a fullscreen container, or we don't have a task (we assume fullscreen
@@ -4410,49 +4425,54 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // screen, but SurfaceViews want to be always at a specific location so we don't fit it to
         // the display.
         final boolean fitToDisplay = (task == null || !inNonFullscreenContainer)
-                || ((mAttrs.type != TYPE_BASE_APPLICATION) && !noLimits);
+                || ((attrs.type != TYPE_BASE_APPLICATION) && !noLimits);
         float x, y;
         int w,h;
 
         final boolean hasCompatScale = hasCompatScale();
-        if ((mAttrs.flags & FLAG_SCALED) != 0) {
-            if (mAttrs.width < 0) {
+        if ((attrs.flags & FLAG_SCALED) != 0 || mAttrs != attrs) {
+            // For the window with different layout attrs for different rotations, we need to avoid
+            // using requested size. Otherwise, when finishing a simulated rotation, the information
+            // coming from WindowManagerServices to the ViewRootImpl may not contain the correct
+            // value for the new rotation, and there will be a quick flash of wrong layout when the
+            // simulated activity faded out.
+            if (attrs.width < 0) {
                 w = pw;
             } else if (hasCompatScale) {
-                w = (int)(mAttrs.width * mGlobalScale + .5f);
+                w = (int) (attrs.width * mGlobalScale + .5f);
             } else {
-                w = mAttrs.width;
+                w = attrs.width;
             }
-            if (mAttrs.height < 0) {
+            if (attrs.height < 0) {
                 h = ph;
             } else if (hasCompatScale) {
-                h = (int)(mAttrs.height * mGlobalScale + .5f);
+                h = (int) (attrs.height * mGlobalScale + .5f);
             } else {
-                h = mAttrs.height;
+                h = attrs.height;
             }
         } else {
-            if (mAttrs.width == MATCH_PARENT) {
+            if (attrs.width == MATCH_PARENT) {
                 w = pw;
             } else if (hasCompatScale) {
-                w = (int)(mRequestedWidth * mGlobalScale + .5f);
+                w = (int) (mRequestedWidth * mGlobalScale + .5f);
             } else {
                 w = mRequestedWidth;
             }
-            if (mAttrs.height == MATCH_PARENT) {
+            if (attrs.height == MATCH_PARENT) {
                 h = ph;
             } else if (hasCompatScale) {
-                h = (int)(mRequestedHeight * mGlobalScale + .5f);
+                h = (int) (mRequestedHeight * mGlobalScale + .5f);
             } else {
                 h = mRequestedHeight;
             }
         }
 
         if (hasCompatScale) {
-            x = mAttrs.x * mGlobalScale;
-            y = mAttrs.y * mGlobalScale;
+            x = attrs.x * mGlobalScale;
+            y = attrs.y * mGlobalScale;
         } else {
-            x = mAttrs.x;
-            y = mAttrs.y;
+            x = attrs.x;
+            y = attrs.y;
         }
 
         if (inNonFullscreenContainer && !layoutInParentFrame()) {
@@ -4479,13 +4499,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         // Set mFrame
-        Gravity.apply(mAttrs.gravity, w, h, containingFrame,
-                (int) (x + mAttrs.horizontalMargin * pw),
-                (int) (y + mAttrs.verticalMargin * ph), windowFrames.mFrame);
-
+        Gravity.apply(attrs.gravity, w, h, containingFrame,
+                (int) (x + attrs.horizontalMargin * pw),
+                (int) (y + attrs.verticalMargin * ph), windowFrames.mFrame);
         // Now make sure the window fits in the overall display frame.
         if (fitToDisplay) {
-            Gravity.applyDisplay(mAttrs.gravity, displayFrame, windowFrames.mFrame);
+            Gravity.applyDisplay(attrs.gravity, displayFrame, windowFrames.mFrame);
         }
 
         // We need to make sure we update the CompatFrame as it is used for
