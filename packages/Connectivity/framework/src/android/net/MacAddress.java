@@ -161,7 +161,7 @@ public final class MacAddress implements Parcelable {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         return (o instanceof MacAddress) && ((MacAddress) o).mAddr == mAddr;
     }
 
