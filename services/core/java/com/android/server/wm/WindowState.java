@@ -533,6 +533,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     private boolean mOrientationChanging;
 
+    /** The time when the window was last requested to redraw for orientation change. */
+    private long mOrientationChangeRedrawRequestTime;
+
     /**
      * Sometimes in addition to the mOrientationChanging
      * flag we report that the orientation is changing
@@ -1441,11 +1444,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // redrawn; to do that, we need to go through the process of getting informed by the
             // application when it has finished drawing.
             if (getOrientationChanging() || dragResizingChanged) {
-                if (getOrientationChanging()) {
-                    Slog.v(TAG_WM, "Orientation start waiting for draw"
-                            + ", mDrawState=DRAW_PENDING in " + this
-                            + ", surfaceController " + winAnimator.mSurfaceController);
-                }
                 if (dragResizingChanged) {
                     ProtoLog.v(WM_DEBUG_RESIZE,
                             "Resize start waiting for draw, "
@@ -3651,7 +3649,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         ProtoLog.v(WM_DEBUG_RESIZE, "Reporting new frame to %s: %s", this,
                 mWindowFrames.mCompatFrame);
-        if (mWinAnimator.mDrawState == DRAW_PENDING) {
+        final boolean drawPending = mWinAnimator.mDrawState == DRAW_PENDING;
+        if (drawPending) {
             ProtoLog.i(WM_DEBUG_ORIENTATION, "Resizing %s WITH DRAW PENDING", this);
         }
 
@@ -3668,7 +3667,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.clearReportResizeHints();
 
         final MergedConfiguration mergedConfiguration = mLastReportedConfiguration;
-        final boolean reportDraw = mWinAnimator.mDrawState == DRAW_PENDING || useBLASTSync() || !mRedrawForSyncReported;
+        final boolean reportDraw = drawPending || useBLASTSync() || !mRedrawForSyncReported;
         final boolean forceRelayout = reportOrientation || isDragResizeChanged() || !mRedrawForSyncReported;
         final int displayId = getDisplayId();
         fillClientWindowFrames(mClientWindowFrames);
@@ -3679,6 +3678,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClient.resized(mClientWindowFrames, reportDraw, mergedConfiguration, forceRelayout,
                     getDisplayContent().getDisplayPolicy().areSystemBarsForcedShownLw(this),
                     displayId);
+            if (drawPending && reportOrientation && mOrientationChanging) {
+                mOrientationChangeRedrawRequestTime = SystemClock.elapsedRealtime();
+                ProtoLog.v(WM_DEBUG_ORIENTATION,
+                        "Requested redraw for orientation change: %s", this);
+            }
 
             if (mWmService.mAccessibilityController != null) {
                 mWmService.mAccessibilityController.onSomeWindowResizedOrMoved(displayId);
@@ -5732,6 +5736,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     boolean finishDrawing(SurfaceControl.Transaction postDrawTransaction) {
+        if (mOrientationChangeRedrawRequestTime > 0) {
+            final long duration =
+                    SystemClock.elapsedRealtime() - mOrientationChangeRedrawRequestTime;
+            Slog.i(TAG, "finishDrawing of orientation change: " + this + " " + duration + "ms");
+            mOrientationChangeRedrawRequestTime = 0;
+        } else if (mActivityRecord != null && mActivityRecord.mRelaunchStartTime != 0
+                && mActivityRecord.findMainWindow() == this) {
+            final long duration =
+                    SystemClock.elapsedRealtime() - mActivityRecord.mRelaunchStartTime;
+            Slog.i(TAG, "finishDrawing of relaunch: " + this + " " + duration + "ms");
+            mActivityRecord.mRelaunchStartTime = 0;
+        }
         if (!onSyncFinishedDrawing()) {
             return mWinAnimator.finishDrawingLocked(postDrawTransaction);
         }
