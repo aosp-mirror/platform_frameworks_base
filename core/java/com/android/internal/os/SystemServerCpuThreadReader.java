@@ -110,4 +110,24 @@ public class SystemServerCpuThreadReader {
 
         return mDeltaCpuThreadTimes;
     }
+
+    /** Returns CPU times, per thread group, since tracking started. */
+    @Nullable
+    public SystemServiceCpuThreadTimes readAbsolute() {
+        final int numCpuFrequencies = mKernelCpuThreadReader.getCpuFrequencyCount();
+        final KernelSingleProcessCpuThreadReader.ProcessCpuUsage processCpuUsage =
+                mKernelCpuThreadReader.getProcessCpuUsage();
+        if (processCpuUsage == null) {
+            return null;
+        }
+        final SystemServiceCpuThreadTimes result = new SystemServiceCpuThreadTimes();
+        result.threadCpuTimesUs = new long[numCpuFrequencies];
+        result.binderThreadCpuTimesUs = new long[numCpuFrequencies];
+        for (int i = 0; i < numCpuFrequencies; ++i) {
+            result.threadCpuTimesUs[i] = processCpuUsage.threadCpuTimesMillis[i] * 1_000;
+            result.binderThreadCpuTimesUs[i] =
+                    processCpuUsage.selectedThreadCpuTimesMillis[i] * 1_000;
+        }
+        return result;
+    }
 }
