@@ -423,6 +423,11 @@ public class PipTaskOrganizer implements ShellTaskOrganizer.TaskListener,
         // Set the exiting state first so if there is fixed rotation later, the running animation
         // won't be interrupted by alpha animation for existing PiP.
         mState = State.EXITING_PIP;
+
+        if (Transitions.ENABLE_SHELL_TRANSITIONS) {
+            mPipTransitionController.startTransition(destinationBounds, wct);
+            return;
+        }
         mSyncTransactionQueue.queue(wct);
         mSyncTransactionQueue.runInSync(t -> {
             // Make sure to grab the latest source hint rect as it could have been

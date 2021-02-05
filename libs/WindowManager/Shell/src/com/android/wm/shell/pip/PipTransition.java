@@ -25,6 +25,7 @@ import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTI
 import static com.android.wm.shell.pip.PipAnimationController.TRANSITION_DIRECTION_TO_PIP;
 import static com.android.wm.shell.pip.PipAnimationController.isInPipDirection;
 import static com.android.wm.shell.pip.PipAnimationController.isOutPipDirection;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
 
 import android.app.TaskInfo;
 import android.content.Context;
@@ -53,6 +54,7 @@ public class PipTransition extends PipTransitionController {
     private final int mEnterExitAnimationDuration;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private Transitions.TransitionFinishCallback mFinishCallback;
+    private Rect mExitDestinationBounds = new Rect();
 
     public PipTransition(Context context,
             PipBoundsState pipBoundsState, PipMenuController pipMenuController,
@@ -67,11 +69,27 @@ public class PipTransition extends PipTransitionController {
     }
 
     @Override
+    public void startTransition(Rect destinationBounds, WindowContainerTransaction out) {
+        mExitDestinationBounds.set(destinationBounds);
+        mTransitions.startTransition(TRANSIT_EXIT_PIP, out, this);
+    }
+
+    @Override
     public boolean startAnimation(@android.annotation.NonNull IBinder transition,
             @android.annotation.NonNull TransitionInfo info,
             @android.annotation.NonNull SurfaceControl.Transaction startTransaction,
             @android.annotation.NonNull SurfaceControl.Transaction finishTransaction,
             @android.annotation.NonNull Transitions.TransitionFinishCallback finishCallback) {
+
+        if (info.getType() == TRANSIT_EXIT_PIP && info.getChanges().size() == 1) {
+            final TransitionInfo.Change change = info.getChanges().get(0);
+            mFinishCallback = finishCallback;
+            boolean success = startExpandAnimation(change.getTaskInfo(), change.getLeash(),
+                    new Rect(mExitDestinationBounds));
+            mExitDestinationBounds.setEmpty();
+            return success;
+        }
+
         for (int i = info.getChanges().size() - 1; i >= 0; --i) {
             final TransitionInfo.Change change = info.getChanges().get(i);
             if (change.getTaskInfo() != null
@@ -107,6 +125,21 @@ public class PipTransition extends PipTransitionController {
             }
         });
         finishResizeForMenu(destinationBounds);
+    }
+
+    private boolean startExpandAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
+            final Rect destinationBounds) {
+        PipAnimationController.PipTransitionAnimator animator =
+                mPipAnimationController.getAnimator(taskInfo, leash, mPipBoundsState.getBounds(),
+                        mPipBoundsState.getBounds(), destinationBounds, null,
+                        TRANSITION_DIRECTION_LEAVE_PIP, 0 /* startingAngle */, Surface.ROTATION_0);
+
+        animator.setTransitionDirection(TRANSITION_DIRECTION_LEAVE_PIP)
+                .setPipAnimationCallback(mPipAnimationCallback)
+                .setDuration(mEnterExitAnimationDuration)
+                .start();
+
+        return true;
     }
 
     private boolean startEnterAnimation(final TaskInfo taskInfo, final SurfaceControl leash,
