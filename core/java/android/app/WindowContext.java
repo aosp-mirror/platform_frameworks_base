@@ -15,8 +15,7 @@
  */
 package android.app;
 
-import static android.view.WindowManagerGlobal.ADD_OKAY;
-import static android.view.WindowManagerGlobal.ADD_TOO_MANY_TOKENS;
+import static android.view.WindowManagerImpl.createWindowContextWindowManager;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,8 +27,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.Display;
 import android.view.IWindowManager;
+import android.view.WindowManager;
 import android.view.WindowManagerGlobal;
-import android.view.WindowManagerImpl;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -46,10 +45,10 @@ import java.lang.ref.Reference;
  */
 @UiContext
 public class WindowContext extends ContextWrapper {
-    private final WindowManagerImpl mWindowManager;
+    private final WindowManager mWindowManager;
     private final IWindowManager mWms;
     private final WindowTokenClient mToken;
-    private boolean mOwnsToken;
+    private boolean mListenerRegistered;
 
     /**
      * Default constructor. Will generate a {@link WindowTokenClient} and attach this context to
@@ -86,25 +85,14 @@ public class WindowContext extends ContextWrapper {
 
         mToken.attachContext(this);
 
-        mWindowManager = new WindowManagerImpl(this);
-        mWindowManager.setDefaultToken(mToken);
+        mWindowManager = createWindowContextWindowManager(this);
 
-        int result;
         try {
-            // Register the token with WindowManager. This will also call back with the current
-            // config back to the client.
-            result = mWms.addWindowTokenWithOptions(
-                    mToken, type, getDisplayId(), options, getPackageName());
+            mListenerRegistered = mWms.registerWindowContextListener(mToken, type, getDisplayId(),
+                    options);
         }  catch (RemoteException e) {
-            mOwnsToken = false;
             throw e.rethrowFromSystemServer();
         }
-        if (result == ADD_TOO_MANY_TOKENS) {
-            throw new UnsupportedOperationException("createWindowContext failed! Too many unused "
-                    + "window contexts. Please see Context#createWindowContext documentation for "
-                    + "detail.");
-        }
-        mOwnsToken = result == ADD_OKAY;
         Reference.reachabilityFence(this);
     }
 
@@ -131,10 +119,10 @@ public class WindowContext extends ContextWrapper {
     /** Used for test to invoke because we can't invoke finalize directly. */
     @VisibleForTesting
     public void release() {
-        if (mOwnsToken) {
+        if (mListenerRegistered) {
+            mListenerRegistered = false;
             try {
-                mWms.removeWindowToken(mToken, getDisplayId());
-                mOwnsToken = false;
+                mWms.unregisterWindowContextListener(mToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

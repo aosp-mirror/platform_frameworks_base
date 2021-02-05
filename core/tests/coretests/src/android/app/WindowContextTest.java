@@ -18,28 +18,37 @@ package android.app;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.display.DisplayManager;
+import android.os.Binder;
 import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams.WindowType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerImpl;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests for {@link WindowContext}
@@ -54,20 +63,14 @@ import org.junit.runner.RunWith;
 @SmallTest
 @Presubmit
 public class WindowContextTest {
+    @Rule
+    public ActivityTestRule<EmptyActivity> mActivityRule =
+            new ActivityTestRule<>(EmptyActivity.class, false /* initialTouchMode */,
+                    false /* launchActivity */);
+
     private final Instrumentation mInstrumentation = InstrumentationRegistry.getInstrumentation();
     private final WindowContext mWindowContext = createWindowContext();
-
-    @Test
-    public void testWindowContextRelease_doRemoveWindowToken() throws Throwable {
-        final IBinder token = mWindowContext.getWindowContextToken();
-        final IWindowManager wms = WindowManagerGlobal.getWindowManagerService();
-
-        assertTrue("Token must be registered to WMS", wms.isWindowToken(token));
-
-        mWindowContext.release();
-
-        assertFalse("Token must be unregistered to WMS", wms.isWindowToken(token));
-    }
+    private final IWindowManager mWms = WindowManagerGlobal.getWindowManagerService();
 
     @Test
     public void testCreateWindowContextWindowManagerAttachClientToken() {
@@ -83,12 +86,133 @@ public class WindowContextTest {
         assertEquals(mWindowContext.getWindowContextToken(), params.mWindowContextToken);
     }
 
+    /**
+     * Test the {@link WindowContext} life cycle behavior to add a new window token:
+     * <ul>
+     *  <li>The window token is created before adding the first view.</li>
+     *  <li>The window token is registered after adding the first view.</li>
+     *  <li>The window token is removed after {@link WindowContext}'s release.</li>
+     * </ul>
+     */
+    @Test
+    public void testCreateWindowContextNewTokenFromClient() throws Throwable {
+        final IBinder token = mWindowContext.getWindowContextToken();
+
+        // Test that the window token is not created yet.
+        assertFalse("Token must not be registered until adding the first window",
+                mWms.isWindowToken(token));
+
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(TYPE_APPLICATION_OVERLAY);
+        final View testView = new View(mWindowContext);
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        testView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                latch.countDown();
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {}
+        });
+
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowContext.getSystemService(WindowManager.class).addView(testView, params);
+
+            assertEquals(token, params.mWindowContextToken);
+        });
+
+
+        assertTrue(latch.await(4, TimeUnit.SECONDS));
+
+
+        // Verify that the window token of the window context is created after first addView().
+        assertTrue("Token must exist after adding the first view.",
+                mWms.isWindowToken(token));
+
+        mWindowContext.release();
+
+        // After the window context's release, the window token is also removed.
+        assertFalse("Token must be removed after release.", mWms.isWindowToken(token));
+    }
+
+    /**
+     * Verifies the behavior when window context attaches an {@link Activity} by override
+     * {@link WindowManager.LayoutParams#token}.
+     *
+     * The window context token should be overridden to
+     * {@link android.view.WindowManager.LayoutParams} and the {@link Activity}'s token must
+     * not be removed regardless of the release of window context.
+     */
+    @Test
+    public void testCreateWindowContext_AttachActivity_TokenNotRemovedAfterRelease()
+            throws Throwable {
+        mActivityRule.launchActivity(new Intent());
+        final Activity activity = mActivityRule.getActivity();
+        final WindowManager.LayoutParams params = activity.getWindow().getAttributes();
+
+        final WindowContext windowContext = createWindowContext(params.type);
+        final IBinder token = windowContext.getWindowContextToken();
+
+        final View testView = new View(windowContext);
+
+        mInstrumentation.runOnMainSync(() -> {
+            windowContext.getSystemService(WindowManager.class).addView(testView, params);
+
+            assertEquals(token, params.mWindowContextToken);
+        });
+        windowContext.release();
+
+        // Even if the window context is released, the activity should still exist.
+        assertTrue("Token must exist even if the window context is released.",
+                mWms.isWindowToken(activity.getActivityToken()));
+    }
+
+    /**
+     * Verifies the behavior when window context attaches an existing token by override
+     * {@link WindowManager.LayoutParams#token}.
+     *
+     * The window context token should be overridden to
+     * {@link android.view.WindowManager.LayoutParams} and the {@link Activity}'s token must not be
+     * removed regardless of release of window context.
+     */
+    @Test
+    public void testCreateWindowContext_AttachWindowToken_TokenNotRemovedAfterRelease()
+            throws Throwable {
+        final WindowContext windowContext = createWindowContext(TYPE_INPUT_METHOD);
+        final IBinder token = windowContext.getWindowContextToken();
+
+        final IBinder existingToken = new Binder();
+        mWms.addWindowToken(existingToken, TYPE_INPUT_METHOD, windowContext.getDisplayId());
+
+        final WindowManager.LayoutParams params =
+                new WindowManager.LayoutParams(TYPE_INPUT_METHOD);
+        params.token = existingToken;
+        final View testView = new View(windowContext);
+
+        mInstrumentation.runOnMainSync(() -> {
+            windowContext.getSystemService(WindowManager.class).addView(testView, params);
+
+            assertEquals(token, params.mWindowContextToken);
+        });
+        windowContext.release();
+
+        // Even if the window context is released, the existing token should still exist.
+        assertTrue("Token must exist even if the window context is released.",
+                mWms.isWindowToken(existingToken));
+
+        mWms.removeWindowToken(existingToken, DEFAULT_DISPLAY);
+    }
+
     private WindowContext createWindowContext() {
+        return createWindowContext(TYPE_APPLICATION_OVERLAY);
+    }
+
+    private WindowContext createWindowContext(@WindowType int type) {
         final Context instContext = mInstrumentation.getTargetContext();
         final Display display = instContext.getSystemService(DisplayManager.class)
                 .getDisplay(DEFAULT_DISPLAY);
-        final Context context = instContext.createDisplayContext(display);
-        return new WindowContext(context, TYPE_APPLICATION_OVERLAY,
-                null /* options */);
+        return (WindowContext) instContext.createWindowContext(display, type,  null /* options */);
     }
 }
