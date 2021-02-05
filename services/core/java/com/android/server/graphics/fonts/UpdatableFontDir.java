@@ -27,6 +27,7 @@ import android.os.FileUtils;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.text.FontConfig;
+import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.Slog;
 
@@ -39,7 +40,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -116,7 +116,7 @@ final class UpdatableFontDir {
      * FontFileInfo}. All files in this map are validated, and have higher revision numbers than
      * corresponding font files in {@link #mPreinstalledFontDirs}.
      */
-    private final Map<String, FontFileInfo> mFontFileInfoMap = new HashMap<>();
+    private final ArrayMap<String, FontFileInfo> mFontFileInfoMap = new ArrayMap<>();
 
     UpdatableFontDir(File filesDir, List<File> preinstalledFontDirs, FontFileParser parser,
             FsverityUtil fsverityUtil) {
@@ -205,7 +205,7 @@ final class UpdatableFontDir {
      */
     public void update(List<FontUpdateRequest> requests) throws SystemFontException {
         // Backup the mapping for rollback.
-        HashMap<String, FontFileInfo> backupMap = new HashMap<>(mFontFileInfoMap);
+        ArrayMap<String, FontFileInfo> backupMap = new ArrayMap<>(mFontFileInfoMap);
         long backupLastModifiedDate = mLastModifiedDate;
         boolean success = false;
         try {
@@ -464,7 +464,7 @@ final class UpdatableFontDir {
     }
 
     Map<String, File> getFontFileMap() {
-        Map<String, File> map = new HashMap<>();
+        Map<String, File> map = new ArrayMap<>();
         for (Map.Entry<String, FontFileInfo> entry : mFontFileInfoMap.entrySet()) {
             map.put(entry.getKey(), entry.getValue().getFile());
         }

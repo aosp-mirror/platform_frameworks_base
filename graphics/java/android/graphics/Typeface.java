@@ -42,6 +42,7 @@ import android.provider.FontsContract;
 import android.system.ErrnoException;
 import android.system.OsConstants;
 import android.text.FontConfig;
+import android.util.ArrayMap;
 import android.util.Base64;
 import android.util.LongSparseArray;
 import android.util.LruCache;
@@ -67,7 +68,6 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -147,7 +147,7 @@ public class Typeface {
      */
     @GuardedBy("SYSTEM_FONT_MAP_LOCK")
     @UnsupportedAppUsage(trackingBug = 123769347)
-    static final Map<String, Typeface> sSystemFontMap = new HashMap<>();
+    static final Map<String, Typeface> sSystemFontMap = new ArrayMap<>();
 
     // DirectByteBuffer object to hold sSystemFontMap's backing memory mapping.
     static ByteBuffer sSystemFontMapBuffer = null;
@@ -1231,7 +1231,7 @@ public class Typeface {
     /** @hide */
     @VisibleForTesting
     public static Map<String, Typeface> deserializeFontMap(ByteBuffer buffer) throws IOException {
-        Map<String, Typeface> fontMap = new HashMap<>();
+        Map<String, Typeface> fontMap = new ArrayMap<>();
         int typefacesBytesCount = buffer.getInt();
         long[] nativePtrs = nativeReadTypefaces(buffer.slice());
         if (nativePtrs == null) {
