@@ -16,8 +16,8 @@
 
 package com.android.systemui.people.widget;
 
-import android.app.INotificationManager;
 import android.app.PendingIntent;
+import android.app.people.IPeopleManager;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -53,8 +53,8 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
                 Settings.Global.PEOPLE_SPACE_CONVERSATION_TYPE, 0) == 0;
         if (showSingleConversation) {
             PeopleSpaceUtils.updateSingleConversationWidgets(context, appWidgetIds,
-                    appWidgetManager, INotificationManager.Stub.asInterface(
-                            ServiceManager.getService(Context.NOTIFICATION_SERVICE)));
+                    appWidgetManager, IPeopleManager.Stub.asInterface(
+                            ServiceManager.getService(Context.PEOPLE_SERVICE)));
             return;
         }
         // Perform this loop procedure for each App Widget that belongs to this provider
@@ -91,6 +91,7 @@ public class PeopleSpaceWidgetProvider extends AppWidgetProvider {
         for (int widgetId : appWidgetIds) {
             if (DEBUG) Log.d(TAG, "Widget removed");
             mUiEventLogger.log(PeopleSpaceUtils.PeopleSpaceWidgetEvent.PEOPLE_SPACE_WIDGET_DELETED);
+            PeopleSpaceUtils.removeStorageForTile(context, widgetId);
         }
     }
 
