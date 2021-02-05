@@ -16,8 +16,6 @@
 
 package com.android.server.net;
 
-import static com.android.server.net.NetworkPolicyManagerService.isUidNetworkingBlockedInternal;
-
 import android.annotation.NonNull;
 import android.net.Network;
 import android.net.NetworkTemplate;
@@ -37,28 +35,6 @@ public abstract class NetworkPolicyManagerInternal {
      * Resets all policies associated with a given user.
      */
     public abstract void resetUserState(int userId);
-
-    /**
-     * Figure out if networking is blocked for a given set of conditions.
-     *
-     * This is used by ConnectivityService via passing stale copies of conditions, so it must not
-     * take any locks.
-     *
-     * @param uid The target uid.
-     * @param uidRules The uid rules which are obtained from NetworkPolicyManagerService.
-     * @param isNetworkMetered True if the network is metered.
-     * @param isBackgroundRestricted True if data saver is enabled.
-     *
-     * @return true if networking is blocked for the UID under the specified conditions.
-     */
-    public static boolean isUidNetworkingBlocked(int uid, int uidRules, boolean isNetworkMetered,
-            boolean isBackgroundRestricted) {
-        // Log of invoking internal function is disabled because it will be called very
-        // frequently. And metrics are unlikely needed on this method because the callers are
-        // external and this method doesn't take any locks or perform expensive operations.
-        return isUidNetworkingBlockedInternal(uid, uidRules, isNetworkMetered,
-                isBackgroundRestricted, null);
-    }
 
     /**
      * Informs that an appId has been added or removed from the temp-powersave-allowlist so that
