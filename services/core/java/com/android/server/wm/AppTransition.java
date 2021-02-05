@@ -266,6 +266,7 @@ public class AppTransition implements Dump {
     private final boolean mLowRamRecentsEnabled;
 
     private final int mDefaultWindowAnimationStyleResId;
+    private boolean mOverrideTaskTransition;
 
     private RemoteAnimationController mRemoteAnimationController;
 
@@ -971,7 +972,8 @@ public class AppTransition implements Dump {
             @Nullable Rect surfaceInsets, @Nullable Rect stableInsets, boolean isVoiceInteraction,
             boolean freeform, WindowContainer container) {
 
-        if (mNextAppTransitionOverrideRequested && container.canCustomizeAppTransition()) {
+        if (mNextAppTransitionOverrideRequested
+                && (container.canCustomizeAppTransition() || mOverrideTaskTransition)) {
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_CUSTOM;
         }
 
@@ -1175,7 +1177,8 @@ public class AppTransition implements Dump {
     }
 
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,
-            IRemoteCallback startedCallback, IRemoteCallback endedCallback) {
+            IRemoteCallback startedCallback, IRemoteCallback endedCallback,
+            boolean overrideTaskTransaction) {
         if (canOverridePendingAppTransition()) {
             clear();
             mNextAppTransitionOverrideRequested = true;
@@ -1185,6 +1188,7 @@ public class AppTransition implements Dump {
             postAnimationCallback();
             mNextAppTransitionCallback = startedCallback;
             mAnimationFinishedCallback = endedCallback;
+            mOverrideTaskTransition = overrideTaskTransaction;
         }
     }
 
