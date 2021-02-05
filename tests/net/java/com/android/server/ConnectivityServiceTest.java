@@ -84,6 +84,11 @@ import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+import static android.net.OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+import static android.net.OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+import static android.net.OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+import static android.net.OemNetworkPreferences.OEM_NETWORK_PREFERENCE_UNINITIALIZED;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
@@ -355,6 +360,7 @@ public class ConnectivityServiceTest {
     private static final long TIMESTAMP = 1234L;
 
     private static final int NET_ID = 110;
+    private static final int OEM_PREF_ANY_NET_ID = -1;
     // Set a non-zero value to verify the flow to set tcp init rwnd value.
     private static final int TEST_TCP_INIT_RWND = 60;
 
@@ -9482,7 +9488,7 @@ public class ConnectivityServiceTest {
     public void testOemNetworkRequestFactoryPreferenceUninitializedThrowsError()
             throws PackageManager.NameNotFoundException {
         @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_UNINITIALIZED;
+                OEM_NETWORK_PREFERENCE_UNINITIALIZED;
 
         // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
         assertThrows(IllegalArgumentException.class,
@@ -9499,7 +9505,7 @@ public class ConnectivityServiceTest {
         final int expectedNumOfRequests = 3;
 
         @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
 
         // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
         final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
@@ -9528,7 +9534,7 @@ public class ConnectivityServiceTest {
         final int expectedNumOfRequests = 2;
 
         @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
 
         // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
         final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
@@ -9554,7 +9560,7 @@ public class ConnectivityServiceTest {
         final int expectedNumOfRequests = 1;
 
         @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
 
         // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
         final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
@@ -9577,7 +9583,7 @@ public class ConnectivityServiceTest {
         final int expectedNumOfRequests = 1;
 
         @OemNetworkPreferences.OemNetworkPreference final int prefToTest =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
 
         // Act on OemNetworkRequestFactory.createNrisFromOemNetworkPreferences()
         final ArraySet<ConnectivityService.NetworkRequestInfo> nris =
@@ -9605,8 +9611,8 @@ public class ConnectivityServiceTest {
         mockGetApplicationInfo(testPackageName2, TEST_PACKAGE_UID);
 
         // Build OemNetworkPreferences object
-        final int testOemPref = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
-        final int testOemPref2 = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+        final int testOemPref = OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final int testOemPref2 = OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
         final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
                 .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
                 .addNetworkPreference(testPackageName2, testOemPref2)
@@ -9630,8 +9636,8 @@ public class ConnectivityServiceTest {
         mockGetApplicationInfo(testPackageName2, testPackageNameUid2);
 
         // Build OemNetworkPreferences object
-        final int testOemPref = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
-        final int testOemPref2 = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+        final int testOemPref = OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final int testOemPref2 = OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
         final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
                 .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
                 .addNetworkPreference(testPackageName2, testOemPref2)
@@ -9665,7 +9671,7 @@ public class ConnectivityServiceTest {
         mockGetApplicationInfo(testPackageName2, testPackageNameUid2);
 
         // Build OemNetworkPreferences object
-        final int testOemPref = OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final int testOemPref = OEM_NETWORK_PREFERENCE_OEM_PAID;
         final OemNetworkPreferences pref = new OemNetworkPreferences.Builder()
                 .addNetworkPreference(TEST_PACKAGE_NAME, testOemPref)
                 .addNetworkPreference(testPackageName2, testOemPref)
@@ -9683,8 +9689,6 @@ public class ConnectivityServiceTest {
     @Test
     public void testSetOemNetworkPreferenceNullListenerAndPrefParamThrowsNpe() {
         mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, true);
-        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
 
         // Act on ConnectivityService.setOemNetworkPreference()
         assertThrows(NullPointerException.class,
@@ -9698,7 +9702,7 @@ public class ConnectivityServiceTest {
             throws Exception {
         mockHasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE, false);
         @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
 
         // Act on ConnectivityService.setOemNetworkPreference()
         assertThrows(UnsupportedOperationException.class,
@@ -9864,7 +9868,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testMultiDefaultGetActiveNetworkIsCorrect() throws Exception {
         @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
         final int expectedOemPrefRequestSize = 1;
 
         // Setup the test process to use networkPref for their default network.
@@ -9885,7 +9889,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testMultiDefaultIsActiveNetworkMeteredIsCorrect() throws Exception {
         @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
         final int expectedOemPrefRequestSize = 1;
 
         // Setup the test process to use networkPref for their default network.
@@ -9912,7 +9916,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testPerAppDefaultRegisterDefaultNetworkCallback() throws Exception {
         @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
         final int expectedOemPrefRequestSize = 1;
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
 
@@ -9949,7 +9953,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testPerAppDefaultRegisterDefaultNetworkCallbackAfterPrefSet() throws Exception {
         @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
         final int expectedOemPrefRequestSize = 1;
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
 
@@ -9986,7 +9990,7 @@ public class ConnectivityServiceTest {
     @Test
     public void testPerAppDefaultRegisterDefaultNetworkCallbackDoesNotFire() throws Exception {
         @OemNetworkPreferences.OemNetworkPreference final int networkPref =
-                OemNetworkPreferences.OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
         final int expectedOemPrefRequestSize = 1;
         final TestNetworkCallback defaultNetworkCallback = new TestNetworkCallback();
         final int userId = UserHandle.getUserId(Process.myUid());
@@ -10035,5 +10039,297 @@ public class ConnectivityServiceTest {
 
         // Confirm we can unregister without issues.
         mCm.unregisterNetworkCallback(defaultNetworkCallback);
+    }
+
+    private void verifySetOemNetworkPreferenceForPreference(
+            @NonNull final UidRangeParcel[] uidRanges,
+            final int addUidRangesNetId,
+            final int addUidRangesTimes,
+            final int removeUidRangesNetId,
+            final int removeUidRangesTimes,
+            final boolean shouldDestroyNetwork) throws RemoteException {
+        final boolean useAnyIdForAdd = OEM_PREF_ANY_NET_ID == addUidRangesNetId;
+        final boolean useAnyIdForRemove = OEM_PREF_ANY_NET_ID == removeUidRangesNetId;
+
+        // Validate netd.
+        verify(mMockNetd, times(addUidRangesTimes))
+                .networkAddUidRanges(
+                        (useAnyIdForAdd ? anyInt() : eq(addUidRangesNetId)), eq(uidRanges));
+        verify(mMockNetd, times(removeUidRangesTimes))
+                .networkRemoveUidRanges(
+                        (useAnyIdForRemove ? anyInt() : eq(removeUidRangesNetId)), eq(uidRanges));
+        if (shouldDestroyNetwork) {
+            verify(mMockNetd, times(1))
+                    .networkDestroy((useAnyIdForRemove ? anyInt() : eq(removeUidRangesNetId)));
+        }
+        reset(mMockNetd);
+    }
+
+    /**
+     * Test the tracked default requests clear previous OEM requests on setOemNetworkPreference().
+     * @throws Exception
+     */
+    @Test
+    public void testSetOemNetworkPreferenceClearPreviousOemValues() throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
+        final int testPackageUid = 123;
+        final String testPackageName = "com.google.apps.contacts";
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(uidRangesForUid(testPackageUid));
+
+        // Validate the starting requests only includes the fallback request.
+        assertEquals(1, mService.mDefaultNetworkRequests.size());
+
+        // Add an OEM default network request to track.
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, testPackageName);
+
+        // Two requests should exist, one for the fallback and one for the pref.
+        assertEquals(2, mService.mDefaultNetworkRequests.size());
+
+        networkPref = OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, testPackageName);
+
+        // Two requests should still exist validating the previous per-app request was replaced.
+        assertEquals(2, mService.mDefaultNetworkRequests.size());
+    }
+
+    /**
+     * Test network priority for preference OEM_NETWORK_PREFERENCE_OEM_PAID following in order:
+     * NET_CAPABILITY_NOT_METERED -> NET_CAPABILITY_OEM_PAID -> fallback
+     * @throws Exception
+     */
+    @Test
+    public void testMultilayerForPreferenceOemPaidEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID;
+
+        // Arrange PackageManager mocks
+        final int testPackageNameUid = 123;
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+
+        // Verify the starting state. No networks should be connected.
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Test lowest to highest priority requests.
+        // Bring up metered cellular. This will satisfy the fallback network.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up ethernet with OEM_PAID. This will satisfy NET_CAPABILITY_OEM_PAID.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_ETHERNET, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up unmetered Wi-Fi. This will satisfy NET_CAPABILITY_NOT_METERED.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_WIFI, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mWiFiNetworkAgent.getNetwork().netId, 1 /* times */,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Disconnecting OEM_PAID should have no effect as it is lower in priority then unmetered.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_ETHERNET, false);
+        // netd should not be called as default networks haven't changed.
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Disconnecting unmetered should put PANS on lowest priority fallback request.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_WIFI, false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mCellNetworkAgent.getNetwork().netId, 1 /* times */,
+                mWiFiNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
+
+        // Disconnecting the fallback network should result in no connectivity.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                mCellNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
+    }
+
+    /**
+     * Test network priority for OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK following in order:
+     * NET_CAPABILITY_NOT_METERED -> NET_CAPABILITY_OEM_PAID
+     * @throws Exception
+     */
+    @Test
+    public void testMultilayerForPreferenceOemPaidNoFallbackEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID_NO_FALLBACK;
+
+        // Arrange PackageManager mocks
+        final int testPackageNameUid = 123;
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+
+        // Verify the starting state. This preference doesn't support using the fallback network
+        // therefore should be on the disconnected network as it has no networks to connect to.
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Test lowest to highest priority requests.
+        // Bring up metered cellular. This will satisfy the fallback network.
+        // This preference should not use this network as it doesn't support fallback usage.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up ethernet with OEM_PAID. This will satisfy NET_CAPABILITY_OEM_PAID.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_ETHERNET, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up unmetered Wi-Fi. This will satisfy NET_CAPABILITY_NOT_METERED.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_WIFI, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mWiFiNetworkAgent.getNetwork().netId, 1 /* times */,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Disconnecting unmetered should put PANS on OEM_PAID.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_WIFI, false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                mWiFiNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
+
+        // Disconnecting OEM_PAID should result in no connectivity.
+        // OEM_PAID_NO_FALLBACK not supporting a fallback now uses the disconnected network.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_ETHERNET, false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                mEthernetNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
+    }
+
+    /**
+     * Test network priority for OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY following in order:
+     * NET_CAPABILITY_OEM_PAID
+     * This preference should only apply to OEM_PAID networks.
+     * @throws Exception
+     */
+    @Test
+    public void testMultilayerForPreferenceOemPaidOnlyEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PAID_ONLY;
+
+        // Arrange PackageManager mocks
+        final int testPackageNameUid = 123;
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+
+        // Verify the starting state. This preference doesn't support using the fallback network
+        // therefore should be on the disconnected network as it has no networks to connect to.
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up metered cellular. This should not apply to this preference.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up unmetered Wi-Fi. This should not apply to this preference.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_WIFI, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up ethernet with OEM_PAID. This will satisfy NET_CAPABILITY_OEM_PAID.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_ETHERNET, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Disconnecting OEM_PAID should result in no connectivity.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_ETHERNET, false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                mEthernetNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
+    }
+
+    /**
+     * Test network priority for OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY following in order:
+     * NET_CAPABILITY_OEM_PRIVATE
+     * This preference should only apply to OEM_PRIVATE networks.
+     * @throws Exception
+     */
+    @Test
+    public void testMultilayerForPreferenceOemPrivateOnlyEvaluatesCorrectly()
+            throws Exception {
+        @OemNetworkPreferences.OemNetworkPreference final int networkPref =
+                OEM_NETWORK_PREFERENCE_OEM_PRIVATE_ONLY;
+
+        // Arrange PackageManager mocks
+        final int testPackageNameUid = 123;
+        final UidRangeParcel[] uidRanges =
+                toUidRangeStableParcels(uidRangesForUid(testPackageNameUid));
+        setupSetOemNetworkPreferenceForPreferenceTest(networkPref, uidRanges, TEST_PACKAGE_NAME);
+
+        // Verify the starting state. This preference doesn't support using the fallback network
+        // therefore should be on the disconnected network as it has no networks to connect to.
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up metered cellular. This should not apply to this preference.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_CELLULAR, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up unmetered Wi-Fi. This should not apply to this preference.
+        setOemNetworkPreferenceAgentConnected(TRANSPORT_WIFI, true);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                OEM_PREF_ANY_NET_ID, 0 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Bring up ethernet with OEM_PRIVATE. This will satisfy NET_CAPABILITY_OEM_PRIVATE.
+        startOemManagedNetwork(false);
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mEthernetNetworkAgent.getNetwork().netId, 1 /* times */,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                false /* shouldDestroyNetwork */);
+
+        // Disconnecting OEM_PRIVATE should result in no connectivity.
+        stopOemManagedNetwork();
+        verifySetOemNetworkPreferenceForPreference(uidRanges,
+                mService.mNoServiceNetwork.network.getNetId(), 1 /* times */,
+                mEthernetNetworkAgent.getNetwork().netId, 0 /* times */,
+                true /* shouldDestroyNetwork */);
     }
 }
