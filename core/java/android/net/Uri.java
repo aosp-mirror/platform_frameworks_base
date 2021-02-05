@@ -343,7 +343,7 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
      * default port explicitly and the other leaves it implicit, they will not
      * be considered equal.
      */
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (!(o instanceof Uri)) {
             return false;
         }
