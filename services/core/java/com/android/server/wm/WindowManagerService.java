@@ -770,7 +770,8 @@ public class WindowManagerService extends IWindowManager.Stub
     final AnrController mAnrController;
 
     private final ScreenshotHashController mScreenshotHashController;
-    private final WindowContextListenerController mWindowContextListenerController =
+    @VisibleForTesting
+    final WindowContextListenerController mWindowContextListenerController =
             new WindowContextListenerController();
 
     @VisibleForTesting
@@ -2794,6 +2795,17 @@ public class WindowManagerService extends IWindowManager.Stub
         return WindowManagerGlobal.ADD_OKAY;
     }
 
+    /**
+     * Registers a listener for a {@link android.app.WindowContext} to subscribe to configuration
+     * changes of a {@link DisplayArea}.
+     *
+     * @param clientToken the window context's token
+     * @param type Window type of the window context
+     * @param displayId The display associated with the window context
+     * @param options A bundle used to pass window-related options and choose the right DisplayArea
+     *
+     * @return {@code true} if the listener was registered successfully.
+     */
     @Override
     public boolean registerWindowContextListener(IBinder clientToken, int type, int displayId,
             Bundle options) {
@@ -2849,6 +2861,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    /** Returns {@code true} if this binder is a registered window token. */
     @Override
     public boolean isWindowToken(IBinder binder) {
         synchronized (mGlobalLock) {
