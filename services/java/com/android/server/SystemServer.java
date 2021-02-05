@@ -207,12 +207,15 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
+import java.util.TreeSet;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
 
@@ -481,6 +484,50 @@ public final class SystemServer implements Dumpable {
 
     private static native void fdtrackAbort();
 
+    private static final File HEAP_DUMP_PATH = new File("/data/system/heapdump/");
+    private static final int MAX_HEAP_DUMPS = 2;
+
+    /**
+     * Dump system_server's heap.
+     *
+     * For privacy reasons, these aren't automatically pulled into bugreports:
+     * they must be manually pulled by the user.
+     */
+    private static void dumpHprof() {
+        // hprof dumps are rather large, so ensure we don't fill the disk by generating
+        // hundreds of these that will live forever.
+        TreeSet<File> existingTombstones = new TreeSet<>();
+        for (File file : HEAP_DUMP_PATH.listFiles()) {
+            if (!file.isFile()) {
+                continue;
+            }
+            if (!file.getName().startsWith("fdtrack-")) {
+                continue;
+            }
+            existingTombstones.add(file);
+        }
+        if (existingTombstones.size() >= MAX_HEAP_DUMPS) {
+            for (int i = 0; i < MAX_HEAP_DUMPS - 1; ++i) {
+                // Leave the newest `MAX_HEAP_DUMPS - 1` tombstones in place.
+                existingTombstones.pollLast();
+            }
+            for (File file : existingTombstones) {
+                if (!file.delete()) {
+                    Slog.w("System", "Failed to clean up hprof " + file);
+                }
+            }
+        }
+
+        try {
+            String date = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
+            String filename = "/data/system/heapdump/fdtrack-" + date + ".hprof";
+            Debug.dumpHprofData(filename);
+        } catch (IOException ex) {
+            Slog.e("System", "Failed to dump fdtrack hprof");
+            ex.printStackTrace();
+        }
+    }
+
     /**
      * Spawn a thread that monitors for fd leaks.
      */
@@ -505,6 +552,7 @@ public final class SystemServer implements Dumpable {
                     enabled = true;
                 } else if (maxFd > abortThreshold) {
                     Slog.i("System", "fdtrack abort threshold reached, dumping and aborting");
+                    dumpHprof();
                     fdtrackAbort();
                 }
 
