@@ -920,20 +920,20 @@ public final class AppExitInfoTracker {
             info = new ApplicationExitInfo();
         }
 
-        synchronized (mService) {
-            final int definingUid = app.hostingRecord != null
-                    ? app.hostingRecord.getDefiningUid() : 0;
-            info.setPid(app.pid);
+        synchronized (mService.mProcLock) {
+            final int definingUid = app.getHostingRecord() != null
+                    ? app.getHostingRecord().getDefiningUid() : 0;
+            info.setPid(app.getPid());
             info.setRealUid(app.uid);
             info.setPackageUid(app.info.uid);
             info.setDefiningUid(definingUid > 0 ? definingUid : app.info.uid);
             info.setProcessName(app.processName);
-            info.setConnectionGroup(app.connectionGroup);
+            info.setConnectionGroup(app.mServices.getConnectionGroup());
             info.setPackageName(app.info.packageName);
             info.setPackageList(app.getPackageList());
             info.setReason(ApplicationExitInfo.REASON_UNKNOWN);
             info.setStatus(0);
-            info.setImportance(procStateToImportance(app.setProcState));
+            info.setImportance(procStateToImportance(app.mState.getSetProcState()));
             info.setPss(app.mProfile.getLastPss());
             info.setRss(app.mProfile.getLastRss());
             info.setTimestamp(System.currentTimeMillis());

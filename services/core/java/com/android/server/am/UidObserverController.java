@@ -204,16 +204,18 @@ public class UidObserverController {
                 } else {
                     UidRecord validateUid = mValidateUids.get(item.uid);
                     if (validateUid == null) {
-                        validateUid = new UidRecord(item.uid);
+                        validateUid = new UidRecord(item.uid, null);
                         mValidateUids.put(item.uid, validateUid);
                     }
                     if ((item.change & UidRecord.CHANGE_IDLE) != 0) {
-                        validateUid.idle = true;
+                        validateUid.setIdle(true);
                     } else if ((item.change & UidRecord.CHANGE_ACTIVE) != 0) {
-                        validateUid.idle = false;
+                        validateUid.setIdle(false);
                     }
-                    validateUid.setCurProcState(validateUid.setProcState = item.procState);
-                    validateUid.curCapability = validateUid.setCapability = item.capability;
+                    validateUid.setSetProcState(item.procState);
+                    validateUid.setCurProcState(item.procState);
+                    validateUid.setSetCapability(item.capability);
+                    validateUid.setCurCapability(item.capability);
                     validateUid.lastDispatchedProcStateSeq = item.procStateSeq;
                 }
             }

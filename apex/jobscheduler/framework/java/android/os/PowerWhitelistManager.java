@@ -74,6 +74,27 @@ public class PowerWhitelistManager {
     }
 
     /**
+     * Allow the temp allowlist behavior, plus allow foreground service start from background.
+     */
+    public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0;
+    /**
+     * Only allow the temp allowlist behavior, not allow foreground service start from
+     * background.
+     */
+    public static final int TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1;
+
+    /**
+     * The list of temp allowlist types.
+     * @hide
+     */
+    @IntDef(flag = true, prefix = { "TEMPORARY_ALLOW_TYPE_" }, value = {
+            TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
+            TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TempAllowListType {}
+
+    /**
      * @hide
      */
     public PowerWhitelistManager(@NonNull Context context) {

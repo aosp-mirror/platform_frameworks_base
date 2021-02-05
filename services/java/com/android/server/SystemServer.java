@@ -160,6 +160,7 @@ import com.android.server.pm.PackageManagerService;
 import com.android.server.pm.ShortcutService;
 import com.android.server.pm.UserManagerService;
 import com.android.server.pm.dex.SystemServerDexLoadReporter;
+import com.android.server.pm.verify.domain.DomainVerificationService;
 import com.android.server.policy.PermissionPolicyService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.policy.role.RoleServicePlatformHelperImpl;
@@ -1060,11 +1061,18 @@ public final class SystemServer implements Dumpable {
                     SystemClock.elapsedRealtime());
         }
 
+        t.traceBegin("StartDomainVerificationService");
+        DomainVerificationService domainVerificationService = new DomainVerificationService(
+                mSystemContext, SystemConfig.getInstance(), platformCompat);
+        mSystemServiceManager.startService(domainVerificationService);
+        t.traceEnd();
+
         t.traceBegin("StartPackageManagerService");
         try {
             Watchdog.getInstance().pauseWatchingCurrentThread("packagemanagermain");
             mPackageManagerService = PackageManagerService.main(mSystemContext, installer,
-                    mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);
+                    domainVerificationService, mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF,
+                    mOnlyCore);
         } finally {
             Watchdog.getInstance().resumeWatchingCurrentThread("packagemanagermain");
         }

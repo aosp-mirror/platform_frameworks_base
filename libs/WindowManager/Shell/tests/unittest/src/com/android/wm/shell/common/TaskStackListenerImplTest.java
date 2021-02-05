@@ -27,7 +27,6 @@ import android.app.ActivityManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.testing.AndroidTestingRunner;
@@ -232,14 +231,6 @@ public class TaskStackListenerImplTest {
         mImpl.onActivityRotation(123);
         verify(mCallback).onActivityRotation(eq(123));
         verify(mOtherCallback).onActivityRotation(eq(123));
-    }
-
-    @Test
-    public void testOnSizeCompatModeActivityChanged() {
-        IBinder b = mock(IBinder.class);
-        mImpl.onSizeCompatModeActivityChanged(123, b);
-        verify(mCallback).onSizeCompatModeActivityChanged(eq(123), eq(b));
-        verify(mOtherCallback).onSizeCompatModeActivityChanged(eq(123), eq(b));
     }
 
     /**

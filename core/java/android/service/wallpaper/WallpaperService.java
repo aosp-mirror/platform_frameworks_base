@@ -880,8 +880,8 @@ public abstract class WallpaperService extends Service {
                         InputChannel inputChannel = new InputChannel();
 
                         if (mSession.addToDisplay(mWindow, mLayout, View.VISIBLE,
-                                mDisplay.getDisplayId(), mInsetsState, mWinFrames.frame,
-                                inputChannel, mInsetsState, mTempControls) < 0) {
+                                mDisplay.getDisplayId(), mInsetsState, inputChannel, mInsetsState,
+                                mTempControls) < 0) {
                             Log.w(TAG, "Failed to add window while updating wallpaper surface.");
                             return;
                         }
@@ -1494,6 +1494,16 @@ public abstract class WallpaperService extends Service {
         private void doDetachEngine() {
             mActiveEngines.remove(mEngine);
             mEngine.detach();
+            // Some wallpapers will not trigger the rendering threads of the remaining engines even
+            // if they are visible, so we need to toggle the state to get their attention.
+            if (!mDetached.get()) {
+                for (Engine eng : mActiveEngines) {
+                    if (eng.mVisible) {
+                        eng.doVisibilityChanged(false);
+                        eng.doVisibilityChanged(true);
+                    }
+                }
+            }
         }
 
         @Override

@@ -14,7 +14,15 @@
  * limitations under the License.
  */
 
-package android.graphics.fonts;
+package com.android.server.am;
 
-/** @hide */
-parcelable SystemFontState;
+/**
+ * Class that is used to generate an instance of the {@link ActivityManagerService#mProcLock},
+ * so the CPU booster can identify the critical section.
+ *
+ * <p>
+ * Use "-Lpr" as the suffix of functions locked with this lock.
+ * </p>
+ */
+final class ActivityManagerProcLock implements ActivityManagerGlobalLock {
+}

@@ -16,14 +16,12 @@
 
 package android.app;
 
-import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.Build;
 import android.os.Bundle;
-
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import android.os.PowerWhitelistManager;
+import android.os.PowerWhitelistManager.TempAllowListType;
 
 /**
  * Helper class for building an options Bundle that can be used with
@@ -75,25 +73,21 @@ public class BroadcastOptions {
             "android:broadcast.allowBackgroundActivityStarts";
 
     /**
-     * Allow the temp allowlist behavior, plus allow foreground service start from background.
-     */
-    public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED = 0;
-    /**
-     * Only allow the temp allowlist behavior, not allow foreground service start from
-     * background.
-     */
-    public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED = 1;
-
-    /**
-     * The list of temp allowlist types.
      * @hide
+     * @deprecated Use {@link android.os.PowerWhitelistManager#
+     * TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED} instead.
      */
-    @IntDef(flag = true, prefix = { "TEMPORARY_WHITELIST_TYPE_" }, value = {
-            TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED,
-            TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface TempAllowListType {}
+    @Deprecated
+    public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED =
+            PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+    /**
+     * @hide
+     * @deprecated Use {@link android.os.PowerWhitelistManager#
+     * TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED} instead.
+     */
+    @Deprecated
+    public static final int TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED =
+            PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED;
 
     public static BroadcastOptions makeBasic() {
         BroadcastOptions opts = new BroadcastOptions();
@@ -125,7 +119,8 @@ public class BroadcastOptions {
             android.Manifest.permission.START_FOREGROUND_SERVICES_FROM_BACKGROUND})
     public void setTemporaryAppWhitelistDuration(long duration) {
         mTemporaryAppWhitelistDuration = duration;
-        mTemporaryAppWhitelistType = TEMPORARY_WHITELIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
+        mTemporaryAppWhitelistType =
+                PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
     }
 
     /**

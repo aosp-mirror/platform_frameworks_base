@@ -1487,7 +1487,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public int addWindow(Session session, IWindow client, LayoutParams attrs, int viewVisibility,
-            int displayId, int requestUserId, InsetsState requestedVisibility, Rect outFrame,
+            int displayId, int requestUserId, InsetsState requestedVisibility,
             InputChannel outInputChannel, InsetsState outInsetsState,
             InsetsSourceControl[] outActiveControls) {
         Arrays.fill(outActiveControls, null);
@@ -1829,7 +1829,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 prepareNoneTransitionForRelaunching(activity);
             }
 
-            if (displayPolicy.getLayoutHint(win.mAttrs, token, outFrame, outInsetsState,
+            if (displayPolicy.getLayoutHint(win.mAttrs, token, outInsetsState,
                     win.isClientLocal())) {
                 res |= WindowManagerGlobal.ADD_FLAG_ALWAYS_CONSUME_SYSTEM_BARS;
             }
@@ -2594,11 +2594,12 @@ public class WindowManagerService extends IWindowManager.Stub
         } else if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = true;
             win.mAnimatingExit = true;
-        } else if (win.isAnimating(TRANSITION | PARENTS)) {
+        } else if (win.mDisplayContent.okToAnimate() && win.isAnimating(TRANSITION | PARENTS)) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
-        } else if (win.getDisplayContent().mWallpaperController.isWallpaperTarget(win)) {
+        } else if (win.mDisplayContent.okToAnimate()
+                && win.mDisplayContent.mWallpaperController.isWallpaperTarget(win)) {
             // If the wallpaper is currently behind this
             // window, we need to change both of them inside
             // of a transaction to avoid artifacts.
@@ -8554,8 +8555,8 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "could not be found!");
                 }
                 final WindowToken windowToken = dc.getWindowToken(attrs.token);
-                return dc.getDisplayPolicy().getLayoutHint(attrs, windowToken,
-                        mTmpRect /* outFrame */, outInsetsState, fromLocal);
+                return dc.getDisplayPolicy().getLayoutHint(attrs, windowToken, outInsetsState,
+                        fromLocal);
             }
         } finally {
             Binder.restoreCallingIdentity(origId);

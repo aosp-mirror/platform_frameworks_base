@@ -45,7 +45,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
-import android.widget.FrameLayout;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
@@ -847,11 +846,14 @@ public class NotificationStackScrollLayoutController {
         return mView.getChildAtRawPosition(x, y);
     }
 
-    public FrameLayout.LayoutParams getLayoutParams() {
-        return (FrameLayout.LayoutParams) mView.getLayoutParams();
+    public ViewGroup.LayoutParams getLayoutParams() {
+        return mView.getLayoutParams();
     }
 
-    public void setLayoutParams(FrameLayout.LayoutParams lp) {
+    /**
+     * Updates layout parameters on the root view
+     */
+    public void setLayoutParams(ViewGroup.LayoutParams lp) {
         mView.setLayoutParams(lp);
     }
 

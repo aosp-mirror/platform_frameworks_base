@@ -86,6 +86,12 @@ public class PowerStatsServiceProtoParser {
                     csvRow += energyConsumerResult.getId() + ","
                         + energyConsumerResult.getTimestampMs() + ","
                         + energyConsumerResult.getEnergyUws() + ",";
+                    for (int k = 0; k < energyConsumerResult.getAttributionCount(); k++) {
+                        final EnergyConsumerAttributionProto energyConsumerAttribution =
+                                energyConsumerResult.getAttribution(k);
+                        csvRow += energyConsumerAttribution.getUid() + ","
+                            + energyConsumerAttribution.getEnergyUws() + ",";
+                    }
                 }
                 System.out.println(csvRow);
             }

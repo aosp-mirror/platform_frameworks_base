@@ -232,8 +232,8 @@ public class AppChildProcessTest {
         ai.packageName = packageName;
         ai.uid = uid;
         ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
-        app.pid = pid;
-        mAms.mPidsSelfLocked.doAddInternal(app);
+        app.setPid(pid);
+        mAms.mPidsSelfLocked.doAddInternal(app.getPid(), app);
         mPhantomInjector.addToProcess(uid, pid, pid);
     }
 

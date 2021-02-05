@@ -572,7 +572,7 @@ package android {
     field public static final int dropDownWidth = 16843362; // 0x1010262
     field public static final int duplicateParentState = 16842985; // 0x10100e9
     field public static final int duration = 16843160; // 0x1010198
-    field public static final int edgeEffectType = 16844322; // 0x1010622
+    field public static final int edgeEffectType = 16844323; // 0x1010623
     field public static final int editTextBackground = 16843602; // 0x1010352
     field public static final int editTextColor = 16843601; // 0x1010351
     field public static final int editTextPreferenceStyle = 16842898; // 0x1010092
@@ -658,7 +658,7 @@ package android {
     field @Deprecated public static final int fontProviderCerts = 16844125; // 0x101055d
     field @Deprecated public static final int fontProviderPackage = 16844119; // 0x1010557
     field @Deprecated public static final int fontProviderQuery = 16844113; // 0x1010551
-    field public static final int fontProviderSystemFontFamily = 16844321; // 0x1010621
+    field public static final int fontProviderSystemFontFamily = 16844322; // 0x1010622
     field public static final int fontStyle = 16844095; // 0x101053f
     field public static final int fontVariationSettings = 16844144; // 0x1010570
     field public static final int fontWeight = 16844083; // 0x1010533
@@ -723,7 +723,7 @@ package android {
     field public static final int gwpAsanMode = 16844310; // 0x1010616
     field public static final int hand_hour = 16843011; // 0x1010103
     field public static final int hand_minute = 16843012; // 0x1010104
-    field public static final int hand_second = 16844323; // 0x1010623
+    field public static final int hand_second = 16844324; // 0x1010624
     field public static final int handle = 16843354; // 0x101025a
     field public static final int handleProfiling = 16842786; // 0x1010022
     field public static final int hapticFeedbackEnabled = 16843358; // 0x101025e
@@ -965,6 +965,7 @@ package android {
     field public static final int measureWithLargestChild = 16843476; // 0x10102d4
     field public static final int mediaRouteButtonStyle = 16843693; // 0x10103ad
     field public static final int mediaRouteTypes = 16843694; // 0x10103ae
+    field public static final int memtagMode = 16844325; // 0x1010625
     field public static final int menuCategory = 16843230; // 0x10101de
     field public static final int mimeGroup = 16844309; // 0x1010615
     field public static final int mimeType = 16842790; // 0x1010026
@@ -988,6 +989,7 @@ package android {
     field public static final int multiArch = 16843918; // 0x101048e
     field public static final int multiprocess = 16842771; // 0x1010013
     field public static final int name = 16842755; // 0x1010003
+    field public static final int nativeHeapZeroInit = 16844326; // 0x1010626
     field public static final int navigationBarColor = 16843858; // 0x1010452
     field public static final int navigationBarDividerColor = 16844141; // 0x101056d
     field public static final int navigationContentDescription = 16843969; // 0x10104c1
@@ -1058,11 +1060,11 @@ package android {
     field public static final int parentActivityName = 16843687; // 0x10103a7
     field @Deprecated public static final int password = 16843100; // 0x101015c
     field public static final int path = 16842794; // 0x101002a
-    field public static final int pathAdvancedPattern = 16844319; // 0x101061f
+    field public static final int pathAdvancedPattern = 16844320; // 0x1010620
     field public static final int pathData = 16843781; // 0x1010405
     field public static final int pathPattern = 16842796; // 0x101002c
     field public static final int pathPrefix = 16842795; // 0x101002b
-    field public static final int pathSuffix = 16844317; // 0x101061d
+    field public static final int pathSuffix = 16844318; // 0x101061e
     field public static final int patternPathData = 16843978; // 0x10104ca
     field public static final int permission = 16842758; // 0x1010006
     field public static final int permissionFlags = 16843719; // 0x10103c7
@@ -1155,7 +1157,7 @@ package android {
     field public static final int reqNavigation = 16843306; // 0x101022a
     field public static final int reqTouchScreen = 16843303; // 0x1010227
     field public static final int requestLegacyExternalStorage = 16844291; // 0x1010603
-    field public static final int requireDeviceScreenOn = 16844316; // 0x101061c
+    field public static final int requireDeviceScreenOn = 16844317; // 0x101061d
     field public static final int requireDeviceUnlock = 16843756; // 0x10103ec
     field public static final int required = 16843406; // 0x101028e
     field public static final int requiredAccountType = 16843734; // 0x10103d6
@@ -1296,10 +1298,10 @@ package android {
     field public static final int spotShadowAlpha = 16843967; // 0x10104bf
     field public static final int src = 16843033; // 0x1010119
     field public static final int ssp = 16843747; // 0x10103e3
-    field public static final int sspAdvancedPattern = 16844320; // 0x1010620
+    field public static final int sspAdvancedPattern = 16844321; // 0x1010621
     field public static final int sspPattern = 16843749; // 0x10103e5
     field public static final int sspPrefix = 16843748; // 0x10103e4
-    field public static final int sspSuffix = 16844318; // 0x101061e
+    field public static final int sspSuffix = 16844319; // 0x101061f
     field public static final int stackFromBottom = 16843005; // 0x10100fd
     field public static final int stackViewStyle = 16843838; // 0x101043e
     field public static final int starStyle = 16842882; // 0x1010082
@@ -1610,6 +1612,8 @@ package android {
     field public static final int windowAnimationStyle = 16842926; // 0x10100ae
     field public static final int windowBackground = 16842836; // 0x1010054
     field public static final int windowBackgroundFallback = 16844035; // 0x1010503
+    field public static final int windowBlurBehindEnabled = 16844316; // 0x101061c
+    field public static final int windowBlurBehindRadius = 16844315; // 0x101061b
     field public static final int windowClipToOutline = 16843947; // 0x10104ab
     field public static final int windowCloseOnTouchOutside = 16843611; // 0x101035b
     field public static final int windowContentOverlay = 16842841; // 0x1010059
@@ -7313,6 +7317,7 @@ package android.app.admin {
     field public static final int RESET_PASSWORD_DO_NOT_ASK_CREDENTIALS_ON_BOOT = 2; // 0x2
     field public static final int RESET_PASSWORD_REQUIRE_ENTRY = 1; // 0x1
     field public static final int SKIP_SETUP_WIZARD = 1; // 0x1
+    field public static final int UNSAFE_OPERATION_REASON_DRIVING_DISTRACTION = 1; // 0x1
     field public static final int WIPE_EUICC = 4; // 0x4
     field public static final int WIPE_EXTERNAL_STORAGE = 1; // 0x1
     field public static final int WIPE_RESET_PROTECTION_DATA = 2; // 0x2
@@ -7466,6 +7471,7 @@ package android.app.admin {
 
   public final class UnsafeStateException extends java.lang.IllegalStateException implements android.os.Parcelable {
     method public int describeContents();
+    method public int getReason();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.app.admin.UnsafeStateException> CREATOR;
   }
@@ -7744,7 +7750,6 @@ package android.app.job {
     method public long getTriggerContentUpdateDelay();
     method @Nullable public android.app.job.JobInfo.TriggerContentUri[] getTriggerContentUris();
     method public boolean isExpedited();
-    method @Deprecated public boolean isForegroundJob();
     method public boolean isImportantWhileForeground();
     method public boolean isPeriodic();
     method public boolean isPersisted();
@@ -7777,7 +7782,6 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setEstimatedNetworkBytes(long, long);
     method @NonNull public android.app.job.JobInfo.Builder setExpedited(boolean);
     method public android.app.job.JobInfo.Builder setExtras(@NonNull android.os.PersistableBundle);
-    method @Deprecated @NonNull public android.app.job.JobInfo.Builder setForeground(boolean);
     method @Deprecated public android.app.job.JobInfo.Builder setImportantWhileForeground(boolean);
     method public android.app.job.JobInfo.Builder setMinimumLatency(long);
     method public android.app.job.JobInfo.Builder setOverrideDeadline(long);
@@ -11640,6 +11644,8 @@ package android.content.pm {
     method public void dump(android.util.Printer, String);
     method public static CharSequence getCategoryTitle(android.content.Context, int);
     method public int getGwpAsanMode();
+    method public int getMemtagMode();
+    method @Nullable public Boolean isNativeHeapZeroInit();
     method public boolean isProfileableByShell();
     method public boolean isResourceOverlay();
     method public boolean isVirtualPreload();
@@ -11689,6 +11695,10 @@ package android.content.pm {
     field public static final int GWP_ASAN_ALWAYS = 1; // 0x1
     field public static final int GWP_ASAN_DEFAULT = -1; // 0xffffffff
     field public static final int GWP_ASAN_NEVER = 0; // 0x0
+    field public static final int MEMTAG_ASYNC = 1; // 0x1
+    field public static final int MEMTAG_DEFAULT = -1; // 0xffffffff
+    field public static final int MEMTAG_OFF = 0; // 0x0
+    field public static final int MEMTAG_SYNC = 2; // 0x2
     field public String appComponentFactory;
     field public String backupAgentName;
     field public int category;
@@ -19455,7 +19465,7 @@ package android.location {
   public interface LocationListener {
     method public default void onFlushComplete(int);
     method public void onLocationChanged(@NonNull android.location.Location);
-    method public default void onLocationChanged(@NonNull android.location.LocationResult);
+    method public default void onLocationChanged(@NonNull java.util.List<android.location.Location>);
     method public default void onProviderDisabled(@NonNull String);
     method public default void onProviderEnabled(@NonNull String);
     method @Deprecated public default void onStatusChanged(String, int, android.os.Bundle);
@@ -19541,8 +19551,8 @@ package android.location {
     field public static final String FUSED_PROVIDER = "fused";
     field public static final String GPS_PROVIDER = "gps";
     field public static final String KEY_FLUSH_COMPLETE = "flushComplete";
+    field public static final String KEY_LOCATIONS = "locations";
     field public static final String KEY_LOCATION_CHANGED = "location";
-    field public static final String KEY_LOCATION_RESULT = "locationResult";
     field public static final String KEY_PROVIDER_ENABLED = "providerEnabled";
     field public static final String KEY_PROXIMITY_ENTERING = "entering";
     field @Deprecated public static final String KEY_STATUS_CHANGED = "status";
@@ -19598,18 +19608,6 @@ package android.location {
     method @NonNull public android.location.LocationRequest.Builder setMinUpdateDistanceMeters(@FloatRange(from=0, to=java.lang.Float.MAX_VALUE) float);
     method @NonNull public android.location.LocationRequest.Builder setMinUpdateIntervalMillis(@IntRange(from=0) long);
     method @NonNull public android.location.LocationRequest.Builder setQuality(int);
-  }
-
-  public final class LocationResult implements android.os.Parcelable {
-    method @NonNull public java.util.List<android.location.Location> asList();
-    method @NonNull public static android.location.LocationResult create(@NonNull android.location.Location);
-    method @NonNull public static android.location.LocationResult create(@NonNull java.util.List<android.location.Location>);
-    method public int describeContents();
-    method @NonNull public android.location.Location get(@IntRange(from=0) int);
-    method @NonNull public android.location.Location getLastLocation();
-    method @IntRange(from=1) public int size();
-    method public void writeToParcel(@NonNull android.os.Parcel, int);
-    field @NonNull public static final android.os.Parcelable.Creator<android.location.LocationResult> CREATOR;
   }
 
   public interface OnNmeaMessageListener {
@@ -20185,7 +20183,7 @@ package android.media {
   }
 
   public class AudioRecord implements android.media.AudioRecordingMonitor android.media.AudioRouting android.media.MicrophoneDirection {
-    ctor public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
+    ctor @RequiresPermission(android.Manifest.permission.RECORD_AUDIO) public AudioRecord(int, int, int, int, int) throws java.lang.IllegalArgumentException;
     method public void addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler);
     method @Deprecated public void addOnRoutingChangedListener(android.media.AudioRecord.OnRoutingChangedListener, android.os.Handler);
     method protected void finalize();
@@ -20246,7 +20244,7 @@ package android.media {
 
   public static class AudioRecord.Builder {
     ctor public AudioRecord.Builder();
-    method public android.media.AudioRecord build() throws java.lang.UnsupportedOperationException;
+    method @RequiresPermission(android.Manifest.permission.RECORD_AUDIO) public android.media.AudioRecord build() throws java.lang.UnsupportedOperationException;
     method public android.media.AudioRecord.Builder setAudioFormat(@NonNull android.media.AudioFormat) throws java.lang.IllegalArgumentException;
     method @NonNull public android.media.AudioRecord.Builder setAudioPlaybackCaptureConfig(@NonNull android.media.AudioPlaybackCaptureConfiguration);
     method public android.media.AudioRecord.Builder setAudioSource(int) throws java.lang.IllegalArgumentException;
@@ -34979,6 +34977,55 @@ package android.provider {
     field public static final String PATH_SETTING_INTENT = "intent";
   }
 
+  public final class SimPhonebookContract {
+    field public static final String AUTHORITY = "com.android.simphonebook";
+    field @NonNull public static final android.net.Uri AUTHORITY_URI;
+  }
+
+  public static final class SimPhonebookContract.ElementaryFiles {
+    method @NonNull public static android.net.Uri getItemUri(int, int);
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-elementary-file";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-elementary-file";
+    field @NonNull public static final android.net.Uri CONTENT_URI;
+    field public static final int EF_ADN = 1; // 0x1
+    field public static final int EF_FDN = 2; // 0x2
+    field public static final int EF_SDN = 3; // 0x3
+    field public static final String EF_TYPE = "ef_type";
+    field public static final int EF_UNKNOWN = 0; // 0x0
+    field public static final String MAX_RECORDS = "max_records";
+    field public static final String NAME_MAX_LENGTH = "name_max_length";
+    field public static final String PHONE_NUMBER_MAX_LENGTH = "phone_number_max_length";
+    field public static final String RECORD_COUNT = "record_count";
+    field public static final String SLOT_INDEX = "slot_index";
+    field public static final String SUBSCRIPTION_ID = "subscription_id";
+  }
+
+  public static final class SimPhonebookContract.SimRecords {
+    method @NonNull public static android.net.Uri getContentUri(int, int);
+    method @NonNull public static android.net.Uri getItemUri(int, int, int);
+    method @NonNull @WorkerThread public static android.provider.SimPhonebookContract.SimRecords.NameValidationResult validateName(@NonNull android.content.ContentResolver, int, int, @NonNull String);
+    field public static final String CONTENT_ITEM_TYPE = "vnd.android.cursor.item/sim-contact_v2";
+    field public static final String CONTENT_TYPE = "vnd.android.cursor.dir/sim-contact_v2";
+    field public static final String ELEMENTARY_FILE_TYPE = "elementary_file_type";
+    field public static final String NAME = "name";
+    field public static final String PHONE_NUMBER = "phone_number";
+    field public static final String RECORD_NUMBER = "record_number";
+    field public static final String SUBSCRIPTION_ID = "subscription_id";
+  }
+
+  public static final class SimPhonebookContract.SimRecords.NameValidationResult implements android.os.Parcelable {
+    ctor public SimPhonebookContract.SimRecords.NameValidationResult(@NonNull String, @NonNull String, int, int);
+    method public int describeContents();
+    method public int getEncodedLength();
+    method public int getMaxEncodedLength();
+    method @NonNull public String getName();
+    method @NonNull public String getSanitizedName();
+    method public boolean isSupportedCharacter(int);
+    method public boolean isValid();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.provider.SimPhonebookContract.SimRecords.NameValidationResult> CREATOR;
+  }
+
   public class SyncStateContract {
     ctor public SyncStateContract();
   }
@@ -45746,6 +45793,8 @@ package android.util {
     method public void clear();
     method public android.util.SparseArray<E> clone();
     method public boolean contains(int);
+    method public boolean contentEquals(@Nullable android.util.SparseArray<E>);
+    method public int contentHashCode();
     method public void delete(int);
     method public E get(int);
     method public E get(int, E);
@@ -49621,7 +49670,7 @@ package android.view {
     field public static final int FLAGS_CHANGED = 4; // 0x4
     field public static final int FLAG_ALLOW_LOCK_WHILE_SCREEN_ON = 1; // 0x1
     field public static final int FLAG_ALT_FOCUSABLE_IM = 131072; // 0x20000
-    field @Deprecated public static final int FLAG_BLUR_BEHIND = 4; // 0x4
+    field public static final int FLAG_BLUR_BEHIND = 4; // 0x4
     field public static final int FLAG_DIM_BEHIND = 2; // 0x2
     field @Deprecated public static final int FLAG_DISMISS_KEYGUARD = 4194304; // 0x400000
     field @Deprecated public static final int FLAG_DITHER = 4096; // 0x1000
@@ -49712,6 +49761,7 @@ package android.view {
     field @Deprecated public static final int TYPE_TOAST = 2005; // 0x7d5
     field public static final int TYPE_WALLPAPER = 2013; // 0x7dd
     field public float alpha;
+    field public int blurBehindRadius;
     field public float buttonBrightness;
     field public float dimAmount;
     field public int flags;

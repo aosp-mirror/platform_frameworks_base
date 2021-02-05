@@ -70,7 +70,7 @@ public class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCall
     }
 
     private int pullOnDevicePowerMeasurement(int atomTag, List<StatsEvent> events) {
-        EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.readEnergyMeters(new int[0]);
+        EnergyMeasurement[] energyMeasurements = mPowerStatsHALWrapper.readEnergyMeter(new int[0]);
         if (energyMeasurements == null) {
             return StatsManager.PULL_SKIP;
         }

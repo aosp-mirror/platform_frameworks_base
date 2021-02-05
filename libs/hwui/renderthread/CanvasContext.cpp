@@ -157,12 +157,14 @@ static void setBufferCount(ANativeWindow* window) {
 void CanvasContext::setSurface(ANativeWindow* window, bool enableTimeout) {
     ATRACE_CALL();
 
-    if (mRenderAheadDepth == 0 && DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
-        mFixedRenderAhead = false;
-        mRenderAheadCapacity = 1;
-    } else {
-        mFixedRenderAhead = true;
+    if (mFixedRenderAhead) {
         mRenderAheadCapacity = mRenderAheadDepth;
+    } else {
+        if (DeviceInfo::get()->getMaxRefreshRate() > 66.6f) {
+            mRenderAheadCapacity = 1;
+        } else {
+            mRenderAheadCapacity = 0;
+        }
     }
 
     if (window) {
@@ -764,11 +766,16 @@ bool CanvasContext::surfaceRequiresRedraw() {
 }
 
 void CanvasContext::setRenderAheadDepth(int renderAhead) {
-    if (renderAhead > 2 || renderAhead < 0 || mNativeSurface) {
+    if (renderAhead > 2 || renderAhead < -1 || mNativeSurface) {
         return;
     }
-    mFixedRenderAhead = true;
-    mRenderAheadDepth = static_cast<uint32_t>(renderAhead);
+    if (renderAhead == -1) {
+        mFixedRenderAhead = false;
+        mRenderAheadDepth = 0;
+    } else {
+        mFixedRenderAhead = true;
+        mRenderAheadDepth = static_cast<uint32_t>(renderAhead);
+    }
 }
 
 SkRect CanvasContext::computeDirtyRect(const Frame& frame, SkRect* dirty) {

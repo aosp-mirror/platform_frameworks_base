@@ -798,7 +798,7 @@ public class ApplicationExitInfoTest {
         final int traceEnd = 8192;
         createRandomFile(traceFile, traceSize);
         assertEquals(traceSize, traceFile.length());
-        mAppExitInfoTracker.handleLogAnrTrace(app.pid, app.uid, app.getPackageList(),
+        mAppExitInfoTracker.handleLogAnrTrace(app.getPid(), app.uid, app.getPackageList(),
                 traceFile, traceStart, traceEnd);
 
         noteAppKill(app, ApplicationExitInfo.REASON_OTHER,
@@ -991,16 +991,16 @@ public class ApplicationExitInfoTest {
         ApplicationInfo ai = new ApplicationInfo();
         ai.packageName = packageName;
         ProcessRecord app = new ProcessRecord(mAms, ai, processName, uid);
-        app.pid = pid;
+        app.setPid(pid);
         app.info.uid = packageUid;
         if (definingUid != null) {
             final String dummyPackageName = "com.android.test";
             final String dummyClassName = ".Foo";
-            app.hostingRecord = HostingRecord.byAppZygote(new ComponentName(
-                    dummyPackageName, dummyClassName), "", definingUid);
+            app.setHostingRecord(HostingRecord.byAppZygote(new ComponentName(
+                    dummyPackageName, dummyClassName), "", definingUid));
         }
-        app.connectionGroup = connectionGroup;
-        app.setProcState = procState;
+        app.mServices.setConnectionGroup(connectionGroup);
+        app.mState.setSetProcState(procState);
         app.mProfile.setLastMemInfo(spy(new Debug.MemoryInfo()));
         app.mProfile.setLastPss(pss);
         app.mProfile.setLastRss(rss);

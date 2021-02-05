@@ -24,7 +24,6 @@ import android.graphics.drawable.PaintDrawable
 import android.graphics.drawable.RippleDrawable
 import android.service.quicksettings.Tile.STATE_ACTIVE
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import com.android.systemui.R
@@ -42,38 +41,23 @@ class QSTileViewHorizontal(
 
     init {
         orientation = HORIZONTAL
-        mDualTargetAllowed = true
+        mDualTargetAllowed = false
         mBg.setImageDrawable(null)
-        createDivider()
         mColorLabelActive = ColorStateList.valueOf(getColorForState(getContext(), STATE_ACTIVE))
+        mMaxLabelLines = 3
     }
 
     override fun createLabel() {
         super.createLabel()
         findViewById<LinearLayout>(R.id.label_group)?.gravity = Gravity.START
         mLabel.gravity = Gravity.START
+        mLabel.textDirection = TEXT_DIRECTION_LOCALE
         mSecondLine.gravity = Gravity.START
+        mSecondLine.textDirection = TEXT_DIRECTION_LOCALE
         val padding = context.resources.getDimensionPixelSize(R.dimen.qs_tile_side_label_padding)
-        mLabelContainer.setPadding(padding, padding, padding, padding)
-        (mLabelContainer.layoutParams as LayoutParams).gravity = Gravity.CENTER_VERTICAL
-    }
-
-    fun createDivider() {
-        divider = LayoutInflater.from(context).inflate(R.layout.qs_tile_label_divider, this, false)
-        val position = indexOfChild(mLabelContainer)
-        addView(divider, position)
-    }
-
-    override fun init(
-        click: OnClickListener?,
-        secondaryClick: OnClickListener?,
-        longClick: OnLongClickListener?
-    ) {
-        super.init(click, secondaryClick, longClick)
-        mLabelContainer.setOnClickListener {
-            longClick?.onLongClick(it)
-        }
-        mLabelContainer.isClickable = false
+        mLabelContainer.setPaddingRelative(0, padding, padding, padding)
+        (mLabelContainer.layoutParams as LayoutParams).gravity =
+                Gravity.CENTER_VERTICAL or Gravity.START
     }
 
     override fun updateRippleSize() {
@@ -83,7 +67,7 @@ class QSTileViewHorizontal(
         val d = super.newTileBackground()
         if (paintDrawable == null) {
             paintDrawable = PaintDrawable(Color.WHITE).apply {
-                setCornerRadius(30f)
+                setCornerRadius(50f)
             }
         }
         if (d is RippleDrawable) {

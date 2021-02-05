@@ -30,6 +30,7 @@ import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.TransactionTooLargeException;
 import android.os.WorkSource;
 import android.util.ArraySet;
@@ -103,7 +104,7 @@ public abstract class ActivityManagerInternal {
      * @param target
      * @param whitelistToken
      * @param duration temp allowlist duration in milliseconds.
-     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param type temp allowlist type defined at {@link TempAllowListType}
      */
     public abstract void setPendingIntentWhitelistDuration(IIntentSender target,
             IBinder whitelistToken, long duration, int type);
@@ -136,10 +137,10 @@ public abstract class ActivityManagerInternal {
      * @param changingUid uid to add or remove to temp allowlist.
      * @param adding true to add to temp allowlist, false to remove from temp allowlist.
      * @param durationMs when adding is true, the duration to be in temp allowlist.
-     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}.
+     * @param type temp allowlist type defined at {@link TempAllowListType}.
      */
     public abstract void updateDeviceIdleTempWhitelist(int[] appids, int changingUid,
-            boolean adding, long durationMs, @BroadcastOptions.TempAllowListType int type);
+            boolean adding, long durationMs, @TempAllowListType int type);
 
     /**
      * Get the procstate for the UID.  The return value will be between
@@ -333,7 +334,7 @@ public abstract class ActivityManagerInternal {
      * @param callerUid the UID that sent the PendingIntent.
      * @param targetUid the UID that is been temp allowlisted.
      * @param duration temp allowlist duration in milliseconds.
-     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param type temp allowlist type defined at {@link TempAllowListType}
      * @param tag
      */
     public abstract void tempWhitelistForPendingIntent(int callerPid, int callerUid, int targetUid,

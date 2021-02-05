@@ -39,6 +39,7 @@ import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -59,6 +60,8 @@ public class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
     private final String mKey;
+    @Nullable
+    private final String mGroupKey;
     private final Executor mMainExecutor;
 
     private long mLastUpdated;
@@ -165,6 +168,7 @@ public class Bubble implements BubbleViewProvider {
         mMetadataShortcutId = shortcutInfo.getId();
         mShortcutInfo = shortcutInfo;
         mKey = key;
+        mGroupKey = null;
         mFlags = 0;
         mUser = shortcutInfo.getUserHandle();
         mPackageName = shortcutInfo.getPackage();
@@ -182,6 +186,7 @@ public class Bubble implements BubbleViewProvider {
             final Bubbles.PendingIntentCanceledListener intentCancelListener,
             Executor mainExecutor) {
         mKey = entry.getKey();
+        mGroupKey = entry.getGroupKey();
         mSuppressionListener = listener;
         mIntentCancelListener = intent -> {
             if (mIntent != null) {
@@ -198,6 +203,14 @@ public class Bubble implements BubbleViewProvider {
     @Override
     public String getKey() {
         return mKey;
+    }
+
+    /**
+     * @see StatusBarNotification#getGroupKey()
+     * @return the group key for this bubble, if one exists.
+     */
+    public String getGroupKey() {
+        return mGroupKey;
     }
 
     public UserHandle getUser() {

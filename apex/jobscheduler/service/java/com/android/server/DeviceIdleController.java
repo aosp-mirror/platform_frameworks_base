@@ -22,7 +22,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.BroadcastOptions;
-import android.app.BroadcastOptions.TempAllowListType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -57,6 +56,7 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
+import android.os.PowerWhitelistManager.TempAllowListType;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -3879,7 +3879,7 @@ public class DeviceIdleController extends SystemService
      * @param adding true to add to temp allowlist, false to remove from temp allowlist.
      * @param durationMs duration in milliseconds to add to temp allowlist, only valid when
      *                   param adding is true.
-     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param type temp allowlist type defined at {@link TempAllowListType}
      */
     private void updateTempWhitelistAppIdsLocked(int uid, boolean adding, long durationMs,
             @TempAllowListType int type) {

@@ -92,6 +92,7 @@ import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_REMOVE_N
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SETTING_PROFILE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_SET_DEVICE_OWNER_FAILED;
 import static android.app.admin.DevicePolicyManager.PROVISIONING_RESULT_STARTING_PROFILE_FAILED;
+import static android.app.admin.DevicePolicyManager.UNSAFE_OPERATION_REASON_NONE;
 import static android.app.admin.DevicePolicyManager.WIPE_EUICC;
 import static android.app.admin.DevicePolicyManager.WIPE_EXTERNAL_STORAGE;
 import static android.app.admin.DevicePolicyManager.WIPE_RESET_PROTECTION_DATA;
@@ -128,6 +129,7 @@ import android.accounts.AccountManager;
 import android.accounts.AccountManagerFuture;
 import android.accounts.AuthenticatorException;
 import android.accounts.OperationCanceledException;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -157,6 +159,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManager.DevicePolicyOperation;
 import android.app.admin.DevicePolicyManager.PasswordComplexity;
 import android.app.admin.DevicePolicyManager.PersonalAppsSuspensionReason;
+import android.app.admin.DevicePolicyManager.UnsafeOperationReason;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.app.admin.DevicePolicySafetyChecker;
 import android.app.admin.DeviceStateCache;
@@ -557,6 +560,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     @ChangeId
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     private static final long USE_SET_LOCATION_ENABLED = 117835097L;
+
+    // Only add to the end of the list. Do not change or rearrange these values, that will break
+    // historical data. Do not use negative numbers or zero, logger only handles positive
+    // integers.
+    private static final int COPY_ACCOUNT_SUCCEEDED = 1;
+    private static final int COPY_ACCOUNT_FAILED = 2;
+    private static final int COPY_ACCOUNT_TIMED_OUT = 3;
+    private static final int COPY_ACCOUNT_EXCEPTION = 4;
+
+    @IntDef({
+            COPY_ACCOUNT_SUCCEEDED,
+            COPY_ACCOUNT_FAILED,
+            COPY_ACCOUNT_TIMED_OUT,
+            COPY_ACCOUNT_EXCEPTION})
+    private @interface CopyAccountStatus {}
 
     /**
      * Admin apps targeting Android S+ may not use
@@ -1067,30 +1085,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
      * @throws UnsafeStateException if it's not safe to execute the operation.
      */
     private void checkCanExecuteOrThrowUnsafe(@DevicePolicyOperation int operation) {
-        if (!canExecute(operation)) {
-            if (mSafetyChecker == null) {
-                // Happens on CTS after it's set just once (by OneTimeSafetyChecker)
-                throw new UnsafeStateException(operation);
-            }
-            // Let mSafetyChecker customize it (for example, by explaining how to retry)
-            throw mSafetyChecker.newUnsafeStateException(operation);
+        int reason = getUnsafeOperationReason(operation);
+        if (reason == UNSAFE_OPERATION_REASON_NONE) return;
+
+        if (mSafetyChecker == null) {
+            // Happens on CTS after it's set just once (by OneTimeSafetyChecker)
+            throw new UnsafeStateException(operation, reason);
         }
+        // Let mSafetyChecker customize it (for example, by explaining how to retry)
+        throw mSafetyChecker.newUnsafeStateException(operation, reason);
     }
 
     /**
-     * Returns whether it's safe to execute the given {@code operation}.
+     * Returns whether it's safe to execute the given {@code operation}, and why.
      */
-    boolean canExecute(@DevicePolicyOperation int operation) {
-        return mSafetyChecker == null || mSafetyChecker.isDevicePolicyOperationSafe(operation);
+    @UnsafeOperationReason
+    int getUnsafeOperationReason(@DevicePolicyOperation int operation) {
+        return mSafetyChecker == null ? UNSAFE_OPERATION_REASON_NONE
+                : mSafetyChecker.getUnsafeOperationReason(operation);
     }
 
     @Override
-    public void setNextOperationSafety(@DevicePolicyOperation int operation, boolean safe) {
+    public void setNextOperationSafety(@DevicePolicyOperation int operation,
+            @UnsafeOperationReason int reason) {
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_DEVICE_ADMINS));
-        Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %b)",
-                DevicePolicyManager.operationToString(operation), safe));
-        mSafetyChecker = new OneTimeSafetyChecker(this, operation, safe);
+        Slog.i(LOG_TAG, String.format("setNextOperationSafety(%s, %s)",
+                DevicePolicyManager.operationToString(operation),
+                DevicePolicyManager.unsafeOperationReasonToString(reason)));
+        mSafetyChecker = new OneTimeSafetyChecker(this, operation, reason);
     }
 
     /**
@@ -15930,11 +15953,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public UserHandle createAndProvisionManagedProfile(
-            @NonNull ManagedProfileProvisioningParams provisioningParams) {
+            @NonNull ManagedProfileProvisioningParams provisioningParams,
+            @NonNull String callerPackage) {
         final ComponentName admin = provisioningParams.getProfileAdminComponentName();
         Objects.requireNonNull(admin, "admin is null");
 
-        final CallerIdentity caller = getCallerIdentity();
+        final CallerIdentity caller = getCallerIdentity(callerPackage);
         Preconditions.checkCallAuthorization(
                 hasCallingOrSelfPermission(permission.MANAGE_PROFILE_AND_DEVICE_OWNERS));
 
@@ -15949,6 +15973,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         "Provisioning preconditions failed with result: " + result);
             }
 
+            final long startTime = SystemClock.elapsedRealtime();
             final Set<String> nonRequiredApps = provisioningParams.isLeaveAllSystemAppsEnabled()
                     ? Collections.emptySet()
                     : mOverlayPackagesProvider.getNonRequiredApps(
@@ -15965,8 +15990,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                         "Error creating profile, createProfileForUserEvenWhenDisallowed "
                                 + "returned null.");
             }
-
             resetInteractAcrossProfilesAppOps();
+            logEventDuration(
+                    DevicePolicyEnums.PLATFORM_PROVISIONING_CREATE_PROFILE_MS,
+                    startTime,
+                    callerPackage);
+
             installExistingAdminPackage(userInfo.id, admin.getPackageName());
             if (!enableAdminAndSetProfileOwner(
                     userInfo.id, caller.getUserId(), admin, provisioningParams.getOwnerName())) {
@@ -15976,10 +16005,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             setUserSetupComplete(userInfo.id);
 
-            startUser(userInfo.id);
+            startUser(userInfo.id, callerPackage);
             maybeMigrateAccount(
                     userInfo.id, caller.getUserId(), provisioningParams.getAccountToMigrate(),
-                    provisioningParams.isKeepAccountMigrated());
+                    provisioningParams.isKeepAccountMigrated(), callerPackage);
 
             if (provisioningParams.isOrganizationOwnedProvisioning()) {
                 markIsProfileOwnerOnOrganizationOwnedDevice(admin, userInfo.id);
@@ -15997,7 +16026,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
             return userInfo.getUserHandle();
         } catch (Exception e) {
-            // in case of any errors during provisioning, remove the newly created profile.
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)
+                    .setStrings(callerPackage)
+                    .write();
+            // In case of any errors during provisioning, remove the newly created profile.
             if (userInfo != null) {
                 mUserManager.removeUserEvenWhenDisallowed(userInfo.id);
             }
@@ -16102,7 +16135,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 mContext.getContentResolver(), USER_SETUP_COMPLETE, 1, userId);
     }
 
-    private void startUser(@UserIdInt int userId) throws IllegalStateException {
+    private void startUser(@UserIdInt int userId, String callerPackage)
+            throws IllegalStateException {
+        final long startTime = SystemClock.elapsedRealtime();
         final UserUnlockedBlockingReceiver unlockedReceiver = new UserUnlockedBlockingReceiver(
                 userId);
         mContext.registerReceiverAsUser(
@@ -16121,6 +16156,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 throw new ServiceSpecificException(PROVISIONING_RESULT_STARTING_PROFILE_FAILED,
                         String.format("Timeout whilst waiting for unlock of user %d.", userId));
             }
+            logEventDuration(
+                    DevicePolicyEnums.PLATFORM_PROVISIONING_START_PROFILE_MS,
+                    startTime,
+                    callerPackage);
         } catch (RemoteException e) {
             // Shouldn't happen.
         } finally {
@@ -16128,9 +16167,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    void maybeMigrateAccount(
+    private void maybeMigrateAccount(
             @UserIdInt int targetUserId, @UserIdInt int sourceUserId, Account accountToMigrate,
-            boolean keepAccountMigrated) {
+            boolean keepAccountMigrated, String callerPackage) {
         final UserHandle sourceUser = UserHandle.of(sourceUserId);
         final UserHandle targetUser = UserHandle.of(targetUserId);
         if (accountToMigrate == null) {
@@ -16141,13 +16180,16 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             Slog.w(LOG_TAG, "sourceUser and targetUser are the same, won't migrate account.");
             return;
         }
-        copyAccount(targetUser, sourceUser, accountToMigrate);
+        copyAccount(targetUser, sourceUser, accountToMigrate, callerPackage);
         if (!keepAccountMigrated) {
             removeAccount(accountToMigrate);
         }
     }
 
-    void copyAccount(UserHandle targetUser, UserHandle sourceUser, Account accountToMigrate) {
+    private void copyAccount(
+            UserHandle targetUser, UserHandle sourceUser, Account accountToMigrate,
+            String callerPackage) {
+        final long startTime = SystemClock.elapsedRealtime();
         try {
             final AccountManager accountManager = mContext.getSystemService(AccountManager.class);
             final boolean copySucceeded = accountManager.copyAccountToUser(
@@ -16156,16 +16198,35 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     targetUser,
                     /* callback= */ null, /* handler= */ null)
                     .getResult(60 * 3, TimeUnit.SECONDS);
-            if (!copySucceeded) {
+            if (copySucceeded) {
+                logCopyAccountStatus(COPY_ACCOUNT_SUCCEEDED, callerPackage);
+                logEventDuration(
+                        DevicePolicyEnums.PLATFORM_PROVISIONING_COPY_ACCOUNT_MS,
+                        startTime,
+                        callerPackage);
+            } else {
+                logCopyAccountStatus(COPY_ACCOUNT_FAILED, callerPackage);
                 Slog.e(LOG_TAG, "Failed to copy account to " + targetUser);
             }
-        } catch (OperationCanceledException | AuthenticatorException | IOException e) {
+        } catch (OperationCanceledException e) {
             // Account migration is not considered a critical operation.
+            logCopyAccountStatus(COPY_ACCOUNT_TIMED_OUT, callerPackage);
+            Slog.e(LOG_TAG, "Exception copying account to " + targetUser, e);
+        } catch (AuthenticatorException | IOException e) {
+            logCopyAccountStatus(COPY_ACCOUNT_EXCEPTION, callerPackage);
             Slog.e(LOG_TAG, "Exception copying account to " + targetUser, e);
         }
     }
 
-    void removeAccount(Account account) {
+    private static void logCopyAccountStatus(@CopyAccountStatus int status, String callerPackage) {
+        DevicePolicyEventLogger
+                .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_COPY_ACCOUNT_STATUS)
+                .setInt(status)
+                .setStrings(callerPackage)
+                .write();
+    }
+
+    private void removeAccount(Account account) {
         final AccountManager accountManager =
                 mContext.getSystemService(AccountManager.class);
         final AccountManagerFuture<Bundle> bundle = accountManager.removeAccount(account,
@@ -16211,7 +16272,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void provisionFullyManagedDevice(
-            FullyManagedDeviceProvisioningParams provisioningParams) {
+            FullyManagedDeviceProvisioningParams provisioningParams, String callerPackage) {
         ComponentName deviceAdmin = provisioningParams.getDeviceAdminComponentName();
 
         Objects.requireNonNull(deviceAdmin, "admin is null.");
@@ -16264,6 +16325,12 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     .setPackage(getManagedProvisioningPackage(mContext))
                     .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
             mContext.sendBroadcastAsUser(intent, UserHandle.SYSTEM);
+        } catch (Exception e) {
+            DevicePolicyEventLogger
+                    .createEvent(DevicePolicyEnums.PLATFORM_PROVISIONING_ERROR)
+                    .setStrings(callerPackage)
+                    .write();
+            throw e;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -16346,5 +16413,14 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             return setDeviceOwner(adminComponent, name, userId);
         }
         return true;
+    }
+
+    private static void logEventDuration(int eventId, long startTime, String callerPackage) {
+        final long duration = SystemClock.elapsedRealtime() - startTime;
+        DevicePolicyEventLogger
+                .createEvent(eventId)
+                .setTimePeriod(duration)
+                .setStrings(callerPackage)
+                .write();
     }
 }

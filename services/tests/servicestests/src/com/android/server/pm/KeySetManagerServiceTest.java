@@ -37,9 +37,10 @@ public class KeySetManagerServiceTest extends AndroidTestCase {
     private KeySetManagerService mKsms;
 
     public PackageSetting generateFakePackageSetting(String name) {
-        return new PackageSetting(name, name, new File(mContext.getCacheDir(), "fakeCodePath"),
-                "", "", "", "", 1, 0, 0, 0 /*sharedUserId*/, null /*usesStaticLibraries*/,
-                null /*usesStaticLibrariesVersions*/, null /*mimeGroups*/);
+        return new PackageSettingBuilder()
+                .setName(name)
+                .setCodePath(new File(mContext.getCacheDir(), "fakeCodePath").getAbsolutePath())
+                .build();
     }
 
     @Override

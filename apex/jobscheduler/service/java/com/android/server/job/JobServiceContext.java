@@ -107,6 +107,7 @@ public final class JobServiceContext implements ServiceConnection {
     private final Handler mCallbackHandler;
     /** Make callbacks to {@link JobSchedulerService} to inform on job completion status. */
     private final JobCompletedListener mCompletedListener;
+    private final JobConcurrencyManager mJobConcurrencyManager;
     /** Used for service binding, etc. */
     private final Context mContext;
     private final Object mLock;
@@ -183,13 +184,14 @@ public final class JobServiceContext implements ServiceConnection {
         }
     }
 
-    JobServiceContext(JobSchedulerService service, IBatteryStats batteryStats,
-            JobPackageTracker tracker, Looper looper) {
+    JobServiceContext(JobSchedulerService service, JobConcurrencyManager concurrencyManager,
+            IBatteryStats batteryStats, JobPackageTracker tracker, Looper looper) {
         mContext = service.getContext();
         mLock = service.getLock();
         mBatteryStats = batteryStats;
         mJobPackageTracker = tracker;
         mCallbackHandler = new JobServiceHandler(looper);
+        mJobConcurrencyManager = concurrencyManager;
         mCompletedListener = service;
         mAvailable = true;
         mVerb = VERB_FINISHED;
@@ -835,6 +837,7 @@ public final class JobServiceContext implements ServiceConnection {
         if (mWakeLock != null) {
             mWakeLock.release();
         }
+        final int workType = mRunningJobWorkType;
         mContext.unbindService(JobServiceContext.this);
         mWakeLock = null;
         mRunningJob = null;
@@ -847,6 +850,7 @@ public final class JobServiceContext implements ServiceConnection {
         mAvailable = true;
         removeOpTimeOutLocked();
         mCompletedListener.onJobCompletedLocked(completedJob, reschedule);
+        mJobConcurrencyManager.onJobCompletedLocked(this, completedJob, workType);
     }
 
     private void applyStoppedReasonLocked(String reason) {

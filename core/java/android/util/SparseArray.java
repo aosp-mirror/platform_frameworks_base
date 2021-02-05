@@ -16,12 +16,15 @@
 
 package android.util;
 
+import android.annotation.Nullable;
 import android.compat.annotation.UnsupportedAppUsage;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.GrowingArrayUtils;
 
 import libcore.util.EmptyArray;
+
+import java.util.Objects;
 
 /**
  * <code>SparseArray</code> maps integers to Objects and, unlike a normal array of Objects,
@@ -504,5 +507,45 @@ public class SparseArray<E> implements Cloneable {
         }
         buffer.append('}');
         return buffer.toString();
+    }
+
+    /**
+     * For backwards compatibility reasons, {@link Object#equals(Object)} cannot be implemented,
+     * so this serves as a manually invoked alternative.
+     */
+    public boolean contentEquals(@Nullable SparseArray<E> other) {
+        if (other == null) {
+            return false;
+        }
+
+        int size = size();
+        if (size != other.size()) {
+            return false;
+        }
+
+        for (int index = 0; index < size; index++) {
+            int key = keyAt(index);
+            if (!Objects.equals(valueAt(index), other.get(key))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * For backwards compatibility, {@link Object#hashCode()} cannot be implemented, so this serves
+     * as a manually invoked alternative.
+     */
+    public int contentHashCode() {
+        int hash = 0;
+        int size = size();
+        for (int index = 0; index < size; index++) {
+            int key = keyAt(index);
+            E value = valueAt(index);
+            hash = 31 * hash + Objects.hashCode(key);
+            hash = 31 * hash + Objects.hashCode(value);
+        }
+        return hash;
     }
 }

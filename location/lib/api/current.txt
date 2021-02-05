@@ -21,8 +21,8 @@ package com.android.location.provider {
     method @Deprecated protected void onInit();
     method @Deprecated protected boolean onSendExtraCommand(@Nullable String, @Nullable android.os.Bundle);
     method @Deprecated protected abstract void onSetRequest(com.android.location.provider.ProviderRequestUnbundled, android.os.WorkSource);
-    method @Deprecated public void reportLocation(android.location.Location);
-    method @Deprecated public void reportLocation(android.location.LocationResult);
+    method @Deprecated public void reportLocation(@NonNull android.location.Location);
+    method @Deprecated public void reportLocations(@NonNull java.util.List<android.location.Location>);
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setAdditionalProviderPackages(java.util.List<java.lang.String>);
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.R) public void setAllowed(boolean);
     method @Deprecated @RequiresApi(android.os.Build.VERSION_CODES.Q) public void setEnabled(boolean);

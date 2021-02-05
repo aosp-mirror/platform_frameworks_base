@@ -335,6 +335,9 @@ public class BrightnessTrackerTest {
         assertEquals(0.5, event.batteryLevel, FLOAT_DELTA);
         assertTrue(event.nightMode);
         assertEquals(3333, event.colorTemperature);
+        assertTrue(event.reduceBrightColors);
+        assertEquals(40, event.reduceBrightColorsStrength);
+        assertEquals(20f, event.reduceBrightColorsOffset, FLOAT_DELTA);
         assertEquals("a.package", event.packageName);
         assertEquals(0, event.userId);
         assertArrayEquals(new long[] {1, 10, 100, 1000, 300, 30, 10, 1}, event.colorValueBuckets);
@@ -561,6 +564,9 @@ public class BrightnessTrackerTest {
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3339);
 
+        mInjector.mSecureIntSettings.put(Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 1);
+        mInjector.mSecureIntSettings.put(Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 40);
+
         startTracker(mTracker);
         mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
                 batteryChangeEvent(30, 100));
@@ -592,6 +598,9 @@ public class BrightnessTrackerTest {
         assertEquals(0.3, event.batteryLevel, FLOAT_DELTA);
         assertTrue(event.nightMode);
         assertEquals(3339, event.colorTemperature);
+        assertTrue(event.reduceBrightColors);
+        assertEquals(40, event.reduceBrightColorsStrength);
+        assertEquals(20f, event.reduceBrightColorsOffset, FLOAT_DELTA);
         assertEquals(0.5f, event.powerBrightnessFactor, FLOAT_DELTA);
         assertTrue(event.isUserSetBrightness);
         assertFalse(event.isDefaultBrightnessConfig);
@@ -605,6 +614,9 @@ public class BrightnessTrackerTest {
 
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_ACTIVATED, 1);
         mInjector.mSecureIntSettings.put(Settings.Secure.NIGHT_DISPLAY_COLOR_TEMPERATURE, 3339);
+
+        mInjector.mSecureIntSettings.put(Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED, 1);
+        mInjector.mSecureIntSettings.put(Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL, 40);
 
         startTracker(mTracker);
         mInjector.mBroadcastReceiver.onReceive(InstrumentationRegistry.getContext(),
@@ -639,6 +651,7 @@ public class BrightnessTrackerTest {
         assertEquals(brightness, event.brightness, FLOAT_DELTA);
         assertEquals(0.3, event.batteryLevel, FLOAT_DELTA);
         assertTrue(event.nightMode);
+        assertTrue(event.reduceBrightColors);
         assertEquals(3339, event.colorTemperature);
     }
 
@@ -661,6 +674,9 @@ public class BrightnessTrackerTest {
         builder.setBatteryLevel(0.7f);
         builder.setNightMode(false);
         builder.setColorTemperature(345);
+        builder.setReduceBrightColors(false);
+        builder.setReduceBrightColorsStrength(40);
+        builder.setReduceBrightColorsOffset(20f);
         builder.setLastBrightness(50f);
         builder.setColorValues(new long[] {23, 34, 45}, 1000L);
         BrightnessChangeEvent event = builder.build();
@@ -684,6 +700,9 @@ public class BrightnessTrackerTest {
         assertEquals(event.batteryLevel, event2.batteryLevel, FLOAT_DELTA);
         assertEquals(event.nightMode, event2.nightMode);
         assertEquals(event.colorTemperature, event2.colorTemperature);
+        assertEquals(event.reduceBrightColors, event2.reduceBrightColors);
+        assertEquals(event.reduceBrightColorsStrength, event2.reduceBrightColorsStrength);
+        assertEquals(event.reduceBrightColorsOffset, event2.reduceBrightColorsOffset, FLOAT_DELTA);
         assertEquals(event.lastBrightness, event2.lastBrightness, FLOAT_DELTA);
         assertArrayEquals(event.colorValueBuckets, event2.colorValueBuckets);
         assertEquals(event.colorSampleDuration, event2.colorSampleDuration);
@@ -1016,6 +1035,18 @@ public class BrightnessTrackerTest {
         @Override
         public boolean isNightDisplayActivated(Context context) {
             return mSecureIntSettings.getOrDefault(Settings.Secure.NIGHT_DISPLAY_ACTIVATED,
+                    0) == 1;
+        }
+
+        @Override
+        public int getReduceBrightColorsStrength(Context context) {
+            return mSecureIntSettings.getOrDefault(Settings.Secure.REDUCE_BRIGHT_COLORS_LEVEL,
+                    0);
+        }
+
+        @Override
+        public boolean isReduceBrightColorsActivated(Context context) {
+            return mSecureIntSettings.getOrDefault(Settings.Secure.REDUCE_BRIGHT_COLORS_ACTIVATED,
                     0) == 1;
         }
 

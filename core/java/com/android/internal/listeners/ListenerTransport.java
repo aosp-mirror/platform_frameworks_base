@@ -16,70 +16,48 @@
 
 package com.android.internal.listeners;
 
-
-import android.annotation.NonNull;
 import android.annotation.Nullable;
-
-import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
- * A listener registration object which holds data associated with a listener, such the executor
- * the listener should run on.
+ * A listener transport object which can run listener operations on an executor.
  *
  * @param <TListener> listener type
  */
-public class ListenerTransport<TListener> {
-
-    private final Executor mExecutor;
-
-    private volatile @Nullable TListener mListener;
-
-    protected ListenerTransport(@NonNull Executor executor, @NonNull TListener listener) {
-        Preconditions.checkArgument(executor != null, "invalid null executor");
-        Preconditions.checkArgument(listener != null, "invalid null listener/callback");
-        mExecutor = executor;
-        mListener = listener;
-    }
+public interface ListenerTransport<TListener> {
 
     /**
-     * Prevents any listener invocations that happen-after this call.
+     * Should return a valid listener until {@link #unregister()} is invoked, and must return
+     * null after that. Recommended (but not required) that this is implemented via a volatile
+     * variable.
      */
-    public final void unregister() {
-        mListener = null;
-    }
+    @Nullable TListener getListener();
+
+    /**
+     * Must be implemented so that {@link #getListener()} returns null after this is invoked.
+     */
+    void unregister();
 
     /**
      * Executes the given operation for the listener.
      */
-    public final void execute(@NonNull Consumer<TListener> operation) {
+    default void execute(Executor executor, Consumer<TListener> operation) {
         Objects.requireNonNull(operation);
 
-        if (mListener == null) {
+        if (getListener() == null) {
             return;
         }
 
-        mExecutor.execute(() -> {
-            TListener listener = mListener;
+        executor.execute(() -> {
+            TListener listener = getListener();
             if (listener == null) {
                 return;
             }
 
             operation.accept(listener);
         });
-    }
-
-    @Override
-    public final boolean equals(Object obj) {
-        // intentionally bound to reference equality so removal works as expected
-        return this == obj;
-    }
-
-    @Override
-    public final int hashCode() {
-        return super.hashCode();
     }
 }

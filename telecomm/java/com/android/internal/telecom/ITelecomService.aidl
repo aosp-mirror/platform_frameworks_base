@@ -333,6 +333,8 @@ interface ITelecomService {
 
     void cleanupStuckCalls();
 
+    void resetCarMode();
+
     void setTestDefaultCallRedirectionApp(String packageName);
 
     void setTestPhoneAcctSuggestionComponent(String flattenedComponentName);

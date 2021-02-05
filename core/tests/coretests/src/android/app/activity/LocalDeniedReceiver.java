@@ -23,7 +23,7 @@ import android.os.RemoteException;
 import android.os.IBinder;
 import android.os.Parcel;
 
-public class LocalDeniedReceiver extends BroadcastReceiver {
+class LocalDeniedReceiver extends BroadcastReceiver {
     public LocalDeniedReceiver() {
     }
 

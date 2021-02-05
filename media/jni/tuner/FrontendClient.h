@@ -31,6 +31,16 @@ using Status = ::ndk::ScopedAStatus;
 
 using ::aidl::android::media::tv::tuner::BnTunerFrontendCallback;
 using ::aidl::android::media::tv::tuner::ITunerFrontend;
+using ::aidl::android::media::tv::tuner::TunerFrontendAnalogSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendAtscSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendAtsc3Settings;
+using ::aidl::android::media::tv::tuner::TunerFrontendCableSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendDvbsSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendDvbtSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendDtmbSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendIsdbsSettings;
+using ::aidl::android::media::tv::tuner::TunerFrontendIsdbs3Settings;
+using ::aidl::android::media::tv::tuner::TunerFrontendIsdbtSettings;
 using ::aidl::android::media::tv::tuner::TunerFrontendScanMessage;
 using ::aidl::android::media::tv::tuner::TunerFrontendSettings;
 
@@ -172,8 +182,24 @@ public:
     int getId();
 
 private:
-    TunerFrontendSettings getAidlFrontendSettings(const FrontendSettings& settings,
-            const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendSettings getAidlFrontendSettings(
+            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendAnalogSettings getAidlAnalogSettings(
+            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendDvbsSettings getAidlDvbsSettings(
+            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendCableSettings getAidlCableSettings(
+            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendDvbtSettings getAidlDvbtSettings(
+            const FrontendSettings& settings, const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendDtmbSettings getAidlDtmbSettings(const FrontendSettingsExt1_1& settingsExt1_1);
+    TunerFrontendAtscSettings getAidlAtscSettings(const FrontendSettings& settings);
+    TunerFrontendAtsc3Settings getAidlAtsc3Settings(const FrontendSettings& settings);
+    TunerFrontendIsdbsSettings getAidlIsdbsSettings(const FrontendSettings& settings);
+    TunerFrontendIsdbs3Settings getAidlIsdbs3Settings(const FrontendSettings& settings);
+    TunerFrontendIsdbtSettings getAidlIsdbtSettings(const FrontendSettings& settings);
+
+    bool validateExtendedSettings(const FrontendSettingsExt1_1& settingsExt1_1);
 
     /**
      * An AIDL Tuner Frontend Singleton assigned at the first time when the Tuner Client

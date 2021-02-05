@@ -16,7 +16,7 @@
 
 package com.android.server;
 
-import android.app.BroadcastOptions;
+import android.os.PowerWhitelistManager.TempAllowListType;
 
 import com.android.server.deviceidle.IDeviceIdleConstraint;
 
@@ -39,12 +39,12 @@ public interface DeviceIdleInternal {
      * allowlist.
      * @param uid
      * @param duration duration in milliseconds
-     * @param type temp allowlist type defined at {@link BroadcastOptions.TempAllowListType}
+     * @param type temp allowlist type defined at {@link TempAllowListType}
      * @param sync
      * @param reason
      */
     void addPowerSaveTempWhitelistAppDirect(int uid, long duration,
-            @BroadcastOptions.TempAllowListType int type, boolean sync,
+            @TempAllowListType int type, boolean sync,
             String reason);
 
     // duration in milliseconds
