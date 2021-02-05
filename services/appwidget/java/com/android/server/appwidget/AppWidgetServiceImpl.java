@@ -55,7 +55,6 @@ import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
@@ -66,9 +65,8 @@ import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
@@ -119,7 +117,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.widget.IRemoteViewsFactory;
 import com.android.server.LocalServices;
 import com.android.server.WidgetBackupProvider;
-import com.android.server.policy.IconUtilities;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -253,8 +250,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
     private boolean mSafeMode;
     private int mMaxWidgetBitmapMemory;
 
-    private IconUtilities mIconUtilities;
-
     AppWidgetServiceImpl(Context context) {
         mContext = context;
     }
@@ -271,7 +266,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         mCallbackHandler = new CallbackHandler(mContext.getMainLooper());
         mBackupRestoreController = new BackupRestoreController();
         mSecurityPolicy = new SecurityPolicy();
-        mIconUtilities = new IconUtilities(mContext);
 
         computeMaximumWidgetBitmapMemory();
         registerBroadcastReceiver();
@@ -578,44 +572,6 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
     }
 
-    private Bitmap createMaskedWidgetBitmap(String providerPackage, int providerUserId) {
-        final long identity = Binder.clearCallingIdentity();
-        try {
-            // Load the unbadged application icon and pass it to the widget to appear on
-            // the masked view.
-            Context userContext = mContext.createPackageContextAsUser(providerPackage, 0,
-                    UserHandle.of(providerUserId));
-            PackageManager pm = userContext.getPackageManager();
-            Drawable icon = pm.getApplicationInfo(providerPackage, 0).loadUnbadgedIcon(pm).mutate();
-            // Create a bitmap of the icon which is what the widget's remoteview requires.
-            icon.setColorFilter(mIconUtilities.getDisabledColorFilter());
-            return mIconUtilities.createIconBitmap(icon);
-        } catch (NameNotFoundException e) {
-            Slog.e(TAG, "Fail to get application icon", e);
-            // Provider package removed, no need to mask its views as its state will be
-            // purged very soon.
-            return null;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
-
-    private RemoteViews createMaskedWidgetRemoteViews(Bitmap icon, boolean showBadge,
-            PendingIntent onClickIntent) {
-        RemoteViews views = new RemoteViews(mContext.getPackageName(),
-                R.layout.work_widget_mask_view);
-        if (icon != null) {
-            views.setImageViewBitmap(R.id.work_widget_app_icon, icon);
-        }
-        if (!showBadge) {
-            views.setViewVisibility(R.id.work_widget_badge_icon, View.INVISIBLE);
-        }
-        if (onClickIntent != null) {
-            views.setOnClickPendingIntent(R.id.work_widget_mask_frame, onClickIntent);
-        }
-        return views;
-    }
-
     /**
      * Mask the target widget belonging to the specified provider, or all active widgets
      * of the provider if target widget == null.
@@ -625,59 +581,63 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         if (widgetCount == 0) {
             return;
         }
-        final String providerPackage = provider.id.componentName.getPackageName();
-        final int providerUserId = provider.getUserId();
-        Bitmap iconBitmap = createMaskedWidgetBitmap(providerPackage, providerUserId);
-        if (iconBitmap == null) {
-            return;
-        }
-        final boolean showBadge;
-        final Intent onClickIntent;
+        RemoteViews views = new RemoteViews(mContext.getPackageName(),
+                R.layout.work_widget_mask_view);
+        ApplicationInfo appInfo = provider.info.providerInfo.applicationInfo;
+        final int appUserId = provider.getUserId();
+        boolean showBadge;
+
         final long identity = Binder.clearCallingIdentity();
         try {
+            final Intent onClickIntent;
+
             if (provider.maskedBySuspendedPackage) {
-                showBadge = mUserManager.hasBadge(providerUserId);
+                showBadge = mUserManager.hasBadge(appUserId);
                 final String suspendingPackage = mPackageManagerInternal.getSuspendingPackage(
-                        providerPackage, providerUserId);
+                        appInfo.packageName, appUserId);
                 if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
                     onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
-                            providerUserId, true);
+                            appUserId, true);
                 } else {
                     final SuspendDialogInfo dialogInfo =
-                            mPackageManagerInternal.getSuspendedDialogInfo(providerPackage,
-                                    suspendingPackage, providerUserId);
+                            mPackageManagerInternal.getSuspendedDialogInfo(
+                                    appInfo.packageName, suspendingPackage, appUserId);
                     // onUnsuspend is null because we don't want to start any activity on
                     // unsuspending from a suspended widget.
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
-                            providerPackage, suspendingPackage, dialogInfo, null, null,
-                            providerUserId);
+                            appInfo.packageName, suspendingPackage, dialogInfo, null, null,
+                            appUserId);
                 }
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;
-                onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(
-                        providerUserId);
+                onClickIntent = UnlaunchableAppActivity.createInQuietModeDialogIntent(appUserId);
             } else /* provider.maskedByLockedProfile */ {
                 showBadge = true;
-                onClickIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null, null,
-                        providerUserId);
+                onClickIntent = mKeyguardManager
+                        .createConfirmDeviceCredentialIntent(null, null, appUserId);
                 if (onClickIntent != null) {
-                    onClickIntent.setFlags(FLAG_ACTIVITY_NEW_TASK
-                            | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    onClickIntent.setFlags(
+                            FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                 }
             }
+
+            if (onClickIntent != null) {
+                views.setOnClickPendingIntent(R.id.work_widget_mask_frame,
+                        PendingIntent.getActivity(mContext, 0, onClickIntent,
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+            }
+
+            Icon icon = appInfo.icon != 0
+                    ? Icon.createWithResource(appInfo.packageName, appInfo.icon)
+                    : Icon.createWithResource(mContext, android.R.drawable.sym_def_app_icon);
+            views.setImageViewIcon(R.id.work_widget_app_icon, icon);
+            if (!showBadge) {
+                views.setViewVisibility(R.id.work_widget_badge_icon, View.INVISIBLE);
+            }
+
             for (int j = 0; j < widgetCount; j++) {
                 Widget widget = provider.widgets.get(j);
                 if (targetWidget != null && targetWidget != widget) continue;
-                PendingIntent intent = null;
-                if (onClickIntent != null) {
-                    // Rare informational activity click is okay being
-                    // immutable; the tradeoff is more security in exchange for
-                    // losing bounds-based window animations
-                    intent = PendingIntent.getActivity(mContext, widget.appWidgetId,
-                            onClickIntent,
-                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-                }
-                RemoteViews views = createMaskedWidgetRemoteViews(iconBitmap, showBadge, intent);
                 if (widget.replaceWithMaskedViewsLocked(views)) {
                     scheduleNotifyUpdateAppWidgetLocked(widget, widget.getEffectiveViewsLocked());
                 }
